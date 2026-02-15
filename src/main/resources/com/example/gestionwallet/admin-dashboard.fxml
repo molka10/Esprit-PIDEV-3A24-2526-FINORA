@@ -3,6 +3,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.control.*?>
 
+
 <StackPane prefWidth="1200" prefHeight="750"
            stylesheets="@dashboard.css"
            xmlns="http://javafx.com/javafx/8"
