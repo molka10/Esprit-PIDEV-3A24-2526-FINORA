@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+
+<BorderPane prefHeight="700.0" prefWidth="1100.0"
+            style="-fx-background-color: #ecf0f1;"
+            xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.example.crud.controllers.UtilisateurStaticController">
+
+    <top>
+        <VBox style="-fx-background-color: linear-gradient(to right, #2c3e50, #34495e); -fx-padding: 25;">
+            <Label text="👤 Sélection du Profil" style="-fx-text-fill:white; -fx-font-weight:bold;">
+                <font><Font size="28"/></font>
+            </Label>
+            <Label text="Entreprise / Investisseur / Admin" style="-fx-text-fill:#bdc3c7;">
+                <font><Font size="14"/></font>
+            </Label>
+        </VBox>
+    </top>
+
+    <center>
+        <VBox alignment="CENTER" spacing="25" style="-fx-padding: 40;">
+
+            <HBox spacing="25" alignment="CENTER">
+                <Button text="🏢 Entreprise" onAction="#choisirEntreprise"
+                        prefWidth="220" prefHeight="80"
+                        style="-fx-background-color:white; -fx-font-size:16px; -fx-font-weight:bold;
+                               -fx-background-radius:14; -fx-border-radius:14; -fx-border-color:#dfe6e9; -fx-border-width:1;
+                               -fx-effect:dropshadow(gaussian, rgba(0,0,0,0.10), 12, 0, 0, 3);"/>
+
+                <Button text="💼 Investisseur" onAction="#choisirInvestisseur"
+                        prefWidth="220" prefHeight="80"
+                        style="-fx-background-color:white; -fx-font-size:16px; -fx-font-weight:bold;
+                               -fx-background-radius:14; -fx-border-radius:14; -fx-border-color:#dfe6e9; -fx-border-width:1;
+                               -fx-effect:dropshadow(gaussian, rgba(0,0,0,0.10), 12, 0, 0, 3);"/>
+
+                <Button text="🛡 Admin" onAction="#choisirAdmin"
+                        prefWidth="220" prefHeight="80"
+                        style="-fx-background-color:white; -fx-font-size:16px; -fx-font-weight:bold;
+                               -fx-background-radius:14; -fx-border-radius:14; -fx-border-color:#dfe6e9; -fx-border-width:1;
+                               -fx-effect:dropshadow(gaussian, rgba(0,0,0,0.10), 12, 0, 0, 3);"/>
+            </HBox>
+
+            <Label fx:id="lblInfo" text="Choisis un profil pour continuer"
+                   style="-fx-text-fill:#2c3e50; -fx-font-size:16px; -fx-font-weight:bold;"/>
+
+        </VBox>
+    </center>
+
+</BorderPane>
