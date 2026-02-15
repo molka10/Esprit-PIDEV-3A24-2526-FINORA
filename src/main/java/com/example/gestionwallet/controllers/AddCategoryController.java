@@ -89,7 +89,7 @@ public class AddCategoryController {
         table.setVgap(15);
         table.setPadding(new Insets(10));
 
-        // ===== HEADER =====
+
         Label headerNom = new Label("Nom Catégorie");
         headerNom.setStyle("-fx-text-fill:white; -fx-font-weight:bold;");
 
@@ -129,13 +129,12 @@ public class AddCategoryController {
             table.add(prioriteLabel, 1, row);
             table.add(actions, 2, row);
 
-            // SUPPRIMER
+
             deleteBtn.setOnAction(e -> {
                 sc.supprimer(c.getId_category());
                 loadCategories();
             });
 
-            // MODIFIER
             editBtn.setOnAction(e -> {
                 nameField.setText(c.getNom());
                 priorityBox.setValue(c.getPriorite());

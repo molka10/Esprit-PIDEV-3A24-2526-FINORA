@@ -142,7 +142,6 @@ public class WalletController {
 
         item.getChildren().addAll(nameLabel, spacer, amountLabel, editBtn, deleteBtn);
 
-        // SUPPRIMER
         deleteBtn.setOnAction(e -> {
 
             Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
@@ -155,7 +154,6 @@ public class WalletController {
             });
         });
 
-        // MODIFIER POPUP MODERNE
         editBtn.setOnAction(e -> {
 
             Stage dialogStage = new Stage();
@@ -207,7 +205,7 @@ public class WalletController {
                 String newName = nameField.getText();
                 String amountText = amountField.getText();
 
-                // ===== NOM LETTRES SEULEMENT =====
+
                 if (newName == null || newName.trim().isEmpty()) {
                     showError("Le nom est obligatoire.");
                     return;
@@ -218,7 +216,6 @@ public class WalletController {
                     return;
                 }
 
-                // ===== MONTANT CHIFFRES SEULEMENT =====
                 if (amountText == null || amountText.trim().isEmpty()) {
                     showError("Le montant est obligatoire.");
                     return;

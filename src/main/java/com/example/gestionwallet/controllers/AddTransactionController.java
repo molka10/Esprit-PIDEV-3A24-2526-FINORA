@@ -30,7 +30,6 @@ public class AddTransactionController {
 
     @FXML
     public void initialize() {
-        // nothing special here now
     }
 
     public void setParentController(WalletController controller) {
@@ -80,7 +79,6 @@ public class AddTransactionController {
         String amountText = amountField.getText();
         String categoryName = categoryBox.getValue();
 
-        // ===== NOM LETTRES SEULEMENT =====
         if (name == null || name.trim().isEmpty()) {
             showError("Le nom est obligatoire.");
             return;
@@ -91,7 +89,6 @@ public class AddTransactionController {
             return;
         }
 
-        // ===== MONTANT CHIFFRES SEULEMENT =====
         if (amountText == null || amountText.trim().isEmpty()) {
             showError("Le montant est obligatoire.");
             return;

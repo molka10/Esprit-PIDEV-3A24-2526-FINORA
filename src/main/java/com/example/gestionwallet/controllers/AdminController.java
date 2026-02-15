@@ -22,13 +22,11 @@ public class AdminController {
         loadWallet();
     }
 
-    // ================= TRANSACTIONS =================
 
     private void loadTransactions() {
 
         transactionContainer.getChildren().clear();
 
-        // ===== HEADER =====
         HBox header = new HBox();
         header.setPadding(new Insets(10));
         header.setSpacing(0);
@@ -60,7 +58,6 @@ public class AdminController {
         }
     }
 
-    // ================= WALLET =================
 
     private void loadWallet() {
 
@@ -99,7 +96,6 @@ public class AdminController {
         walletContainer.getChildren().add(row);
     }
 
-    // ================= HELPERS =================
 
     private Label createHeaderLabel(String text, double width) {
 
