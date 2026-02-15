@@ -23,6 +23,7 @@ public class testcategorie {
         // READ
         sc.afficher().forEach(System.out::println);
 
+
         // DELETE
         sc.supprimer(9);
     }
