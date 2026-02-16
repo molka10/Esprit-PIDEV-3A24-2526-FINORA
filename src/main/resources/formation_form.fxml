@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="tn.finora.controllers.FormationFormController"
+      spacing="12" styleClass="card">
+
+    <Label fx:id="lblTitle" text="Ajouter Formation" styleClass="title"/>
+
+    <GridPane hgap="10" vgap="10">
+        <columnConstraints>
+            <ColumnConstraints percentWidth="25"/>
+            <ColumnConstraints percentWidth="75"/>
+        </columnConstraints>
+
+        <Label text="Titre:" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+        <TextField fx:id="txtTitre" promptText="ex: Java JDBC" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+
+        <Label text="Catégorie:" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+        <TextField fx:id="txtCategorie" promptText="ex: Informatique" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+
+        <Label text="Niveau:" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+        <ComboBox fx:id="cbNiveau" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+
+        <Label text="Description:" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
+        <TextArea fx:id="txtDescription" prefRowCount="4" promptText="Description..." GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+
+        <Label text="Image URL:" GridPane.rowIndex="4" GridPane.columnIndex="0"/>
+        <TextField fx:id="txtImageUrl" promptText="optionnel: http..." GridPane.rowIndex="4" GridPane.columnIndex="1"/>
+
+        <Label text="Publié:" GridPane.rowIndex="5" GridPane.columnIndex="0"/>
+        <CheckBox fx:id="chkPublished" GridPane.rowIndex="5" GridPane.columnIndex="1"/>
+    </GridPane>
+
+    <Label fx:id="lblError" text="" styleClass="error"/>
+
+    <HBox spacing="10">
+        <Button text="💾 Enregistrer" styleClass="btn-primary" onAction="#onSave"/>
+        <Button text="Annuler" styleClass="btn-ghost" onAction="#onCancel"/>
+    </HBox>
+
+</VBox>

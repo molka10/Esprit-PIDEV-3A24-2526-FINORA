@@ -1,0 +1,177 @@
+/* ===== Theme (white + purple) ===== */
+.root {
+    -fx-font-family: "Segoe UI", "Inter", Arial;
+    -fx-background-color: #F6F2FF; /* soft lavender background */
+}
+
+/* page container */
+.screen {
+    -fx-background-color: transparent;
+}
+
+/* top header card */
+.card {
+    -fx-background-color: rgba(255,255,255,0.95);
+    -fx-background-radius: 22;
+    -fx-border-radius: 22;
+    -fx-border-color: rgba(168,85,247,0.18);
+    -fx-border-width: 1;
+    -fx-effect: dropshadow(gaussian, rgba(22, 18, 38, 0.10), 24, 0.2, 0, 8);
+}
+
+/* Titles */
+.title {
+    -fx-text-fill: #171129;
+    -fx-font-size: 34px;
+    -fx-font-weight: 800;
+}
+.subtitle {
+    -fx-text-fill: #6B5A8A;
+    -fx-font-size: 14px;
+}
+
+/* toolbar */
+.toolbar {
+    -fx-background-color: rgba(255,255,255,0.75);
+    -fx-background-radius: 18;
+    -fx-border-radius: 18;
+    -fx-border-color: rgba(168,85,247,0.14);
+    -fx-border-width: 1;
+    -fx-padding: 10 12 10 12;
+    -fx-effect: dropshadow(gaussian, rgba(22, 18, 38, 0.08), 18, 0.2, 0, 6);
+}
+
+/* Buttons */
+.button {
+    -fx-background-radius: 16;
+    -fx-border-radius: 16;
+    -fx-font-weight: 700;
+    -fx-padding: 10 16 10 16;
+    -fx-cursor: hand;
+}
+
+.btn-primary {
+    -fx-text-fill: white;
+    -fx-background-color: linear-gradient(to right, #7C3AED, #A855F7);
+    -fx-effect: dropshadow(gaussian, rgba(124,58,237,0.30), 18, 0.2, 0, 6);
+}
+.btn-primary:hover {
+    -fx-background-color: linear-gradient(to right, #6D28D9, #9333EA);
+}
+
+.btn-ghost {
+    -fx-text-fill: #5B21B6;
+    -fx-background-color: rgba(255,255,255,0.85);
+    -fx-border-color: rgba(124,58,237,0.35);
+    -fx-border-width: 1;
+}
+.btn-ghost:hover {
+    -fx-background-color: rgba(124,58,237,0.08);
+}
+
+.btn-danger {
+    -fx-text-fill: #B42318;
+    -fx-background-color: rgba(255,255,255,0.85);
+    -fx-border-color: rgba(240,68,56,0.45);
+    -fx-border-width: 1;
+}
+.btn-danger:hover {
+    -fx-background-color: rgba(240,68,56,0.10);
+}
+
+/* ScrollPane modern */
+.scroll-pane {
+    -fx-background: transparent;
+    -fx-background-color: transparent;
+}
+.scroll-pane > .viewport {
+    -fx-background-color: transparent;
+}
+.scroll-bar:vertical .thumb {
+    -fx-background-color: rgba(168,85,247,0.35);
+    -fx-background-radius: 999;
+}
+.scroll-bar:vertical {
+    -fx-background-color: transparent;
+}
+
+/* ===== Card items (each formation) ===== */
+.item-card {
+    -fx-background-color: white;
+    -fx-background-radius: 18;
+    -fx-border-radius: 18;
+    -fx-border-color: rgba(168,85,247,0.14);
+    -fx-border-width: 1;
+    -fx-effect: dropshadow(gaussian, rgba(22, 18, 38, 0.10), 18, 0.15, 0, 6);
+    -fx-padding: 14;
+}
+.item-card:hover {
+    -fx-border-color: rgba(168,85,247,0.35);
+    -fx-effect: dropshadow(gaussian, rgba(22, 18, 38, 0.14), 24, 0.15, 0, 10);
+}
+
+.item-title {
+    -fx-text-fill: #171129;
+    -fx-font-size: 20px;
+    -fx-font-weight: 800;
+}
+
+.badge {
+    -fx-background-radius: 999;
+    -fx-border-radius: 999;
+    -fx-padding: 4 10 4 10;
+    -fx-font-size: 12px;
+    -fx-font-weight: 700;
+}
+.badge-purple {
+    -fx-text-fill: #5B21B6;
+    -fx-background-color: rgba(168,85,247,0.12);
+    -fx-border-color: rgba(168,85,247,0.35);
+    -fx-border-width: 1;
+}
+.badge-green {
+    -fx-text-fill: #067647;
+    -fx-background-color: rgba(34,197,94,0.12);
+    -fx-border-color: rgba(34,197,94,0.35);
+    -fx-border-width: 1;
+}
+.badge-gray {
+    -fx-text-fill: #5B5B6B;
+    -fx-background-color: rgba(17,17,17,0.06);
+    -fx-border-color: rgba(17,17,17,0.10);
+    -fx-border-width: 1;
+}
+
+/* selection ring */
+.item-selected {
+    -fx-border-color: rgba(168,85,247,0.95);
+    -fx-border-width: 2;
+}
+.badge {
+    -fx-padding: 6 10;
+    -fx-background-radius: 999;
+    -fx-font-size: 12px;
+}
+
+.badge-purple {
+    -fx-background-color: rgba(124, 58, 237, 0.15);
+    -fx-text-fill: #7c3aed;
+    -fx-border-color: rgba(124, 58, 237, 0.35);
+    -fx-border-radius: 999;
+}
+
+.badge-gray {
+    -fx-background-color: rgba(15, 23, 42, 0.06);
+    -fx-text-fill: #334155;
+    -fx-border-color: rgba(15, 23, 42, 0.12);
+    -fx-border-radius: 999;
+}
+
+.selected-card {
+    -fx-border-color: #7c3aed;
+    -fx-border-width: 2;
+}
+.card-title {
+    -fx-font-size: 18px;
+    -fx-font-weight: 700;
+}

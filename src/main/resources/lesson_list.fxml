@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="tn.finora.controllers.LessonListController">
+
+    <top>
+        <VBox spacing="8" styleClass="card">
+            <Label text="Gestion Lessons" styleClass="title"/>
+            <Label text="Gestion des leçons associées aux formations" styleClass="subtitle"/>
+        </VBox>
+    </top>
+
+    <center>
+        <VBox spacing="14" styleClass="screen">
+            <padding>
+                <Insets top="16" right="16" bottom="16" left="16"/>
+            </padding>
+
+            <!-- Toolbar -->
+            <HBox spacing="10" styleClass="toolbar" alignment="CENTER_LEFT">
+                <Label text="Formation:" styleClass="subtitle"/>
+                <ComboBox fx:id="cbFormation"
+                          prefWidth="320"
+                          promptText="Toutes les formations"
+                          onAction="#onFilter"/>
+
+                <Region HBox.hgrow="ALWAYS"/>
+
+                <Button text="➕ Ajouter" styleClass="btn-primary" onAction="#onAdd"/>
+                <Button text="✏ Modifier" styleClass="btn-ghost" onAction="#onEdit"/>
+                <Button text="🗑 Supprimer" styleClass="btn-danger" onAction="#onDelete"/>
+                <Button text="⬅ Formations" styleClass="btn-ghost" onAction="#goFormations"/>
+            </HBox>
+
+            <!-- Cards -->
+            <ScrollPane fitToWidth="true" styleClass="scroll">
+                <content>
+                    <VBox fx:id="cardsBox" spacing="14" styleClass="cards">
+                        <!-- cards injected by controller -->
+                    </VBox>
+                </content>
+            </ScrollPane>
+
+            <Label fx:id="lblInfo" text="" styleClass="subtitle"/>
+        </VBox>
+    </center>
+
+</BorderPane>
