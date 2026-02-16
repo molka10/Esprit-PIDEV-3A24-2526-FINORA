@@ -30,6 +30,12 @@ public class AddTransactionController {
 
     @FXML
     public void initialize() {
+
+        // Style général blanc + violet
+        nameField.setStyle("-fx-background-color:#f3f0fa; -fx-text-fill:#4b0082; -fx-background-radius:10;");
+        amountField.setStyle("-fx-background-color:#f3f0fa; -fx-text-fill:#4b0082; -fx-background-radius:10;");
+        datePicker.setStyle("-fx-background-color:#f3f0fa; -fx-background-radius:10;");
+        categoryBox.setStyle("-fx-background-color:#f3f0fa; -fx-background-radius:10;");
     }
 
     public void setParentController(WalletController controller) {
@@ -41,12 +47,7 @@ public class AddTransactionController {
         this.currentType = type;
 
         typeLabel.setText(type);
-
-        if(type.equals("INCOME")){
-            typeLabel.setStyle("-fx-text-fill:#2ecc71; -fx-font-weight:bold;");
-        } else {
-            typeLabel.setStyle("-fx-text-fill:#e74c3c; -fx-font-weight:bold;");
-        }
+        typeLabel.setStyle("-fx-text-fill:#8e44ad; -fx-font-weight:bold; -fx-font-size:16;");
 
         loadCategoriesByType(type);
     }
@@ -63,6 +64,7 @@ public class AddTransactionController {
             }
         }
     }
+
     private void showError(String message) {
 
         Alert alert = new Alert(Alert.AlertType.ERROR);
@@ -142,7 +144,6 @@ public class AddTransactionController {
         }
     }
 
-
     @FXML
     private void openAddCategory() {
 
@@ -155,6 +156,7 @@ public class AddTransactionController {
             Stage stage = new Stage();
             stage.setScene(new Scene(loader.load()));
             stage.initModality(Modality.APPLICATION_MODAL);
+            stage.setTitle("Ajouter Catégorie");
 
             AddCategoryController controller = loader.getController();
             controller.setCategoryType(currentType);

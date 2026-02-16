@@ -3,7 +3,6 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.control.*?>
 
-
 <BorderPane xmlns="http://javafx.com/javafx/8"
             xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="com.example.gestionwallet.controllers.WalletController"
@@ -15,37 +14,38 @@
     <left>
         <VBox prefWidth="220"
               spacing="30"
-              style="-fx-background-color: linear-gradient(to bottom, #2c3e50, #1e2a3a); -fx-padding:30;">
+              style="-fx-background-color: linear-gradient(to bottom, #8e44ad, #6a0dad); -fx-padding:30;">
 
             <Label text="💳 Wallet"
                    style="-fx-text-fill:white; -fx-font-size:22; -fx-font-weight:bold;"/>
 
-            <Button text="Dashboard" styleClass="btn-blue"/>
+            <Button text="Dashboard"
+                    style="-fx-background-color:white; -fx-text-fill:#6a0dad; -fx-background-radius:10;"/>
+
             <Button text="Admin"
-                    styleClass="btn-blue"
+                    style="-fx-background-color:#e8e3f8; -fx-text-fill:#6a0dad; -fx-background-radius:10;"
                     onAction="#openAdminPage"/>
 
         </VBox>
     </left>
 
-
     <!-- TOP -->
     <top>
         <HBox spacing="20"
               alignment="CENTER_LEFT"
-              style="-fx-padding:20; -fx-background-color:#273c55;">
+              style="-fx-padding:20; -fx-background-color:white;">
 
             <Label fx:id="balanceLabel"
                    text="Balance: 0 DT"
-                   style="-fx-font-size:26; -fx-font-weight:bold; -fx-text-fill:white;"/>
+                   style="-fx-font-size:26; -fx-font-weight:bold; -fx-text-fill:#6a0dad;"/>
 
             <Region HBox.hgrow="ALWAYS"/>
 
             <Button text="Analyse"
-                    styleClass="btn-blue"/>
+                    style="-fx-background-color:#dcd6f7; -fx-text-fill:#6a0dad; -fx-background-radius:10;"/>
 
             <Button text="Historique"
-                    styleClass="btn-green"/>
+                    style="-fx-background-color:#8e44ad; -fx-text-fill:white; -fx-background-radius:10;"/>
 
         </HBox>
     </top>
@@ -54,17 +54,17 @@
     <center>
         <HBox spacing="40"
               alignment="CENTER"
-              style="-fx-padding:40; -fx-background-color:#1e2a3a;">
+              style="-fx-padding:40; -fx-background-color:#f4f4f8;">
 
             <VBox fx:id="outcomeBox"
                   spacing="30"
                   prefWidth="550"
-                  styleClass="card"/>
+                  style="-fx-background-color:white; -fx-background-radius:20; -fx-padding:20; -fx-effect:dropshadow(gaussian, rgba(0,0,0,0.1), 20,0,0,5);"/>
 
             <VBox fx:id="incomeBox"
                   spacing="30"
                   prefWidth="550"
-                  styleClass="card"/>
+                  style="-fx-background-color:white; -fx-background-radius:20; -fx-padding:20; -fx-effect:dropshadow(gaussian, rgba(0,0,0,0.1), 20,0,0,5);"/>
 
         </HBox>
     </center>

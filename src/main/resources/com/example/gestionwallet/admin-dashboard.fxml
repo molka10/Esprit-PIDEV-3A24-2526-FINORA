@@ -3,37 +3,56 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.control.*?>
 
-
 <StackPane prefWidth="1200" prefHeight="750"
            stylesheets="@dashboard.css"
            xmlns="http://javafx.com/javafx/8"
            xmlns:fx="http://javafx.com/fxml/1"
-           fx:controller="com.example.gestionwallet.controllers.AdminController">
+           fx:controller="com.example.gestionwallet.controllers.AdminController"
+           style="-fx-background-color:#f4f4f8;">
 
-    <VBox spacing="30" maxWidth="1000" styleClass="card">
+    <VBox spacing="30" maxWidth="1000"
+          style="-fx-background-color:white; -fx-padding:40; -fx-background-radius:25; -fx-effect:dropshadow(gaussian, rgba(0,0,0,0.1), 20,0,0,5);">
 
+        <!-- HEADER -->
         <HBox alignment="CENTER_LEFT">
-            <Label text="Admin Dashboard" styleClass="title-label"/>
+            <Label text="Admin Dashboard"
+                   style="-fx-font-size:26; -fx-font-weight:bold; -fx-text-fill:#6a0dad;"/>
+
             <Region HBox.hgrow="ALWAYS"/>
-            <Button text="Download PDF" styleClass="btn-blue"/>
+
+            <Button text="Download PDF"
+                    style="-fx-background-color:#8e44ad; -fx-text-fill:white; -fx-background-radius:10;"/>
         </HBox>
 
-        <HBox spacing="30">
+        <!-- MAIN CONTENT -->
+        <HBox spacing="40">
 
             <!-- WALLET CARD -->
-            <VBox spacing="20" prefWidth="450" styleClass="card">
-                <Label text="Wallet" style="-fx-text-fill:white; -fx-font-size:16;"/>
-                <ScrollPane fitToWidth="true" prefHeight="400">
-                    <VBox fx:id="walletContainer" spacing="10"/>
+            <VBox spacing="20" prefWidth="450"
+                  style="-fx-background-color:white; -fx-padding:25; -fx-background-radius:20; -fx-effect:dropshadow(gaussian, rgba(0,0,0,0.1), 15,0,0,4);">
+
+                <Label text="Wallet"
+                       style="-fx-text-fill:#6a0dad; -fx-font-size:18; -fx-font-weight:bold;"/>
+
+                <ScrollPane fitToWidth="true" prefHeight="400"
+                            style="-fx-background-color:transparent;">
+                    <VBox fx:id="walletContainer" spacing="15"/>
                 </ScrollPane>
+
             </VBox>
 
             <!-- TRANSACTION CARD -->
-            <VBox spacing="20" prefWidth="450" styleClass="card">
-                <Label text="Transactions" style="-fx-text-fill:white; -fx-font-size:16;"/>
-                <ScrollPane fitToWidth="true" prefHeight="400">
-                    <VBox fx:id="transactionContainer" spacing="10"/>
+            <VBox spacing="20" prefWidth="450"
+                  style="-fx-background-color:white; -fx-padding:25; -fx-background-radius:20; -fx-effect:dropshadow(gaussian, rgba(0,0,0,0.1), 15,0,0,4);">
+
+                <Label text="Transactions"
+                       style="-fx-text-fill:#6a0dad; -fx-font-size:18; -fx-font-weight:bold;"/>
+
+                <ScrollPane fitToWidth="true" prefHeight="400"
+                            style="-fx-background-color:transparent;">
+                    <VBox fx:id="transactionContainer" spacing="15"/>
                 </ScrollPane>
+
             </VBox>
 
         </HBox>

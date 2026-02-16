@@ -39,13 +39,10 @@ public class WalletController {
     private VBox createCard(String title, boolean isIncome) {
 
         Label titleLabel = new Label(title);
-        titleLabel.setStyle("-fx-font-size:18; -fx-font-weight:bold; -fx-text-fill:white;");
+        titleLabel.setStyle("-fx-font-size:18; -fx-font-weight:bold; -fx-text-fill:#6a0dad;");
 
         Button addBtn = new Button("+ Add");
-        addBtn.setStyle(isIncome
-                ? "-fx-background-color:#2ecc71; -fx-text-fill:white;"
-                : "-fx-background-color:#e74c3c; -fx-text-fill:white;");
-
+        addBtn.setStyle("-fx-background-color:#8e44ad; -fx-text-fill:white; -fx-background-radius:10;");
         addBtn.setOnAction(e -> openAddTransaction(isIncome));
 
         Region spacer = new Region();
@@ -62,17 +59,18 @@ public class WalletController {
         ScrollPane scrollPane = new ScrollPane(list);
         scrollPane.setFitToWidth(true);
         scrollPane.setPrefHeight(350);
+        scrollPane.setStyle("-fx-background:white;");
 
         VBox card = new VBox(15, header, scrollPane);
         card.setPadding(new Insets(20));
         card.setPrefWidth(420);
-        card.setStyle("-fx-background-color:#273c55; -fx-background-radius:20;");
+        card.setStyle("-fx-background-color:white; -fx-background-radius:20; "
+                + "-fx-effect:dropshadow(gaussian, rgba(0,0,0,0.1), 20,0,0,5);");
 
         return card;
     }
 
     private void openAddTransaction(boolean isIncome) {
-
         try {
 
             FXMLLoader loader = new FXMLLoader(
@@ -114,28 +112,24 @@ public class WalletController {
         HBox item = new HBox(10);
         item.setPrefWidth(500);
         item.setMinHeight(60);
-
         item.setPadding(new Insets(10));
-        item.setStyle("-fx-background-color:#34495e; -fx-background-radius:10;");
+        item.setStyle("-fx-background-color:#f3f0fa; -fx-background-radius:10;");
 
         Label nameLabel = new Label(t.getNom_transaction());
-        nameLabel.setStyle("-fx-font-weight:bold; -fx-text-fill:white;");
+        nameLabel.setStyle("-fx-font-weight:bold; -fx-text-fill:#4b0082;");
         nameLabel.setMaxWidth(Double.MAX_VALUE);
         HBox.setHgrow(nameLabel, Priority.ALWAYS);
         nameLabel.setWrapText(true);
         nameLabel.setMaxWidth(250);
 
-
         Label amountLabel = new Label(t.getMontant() + " DT");
-        amountLabel.setStyle(t.getMontant() >= 0
-                ? "-fx-text-fill:#2ecc71;"
-                : "-fx-text-fill:#e74c3c;");
+        amountLabel.setStyle("-fx-text-fill:#8e44ad; -fx-font-weight:bold;");
 
         Button editBtn = new Button("Modifier");
-        editBtn.setStyle("-fx-background-color:#3498db; -fx-text-fill:white;");
+        editBtn.setStyle("-fx-background-color:#dcd6f7; -fx-text-fill:#6a0dad; -fx-background-radius:8;");
 
         Button deleteBtn = new Button("Supprimer");
-        deleteBtn.setStyle("-fx-background-color:#e74c3c; -fx-text-fill:white;");
+        deleteBtn.setStyle("-fx-background-color:#cdb4f6; -fx-text-fill:#4b0082; -fx-background-radius:8;");
 
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
@@ -143,7 +137,6 @@ public class WalletController {
         item.getChildren().addAll(nameLabel, spacer, amountLabel, editBtn, deleteBtn);
 
         deleteBtn.setOnAction(e -> {
-
             Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
             confirm.setHeaderText("Supprimer transaction ?");
             confirm.showAndWait().ifPresent(response -> {
@@ -162,28 +155,28 @@ public class WalletController {
 
             VBox card = new VBox(20);
             card.setPadding(new Insets(30));
-            card.setStyle("-fx-background-color:#273c55; -fx-background-radius:20;");
+            card.setStyle("-fx-background-color:white; -fx-background-radius:20;");
 
             Label title = new Label("Modifier Transaction");
-            title.setStyle("-fx-text-fill:white; -fx-font-size:18; -fx-font-weight:bold;");
+            title.setStyle("-fx-text-fill:#6a0dad; -fx-font-size:18; -fx-font-weight:bold;");
 
             Label nameLabelPopup = new Label("Nom:");
-            nameLabelPopup.setStyle("-fx-text-fill:#dcdde1;");
+            nameLabelPopup.setStyle("-fx-text-fill:#4b0082;");
 
             TextField nameField = new TextField(t.getNom_transaction());
-            nameField.setStyle("-fx-background-color:#34495e; -fx-text-fill:white; -fx-background-radius:10;");
+            nameField.setStyle("-fx-background-color:#f3f0fa; -fx-text-fill:#4b0082; -fx-background-radius:10;");
 
             Label amountLabelPopup = new Label("Montant:");
-            amountLabelPopup.setStyle("-fx-text-fill:#dcdde1;");
+            amountLabelPopup.setStyle("-fx-text-fill:#4b0082;");
 
             TextField amountField = new TextField(String.valueOf(Math.abs(t.getMontant())));
-            amountField.setStyle("-fx-background-color:#34495e; -fx-text-fill:white; -fx-background-radius:10;");
+            amountField.setStyle("-fx-background-color:#f3f0fa; -fx-text-fill:#4b0082; -fx-background-radius:10;");
 
             Button saveBtn = new Button("Enregistrer");
-            saveBtn.setStyle("-fx-background-color:#2ecc71; -fx-text-fill:white; -fx-background-radius:10;");
+            saveBtn.setStyle("-fx-background-color:#8e44ad; -fx-text-fill:white; -fx-background-radius:10;");
 
             Button cancelBtn = new Button("Annuler");
-            cancelBtn.setStyle("-fx-background-color:#e74c3c; -fx-text-fill:white; -fx-background-radius:10;");
+            cancelBtn.setStyle("-fx-background-color:#e8e3f8; -fx-text-fill:#6a0dad; -fx-background-radius:10;");
 
             HBox buttons = new HBox(15, cancelBtn, saveBtn);
 
@@ -195,7 +188,7 @@ public class WalletController {
             );
 
             StackPane root = new StackPane(card);
-            root.setStyle("-fx-background-color:#1e2a3a;");
+            root.setStyle("-fx-background-color:#f4f4f8;");
 
             Scene scene = new Scene(root, 400, 300);
             dialogStage.setScene(scene);
@@ -204,7 +197,6 @@ public class WalletController {
 
                 String newName = nameField.getText();
                 String amountText = amountField.getText();
-
 
                 if (newName == null || newName.trim().isEmpty()) {
                     showError("Le nom est obligatoire.");
@@ -241,10 +233,8 @@ public class WalletController {
             });
 
             cancelBtn.setOnAction(ev -> dialogStage.close());
-
             dialogStage.showAndWait();
         });
-
 
         if (t.getType().equals("INCOME"))
             incomeList.getChildren().add(item);
@@ -258,10 +248,13 @@ public class WalletController {
 
         balanceLabel.setText("Balance: " + balance + " DT");
 
-        balanceLabel.setStyle(balance < 0
-                ? "-fx-font-size:26; -fx-font-weight:bold; -fx-text-fill:red;"
-                : "-fx-font-size:26; -fx-font-weight:bold; -fx-text-fill:#2ecc71;");
+        if (balance >= 0) {
+            balanceLabel.setStyle("-fx-font-size:26; -fx-font-weight:bold; -fx-text-fill:#2ecc71;");
+        } else {
+            balanceLabel.setStyle("-fx-font-size:26; -fx-font-weight:bold; -fx-text-fill:#e74c3c;");
+        }
     }
+
 
     private void showError(String message) {
 
@@ -271,6 +264,7 @@ public class WalletController {
         alert.setContentText(message);
         alert.showAndWait();
     }
+
     @FXML
     private void openAdminPage() {
 
@@ -289,6 +283,4 @@ public class WalletController {
             e.printStackTrace();
         }
     }
-
-
 }

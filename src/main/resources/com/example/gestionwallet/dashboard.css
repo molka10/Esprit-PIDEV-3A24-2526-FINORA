@@ -1,190 +1,98 @@
 /* ================= ROOT ================= */
 
 .root {
-    -fx-background-color: #1e2a3a;
+    -fx-background-color: #f4f4f8; /* blanc très clair */
     -fx-font-family: "Segoe UI";
 }
 
 /* ================= CARD ================= */
 
 .card {
-    -fx-background-color: #273c55;
+    -fx-background-color: white;
     -fx-background-radius: 20;
     -fx-padding: 30;
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.4), 20, 0, 0, 5);
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 20, 0, 0, 5);
 }
-
 
 /* ================= LABELS ================= */
 
 .title-label {
-    -fx-text-fill: white;
+    -fx-text-fill: #6a0dad; /* violet */
     -fx-font-size: 22px;
     -fx-font-weight: bold;
 }
 
 .label {
-    -fx-text-fill: #dcdde1;
+    -fx-text-fill: #444444;
 }
 
 /* ================= INPUTS ================= */
 
 .text-field {
-    -fx-background-color: #34495e;
-    -fx-text-fill: white;
+    -fx-background-color: #ffffff;
+    -fx-text-fill: #333333;
     -fx-background-radius: 10;
     -fx-border-radius: 10;
-    -fx-prompt-text-fill: #95a5a6;
+    -fx-border-color: #dcd6f7;
+}
+
+.text-field:focused {
+    -fx-border-color: #8e44ad;
 }
 
 /* ================= COMBOBOX ================= */
 
 .combo-box {
-    -fx-background-color: #34495e;
-    -fx-text-fill: white;
+    -fx-background-color: white;
+    -fx-text-fill: #333333;
     -fx-background-radius: 10;
+    -fx-border-color: #dcd6f7;
 }
 
 /* ================= BUTTONS ================= */
 
-.btn-green {
-    -fx-background-color: #2ecc71;
+.btn-purple {
+    -fx-background-color: #8e44ad;
     -fx-text-fill: white;
     -fx-background-radius: 10;
     -fx-font-weight: bold;
 }
 
-.btn-green:hover {
-    -fx-background-color: #27ae60;
+.btn-purple:hover {
+    -fx-background-color: #6a0dad;
 }
 
-.btn-blue {
-    -fx-background-color: #3498db;
-    -fx-text-fill: white;
-    -fx-background-radius: 10;
-    -fx-font-weight: bold;
-}
-
-.btn-blue:hover {
-    -fx-background-color: #2980b9;
-}
-
-.btn-red {
-    -fx-background-color: #e74c3c;
-    -fx-text-fill: white;
+.btn-light {
+    -fx-background-color: #e8e3f8;
+    -fx-text-fill: #6a0dad;
     -fx-background-radius: 10;
 }
 
-.btn-red:hover {
-    -fx-background-color: #c0392b;
-}
-
-/* ================= SCROLL ================= */
-
-.scroll-pane {
-    -fx-background: transparent;
-    -fx-background-color: transparent;
-}
-
-.list-item {
-    -fx-background-color: #34495e;
-    -fx-background-radius: 10;
-    -fx-padding: 10;
-}
-
-/* ================================================= */
-/* ================= DATE PICKER =================== */
-/* ================================================= */
+/* ================= DATE PICKER ================= */
 
 .date-picker {
-    -fx-background-color: #34495e;
+    -fx-background-color: white;
     -fx-background-radius: 10;
-}
-
-.date-picker .text-field {
-    -fx-background-color: #34495e;
-    -fx-text-fill: white;
-    -fx-background-radius: 10 0 0 10;
+    -fx-border-color: #dcd6f7;
 }
 
 .date-picker .arrow-button {
-    -fx-background-color: #2c3e50;
-    -fx-background-radius: 0 10 10 0;
+    -fx-background-color: #8e44ad;
 }
 
 .date-picker .arrow {
     -fx-background-color: white;
 }
 
-/* POPUP DARK */
-
-.date-picker-popup {
-    -fx-background-color: #1e2a3a;
-    -fx-border-color: #2c3e50;
-}
-
-/* HEADER */
-
-.date-picker-popup .month-year-pane {
-    -fx-background-color: #273c55;
-}
-
-/* ================= TEXT BLACK ================= */
-
-/* Month & Year */
-.date-picker-popup .month-year-pane .label {
-    -fx-text-fill: black;
-}
-
-/* Week names (Mon Tue ...) */
-.date-picker-popup .day-name-cell {
-    -fx-background-color: #273c55;
-    -fx-text-fill: black;
-}
-
-/* Normal days */
-.date-picker-popup .day-cell {
-    -fx-background-color: transparent;
-    -fx-text-fill: black;
-}
-
-/* Hover */
-.date-picker-popup .day-cell:hover {
-    -fx-background-color: #3498db;
-    -fx-text-fill: black;
-}
-
-/* Selected */
-.date-picker-popup .day-cell:selected {
-    -fx-background-color: #2ecc71;
-    -fx-text-fill: black;
-}
-
-/* Today border */
-.date-picker-popup .today {
-    -fx-border-color: #2ecc71;
-}
-
-/* Disabled days */
-.date-picker-popup .day-cell:disabled {
-    -fx-text-fill: #888888;
-}
-/* ================= TABLEVIEW DARK ================= */
+/* ================= TABLEVIEW ================= */
 
 .table-view {
-    -fx-background-color: #273c55;
-    -fx-border-color: transparent;
-    -fx-table-cell-border-color: transparent;
+    -fx-background-color: white;
+    -fx-border-color: #dcd6f7;
 }
-
-/* HEADER BACKGROUND */
 
 .table-view .column-header-background {
-    -fx-background-color: #1e2a3a;
-}
-
-.table-view .column-header {
-    -fx-background-color: transparent;
+    -fx-background-color: #8e44ad;
 }
 
 .table-view .column-header .label {
@@ -192,42 +100,26 @@
     -fx-font-weight: bold;
 }
 
-/* ROWS */
-
 .table-row-cell {
-    -fx-background-color: #34495e;
-    -fx-text-fill: white;
+    -fx-background-color: white;
+    -fx-text-fill: #333333;
 }
 
 .table-row-cell:odd {
-    -fx-background-color: #2f4258;
+    -fx-background-color: #f3f0fa;
 }
-
-.table-row-cell:hover {
-    -fx-background-color: #3d5a73;
-}
-
-/* SELECTED ROW */
 
 .table-row-cell:selected {
-    -fx-background-color: #3498db;
+    -fx-background-color: #dcd6f7;
 }
-
-/* CELLS */
 
 .table-cell {
-    -fx-text-fill: white;
-    -fx-alignment: CENTER-LEFT;
+    -fx-text-fill: #333333;
 }
 
-/* SCROLL BAR */
+/* ================= SCROLL BAR ================= */
 
-.table-view .scroll-bar:vertical,
-.table-view .scroll-bar:horizontal {
-    -fx-background-color: transparent;
-}
-
-.table-view .scroll-bar .thumb {
-    -fx-background-color: #3498db;
+.scroll-bar .thumb {
+    -fx-background-color: #8e44ad;
     -fx-background-radius: 5;
 }

@@ -22,7 +22,6 @@ public class AdminController {
         loadWallet();
     }
 
-
     private void loadTransactions() {
 
         transactionContainer.getChildren().clear();
@@ -30,6 +29,7 @@ public class AdminController {
         HBox header = new HBox();
         header.setPadding(new Insets(10));
         header.setSpacing(0);
+        header.setStyle("-fx-background-color:#8e44ad; -fx-background-radius:10;");
 
         header.getChildren().addAll(
                 createHeaderLabel("User", 120),
@@ -45,7 +45,7 @@ public class AdminController {
             HBox row = new HBox();
             row.setPadding(new Insets(10));
             row.setSpacing(0);
-            row.setStyle("-fx-background-color:#34495e; -fx-background-radius:10;");
+            row.setStyle("-fx-background-color:#f3f0fa; -fx-background-radius:10;");
 
             row.getChildren().addAll(
                     createCell("User", 120),
@@ -57,7 +57,6 @@ public class AdminController {
             transactionContainer.getChildren().add(row);
         }
     }
-
 
     private void loadWallet() {
 
@@ -72,30 +71,31 @@ public class AdminController {
         HBox row = new HBox();
         row.setPadding(new Insets(15));
         row.setSpacing(40);
-        row.setStyle("-fx-background-color:#34495e; -fx-background-radius:10;");
+        row.setStyle("-fx-background-color:white; -fx-background-radius:10; "
+                + "-fx-effect:dropshadow(gaussian, rgba(0,0,0,0.1), 10,0,0,3);");
 
         Label user = new Label("User");
-        user.setStyle("-fx-text-fill:white;");
+        user.setStyle("-fx-text-fill:#6a0dad;");
         user.setPrefWidth(120);
 
         Label role = new Label("Utilisateur");
-        role.setStyle("-fx-text-fill:white;");
+        role.setStyle("-fx-text-fill:#6a0dad;");
         role.setPrefWidth(150);
 
         Label solde = new Label(total + " DT");
         solde.setPrefWidth(150);
 
         if (total >= 0) {
-            solde.setStyle("-fx-text-fill:#2ecc71; -fx-font-weight:bold;");
+            solde.setStyle("-fx-text-fill:#2ecc71; -fx-font-weight:bold;"); // vert
         } else {
-            solde.setStyle("-fx-text-fill:#e74c3c; -fx-font-weight:bold;");
+            solde.setStyle("-fx-text-fill:#e74c3c; -fx-font-weight:bold;"); // rouge
         }
+
 
         row.getChildren().addAll(user, role, solde);
 
         walletContainer.getChildren().add(row);
     }
-
 
     private Label createHeaderLabel(String text, double width) {
 
@@ -109,7 +109,7 @@ public class AdminController {
 
         Label label = new Label(text);
         label.setPrefWidth(width);
-        label.setStyle("-fx-text-fill:white;");
+        label.setStyle("-fx-text-fill:#4b0082;");
         return label;
     }
 
@@ -119,11 +119,12 @@ public class AdminController {
         label.setPrefWidth(width);
 
         if (montant >= 0) {
-            label.setStyle("-fx-text-fill:#2ecc71;");
+            label.setStyle("-fx-text-fill:#2ecc71; -fx-font-weight:bold;"); // vert INCOME
         } else {
-            label.setStyle("-fx-text-fill:#e74c3c;");
+            label.setStyle("-fx-text-fill:#e74c3c; -fx-font-weight:bold;"); // rouge OUTCOME
         }
 
         return label;
     }
+
 }
