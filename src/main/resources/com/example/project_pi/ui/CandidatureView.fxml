@@ -52,7 +52,6 @@
 
                 <TableView fx:id="table" styleClass="table">
                     <columns>
-                        <TableColumn fx:id="colId" text="ID" prefWidth="60"/>
                         <TableColumn fx:id="colAppelOffreId" text="AppelOffre ID" prefWidth="110"/>
                         <TableColumn fx:id="colNom" text="Nom" prefWidth="180"/>
                         <TableColumn fx:id="colEmail" text="Email" prefWidth="220"/>
@@ -62,7 +61,7 @@
                     </columns>
                 </TableView>
 
-                <Label text="Astuce: l’appel_offre_id doit exister (FK)."
+                <Label text="Astuce: l’appel_offre_id doit exister ."
                        styleClass="muted"/>
             </VBox>
         </VBox>

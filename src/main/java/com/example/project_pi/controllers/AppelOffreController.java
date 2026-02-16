@@ -25,7 +25,6 @@ public class AppelOffreController {
     @FXML private TextField searchField;
     @FXML private TableView<AppelOffre> table;
 
-    @FXML private TableColumn<AppelOffre, Integer> colId;
     @FXML private TableColumn<AppelOffre, String> colTitre;
     @FXML private TableColumn<AppelOffre, String> colCategorie;
     @FXML private TableColumn<AppelOffre, String> colType;
@@ -46,7 +45,6 @@ public class AppelOffreController {
         // 1) Bind columns to AppelOffre getters
         // Property names must match getter names:
         // getAppelOffreId -> "appelOffreId", getTitre -> "titre", etc.
-        colId.setCellValueFactory(new PropertyValueFactory<>("appelOffreId"));
         colTitre.setCellValueFactory(new PropertyValueFactory<>("titre"));
         colCategorie.setCellValueFactory(new PropertyValueFactory<>("categorie"));
         colType.setCellValueFactory(new PropertyValueFactory<>("type"));

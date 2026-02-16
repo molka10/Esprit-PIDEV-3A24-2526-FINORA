@@ -24,7 +24,6 @@ public class CandidatureController {
 
     @FXML private TableView<Candidature> table;
 
-    @FXML private TableColumn<Candidature, Integer> colId;
     @FXML private TableColumn<Candidature, Integer> colAppelOffreId;
     @FXML private TableColumn<Candidature, String> colNom;
     @FXML private TableColumn<Candidature, String> colEmail;
@@ -38,7 +37,6 @@ public class CandidatureController {
     @FXML
     private void initialize() {
         // Bind columns to entity properties
-        colId.setCellValueFactory(new PropertyValueFactory<>("candidatureId"));
         colAppelOffreId.setCellValueFactory(new PropertyValueFactory<>("appelOffreId"));
         colNom.setCellValueFactory(new PropertyValueFactory<>("nomCandidat"));
         colEmail.setCellValueFactory(new PropertyValueFactory<>("emailCandidat"));

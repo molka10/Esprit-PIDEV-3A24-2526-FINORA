@@ -77,7 +77,6 @@
 
                 <TableView fx:id="table" styleClass="table">
                     <columns>
-                        <TableColumn fx:id="colId" text="ID" prefWidth="60"/>
                         <TableColumn fx:id="colTitre" text="Titre" prefWidth="260"/>
                         <TableColumn fx:id="colCategorie" text="Catégorie" prefWidth="140"/>
                         <TableColumn fx:id="colType" text="Type" prefWidth="140"/>
