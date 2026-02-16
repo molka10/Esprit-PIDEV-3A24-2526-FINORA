@@ -13,33 +13,37 @@ public class UtilisateurStaticController {
 
     @FXML
     private void choisirAdmin(ActionEvent event) {
-        ouvrir(event, "/com/example/crud/bourse-view.fxml", "Gestion des Bourses");
+        naviguerVers("/com/example/crud/dashboard-admin-view.fxml",
+                "FINORA - Dashboard Admin",
+                event);
     }
 
     @FXML
     private void choisirEntreprise(ActionEvent event) {
-        ouvrir(event, "/com/example/crud/trading-view.fxml", "FINORA - Trading (Entreprise)");
+        naviguerVers("/com/example/crud/dashboard-investisseur-view.fxml",
+                "FINORA - Dashboard Entreprise",
+                event);
     }
 
     @FXML
     private void choisirInvestisseur(ActionEvent event) {
-        ouvrir(event, "/com/example/crud/trading-view.fxml", "FINORA - Trading (Investisseur)");
+        naviguerVers("/com/example/crud/dashboard-investisseur-view.fxml",
+                "FINORA - Dashboard Entreprise",
+                event);
     }
-
-    private void ouvrir(ActionEvent event, String fxml, String title) {
+    private void naviguerVers(String cheminFxml, String titreWindow, ActionEvent event) {
         try {
-            Parent root = FXMLLoader.load(getClass().getResource(fxml));
+            Parent root = FXMLLoader.load(getClass().getResource(cheminFxml));
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-            stage.setTitle(title);
+            stage.setTitle(titreWindow);
             stage.setScene(new Scene(root));
             stage.show();
         } catch (Exception e) {
             e.printStackTrace();
-            Alert a = new Alert(Alert.AlertType.ERROR);
-            a.setTitle("Erreur");
-            a.setHeaderText("Erreur");
-            a.setContentText("Erreur affichage : " + e.getMessage());
-            a.showAndWait();
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Erreur");
+            alert.setContentText("Impossible de charger la page : " + e.getMessage());
+            alert.showAndWait();
         }
     }
 }

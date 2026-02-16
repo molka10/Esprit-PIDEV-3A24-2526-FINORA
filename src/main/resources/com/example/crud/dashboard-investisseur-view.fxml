@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.example.crud.controllers.DashboardInvestisseurController"
+            stylesheets="@styles.css"
+            style="-fx-background-color: #F5F7FA;">
+
+    <!-- ============================================ -->
+    <!-- HEADER / TOP BAR -->
+    <!-- ============================================ -->
+    <top>
+        <VBox style="-fx-background-color: linear-gradient(to right, #6366F1, #8B5CF6); -fx-padding: 20;">
+            <HBox alignment="CENTER_LEFT" spacing="20">
+                <Label fx:id="lblBienvenue"
+                       text="👋 Bienvenue, Investisseur !"
+                       style="-fx-text-fill: white; -fx-font-size: 24px; -fx-font-weight: bold;"/>
+
+                <Region HBox.hgrow="ALWAYS"/>
+
+                <Label fx:id="lblDateHeure"
+                       text="📅 16/02/2025 - ⏰ 14:30:00"
+                       style="-fx-text-fill: white; -fx-font-size: 14px;"/>
+
+                <Button fx:id="btnDeconnexion"
+                        text="🚪 Déconnexion"
+                        onAction="#deconnexion"
+                        style="-fx-background-color: rgba(255,255,255,0.2); -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 8; -fx-cursor: hand;"/>
+            </HBox>
+        </VBox>
+    </top>
+
+    <!-- ============================================ -->
+    <!-- LEFT SIDEBAR / NAVIGATION -->
+    <!-- ============================================ -->
+    <left>
+        <VBox spacing="10" style="-fx-background-color: white; -fx-padding: 20; -fx-pref-width: 200;">
+            <padding>
+                <Insets top="20" right="15" bottom="20" left="15"/>
+            </padding>
+
+            <Label text="📊 Navigation"
+                   style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #6b7280;"/>
+
+            <Separator/>
+
+            <Button fx:id="btnBourses"
+                    text="🏦 Bourses"
+                    onAction="#ouvrirBourses"
+                    maxWidth="Infinity"
+                    style="-fx-background-color: #6366F1; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 8; -fx-padding: 10; -fx-cursor: hand;"/>
+
+            <Button fx:id="btnActions"
+                    text="📈 Actions"
+                    onAction="#ouvrirActions"
+                    maxWidth="Infinity"
+                    style="-fx-background-color: #6366F1; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 8; -fx-padding: 10; -fx-cursor: hand;"/>
+
+            <Button fx:id="btnWatchlist"
+                    text="⭐ Watchlist"
+                    onAction="#afficherWatchlist"
+                    maxWidth="Infinity"
+                    style="-fx-background-color: #10b981; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 8; -fx-padding: 10; -fx-cursor: hand;"/>
+
+            <Button fx:id="btnAlertes"
+                    text="🔔 Alertes"
+                    onAction="#afficherAlertes"
+                    maxWidth="Infinity"
+                    style="-fx-background-color: #f59e0b; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 8; -fx-padding: 10; -fx-cursor: hand;"/>
+        </VBox>
+    </left>
+
+    <!-- ============================================ -->
+    <!-- CENTER / MAIN CONTENT -->
+    <!-- ============================================ -->
+    <center>
+        <ScrollPane fitToWidth="true" style="-fx-background-color: transparent;">
+            <VBox spacing="20" style="-fx-padding: 20;">
+
+                <!-- ======================== -->
+                <!-- STATISTIQUES RAPIDES -->
+                <!-- ======================== -->
+                <HBox spacing="15" alignment="CENTER_LEFT">
+
+                    <!-- Total Bourses -->
+                    <VBox spacing="5"
+                          style="-fx-background-color: white; -fx-background-radius: 12; -fx-padding: 20; -fx-pref-width: 200; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 2);">
+                        <Label text="🏦 Total Bourses"
+                               style="-fx-font-size: 12px; -fx-text-fill: #6b7280;"/>
+                        <Label fx:id="lblTotalBourses"
+                               text="0"
+                               style="-fx-font-size: 32px; -fx-font-weight: bold; -fx-text-fill: #6366F1;"/>
+                    </VBox>
+
+                    <!-- Total Actions -->
+                    <VBox spacing="5"
+                          style="-fx-background-color: white; -fx-background-radius: 12; -fx-padding: 20; -fx-pref-width: 200; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 2);">
+                        <Label text="📈 Total Actions"
+                               style="-fx-font-size: 12px; -fx-text-fill: #6b7280;"/>
+                        <Label fx:id="lblTotalActions"
+                               text="0"
+                               style="-fx-font-size: 32px; -fx-font-weight: bold; -fx-text-fill: #10b981;"/>
+                    </VBox>
+
+                    <!-- Watchlist -->
+                    <VBox spacing="5"
+                          style="-fx-background-color: white; -fx-background-radius: 12; -fx-padding: 20; -fx-pref-width: 200; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 2);">
+                        <Label text="⭐ Watchlist"
+                               style="-fx-font-size: 12px; -fx-text-fill: #6b7280;"/>
+                        <Label fx:id="lblWatchlistCount"
+                               text="0"
+                               style="-fx-font-size: 32px; -fx-font-weight: bold; -fx-text-fill: #f59e0b;"/>
+                    </VBox>
+
+                    <!-- Alertes -->
+                    <VBox spacing="5"
+                          style="-fx-background-color: white; -fx-background-radius: 12; -fx-padding: 20; -fx-pref-width: 200; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 2);">
+                        <Label text="🔔 Alertes Actives"
+                               style="-fx-font-size: 12px; -fx-text-fill: #6b7280;"/>
+                        <Label fx:id="lblAlertes"
+                               text="0"
+                               style="-fx-font-size: 32px; -fx-font-weight: bold; -fx-text-fill: #ef4444;"/>
+                    </VBox>
+
+                </HBox>
+
+                <!-- ======================== -->
+                <!-- TOP GAINERS -->
+                <!-- ======================== -->
+                <VBox spacing="10"
+                      style="-fx-background-color: white; -fx-background-radius: 12; -fx-padding: 20; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 2);">
+                    <Label text="📈 Top Gainers (Meilleures Performances)"
+                           style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #10b981;"/>
+
+                    <FlowPane fx:id="topGainersContainer"
+                              hgap="15"
+                              vgap="15">
+                        <!-- Cartes générées dynamiquement -->
+                    </FlowPane>
+                </VBox>
+
+                <!-- ======================== -->
+                <!-- TOP LOSERS -->
+                <!-- ======================== -->
+                <VBox spacing="10"
+                      style="-fx-background-color: white; -fx-background-radius: 12; -fx-padding: 20; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 2);">
+                    <Label text="📉 Top Losers (Moins Bonnes Performances)"
+                           style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #ef4444;"/>
+
+                    <FlowPane fx:id="topLosersContainer"
+                              hgap="15"
+                              vgap="15">
+                        <!-- Cartes générées dynamiquement -->
+                    </FlowPane>
+                </VBox>
+
+                <!-- ======================== -->
+                <!-- GRAPHIQUE SECTEURS -->
+                <!-- ======================== -->
+                <VBox spacing="10"
+                      fx:id="chartContainer"
+                      style="-fx-background-color: white; -fx-background-radius: 12; -fx-padding: 20; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 2);">
+                    <!-- Graphique généré dynamiquement -->
+                </VBox>
+
+            </VBox>
+        </ScrollPane>
+    </center>
+
+</BorderPane>
