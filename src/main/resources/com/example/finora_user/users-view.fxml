@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.ToggleGroup?>
+<?import javafx.scene.control.ToggleButton?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.example.finora_user.controllers.UsersController"
+            stylesheets="@theme.css"
+            styleClass="root-bg">
+
+    <!-- TOP BAR -->
+    <top>
+        <HBox spacing="12" styleClass="topbar" alignment="CENTER_LEFT">
+            <padding>
+                <Insets top="12" right="20" bottom="12" left="20"/>
+            </padding>
+
+            <!-- ✅ ToggleGroup must be defined here, not as a child -->
+            <fx:define>
+                <ToggleGroup fx:id="searchModeGroup"/>
+            </fx:define>
+
+            <children>
+                <Label text="Finora - Gestion Utilisateurs" styleClass="topbar-title"/>
+
+                <Region HBox.hgrow="ALWAYS"/>
+
+                <!-- Toggle buttons -->
+                <ToggleButton fx:id="toggleText" text="Nom/Email"
+                              toggleGroup="$searchModeGroup" selected="true"
+                              onAction="#handleSearchMode" styleClass="btn-ghost"/>
+
+                <ToggleButton fx:id="toggleId" text="ID"
+                              toggleGroup="$searchModeGroup"
+                              onAction="#handleSearchMode" styleClass="btn-ghost"/>
+
+                <ToggleButton fx:id="toggleRole" text="Role"
+                              toggleGroup="$searchModeGroup"
+                              onAction="#handleSearchMode" styleClass="btn-ghost"/>
+
+                <!-- Search field -->
+                <TextField fx:id="searchField"
+                           promptText="Rechercher..."
+                           styleClass="field"
+                           prefWidth="260"
+                           onKeyReleased="#handleSearchDynamic"/>
+
+                <!-- Role selector -->
+                <ComboBox fx:id="roleFilterCombo"
+                          promptText="Choisir role"
+                          visible="false"
+                          managed="false"
+                          styleClass="field"
+                          prefWidth="150"
+                          onAction="#handleRoleFilter"/>
+
+                <Button text="Actualiser" onAction="#handleRefresh" styleClass="btn-ghost"/>
+            </children>
+        </HBox>
+    </top>
+
+
+
+    <!-- CENTER CONTENT -->
+    <center>
+        <HBox spacing="20">
+            <padding>
+                <Insets top="20" right="20" bottom="20" left="20"/>
+            </padding>
+
+            <!-- TABLE SECTION -->
+            <VBox spacing="10" styleClass="card" HBox.hgrow="ALWAYS">
+                <padding>
+                    <Insets top="15" right="15" bottom="15" left="15"/>
+                </padding>
+
+                <children>
+                    <Label text="Liste des utilisateurs" styleClass="h2"/>
+
+                    <TableView fx:id="usersTable"
+                               VBox.vgrow="ALWAYS"
+                               onMouseClicked="#handleTableClick">
+
+                        <columns>
+                            <TableColumn fx:id="colId" text="ID" prefWidth="60"/>
+                            <TableColumn fx:id="colUsername" text="Username" prefWidth="150"/>
+                            <TableColumn fx:id="colEmail" text="Email" prefWidth="220"/>
+                            <TableColumn fx:id="colRole" text="Role" prefWidth="130"/>
+                        </columns>
+                    </TableView>
+                </children>
+            </VBox>
+
+            <!-- FORM SECTION -->
+            <VBox spacing="15" styleClass="card" prefWidth="380">
+                <padding>
+                    <Insets top="15" right="15" bottom="15" left="15"/>
+                </padding>
+
+                <children>
+                    <Label text="Détails utilisateur" styleClass="h2"/>
+
+                    <!-- ID -->
+                    <Label text="ID"/>
+                    <TextField fx:id="idField" editable="false"/>
+
+                    <!-- Username -->
+                    <Label text="Username"/>
+                    <TextField fx:id="usernameField" promptText="Entrer username"/>
+
+                    <!-- Email -->
+                    <Label text="Email"/>
+                    <TextField fx:id="emailField" promptText="Entrer email"/>
+
+                    <!-- Password -->
+                    <Label text="Mot de passe"/>
+                    <PasswordField fx:id="passwordField" promptText="Entrer mot de passe"/>
+
+                    <!-- Role -->
+                    <Label text="Role"/>
+                    <ComboBox fx:id="roleCombo"/>
+
+                    <!-- BUTTONS -->
+                    <HBox spacing="10">
+                        <Button text="Ajouter"
+                                onAction="#handleAdd"
+                                styleClass="btn-primary"
+                                HBox.hgrow="ALWAYS"
+                                maxWidth="Infinity"/>
+
+                        <Button text="Modifier"
+                                onAction="#handleUpdate"
+                                styleClass="btn-secondary"
+                                HBox.hgrow="ALWAYS"
+                                maxWidth="Infinity"/>
+                    </HBox>
+
+                    <Button text="Supprimer"
+                            onAction="#handleDelete"
+                            styleClass="btn-danger"
+                            maxWidth="Infinity"/>
+
+                    <Button text="Vider"
+                            onAction="#handleClear"
+                            styleClass="btn-ghost"
+                            maxWidth="Infinity"/>
+
+                    <Label fx:id="statusLabel" text="" wrapText="true"/>
+                </children>
+            </VBox>
+
+        </HBox>
+    </center>
+</BorderPane>

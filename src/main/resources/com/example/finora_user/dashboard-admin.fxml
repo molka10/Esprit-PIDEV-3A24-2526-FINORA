@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.example.finora_user.controllers.DashboardAdminController"
+            stylesheets="@theme.css" styleClass="root-bg">
+
+    <top>
+        <HBox styleClass="topbar" alignment="CENTER_LEFT">
+            <padding><Insets top="12" right="20" bottom="12" left="20"/></padding>
+            <children>
+                <Label text="Dashboard Admin" styleClass="topbar-title"/>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Button text="Déconnexion" onAction="#logout" styleClass="btn-ghost"/>
+            </children>
+        </HBox>
+    </top>
+
+    <center>
+        <VBox spacing="15" alignment="CENTER">
+            <Label text="Espace Administrateur" styleClass="h2"/>
+
+            <HBox spacing="15" alignment="CENTER">
+                <Button text="Bourse" onAction="#openBourse" styleClass="btn-secondary" prefWidth="220"/>
+                <Button text="Portefeuille" onAction="#openPortefeuille" styleClass="btn-secondary" prefWidth="220"/>
+                <Button text="Appel d'offre" onAction="#openAppelOffre" styleClass="btn-secondary" prefWidth="220"/>
+                <Button text="Gestion Users" onAction="#openGestionUsers" styleClass="btn-primary" prefWidth="220"/>
+            </HBox>
+
+            <Label fx:id="statusLabel" text="" styleClass="muted"/>
+        </VBox>
+    </center>
+</BorderPane>

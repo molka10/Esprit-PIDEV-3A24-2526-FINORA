@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.example.finora_user.controllers.LoginController"
+            stylesheets="@theme.css" styleClass="root-bg">
+
+    <children>
+        <VBox alignment="CENTER" spacing="12"
+              AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0"
+              AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0">
+
+            <VBox maxWidth="420" spacing="12" styleClass="card">
+                <padding><Insets top="20" right="20" bottom="20" left="20"/></padding>
+
+                <Label text="Connexion" styleClass="h2"/>
+
+                <TextField fx:id="emailField" promptText="Email" styleClass="field"/>
+                <PasswordField fx:id="passwordField" promptText="Mot de passe" styleClass="field"/>
+
+                <Button text="Se connecter" onAction="#handleLogin" styleClass="btn-primary" maxWidth="Infinity"/>
+                <Button text="Créer un compte" onAction="#goToSignup" styleClass="btn-ghost" maxWidth="Infinity"/>
+
+                <Label fx:id="statusLabel" text="" wrapText="true" styleClass="muted"/>
+            </VBox>
+
+        </VBox>
+    </children>
+</AnchorPane>

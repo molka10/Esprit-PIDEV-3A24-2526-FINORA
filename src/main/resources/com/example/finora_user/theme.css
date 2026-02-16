@@ -1,0 +1,64 @@
+.root-bg {
+    -fx-background-color: #0f172a;
+    -fx-font-family: "Segoe UI";
+}
+
+.topbar {
+    -fx-background-color: #1e293b;
+}
+
+.topbar-title {
+    -fx-text-fill: white;
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+}
+
+.card {
+    -fx-background-color: #1e293b;
+    -fx-background-radius: 15;
+    -fx-padding: 10;
+}
+
+.h2 {
+    -fx-text-fill: #38bdf8;
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+}
+
+.label {
+    -fx-text-fill: white;
+}
+
+.text-field, .password-field, .combo-box {
+    -fx-background-color: #334155;
+    -fx-text-fill: white;
+    -fx-background-radius: 8;
+}
+
+.btn-primary {
+    -fx-background-color: #22c55e;
+    -fx-text-fill: white;
+    -fx-background-radius: 8;
+}
+
+.btn-secondary {
+    -fx-background-color: #3b82f6;
+    -fx-text-fill: white;
+    -fx-background-radius: 8;
+}
+
+.btn-danger {
+    -fx-background-color: #ef4444;
+    -fx-text-fill: white;
+    -fx-background-radius: 8;
+}
+
+.btn-ghost {
+    -fx-background-color: transparent;
+    -fx-text-fill: #94a3b8;
+}
+.field-error {
+    -fx-border-color: #ef4444;
+    -fx-border-width: 2;
+    -fx-border-radius: 8;
+}
