@@ -22,27 +22,63 @@
             </padding>
 
             <!-- Toolbar -->
-            <HBox spacing="10" styleClass="toolbar" alignment="CENTER_LEFT">
-                <Label text="Formation:" styleClass="subtitle"/>
-                <ComboBox fx:id="cbFormation"
-                          prefWidth="320"
-                          promptText="Toutes les formations"
-                          onAction="#onFilter"/>
+            <HBox spacing="12" alignment="CENTER_LEFT" styleClass="toolbar">
 
+                <!-- LEFT SIDE -->
+                <HBox spacing="10" alignment="CENTER_LEFT">
+                    <Label text="Formation:" styleClass="subtitle"/>
+
+                    <ComboBox fx:id="cbFormation"
+                              prefWidth="220"
+                              minWidth="180"
+                              promptText="Toutes les formations"
+                              onAction="#onFilter"/>
+
+                    <TextField fx:id="txtSearch"
+                               prefWidth="220"
+                               minWidth="180"
+                               promptText="Rechercher..."
+                               onKeyReleased="#onSearch"/>
+
+                    <ComboBox fx:id="cbSort"
+                              prefWidth="180"
+                              minWidth="150"
+                              onAction="#onSort"/>
+                </HBox>
+
+                <!-- PUSH BUTTONS TO RIGHT -->
                 <Region HBox.hgrow="ALWAYS"/>
 
-                <Button text="➕ Ajouter" styleClass="btn-primary" onAction="#onAdd"/>
-                <Button text="✏ Modifier" styleClass="btn-ghost" onAction="#onEdit"/>
-                <Button text="🗑 Supprimer" styleClass="btn-danger" onAction="#onDelete"/>
-                <Button text="⬅ Formations" styleClass="btn-ghost" onAction="#goFormations"/>
+                <!-- RIGHT SIDE BUTTONS -->
+                <HBox spacing="10" alignment="CENTER_RIGHT">
+                    <Button text="➕ Ajouter"
+                            minWidth="110"
+                            styleClass="btn-primary"
+                            onAction="#onAdd"/>
+
+                    <Button text="✏ Modifier"
+                            minWidth="110"
+                            styleClass="btn-ghost"
+                            onAction="#onEdit"/>
+
+                    <Button text="🗑 Supprimer"
+                            minWidth="110"
+                            styleClass="btn-danger"
+                            onAction="#onDelete"/>
+
+                    <Button text="⬅ Formations"
+                            minWidth="130"
+                            styleClass="btn-ghost"
+                            onAction="#goFormations"/>
+                </HBox>
+
             </HBox>
+
 
             <!-- Cards -->
             <ScrollPane fitToWidth="true" styleClass="scroll">
                 <content>
-                    <VBox fx:id="cardsBox" spacing="14" styleClass="cards">
-                        <!-- cards injected by controller -->
-                    </VBox>
+                    <VBox fx:id="cardsBox" spacing="14" styleClass="cards"/>
                 </content>
             </ScrollPane>
 

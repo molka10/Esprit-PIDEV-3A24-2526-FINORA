@@ -2,6 +2,7 @@ package tn.finora.finoraformation;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
@@ -10,13 +11,18 @@ public class HelloApplication extends Application {
     @Override
     public void start(Stage stage) throws Exception {
 
-        // ✅ Your FXML is directly in src/main/resources (root)
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/formation_list.fxml"));
+        FXMLLoader loader = new FXMLLoader(
+                getClass().getResource("/formation_list.fxml")
+        );
 
-        Scene scene = new Scene(loader.load(), 1000, 650);
+        Parent root = loader.load();
 
-        // ✅ Your CSS is also in root
-        scene.getStylesheets().add(getClass().getResource("/style.css").toExternalForm());
+        Scene scene = new Scene(root, 1250, 720);
+
+        // CSS
+        scene.getStylesheets().add(
+                getClass().getResource("/style.css").toExternalForm()
+        );
 
         stage.setTitle("Finora - Gestion Formation");
         stage.setScene(scene);
