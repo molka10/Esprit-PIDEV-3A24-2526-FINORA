@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="tn.finora.controllers.InvestmentFormController"
+            stylesheets="@../styles/style.css">
+
+    <center>
+        <VBox spacing="14" styleClass="form-box">
+            <padding>
+                <Insets top="18" right="18" bottom="18" left="18"/>
+            </padding>
+
+            <Label fx:id="titleLabel" text="Add Investment" styleClass="title"/>
+
+            <GridPane hgap="12" vgap="10">
+
+                <!-- ✅ FIX: ColumnConstraints must be inside columnConstraints tag -->
+                <columnConstraints>
+                    <ColumnConstraints percentWidth="28"/>
+                    <ColumnConstraints percentWidth="72"/>
+                </columnConstraints>
+
+                <Label text="Name:" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+                <TextField fx:id="nameField" promptText="ex: Land Project"
+                           GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+
+                <Label text="Category:" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+                <TextField fx:id="categoryField" promptText="ex: terrain / maison"
+                           GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+
+                <Label text="Location:" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+                <TextField fx:id="locationField" promptText="ex: Tunis"
+                           GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+
+                <Label text="Estimated Value:" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
+                <TextField fx:id="valueField" promptText="ex: 15000.50"
+                           GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+
+                <Label text="Risk Level:" GridPane.rowIndex="4" GridPane.columnIndex="0"/>
+                <ComboBox fx:id="riskCombo" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
+
+                <Label text="Image URL:" GridPane.rowIndex="5" GridPane.columnIndex="0"/>
+                <TextField fx:id="imageField" promptText="https://..."
+                           GridPane.rowIndex="5" GridPane.columnIndex="1"/>
+
+                <Label text="Description:" GridPane.rowIndex="6" GridPane.columnIndex="0"/>
+                <TextArea fx:id="descArea" promptText="Short description..." prefRowCount="3"
+                          GridPane.rowIndex="6" GridPane.columnIndex="1"/>
+            </GridPane>
+
+            <Label fx:id="errorLabel" text="" styleClass="error-text"/>
+
+            <HBox spacing="10">
+                <Button text="💾 Save" onAction="#onSave" styleClass="btn-primary"/>
+                <Button text="✖ Cancel" onAction="#onCancel" styleClass="btn-secondary"/>
+            </HBox>
+        </VBox>
+    </center>
+</BorderPane>

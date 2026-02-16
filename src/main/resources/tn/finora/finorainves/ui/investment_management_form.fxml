@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="tn.finora.controllers.InvestmentManagementFormController"
+            stylesheets="@../styles/style.css">
+
+    <center>
+        <VBox spacing="14" styleClass="form-box">
+            <padding>
+                <Insets top="18" right="18" bottom="18" left="18"/>
+            </padding>
+
+            <Label fx:id="titleLabel" text="Add Investment Management" styleClass="title"/>
+
+            <GridPane hgap="12" vgap="10">
+                <ColumnConstraints percentWidth="32"/>
+                <ColumnConstraints percentWidth="68"/>
+
+                <Label text="Investment (FK):" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+                <ComboBox fx:id="investmentCombo" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+
+                <Label text="Investment Type:" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+                <TextField fx:id="typeField" promptText="ex: LONG_TERM" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+
+                <Label text="Amount Invested:" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+                <TextField fx:id="amountField" promptText="ex: 5000.00" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+
+                <Label text="Ownership %:" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
+                <TextField fx:id="percentField" promptText="0 - 100" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+
+                <Label text="Start Date:" GridPane.rowIndex="4" GridPane.columnIndex="0"/>
+                <DatePicker fx:id="startDatePicker" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
+
+                <Label text="Status:" GridPane.rowIndex="5" GridPane.columnIndex="0"/>
+                <ComboBox fx:id="statusCombo" GridPane.rowIndex="5" GridPane.columnIndex="1"/>
+            </GridPane>
+
+            <Label fx:id="errorLabel" text="" styleClass="error-text"/>
+
+            <HBox spacing="10">
+                <Button text="💾 Save" onAction="#onSave" styleClass="btn-primary"/>
+                <Button text="✖ Cancel" onAction="#onCancel" styleClass="btn-secondary"/>
+            </HBox>
+        </VBox>
+    </center>
+</BorderPane>
