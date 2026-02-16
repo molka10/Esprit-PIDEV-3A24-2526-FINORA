@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.example.project_pi.controllers.AppelOffreController"
+
+            styleClass="root">
+
+
+    <!-- TOP BAR -->
+    <top>
+        <HBox spacing="12" styleClass="topbar">
+            <padding>
+                <Insets top="14" right="18" bottom="14" left="18"/>
+            </padding>
+
+            <VBox spacing="2">
+                <Label text="Gestion des Appels d’Offres" styleClass="title"/>
+                <Label text="Créer, modifier, supprimer et rechercher des appels d’offres" styleClass="subtitle"/>
+            </VBox>
+
+            <Pane HBox.hgrow="ALWAYS"/>
+
+            <TextField fx:id="searchField" promptText="Rechercher par titre / catégorie..."
+                       styleClass="search"/>
+
+            <Button text="Nouveau" styleClass="primary-btn" onAction="#onNew"/>
+        </HBox>
+    </top>
+
+    <!-- CENTER CONTENT -->
+    <center>
+        <VBox spacing="12" styleClass="content">
+            <padding>
+                <Insets top="16" right="18" bottom="18" left="18"/>
+            </padding>
+
+            <!-- Quick Stats -->
+            <HBox spacing="12">
+                <HBox spacing="10" styleClass="stat-card" HBox.hgrow="ALWAYS">
+                    <VBox spacing="2">
+                        <Label text="Total" styleClass="stat-label"/>
+                        <Label fx:id="totalLabel" text="0" styleClass="stat-value"/>
+                    </VBox>
+                </HBox>
+
+                <HBox spacing="10" styleClass="stat-card" HBox.hgrow="ALWAYS">
+                    <VBox spacing="2">
+                        <Label text="Published" styleClass="stat-label"/>
+                        <Label fx:id="publishedLabel" text="0" styleClass="stat-value"/>
+                    </VBox>
+                </HBox>
+
+                <HBox spacing="10" styleClass="stat-card" HBox.hgrow="ALWAYS">
+                    <VBox spacing="2">
+                        <Label text="Draft" styleClass="stat-label"/>
+                        <Label fx:id="draftLabel" text="0" styleClass="stat-value"/>
+                    </VBox>
+                </HBox>
+            </HBox>
+
+            <!-- Table Card -->
+            <VBox spacing="10" styleClass="card">
+                <HBox spacing="10">
+                    <Label text="Liste des appels d’offres" styleClass="section-title"/>
+                    <Pane HBox.hgrow="ALWAYS"/>
+
+                    <Button text="Actualiser" styleClass="ghost-btn" onAction="#onRefresh"/>
+                    <Button text="Modifier" styleClass="ghost-btn" onAction="#onEdit"/>
+                    <Button text="Supprimer" styleClass="danger-btn" onAction="#onDelete"/>
+                </HBox>
+
+                <TableView fx:id="table" styleClass="table">
+                    <columns>
+                        <TableColumn fx:id="colId" text="ID" prefWidth="60"/>
+                        <TableColumn fx:id="colTitre" text="Titre" prefWidth="260"/>
+                        <TableColumn fx:id="colCategorie" text="Catégorie" prefWidth="140"/>
+                        <TableColumn fx:id="colType" text="Type" prefWidth="140"/>
+                        <TableColumn fx:id="colBudget" text="Budget" prefWidth="140"/>
+                        <TableColumn fx:id="colDateLimite" text="Date limite" prefWidth="120"/>
+                        <TableColumn fx:id="colStatut" text="Statut" prefWidth="110"/>
+                    </columns>
+                </TableView>
+
+                <Label text="Astuce: sélectionne une ligne puis clique Modifier/Supprimer."
+                       styleClass="muted"/>
+            </VBox>
+        </VBox>
+    </center>
+</BorderPane>

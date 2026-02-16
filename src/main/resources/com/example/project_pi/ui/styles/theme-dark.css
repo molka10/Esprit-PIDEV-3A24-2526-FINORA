@@ -1,0 +1,140 @@
+/* ===== Luxury Deep Purple Theme ===== */
+
+.root {
+    -fx-font-family: "Segoe UI";
+    -fx-background-color: #140F1F;  /* rich dark violet */
+}
+
+/* Sidebar / Topbar */
+.sidebar {
+    -fx-background-color: #1A1328;
+    -fx-border-color: #2C2145;
+    -fx-border-width: 0 1 0 0;
+}
+
+.topbar  {
+    -fx-background-color: #1A1328;
+    -fx-border-color: #2C2145;
+    -fx-border-width: 0 0 1 0;
+}
+
+.title {
+    -fx-text-fill: #F3EEFF;
+    -fx-font-weight: 900;
+}
+
+.subtitle, .muted {
+    -fx-text-fill: #B9A8E6;
+}
+
+.card, .stat-card {
+    -fx-background-color: #1E1630;
+    -fx-background-radius: 16;
+    -fx-border-radius: 16;
+    -fx-border-color: #2C2145;
+    -fx-padding: 14;
+}
+
+.section-title {
+    -fx-text-fill: #F3EEFF;
+    -fx-font-weight: 900;
+}
+
+/* Inputs */
+.text-field, .text-area, .combo-box, .date-picker {
+    -fx-background-color: #241A3A;
+    -fx-text-fill: #F3EEFF;
+    -fx-border-color: #3B2C5F;
+    -fx-background-radius: 12;
+    -fx-border-radius: 12;
+    -fx-prompt-text-fill: #9F8AD6;
+}
+
+.text-area .content {
+    -fx-background-color: transparent;
+}
+
+/* Buttons */
+.primary-btn {
+    -fx-background-color: #A855F7;   /* luxury purple */
+    -fx-text-fill: white;
+    -fx-font-weight: 900;
+    -fx-background-radius: 12;
+}
+
+.primary-btn:hover {
+    -fx-background-color: #9333EA;
+}
+
+.ghost-btn {
+    -fx-background-color: #241A3A;
+    -fx-text-fill: #F3EEFF;
+    -fx-font-weight: 800;
+    -fx-border-color: #3B2C5F;
+    -fx-border-width: 1;
+    -fx-border-radius: 12;
+    -fx-background-radius: 12;
+}
+
+.danger-btn {
+    -fx-background-color: #C026D3;
+    -fx-text-fill: white;
+    -fx-font-weight: 900;
+    -fx-background-radius: 12;
+}
+
+.nav-btn {
+    -fx-background-color: #1E1630;
+    -fx-text-fill: #F3EEFF;
+    -fx-font-weight: 800;
+    -fx-background-radius: 12;
+}
+
+.nav-btn:hover {
+    -fx-background-color: #2A1F45;
+}
+
+.nav-btn-active {
+    -fx-background-color: #2E2357;
+    -fx-border-color: #A855F7;
+    -fx-border-width: 1;
+    -fx-border-radius: 12;
+}
+
+/* Table */
+.table-view {
+    -fx-background-color: #1E1630;
+    -fx-border-color: #2C2145;
+    -fx-border-radius: 12;
+    -fx-background-radius: 12;
+}
+
+.table-view .column-header-background,
+.table-view .column-header,
+.table-view .filler,
+.table-view .corner {
+    -fx-background-color: #241A3A;
+    -fx-border-color: #3B2C5F;
+}
+
+.table-view .column-header .label {
+    -fx-text-fill: #F3EEFF;
+    -fx-font-weight: 900;
+}
+
+.table-view .table-cell {
+    -fx-text-fill: #F3EEFF;
+}
+
+.table-row-cell:odd {
+    -fx-background-color: #211735;
+}
+
+.table-row-cell:filled:selected,
+.table-row-cell:filled:selected:hover {
+    -fx-background-color: #3B2C5F;
+}
+
+.error-text {
+    -fx-text-fill: #F472B6;
+}

@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.example.project_pi.controllers.DashboardController"
+
+            styleClass="root">
+
+    <!-- Sidebar -->
+    <left>
+        <VBox spacing="14" prefWidth="230" styleClass="sidebar">
+            <padding>
+                <Insets top="22" right="16" bottom="22" left="16"/>
+            </padding>
+
+            <Label text="PROJECT" styleClass="brand"/>
+            <Separator opacity="0.25"/>
+
+            <Button fx:id="btnAppelOffre"
+                    text="Appels d’Offres"
+                    styleClass="nav-btn"
+                    maxWidth="1.7976931348623157E308"
+                    onAction="#goAppelOffre"/>
+
+            <Button fx:id="btnCandidature"
+                    text="Candidatures"
+                    styleClass="nav-btn"
+                    maxWidth="1.7976931348623157E308"
+                    onAction="#goCandidature"/>
+
+            <Pane VBox.vgrow="ALWAYS"/>
+            <Button fx:id="btnTheme"
+                    text="🌙 Dark / ☀ Light"
+                    styleClass="ghost-btn"
+                    maxWidth="1.7976931348623157E308"
+                    onAction="#toggleTheme"/>
+
+            <Label text="© 2026" styleClass="muted"/>
+        </VBox>
+    </left>
+
+    <!-- Center content changes -->
+    <center>
+        <StackPane fx:id="contentPane" styleClass="content">
+            <padding>
+                <Insets />
+            </padding>
+        </StackPane>
+    </center>
+
+</BorderPane>

@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.example.project_pi.controllers.AppelOffreFormController"
+
+            styleClass="root">
+
+    <top>
+        <HBox spacing="12" styleClass="topbar">
+            <padding>
+                <Insets top="14" right="18" bottom="14" left="18"/>
+            </padding>
+
+            <VBox spacing="2">
+                <Label fx:id="formTitle" text="Nouveau Appel d’Offre" styleClass="title"/>
+                <Label text="Remplis les informations puis enregistre" styleClass="subtitle"/>
+            </VBox>
+
+            <Pane HBox.hgrow="ALWAYS"/>
+
+            <Button text="Retour" styleClass="ghost-btn" onAction="#onBack"/>
+        </HBox>
+    </top>
+
+    <center>
+        <VBox spacing="14" styleClass="content">
+            <padding>
+                <Insets top="18" right="18" bottom="18" left="18"/>
+            </padding>
+
+            <VBox spacing="12" styleClass="card">
+                <Label text="Informations" styleClass="section-title"/>
+
+                <GridPane hgap="12" vgap="12">
+                    <columnConstraints>
+                        <ColumnConstraints percentWidth="25"/>
+                        <ColumnConstraints percentWidth="75"/>
+                    </columnConstraints>
+
+                    <!-- Titre -->
+                    <Label text="Titre"/>
+                    <TextField fx:id="titreField" promptText="Ex: Développement application mobile" GridPane.columnIndex="1"/>
+
+                    <!-- Description -->
+                    <Label text="Description" GridPane.rowIndex="1"/>
+                    <TextArea fx:id="descriptionArea" promptText="Décris le besoin..." prefRowCount="4"
+                              GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+
+                    <!-- Catégorie -->
+                    <Label text="Catégorie" GridPane.rowIndex="2"/>
+                    <TextField fx:id="categorieField" promptText="Ex: Informatique" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+
+                    <!-- Type -->
+                    <Label text="Type" GridPane.rowIndex="3"/>
+                    <ComboBox fx:id="typeCombo" GridPane.rowIndex="3" GridPane.columnIndex="1" promptText="Choisir type"/>
+
+                    <!-- Budget min/max -->
+                    <Label text="Budget min" GridPane.rowIndex="4"/>
+                    <TextField fx:id="budgetMinField" promptText="Ex: 15000" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
+
+                    <Label text="Budget max" GridPane.rowIndex="5"/>
+                    <TextField fx:id="budgetMaxField" promptText="Ex: 25000" GridPane.rowIndex="5" GridPane.columnIndex="1"/>
+
+                    <!-- Devise -->
+                    <Label text="Devise" GridPane.rowIndex="6"/>
+                    <ComboBox fx:id="deviseCombo" GridPane.rowIndex="6" GridPane.columnIndex="1" promptText="Ex: TND"/>
+
+                    <!-- Date limite -->
+                    <Label text="Date limite" GridPane.rowIndex="7"/>
+                    <DatePicker fx:id="dateLimitePicker" GridPane.rowIndex="7" GridPane.columnIndex="1"/>
+
+                    <!-- Statut -->
+                    <Label text="Statut" GridPane.rowIndex="8"/>
+                    <ComboBox fx:id="statutCombo" GridPane.rowIndex="8" GridPane.columnIndex="1" promptText="draft / published / closed"/>
+                </GridPane>
+
+                <HBox spacing="10" alignment="CENTER_RIGHT">
+                    <Label fx:id="errorLabel" text="" styleClass="error-text"/>
+                    <Pane HBox.hgrow="ALWAYS"/>
+                    <Button text="Annuler" styleClass="ghost-btn" onAction="#onCancel"/>
+                    <Button text="Enregistrer" styleClass="primary-btn" onAction="#onSave"/>
+                </HBox>
+            </VBox>
+        </VBox>
+    </center>
+</BorderPane>
