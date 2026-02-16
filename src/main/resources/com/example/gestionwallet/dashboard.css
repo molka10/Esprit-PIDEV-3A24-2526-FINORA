@@ -117,7 +117,7 @@
     -fx-text-fill: #333333;
 }
 
-/* ================= SCROLL BAR ===============*/
+/* ================= SCROLL BAR ============== */
 .scroll-bar .thumb {
     -fx-background-color: #8e44ad;
     -fx-background-radius: 5;
