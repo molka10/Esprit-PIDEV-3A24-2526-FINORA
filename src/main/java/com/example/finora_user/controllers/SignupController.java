@@ -9,26 +9,32 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
 
-import java.sql.SQLException;
+import java.time.LocalDate;
 
 public class SignupController {
 
     @FXML private TextField usernameField;
     @FXML private TextField emailField;
     @FXML private PasswordField passwordField;
+    @FXML private PasswordField confirmPasswordField;
+
+    @FXML private TextField phoneField;
+    @FXML private TextField addressField;
+    @FXML private DatePicker dobPicker;
+
     @FXML private ComboBox<String> roleCombo;
+    @FXML private CheckBox termsCheck;
     @FXML private Label statusLabel;
 
     private UserService service;
 
     @FXML
     public void initialize() {
-        roleCombo.setItems(FXCollections.observableArrayList("USER", "ENTREPRISE"));
-        roleCombo.setValue("USER");
-
         try {
             service = new UserService();
-        } catch (SQLException e) {
+            roleCombo.setItems(FXCollections.observableArrayList("USER", "ENTREPRISE"));
+            roleCombo.setValue("USER");
+        } catch (Exception e) {
             statusLabel.setText("❌ Erreur DB: " + e.getMessage());
             e.printStackTrace();
         }
@@ -37,29 +43,49 @@ public class SignupController {
     @FXML
     private void handleSignup() {
         try {
+            // ✅ avoid crash if fx:id missing
+            if (termsCheck == null) {
+                statusLabel.setText("❌ termsCheck is NULL. Fix fx:id=\"termsCheck\" in signup-view.fxml");
+                return;
+            }
+
             String username = usernameField.getText().trim();
             String email = emailField.getText().trim();
             String pass = passwordField.getText();
-            String role = roleCombo.getValue();
+            String confirmPass = confirmPasswordField.getText();
 
-            String err = InputValidator.validateSignup(username, email, pass, role);
+            String phone = phoneField.getText().trim();
+            String address = addressField.getText().trim();
+            LocalDate dob = dobPicker.getValue();
+
+            String role = roleCombo.getValue();
+            boolean termsAccepted = termsCheck.isSelected();
+
+            String err = InputValidator.validateSignup(
+                    username, email, pass, confirmPass,
+                    phone, address, dob, termsAccepted
+            );
+
             if (err != null) {
                 statusLabel.setText("⚠️ " + err);
                 return;
             }
 
-            // store plain password for now
             User u = new User(username, email, pass, role);
+            u.setPhone(phone);
+            u.setAddress(address);
+            u.setDateOfBirth(dob);
 
-            service.addUserReturnId(u);
+            int id = service.addUserReturnId(u);
 
-            statusLabel.setText("✅ Compte créé ! Retour au login...");
-            Navigator.goTo((Stage) usernameField.getScene().getWindow(), "login-view.fxml", "Connexion");
+            if (id != -1) {
+                statusLabel.setText("✅ Compte créé ! Retour au login...");
+                Navigator.goTo((Stage) usernameField.getScene().getWindow(),
+                        "login-view.fxml", "Connexion");
+            } else {
+                statusLabel.setText("❌ Échec création compte.");
+            }
 
-        } catch (SQLException e) {
-            // if email is UNIQUE, this may happen when email already exists
-            statusLabel.setText("❌ Erreur DB: " + e.getMessage());
-            e.printStackTrace();
         } catch (Exception e) {
             statusLabel.setText("❌ Erreur: " + e.getMessage());
             e.printStackTrace();

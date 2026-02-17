@@ -4,9 +4,11 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<AnchorPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+<AnchorPane xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="com.example.finora_user.controllers.SignupController"
-            stylesheets="@theme.css" styleClass="root-bg">
+            stylesheets="@theme.css"
+            styleClass="root-bg">
 
     <children>
         <VBox alignment="CENTER" spacing="12"
@@ -14,7 +16,9 @@
               AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0">
 
             <VBox maxWidth="420" spacing="12" styleClass="card">
-                <padding><Insets top="20" right="20" bottom="20" left="20"/></padding>
+                <padding>
+                    <Insets top="20" right="20" bottom="20" left="20"/>
+                </padding>
 
                 <Label text="Créer un compte" styleClass="h2"/>
 
@@ -24,8 +28,19 @@
 
                 <ComboBox fx:id="roleCombo" promptText="Role" styleClass="field"/>
 
-                <Button text="S'inscrire" onAction="#handleSignup" styleClass="btn-primary" maxWidth="Infinity"/>
-                <Button text="Retour login" onAction="#goToLogin" styleClass="btn-ghost" maxWidth="Infinity"/>
+                <TextField fx:id="phoneField" promptText="Phone Number" styleClass="field"/>
+                <TextField fx:id="addressField" promptText="Address" styleClass="field"/>
+                <DatePicker fx:id="dobPicker" />
+
+                <PasswordField fx:id="confirmPasswordField" promptText="Confirm Password" styleClass="field"/>
+
+                <CheckBox fx:id="termsCheck" text="I agree to the Terms and Conditions"/>
+
+                <Button text="S'inscrire" onAction="#handleSignup"
+                        styleClass="btn-primary" maxWidth="Infinity"/>
+
+                <Button text="Retour login" onAction="#goToLogin"
+                        styleClass="btn-ghost" maxWidth="Infinity"/>
 
                 <Label fx:id="statusLabel" text="" wrapText="true" styleClass="muted"/>
             </VBox>

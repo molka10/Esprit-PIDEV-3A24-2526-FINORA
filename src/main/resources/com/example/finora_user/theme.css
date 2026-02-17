@@ -108,3 +108,6 @@
     -fx-border-width: 2;
     -fx-border-radius: 8;
 }
+.field {
+    -fx-background-radius: 8;
+}

@@ -3,15 +3,32 @@ package com.example.finora_user.main;
 import com.example.finora_user.entities.User;
 import com.example.finora_user.services.UserService;
 
+import java.time.LocalDate;
+
 public class testUser {
+
     public static void main(String[] args) {
+
         try {
             UserService service = new UserService();
 
-            User u = new User("houyem", "houyem@mail.com", "Test1234", "USER");
-            service.addUser(u);
+            // Create user with new fields
+            User u = new User();
+            u.setUsername("testUser");
+            u.setEmail("test@mail.com");
+            u.setMotDePasse("123456");
+            u.setRole("USER");
+            u.setPhone("12345678");
+            u.setAddress("Tunis");
+            u.setDateOfBirth(LocalDate.of(2000, 1, 1));
 
-            service.getAllUsers().forEach(System.out::println);
+            int id = service.addUserReturnId(u);
+
+            if (id != -1) {
+                System.out.println("✅ User added with ID: " + id);
+            } else {
+                System.out.println("❌ Insert failed");
+            }
 
         } catch (Exception e) {
             e.printStackTrace();

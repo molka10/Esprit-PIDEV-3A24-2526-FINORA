@@ -1,75 +1,98 @@
 package com.example.finora_user.utils;
 
+import java.time.LocalDate;
+import java.time.Period;
 import java.util.regex.Pattern;
 
 public class InputValidator {
 
-    private static final Pattern EMAIL =
+    private static final Pattern EMAIL_PATTERN =
             Pattern.compile("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$");
 
-    // username: 3..20, letters/numbers/_ only
-    private static final Pattern USERNAME =
-            Pattern.compile("^[A-Za-z0-9_]{3,20}$");
+    private static final Pattern PHONE_PATTERN =
+            Pattern.compile("^[0-9]{8,15}$");
 
-    // password: min 6 chars (simple for validation day)
-    public static String validateSignup(String username, String email, String pass, String role) {
-        if (isBlank(username) || isBlank(email) || isBlank(pass) || isBlank(role))
-            return "Tous les champs sont obligatoires.";
-
-        if (!USERNAME.matcher(username).matches())
-            return "Username invalide (3-20 caractères, lettres/chiffres/_).";
-
-        if (!EMAIL.matcher(email).matches())
-            return "Email invalide. Exemple: user@mail.com";
-
-        if (pass.length() < 6)
-            return "Mot de passe trop court (minimum 6 caractères).";
-
-        if (!isRoleValid(role))
-            return "Role invalide (ADMIN / ENTREPRISE / USER).";
-
-        return null; // OK
-    }
-
+    // ---------------- LOGIN ----------------
     public static String validateLogin(String email, String pass) {
-        if (isBlank(email) || isBlank(pass))
-            return "Veuillez remplir email et mot de passe.";
-
-        if (!EMAIL.matcher(email).matches())
-            return "Email invalide.";
-
-        if (pass.length() < 6)
-            return "Mot de passe invalide.";
-
-        return null; // OK
-    }
-
-    public static String validateAddUser(String username, String email, String pass, String role) {
-        // same as signup (admin add)
-        return validateSignup(username, email, pass, role);
-    }
-
-    public static String validateUpdateUser(String username, String email, String role) {
-        if (isBlank(username) || isBlank(email) || isBlank(role))
-            return "Username, email et role sont obligatoires.";
-
-        if (!USERNAME.matcher(username).matches())
-            return "Username invalide (3-20 caractères, lettres/chiffres/_).";
-
-        if (!EMAIL.matcher(email).matches())
-            return "Email invalide.";
-
-        if (!isRoleValid(role))
-            return "Role invalide (ADMIN / ENTREPRISE / USER).";
-
+        if (email == null || email.trim().isEmpty()) return "Email requis.";
+        if (!EMAIL_PATTERN.matcher(email.trim()).matches()) return "Format email invalide.";
+        if (pass == null || pass.isEmpty()) return "Mot de passe requis.";
         return null;
     }
 
-    private static boolean isRoleValid(String role) {
-        return "ADMIN".equals(role) || "ENTREPRISE".equals(role) || "USER".equals(role);
+    // ---------------- USERS ADD (Gestion users) ----------------
+    public static String validateAddUser(String username, String email, String pass, String role) {
+        if (username == null || username.trim().isEmpty()) return "Username requis.";
+        if (username.trim().length() < 3) return "Username min 3 caractères.";
+        if (email == null || email.trim().isEmpty()) return "Email requis.";
+        if (!EMAIL_PATTERN.matcher(email.trim()).matches()) return "Format email invalide.";
+        if (pass == null || pass.isEmpty()) return "Mot de passe requis.";
+        if (pass.length() < 6) return "Mot de passe min 6 caractères.";
+        if (role == null || role.trim().isEmpty()) return "Role requis.";
+        return null;
     }
 
-    private static boolean isBlank(String s) {
-        return s == null || s.trim().isEmpty();
+    // ---------------- USERS UPDATE (Gestion users) ----------------
+    public static String validateUpdateUser(String username, String email, String role) {
+        if (username == null || username.trim().isEmpty()) return "Username requis.";
+        if (username.trim().length() < 3) return "Username min 3 caractères.";
+        if (email == null || email.trim().isEmpty()) return "Email requis.";
+        if (!EMAIL_PATTERN.matcher(email.trim()).matches()) return "Format email invalide.";
+        if (role == null || role.trim().isEmpty()) return "Role requis.";
+        return null;
+    }
+
+    // ---------------- SIGNUP (NEW) ----------------
+    public static String validateSignup(
+            String username,
+            String email,
+            String password,
+            String confirmPassword,
+            String phone,
+            String address,
+            LocalDate dob,
+            boolean termsAccepted
+    ) {
+        if (username == null || username.trim().isEmpty())
+            return "Username requis.";
+        if (username.trim().length() < 3)
+            return "Username min 3 caractères.";
+
+        if (email == null || email.trim().isEmpty())
+            return "Email requis.";
+        if (!EMAIL_PATTERN.matcher(email.trim()).matches())
+            return "Format email invalide.";
+
+        if (password == null || password.isEmpty())
+            return "Mot de passe requis.";
+        if (password.length() < 6)
+            return "Mot de passe min 6 caractères.";
+
+        if (confirmPassword == null || confirmPassword.isEmpty())
+            return "Confirmation mot de passe requise.";
+        if (!password.equals(confirmPassword))
+            return "Les mots de passe ne correspondent pas.";
+
+        if (phone == null || phone.trim().isEmpty())
+            return "Téléphone requis.";
+        if (!PHONE_PATTERN.matcher(phone.trim()).matches())
+            return "Téléphone invalide (8-15 chiffres).";
+
+        if (address == null || address.trim().isEmpty())
+            return "Adresse requise.";
+        if (address.trim().length() < 3)
+            return "Adresse trop courte.";
+
+        if (dob == null)
+            return "Date de naissance requise.";
+
+        int age = Period.between(dob, LocalDate.now()).getYears();
+        if (age < 18)
+            return "Vous devez avoir au moins 18 ans.";
+
+        if (!termsAccepted)
+            return "Vous devez accepter les Conditions générales.";
+
+        return null; // ✅ OK
     }
 }
