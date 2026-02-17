@@ -19,6 +19,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
 
@@ -31,35 +32,21 @@ import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 /**
- * 🎨 ActionController - Version Moderne Style Mobile
+ * 🎨 ActionController - Version Finale avec Dialog
  *
- * Améliorations :
- * - ✅ Interface liste verticale (style app mobile)
- * - ✅ Variations en couleur (vert/rouge)
- * - ✅ Formulaire caché (toggle)
- * - ✅ Design épuré et moderne
+ * Fonctionnalités :
+ * - ✅ Dialog modal pour ajout/modification
+ * - ✅ Boutons Modifier/Supprimer sur chaque ligne
+ * - ✅ Interface liste style mobile
+ * - ✅ Variations en couleur
  */
 public class ActionController implements Initializable {
 
-    // Champs formulaire
-    @FXML private TextField tfId;
+    // UI Components
     @FXML private ComboBox<Bourse> cbBourse;
-    @FXML private TextField tfSymbole;
-    @FXML private TextField tfNomEntreprise;
-    @FXML private ComboBox<String> cbSecteur;
-    @FXML private TextField tfPrix;
-    @FXML private TextField tfQuantite;
-    @FXML private ComboBox<String> cbStatut;
-
-    // Recherche et affichage
     @FXML private TextField searchField;
     @FXML private Label lblTotal;
-
-    // ✅ CHANGÉ : VBox au lieu de FlowPane pour liste verticale
     @FXML private VBox cardsContainer;
-
-    // ✅ NOUVEAU : Container du formulaire pour le toggle
-    @FXML private VBox formulaireContainer;
 
     private final ServiceAction serviceAction = new ServiceAction();
     private final ServiceBourse serviceBourse = new ServiceBourse();
@@ -76,18 +63,9 @@ public class ActionController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
 
-        cbSecteur.setItems(FXCollections.observableArrayList(
-                "Technologie", "Finance", "Santé", "Énergie", "Consommation",
-                "Industrie", "Immobilier", "Télécommunications", "Services", "Autre"
-        ));
-        cbStatut.setItems(FXCollections.observableArrayList("DISPONIBLE", "INDISPONIBLE"));
-
-        cbSecteur.getSelectionModel().selectFirst();
-        cbStatut.getSelectionModel().selectFirst();
-
         cbBourse.setConverter(new StringConverter<>() {
             @Override public String toString(Bourse b) {
-                if (b == null) return "";
+                if (b == null) return "Toutes les bourses";
                 return b.getNomBourse() + " (" + b.getDevise() + " - " + b.getPays() + ")";
             }
             @Override public Bourse fromString(String s) { return null; }
@@ -102,7 +80,7 @@ public class ActionController implements Initializable {
         chargerActionsAsync(null);
     }
 
-    // ✅ Appelé depuis BourseController
+    // ✅ Préselection depuis BourseController
     public void preselectionnerBourseParId(int idBourse) {
         pendingPreselectBourseId = idBourse;
 
@@ -110,7 +88,7 @@ public class ActionController implements Initializable {
             if (cbBourse.getItems() != null && !cbBourse.getItems().isEmpty()) {
                 for (Bourse b : cbBourse.getItems()) {
                     if (b.getIdBourse() == idBourse) {
-                        cbBourse.setValue(b); // listener => filtre
+                        cbBourse.setValue(b);
                         pendingPreselectBourseId = null;
                         break;
                     }
@@ -137,20 +115,160 @@ public class ActionController implements Initializable {
         }
     }
 
-    // ✅ NOUVEAU : Toggle formulaire
-    @FXML
-    private void afficherFormulaire(ActionEvent event) {
-        if (formulaireContainer != null) {
-            ScrollPane parent = (ScrollPane) formulaireContainer.getParent();
-            boolean visible = parent.isVisible();
-            parent.setVisible(!visible);
-            parent.setManaged(!visible);
+    // ======================
+    // DIALOG AJOUT/MODIFICATION
+    // ======================
 
-            if (!visible) {
-                clearFields(); // Vider quand on ouvre
-            }
-        }
+    /**
+     * ✅ Ouvrir dialog pour ajouter une action
+     */
+    @FXML
+    private void ouvrirDialogAjout(ActionEvent event) {
+        ouvrirDialog(null); // null = mode ajout
     }
+
+    /**
+     * ✅ Dialog générique pour ajout/modification
+     */
+    private void ouvrirDialog(Action actionAModifier) {
+        Dialog<ButtonType> dialog = new Dialog<>();
+        dialog.setTitle(actionAModifier == null ? "➕ Nouvelle Action" : "✏️ Modifier Action");
+        dialog.setHeaderText(actionAModifier == null ? "Ajouter une nouvelle action" : "Modifier l'action " + actionAModifier.getSymbole());
+
+        // Boutons
+        ButtonType btnSave = new ButtonType(actionAModifier == null ? "Ajouter" : "Modifier", ButtonBar.ButtonData.OK_DONE);
+        ButtonType btnCancel = new ButtonType("Annuler", ButtonBar.ButtonData.CANCEL_CLOSE);
+        dialog.getDialogPane().getButtonTypes().addAll(btnSave, btnCancel);
+
+        // Formulaire
+        GridPane grid = new GridPane();
+        grid.setHgap(15);
+        grid.setVgap(12);
+        grid.setPadding(new Insets(20));
+
+        // Champs
+        ComboBox<Bourse> cbDialogBourse = new ComboBox<>();
+        cbDialogBourse.setItems(cbBourse.getItems());
+        cbDialogBourse.setConverter(cbBourse.getConverter());
+        cbDialogBourse.setPrefWidth(300);
+
+        TextField tfSymbole = new TextField();
+        tfSymbole.setPromptText("Ex: AAPL, MSFT");
+
+        TextField tfNomEntreprise = new TextField();
+        tfNomEntreprise.setPromptText("Ex: Apple Inc.");
+
+        ComboBox<String> cbSecteur = new ComboBox<>();
+        cbSecteur.setItems(FXCollections.observableArrayList(
+                "Technologie", "Finance", "Santé", "Énergie", "Consommation",
+                "Industrie", "Immobilier", "Télécommunications", "Services", "Autre"
+        ));
+
+        TextField tfPrix = new TextField();
+        tfPrix.setPromptText("Ex: 178.50");
+
+        TextField tfQuantite = new TextField();
+        tfQuantite.setPromptText("Ex: 1000");
+
+        ComboBox<String> cbStatut = new ComboBox<>();
+        cbStatut.setItems(FXCollections.observableArrayList("DISPONIBLE", "INDISPONIBLE"));
+        cbStatut.getSelectionModel().selectFirst();
+
+        // Pré-remplir si modification
+        if (actionAModifier != null) {
+            cbDialogBourse.setValue(actionAModifier.getBourse());
+            tfSymbole.setText(actionAModifier.getSymbole());
+            tfNomEntreprise.setText(actionAModifier.getNomEntreprise());
+            cbSecteur.setValue(actionAModifier.getSecteur());
+            tfPrix.setText(String.valueOf(actionAModifier.getPrixUnitaire()));
+            tfQuantite.setText(String.valueOf(actionAModifier.getQuantiteDisponible()));
+            cbStatut.setValue(actionAModifier.getStatut());
+        } else {
+            cbSecteur.getSelectionModel().selectFirst();
+        }
+
+        // Ajouter au grid
+        int row = 0;
+        grid.add(new Label("Bourse *"), 0, row);
+        grid.add(cbDialogBourse, 1, row++);
+
+        grid.add(new Label("Symbole *"), 0, row);
+        grid.add(tfSymbole, 1, row++);
+
+        grid.add(new Label("Nom Entreprise *"), 0, row);
+        grid.add(tfNomEntreprise, 1, row++);
+
+        grid.add(new Label("Secteur *"), 0, row);
+        grid.add(cbSecteur, 1, row++);
+
+        grid.add(new Label("Prix Unitaire *"), 0, row);
+        grid.add(tfPrix, 1, row++);
+
+        grid.add(new Label("Quantité *"), 0, row);
+        grid.add(tfQuantite, 1, row++);
+
+        grid.add(new Label("Statut *"), 0, row);
+        grid.add(cbStatut, 1, row++);
+
+        dialog.getDialogPane().setContent(grid);
+
+        // Validation et sauvegarde
+        dialog.showAndWait().ifPresent(response -> {
+            if (response == btnSave) {
+                try {
+                    // Validation
+                    if (cbDialogBourse.getValue() == null) {
+                        showError("Veuillez sélectionner une bourse");
+                        return;
+                    }
+                    if (tfSymbole.getText().trim().isEmpty()) {
+                        showError("Le symbole est obligatoire");
+                        return;
+                    }
+                    if (tfNomEntreprise.getText().trim().isEmpty()) {
+                        showError("Le nom de l'entreprise est obligatoire");
+                        return;
+                    }
+
+                    double prix = Double.parseDouble(tfPrix.getText().trim());
+                    int quantite = Integer.parseInt(tfQuantite.getText().trim());
+
+                    Action action = new Action(
+                            cbDialogBourse.getValue(),
+                            tfSymbole.getText().trim(),
+                            tfNomEntreprise.getText().trim(),
+                            cbSecteur.getValue(),
+                            prix,
+                            quantite,
+                            cbStatut.getValue()
+                    );
+
+                    if (actionAModifier != null) {
+                        // Modification
+                        action.setIdAction(actionAModifier.getIdAction());
+                        serviceAction.update(action);
+                        showSuccess("✏️ Action modifiée avec succès !");
+                    } else {
+                        // Ajout
+                        serviceAction.add(action);
+                        showSuccess("✅ Action ajoutée avec succès !");
+                    }
+
+                    afficherActions(null);
+
+                } catch (NumberFormatException e) {
+                    showError("Prix ou quantité invalide");
+                } catch (Exception e) {
+                    showError("Erreur : " + e.getMessage());
+                    e.printStackTrace();
+                }
+            }
+        });
+    }
+
+    // ======================
+    // CHARGEMENT DES DONNÉES
+    // ======================
 
     private void chargerBoursesAsync() {
         Task<List<Bourse>> task = new Task<>() {
@@ -166,7 +284,7 @@ public class ActionController implements Initializable {
             if (pendingPreselectBourseId != null) {
                 for (Bourse b : bourses) {
                     if (b.getIdBourse() == pendingPreselectBourseId) {
-                        cbBourse.setValue(b); // filtre auto
+                        cbBourse.setValue(b);
                         pendingPreselectBourseId = null;
                         break;
                     }
@@ -206,112 +324,6 @@ public class ActionController implements Initializable {
         dbExecutor.submit(task);
     }
 
-    // ======================
-    // CRUD
-    // ======================
-    @FXML
-    void ajouterAction(ActionEvent event) {
-        if (!validerFormulaire()) return;
-
-        Bourse b = cbBourse.getValue();
-        Action action = new Action(
-                b,
-                tfSymbole.getText().trim(),
-                tfNomEntreprise.getText().trim(),
-                cbSecteur.getValue(),
-                Double.parseDouble(tfPrix.getText().trim()),
-                Integer.parseInt(tfQuantite.getText().trim()),
-                cbStatut.getValue()
-        );
-
-        Task<Void> task = new Task<>() {
-            @Override protected Void call() { serviceAction.add(action); return null; }
-        };
-
-        task.setOnSucceeded(e -> {
-            showSuccess("✅ Action ajoutée !");
-            clearFields();
-            afficherActions(null);
-        });
-
-        task.setOnFailed(e -> {
-            Throwable ex = task.getException();
-            showError("Erreur ajout : " + (ex != null ? ex.getMessage() : "inconnue"));
-            if (ex != null) ex.printStackTrace();
-        });
-
-        dbExecutor.submit(task);
-    }
-
-    @FXML
-    void modifierAction(ActionEvent event) {
-        if (tfId.getText().trim().isEmpty()) { showError("ID obligatoire !"); return; }
-        if (!validerFormulaire()) return;
-
-        Action action = new Action(
-                cbBourse.getValue(),
-                tfSymbole.getText().trim(),
-                tfNomEntreprise.getText().trim(),
-                cbSecteur.getValue(),
-                Double.parseDouble(tfPrix.getText().trim()),
-                Integer.parseInt(tfQuantite.getText().trim()),
-                cbStatut.getValue()
-        );
-        action.setIdAction(Integer.parseInt(tfId.getText().trim()));
-
-        Task<Void> task = new Task<>() {
-            @Override protected Void call() { serviceAction.update(action); return null; }
-        };
-
-        task.setOnSucceeded(e -> {
-            showSuccess("✏️ Modifié !");
-            clearFields();
-            afficherActions(null);
-        });
-
-        task.setOnFailed(e -> {
-            Throwable ex = task.getException();
-            showError("Erreur modif : " + (ex != null ? ex.getMessage() : "inconnue"));
-            if (ex != null) ex.printStackTrace();
-        });
-
-        dbExecutor.submit(task);
-    }
-
-    @FXML
-    void supprimerAction(ActionEvent event) {
-        if (tfId.getText().trim().isEmpty()) { showError("ID obligatoire !"); return; }
-
-        int id = Integer.parseInt(tfId.getText().trim());
-
-        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
-        confirm.setTitle("Confirmation");
-        confirm.setHeaderText("Supprimer l'action ?");
-        confirm.setContentText("ID " + id + " - irréversible !");
-        if (confirm.showAndWait().orElse(ButtonType.CANCEL) != ButtonType.OK) return;
-
-        Action a = new Action();
-        a.setIdAction(id);
-
-        Task<Void> task = new Task<>() {
-            @Override protected Void call() { serviceAction.delete(a); return null; }
-        };
-
-        task.setOnSucceeded(e -> {
-            showSuccess("🗑 Supprimé !");
-            clearFields();
-            afficherActions(null);
-        });
-
-        task.setOnFailed(e -> {
-            Throwable ex = task.getException();
-            showError("Erreur suppression : " + (ex != null ? ex.getMessage() : "inconnue"));
-            if (ex != null) ex.printStackTrace();
-        });
-
-        dbExecutor.submit(task);
-    }
-
     @FXML
     void afficherActions(ActionEvent event) {
         Bourse b = cbBourse.getValue();
@@ -319,10 +331,17 @@ public class ActionController implements Initializable {
         else chargerActionsAsync(b.getIdBourse());
     }
 
+    // ======================
+    // RECHERCHE
+    // ======================
+
     @FXML
     private void handleRechercher(ActionEvent event) {
         String keyword = searchField.getText().trim().toLowerCase();
-        if (keyword.isEmpty()) { showError("Entrez un mot-clé !"); return; }
+        if (keyword.isEmpty()) {
+            showError("Entrez un mot-clé !");
+            return;
+        }
 
         Task<List<Action>> task = new Task<>() {
             @Override protected List<Action> call() {
@@ -343,19 +362,14 @@ public class ActionController implements Initializable {
     @FXML
     private void handleActualiser(ActionEvent event) {
         searchField.clear();
-        clearFields();
         cbBourse.setValue(null);
         afficherActions(null);
     }
 
-    @FXML
-    private void viderFormulaire(ActionEvent event) {
-        clearFields();
-    }
+    // ======================
+    // AFFICHAGE LISTE MOBILE
+    // ======================
 
-    // ======================
-    // AFFICHAGE STYLE LISTE MOBILE
-    // ======================
     private void afficherCartes(List<Action> actions) {
         cardsContainer.getChildren().clear();
 
@@ -367,7 +381,6 @@ public class ActionController implements Initializable {
             return;
         }
 
-        // ✅ Ajouter chaque action comme item de liste
         for (Action a : actions) {
             cardsContainer.getChildren().add(creerItemAction(a));
         }
@@ -376,24 +389,22 @@ public class ActionController implements Initializable {
     }
 
     /**
-     * ✅ NOUVEAU : Créer un item d'action style liste mobile
+     * ✅ Créer un item d'action avec boutons Modifier/Supprimer
      */
     private HBox creerItemAction(Action action) {
         HBox item = new HBox(15);
         item.setPadding(new Insets(16));
         item.setAlignment(Pos.CENTER_LEFT);
-        item.setCursor(Cursor.HAND);
 
-        // Style avec bordure en bas
         item.setStyle(
                 "-fx-background-color: white;" +
                         "-fx-border-color: transparent transparent #e5e7eb transparent;" +
                         "-fx-border-width: 0 0 1 0;"
         );
 
-        // === PARTIE GAUCHE : Symbole + Nom ===
+        // === GAUCHE : Symbole + Nom ===
         VBox gauche = new VBox(4);
-        gauche.setPrefWidth(250);
+        gauche.setPrefWidth(200);
 
         Label symbole = new Label(action.getSymbole());
         symbole.setStyle("-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #1f2937;");
@@ -403,7 +414,7 @@ public class ActionController implements Initializable {
 
         gauche.getChildren().addAll(symbole, nom);
 
-        // === PARTIE CENTRE : Prix + Détails ===
+        // === CENTRE : Prix + Détails ===
         VBox centre = new VBox(4);
         HBox.setHgrow(centre, Priority.ALWAYS);
 
@@ -416,14 +427,16 @@ public class ActionController implements Initializable {
 
         centre.getChildren().addAll(prix, details);
 
-        // === PARTIE DROITE : Variation ===
-        VBox droite = new VBox(4);
+        // === DROITE : Variation + Boutons ===
+        HBox droite = new HBox(12);
         droite.setAlignment(Pos.CENTER_RIGHT);
-        droite.setPrefWidth(100);
 
-        // Simuler variation (remplacer par vraies données plus tard)
-        Random rand = new Random(action.getIdAction()); // Seed pour cohérence
-        double variation = (rand.nextDouble() * 10) - 5; // -5% à +5%
+        // Variation
+        VBox varBox = new VBox(4);
+        varBox.setAlignment(Pos.CENTER_RIGHT);
+
+        Random rand = new Random(action.getIdAction());
+        double variation = (rand.nextDouble() * 10) - 5;
 
         String couleur = variation >= 0 ? "#10b981" : "#ef4444";
         String symboleVar = variation >= 0 ? "▲" : "▼";
@@ -431,119 +444,76 @@ public class ActionController implements Initializable {
         Label varLabel = new Label(symboleVar + " " + String.format("%.2f%%", Math.abs(variation)));
         varLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: " + couleur + ";");
 
-        // Indicateur coloré
         Region indicator = new Region();
         indicator.setPrefSize(8, 8);
         indicator.setStyle("-fx-background-color: " + couleur + "; -fx-background-radius: 4;");
 
-        droite.getChildren().addAll(indicator, varLabel);
+        varBox.getChildren().addAll(indicator, varLabel);
+
+        // ✅ Boutons Modifier/Supprimer
+        Button btnModifier = new Button("✏️");
+        btnModifier.setStyle(
+                "-fx-background-color: #3b82f6;" +
+                        "-fx-text-fill: white;" +
+                        "-fx-font-size: 14px;" +
+                        "-fx-background-radius: 6;" +
+                        "-fx-padding: 6 12;" +
+                        "-fx-cursor: hand;"
+        );
+        btnModifier.setOnAction(e -> ouvrirDialog(action));
+
+        Button btnSupprimer = new Button("🗑️");
+        btnSupprimer.setStyle(
+                "-fx-background-color: #ef4444;" +
+                        "-fx-text-fill: white;" +
+                        "-fx-font-size: 14px;" +
+                        "-fx-background-radius: 6;" +
+                        "-fx-padding: 6 12;" +
+                        "-fx-cursor: hand;"
+        );
+        btnSupprimer.setOnAction(e -> supprimerAction(action));
+
+        droite.getChildren().addAll(varBox, btnModifier, btnSupprimer);
 
         // === ASSEMBLER ===
         item.getChildren().addAll(gauche, centre, droite);
 
-        // === ÉVÉNEMENTS ===
-        item.setOnMouseClicked(e -> {
-            // Remplir le formulaire avec les données
-            tfId.setText(String.valueOf(action.getIdAction()));
-            tfSymbole.setText(action.getSymbole());
-            tfNomEntreprise.setText(action.getNomEntreprise());
-            cbBourse.setValue(action.getBourse());
-            cbSecteur.setValue(action.getSecteur());
-            tfPrix.setText(String.valueOf(action.getPrixUnitaire()));
-            tfQuantite.setText(String.valueOf(action.getQuantiteDisponible()));
-            cbStatut.setValue(action.getStatut());
-
-            // Afficher le formulaire si caché
-            if (formulaireContainer != null) {
-                ScrollPane parent = (ScrollPane) formulaireContainer.getParent();
-                if (!parent.isVisible()) {
-                    parent.setVisible(true);
-                    parent.setManaged(true);
-                }
-            }
-        });
-
         // Effet hover
         item.setOnMouseEntered(e ->
-                item.setStyle(
-                        "-fx-background-color: #f9fafb;" +
-                                "-fx-border-color: transparent transparent #e5e7eb transparent;" +
-                                "-fx-border-width: 0 0 1 0;"
-                )
+                item.setStyle("-fx-background-color: #f9fafb; -fx-border-color: transparent transparent #e5e7eb transparent; -fx-border-width: 0 0 1 0;")
         );
 
         item.setOnMouseExited(e ->
-                item.setStyle(
-                        "-fx-background-color: white;" +
-                                "-fx-border-color: transparent transparent #e5e7eb transparent;" +
-                                "-fx-border-width: 0 0 1 0;"
-                )
+                item.setStyle("-fx-background-color: white; -fx-border-color: transparent transparent #e5e7eb transparent; -fx-border-width: 0 0 1 0;")
         );
 
         return item;
     }
 
-    // ======================
-    // ANCIEN CODE (à supprimer si tu veux)
-    // ======================
-    @SuppressWarnings("unused")
-    private VBox buildActionCard(Action a) {
-        // Ancienne méthode de création de cartes
-        // Tu peux la supprimer ou la garder en backup
-        VBox card = new VBox(8);
-        card.setPadding(new Insets(12));
-        card.setPrefWidth(290);
-        card.setCursor(Cursor.HAND);
+    /**
+     * ✅ Supprimer une action
+     */
+    private void supprimerAction(Action action) {
+        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
+        confirm.setTitle("Confirmation");
+        confirm.setHeaderText("Supprimer l'action " + action.getSymbole() + " ?");
+        confirm.setContentText("Cette action est irréversible !");
 
-        card.setStyle(
-                "-fx-background-color: white;" +
-                        "-fx-background-radius: 12;" +
-                        "-fx-border-radius: 12;" +
-                        "-fx-border-color: #dfe6e9;" +
-                        "-fx-border-width: 1;" +
-                        "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 10, 0, 0, 2);"
-        );
-
-        Label title = new Label("📈 " + a.getSymbole() + " - " + a.getNomEntreprise());
-        title.setStyle("-fx-font-weight: bold; -fx-font-size: 16px; -fx-text-fill:#2c3e50;");
-
-        Label bourse = new Label("🏦 Bourse : " + (a.getBourse() != null ? a.getBourse().getNomBourse() : "N/A"));
-        Label secteur = new Label("🏷 Secteur : " + a.getSecteur());
-        Label prix = new Label("💰 Prix : " + String.format("%.2f", a.getPrixUnitaire()));
-        Label qte = new Label("📦 Quantité : " + a.getQuantiteDisponible());
-        Label statut = new Label("📌 Statut : " + a.getStatut());
-
-        card.getChildren().addAll(title, bourse, secteur, prix, qte, statut);
-        return card;
+        if (confirm.showAndWait().orElse(ButtonType.CANCEL) == ButtonType.OK) {
+            try {
+                serviceAction.delete(action);
+                showSuccess("🗑️ Action supprimée avec succès !");
+                afficherActions(null);
+            } catch (Exception e) {
+                showError("Erreur suppression : " + e.getMessage());
+                e.printStackTrace();
+            }
+        }
     }
 
     // ======================
-    // VALIDATION & UTILS
+    // UTILS
     // ======================
-    private boolean validerFormulaire() {
-        if (cbBourse.getValue() == null) { showError("Choisissez une bourse !"); return false; }
-        if (tfSymbole.getText().trim().isEmpty()) { showError("Symbole obligatoire !"); return false; }
-        if (tfNomEntreprise.getText().trim().isEmpty()) { showError("Entreprise obligatoire !"); return false; }
-        if (cbSecteur.getValue() == null) { showError("Secteur obligatoire !"); return false; }
-
-        try { Double.parseDouble(tfPrix.getText().trim()); }
-        catch (Exception e) { showError("Prix invalide !"); return false; }
-
-        try { Integer.parseInt(tfQuantite.getText().trim()); }
-        catch (Exception e) { showError("Quantité invalide !"); return false; }
-
-        return true;
-    }
-
-    private void clearFields() {
-        tfId.clear();
-        tfSymbole.clear();
-        tfNomEntreprise.clear();
-        tfPrix.clear();
-        tfQuantite.clear();
-        cbSecteur.getSelectionModel().selectFirst();
-        cbStatut.getSelectionModel().selectFirst();
-    }
 
     private void showError(String msg) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
