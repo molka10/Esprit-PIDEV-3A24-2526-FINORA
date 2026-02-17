@@ -78,6 +78,16 @@
 
                 <Button text="↻ Actualiser" onAction="#handleActualiser"
                         style="-fx-background-color: #00d4aa; -fx-text-fill: #0f1117; -fx-font-size: 13px; -fx-font-weight: bold; -fx-background-radius: 10; -fx-padding: 10 20; -fx-cursor: hand;"/>
+                <Button fx:id="btnRetour"
+                        text="← Retour"
+                        onAction="#retourProfil"
+                        style="-fx-background-color: #374151;
+               -fx-text-fill: white;
+               -fx-font-weight: bold;
+               -fx-background-radius: 8;
+               -fx-padding: 8 18;
+               -fx-cursor: hand;" />
+
             </HBox>
 
             <!-- MAIN CONTENT SCROLL -->

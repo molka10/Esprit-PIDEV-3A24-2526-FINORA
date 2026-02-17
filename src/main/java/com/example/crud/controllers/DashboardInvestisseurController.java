@@ -453,6 +453,24 @@ public class DashboardInvestisseurController implements Initializable {
             showError("Erreur ouverture historique : " + ex.getMessage());
         }
     }
+    @FXML
+    private void retourProfil(ActionEvent event) {
+        try {
+            Parent root = FXMLLoader.load(
+                    getClass().getResource("/com/example/crud/utilisateur-static-view.fxml")
+            );
+
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            stage.setScene(new Scene(root));
+            stage.setTitle("FINORA - Sélection du Profil");
+            stage.show();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            showError("Erreur retour : " + e.getMessage());
+        }
+    }
+
 
     // ============================================================
     //  WATCHLIST
