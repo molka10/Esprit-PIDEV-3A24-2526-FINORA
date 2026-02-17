@@ -3,210 +3,94 @@ package com.example.crud.controllers;
 import com.example.crud.models.Bourse;
 import com.example.crud.services.ServiceBourse;
 import javafx.collections.FXCollections;
+import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.layout.FlowPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
-import javafx.scene.layout.Region;
+import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.LineTo;
-import javafx.scene.shape.MoveTo;
-import javafx.scene.shape.Path;
+import javafx.scene.shape.*;
 import javafx.stage.Stage;
 
 import java.net.URL;
-import java.util.Locale;
-import java.util.Random;
-import java.util.ResourceBundle;
-import java.util.TreeSet;
+import java.util.*;
+import java.util.concurrent.*;
+import java.util.stream.Collectors;
 
 /**
- * 🎨 BourseController - Version Moderne et Améliorée
+ * 🎨 BourseController - Version Finale
  *
- * Améliorations :
- * - ✅ ID masqué (utilisé uniquement en interne)
- * - ✅ Mini-graphiques de tendance
- * - ✅ Design moderne type "trading app"
- * - ✅ Badges de statut colorés
- * - ✅ Interface allégée et élégante
+ * - ✅ Formulaire invisible (Dialog)
+ * - ✅ Bouton "Détails" sur chaque carte
+ * - ✅ Bouton "Actions" filtre les actions
+ * - ✅ Modifier / Supprimer sur chaque carte
+ * - ✅ Mini-graphiques + badges statut
  */
 public class BourseController implements Initializable {
 
-    @FXML private TextField tfNom;
-    @FXML private ComboBox<String> cbPays;
-    @FXML private ComboBox<String> cbDevise;
-    @FXML private ComboBox<String> cbStatut;
-
     @FXML private TextField searchField;
     @FXML private Label lblTotal;
-
     @FXML private FlowPane cardsContainer;
 
     private final ServiceBourse service = new ServiceBourse();
 
-    // ID sélectionné (caché de l'utilisateur)
-    private Integer selectedBourseId = null;
+    private final ExecutorService dbExecutor = Executors.newSingleThreadExecutor(r -> {
+        Thread t = new Thread(r); t.setDaemon(true); return t;
+    });
 
     @Override
-    public void initialize(URL url, ResourceBundle resourceBundle) {
-
-        TreeSet<String> paysSet = new TreeSet<>();
-        for (String code : Locale.getISOCountries()) {
-            Locale locale = new Locale("", code);
-            String nomPays = locale.getDisplayCountry(Locale.FRENCH);
-            if (nomPays != null && !nomPays.isBlank()) paysSet.add(nomPays);
-        }
-        cbPays.setItems(FXCollections.observableArrayList(paysSet));
-
-        cbDevise.setItems(FXCollections.observableArrayList("TND", "EUR", "USD", "GBP", "JPY", "CHF", "CAD"));
-        cbStatut.setItems(FXCollections.observableArrayList("ACTIVE", "INACTIVE"));
-
-        cbDevise.getSelectionModel().selectFirst();
-        cbStatut.getSelectionModel().selectFirst();
-
+    public void initialize(URL url, ResourceBundle rb) {
         afficherBourses(null);
     }
 
-    // ======================
-    // CRUD
-    // ======================
-    @FXML
-    void ajouterBourse(ActionEvent event) {
-        try {
-            String nom = tfNom.getText().trim();
-            String pays = cbPays.getValue();
-            String devise = cbDevise.getValue();
-            String statut = cbStatut.getValue();
+    // ============================================================
+    //  CHARGEMENT
+    // ============================================================
 
-            if (nom.isEmpty() || pays == null || pays.isBlank() || devise == null || statut == null) {
-                showError("Nom, Pays, Devise, Statut sont obligatoires.");
-                return;
+    private void afficherBourses(String filtre) {
+        Task<List<Bourse>> task = new Task<>() {
+            @Override protected List<Bourse> call() { return service.getAll(); }
+        };
+
+        task.setOnSucceeded(e -> {
+            List<Bourse> bourses = task.getValue();
+
+            if (filtre != null && !filtre.isBlank()) {
+                String kw = filtre.toLowerCase();
+                bourses = bourses.stream()
+                        .filter(b -> b.getNomBourse().toLowerCase().contains(kw)
+                                || b.getPays().toLowerCase().contains(kw))
+                        .collect(Collectors.toList());
             }
 
-            service.add(new Bourse(nom, pays, devise, statut));
-            showSuccess("✅ Bourse ajoutée !");
-            clearFields();
-            afficherBourses(null);
-
-        } catch (Exception e) {
-            showError("Erreur ajout : " + e.getMessage());
-            e.printStackTrace();
-        }
-    }
-
-    @FXML
-    void modifierBourse(ActionEvent event) {
-        try {
-            if (selectedBourseId == null) {
-                showError("Veuillez sélectionner une bourse à modifier.");
-                return;
-            }
-
-            String nom = tfNom.getText().trim();
-            String pays = cbPays.getValue();
-            String devise = cbDevise.getValue();
-            String statut = cbStatut.getValue();
-
-            if (nom.isEmpty() || pays == null || pays.isBlank() || devise == null || statut == null) {
-                showError("Nom, Pays, Devise, Statut sont obligatoires.");
-                return;
-            }
-
-            Bourse b = new Bourse(selectedBourseId, nom, pays, devise, statut, null);
-            service.update(b);
-
-            showSuccess("✏️ Bourse modifiée !");
-            clearFields();
-            afficherBourses(null);
-
-        } catch (Exception e) {
-            showError("Erreur modification : " + e.getMessage());
-            e.printStackTrace();
-        }
-    }
-
-    @FXML
-    void supprimerBourse(ActionEvent event) {
-        try {
-            if (selectedBourseId == null) {
-                showError("Veuillez sélectionner une bourse à supprimer.");
-                return;
-            }
-
-            Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
-            confirm.setTitle("Confirmation");
-            confirm.setHeaderText("Supprimer la bourse ?");
-            confirm.setContentText("Cette action est irréversible.");
-
-            if (confirm.showAndWait().orElse(ButtonType.CANCEL) != ButtonType.OK) return;
-
-            Bourse b = new Bourse();
-            b.setIdBourse(selectedBourseId);
-            service.delete(b);
-
-            showSuccess("🗑️ Bourse supprimée !");
-            clearFields();
-            afficherBourses(null);
-
-        } catch (Exception e) {
-            showError("Erreur suppression : " + e.getMessage());
-            e.printStackTrace();
-        }
-    }
-
-    // ======================
-    // DISPLAY - VERSION MODERNE
-    // ======================
-    @FXML
-    void afficherBourses(ActionEvent event) {
-        try {
-            var bourses = service.getAll();
             cardsContainer.getChildren().clear();
-
-            if (bourses.isEmpty()) {
-                Label empty = new Label("⚠️ Aucune bourse.");
-                empty.setStyle("-fx-text-fill:#9ca3af; -fx-font-size:14px;");
-                cardsContainer.getChildren().add(empty);
-            } else {
-                for (Bourse b : bourses) {
-                    cardsContainer.getChildren().add(creerCarteModerne(b));
-                }
+            for (Bourse b : bourses) {
+                cardsContainer.getChildren().add(creerCarte(b));
             }
-
             lblTotal.setText("📊 Total : " + bourses.size() + " bourse(s)");
+        });
 
-        } catch (Exception e) {
-            showError("Erreur affichage : " + e.getMessage());
-            e.printStackTrace();
-        }
+        task.setOnFailed(e -> showError("Erreur chargement : " + task.getException().getMessage()));
+        dbExecutor.submit(task);
     }
 
-    /**
-     * 🎨 Créer une carte moderne style "Trading App"
-     * - ID masqué
-     * - Mini-graphique de tendance
-     * - Badge de statut coloré
-     * - Design épuré
-     */
-    private VBox creerCarteModerne(Bourse b) {
-        VBox card = new VBox(12);
-        card.setPadding(new Insets(16));
-        card.setPrefWidth(280);
-        card.setCursor(Cursor.HAND);
+    // ============================================================
+    //  CARTE BOURSE
+    // ============================================================
 
-        // Style moderne avec dégradé subtil
+    private VBox creerCarte(Bourse b) {
+        VBox card = new VBox(12);
+        card.setPrefWidth(310);
+        card.setPadding(new Insets(20));
         card.setStyle(
-                "-fx-background-color: linear-gradient(to bottom, #ffffff, #f9fafb);" +
+                "-fx-background-color: white;" +
                         "-fx-background-radius: 16;" +
                         "-fx-border-radius: 16;" +
                         "-fx-border-color: #e5e7eb;" +
@@ -214,163 +98,320 @@ public class BourseController implements Initializable {
                         "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 12, 0, 0, 2);"
         );
 
-        // === HEADER: Nom + Badge Statut ===
+        // === HEADER : Nom + Badge statut ===
         HBox header = new HBox(10);
         header.setAlignment(Pos.CENTER_LEFT);
 
         Label nomLabel = new Label(b.getNomBourse());
-        nomLabel.setStyle("-fx-font-weight: bold; -fx-font-size: 18px; -fx-text-fill: #1f2937;");
-
-        // Badge de statut coloré
-        Label badgeStatut = creerBadgeStatut(b.getStatut());
+        nomLabel.setStyle("-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #1f2937;");
 
         Region spacer = new Region();
-        HBox.setHgrow(spacer, javafx.scene.layout.Priority.ALWAYS);
+        HBox.setHgrow(spacer, Priority.ALWAYS);
 
-        header.getChildren().addAll(nomLabel, spacer, badgeStatut);
+        Label badge = creerBadgeStatut(b.getStatut());
+        header.getChildren().addAll(nomLabel, spacer, badge);
 
-        // === INFORMATIONS PRINCIPALES ===
+        // === INFOS : Pays + Devise ===
         VBox infos = new VBox(6);
-
-        // Pays avec emoji drapeau
         Label paysLabel = new Label("📍 " + b.getPays());
         paysLabel.setStyle("-fx-font-size: 13px; -fx-text-fill: #6b7280;");
-
-        // Devise avec emoji monnaie
         Label deviseLabel = new Label("💰 " + b.getDevise());
         deviseLabel.setStyle("-fx-font-size: 13px; -fx-text-fill: #6b7280;");
-
         infos.getChildren().addAll(paysLabel, deviseLabel);
 
-        // === MINI GRAPHIQUE DE TENDANCE ===
-        Path miniGraph = creerMiniGraphique();
+        // === MINI GRAPHIQUE ===
+        Pane chartPane = new Pane();
+        chartPane.setPrefHeight(45);
+        Path path = creerMiniGraphique(b.getIdBourse());
+        chartPane.getChildren().add(path);
 
-        // === BOUTONS D'ACTION ===
-        HBox actions = new HBox(8);
-        actions.setAlignment(Pos.CENTER);
-        actions.setPadding(new Insets(8, 0, 0, 0));
+        // === BOUTONS ===
+        // Ligne 1 : Détails + Actions
+        HBox row1 = new HBox(8);
+        row1.setAlignment(Pos.CENTER_LEFT);
 
-        Button btnSelect = new Button("Sélectionner");
-        btnSelect.setStyle(
-                "-fx-background-color: #6366f1;" +
-                        "-fx-text-fill: white;" +
-                        "-fx-font-size: 11px;" +
-                        "-fx-font-weight: bold;" +
-                        "-fx-background-radius: 8;" +
-                        "-fx-padding: 8 16;" +
-                        "-fx-cursor: hand;"
+        Button btnDetails = new Button("🔍 Détails");
+        btnDetails.setStyle(
+                "-fx-background-color: #6366f122; -fx-text-fill: #6366f1;" +
+                        "-fx-font-size: 12px; -fx-font-weight: bold;" +
+                        "-fx-background-radius: 8; -fx-padding: 8 14; -fx-cursor: hand;" +
+                        "-fx-border-color: #6366f144; -fx-border-radius: 8; -fx-border-width: 1;"
         );
+        btnDetails.setOnAction(e -> ouvrirPanelDetails(b));
 
-        Button btnActions = new Button("Actions");
+        Button btnActions = new Button("📈 Actions");
         btnActions.setStyle(
-                "-fx-background-color: #10b981;" +
-                        "-fx-text-fill: white;" +
-                        "-fx-font-size: 11px;" +
-                        "-fx-font-weight: bold;" +
-                        "-fx-background-radius: 8;" +
-                        "-fx-padding: 8 16;" +
-                        "-fx-cursor: hand;"
+                "-fx-background-color: #10b98122; -fx-text-fill: #10b981;" +
+                        "-fx-font-size: 12px; -fx-font-weight: bold;" +
+                        "-fx-background-radius: 8; -fx-padding: 8 14; -fx-cursor: hand;" +
+                        "-fx-border-color: #10b98144; -fx-border-radius: 8; -fx-border-width: 1;"
         );
-
-        actions.getChildren().addAll(btnSelect, btnActions);
-
-        // === ÉVÉNEMENTS ===
-        Runnable select = () -> {
-            // Stocker l'ID en interne (invisible pour l'utilisateur)
-            selectedBourseId = b.getIdBourse();
-
-            // Remplir le formulaire
-            tfNom.setText(b.getNomBourse());
-            cbPays.setValue(b.getPays());
-            cbDevise.setValue(b.getDevise());
-            cbStatut.setValue(b.getStatut());
-
-            // Feedback visuel
-            showInfo("Bourse sélectionnée : " + b.getNomBourse());
-        };
-
-        card.setOnMouseClicked(e -> select.run());
-        btnSelect.setOnAction(e -> select.run());
         btnActions.setOnAction(e -> ouvrirActionsPourBourse(b));
 
-        // Effet hover
-        card.setOnMouseEntered(e -> {
-            card.setStyle(
-                    "-fx-background-color: linear-gradient(to bottom, #f9fafb, #f3f4f6);" +
-                            "-fx-background-radius: 16;" +
-                            "-fx-border-radius: 16;" +
-                            "-fx-border-color: #6366f1;" +
-                            "-fx-border-width: 2;" +
-                            "-fx-effect: dropshadow(gaussian, rgba(99,102,241,0.3), 15, 0, 0, 3);"
-            );
-        });
+        row1.getChildren().addAll(btnDetails, btnActions);
 
-        card.setOnMouseExited(e -> {
-            card.setStyle(
-                    "-fx-background-color: linear-gradient(to bottom, #ffffff, #f9fafb);" +
-                            "-fx-background-radius: 16;" +
-                            "-fx-border-radius: 16;" +
-                            "-fx-border-color: #e5e7eb;" +
-                            "-fx-border-width: 1;" +
-                            "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 12, 0, 0, 2);"
-            );
-        });
+        // Ligne 2 : Modifier + Supprimer
+        HBox row2 = new HBox(8);
+        row2.setAlignment(Pos.CENTER_LEFT);
 
-        card.getChildren().addAll(header, infos, miniGraph, actions);
+        Button btnModifier = new Button("✏️ Modifier");
+        btnModifier.setStyle(
+                "-fx-background-color: #3b82f622; -fx-text-fill: #3b82f6;" +
+                        "-fx-font-size: 12px; -fx-font-weight: bold;" +
+                        "-fx-background-radius: 8; -fx-padding: 8 14; -fx-cursor: hand;" +
+                        "-fx-border-color: #3b82f644; -fx-border-radius: 8; -fx-border-width: 1;"
+        );
+        btnModifier.setOnAction(e -> ouvrirDialogModifier(b));
+
+        Button btnSupprimer = new Button("🗑️ Supprimer");
+        btnSupprimer.setStyle(
+                "-fx-background-color: #ef444422; -fx-text-fill: #ef4444;" +
+                        "-fx-font-size: 12px; -fx-font-weight: bold;" +
+                        "-fx-background-radius: 8; -fx-padding: 8 14; -fx-cursor: hand;" +
+                        "-fx-border-color: #ef444444; -fx-border-radius: 8; -fx-border-width: 1;"
+        );
+        btnSupprimer.setOnAction(e -> supprimerBourse(b));
+
+        row2.getChildren().addAll(btnModifier, btnSupprimer);
+
+        // Hover
+        card.setOnMouseEntered(ev -> card.setStyle(
+                "-fx-background-color: white; -fx-background-radius: 16; -fx-border-radius: 16;" +
+                        "-fx-border-color: #6366f1; -fx-border-width: 2;" +
+                        "-fx-effect: dropshadow(gaussian, rgba(99,102,241,0.25), 16, 0, 0, 4);"
+        ));
+        card.setOnMouseExited(ev -> card.setStyle(
+                "-fx-background-color: white; -fx-background-radius: 16; -fx-border-radius: 16;" +
+                        "-fx-border-color: #e5e7eb; -fx-border-width: 1;" +
+                        "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 12, 0, 0, 2);"
+        ));
+
+        card.getChildren().addAll(header, infos, chartPane, row1, row2);
         return card;
     }
 
-    /**
-     * 🎨 Créer un badge de statut coloré
-     */
-    private Label creerBadgeStatut(String statut) {
-        Label badge = new Label(statut);
-        badge.setPadding(new Insets(4, 10, 4, 10));
-        badge.setStyle(
-                "-fx-font-size: 10px;" +
-                        "-fx-font-weight: bold;" +
-                        "-fx-background-radius: 12;" +
-                        (statut.equals("ACTIVE")
-                                ? "-fx-background-color: #d1fae5; -fx-text-fill: #065f46;"
-                                : "-fx-background-color: #fee2e2; -fx-text-fill: #991b1b;")
+    // ============================================================
+    //  PANEL DÉTAILS (Dialog riche)
+    // ============================================================
+
+    private void ouvrirPanelDetails(Bourse b) {
+        Dialog<ButtonType> dialog = new Dialog<>();
+        dialog.setTitle("🔍 Détails — " + b.getNomBourse());
+        dialog.getDialogPane().getButtonTypes().add(ButtonType.CLOSE);
+        dialog.getDialogPane().setMinWidth(480);
+
+        VBox content = new VBox(0);
+        content.setStyle("-fx-background-color: #f5f7fa;");
+
+        // ─ Header coloré ─
+        VBox headerBox = new VBox(6);
+        headerBox.setPadding(new Insets(24));
+        headerBox.setStyle("-fx-background-color: linear-gradient(to right, #6366f1, #8b5cf6);");
+
+        Label titre = new Label(b.getNomBourse());
+        titre.setStyle("-fx-font-size: 26px; -fx-font-weight: bold; -fx-text-fill: white;");
+
+        Label badgeCopy = creerBadgeStatut(b.getStatut());
+
+        HBox titreRow = new HBox(12, titre, badgeCopy);
+        titreRow.setAlignment(Pos.CENTER_LEFT);
+        headerBox.getChildren().add(titreRow);
+
+        // ─ Corps des infos ─
+        VBox body = new VBox(0);
+        body.setPadding(new Insets(0));
+
+        body.getChildren().addAll(
+                creerLigneDetail("📍 Pays", b.getPays(), "#6366f1"),
+                creerLigneDetail("💰 Devise", b.getDevise(), "#10b981"),
+                creerLigneDetail("📌 Statut", b.getStatut(),
+                        b.getStatut().equals("ACTIVE") ? "#10b981" : "#ef4444"),
+                creerLigneDetail("📅 Créée le",
+                        b.getDateCreation() != null ? b.getDateCreation().toString() : "N/A", "#6b7280")
         );
-        return badge;
+
+        // ─ Mini graphique en grand ─
+        VBox chartBox = new VBox(8);
+        chartBox.setPadding(new Insets(20));
+        chartBox.setStyle("-fx-background-color: white;");
+
+        Label chartTitle = new Label("📊 Tendance de performance");
+        chartTitle.setStyle("-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #374151;");
+
+        Pane bigChart = new Pane();
+        bigChart.setPrefHeight(80);
+        bigChart.setPrefWidth(420);
+        Path bigPath = creerMiniGraphiqueGrand(b.getIdBourse(), 420, 80);
+        bigChart.getChildren().add(bigPath);
+
+        chartBox.getChildren().addAll(chartTitle, bigChart);
+
+        content.getChildren().addAll(headerBox, body, chartBox);
+        dialog.getDialogPane().setContent(content);
+        dialog.showAndWait();
     }
 
-    /**
-     * 📈 Créer un mini-graphique de tendance (simulation)
-     */
-    private Path creerMiniGraphique() {
-        Path path = new Path();
-        Random rand = new Random();
+    private HBox creerLigneDetail(String cle, String valeur, String couleur) {
+        HBox ligne = new HBox();
+        ligne.setPadding(new Insets(14, 20, 14, 20));
+        ligne.setAlignment(Pos.CENTER_LEFT);
+        ligne.setStyle("-fx-background-color: white; -fx-border-color: transparent transparent #f3f4f6 transparent; -fx-border-width: 0 0 1 0;");
 
-        // Point de départ
-        double startY = 20 + rand.nextDouble() * 10;
-        path.getElements().add(new MoveTo(0, startY));
+        // Barre colorée à gauche
+        Region bar = new Region();
+        bar.setPrefSize(4, 30);
+        bar.setStyle("-fx-background-color: " + couleur + "; -fx-background-radius: 2;");
 
-        // Générer 8 points aléatoires pour simuler une tendance
-        for (int i = 1; i <= 8; i++) {
-            double x = i * 30;
-            double y = 15 + rand.nextDouble() * 15;
-            path.getElements().add(new LineTo(x, y));
+        VBox textBox = new VBox(3);
+        textBox.setPadding(new Insets(0, 0, 0, 14));
+
+        Label cleLabel = new Label(cle);
+        cleLabel.setStyle("-fx-font-size: 11px; -fx-text-fill: #9ca3af;");
+
+        Label valLabel = new Label(valeur);
+        valLabel.setStyle("-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #1f2937;");
+
+        textBox.getChildren().addAll(cleLabel, valLabel);
+        ligne.getChildren().addAll(bar, textBox);
+        return ligne;
+    }
+
+    // ============================================================
+    //  DIALOG AJOUTER / MODIFIER
+    // ============================================================
+
+    @FXML
+    private void ouvrirDialogAjout(ActionEvent event) {
+        ouvrirDialog(null);
+    }
+
+    private void ouvrirDialogModifier(Bourse bourse) {
+        ouvrirDialog(bourse);
+    }
+
+    private void ouvrirDialog(Bourse bourseAModifier) {
+        Dialog<ButtonType> dialog = new Dialog<>();
+        dialog.setTitle(bourseAModifier == null ? "➕ Nouvelle Bourse" : "✏️ Modifier — " + bourseAModifier.getNomBourse());
+        dialog.setHeaderText(bourseAModifier == null ? "Remplissez les informations de la bourse" : "Modifiez les informations");
+
+        ButtonType btnSave = new ButtonType(
+                bourseAModifier == null ? "Ajouter" : "Modifier",
+                ButtonBar.ButtonData.OK_DONE);
+        dialog.getDialogPane().getButtonTypes().addAll(btnSave, ButtonType.CANCEL);
+        dialog.getDialogPane().setMinWidth(460);
+
+        // Formulaire
+        GridPane grid = new GridPane();
+        grid.setHgap(15);
+        grid.setVgap(14);
+        grid.setPadding(new Insets(24));
+
+        // Champs
+        TextField tfNom = new TextField();
+        tfNom.setPromptText("Ex: NYSE, Euronext, NASDAQ");
+        tfNom.setPrefWidth(310);
+
+        // Pays
+        TreeSet<String> paysSet = new TreeSet<>();
+        for (String code : java.util.Locale.getISOCountries()) {
+            String nom = new java.util.Locale("", code).getDisplayCountry(java.util.Locale.FRENCH);
+            if (nom != null && !nom.isBlank()) paysSet.add(nom);
+        }
+        ComboBox<String> cbPays = new ComboBox<>(FXCollections.observableArrayList(paysSet));
+        cbPays.setPrefWidth(310);
+        cbPays.setEditable(true);
+
+        ComboBox<String> cbDevise = new ComboBox<>(FXCollections.observableArrayList(
+                "TND", "EUR", "USD", "GBP", "JPY", "CHF", "CAD", "MAD", "DZD"));
+        cbDevise.setPrefWidth(310);
+
+        ComboBox<String> cbStatut = new ComboBox<>(FXCollections.observableArrayList("ACTIVE", "INACTIVE"));
+        cbStatut.setPrefWidth(310);
+
+        // Pré-remplir si modification
+        if (bourseAModifier != null) {
+            tfNom.setText(bourseAModifier.getNomBourse());
+            cbPays.setValue(bourseAModifier.getPays());
+            cbDevise.setValue(bourseAModifier.getDevise());
+            cbStatut.setValue(bourseAModifier.getStatut());
+        } else {
+            cbDevise.getSelectionModel().selectFirst();
+            cbStatut.getSelectionModel().selectFirst();
         }
 
-        // Style du graphique
-        path.setStroke(Color.web("#6366f1"));
-        path.setStrokeWidth(2);
-        path.setFill(null);
+        int row = 0;
+        grid.add(creerLabel("Nom de la Bourse *"), 0, row); grid.add(tfNom, 1, row++);
+        grid.add(creerLabel("Pays *"), 0, row);             grid.add(cbPays, 1, row++);
+        grid.add(creerLabel("Devise *"), 0, row);           grid.add(cbDevise, 1, row++);
+        grid.add(creerLabel("Statut *"), 0, row);           grid.add(cbStatut, 1, row);
 
-        // Conteneur avec hauteur fixe
-        VBox container = new VBox(path);
-        container.setPrefHeight(40);
-        container.setAlignment(Pos.CENTER);
+        dialog.getDialogPane().setContent(grid);
 
-        return path;
+        dialog.showAndWait().ifPresent(response -> {
+            if (response != btnSave) return;
+
+            String nom = tfNom.getText().trim();
+            String pays = cbPays.getValue();
+            String devise = cbDevise.getValue();
+            String statut = cbStatut.getValue();
+
+            if (nom.isEmpty()) { showError("Le nom est obligatoire !"); return; }
+            if (pays == null || pays.isEmpty()) { showError("Le pays est obligatoire !"); return; }
+            if (devise == null) { showError("La devise est obligatoire !"); return; }
+            if (statut == null) { showError("Le statut est obligatoire !"); return; }
+
+            try {
+                if (bourseAModifier == null) {
+                    // AJOUT
+                    Bourse newBourse = new Bourse(nom, pays, devise, statut);
+                    service.add(newBourse);
+                    showSuccess("✅ Bourse ajoutée !");
+                } else {
+                    // MODIFICATION
+                    bourseAModifier.setNomBourse(nom);
+                    bourseAModifier.setPays(pays);
+                    bourseAModifier.setDevise(devise);
+                    bourseAModifier.setStatut(statut);
+                    service.update(bourseAModifier);
+                    showSuccess("✏️ Bourse modifiée !");
+                }
+                afficherBourses(null);
+            } catch (Exception ex) {
+                showError("Erreur : " + ex.getMessage());
+                ex.printStackTrace();
+            }
+        });
     }
+
+    // ============================================================
+    //  SUPPRIMER
+    // ============================================================
+
+    private void supprimerBourse(Bourse bourse) {
+        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
+        confirm.setTitle("Confirmation");
+        confirm.setHeaderText("Supprimer " + bourse.getNomBourse() + " ?");
+        confirm.setContentText("⚠️ Cette action est irréversible !\nToutes les actions liées seront supprimées.");
+
+        if (confirm.showAndWait().orElse(ButtonType.CANCEL) == ButtonType.OK) {
+            try {
+                service.delete(bourse);
+                showSuccess("🗑️ Bourse supprimée !");
+                afficherBourses(null);
+            } catch (Exception ex) {
+                showError("Erreur suppression : " + ex.getMessage());
+            }
+        }
+    }
+
+    // ============================================================
+    //  NAVIGATION → Actions filtrées
+    // ============================================================
 
     private void ouvrirActionsPourBourse(Bourse bourse) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/crud/action-view.fxml"));
+            FXMLLoader loader = new FXMLLoader(
+                    getClass().getResource("/com/example/crud/action-view.fxml"));
             Parent root = loader.load();
 
             ActionController ctrl = loader.getController();
@@ -387,85 +428,97 @@ public class BourseController implements Initializable {
         }
     }
 
-    // ======================
-    // SEARCH / RESET
-    // ======================
+    @FXML
+    private void retourProfil(ActionEvent event) {
+        try {
+            FXMLLoader loader = new FXMLLoader(
+                    getClass().getResource("/com/example/crud/utilisateur-static-view.fxml"));
+            Parent root = loader.load();
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            stage.setScene(new Scene(root));
+            stage.setTitle("FINORA - Choisir Profil");
+            stage.show();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            showError("Erreur retour : " + ex.getMessage());
+        }
+    }
+
+    // ============================================================
+    //  RECHERCHE / ACTUALISER
+    // ============================================================
+
     @FXML
     private void handleRechercher(ActionEvent event) {
-        try {
-            String keyword = searchField.getText().trim().toLowerCase();
-            if (keyword.isEmpty()) { showError("Entrez un mot-clé !"); return; }
-
-            var resultats = service.searchByName(keyword);
-            cardsContainer.getChildren().clear();
-
-            for (Bourse b : resultats) {
-                cardsContainer.getChildren().add(creerCarteModerne(b));
-            }
-
-            lblTotal.setText("🔍 Résultats : " + resultats.size() + " bourse(s)");
-
-        } catch (Exception e) {
-            showError("Erreur recherche : " + e.getMessage());
-            e.printStackTrace();
-        }
+        String kw = searchField.getText().trim();
+        if (kw.isEmpty()) { showError("Entrez un mot-clé !"); return; }
+        afficherBourses(kw);
     }
 
     @FXML
     private void handleActualiser(ActionEvent event) {
         searchField.clear();
-        clearFields();
         afficherBourses(null);
     }
 
-    @FXML
-    private void viderFormulaire(ActionEvent event) {
-        clearFields();
-    }
+    // ============================================================
+    //  HELPERS VISUELS
+    // ============================================================
 
-    @FXML
-    private void retourProfil(ActionEvent event) {
-        try {
-            Parent root = FXMLLoader.load(getClass().getResource("/com/example/crud/utilisateur-static-view.fxml"));
-            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-            stage.setTitle("FINORA - Choisir Profil");
-            stage.setScene(new Scene(root));
-            stage.show();
-        } catch (Exception e) {
-            e.printStackTrace();
-            showError("Erreur retour : " + e.getMessage());
+    private Label creerBadgeStatut(String statut) {
+        Label badge = new Label(statut);
+        if ("ACTIVE".equals(statut)) {
+            badge.setStyle("-fx-background-color: #d1fae5; -fx-text-fill: #065f46;" +
+                    "-fx-font-size: 11px; -fx-font-weight: bold;" +
+                    "-fx-background-radius: 20; -fx-padding: 4 10;");
+        } else {
+            badge.setStyle("-fx-background-color: #fee2e2; -fx-text-fill: #991b1b;" +
+                    "-fx-font-size: 11px; -fx-font-weight: bold;" +
+                    "-fx-background-radius: 20; -fx-padding: 4 10;");
         }
+        return badge;
     }
 
-    private void clearFields() {
-        selectedBourseId = null; // Réinitialiser l'ID sélectionné
-        if (tfNom != null) tfNom.clear();
-        if (cbPays != null) cbPays.getSelectionModel().clearSelection();
-        if (cbDevise != null) cbDevise.getSelectionModel().selectFirst();
-        if (cbStatut != null) cbStatut.getSelectionModel().selectFirst();
+    private Path creerMiniGraphique(int seed) {
+        return creerMiniGraphiqueGrand(seed, 270, 40);
+    }
+
+    private Path creerMiniGraphiqueGrand(int seed, double width, double height) {
+        Path path = new Path();
+        Random rand = new Random(seed);
+        int points = 10;
+        double stepX = width / (points - 1);
+        double midY = height / 2;
+
+        double startY = midY + (rand.nextDouble() - 0.5) * (height * 0.6);
+        path.getElements().add(new MoveTo(0, startY));
+
+        for (int i = 1; i < points; i++) {
+            double x = i * stepX;
+            double y = midY + (rand.nextDouble() - 0.5) * (height * 0.6);
+            path.getElements().add(new LineTo(x, y));
+        }
+
+        path.setStroke(Color.web("#6366f1"));
+        path.setStrokeWidth(2.5);
+        path.setFill(Color.TRANSPARENT);
+        path.setSmooth(true);
+        return path;
+    }
+
+    private Label creerLabel(String text) {
+        Label l = new Label(text);
+        l.setStyle("-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #374151;");
+        return l;
     }
 
     private void showError(String msg) {
-        Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle("Erreur");
-        alert.setHeaderText("Erreur");
-        alert.setContentText(msg);
-        alert.showAndWait();
+        Alert a = new Alert(Alert.AlertType.ERROR);
+        a.setTitle("Erreur"); a.setHeaderText(null); a.setContentText(msg); a.showAndWait();
     }
 
     private void showSuccess(String msg) {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Succès");
-        alert.setHeaderText(null);
-        alert.setContentText(msg);
-        alert.showAndWait();
-    }
-
-    private void showInfo(String msg) {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Information");
-        alert.setHeaderText(null);
-        alert.setContentText(msg);
-        alert.showAndWait();
+        Alert a = new Alert(Alert.AlertType.INFORMATION);
+        a.setTitle("Succès"); a.setHeaderText(null); a.setContentText(msg); a.showAndWait();
     }
 }

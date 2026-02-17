@@ -1,9 +1,10 @@
 package com.example.crud.controllers;
 
 import com.example.crud.models.Action;
-import com.example.crud.models.Bourse;
 import com.example.crud.services.ServiceAction;
 import com.example.crud.services.ServiceBourse;
+import com.example.crud.services.ServiceTransaction;
+import com.example.crud.utils.Session;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.concurrent.Task;
@@ -11,11 +12,11 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
-import javafx.geometry.Insets;
-import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.*;
@@ -30,15 +31,8 @@ import java.util.*;
 import java.util.concurrent.*;
 
 /**
- * 🏦 DashboardTradingController
+ * 🏦 DashboardInvestisseurController
  * Dashboard Investisseur/Entreprise style Bourse Desktop
- *
- * Fonctionnalités :
- * - Portfolio + indices marché
- * - Graphique de performance
- * - Watchlist persistante
- * - Tableau marché avec variations
- * - Dialog Acheter / Vendre avec quantité précise
  */
 public class DashboardInvestisseurController implements Initializable {
 
@@ -68,37 +62,36 @@ public class DashboardInvestisseurController implements Initializable {
     @FXML private TextField searchField;
 
     private final ServiceAction serviceAction = new ServiceAction();
-    private final ServiceBourse serviceBourse = new ServiceBourse();
+    private final ServiceBourse serviceBourse = new ServiceBourse(); // (ok si utilisé ailleurs)
+    private final ServiceTransaction serviceTransaction = new ServiceTransaction();
 
-    // Watchlist en mémoire (IDs des actions favorites)
+    // Watchlist en mémoire
     private final Set<Integer> watchlistIds = new HashSet<>();
-    // Portfolio simulé (map idAction → quantité possédée)
+    // Portfolio : idAction → quantité possédée (local UI)
     private final Map<Integer, Integer> portfolio = new HashMap<>();
-    // Prix d'achat moyen
+    // Prix d'achat moyen (local UI)
     private final Map<Integer, Double> prixAchat = new HashMap<>();
 
     private List<Action> toutesActions = new ArrayList<>();
     private final Random random = new Random();
 
     private final ScheduledExecutorService scheduler =
-            Executors.newScheduledThreadPool(2, r -> { Thread t = new Thread(r); t.setDaemon(true); return t; });
+            Executors.newScheduledThreadPool(2, r -> {
+                Thread t = new Thread(r);
+                t.setDaemon(true);
+                return t;
+            });
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        // Date/heure
         lblDateTime.setText(LocalDateTime.now()
                 .format(DateTimeFormatter.ofPattern("EEEE, dd MMMM yyyy", Locale.FRENCH)));
 
-        // Configurer graphique
         configureChart();
-
-        // Charger données
         chargerDonnees();
-
-        // Charger news statiques
         chargerNews();
 
-        // Refresh variations toutes les 4 secondes
+        // Refresh toutes les 4 secondes
         scheduler.scheduleAtFixedRate(() ->
                 Platform.runLater(this::rafraichirVariations), 4, 4, TimeUnit.SECONDS);
     }
@@ -113,6 +106,7 @@ public class DashboardInvestisseurController implements Initializable {
                 return serviceAction.getAll();
             }
         };
+
         task.setOnSucceeded(e -> {
             toutesActions = task.getValue();
 
@@ -126,22 +120,14 @@ public class DashboardInvestisseurController implements Initializable {
                     .forEach(nomsBourses::add);
             cbFiltreMarche.setItems(FXCollections.observableArrayList(nomsBourses));
 
-            // Stats
             lblMesActions.setText(toutesActions.size() + " actions");
-
-            // Remplir tableau marché
             afficherTableauMarche(toutesActions);
-
-            // Remplir watchlist
             rafraichirWatchlist();
-
-            // Graphique
             remplirGraphique();
-
-            // Portfolio
             calculerPortfolio();
         });
-        task.setOnFailed(e -> System.err.println("Erreur chargement : " + task.getException()));
+
+        task.setOnFailed(e -> System.err.println("Erreur : " + task.getException()));
         new Thread(task).start();
     }
 
@@ -151,7 +137,6 @@ public class DashboardInvestisseurController implements Initializable {
 
     private void afficherTableauMarche(List<Action> actions) {
         marcheContainer.getChildren().clear();
-
         for (Action action : actions) {
             marcheContainer.getChildren().add(creerLigneMarche(action));
         }
@@ -163,7 +148,7 @@ public class DashboardInvestisseurController implements Initializable {
         row.setAlignment(Pos.CENTER_LEFT);
         row.setStyle("-fx-background-color: #0f111733; -fx-background-radius: 8; -fx-cursor: hand;");
 
-        // Badge symbole coloré
+        // Badge couleur
         String[] colors = {"#6366f1", "#f59e0b", "#10b981", "#ef4444", "#3b82f6", "#8b5cf6"};
         String color = colors[Math.abs(action.getSymbole().hashCode()) % colors.length];
 
@@ -181,34 +166,29 @@ public class DashboardInvestisseurController implements Initializable {
         symbolBox.setAlignment(Pos.CENTER_LEFT);
         symbolBox.setPrefWidth(120);
 
-        // Nom entreprise
         Label nomLabel = new Label(action.getNomEntreprise());
         nomLabel.setStyle("-fx-font-size: 13px; -fx-text-fill: #e5e7eb;");
         HBox.setHgrow(nomLabel, Priority.ALWAYS);
 
-        // Prix
         Label prixLabel = new Label(String.format("%.2f", action.getPrixUnitaire()));
         prixLabel.setStyle("-fx-font-size: 13px; -fx-text-fill: white; -fx-font-weight: bold; -fx-pref-width: 100; -fx-alignment: CENTER_RIGHT;");
 
-        // Variation (simulée)
-        double var = (new Random(action.getIdAction() + System.currentTimeMillis() / 4000).nextDouble() * 8) - 4;
-        String varStr = String.format("%+.2f%%", var);
-        Label varLabel = new Label(varStr);
+        // Variation simulée
+        double var = (new Random(action.getIdAction() + System.currentTimeMillis() / 4000)
+                .nextDouble() * 8) - 4;
+        Label varLabel = new Label(String.format("%+.2f%%", var));
         varLabel.setStyle("-fx-font-size: 13px; -fx-font-weight: bold;" +
                 "-fx-text-fill: " + (var >= 0 ? "#00d4aa" : "#ef4444") + ";" +
                 "-fx-pref-width: 100; -fx-alignment: CENTER_RIGHT;");
 
-        // Volume
         Label volLabel = new Label(
                 NumberFormat.getInstance(Locale.US).format((long) action.getQuantiteDisponible() * 1000)
         );
         volLabel.setStyle("-fx-font-size: 11px; -fx-text-fill: #6b7280; -fx-pref-width: 100; -fx-alignment: CENTER_RIGHT;");
 
-        // Bouton Trade
         Button btnTrade = new Button("Trade");
         btnTrade.setStyle(
-                "-fx-background-color: #00d4aa22;" +
-                        "-fx-text-fill: #00d4aa;" +
+                "-fx-background-color: #00d4aa22; -fx-text-fill: #00d4aa;" +
                         "-fx-font-size: 11px; -fx-font-weight: bold;" +
                         "-fx-background-radius: 6; -fx-padding: 6 14; -fx-cursor: hand;" +
                         "-fx-border-color: #00d4aa44; -fx-border-radius: 6; -fx-border-width: 1;" +
@@ -216,7 +196,6 @@ public class DashboardInvestisseurController implements Initializable {
         );
         btnTrade.setOnAction(e -> ouvrirDialogTrade(action));
 
-        // Hover effect
         row.setOnMouseEntered(e -> row.setStyle("-fx-background-color: #ffffff0a; -fx-background-radius: 8; -fx-cursor: hand;"));
         row.setOnMouseExited(e -> row.setStyle("-fx-background-color: #0f111733; -fx-background-radius: 8; -fx-cursor: hand;"));
 
@@ -225,19 +204,18 @@ public class DashboardInvestisseurController implements Initializable {
     }
 
     // ============================================================
-    //  DIALOG TRADE (ACHETER / VENDRE)
+    //  DIALOG TRADE
     // ============================================================
 
     @FXML
     private void ouvrirDialogAcheter(ActionEvent event) {
         if (toutesActions.isEmpty()) { showInfo("Aucune action disponible."); return; }
-        ouvrirDialogTrade(toutesActions.get(0)); // Ouvre sur la première par défaut
+        ouvrirDialogTrade(toutesActions.get(0));
     }
 
     @FXML
     private void ouvrirDialogVendre(ActionEvent event) {
         if (portfolio.isEmpty()) { showInfo("Vous ne possédez aucune action à vendre."); return; }
-        // Ouvre dialog avec mode vente
         ouvrirDialogTradeAvecMode(null, "VENDRE");
     }
 
@@ -252,15 +230,14 @@ public class DashboardInvestisseurController implements Initializable {
         ButtonType btnConfirm = new ButtonType("Confirmer", ButtonBar.ButtonData.OK_DONE);
         ButtonType btnCancel = new ButtonType("Annuler", ButtonBar.ButtonData.CANCEL_CLOSE);
         dialog.getDialogPane().getButtonTypes().addAll(btnConfirm, btnCancel);
-        dialog.getDialogPane().setMinWidth(500);
+        dialog.getDialogPane().setMinWidth(480);
 
-        VBox content = new VBox(20);
+        VBox content = new VBox(16);
         content.setPadding(new Insets(24));
 
-        // === MODE TOGGLE ===
-        ToggleGroup modeGroup = new ToggleGroup();
         ToggleButton btnAchat = new ToggleButton("🟢 Acheter");
         ToggleButton btnVente = new ToggleButton("🔴 Vendre");
+        ToggleGroup modeGroup = new ToggleGroup();
         btnAchat.setToggleGroup(modeGroup);
         btnVente.setToggleGroup(modeGroup);
 
@@ -272,10 +249,6 @@ public class DashboardInvestisseurController implements Initializable {
 
         HBox modeBox = new HBox(8, btnAchat, btnVente);
 
-        // === SÉLECTION ACTION ===
-        Label lblActionTitle = new Label("Action");
-        lblActionTitle.setStyle("-fx-font-size: 12px; -fx-font-weight: bold;");
-
         ComboBox<Action> cbAction = new ComboBox<>();
         cbAction.setItems(FXCollections.observableArrayList(toutesActions));
         cbAction.setConverter(new javafx.util.StringConverter<>() {
@@ -284,39 +257,25 @@ public class DashboardInvestisseurController implements Initializable {
             }
             @Override public Action fromString(String s) { return null; }
         });
-        cbAction.setPrefWidth(440);
+        cbAction.setPrefWidth(430);
 
         if (actionPreselect != null) cbAction.setValue(actionPreselect);
         else if (!toutesActions.isEmpty()) cbAction.setValue(toutesActions.get(0));
 
-        // === PRIX ACTUEL ===
-        Label lblPrixActuelTitle = new Label("Prix actuel");
-        lblPrixActuelTitle.setStyle("-fx-font-size: 12px; -fx-font-weight: bold;");
         Label lblPrixActuel = new Label();
-        lblPrixActuel.setStyle("-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #00d4aa;");
+        lblPrixActuel.setStyle("-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #00d4aa;");
 
-        // Mettre à jour prix quand action change
         cbAction.valueProperty().addListener((obs, o, n) -> {
-            if (n != null) {
-                lblPrixActuel.setText(String.format("%.2f %s",
-                        n.getPrixUnitaire(),
-                        n.getBourse() != null ? n.getBourse().getDevise() : "TND"));
-            }
+            if (n != null) lblPrixActuel.setText(String.format("%.2f %s",
+                    n.getPrixUnitaire(),
+                    n.getBourse() != null ? n.getBourse().getDevise() : "TND"));
         });
-
         if (cbAction.getValue() != null) {
             Action sel = cbAction.getValue();
             lblPrixActuel.setText(String.format("%.2f %s",
                     sel.getPrixUnitaire(),
                     sel.getBourse() != null ? sel.getBourse().getDevise() : "TND"));
         }
-
-        // === QUANTITÉ ===
-        Label lblQteTitle = new Label("Quantité");
-        lblQteTitle.setStyle("-fx-font-size: 12px; -fx-font-weight: bold;");
-
-        HBox qteBox = new HBox(10);
-        qteBox.setAlignment(Pos.CENTER_LEFT);
 
         Button btnMinus = new Button("−");
         btnMinus.setStyle("-fx-background-color: #374151; -fx-text-fill: white; -fx-font-size: 18px; -fx-background-radius: 8; -fx-padding: 4 14; -fx-cursor: hand;");
@@ -331,15 +290,12 @@ public class DashboardInvestisseurController implements Initializable {
         btnMinus.setOnAction(e -> spinnerQte.decrement());
         btnPlus.setOnAction(e -> spinnerQte.increment());
 
-        qteBox.getChildren().addAll(btnMinus, spinnerQte, btnPlus);
+        HBox qteBox = new HBox(10, btnMinus, spinnerQte, btnPlus);
+        qteBox.setAlignment(Pos.CENTER_LEFT);
 
-        // === TOTAL ESTIMÉ ===
-        Label lblTotalTitle = new Label("Total estimé");
-        lblTotalTitle.setStyle("-fx-font-size: 12px; -fx-font-weight: bold;");
         Label lblTotal = new Label("0.00 TND");
-        lblTotal.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
+        lblTotal.setStyle("-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #f59e0b;");
 
-        // Calculer total dynamiquement
         Runnable calcTotal = () -> {
             if (cbAction.getValue() != null) {
                 double total = cbAction.getValue().getPrixUnitaire() * spinnerQte.getValue();
@@ -356,61 +312,63 @@ public class DashboardInvestisseurController implements Initializable {
         content.getChildren().addAll(
                 modeBox,
                 new Separator(),
-                lblActionTitle, cbAction,
-                lblPrixActuelTitle, lblPrixActuel,
-                lblQteTitle, qteBox,
+                new Label("Action :"), cbAction,
+                new Label("Prix actuel :"), lblPrixActuel,
+                new Label("Quantité :"), qteBox,
                 new Separator(),
-                lblTotalTitle, lblTotal
+                new Label("Total estimé :"), lblTotal
         );
 
         dialog.getDialogPane().setContent(content);
 
         dialog.showAndWait().ifPresent(response -> {
             if (response == btnConfirm) {
-                Action actionSelectionnee = cbAction.getValue();
+                Action sel = cbAction.getValue();
                 int quantite = spinnerQte.getValue();
-                boolean estAchat = btnAchat.isSelected();
+                if (sel == null) { showError("Sélectionnez une action !"); return; }
 
-                if (actionSelectionnee == null) {
-                    showError("Sélectionnez une action !");
-                    return;
-                }
-
-                if (estAchat) {
-                    executerAchat(actionSelectionnee, quantite);
-                } else {
-                    executerVente(actionSelectionnee, quantite);
-                }
+                if (btnAchat.isSelected()) executerAchat(sel, quantite);
+                else executerVente(sel, quantite);
             }
         });
     }
 
     // ============================================================
-    //  LOGIQUE ACHAT / VENTE
+    //  ACHAT / VENTE
     // ============================================================
 
     private void executerAchat(Action action, int quantite) {
-        int idAction = action.getIdAction();
-        portfolio.merge(idAction, quantite, Integer::sum);
-        prixAchat.put(idAction, action.getPrixUnitaire());
+        try {
+            // ✅ DB : update stock + insert transaction
+            serviceTransaction.acheter(
+                    action.getIdAction(),
+                    quantite,
+                    Session.getRole().name(),
+                    Session.getDisplayName()
+            );
 
-        double total = action.getPrixUnitaire() * quantite;
-        String devise = action.getBourse() != null ? action.getBourse().getDevise() : "TND";
+            // ✅ UI (local)
+            portfolio.merge(action.getIdAction(), quantite, Integer::sum);
+            prixAchat.put(action.getIdAction(), action.getPrixUnitaire());
 
-        showSuccess(String.format(
-                "✅ Achat Confirmé !\n\n" +
-                        "📈 %s (%s)\n" +
-                        "📦 Quantité : %d\n" +
-                        "💰 Prix unitaire : %.2f %s\n" +
-                        "💵 Total : %.2f %s",
-                action.getSymbole(), action.getNomEntreprise(),
-                quantite,
-                action.getPrixUnitaire(), devise,
-                total, devise
-        ));
+            double total = action.getPrixUnitaire() * quantite;
+            double commission = Math.round(total * 0.005 * 100.0) / 100.0;
+            String devise = action.getBourse() != null ? action.getBourse().getDevise() : "TND";
 
-        calculerPortfolio();
-        rafraichirWatchlist();
+            showSuccess(String.format(
+                    "✅ Achat Confirmé !\n\n📈 %s (%s)\n📦 Quantité : %d\n💰 Prix : %.2f %s\n💵 Total : %.2f %s\n🏦 Commission (0.5%%) : %.2f %s",
+                    action.getSymbole(), action.getNomEntreprise(),
+                    quantite, action.getPrixUnitaire(), devise, total, devise, commission, devise
+            ));
+
+            // refresh actions + stats
+            chargerDonnees();
+            calculerPortfolio();
+            rafraichirWatchlist();
+
+        } catch (Exception ex) {
+            showError("Achat impossible : " + ex.getMessage());
+        }
     }
 
     private void executerVente(Action action, int quantite) {
@@ -418,45 +376,82 @@ public class DashboardInvestisseurController implements Initializable {
         int possede = portfolio.getOrDefault(idAction, 0);
 
         if (possede <= 0) {
-            showError("Vous ne possédez aucune action " + action.getSymbole() + " à vendre !");
+            showError("Vous ne possédez aucune action " + action.getSymbole() + " !");
             return;
         }
-
         if (quantite > possede) {
-            showError(String.format(
-                    "Vous ne possédez que %d action(s) %s.\n" +
-                            "Vous ne pouvez pas en vendre %d.",
-                    possede, action.getSymbole(), quantite
-            ));
+            showError("Vous possédez seulement " + possede + " action(s) " + action.getSymbole() + ".");
             return;
         }
 
-        int nouvQte = possede - quantite;
-        if (nouvQte == 0) portfolio.remove(idAction);
-        else portfolio.put(idAction, nouvQte);
+        try {
+            // ✅ DB : update stock + insert transaction
+            serviceTransaction.vendre(
+                    action.getIdAction(),
+                    quantite,
+                    Session.getRole().name(),
+                    Session.getDisplayName()
+            );
 
-        double total = action.getPrixUnitaire() * quantite;
-        double prixMoyen = prixAchat.getOrDefault(idAction, action.getPrixUnitaire());
-        double plusvalue = (action.getPrixUnitaire() - prixMoyen) * quantite;
-        String devise = action.getBourse() != null ? action.getBourse().getDevise() : "TND";
+            // ✅ UI (local)
+            int nouvQte = possede - quantite;
+            if (nouvQte == 0) portfolio.remove(idAction);
+            else portfolio.put(idAction, nouvQte);
 
-        showSuccess(String.format(
-                "✅ Vente Confirmée !\n\n" +
-                        "📉 %s (%s)\n" +
-                        "📦 Quantité vendue : %d  |  Reste : %d\n" +
-                        "💰 Prix unitaire : %.2f %s\n" +
-                        "💵 Total : %.2f %s\n" +
-                        "%s Plus-value : %.2f %s",
-                action.getSymbole(), action.getNomEntreprise(),
-                quantite, nouvQte,
-                action.getPrixUnitaire(), devise,
-                total, devise,
-                plusvalue >= 0 ? "📈" : "📉",
-                plusvalue, devise
-        ));
+            double total = action.getPrixUnitaire() * quantite;
+            double prixMoyen = prixAchat.getOrDefault(idAction, action.getPrixUnitaire());
+            double plusvalue = (action.getPrixUnitaire() - prixMoyen) * quantite;
+            double commission = Math.round(total * 0.005 * 100.0) / 100.0;
+            String devise = action.getBourse() != null ? action.getBourse().getDevise() : "TND";
 
-        calculerPortfolio();
-        rafraichirWatchlist();
+            showSuccess(String.format(
+                    "✅ Vente Confirmée !\n\n📉 %s (%s)\n📦 Vendu : %d  |  Reste : %d\n💰 Prix : %.2f %s\n💵 Total : %.2f %s\n%s Plus-value : %.2f %s\n🏦 Commission (0.5%%) : %.2f %s",
+                    action.getSymbole(), action.getNomEntreprise(),
+                    quantite, nouvQte,
+                    action.getPrixUnitaire(), devise,
+                    total, devise,
+                    plusvalue >= 0 ? "📈" : "📉", plusvalue, devise,
+                    commission, devise
+            ));
+
+            chargerDonnees();
+            calculerPortfolio();
+            rafraichirWatchlist();
+
+        } catch (Exception ex) {
+            showError("Vente impossible : " + ex.getMessage());
+        }
+    }
+
+    // ============================================================
+    //  NAVIGATION → HISTORIQUE
+    // ============================================================
+
+    @FXML
+    private void ouvrirHistorique(ActionEvent event) {
+        try {
+            URL url = getClass().getResource("/com/example/crud/Historique view.fxml");
+            if (url == null) {
+                showError("FXML introuvable : /com/example/crud/Historique view.fxml\n" +
+                        "Vérifie : src/main/resources/com/example/crud/");
+                return;
+            }
+
+            FXMLLoader loader = new FXMLLoader(url);
+            Parent root = loader.load();
+
+            Historiquecontroller ctrl = loader.getController();
+            ctrl.setFxmlRetour("/com/example/crud/dashboard-investisseur-view.fxml");
+
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            stage.setScene(new Scene(root));
+            stage.setTitle("FINORA - Historique des Transactions");
+            stage.show();
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            showError("Erreur ouverture historique : " + ex.getMessage());
+        }
     }
 
     // ============================================================
@@ -470,12 +465,9 @@ public class DashboardInvestisseurController implements Initializable {
         dialog.getDialogPane().getButtonTypes().add(ButtonType.CLOSE);
         dialog.getDialogPane().setMinWidth(400);
 
-        VBox content = new VBox(12);
+        VBox content = new VBox(10);
         content.setPadding(new Insets(20));
-
-        Label title = new Label("Choisissez les actions à suivre :");
-        title.setStyle("-fx-font-size: 14px; -fx-font-weight: bold;");
-        content.getChildren().add(title);
+        content.getChildren().add(new Label("Choisissez les actions à suivre :"));
 
         for (Action action : toutesActions) {
             HBox ligne = new HBox(12);
@@ -483,12 +475,10 @@ public class DashboardInvestisseurController implements Initializable {
 
             CheckBox cb = new CheckBox(action.getSymbole() + " — " + action.getNomEntreprise());
             cb.setSelected(watchlistIds.contains(action.getIdAction()));
-            cb.setStyle("-fx-font-size: 13px;");
-
             HBox.setHgrow(cb, Priority.ALWAYS);
 
             Label prixLabel = new Label(String.format("%.2f", action.getPrixUnitaire()));
-            prixLabel.setStyle("-fx-font-size: 12px; -fx-text-fill: #00d4aa;");
+            prixLabel.setStyle("-fx-text-fill: #00d4aa;");
 
             cb.selectedProperty().addListener((obs, o, selected) -> {
                 if (selected) watchlistIds.add(action.getIdAction());
@@ -510,8 +500,8 @@ public class DashboardInvestisseurController implements Initializable {
         watchlistContainer.getChildren().clear();
 
         if (watchlistIds.isEmpty()) {
-            Label empty = new Label("Aucune action en watchlist.\nCliquez sur ⭐ Watchlist pour en ajouter.");
-            empty.setStyle("-fx-font-size: 12px; -fx-text-fill: #6b7280; -fx-text-alignment: CENTER;");
+            Label empty = new Label("Cliquez sur ⭐ Watchlist\npour ajouter des actions.");
+            empty.setStyle("-fx-font-size: 12px; -fx-text-fill: #6b7280;");
             empty.setWrapText(true);
             watchlistContainer.getChildren().add(empty);
             return;
@@ -525,14 +515,12 @@ public class DashboardInvestisseurController implements Initializable {
             item.setPadding(new Insets(10));
             item.setStyle("-fx-background-color: #0f111777; -fx-background-radius: 8;");
 
-            // Symbole
             Label sym = new Label(action.getSymbole());
             sym.setStyle("-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: white;");
 
             Region spacer = new Region();
             HBox.setHgrow(spacer, Priority.ALWAYS);
 
-            // Prix + variation
             double var = (random.nextDouble() * 4) - 2;
             VBox pricesBox = new VBox(2);
             pricesBox.setAlignment(Pos.CENTER_RIGHT);
@@ -544,7 +532,6 @@ public class DashboardInvestisseurController implements Initializable {
             varLbl.setStyle("-fx-font-size: 11px; -fx-text-fill: " + (var >= 0 ? "#00d4aa" : "#ef4444") + ";");
 
             pricesBox.getChildren().addAll(prixLbl, varLbl);
-
             item.getChildren().addAll(sym, spacer, pricesBox);
             watchlistContainer.getChildren().add(item);
         }
@@ -555,25 +542,19 @@ public class DashboardInvestisseurController implements Initializable {
     // ============================================================
 
     private void calculerPortfolio() {
-        double valeurTotale = 0;
+        double valeur = 0;
         for (Map.Entry<Integer, Integer> entry : portfolio.entrySet()) {
-            Optional<Action> actionOpt = toutesActions.stream()
-                    .filter(a -> a.getIdAction() == entry.getKey())
-                    .findFirst();
-            if (actionOpt.isPresent()) {
-                valeurTotale += actionOpt.get().getPrixUnitaire() * entry.getValue();
-            }
+            Optional<Action> opt = toutesActions.stream()
+                    .filter(a -> a.getIdAction() == entry.getKey()).findFirst();
+            if (opt.isPresent()) valeur += opt.get().getPrixUnitaire() * entry.getValue();
         }
 
-        final double valeurFinal = valeurTotale;
+        final double v = valeur;
         Platform.runLater(() -> {
-            if (valeurFinal > 0) {
-                lblPortfolio.setText(String.format("%.2f TND", valeurFinal));
-                lblPortfolioChange.setText("📊 " + portfolio.size() + " action(s) en portefeuille");
-            } else {
-                lblPortfolio.setText("0.00 TND");
-                lblPortfolioChange.setText("Aucune position ouverte");
-            }
+            lblPortfolio.setText(v > 0 ? String.format("%.2f TND", v) : "0.00 TND");
+            lblPortfolioChange.setText(v > 0
+                    ? "📊 " + portfolio.size() + " position(s) ouvertes"
+                    : "Aucune position ouverte");
         });
     }
 
@@ -589,15 +570,12 @@ public class DashboardInvestisseurController implements Initializable {
 
     private void remplirGraphique() {
         XYChart.Series<String, Number> series = new XYChart.Series<>();
-        series.setName("Performance");
-
         String[] jours = {"Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"};
         double val = 100;
-        for (String jour : jours) {
+        for (String j : jours) {
             val += (random.nextDouble() * 20) - 8;
-            series.getData().add(new XYChart.Data<>(jour, val));
+            series.getData().add(new XYChart.Data<>(j, val));
         }
-
         lineChart.getData().clear();
         lineChart.getData().add(series);
     }
@@ -612,13 +590,15 @@ public class DashboardInvestisseurController implements Initializable {
                 {"Résultats trimestriels : volatilité forte sur le Nasdaq.", "15 min"},
                 {"EUR/USD : léger rebond après annonces BCE.", "1h"},
                 {"Les matières premières en forte hausse ce matin.", "3h"},
-                {"Bourse de Paris : le CAC 40 franchit un seuil.", "6h"}
+                {"Bourse de Paris : le CAC 40 franchit un seuil clé.", "6h"}
         };
+
+        newsContainer.getChildren().clear();
 
         for (String[] item : news) {
             VBox card = new VBox(6);
             card.setPadding(new Insets(12));
-            card.setStyle("-fx-background-color: #0f111766; -fx-background-radius: 8; -fx-cursor: hand;");
+            card.setStyle("-fx-background-color: #0f111766; -fx-background-radius: 8;");
 
             Label txt = new Label(item[0]);
             txt.setWrapText(true);
@@ -627,10 +607,10 @@ public class DashboardInvestisseurController implements Initializable {
             HBox footer = new HBox();
             Label time = new Label("🕐 il y a " + item[1]);
             time.setStyle("-fx-font-size: 10px; -fx-text-fill: #6b7280;");
-            Label aiTag = new Label("+1AI%");
-            aiTag.setStyle("-fx-font-size: 10px; -fx-text-fill: #00d4aa;");
             Region sp = new Region(); HBox.setHgrow(sp, Priority.ALWAYS);
-            footer.getChildren().addAll(time, sp, aiTag);
+            Label tag = new Label("+IA");
+            tag.setStyle("-fx-font-size: 10px; -fx-text-fill: #00d4aa;");
+            footer.getChildren().addAll(time, sp, tag);
 
             card.getChildren().addAll(txt, footer);
             newsContainer.getChildren().add(card);
@@ -652,9 +632,7 @@ public class DashboardInvestisseurController implements Initializable {
     }
 
     @FXML
-    private void navDashboard(ActionEvent event) {
-        // Navigation interne
-    }
+    private void navDashboard(ActionEvent event) { /* navigation interne */ }
 
     // ============================================================
     //  UTILS
@@ -662,16 +640,25 @@ public class DashboardInvestisseurController implements Initializable {
 
     private void showError(String msg) {
         Alert a = new Alert(Alert.AlertType.ERROR);
-        a.setTitle("Erreur"); a.setHeaderText(null); a.setContentText(msg); a.showAndWait();
+        a.setTitle("Erreur");
+        a.setHeaderText(null);
+        a.setContentText(msg);
+        a.showAndWait();
     }
 
     private void showSuccess(String msg) {
         Alert a = new Alert(Alert.AlertType.INFORMATION);
-        a.setTitle("Succès"); a.setHeaderText(null); a.setContentText(msg); a.showAndWait();
+        a.setTitle("Succès");
+        a.setHeaderText(null);
+        a.setContentText(msg);
+        a.showAndWait();
     }
 
     private void showInfo(String msg) {
         Alert a = new Alert(Alert.AlertType.INFORMATION);
-        a.setTitle("Information"); a.setHeaderText(null); a.setContentText(msg); a.showAndWait();
+        a.setTitle("Information");
+        a.setHeaderText(null);
+        a.setContentText(msg);
+        a.showAndWait();
     }
 }

@@ -19,6 +19,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
+import javafx.scene.control.Spinner;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
@@ -428,47 +429,60 @@ public class ActionController implements Initializable {
         centre.getChildren().addAll(prix, details);
 
         // === DROITE : Variation + Boutons ===
-        HBox droite = new HBox(12);
+        HBox droite = new HBox(14);
         droite.setAlignment(Pos.CENTER_RIGHT);
 
         // Variation
-        VBox varBox = new VBox(4);
-        varBox.setAlignment(Pos.CENTER_RIGHT);
-
         Random rand = new Random(action.getIdAction());
         double variation = (rand.nextDouble() * 10) - 5;
-
         String couleur = variation >= 0 ? "#10b981" : "#ef4444";
         String symboleVar = variation >= 0 ? "▲" : "▼";
 
+        VBox varBox = new VBox(4);
+        varBox.setAlignment(Pos.CENTER_RIGHT);
+        varBox.setPrefWidth(110);
+
+        // Barre de progression colorée
+        Region barBackground = new Region();
+        barBackground.setPrefSize(90, 5);
+        barBackground.setStyle("-fx-background-color: #e5e7eb; -fx-background-radius: 3;");
+
+        Region barFill = new Region();
+        double barWidth = Math.min(90, Math.abs(variation) / 10.0 * 90);
+        barFill.setPrefSize(barWidth, 5);
+        barFill.setStyle("-fx-background-color: " + couleur + "; -fx-background-radius: 3;");
+
+        StackPane barPane = new StackPane();
+        barPane.setAlignment(Pos.CENTER_LEFT);
+        barPane.getChildren().addAll(barBackground, barFill);
+
         Label varLabel = new Label(symboleVar + " " + String.format("%.2f%%", Math.abs(variation)));
-        varLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: " + couleur + ";");
+        varLabel.setStyle("-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: " + couleur + ";");
 
-        Region indicator = new Region();
-        indicator.setPrefSize(8, 8);
-        indicator.setStyle("-fx-background-color: " + couleur + "; -fx-background-radius: 4;");
+        varBox.getChildren().addAll(barPane, varLabel);
 
-        varBox.getChildren().addAll(indicator, varLabel);
-
-        // ✅ Boutons Modifier/Supprimer
-        Button btnModifier = new Button("✏️");
+        // Bouton Modifier — texte clair
+        Button btnModifier = new Button("Modifier");
         btnModifier.setStyle(
                 "-fx-background-color: #3b82f6;" +
                         "-fx-text-fill: white;" +
-                        "-fx-font-size: 14px;" +
-                        "-fx-background-radius: 6;" +
-                        "-fx-padding: 6 12;" +
+                        "-fx-font-size: 12px;" +
+                        "-fx-font-weight: bold;" +
+                        "-fx-background-radius: 8;" +
+                        "-fx-padding: 8 16;" +
                         "-fx-cursor: hand;"
         );
         btnModifier.setOnAction(e -> ouvrirDialog(action));
 
-        Button btnSupprimer = new Button("🗑️");
+        // Bouton Supprimer — texte clair
+        Button btnSupprimer = new Button("Supprimer");
         btnSupprimer.setStyle(
                 "-fx-background-color: #ef4444;" +
                         "-fx-text-fill: white;" +
-                        "-fx-font-size: 14px;" +
-                        "-fx-background-radius: 6;" +
-                        "-fx-padding: 6 12;" +
+                        "-fx-font-size: 12px;" +
+                        "-fx-font-weight: bold;" +
+                        "-fx-background-radius: 8;" +
+                        "-fx-padding: 8 16;" +
                         "-fx-cursor: hand;"
         );
         btnSupprimer.setOnAction(e -> supprimerAction(action));

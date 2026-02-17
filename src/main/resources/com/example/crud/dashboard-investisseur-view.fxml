@@ -31,6 +31,9 @@
             <Button text="📈" style="-fx-background-color: transparent; -fx-text-fill: #6b7280; -fx-font-size: 20px; -fx-background-radius: 10; -fx-cursor: hand; -fx-pref-width: 60; -fx-pref-height: 50;"/>
             <Label text="Ordres" style="-fx-font-size: 9px; -fx-text-fill: #6b7280; -fx-padding: -4 0 8 0;" alignment="CENTER"/>
 
+            <Button text="📜" onAction="#ouvrirHistorique" style="-fx-background-color: transparent; -fx-text-fill: #6b7280; -fx-font-size: 20px; -fx-background-radius: 10; -fx-cursor: hand; -fx-pref-width: 60; -fx-pref-height: 50;"/>
+            <Label text="Historique" style="-fx-font-size: 9px; -fx-text-fill: #6b7280; -fx-padding: -4 0 8 0;" alignment="CENTER"/>
+
             <Button text="📰" style="-fx-background-color: transparent; -fx-text-fill: #6b7280; -fx-font-size: 20px; -fx-background-radius: 10; -fx-cursor: hand; -fx-pref-width: 60; -fx-pref-height: 50;"/>
             <Label text="News" style="-fx-font-size: 9px; -fx-text-fill: #6b7280; -fx-padding: -4 0 8 0;" alignment="CENTER"/>
 
@@ -91,7 +94,7 @@
                         <VBox spacing="6" HBox.hgrow="ALWAYS"
                               style="-fx-background-color: #1a1d27; -fx-background-radius: 14; -fx-padding: 20; -fx-border-color: #ffffff11; -fx-border-radius: 14; -fx-border-width: 1;">
                             <Label text="Portfolio" style="-fx-font-size: 12px; -fx-text-fill: #6b7280;"/>
-                            <Label fx:id="lblPortfolio" text="/$24,000"
+                            <Label fx:id="lblPortfolio" text="\$24,000"
                                    style="-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: white;"/>
                             <Label fx:id="lblPortfolioChange" text="▲ +2.4% aujourd'hui"
                                    style="-fx-font-size: 12px; -fx-text-fill: #00d4aa;"/>
@@ -168,6 +171,8 @@
                                         style="-fx-background-color: #ef4444; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold; -fx-background-radius: 10; -fx-padding: 12 30; -fx-cursor: hand;"/>
                                 <Button text="⭐ Watchlist" onAction="#ouvrirDialogWatchlist"
                                         style="-fx-background-color: #f59e0b22; -fx-text-fill: #f59e0b; -fx-font-size: 14px; -fx-font-weight: bold; -fx-background-radius: 10; -fx-padding: 12 20; -fx-cursor: hand; -fx-border-color: #f59e0b44; -fx-border-radius: 10; -fx-border-width: 1;"/>
+                                <Button text="📜 Historique" onAction="#ouvrirHistorique"
+                                        style="-fx-background-color: #6366f122; -fx-text-fill: #6366f1; -fx-font-size: 14px; -fx-font-weight: bold; -fx-background-radius: 10; -fx-padding: 12 20; -fx-cursor: hand; -fx-border-color: #6366f144; -fx-border-radius: 10; -fx-border-width: 1;"/>
                             </HBox>
                         </VBox>
 
