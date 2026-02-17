@@ -5,97 +5,222 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.Font?>
 
-<BorderPane prefHeight="700.0" prefWidth="1100.0"
-            style="-fx-background-color: #ecf0f1;"
+<BorderPane prefHeight="700.0" prefWidth="1200.0"
             xmlns="http://javafx.com/javafx/17"
             xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="com.example.crud.controllers.ActionController">
+            fx:controller="com.example.crud.controllers.ActionController"
+            style="-fx-background-color: #f5f7fa;">
 
-    <!-- HEADER -->
+    <!-- ============================================ -->
+    <!-- HEADER / TOPBAR -->
+    <!-- ============================================ -->
     <top>
-        <VBox style="-fx-background-color: linear-gradient(to right, #2c3e50, #34495e); -fx-padding: 25;" spacing="10">
-            <Label text="📈 Gestion des Actions" style="-fx-text-fill: white; -fx-font-weight: bold;">
-                <font><Font size="28.0"/></font>
-            </Label>
-
-            <HBox spacing="10">
-                <Label text="Module FINORA - Actions par Bourse" style="-fx-text-fill: #bdc3c7;">
-                    <font><Font size="14.0"/></font>
-                </Label>
+        <VBox style="-fx-background-color: linear-gradient(to right, #2c5f6f, #3d7d8f); -fx-padding: 24;">
+            <HBox alignment="CENTER_LEFT" spacing="20">
+                <Label text="📈 Gestion des Actions"
+                       style="-fx-text-fill: white; -fx-font-size: 26px; -fx-font-weight: bold;"/>
 
                 <Region HBox.hgrow="ALWAYS"/>
 
-                <!-- ✅ Retour -->
-                <Button text="⬅ Retour" onAction="#retourBourses"
-                        style="-fx-background-color:#16a085; -fx-text-fill:white; -fx-font-weight:bold; -fx-background-radius:8;"/>
+                <Button text="⬅ Retour"
+                        onAction="#retourBourses"
+                        style="-fx-background-color: rgba(255,255,255,0.2); -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold; -fx-background-radius: 8; -fx-padding: 10 20; -fx-cursor: hand;"/>
             </HBox>
+
+            <Label text="Module FINORA - Actions par Bourse"
+                   style="-fx-text-fill: rgba(255,255,255,0.8); -fx-font-size: 14px; -fx-padding: 8 0 0 0;"/>
         </VBox>
     </top>
 
-    <!-- LEFT FORM -->
+    <!-- ============================================ -->
+    <!-- LEFT SIDEBAR - FORMULAIRE (caché par défaut) -->
+    <!-- ============================================ -->
     <left>
-        <VBox prefWidth="350" spacing="15"
-              style="-fx-background-color: white; -fx-padding: 25; -fx-border-color: #dfe6e9; -fx-border-width: 0 1 0 0;">
+        <ScrollPane fitToHeight="true"
+                    style="-fx-background-color: white; -fx-background: white;"
+                    hbarPolicy="NEVER"
+                    visible="false"
+                    managed="false">
+            <VBox fx:id="formulaireContainer"
+                  spacing="16"
+                  style="-fx-background-color: white; -fx-padding: 24; -fx-pref-width: 320;">
 
-            <Label text="📝 Formulaire Action"
-                   style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;" />
-            <Separator />
+                <!-- Titre du formulaire -->
+                <VBox spacing="6">
+                    <Label text="📝 Formulaire Action"
+                           style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #1f2937;"/>
+                    <Separator style="-fx-background-color: #e5e7eb;"/>
+                </VBox>
 
-            <TextField fx:id="tfId" promptText="ID (modifier/supprimer)" style="-fx-pref-height:35px;"/>
+                <!-- Champ Bourse -->
+                <VBox spacing="6">
+                    <Label text="Bourse *"
+                           style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #374151;"/>
+                    <ComboBox fx:id="cbBourse"
+                              promptText="Sélectionner une bourse"
+                              maxWidth="Infinity"
+                              style="-fx-background-color: #f9fafb; -fx-background-radius: 8; -fx-font-size: 13px;"/>
+                </VBox>
 
-            <ComboBox fx:id="cbBourse" promptText="Bourse *" prefWidth="300" style="-fx-pref-height:35px;"/>
+                <!-- Champ Symbole -->
+                <VBox spacing="6">
+                    <Label text="Symbole *"
+                           style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #374151;"/>
+                    <TextField fx:id="tfSymbole"
+                               promptText="Ex: AAPL, MSFT"
+                               style="-fx-background-color: #f9fafb; -fx-background-radius: 8; -fx-padding: 10; -fx-font-size: 13px;"/>
+                </VBox>
 
-            <TextField fx:id="tfSymbole" promptText="Symbole *" style="-fx-pref-height:35px;"/>
-            <TextField fx:id="tfNomEntreprise" promptText="Entreprise *" style="-fx-pref-height:35px;"/>
+                <!-- Champ Nom Entreprise -->
+                <VBox spacing="6">
+                    <Label text="Nom Entreprise *"
+                           style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #374151;"/>
+                    <TextField fx:id="tfNomEntreprise"
+                               promptText="Ex: Apple Inc."
+                               style="-fx-background-color: #f9fafb; -fx-background-radius: 8; -fx-padding: 10; -fx-font-size: 13px;"/>
+                </VBox>
 
-            <ComboBox fx:id="cbSecteur" promptText="Secteur *" prefWidth="300" style="-fx-pref-height:35px;"/>
+                <!-- Champ Secteur -->
+                <VBox spacing="6">
+                    <Label text="Secteur *"
+                           style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #374151;"/>
+                    <ComboBox fx:id="cbSecteur"
+                              promptText="Sélectionner un secteur"
+                              maxWidth="Infinity"
+                              style="-fx-background-color: #f9fafb; -fx-background-radius: 8; -fx-font-size: 13px;"/>
+                </VBox>
 
-            <TextField fx:id="tfPrix" promptText="Prix *" style="-fx-pref-height:35px;"/>
-            <TextField fx:id="tfQuantite" promptText="Quantité *" style="-fx-pref-height:35px;"/>
+                <!-- Champ Prix -->
+                <VBox spacing="6">
+                    <Label text="Prix Unitaire *"
+                           style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #374151;"/>
+                    <TextField fx:id="tfPrix"
+                               promptText="Ex: 178.50"
+                               style="-fx-background-color: #f9fafb; -fx-background-radius: 8; -fx-padding: 10; -fx-font-size: 13px;"/>
+                </VBox>
 
-            <ComboBox fx:id="cbStatut" promptText="Statut *" prefWidth="300" style="-fx-pref-height:35px;"/>
+                <!-- Champ Quantité -->
+                <VBox spacing="6">
+                    <Label text="Quantité *"
+                           style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #374151;"/>
+                    <TextField fx:id="tfQuantite"
+                               promptText="Ex: 1000"
+                               style="-fx-background-color: #f9fafb; -fx-background-radius: 8; -fx-padding: 10; -fx-font-size: 13px;"/>
+                </VBox>
 
-            <Separator />
+                <!-- Champ Statut -->
+                <VBox spacing="6">
+                    <Label text="Statut *"
+                           style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #374151;"/>
+                    <ComboBox fx:id="cbStatut"
+                              promptText="Sélectionner un statut"
+                              maxWidth="Infinity"
+                              style="-fx-background-color: #f9fafb; -fx-background-radius: 8; -fx-font-size: 13px;"/>
+                </VBox>
 
-            <Button text="✚ Ajouter" onAction="#ajouterAction" prefWidth="300" prefHeight="40"
-                    style="-fx-background-color:#27ae60; -fx-text-fill:white; -fx-font-weight:bold; -fx-background-radius:8;"/>
+                <!-- Séparateur -->
+                <Separator style="-fx-background-color: #e5e7eb; -fx-padding: 8 0;"/>
 
-            <HBox spacing="10">
-                <Button text="✎ Modifier" onAction="#modifierAction" prefWidth="145" prefHeight="40"
-                        style="-fx-background-color:#3498db; -fx-text-fill:white; -fx-font-weight:bold; -fx-background-radius:8;"/>
-                <Button text="🗑 Supprimer" onAction="#supprimerAction" prefWidth="145" prefHeight="40"
-                        style="-fx-background-color:#e74c3c; -fx-text-fill:white; -fx-font-weight:bold; -fx-background-radius:8;"/>
-            </HBox>
+                <!-- Boutons d'action -->
+                <VBox spacing="10">
 
-            <Button text="↻ Vider" onAction="#viderFormulaire" prefWidth="300" prefHeight="40"
-                    style="-fx-background-color:#95a5a6; -fx-text-fill:white; -fx-font-weight:bold; -fx-background-radius:8;"/>
+                    <Button text="✚ Ajouter"
+                            onAction="#ajouterAction"
+                            maxWidth="Infinity"
+                            style="-fx-background-color: #10b981; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold; -fx-background-radius: 10; -fx-padding: 12; -fx-cursor: hand;"/>
 
-            <Region VBox.vgrow="ALWAYS"/>
-        </VBox>
+                    <Button text="✏️ Modifier"
+                            onAction="#modifierAction"
+                            maxWidth="Infinity"
+                            style="-fx-background-color: #3b82f6; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold; -fx-background-radius: 10; -fx-padding: 12; -fx-cursor: hand;"/>
+
+                    <Button text="🗑️ Supprimer"
+                            onAction="#supprimerAction"
+                            maxWidth="Infinity"
+                            style="-fx-background-color: #ef4444; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold; -fx-background-radius: 10; -fx-padding: 12; -fx-cursor: hand;"/>
+
+                    <Button text="↻ Vider"
+                            onAction="#viderFormulaire"
+                            maxWidth="Infinity"
+                            style="-fx-background-color: #6b7280; -fx-text-fill: white; -fx-font-size: 13px; -fx-font-weight: bold; -fx-background-radius: 10; -fx-padding: 10; -fx-cursor: hand;"/>
+
+                </VBox>
+
+            </VBox>
+        </ScrollPane>
     </left>
 
-    <!-- CENTER -->
+    <!-- ============================================ -->
+    <!-- CENTER - LISTE DES ACTIONS STYLE MOBILE -->
+    <!-- ============================================ -->
     <center>
-        <VBox spacing="20" style="-fx-padding: 30;">
+        <VBox spacing="20" style="-fx-padding: 24; -fx-background-color: #f5f7fa;">
 
-            <HBox alignment="CENTER_LEFT" spacing="15"
-                  style="-fx-background-color: white; -fx-padding: 15; -fx-background-radius: 10;">
-                <Label text="🔍" style="-fx-font-size: 20px;" />
-                <TextField fx:id="searchField" promptText="Rechercher symbole / entreprise..." HBox.hgrow="ALWAYS"
-                           style="-fx-pref-height:35px;"/>
-                <Button text="Rechercher" onAction="#handleRechercher"
-                        style="-fx-background-color:#34495e; -fx-text-fill:white; -fx-font-weight:bold; -fx-pref-height:35px;"/>
-                <Button text="↻ Actualiser" onAction="#handleActualiser"
-                        style="-fx-background-color:#16a085; -fx-text-fill:white; -fx-font-weight:bold; -fx-pref-height:35px;"/>
+            <!-- Barre de recherche et filtres -->
+            <VBox spacing="12"
+                  style="-fx-background-color: white; -fx-background-radius: 12; -fx-padding: 20; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.06), 10, 0, 0, 2);">
+
+                <HBox spacing="12" alignment="CENTER_LEFT">
+
+                    <!-- Sélecteur de bourse -->
+                    <VBox spacing="6" HBox.hgrow="SOMETIMES">
+                        <Label text="🏦 Bourse"
+                               style="-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #6b7280;"/>
+                        <ComboBox fx:id="cbBourse"
+                                  promptText="Toutes les bourses"
+                                  maxWidth="Infinity"
+                                  style="-fx-background-color: #f9fafb; -fx-background-radius: 8; -fx-font-size: 13px; -fx-padding: 8;"/>
+                    </VBox>
+
+                    <!-- Champ de recherche -->
+                    <VBox spacing="6" HBox.hgrow="ALWAYS">
+                        <Label text="🔍 Recherche"
+                               style="-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #6b7280;"/>
+                        <TextField fx:id="searchField"
+                                   promptText="Rechercher par symbole ou entreprise..."
+                                   HBox.hgrow="ALWAYS"
+                                   style="-fx-background-color: #f9fafb; -fx-background-radius: 8; -fx-padding: 10 14; -fx-font-size: 13px;"/>
+                    </VBox>
+
+                    <!-- Boutons -->
+                    <VBox spacing="6">
+                        <Label text=" " style="-fx-font-size: 12px;"/> <!-- Spacer pour alignment -->
+                        <HBox spacing="8">
+                            <Button text="🔍"
+                                    onAction="#handleRechercher"
+                                    style="-fx-background-color: #2c5f6f; -fx-text-fill: white; -fx-font-size: 16px; -fx-background-radius: 8; -fx-padding: 8 16; -fx-cursor: hand;"/>
+
+                            <Button text="↻"
+                                    onAction="#handleActualiser"
+                                    style="-fx-background-color: #6b7280; -fx-text-fill: white; -fx-font-size: 16px; -fx-background-radius: 8; -fx-padding: 8 16; -fx-cursor: hand;"/>
+
+                            <Button text="➕ Nouvelle Action"
+                                    onAction="#afficherFormulaire"
+                                    style="-fx-background-color: #10b981; -fx-text-fill: white; -fx-font-size: 13px; -fx-font-weight: bold; -fx-background-radius: 8; -fx-padding: 8 16; -fx-cursor: hand;"/>
+                        </HBox>
+                    </VBox>
+
+                </HBox>
+            </VBox>
+
+            <!-- Compteur total -->
+            <HBox alignment="CENTER_LEFT" spacing="10">
+                <Label fx:id="lblTotal"
+                       text="📊 Total : 0 action(s)"
+                       style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #374151;"/>
             </HBox>
 
-            <Label fx:id="lblTotal" text="📋 Total : 0 action(s)"
-                   style="-fx-font-weight:bold; -fx-font-size:18px; -fx-text-fill:#2c3e50;" />
-
-            <ScrollPane fitToWidth="true" style="-fx-background-color: transparent; -fx-border-color: transparent;" VBox.vgrow="ALWAYS">
+            <!-- Container des actions (style liste mobile) -->
+            <ScrollPane fitToWidth="true"
+                        VBox.vgrow="ALWAYS"
+                        style="-fx-background-color: transparent; -fx-background: transparent;"
+                        hbarPolicy="NEVER">
                 <content>
-                    <FlowPane fx:id="cardsContainer" hgap="20" vgap="20" prefWrapLength="650"
-                              style="-fx-background-color: transparent; -fx-padding: 10;" />
+                    <VBox fx:id="cardsContainer"
+                          spacing="0"
+                          style="-fx-background-color: white; -fx-background-radius: 12; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.06), 10, 0, 0, 2);">
+                        <!-- Les items seront générés dynamiquement ici -->
+                    </VBox>
                 </content>
             </ScrollPane>
 
