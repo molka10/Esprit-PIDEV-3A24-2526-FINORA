@@ -2,13 +2,12 @@
 
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<?import javafx.scene.text.Font?>
 
 <BorderPane prefHeight="700.0" prefWidth="1100.0"
             xmlns="http://javafx.com/javafx/17"
             xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="com.example.crud.controllers.UtilisateurStaticController"
-            stylesheets="@bourse.css">
+            stylesheets="@profile-dark.css">
 
     <top>
         <VBox styleClass="topbar" spacing="6">
@@ -19,14 +18,35 @@
 
     <center>
         <StackPane styleClass="content-wrap">
-            <VBox alignment="CENTER" spacing="25" styleClass="content" prefWidth="900" prefHeight="520">
-                <HBox spacing="25" alignment="CENTER">
-                    <Button text="🏢 Entreprise" onAction="#choisirEntreprise" styleClass="btn-primary" prefWidth="220" prefHeight="70"/>
-                    <Button text="💼 Investisseur" onAction="#choisirInvestisseur" styleClass="btn-primary" prefWidth="220" prefHeight="70"/>
-                    <Button text="🛡 Admin" onAction="#choisirAdmin" styleClass="btn-primary" prefWidth="220" prefHeight="70"/>
+            <VBox alignment="CENTER" spacing="22" styleClass="content-card" prefWidth="900" prefHeight="520">
+
+                <HBox spacing="18" alignment="CENTER">
+
+                    <VBox fx:id="cardEntreprise" styleClass="profile-card" prefWidth="260" alignment="CENTER" spacing="8"
+                          onMouseClicked="#choisirEntreprise">
+                        <Label text="🏢" styleClass="card-icon"/>
+                        <Label text="Entreprise" styleClass="card-title"/>
+                        <Label text="Gestion et suivi des opérations" styleClass="card-desc"/>
+                    </VBox>
+
+                    <VBox fx:id="cardInvestisseur" styleClass="profile-card" prefWidth="260" alignment="CENTER" spacing="8"
+                          onMouseClicked="#choisirInvestisseur">
+                        <Label text="💼" styleClass="card-icon"/>
+                        <Label text="Investisseur" styleClass="card-title"/>
+                        <Label text="Portefeuille, achats et ventes" styleClass="card-desc"/>
+                    </VBox>
+
+                    <VBox fx:id="cardAdmin" styleClass="profile-card" prefWidth="260" alignment="CENTER" spacing="8"
+                          onMouseClicked="#choisirAdmin">
+                        <Label text="🛡" styleClass="card-icon"/>
+                        <Label text="Admin" styleClass="card-title"/>
+                        <Label text="Contrôle et paramétrage du système" styleClass="card-desc"/>
+                    </VBox>
+
                 </HBox>
 
-                <Label fx:id="lblInfo" text="Choisis un profil pour continuer" styleClass="card-title"/>
+                <Label fx:id="lblInfo" text="Choisis un profil pour continuer" styleClass="hint"/>
+
             </VBox>
         </StackPane>
     </center>
