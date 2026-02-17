@@ -1,156 +1,92 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.geometry.Insets?>
+<?import javafx.scene.chart.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<BorderPane xmlns="http://javafx.com/javafx"
-            xmlns:fx="http://javafx.com/fxml"
+<BorderPane prefHeight="720.0" prefWidth="1200.0"
+            xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="com.example.crud.controllers.Dashboardadmincontroller"
-            style="-fx-background-color: #F5F7FA;">
+            stylesheets="@admin-dark.css">
 
-    <!-- ============================================ -->
-    <!-- HEADER -->
-    <!-- ============================================ -->
+    <!-- TOP BAR -->
     <top>
-        <VBox style="-fx-background-color: linear-gradient(to right, #dc2626, #ef4444); -fx-padding: 20;">
-            <HBox alignment="CENTER_LEFT" spacing="20">
-                <Label fx:id="lblBienvenue"
-                       text="👨‍💼 Bienvenue, Administrateur !"
-                       style="-fx-text-fill: white; -fx-font-size: 24px; -fx-font-weight: bold;"/>
+        <HBox styleClass="topbar" alignment="CENTER_LEFT" spacing="14">
+            <Label fx:id="lblBienvenue" text="👨‍💼 Bienvenue, Administrateur !" styleClass="top-title"/>
+            <Pane HBox.hgrow="ALWAYS"/>
 
-                <Region HBox.hgrow="ALWAYS"/>
-
-                <Label fx:id="lblDateHeure"
-                       text="📅 16/02/2025 - ⏰ 14:30:00"
-                       style="-fx-text-fill: white; -fx-font-size: 14px;"/>
-
-                <Button text="🚪 Déconnexion"
-                        onAction="#deconnexion"
-                        style="-fx-background-color: rgba(255,255,255,0.2); -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 8; -fx-cursor: hand;"/>
-            </HBox>
-        </VBox>
+            <Label fx:id="lblDateHeure" text="📅 --/--/---- - ⏰ --:--:--" styleClass="chip"/>
+            <Button text="Déconnexion" styleClass="btn-logout" onAction="#deconnexion"/>
+        </HBox>
     </top>
 
-    <!-- ============================================ -->
     <!-- LEFT SIDEBAR -->
-    <!-- ============================================ -->
     <left>
-        <VBox spacing="10" style="-fx-background-color: white; -fx-padding: 20; -fx-pref-width: 220;">
-            <padding>
-                <Insets top="20" right="15" bottom="20" left="15"/>
-            </padding>
+        <VBox styleClass="sidebar">
+            <Label text="Administration" styleClass="side-title"/>
 
-            <Label text="⚙️ Administration"
-                   style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #6b7280;"/>
+            <Button text="🏛  Gérer Bourses" styleClass="side-btn primary" onAction="#gererBourses"/>
+            <Button text="📈  Gérer Actions" styleClass="side-btn primary" onAction="#gererActions"/>
 
-            <Separator/>
+            <Separator style="-fx-opacity: 0.35;"/>
 
-            <Button text="🏦 Gérer Bourses"
-                    onAction="#gererBourses"
-                    maxWidth="Infinity"
-                    style="-fx-background-color: #dc2626; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 8; -fx-padding: 10; -fx-cursor: hand;"/>
+            <Label text="Logs Système" styleClass="side-title"/>
 
-            <Button text="📈 Gérer Actions"
-                    onAction="#gererActions"
-                    maxWidth="Infinity"
-                    style="-fx-background-color: #dc2626; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 8; -fx-padding: 10; -fx-cursor: hand;"/>
-
-            <Separator/>
-
-            <Label text="📋 Logs Système"
-                   style="-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #6b7280; -fx-padding: 10 0 5 0;"/>
-
-            <ListView fx:id="logsListView"
-                      prefHeight="200"
-                      style="-fx-background-color: #f9fafb; -fx-border-color: #e5e7eb; -fx-border-radius: 8; -fx-background-radius: 8;"/>
+            <VBox styleClass="card" VBox.vgrow="ALWAYS">
+                <ListView fx:id="logsListView" styleClass="logs"/>
+            </VBox>
         </VBox>
     </left>
 
-    <!-- ============================================ -->
-    <!-- CENTER -->
-    <!-- ============================================ -->
+    <!-- CENTER CONTENT -->
     <center>
-        <ScrollPane fitToWidth="true" style="-fx-background-color: transparent;">
-            <VBox spacing="20" style="-fx-padding: 20;">
+        <ScrollPane fitToWidth="true" styleClass="scroll" pannable="true">
+            <VBox spacing="14" styleClass="content-wrap">
 
-                <!-- ======================== -->
-                <!-- STATISTIQUES GLOBALES -->
-                <!-- ======================== -->
-                <HBox spacing="15" alignment="CENTER_LEFT">
-
-                    <!-- Total Bourses -->
-                    <VBox spacing="5"
-                          style="-fx-background-color: white; -fx-background-radius: 12; -fx-padding: 20; -fx-pref-width: 220; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 2);">
-                        <Label text="🏦 Total Bourses"
-                               style="-fx-font-size: 12px; -fx-text-fill: #6b7280;"/>
-                        <Label fx:id="lblTotalBourses"
-                               text="0"
-                               style="-fx-font-size: 32px; -fx-font-weight: bold; -fx-text-fill: #dc2626;"/>
+                <!-- KPI Row -->
+                <HBox spacing="14">
+                    <VBox styleClass="card kpi" HBox.hgrow="ALWAYS">
+                        <Label text="Total Bourses" styleClass="card-sub"/>
+                        <Label fx:id="lblTotalBourses" text="0" styleClass="kpi-value"/>
                     </VBox>
 
-                    <!-- Total Actions -->
-                    <VBox spacing="5"
-                          style="-fx-background-color: white; -fx-background-radius: 12; -fx-padding: 20; -fx-pref-width: 220; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 2);">
-                        <Label text="📈 Total Actions"
-                               style="-fx-font-size: 12px; -fx-text-fill: #6b7280;"/>
-                        <Label fx:id="lblTotalActions"
-                               text="0"
-                               style="-fx-font-size: 32px; -fx-font-weight: bold; -fx-text-fill: #10b981;"/>
+                    <VBox styleClass="card kpi" HBox.hgrow="ALWAYS">
+                        <Label text="Total Actions" styleClass="card-sub"/>
+                        <Label fx:id="lblTotalActions" text="0" styleClass="kpi-value"/>
                     </VBox>
 
-                    <!-- Pays -->
-                    <VBox spacing="5"
-                          style="-fx-background-color: white; -fx-background-radius: 12; -fx-padding: 20; -fx-pref-width: 220; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 2);">
-                        <Label text="🌍 Pays Couverts"
-                               style="-fx-font-size: 12px; -fx-text-fill: #6b7280;"/>
-                        <Label fx:id="lblBoursesPays"
-                               text="0"
-                               style="-fx-font-size: 32px; -fx-font-weight: bold; -fx-text-fill: #3b82f6;"/>
+                    <VBox styleClass="card kpi" HBox.hgrow="ALWAYS">
+                        <Label text="Pays Couverts" styleClass="card-sub"/>
+                        <Label fx:id="lblBoursesPays" text="0" styleClass="kpi-value"/>
                     </VBox>
 
-                    <!-- Secteurs -->
-                    <VBox spacing="5"
-                          style="-fx-background-color: white; -fx-background-radius: 12; -fx-padding: 20; -fx-pref-width: 220; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 2);">
-                        <Label text="🏷️ Secteurs"
-                               style="-fx-font-size: 12px; -fx-text-fill: #6b7280;"/>
-                        <Label fx:id="lblSecteurs"
-                               text="0"
-                               style="-fx-font-size: 32px; -fx-font-weight: bold; -fx-text-fill: #f59e0b;"/>
+                    <VBox styleClass="card kpi" HBox.hgrow="ALWAYS">
+                        <Label text="Secteurs" styleClass="card-sub"/>
+                        <Label fx:id="lblSecteurs" text="0" styleClass="kpi-value"/>
                     </VBox>
-
                 </HBox>
 
-                <!-- ======================== -->
-                <!-- GRAPHIQUES LIGNE 1 -->
-                <!-- ======================== -->
-                <HBox spacing="15" alignment="CENTER">
-
-                    <!-- Graphique Pays -->
-                    <VBox fx:id="chartPaysContainer"
-                          spacing="10"
-                          HBox.hgrow="ALWAYS"
-                          style="-fx-background-color: white; -fx-background-radius: 12; -fx-padding: 20; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 2);">
-                        <!-- Graphique généré dynamiquement -->
+                <!-- Charts row -->
+                <HBox spacing="14">
+                    <VBox styleClass="card" HBox.hgrow="ALWAYS">
+                        <Label text="🌍 Bourses par Pays" styleClass="card-title"/>
+                        <VBox fx:id="chartPaysContainer" spacing="8"/>
                     </VBox>
 
-                    <!-- Graphique Devises -->
-                    <VBox fx:id="chartDevisesContainer"
-                          spacing="10"
-                          HBox.hgrow="ALWAYS"
-                          style="-fx-background-color: white; -fx-background-radius: 12; -fx-padding: 20; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 2);">
-                        <!-- Graphique généré dynamiquement -->
+                    <VBox styleClass="card" HBox.hgrow="ALWAYS">
+                        <Label text="💰 Bourses par Devise" styleClass="card-title"/>
+                        <VBox fx:id="chartDevisesContainer" spacing="8"/>
                     </VBox>
-
                 </HBox>
+                <Button text="💰 Commission"
+                        onAction="#ouvrirCommission"
+                        styleClass="btn-primary"/>
 
-                <!-- ======================== -->
-                <!-- GRAPHIQUE SECTEURS -->
-                <!-- ======================== -->
-                <VBox fx:id="chartSecteursContainer"
-                      spacing="10"
-                      style="-fx-background-color: white; -fx-background-radius: 12; -fx-padding: 20; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 2);">
-                    <!-- Graphique généré dynamiquement -->
+                <!-- Bar chart -->
+                <VBox styleClass="card">
+                    <Label text="🏷️ Actions par Secteur" styleClass="card-title"/>
+                    <VBox fx:id="chartSecteursContainer" spacing="8"/>
                 </VBox>
 
             </VBox>

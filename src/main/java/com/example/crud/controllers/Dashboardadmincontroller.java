@@ -12,12 +12,13 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.geometry.Side;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.chart.*;
 import javafx.scene.control.*;
-import javafx.scene.layout.*;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 import java.net.URL;
@@ -26,42 +27,21 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
-/**
- * 🎯 Dashboard Admin
- *
- * Fonctionnalités :
- * - Vue d'ensemble complète du système
- * - Statistiques avancées (répartition pays, secteurs, devises)
- * - Graphiques multiples (PieChart, BarChart)
- * - Accès rapide au CRUD
- * - Logs d'activité (simulé)
- */
 public class Dashboardadmincontroller implements Initializable {
-
-    // =====================
-    // FXML Components
-    // =====================
 
     @FXML private Label lblBienvenue;
     @FXML private Label lblDateHeure;
 
-    // Statistiques globales
     @FXML private Label lblTotalBourses;
     @FXML private Label lblTotalActions;
     @FXML private Label lblBoursesPays;
     @FXML private Label lblSecteurs;
 
-    // Graphiques
     @FXML private VBox chartPaysContainer;
     @FXML private VBox chartSecteursContainer;
     @FXML private VBox chartDevisesContainer;
 
-    // Logs
     @FXML private ListView<String> logsListView;
-
-    // =====================
-    // Services
-    // =====================
 
     private final ServiceBourse serviceBourse = new ServiceBourse();
     private final ServiceAction serviceAction = new ServiceAction();
@@ -72,28 +52,25 @@ public class Dashboardadmincontroller implements Initializable {
         return t;
     });
 
+    private final Timer timer = new Timer(true);
+
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         lblBienvenue.setText("👨‍💼 Bienvenue, Administrateur !");
-
         updateDateTime();
-        chargerStatistiques();
-        chargerGraphiques();
-        chargerLogs();
 
-        // Timer pour l'heure
-        Timer timer = new Timer(true);
+        // refresh time every second
         timer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
                 Platform.runLater(() -> updateDateTime());
             }
         }, 1000, 1000);
-    }
 
-    // =====================
-    // Date/Heure
-    // =====================
+        // load everything
+        chargerStatistiquesEtLogs();
+        chargerGraphiques();
+    }
 
     private void updateDateTime() {
         Calendar cal = Calendar.getInstance();
@@ -107,12 +84,24 @@ public class Dashboardadmincontroller implements Initializable {
 
         lblDateHeure.setText("📅 " + jour + "/" + mois + "/" + annee + " - ⏰ " + heure);
     }
+    @FXML
+    private void ouvrirCommission(ActionEvent event) {
+        try {
+            FXMLLoader loader = new FXMLLoader(
+                    getClass().getResource("/com/example/crud/Commission view.fxml"));
+            Parent root = loader.load();
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            stage.setScene(new Scene(root));
+            stage.setTitle("FINORA - Gestion des Commissions");
+            stage.show();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
-    // =====================
-    // Statistiques
-    // =====================
 
-    private void chargerStatistiques() {
+    // ========= Stats + Logs (fix async ordering) =========
+    private void chargerStatistiquesEtLogs() {
         Task<Map<String, Object>> task = new Task<>() {
             @Override
             protected Map<String, Object> call() {
@@ -123,18 +112,10 @@ public class Dashboardadmincontroller implements Initializable {
                 stats.put("totalBourses", bourses.size());
                 stats.put("totalActions", actions.size());
 
-                // Nombre de pays distincts
-                long nbPays = bourses.stream()
-                        .map(Bourse::getPays)
-                        .distinct()
-                        .count();
+                long nbPays = bourses.stream().map(Bourse::getPays).filter(Objects::nonNull).distinct().count();
                 stats.put("nbPays", nbPays);
 
-                // Nombre de secteurs distincts
-                long nbSecteurs = actions.stream()
-                        .map(Action::getSecteur)
-                        .distinct()
-                        .count();
+                long nbSecteurs = actions.stream().map(Action::getSecteur).filter(Objects::nonNull).distinct().count();
                 stats.put("nbSecteurs", nbSecteurs);
 
                 return stats;
@@ -143,19 +124,37 @@ public class Dashboardadmincontroller implements Initializable {
 
         task.setOnSucceeded(e -> {
             Map<String, Object> stats = task.getValue();
+
             lblTotalBourses.setText(String.valueOf(stats.get("totalBourses")));
             lblTotalActions.setText(String.valueOf(stats.get("totalActions")));
             lblBoursesPays.setText(String.valueOf(stats.get("nbPays")));
             lblSecteurs.setText(String.valueOf(stats.get("nbSecteurs")));
+
+            // logs AFTER labels updated
+            chargerLogs(
+                    (int) stats.get("totalBourses"),
+                    (int) stats.get("totalActions")
+            );
         });
 
+        task.setOnFailed(e -> showError("Erreur chargement statistiques : " + task.getException().getMessage()));
         executor.submit(task);
     }
 
-    // =====================
-    // Graphiques
-    // =====================
+    private void chargerLogs(int totalBourses, int totalActions) {
+        ObservableList<String> logs = FXCollections.observableArrayList();
+        Calendar cal = Calendar.getInstance();
+        String heure = String.format("%02d:%02d", cal.get(Calendar.HOUR_OF_DAY), cal.get(Calendar.MINUTE));
 
+        logs.add("[" + heure + "] ✅ Système démarré");
+        logs.add("[" + heure + "] 📊 " + totalBourses + " bourses chargées");
+        logs.add("[" + heure + "] 📈 " + totalActions + " actions chargées");
+        logs.add("[" + heure + "] 🔐 Admin connecté");
+
+        logsListView.setItems(logs);
+    }
+
+    // ========= Graphiques =========
     private void chargerGraphiques() {
         chargerGraphiquePays();
         chargerGraphiqueSecteurs();
@@ -167,40 +166,35 @@ public class Dashboardadmincontroller implements Initializable {
             @Override
             protected Map<String, Long> call() {
                 List<Bourse> bourses = serviceBourse.getAll();
-
                 return bourses.stream()
-                        .collect(Collectors.groupingBy(
-                                Bourse::getPays,
-                                Collectors.counting()
-                        ));
+                        .filter(b -> b.getPays() != null)
+                        .collect(Collectors.groupingBy(Bourse::getPays, Collectors.counting()));
             }
         };
 
         task.setOnSucceeded(e -> {
-            Map<String, Long> data = task.getValue();
+            chartPaysContainer.getChildren().clear();
 
+            Map<String, Long> data = task.getValue();
             if (data.isEmpty()) {
-                Label empty = new Label("📊 Aucune donnée");
-                chartPaysContainer.getChildren().add(empty);
+                chartPaysContainer.getChildren().add(new Label("📊 Aucune donnée"));
                 return;
             }
 
             PieChart chart = new PieChart();
-            chart.setTitle("🌍 Bourses par Pays");
-            chart.setLegendSide(javafx.geometry.Side.BOTTOM);
+            chart.setLegendSide(Side.BOTTOM);
+            chart.setLabelsVisible(true);
 
             ObservableList<PieChart.Data> pieData = FXCollections.observableArrayList();
-            data.forEach((pays, count) -> {
-                pieData.add(new PieChart.Data(pays + " (" + count + ")", count));
-            });
+            data.forEach((pays, count) -> pieData.add(new PieChart.Data(pays + " (" + count + ")", count)));
 
             chart.setData(pieData);
             chart.setPrefHeight(300);
 
-            chartPaysContainer.getChildren().clear();
             chartPaysContainer.getChildren().add(chart);
         });
 
+        task.setOnFailed(e -> showError("Erreur graphique pays : " + task.getException().getMessage()));
         executor.submit(task);
     }
 
@@ -209,21 +203,18 @@ public class Dashboardadmincontroller implements Initializable {
             @Override
             protected Map<String, Long> call() {
                 List<Action> actions = serviceAction.getAll();
-
                 return actions.stream()
-                        .collect(Collectors.groupingBy(
-                                Action::getSecteur,
-                                Collectors.counting()
-                        ));
+                        .filter(a -> a.getSecteur() != null)
+                        .collect(Collectors.groupingBy(Action::getSecteur, Collectors.counting()));
             }
         };
 
         task.setOnSucceeded(e -> {
-            Map<String, Long> data = task.getValue();
+            chartSecteursContainer.getChildren().clear();
 
+            Map<String, Long> data = task.getValue();
             if (data.isEmpty()) {
-                Label empty = new Label("📊 Aucune donnée");
-                chartSecteursContainer.getChildren().add(empty);
+                chartSecteursContainer.getChildren().add(new Label("📊 Aucune donnée"));
                 return;
             }
 
@@ -233,22 +224,18 @@ public class Dashboardadmincontroller implements Initializable {
             yAxis.setLabel("Nombre d'actions");
 
             BarChart<String, Number> chart = new BarChart<>(xAxis, yAxis);
-            chart.setTitle("🏷️ Actions par Secteur");
             chart.setLegendVisible(false);
 
             XYChart.Series<String, Number> series = new XYChart.Series<>();
-
-            data.forEach((secteur, count) -> {
-                series.getData().add(new XYChart.Data<>(secteur, count));
-            });
+            data.forEach((secteur, count) -> series.getData().add(new XYChart.Data<>(secteur, count)));
 
             chart.getData().add(series);
-            chart.setPrefHeight(300);
+            chart.setPrefHeight(320);
 
-            chartSecteursContainer.getChildren().clear();
             chartSecteursContainer.getChildren().add(chart);
         });
 
+        task.setOnFailed(e -> showError("Erreur graphique secteurs : " + task.getException().getMessage()));
         executor.submit(task);
     }
 
@@ -257,65 +244,39 @@ public class Dashboardadmincontroller implements Initializable {
             @Override
             protected Map<String, Long> call() {
                 List<Bourse> bourses = serviceBourse.getAll();
-
                 return bourses.stream()
-                        .collect(Collectors.groupingBy(
-                                Bourse::getDevise,
-                                Collectors.counting()
-                        ));
+                        .filter(b -> b.getDevise() != null)
+                        .collect(Collectors.groupingBy(Bourse::getDevise, Collectors.counting()));
             }
         };
 
         task.setOnSucceeded(e -> {
-            Map<String, Long> data = task.getValue();
+            chartDevisesContainer.getChildren().clear();
 
+            Map<String, Long> data = task.getValue();
             if (data.isEmpty()) {
-                Label empty = new Label("📊 Aucune donnée");
-                chartDevisesContainer.getChildren().add(empty);
+                chartDevisesContainer.getChildren().add(new Label("📊 Aucune donnée"));
                 return;
             }
 
             PieChart chart = new PieChart();
-            chart.setTitle("💰 Bourses par Devise");
-            chart.setLegendSide(javafx.geometry.Side.BOTTOM);
+            chart.setLegendSide(Side.BOTTOM);
+            chart.setLabelsVisible(true);
 
             ObservableList<PieChart.Data> pieData = FXCollections.observableArrayList();
-            data.forEach((devise, count) -> {
-                pieData.add(new PieChart.Data(devise + " (" + count + ")", count));
-            });
+            data.forEach((devise, count) -> pieData.add(new PieChart.Data(devise + " (" + count + ")", count)));
 
             chart.setData(pieData);
-            chart.setPrefHeight(250);
+            chart.setPrefHeight(280);
 
-            chartDevisesContainer.getChildren().clear();
             chartDevisesContainer.getChildren().add(chart);
         });
 
+        task.setOnFailed(e -> showError("Erreur graphique devises : " + task.getException().getMessage()));
         executor.submit(task);
     }
 
-    // =====================
-    // Logs (simulé)
-    // =====================
-
-    private void chargerLogs() {
-        ObservableList<String> logs = FXCollections.observableArrayList();
-
-        Calendar cal = Calendar.getInstance();
-        String heure = String.format("%02d:%02d", cal.get(Calendar.HOUR_OF_DAY), cal.get(Calendar.MINUTE));
-
-        logs.add("[" + heure + "] ✅ Système démarré");
-        logs.add("[" + heure + "] 📊 " + lblTotalBourses.getText() + " bourses chargées");
-        logs.add("[" + heure + "] 📈 " + lblTotalActions.getText() + " actions chargées");
-        logs.add("[" + heure + "] 🔐 Admin connecté");
-
-        logsListView.setItems(logs);
-    }
-
-    // =====================
-    // Navigation
-    // =====================
-
+    // ========= Navigation =========
     @FXML
     private void gererBourses(ActionEvent event) {
         naviguerVers("/com/example/crud/bourse-view.fxml", "Gestion des Bourses", event);
@@ -344,6 +305,11 @@ public class Dashboardadmincontroller implements Initializable {
             stage.setTitle(titre);
             stage.setScene(new Scene(root));
             stage.show();
+
+            // Optionnel : stop resources when leaving admin
+            // timer.cancel();
+            // executor.shutdownNow();
+
         } catch (Exception e) {
             e.printStackTrace();
             showError("Erreur de navigation : " + e.getMessage());
