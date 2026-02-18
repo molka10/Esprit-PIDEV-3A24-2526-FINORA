@@ -11,6 +11,9 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import tn.finora.entities.Formation;
 import tn.finora.services.FormationService;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.StackPane;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -136,6 +139,31 @@ public class FormationListController {
         card.getStyleClass().add("item-card");
         card.setUserData(f.getId());
 
+        // ✅ Udemy-like thumbnail (ImageView)
+        String imgUrl = safeRaw(f.getImageUrl()).trim();
+
+        ImageView thumb = new ImageView();
+        thumb.getStyleClass().add("thumb");
+        thumb.setFitWidth(260);
+        thumb.setFitHeight(140);
+        thumb.setPreserveRatio(false);
+        thumb.setSmooth(true);
+        thumb.setCache(true);
+
+        if (!imgUrl.isBlank()) {
+            try {
+                Image img = new Image(imgUrl, true); // background loading ✅
+                thumb.setImage(img);
+            } catch (Exception ignored) {
+            }
+        }
+
+        Label noImg = new Label(imgUrl.isBlank() ? "Aucune image" : "");
+        noImg.getStyleClass().add("thumb-placeholder");
+
+        StackPane imageBox = new StackPane(thumb, noImg);
+        imageBox.getStyleClass().add("thumb-box");
+
         // Title
         String titre = safeRaw(f.getTitre()).trim();
         Label title = new Label(titre.isBlank() ? "(Sans titre)" : titre);
@@ -173,11 +201,6 @@ public class FormationListController {
 
         badges.getChildren().addAll(niveauBadge, pubBadge);
 
-        // Image link
-        String imgUrl = safeRaw(f.getImageUrl()).trim();
-        Label image = new Label("🔗 " + (imgUrl.isBlank() ? "(aucune image)" : imgUrl));
-        image.getStyleClass().add("link-text");
-
         // Actions
         HBox actions = new HBox(10);
 
@@ -199,13 +222,15 @@ public class FormationListController {
 
         actions.getChildren().addAll(lessonsBtn, selectBtn, editBtn, deleteBtn);
 
-        card.getChildren().addAll(title, tagsPane, badges, image, actions);
+        // ✅ Udemy layout order: image -> title -> tags -> badges -> actions
+        card.getChildren().addAll(imageBox, title, tagsPane, badges, actions);
 
         // click card = select
         card.setOnMouseClicked(e -> { selected = f; highlightSelection(); });
 
         return card;
     }
+
 
     private String niveauClass(String niveau) {
         String n = niveau.toLowerCase();
