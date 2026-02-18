@@ -205,22 +205,26 @@ public class TradingController {
     @FXML
     private void acheter(ActionEvent event) {
         if (selectedAction == null) { showError("Sélectionne une action."); return; }
+
         int q = parseQty();
         if (q <= 0) return;
 
+        int stockDispo = selectedAction.getQuantiteDisponible(); // quantité disponible (marché)
+        if (q > stockDispo) {
+            showError("Quantité insuffisante ! Stock disponible : " + stockDispo);
+            return;
+        }
+
         try {
-            // ✅ Update DB + insert transaction
             serviceTransaction.acheter(
                     selectedAction.getIdAction(),
                     q,
-                    Session.getRole().name(),       // INVESTISSEUR/ENTREPRISE
+                    Session.getRole().name(),
                     Session.getDisplayName()
             );
 
             lblMsg.setText("🟢 Achat OK : " + q + " x " + selectedAction.getSymbole());
             showSuccess("Achat effectué ✅");
-
-            // ✅ refresh list to see new quantity
             chargerActions();
 
         } catch (Exception e) {
@@ -231,11 +235,21 @@ public class TradingController {
     @FXML
     private void vendre(ActionEvent event) {
         if (selectedAction == null) { showError("Sélectionne une action."); return; }
+
         int q = parseQty();
         if (q <= 0) return;
 
         try {
-            // ✅ Update DB + insert transaction
+            int possede = serviceTransaction.getQuantitePossedee(
+                    Session.getDisplayName(),
+                    selectedAction.getIdAction()
+            );
+
+            if (q > possede) {
+                showError("Vente impossible ! Tu possèdes : " + possede + " actions.");
+                return;
+            }
+
             serviceTransaction.vendre(
                     selectedAction.getIdAction(),
                     q,
@@ -245,14 +259,13 @@ public class TradingController {
 
             lblMsg.setText("🔴 Vente OK : " + q + " x " + selectedAction.getSymbole());
             showSuccess("Vente effectuée ✅");
-
-            // ✅ refresh list to see new quantity
             chargerActions();
 
         } catch (Exception e) {
             showError(e.getMessage());
         }
     }
+
 
     private int parseQty() {
         String s = tfQuantiteTrade.getText().trim();
