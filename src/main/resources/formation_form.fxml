@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
@@ -9,7 +8,7 @@
       fx:controller="tn.finora.controllers.FormationFormController"
       spacing="12" styleClass="card">
 
-    <Label text="Ajouter Formation" styleClass="title"/>
+    <Label fx:id="lblTitle" text="Ajouter Formation" styleClass="title"/>
 
     <GridPane hgap="10" vgap="10">
         <columnConstraints>
@@ -18,16 +17,26 @@
         </columnConstraints>
 
         <Label text="Titre:" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
-        <TextField fx:id="txtTitre" promptText="ex: Java JDBC" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+        <TextField fx:id="txtTitre" promptText="ex: Introduction à la bourse" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
 
-        <Label text="Catégories (tags):" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+        <!-- Catégories (Pinterest tags) -->
+        <Label text="Catégories:" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+
         <VBox spacing="8" GridPane.rowIndex="1" GridPane.columnIndex="1">
-            <HBox spacing="10">
-                <TextField fx:id="txtCategorieInput" promptText="Tape un tag puis Entrée (ex: Web)"/>
-                <Button text="Ajouter" styleClass="btn-ghost" onAction="#onAddTag"/>
+            <HBox spacing="8">
+                <ComboBox fx:id="cbCategorie"
+                          prefWidth="260"
+                          promptText="Choisir une catégorie..."
+                          onAction="#onPickCategorie"/>
+
+                <TextField fx:id="txtCategorieTag"
+                           promptText="Ou écrire un tag..."
+                           onAction="#onAddTag"/>
+
+                <Button text="+ Ajouter" styleClass="btn-ghost" onAction="#onAddTag"/>
             </HBox>
-            <FlowPane fx:id="tagsPane" hgap="8" vgap="8"/>
-            <Label text="Astuce: tu peux aussi coller: Java, Web, JDBC" styleClass="hint"/>
+
+            <FlowPane fx:id="tagsPane" hgap="8" vgap="8" prefWrapLength="520"/>
         </VBox>
 
         <Label text="Niveau:" GridPane.rowIndex="2" GridPane.columnIndex="0"/>

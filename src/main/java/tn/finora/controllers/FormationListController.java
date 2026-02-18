@@ -27,8 +27,6 @@ public class FormationListController {
     private final FormationService service = new FormationService();
 
     private Formation selected;
-
-    // keep full list for search/sort
     private List<Formation> allFormations = new ArrayList<>();
 
     @FXML
@@ -61,37 +59,26 @@ public class FormationListController {
         }
     }
 
-    // called by FXML (onKeyReleased)
-    @FXML
-    private void onSearch() {
-        applySearchAndSort();
-    }
-
-    // called by FXML (onAction)
-    @FXML
-    private void onSort() {
-        applySearchAndSort();
-    }
+    @FXML private void onSearch() { applySearchAndSort(); }
+    @FXML private void onSort()   { applySearchAndSort(); }
 
     private void applySearchAndSort() {
+        if (cardsContainer == null) return;
+
         cardsContainer.getChildren().clear();
         selected = null;
 
         String q = (txtSearch == null || txtSearch.getText() == null)
-                ? ""
-                : txtSearch.getText().trim().toLowerCase();
+                ? "" : txtSearch.getText().trim().toLowerCase();
 
         String sort = (cbSort == null) ? "Dernier ajouté" : cbSort.getSelectionModel().getSelectedItem();
 
-        // 1) filter
         List<Formation> filtered = allFormations.stream()
                 .filter(f -> matches(f, q))
                 .toList();
 
-        // 2) sort
         List<Formation> sorted = sortFormations(filtered, sort);
 
-        // 3) render
         for (Formation f : sorted) {
             cardsContainer.getChildren().add(createCard(f));
         }
@@ -105,7 +92,6 @@ public class FormationListController {
         String titre = safeLower(f.getTitre());
         String niveau = safeLower(f.getNiveau());
 
-        // categorie tags: "Java, Web, JDBC" -> match any tag too
         List<String> tags = parseTags(f.getCategorie());
         boolean tagMatch = tags.stream().anyMatch(t -> t.toLowerCase().contains(q));
 
@@ -141,7 +127,7 @@ public class FormationListController {
                     })
                     .toList();
 
-            default -> list.stream().sorted(byIdDesc).toList(); // Dernier ajouté
+            default -> list.stream().sorted(byIdDesc).toList();
         };
     }
 
@@ -151,42 +137,46 @@ public class FormationListController {
         card.setUserData(f.getId());
 
         // Title
-        Label title = new Label(safeRaw(f.getTitre()).isBlank() ? "(Sans titre)" : f.getTitre());
+        String titre = safeRaw(f.getTitre()).trim();
+        Label title = new Label(titre.isBlank() ? "(Sans titre)" : titre);
         title.getStyleClass().add("item-title");
 
-        // ===== Pinterest-style tags row (FlowPane so it wraps nicely) =====
+        // ===== Pinterest tags row =====
         FlowPane tagsPane = new FlowPane(8, 8);
-        tagsPane.setPrefWrapLength(900); // helps wrap inside large cards
         tagsPane.getStyleClass().add("chips-row");
+        tagsPane.setPrefWrapLength(900);
 
         List<String> tags = parseTags(f.getCategorie());
         if (tags.isEmpty()) {
             Label empty = new Label("Aucune catégorie");
-            empty.getStyleClass().addAll("badge", "badge-gray");
+            empty.getStyleClass().addAll("tag-chip", "tag-gray");
             tagsPane.getChildren().add(empty);
         } else {
             for (String tag : tags) {
                 Label chip = new Label(tag);
-                chip.getStyleClass().addAll("badge", "badge-purple"); // reuse your badge style
+                chip.getStyleClass().addAll("tag-chip", colorClassFor(tag));
                 tagsPane.getChildren().add(chip);
             }
         }
 
-        // ===== Other badges =====
+        // ===== Meta badges =====
         HBox badges = new HBox(8);
 
-        Label niveauBadge = new Label(safeRaw(f.getNiveau()).isBlank() ? "Niveau ?" : f.getNiveau());
-        niveauBadge.getStyleClass().addAll("badge", "badge-gray");
+        String niveau = safeRaw(f.getNiveau()).trim();
+        if (niveau.isBlank()) niveau = "Niveau ?";
+
+        Label niveauBadge = new Label(niveau);
+        niveauBadge.getStyleClass().addAll("badge", niveauClass(niveau));
 
         Label pubBadge = new Label(f.isPublished() ? "Publié" : "Non publié");
         pubBadge.getStyleClass().addAll("badge", f.isPublished() ? "badge-green" : "badge-gray");
 
         badges.getChildren().addAll(niveauBadge, pubBadge);
 
-        // Image (no ID shown)
+        // Image link
         String imgUrl = safeRaw(f.getImageUrl()).trim();
         Label image = new Label("🔗 " + (imgUrl.isBlank() ? "(aucune image)" : imgUrl));
-        image.setStyle("-fx-text-fill: #6B5A8A; -fx-font-size: 12px;");
+        image.getStyleClass().add("link-text");
 
         // Actions
         HBox actions = new HBox(10);
@@ -217,6 +207,26 @@ public class FormationListController {
         return card;
     }
 
+    private String niveauClass(String niveau) {
+        String n = niveau.toLowerCase();
+        if (n.contains("début")) return "badge-beginner";
+        if (n.contains("inter")) return "badge-intermediate";
+        if (n.contains("avanc")) return "badge-advanced";
+        return "badge-gray";
+    }
+
+    private String colorClassFor(String tag) {
+        int h = Math.abs(tag.toLowerCase().hashCode());
+        return switch (h % 6) {
+            case 0 -> "tag-purple";
+            case 1 -> "tag-pink";
+            case 2 -> "tag-blue";
+            case 3 -> "tag-green";
+            case 4 -> "tag-orange";
+            default -> "tag-gray";
+        };
+    }
+
     private void highlightSelection() {
         for (var node : cardsContainer.getChildren()) {
             if (node instanceof VBox v) {
@@ -236,8 +246,7 @@ public class FormationListController {
     }
 
     // ===== CRUD Buttons =====
-    @FXML
-    private void onAdd() { openForm(null); }
+    @FXML private void onAdd() { openForm(null); }
 
     @FXML
     private void onEdit() {
@@ -324,8 +333,7 @@ public class FormationListController {
         raw = raw.trim();
         if (raw.isEmpty()) return List.of();
 
-        // split by comma
-        String[] parts = raw.split(",");
+        String[] parts = raw.split("[,;]");
         List<String> out = new ArrayList<>();
         for (String p : parts) {
             String t = p.trim();
@@ -340,7 +348,7 @@ public class FormationListController {
         return tags.get(0).toLowerCase();
     }
 
-    // ===== Helpers =====
+    // ===== Utils =====
     private String safeLower(String s) { return s == null ? "" : s.toLowerCase(); }
     private String safeRaw(String s) { return s == null ? "" : s; }
 

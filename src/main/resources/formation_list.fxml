@@ -38,10 +38,9 @@
                 <Button text="📚 Lessons" styleClass="btn-ghost" onAction="#goLessons"/>
             </HBox>
 
-            <!-- Cards area -->
-            <ScrollPane fitToWidth="true" styleClass="card">
+            <ScrollPane fitToWidth="true" styleClass="scroll">
                 <content>
-                    <VBox fx:id="cardsContainer" spacing="12"/>
+                    <VBox fx:id="cardsContainer" spacing="12" styleClass="cards"/>
                 </content>
             </ScrollPane>
 

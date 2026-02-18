@@ -1,5 +1,6 @@
 package tn.finora.controllers;
 
+import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.layout.FlowPane;
@@ -8,19 +9,24 @@ import javafx.stage.Stage;
 import tn.finora.entities.Formation;
 import tn.finora.services.FormationService;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.stream.Collectors;
 
 public class FormationFormController {
 
+    @FXML private Label lblTitle;
+
     @FXML private TextField txtTitre;
     @FXML private TextArea txtDescription;
 
-    // Tags UI
-    @FXML private TextField txtCategorieInput;
-    @FXML private FlowPane tagsPane;
+    // ===== Categories (Pinterest tags) =====
+    @FXML private ComboBox<String> cbCategorie;      // pick from list
+    @FXML private TextField txtCategorieTag;         // type tag manually
+    @FXML private FlowPane tagsPane;                 // chips container
 
-    // Niveau + autres
+    // ===== Other fields =====
     @FXML private ComboBox<String> cbNiveau;
     @FXML private TextField txtImageUrl;
     @FXML private CheckBox chkPublished;
@@ -39,14 +45,26 @@ public class FormationFormController {
 
     @FXML
     public void initialize() {
-        // niveau options (si tu avais déjà ça, garde le même contenu)
+
+        // niveaux
         if (cbNiveau != null && cbNiveau.getItems().isEmpty()) {
             cbNiveau.getItems().addAll("Débutant", "Intermédiaire", "Avancé");
         }
 
-        // Enter key -> add tag
-        if (txtCategorieInput != null) {
-            txtCategorieInput.setOnAction(e -> onAddTag());
+        // ✅ Finance / Bourse / Invest categories
+        if (cbCategorie != null && cbCategorie.getItems().isEmpty()) {
+            cbCategorie.setItems(FXCollections.observableArrayList(
+                    "Bourse", "Investissement", "Trading", "Actions", "ETF",
+                    "Obligations", "Crypto", "Forex", "Analyse technique",
+                    "Analyse fondamentale", "Gestion des risques", "Portefeuille",
+                    "Dividendes", "Marchés financiers", "Psychologie du trader",
+                    "Économie", "Inflation", "Taux d’intérêt", "Fiscalité"
+            ));
+        }
+
+        // enter in text field = add tag
+        if (txtCategorieTag != null) {
+            txtCategorieTag.setOnAction(e -> onAddTag());
         }
     }
 
@@ -57,6 +75,8 @@ public class FormationFormController {
         if (tagsPane != null) tagsPane.getChildren().clear();
 
         if (f != null) {
+            if (lblTitle != null) lblTitle.setText("Modifier Formation");
+
             txtTitre.setText(nz(f.getTitre()));
             txtDescription.setText(nz(f.getDescription()));
             txtImageUrl.setText(nz(f.getImageUrl()));
@@ -64,34 +84,52 @@ public class FormationFormController {
 
             if (cbNiveau != null) cbNiveau.getSelectionModel().select(nz(f.getNiveau()));
 
-            // parse categorie string => tags
             parseTagsFromString(f.getCategorie()).forEach(this::addTagInternal);
+        } else {
+            if (lblTitle != null) lblTitle.setText("Ajouter Formation");
         }
 
         renderTags();
+    }
+
+    // when user selects from ComboBox
+    @FXML
+    private void onPickCategorie() {
+        clearError();
+
+        if (cbCategorie == null) return;
+        String picked = cbCategorie.getSelectionModel().getSelectedItem();
+        if (picked == null || picked.isBlank()) return;
+
+        if (txtCategorieTag != null) txtCategorieTag.setText(picked);
+        onAddTag();
+
+        cbCategorie.getSelectionModel().clearSelection();
     }
 
     @FXML
     private void onAddTag() {
         clearError();
 
-        if (txtCategorieInput == null) return;
-        String raw = nz(txtCategorieInput.getText()).trim();
-
+        if (txtCategorieTag == null) return;
+        String raw = nz(txtCategorieTag.getText()).trim();
         if (raw.isEmpty()) return;
 
-        // allow paste "Java, Web, JDBC"
+        // allow "Bourse, ETF; Crypto"
         List<String> parsed = parseTagsFromString(raw);
         for (String t : parsed) addTagInternal(t);
 
-        txtCategorieInput.clear();
+        txtCategorieTag.clear();
         renderTags();
     }
 
     private void addTagInternal(String tag) {
         String t = normalizeTag(tag);
         if (t.isEmpty()) return;
-        if (t.length() > 20) t = t.substring(0, 20); // small limit to look nice
+
+        // small limit for nice chips
+        if (t.length() > 24) t = t.substring(0, 24);
+
         tags.add(t);
     }
 
@@ -128,7 +166,7 @@ public class FormationFormController {
 
             if (titre.isEmpty()) { markError("Titre obligatoire"); return; }
             if (niveau.isEmpty()) { markError("Niveau obligatoire"); return; }
-            if (tags.isEmpty()) { markError("Ajoute au moins un tag catégorie"); return; }
+            if (tags.isEmpty()) { markError("Ajoute au moins 1 catégorie (tag)"); return; }
 
             Formation f = (current == null) ? new Formation() : current;
 
@@ -136,11 +174,11 @@ public class FormationFormController {
             f.setDescription(nz(txtDescription.getText()));
             f.setNiveau(niveau);
 
-            // store tags as one String (DB unchanged)
+            // store tags as "tag1, tag2, tag3"
             f.setCategorie(String.join(", ", tags));
 
             f.setImageUrl(nz(txtImageUrl.getText()));
-            f.setPublished(chkPublished.isSelected());
+            f.setPublished(chkPublished != null && chkPublished.isSelected());
 
             if (current == null) service.add(f);
             else service.update(f);
@@ -173,9 +211,7 @@ public class FormationFormController {
 
     private String normalizeTag(String s) {
         if (s == null) return "";
-        String t = s.trim();
-        // remove double spaces
-        t = t.replaceAll("\\s{2,}", " ");
+        String t = s.trim().replaceAll("\\s{2,}", " ");
         return t;
     }
 

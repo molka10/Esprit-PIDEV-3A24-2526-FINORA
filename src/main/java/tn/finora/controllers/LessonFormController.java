@@ -12,7 +12,6 @@ import java.util.List;
 
 public class LessonFormController {
 
-    // ✅ instead of TextField formationId
     @FXML private ComboBox<Formation> cbFormation;
 
     @FXML private TextField txtTitre;
