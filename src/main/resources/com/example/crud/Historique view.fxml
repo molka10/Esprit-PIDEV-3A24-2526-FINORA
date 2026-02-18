@@ -97,7 +97,8 @@
                     <Label text="Prix Unit." style="-fx-text-fill: #6b7280; -fx-font-size: 11px; -fx-font-weight: bold; -fx-pref-width: 110;" alignment="CENTER_RIGHT"/>
                     <Label text="Montant"   style="-fx-text-fill: #6b7280; -fx-font-size: 11px; -fx-font-weight: bold; -fx-pref-width: 120;" alignment="CENTER_RIGHT"/>
                     <Label text="Commission" style="-fx-text-fill: #6b7280; -fx-font-size: 11px; -fx-font-weight: bold; -fx-pref-width: 110;" alignment="CENTER_RIGHT"/>
-                    <Label text="Date"      style="-fx-text-fill: #6b7280; -fx-font-size: 11px; -fx-font-weight: bold; -fx-pref-width: 160;" alignment="CENTER_RIGHT"/>
+                    <Label text="Date"      style="-fx-text-fill: #6b7280; -fx-font-size: 11px; -fx-font-weight: bold; -fx-pref-width: 140;" alignment="CENTER_RIGHT"/>
+                    <Label text="Export"    style="-fx-text-fill: #6b7280; -fx-font-size: 11px; -fx-font-weight: bold; -fx-pref-width: 80;" alignment="CENTER_RIGHT"/>
                 </HBox>
 
                 <!-- Lignes dynamiques -->

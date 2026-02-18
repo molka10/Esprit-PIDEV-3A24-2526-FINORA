@@ -2,6 +2,7 @@ package com.example.crud.controllers;
 
 import com.example.crud.models.Transaction;
 import com.example.crud.services.ServiceTransaction;
+import com.example.crud.services.Servicepdf;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -46,6 +47,7 @@ public class Historiquecontroller implements Initializable {
     @FXML private VBox listeContainer;
 
     private final ServiceTransaction serviceTransaction = new ServiceTransaction();
+    private final Servicepdf servicePDF = new Servicepdf();
     private List<Transaction> toutesTransactions;
     private String filtreActif = "TOUS";
 
@@ -217,9 +219,30 @@ public class Historiquecontroller implements Initializable {
                 ? new SimpleDateFormat("dd/MM/yyyy HH:mm").format(t.getDateTransaction())
                 : "—";
         Label dateLabel = new Label(dateStr);
-        dateLabel.setStyle("-fx-font-size: 11px; -fx-text-fill: #6b7280; -fx-pref-width: 160; -fx-alignment: CENTER_RIGHT;");
+        dateLabel.setStyle("-fx-font-size: 11px; -fx-text-fill: #6b7280; -fx-pref-width: 140; -fx-alignment: CENTER_RIGHT;");
 
-        row.getChildren().addAll(badgeType, symLabel, nomLabel, qteLabel, prixLabel, montantLabel, commLabel, dateLabel);
+        // Bouton PDF
+        Button btnPDF = new Button("📄 PDF");
+        btnPDF.setStyle(
+                "-fx-background-color: #6366f1; -fx-text-fill: white;" +
+                        "-fx-font-size: 10px; -fx-font-weight: bold;" +
+                        "-fx-background-radius: 6; -fx-padding: 6 12; -fx-cursor: hand;"
+        );
+        btnPDF.setOnAction(e -> {
+            String pdfPath = servicePDF.genererFacture(t);
+            if (pdfPath != null) {
+                servicePDF.ouvrirPDF(pdfPath);
+                showSuccess("✅ Facture générée et ouverte !\n" + pdfPath);
+            } else {
+                showError("❌ Erreur lors de la génération du PDF");
+            }
+        });
+
+        HBox actionBox = new HBox(btnPDF);
+        actionBox.setAlignment(Pos.CENTER_RIGHT);
+        actionBox.setPrefWidth(80);
+
+        row.getChildren().addAll(badgeType, symLabel, nomLabel, qteLabel, prixLabel, montantLabel, commLabel, dateLabel, actionBox);
         return row;
     }
 
@@ -251,5 +274,15 @@ public class Historiquecontroller implements Initializable {
         } catch (Exception ex) {
             ex.printStackTrace();
         }
+    }
+
+    private void showError(String msg) {
+        Alert a = new Alert(Alert.AlertType.ERROR);
+        a.setTitle("Erreur"); a.setHeaderText(null); a.setContentText(msg); a.showAndWait();
+    }
+
+    private void showSuccess(String msg) {
+        Alert a = new Alert(Alert.AlertType.INFORMATION);
+        a.setTitle("Succès"); a.setHeaderText(null); a.setContentText(msg); a.showAndWait();
     }
 }
