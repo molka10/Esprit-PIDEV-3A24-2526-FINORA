@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="tn.finora.controllers.LessonViewController"
+            styleClass="screen">
+
+    <top>
+        <VBox spacing="10" styleClass="card">
+            <Label fx:id="lblTitre" text="Titre Lesson" styleClass="title"/>
+
+            <HBox spacing="10" alignment="CENTER_LEFT">
+                <Label fx:id="lblMeta" text="Formation • Ordre • Durée" styleClass="subtitle"/>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Button text="⬅ Retour" styleClass="btn-ghost" onAction="#onBack"/>
+            </HBox>
+
+            <!-- Progress -->
+            <HBox spacing="10" alignment="CENTER_LEFT">
+                <Label text="Progression:" styleClass="subtitle"/>
+                <ProgressBar fx:id="progressBar" prefWidth="320"/>
+                <Label fx:id="lblProgress" text="0%" styleClass="subtitle"/>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Button fx:id="btnPrev" text="◀ Précédent" styleClass="btn-ghost" onAction="#onPrev"/>
+                <Button fx:id="btnNext" text="Suivant ▶" styleClass="btn-primary" onAction="#onNext"/>
+            </HBox>
+        </VBox>
+    </top>
+
+    <center>
+        <ScrollPane fitToWidth="true" styleClass="scroll">
+            <content>
+                <VBox spacing="12">
+                    <padding>
+                        <Insets top="16" right="16" bottom="16" left="16"/>
+                    </padding>
+
+                    <Label text="Contenu" styleClass="subtitle"/>
+
+                    <TextArea fx:id="txtContenu"
+                              editable="false"
+                              wrapText="true"
+                              prefRowCount="18"/>
+                </VBox>
+            </content>
+        </ScrollPane>
+    </center>
+
+</BorderPane>

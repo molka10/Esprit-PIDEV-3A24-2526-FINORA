@@ -1,14 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<VBox xmlns="http://javafx.com/javafx"
-      xmlns:fx="http://javafx.com/fxml"
+<VBox xmlns="http://javafx.com/javafx/17"
+      xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="tn.finora.controllers.FormationFormController"
       spacing="12" styleClass="card">
 
-    <Label fx:id="lblTitle" text="Ajouter Formation" styleClass="title"/>
+    <Label text="Ajouter Formation" styleClass="title"/>
 
     <GridPane hgap="10" vgap="10">
         <columnConstraints>
@@ -19,8 +20,15 @@
         <Label text="Titre:" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
         <TextField fx:id="txtTitre" promptText="ex: Java JDBC" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
 
-        <Label text="Catégorie:" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
-        <TextField fx:id="txtCategorie" promptText="ex: Informatique" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+        <Label text="Catégories (tags):" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+        <VBox spacing="8" GridPane.rowIndex="1" GridPane.columnIndex="1">
+            <HBox spacing="10">
+                <TextField fx:id="txtCategorieInput" promptText="Tape un tag puis Entrée (ex: Web)"/>
+                <Button text="Ajouter" styleClass="btn-ghost" onAction="#onAddTag"/>
+            </HBox>
+            <FlowPane fx:id="tagsPane" hgap="8" vgap="8"/>
+            <Label text="Astuce: tu peux aussi coller: Java, Web, JDBC" styleClass="hint"/>
+        </VBox>
 
         <Label text="Niveau:" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
         <ComboBox fx:id="cbNiveau" GridPane.rowIndex="2" GridPane.columnIndex="1"/>

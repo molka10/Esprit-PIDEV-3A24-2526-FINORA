@@ -5,6 +5,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
@@ -20,7 +21,6 @@ public class FormationListController {
     @FXML private VBox cardsContainer;
     @FXML private Label lblInfo;
 
-    // NEW
     @FXML private TextField txtSearch;
     @FXML private ComboBox<String> cbSort;
 
@@ -28,7 +28,7 @@ public class FormationListController {
 
     private Formation selected;
 
-    // NEW: keep full list in memory for search/sort
+    // keep full list for search/sort
     private List<Formation> allFormations = new ArrayList<>();
 
     @FXML
@@ -39,6 +39,7 @@ public class FormationListController {
 
     private void initSort() {
         if (cbSort == null) return;
+
         cbSort.setItems(FXCollections.observableArrayList(
                 "Dernier ajouté",
                 "Titre (A → Z)",
@@ -54,19 +55,19 @@ public class FormationListController {
         try {
             selected = null;
             allFormations = service.getAll();
-            applySearchAndSort(); // render cards
+            applySearchAndSort();
         } catch (Exception e) {
             showError("Erreur chargement formations: " + e.getMessage());
         }
     }
 
-    // NEW: called by FXML onKeyReleased
+    // called by FXML (onKeyReleased)
     @FXML
     private void onSearch() {
         applySearchAndSort();
     }
 
-    // NEW: called by FXML onAction
+    // called by FXML (onAction)
     @FXML
     private void onSort() {
         applySearchAndSort();
@@ -76,7 +77,10 @@ public class FormationListController {
         cardsContainer.getChildren().clear();
         selected = null;
 
-        String q = (txtSearch == null || txtSearch.getText() == null) ? "" : txtSearch.getText().trim().toLowerCase();
+        String q = (txtSearch == null || txtSearch.getText() == null)
+                ? ""
+                : txtSearch.getText().trim().toLowerCase();
+
         String sort = (cbSort == null) ? "Dernier ajouté" : cbSort.getSelectionModel().getSelectedItem();
 
         // 1) filter
@@ -92,17 +96,20 @@ public class FormationListController {
             cardsContainer.getChildren().add(createCard(f));
         }
 
-        if (lblInfo != null) {
-            lblInfo.setText("Affichées: " + sorted.size() + " / " + allFormations.size()
-                    + "  |  Sélection: " + (selected == null ? "-" : selected.getTitre()));
-        }
+        updateInfo(sorted.size(), allFormations.size());
     }
 
     private boolean matches(Formation f, String q) {
         if (q.isEmpty()) return true;
-        return safe(f.getTitre()).contains(q)
-                || safe(f.getCategorie()).contains(q)
-                || safe(f.getNiveau()).contains(q);
+
+        String titre = safeLower(f.getTitre());
+        String niveau = safeLower(f.getNiveau());
+
+        // categorie tags: "Java, Web, JDBC" -> match any tag too
+        List<String> tags = parseTags(f.getCategorie());
+        boolean tagMatch = tags.stream().anyMatch(t -> t.toLowerCase().contains(q));
+
+        return titre.contains(q) || niveau.contains(q) || tagMatch;
     }
 
     private List<Formation> sortFormations(List<Formation> list, String sort) {
@@ -112,23 +119,28 @@ public class FormationListController {
 
         return switch (sort) {
             case "Titre (A → Z)" -> list.stream()
-                    .sorted(Comparator.comparing(a -> safe(a.getTitre())))
+                    .sorted(Comparator.comparing(a -> safeLower(a.getTitre())))
                     .toList();
+
             case "Titre (Z → A)" -> list.stream()
-                    .sorted(Comparator.comparing((Formation a) -> safe(a.getTitre())).reversed())
+                    .sorted(Comparator.comparing((Formation a) -> safeLower(a.getTitre())).reversed())
                     .toList();
+
             case "Catégorie (A → Z)" -> list.stream()
-                    .sorted(Comparator.comparing(a -> safe(a.getCategorie())))
+                    .sorted(Comparator.comparing(a -> firstTagLower(a.getCategorie())))
                     .toList();
+
             case "Niveau (A → Z)" -> list.stream()
-                    .sorted(Comparator.comparing(a -> safe(a.getNiveau())))
+                    .sorted(Comparator.comparing(a -> safeLower(a.getNiveau())))
                     .toList();
+
             case "Publié d'abord" -> list.stream()
                     .sorted((a, b) -> {
                         int c = Boolean.compare(b.isPublished(), a.isPublished());
                         return (c != 0) ? c : byIdDesc.compare(a, b);
                     })
                     .toList();
+
             default -> list.stream().sorted(byIdDesc).toList(); // Dernier ajouté
         };
     }
@@ -138,28 +150,50 @@ public class FormationListController {
         card.getStyleClass().add("item-card");
         card.setUserData(f.getId());
 
-        Label title = new Label(f.getTitre());
+        // Title
+        Label title = new Label(safeRaw(f.getTitre()).isBlank() ? "(Sans titre)" : f.getTitre());
         title.getStyleClass().add("item-title");
 
+        // ===== Pinterest-style tags row (FlowPane so it wraps nicely) =====
+        FlowPane tagsPane = new FlowPane(8, 8);
+        tagsPane.setPrefWrapLength(900); // helps wrap inside large cards
+        tagsPane.getStyleClass().add("chips-row");
+
+        List<String> tags = parseTags(f.getCategorie());
+        if (tags.isEmpty()) {
+            Label empty = new Label("Aucune catégorie");
+            empty.getStyleClass().addAll("badge", "badge-gray");
+            tagsPane.getChildren().add(empty);
+        } else {
+            for (String tag : tags) {
+                Label chip = new Label(tag);
+                chip.getStyleClass().addAll("badge", "badge-purple"); // reuse your badge style
+                tagsPane.getChildren().add(chip);
+            }
+        }
+
+        // ===== Other badges =====
         HBox badges = new HBox(8);
 
-        Label catBadge = new Label(f.getCategorie());
-        catBadge.getStyleClass().addAll("badge", "badge-purple");
-
-        Label niveauBadge = new Label(f.getNiveau());
+        Label niveauBadge = new Label(safeRaw(f.getNiveau()).isBlank() ? "Niveau ?" : f.getNiveau());
         niveauBadge.getStyleClass().addAll("badge", "badge-gray");
 
         Label pubBadge = new Label(f.isPublished() ? "Publié" : "Non publié");
-        pubBadge.getStyleClass().addAll("badge",
-                f.isPublished() ? "badge-green" : "badge-gray");
+        pubBadge.getStyleClass().addAll("badge", f.isPublished() ? "badge-green" : "badge-gray");
 
-        badges.getChildren().addAll(catBadge, niveauBadge, pubBadge);
+        badges.getChildren().addAll(niveauBadge, pubBadge);
 
-        String imgUrl = safeRaw(f.getImageUrl());
+        // Image (no ID shown)
+        String imgUrl = safeRaw(f.getImageUrl()).trim();
         Label image = new Label("🔗 " + (imgUrl.isBlank() ? "(aucune image)" : imgUrl));
         image.setStyle("-fx-text-fill: #6B5A8A; -fx-font-size: 12px;");
 
+        // Actions
         HBox actions = new HBox(10);
+
+        Button lessonsBtn = new Button("Voir lessons");
+        lessonsBtn.getStyleClass().add("btn-ghost");
+        lessonsBtn.setOnAction(e -> openLessonsForFormation(f));
 
         Button selectBtn = new Button("Sélectionner");
         selectBtn.getStyleClass().add("btn-ghost");
@@ -173,11 +207,11 @@ public class FormationListController {
         deleteBtn.getStyleClass().add("btn-danger");
         deleteBtn.setOnAction(e -> { selected = f; onDelete(); });
 
-        actions.getChildren().addAll(selectBtn, editBtn, deleteBtn);
+        actions.getChildren().addAll(lessonsBtn, selectBtn, editBtn, deleteBtn);
 
-        card.getChildren().addAll(title, badges, image, actions);
+        card.getChildren().addAll(title, tagsPane, badges, image, actions);
 
-        // click on card = select
+        // click card = select
         card.setOnMouseClicked(e -> { selected = f; highlightSelection(); });
 
         return card;
@@ -191,10 +225,30 @@ public class FormationListController {
                 if (isSel) v.getStyleClass().add("item-selected");
             }
         }
+        updateInfo(cardsContainer.getChildren().size(), allFormations.size());
+    }
+
+    private void updateInfo(int shown, int total) {
         if (lblInfo != null) {
-            lblInfo.setText("Affichées: " + cardsContainer.getChildren().size() + " / " + allFormations.size()
+            lblInfo.setText("Affichées: " + shown + " / " + total
                     + "  |  Sélection: " + (selected == null ? "-" : selected.getTitre()));
         }
+    }
+
+    // ===== CRUD Buttons =====
+    @FXML
+    private void onAdd() { openForm(null); }
+
+    @FXML
+    private void onEdit() {
+        if (selected == null) { showWarn("Sélectionne une formation (clique sur une carte)"); return; }
+        openForm(selected);
+    }
+
+    @FXML
+    private void onDelete() {
+        if (selected == null) { showWarn("Sélectionne une formation (clique sur une carte)"); return; }
+        deleteFormation(selected);
     }
 
     private void deleteFormation(Formation f) {
@@ -214,27 +268,29 @@ public class FormationListController {
         }
     }
 
-    @FXML
-    private void onAdd() { openForm(null); }
-
-    @FXML
-    private void onEdit() {
-        if (selected == null) { showWarn("Sélectionne une formation (clique sur une carte)"); return; }
-        openForm(selected);
-    }
-
-    @FXML
-    private void onDelete() {
-        if (selected == null) { showWarn("Sélectionne une formation (clique sur une carte)"); return; }
-        deleteFormation(selected);
-    }
-
+    // ===== Navigation =====
     @FXML
     private void goLessons() {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/lesson_list.fxml"));
             Scene scene = new Scene(loader.load(), 1250, 720);
             scene.getStylesheets().add(getClass().getResource("/style.css").toExternalForm());
+
+            Stage stage = (Stage) cardsContainer.getScene().getWindow();
+            stage.setScene(scene);
+        } catch (Exception e) {
+            showError("Impossible d'ouvrir Lessons: " + e.getMessage());
+        }
+    }
+
+    private void openLessonsForFormation(Formation formation) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/lesson_list.fxml"));
+            Scene scene = new Scene(loader.load(), 1250, 720);
+            scene.getStylesheets().add(getClass().getResource("/style.css").toExternalForm());
+
+            LessonListController controller = loader.getController();
+            controller.setSelectedFormation(formation);
 
             Stage stage = (Stage) cardsContainer.getScene().getWindow();
             stage.setScene(scene);
@@ -262,7 +318,30 @@ public class FormationListController {
         }
     }
 
-    private String safe(String s) { return s == null ? "" : s.toLowerCase(); }
+    // ===== Tags Helpers =====
+    private List<String> parseTags(String raw) {
+        if (raw == null) return List.of();
+        raw = raw.trim();
+        if (raw.isEmpty()) return List.of();
+
+        // split by comma
+        String[] parts = raw.split(",");
+        List<String> out = new ArrayList<>();
+        for (String p : parts) {
+            String t = p.trim();
+            if (!t.isEmpty()) out.add(t);
+        }
+        return out;
+    }
+
+    private String firstTagLower(String raw) {
+        List<String> tags = parseTags(raw);
+        if (tags.isEmpty()) return "";
+        return tags.get(0).toLowerCase();
+    }
+
+    // ===== Helpers =====
+    private String safeLower(String s) { return s == null ? "" : s.toLowerCase(); }
     private String safeRaw(String s) { return s == null ? "" : s; }
 
     private void showWarn(String msg) { new Alert(Alert.AlertType.WARNING, msg).showAndWait(); }

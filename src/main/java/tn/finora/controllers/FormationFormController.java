@@ -1,94 +1,145 @@
 package tn.finora.controllers;
 
-import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.scene.layout.FlowPane;
+import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 import tn.finora.entities.Formation;
 import tn.finora.services.FormationService;
+
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class FormationFormController {
 
     @FXML private TextField txtTitre;
     @FXML private TextArea txtDescription;
-    @FXML private TextField txtCategorie;
+
+    // Tags UI
+    @FXML private TextField txtCategorieInput;
+    @FXML private FlowPane tagsPane;
+
+    // Niveau + autres
     @FXML private ComboBox<String> cbNiveau;
     @FXML private TextField txtImageUrl;
     @FXML private CheckBox chkPublished;
+
+    @FXML private Label lblError;
 
     private final FormationService service = new FormationService();
 
     private Formation current;
     private Runnable onSaved;
 
-    @FXML
-    public void initialize() {
-        cbNiveau.setItems(FXCollections.observableArrayList(
-                "Débutant", "Intermédiaire", "Avancé"
-        ));
-        cbNiveau.setPromptText("Choisir un niveau");
-    }
+    // Tags state
+    private final LinkedHashSet<String> tags = new LinkedHashSet<>();
 
     public void setOnSaved(Runnable onSaved) { this.onSaved = onSaved; }
 
+    @FXML
+    public void initialize() {
+        // niveau options (si tu avais déjà ça, garde le même contenu)
+        if (cbNiveau != null && cbNiveau.getItems().isEmpty()) {
+            cbNiveau.getItems().addAll("Débutant", "Intermédiaire", "Avancé");
+        }
+
+        // Enter key -> add tag
+        if (txtCategorieInput != null) {
+            txtCategorieInput.setOnAction(e -> onAddTag());
+        }
+    }
+
     public void setData(Formation f) {
         this.current = f;
+
+        tags.clear();
+        if (tagsPane != null) tagsPane.getChildren().clear();
+
         if (f != null) {
-            txtTitre.setText(f.getTitre());
-            txtDescription.setText(f.getDescription());
-            txtCategorie.setText(f.getCategorie());
-            cbNiveau.setValue(f.getNiveau());
-            txtImageUrl.setText(f.getImageUrl());
+            txtTitre.setText(nz(f.getTitre()));
+            txtDescription.setText(nz(f.getDescription()));
+            txtImageUrl.setText(nz(f.getImageUrl()));
             chkPublished.setSelected(f.isPublished());
+
+            if (cbNiveau != null) cbNiveau.getSelectionModel().select(nz(f.getNiveau()));
+
+            // parse categorie string => tags
+            parseTagsFromString(f.getCategorie()).forEach(this::addTagInternal);
+        }
+
+        renderTags();
+    }
+
+    @FXML
+    private void onAddTag() {
+        clearError();
+
+        if (txtCategorieInput == null) return;
+        String raw = nz(txtCategorieInput.getText()).trim();
+
+        if (raw.isEmpty()) return;
+
+        // allow paste "Java, Web, JDBC"
+        List<String> parsed = parseTagsFromString(raw);
+        for (String t : parsed) addTagInternal(t);
+
+        txtCategorieInput.clear();
+        renderTags();
+    }
+
+    private void addTagInternal(String tag) {
+        String t = normalizeTag(tag);
+        if (t.isEmpty()) return;
+        if (t.length() > 20) t = t.substring(0, 20); // small limit to look nice
+        tags.add(t);
+    }
+
+    private void renderTags() {
+        if (tagsPane == null) return;
+        tagsPane.getChildren().clear();
+
+        for (String t : tags) {
+            HBox chip = new HBox(6);
+            chip.getStyleClass().addAll("chip", "chip-purple");
+
+            Label lbl = new Label(t);
+            lbl.getStyleClass().add("chip-text");
+
+            Button x = new Button("✕");
+            x.getStyleClass().add("chip-x");
+            x.setOnAction(e -> {
+                tags.remove(t);
+                renderTags();
+            });
+
+            chip.getChildren().addAll(lbl, x);
+            tagsPane.getChildren().add(chip);
         }
     }
 
     @FXML
     private void onSave() {
-        clearErrors();
-
-        String titre = safe(txtTitre.getText());
-        String categorie = safe(txtCategorie.getText());
-        String niveau = cbNiveau.getValue();
-        String imageUrl = safe(txtImageUrl.getText());
-        String description = txtDescription.getText(); // peut être vide
-
-        // ✅ validations
-        boolean ok = true;
-
-        if (titre.isBlank()) { markError(txtTitre); ok = false; }
-        else if (titre.length() < 3) { markError(txtTitre); ok = false; }
-
-        if (categorie.isBlank()) { markError(txtCategorie); ok = false; }
-        else if (categorie.length() < 3) { markError(txtCategorie); ok = false; }
-
-        if (niveau == null || niveau.isBlank()) { markError(cbNiveau); ok = false; }
-
-
-        if (!imageUrl.isBlank() && !isValidUrl(imageUrl)) {
-            markError(txtImageUrl);
-            ok = false;
-        }
-
-        if (!ok) {
-            showWarn("""
-                    Vérifie les champs :
-                    - Titre (obligatoire, min 3 caractères)
-                    - Catégorie (obligatoire, min 3 caractères)
-                    - Niveau (obligatoire)
-                    - Image URL (optionnel mais doit être valide si rempli)
-                    """);
-            return;
-        }
+        clearError();
 
         try {
+            String titre = nz(txtTitre.getText()).trim();
+            String niveau = (cbNiveau == null) ? "" : nz(cbNiveau.getSelectionModel().getSelectedItem()).trim();
+
+            if (titre.isEmpty()) { markError("Titre obligatoire"); return; }
+            if (niveau.isEmpty()) { markError("Niveau obligatoire"); return; }
+            if (tags.isEmpty()) { markError("Ajoute au moins un tag catégorie"); return; }
+
             Formation f = (current == null) ? new Formation() : current;
 
             f.setTitre(titre);
-            f.setDescription(description);
-            f.setCategorie(categorie);
+            f.setDescription(nz(txtDescription.getText()));
             f.setNiveau(niveau);
-            f.setImageUrl(imageUrl);
+
+            // store tags as one String (DB unchanged)
+            f.setCategorie(String.join(", ", tags));
+
+            f.setImageUrl(nz(txtImageUrl.getText()));
             f.setPublished(chkPublished.isSelected());
 
             if (current == null) service.add(f);
@@ -96,39 +147,46 @@ public class FormationFormController {
 
             if (onSaved != null) onSaved.run();
             close();
+
         } catch (Exception e) {
-            showError("Erreur Save: " + e.getMessage());
+            markError("Erreur Save: " + e.getMessage());
         }
     }
 
     @FXML
     private void onCancel() { close(); }
 
-    // ---------------- helpers ----------------
-
-    private String safe(String s) { return s == null ? "" : s.trim(); }
-
-    private boolean isValidUrl(String url) {
-        // simple validation (enough for school project)
-        return url.startsWith("http://") || url.startsWith("https://");
-    }
-
-    private void clearErrors() {
-        txtTitre.setStyle(null);
-        txtCategorie.setStyle(null);
-        txtImageUrl.setStyle(null);
-        cbNiveau.setStyle(null);
-    }
-
-    private void markError(Control c) {
-        c.setStyle("-fx-border-color: #ff4d4d; -fx-border-width: 2; -fx-border-radius: 8;");
-    }
-
     private void close() {
         Stage stage = (Stage) txtTitre.getScene().getWindow();
         stage.close();
     }
 
-    private void showWarn(String msg) { new Alert(Alert.AlertType.WARNING, msg).showAndWait(); }
-    private void showError(String msg) { new Alert(Alert.AlertType.ERROR, msg).showAndWait(); }
+    // ===== Helpers =====
+
+    private List<String> parseTagsFromString(String s) {
+        if (s == null) return List.of();
+        return Arrays.stream(s.split("[,;]"))
+                .map(String::trim)
+                .filter(x -> !x.isEmpty())
+                .collect(Collectors.toList());
+    }
+
+    private String normalizeTag(String s) {
+        if (s == null) return "";
+        String t = s.trim();
+        // remove double spaces
+        t = t.replaceAll("\\s{2,}", " ");
+        return t;
+    }
+
+    private String nz(String s) { return s == null ? "" : s; }
+
+    private void markError(String msg) {
+        if (lblError != null) lblError.setText(msg);
+        else new Alert(Alert.AlertType.ERROR, msg).showAndWait();
+    }
+
+    private void clearError() {
+        if (lblError != null) lblError.setText("");
+    }
 }
