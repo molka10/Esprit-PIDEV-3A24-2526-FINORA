@@ -21,6 +21,8 @@
                     style="-fx-background-color: #00d4aa; -fx-text-fill: #0f1117; -fx-font-size: 13px; -fx-font-weight: bold; -fx-background-radius: 8; -fx-padding: 10 20; -fx-cursor: hand;"/>
             <Button text="⬅ Retour" onAction="#retourDashboard"
                     style="-fx-background-color: rgba(255,255,255,0.1); -fx-text-fill: white; -fx-font-size: 13px; -fx-font-weight: bold; -fx-background-radius: 8; -fx-padding: 10 20; -fx-cursor: hand;"/>
+            <Button text="🔍 Supervision" onAction="#ouvrirSupervision"
+                    style="-fx-background-color: #6366f1; -fx-text-fill: white; -fx-font-size: 13px; -fx-background-radius: 8; -fx-padding: 10 20; -fx-cursor: hand;"/>
         </HBox>
     </top>
 

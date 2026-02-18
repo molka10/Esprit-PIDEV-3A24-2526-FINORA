@@ -98,7 +98,22 @@ public class Dashboardadmincontroller implements Initializable {
             e.printStackTrace();
         }
     }
+    @FXML
+    private void ouvrirSupervision(ActionEvent event) {
+        try {
+            FXMLLoader loader = new FXMLLoader(
+                    getClass().getResource("/com/example/crud/supervision-view.fxml"));
+            Parent root = loader.load();
 
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            stage.setScene(new Scene(root));
+            stage.setTitle("FINORA - Supervision des Transactions");
+            stage.show();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            showError("Erreur ouverture supervision : " + ex.getMessage());
+        }
+    }
 
     // ========= Stats + Logs (fix async ordering) =========
     private void chargerStatistiquesEtLogs() {

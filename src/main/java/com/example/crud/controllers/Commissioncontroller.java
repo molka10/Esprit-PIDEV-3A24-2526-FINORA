@@ -183,6 +183,23 @@ public class Commissioncontroller implements Initializable {
         ouvrirDialog(commission);
     }
 
+
+
+    @FXML
+    private void ouvrirSupervision(ActionEvent event) {
+        try {
+            FXMLLoader loader = new FXMLLoader(
+                    getClass().getResource("/com/example/crud/supervision-view.fxml"));
+            Parent root = loader.load();
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            stage.setScene(new Scene(root));
+            stage.setTitle("FINORA - Supervision");
+            stage.show();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+
     private void ouvrirDialog(Commission commissionAModifier) {
         Dialog<ButtonType> dialog = new Dialog<>();
         dialog.setTitle(commissionAModifier == null ? "➕ Nouvelle Commission" : "✏️ Modifier Commission");

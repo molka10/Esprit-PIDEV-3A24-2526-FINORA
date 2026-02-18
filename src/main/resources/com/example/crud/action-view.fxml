@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
@@ -8,98 +7,89 @@
             xmlns="http://javafx.com/javafx/17"
             xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="com.example.crud.controllers.ActionController"
-            style="-fx-background-color: #f5f7fa;">
+            stylesheets="@bourse.css">
 
     <!-- ============================================ -->
     <!-- HEADER -->
     <!-- ============================================ -->
     <top>
-        <VBox style="-fx-background-color: linear-gradient(to right, #2c5f6f, #3d7d8f); -fx-padding: 24;">
-            <HBox alignment="CENTER_LEFT" spacing="20">
-                <Label text="📈 Gestion des Actions"
-                       style="-fx-text-fill: white; -fx-font-size: 26px; -fx-font-weight: bold;"/>
+        <VBox styleClass="top-bar">
+            <HBox alignment="CENTER_LEFT" spacing="18">
+                <Label text="📈 Gestion des Actions" styleClass="top-title"/>
 
                 <Region HBox.hgrow="ALWAYS"/>
 
                 <Button text="⬅ Retour"
                         onAction="#retourBourses"
-                        style="-fx-background-color: rgba(255,255,255,0.2); -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold; -fx-background-radius: 8; -fx-padding: 10 20; -fx-cursor: hand;"/>
+                        styleClass="btn btn-back"/>
             </HBox>
 
-            <Label text="Module FINORA - Actions par Bourse"
-                   style="-fx-text-fill: rgba(255,255,255,0.8); -fx-font-size: 14px; -fx-padding: 8 0 0 0;"/>
+            <Label text="Module FINORA - Actions par Bourse" styleClass="top-subtitle"/>
         </VBox>
     </top>
 
     <!-- ============================================ -->
-    <!-- CENTER - LISTE DES ACTIONS -->
+    <!-- CENTER -->
     <!-- ============================================ -->
     <center>
-        <VBox spacing="20" style="-fx-padding: 24; -fx-background-color: #f5f7fa;">
+        <VBox spacing="18" style="-fx-padding: 24;">
 
-            <!-- Barre de recherche et filtres -->
-            <VBox spacing="12"
-                  style="-fx-background-color: white; -fx-background-radius: 12; -fx-padding: 20; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.06), 10, 0, 0, 2);">
+            <!-- Barre de recherche -->
+            <VBox spacing="12" styleClass="glass" style="-fx-padding: 18;">
 
                 <HBox spacing="12" alignment="CENTER_LEFT">
 
                     <!-- Sélecteur de bourse -->
                     <VBox spacing="6" HBox.hgrow="SOMETIMES">
-                        <Label text="🏦 Bourse"
-                               style="-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #6b7280;"/>
+                        <Label text="🏦 Bourse" styleClass="label-muted"/>
                         <ComboBox fx:id="cbBourse"
                                   promptText="Toutes les bourses"
-                                  prefWidth="250"
-                                  style="-fx-background-color: #f9fafb; -fx-background-radius: 8; -fx-font-size: 13px; -fx-padding: 8;"/>
+                                  prefWidth="250"/>
                     </VBox>
 
-                    <!-- Champ de recherche -->
+                    <!-- Recherche -->
                     <VBox spacing="6" HBox.hgrow="ALWAYS">
-                        <Label text="🔍 Recherche"
-                               style="-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #6b7280;"/>
+                        <Label text="🔍 Recherche" styleClass="label-muted"/>
                         <TextField fx:id="searchField"
-                                   promptText="Rechercher par symbole ou entreprise..."
-                                   style="-fx-background-color: #f9fafb; -fx-background-radius: 8; -fx-padding: 10 14; -fx-font-size: 13px;"/>
+                                   promptText="Rechercher par symbole ou entreprise..."/>
                     </VBox>
 
                     <!-- Boutons -->
                     <VBox spacing="6">
-                        <Label text=" " style="-fx-font-size: 12px;"/>
-                        <HBox spacing="8">
+                        <Label text=" " style="-fx-opacity: 0;"/>
+                        <HBox spacing="10">
                             <Button text="🔍"
                                     onAction="#handleRechercher"
-                                    style="-fx-background-color: #2c5f6f; -fx-text-fill: white; -fx-font-size: 16px; -fx-background-radius: 8; -fx-padding: 8 16; -fx-cursor: hand;"/>
+                                    styleClass="btn btn-search"/>
 
                             <Button text="↻"
                                     onAction="#handleActualiser"
-                                    style="-fx-background-color: #6b7280; -fx-text-fill: white; -fx-font-size: 16px; -fx-background-radius: 8; -fx-padding: 8 16; -fx-cursor: hand;"/>
+                                    styleClass="btn btn-refresh"/>
 
                             <Button text="➕ Nouvelle Action"
                                     onAction="#ouvrirDialogAjout"
-                                    style="-fx-background-color: #10b981; -fx-text-fill: white; -fx-font-size: 13px; -fx-font-weight: bold; -fx-background-radius: 8; -fx-padding: 8 16; -fx-cursor: hand;"/>
+                                    styleClass="btn btn-add"/>
                         </HBox>
                     </VBox>
 
                 </HBox>
             </VBox>
 
-            <!-- Compteur total -->
+            <!-- Compteur -->
             <HBox alignment="CENTER_LEFT" spacing="10">
                 <Label fx:id="lblTotal"
                        text="📊 Total : 0 action(s)"
-                       style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #374151;"/>
+                       styleClass="label-strong"/>
             </HBox>
 
-            <!-- Container des actions (style liste mobile) -->
-            <ScrollPane fitToWidth="true"
-                        VBox.vgrow="ALWAYS"
-                        style="-fx-background-color: transparent; -fx-background: transparent;"
-                        hbarPolicy="NEVER">
+            <!-- Liste actions -->
+            <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS" hbarPolicy="NEVER">
                 <content>
                     <VBox fx:id="cardsContainer"
-                          spacing="0"
-                          style="-fx-background-color: white; -fx-background-radius: 12; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.06), 10, 0, 0, 2);">
-                        <!-- Les items seront générés dynamiquement ici -->
+                          spacing="10"
+                          styleClass="glass"
+                          style="-fx-padding: 12;">
+                        <!-- items générés dynamiquement -->
                     </VBox>
                 </content>
             </ScrollPane>

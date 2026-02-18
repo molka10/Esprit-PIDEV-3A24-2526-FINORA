@@ -26,8 +26,32 @@
         <VBox styleClass="sidebar">
             <Label text="Administration" styleClass="side-title"/>
 
-            <Button text="🏛  Gérer Bourses" styleClass="side-btn primary" onAction="#gererBourses"/>
-            <Button text="📈  Gérer Actions" styleClass="side-btn primary" onAction="#gererActions"/>
+            <Button text="🏛  Gérer Bourses" styleClass="side-btn primary" onAction="#gererBourses"
+                    style="-fx-background-color: #1f2937;
+               -fx-text-fill: white;
+               -fx-background-radius: 6;
+               -fx-padding: 8 12;
+               -fx-cursor: hand;"
+                    maxWidth="Infinity"/>
+            <!-- Bouton Supervision dans le header ou sidebar -->
+            <Button text="🔍 Supervision" onAction="#ouvrirSupervision"
+                    style="-fx-background-color: #6366f1; -fx-text-fill: white; -fx-font-size: 13px; -fx-font-weight: bold; -fx-background-radius: 8; -fx-padding: 10 20; -fx-cursor: hand;"/>
+            <Button text="📈  Gérer Actions" styleClass="side-btn primary" onAction="#gererActions"
+                    style="-fx-background-color: #1f2937;
+               -fx-text-fill: white;
+               -fx-background-radius: 6;
+               -fx-padding: 8 12;
+               -fx-cursor: hand;"
+                    maxWidth="Infinity"/>
+            <Button text="💰 Gérer Commission"
+                    onAction="#ouvrirCommission"
+                    style="-fx-background-color: #1f2937;
+               -fx-text-fill: white;
+               -fx-background-radius: 6;
+               -fx-padding: 8 12;
+               -fx-cursor: hand;"
+                    maxWidth="Infinity"/>
+
 
             <Separator style="-fx-opacity: 0.35;"/>
 
@@ -79,9 +103,7 @@
                         <VBox fx:id="chartDevisesContainer" spacing="8"/>
                     </VBox>
                 </HBox>
-                <Button text="💰 Commission"
-                        onAction="#ouvrirCommission"
-                        styleClass="btn-primary"/>
+
 
                 <!-- Bar chart -->
                 <VBox styleClass="card">
