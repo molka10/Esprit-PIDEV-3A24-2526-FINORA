@@ -25,7 +25,13 @@ public class DBConnection {
         return instance;
     }
 
-    public Connection getConnection() {
+    /**
+     * Returns a valid JDBC connection (reconnects automatically if the connection was closed).
+     */
+    public Connection getConnection() throws SQLException {
+        if (connection == null || connection.isClosed()) {
+            connection = DriverManager.getConnection(URL, USER, PASSWORD);
+        }
         return connection;
     }
 }

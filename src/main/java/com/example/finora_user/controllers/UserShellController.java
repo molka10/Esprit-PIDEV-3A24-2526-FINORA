@@ -1,6 +1,7 @@
 package com.example.finora_user.controllers;
 
 import com.example.finora_user.utils.Navigator;
+import com.example.finora_user.utils.Session;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -13,6 +14,11 @@ public class UserShellController {
 
     @FXML
     public void initialize() {
+        // Route protection: must be logged in to access the user shell
+        if (!Session.isLoggedIn()) {
+            logout();
+            return;
+        }
         goBourse(); // default page
     }
 
@@ -31,6 +37,7 @@ public class UserShellController {
 
     @FXML
     public void logout() {
+        Session.clear();
         Stage stage = (Stage) contentArea.getScene().getWindow();
         Navigator.goTo(stage, "login-view.fxml", "Connexion");
     }

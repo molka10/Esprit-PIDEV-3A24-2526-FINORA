@@ -1,6 +1,7 @@
 package com.example.finora_user.controllers;
 
 import com.example.finora_user.utils.Navigator;
+import com.example.finora_user.utils.Session;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -13,6 +14,11 @@ public class AdminShellController {
 
     @FXML
     public void initialize() {
+        // Basic route protection: only ADMIN can access the admin shell
+        if (!Session.isAdmin()) {
+            logout();
+            return;
+        }
         goBourse(); // default page
     }
 
@@ -32,6 +38,7 @@ public class AdminShellController {
 
     @FXML
     public void logout() {
+        Session.clear();
         Stage stage = (Stage) contentArea.getScene().getWindow();
         Navigator.goTo(stage, "login-view.fxml", "Connexion");
     }

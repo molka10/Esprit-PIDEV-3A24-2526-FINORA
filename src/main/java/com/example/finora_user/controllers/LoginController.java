@@ -4,6 +4,7 @@ import com.example.finora_user.entities.User;
 import com.example.finora_user.services.UserService;
 import com.example.finora_user.utils.InputValidator;
 import com.example.finora_user.utils.Navigator;
+import com.example.finora_user.utils.Session;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
@@ -46,6 +47,9 @@ public class LoginController {
                 statusLabel.setText("❌ Email ou mot de passe incorrect.");
                 return;
             }
+
+            // Store authenticated user in session
+            Session.setCurrentUser(user);
 
             Stage stage = (Stage) emailField.getScene().getWindow();
 

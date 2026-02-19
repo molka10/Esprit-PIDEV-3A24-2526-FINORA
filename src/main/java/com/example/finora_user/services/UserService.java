@@ -2,6 +2,7 @@ package com.example.finora_user.services;
 
 import com.example.finora_user.entities.User;
 import com.example.finora_user.utils.DBConnection;
+import com.example.finora_user.utils.PasswordUtils;
 
 import java.sql.*;
 import java.time.LocalDate;
@@ -29,7 +30,8 @@ public class UserService {
 
         ps.setString(1, u.getUsername());
         ps.setString(2, u.getEmail());
-        ps.setString(3, u.getMotDePasse());
+        // Store hashed password (PBKDF2)
+        ps.setString(3, PasswordUtils.hash(u.getMotDePasse()));
         ps.setString(4, u.getRole());
         ps.setString(5, u.getPhone());
         ps.setString(6, u.getAddress());
@@ -123,19 +125,51 @@ public class UserService {
     // ================= LOGIN =================
     public User login(String email, String motDePasse) throws SQLException {
 
-        String sql = "SELECT * FROM users WHERE email=? AND mot_de_passe=?";
+        String sql = "SELECT * FROM users WHERE email=?";
         PreparedStatement ps = cn.prepareStatement(sql);
-
         ps.setString(1, email);
-        ps.setString(2, motDePasse);
 
         ResultSet rs = ps.executeQuery();
 
-        if (rs.next()) {
-            return map(rs);
+        if (!rs.next()) {
+            return null;
+        }
+
+        User user = map(rs);
+        String storedPassword = user.getMotDePasse();
+
+        // If already BCrypt hashed
+        if (PasswordUtils.isHashed(storedPassword)) {
+            return PasswordUtils.verify(motDePasse, storedPassword) ? user : null;
+        }
+
+        // Legacy plain-text support (auto-upgrade)
+        if (storedPassword != null && storedPassword.equals(motDePasse)) {
+
+            String newHash = PasswordUtils.hash(motDePasse);
+
+            // Upgrade password in DB
+            String updateSql = "UPDATE users SET mot_de_passe=? WHERE id=?";
+            PreparedStatement ups = cn.prepareStatement(updateSql);
+            ups.setString(1, newHash);
+            ups.setInt(2, user.getId());
+            ups.executeUpdate();
+
+            user.setMotDePasse(newHash);
+            return user;
         }
 
         return null;
+    }
+
+
+    private void upgradePasswordHash(int userId, String hashed) throws SQLException {
+        String sql = "UPDATE users SET mot_de_passe=? WHERE id=?";
+        try (PreparedStatement ps = cn.prepareStatement(sql)) {
+            ps.setString(1, hashed);
+            ps.setInt(2, userId);
+            ps.executeUpdate();
+        }
     }
 
     // ================= SEARCH TEXT =================
