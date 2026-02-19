@@ -87,6 +87,9 @@
                -fx-background-radius: 8;
                -fx-padding: 8 18;
                -fx-cursor: hand;" />
+                <Button text="🤖 Chatbot"
+                        onAction="#ouvrirChatbot"
+                        styleClass="btn btn-add"/>
 
             </HBox>
 

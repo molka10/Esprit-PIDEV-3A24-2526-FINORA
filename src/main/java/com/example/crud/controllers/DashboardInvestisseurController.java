@@ -333,6 +333,28 @@ public class DashboardInvestisseurController implements Initializable {
         });
     }
 
+
+    @FXML
+    private void ouvrirChatbot(ActionEvent event) {
+        try {
+            URL fxml = getClass().getResource("/com/example/crud/Chatbot view.fxml");
+            System.out.println("FXML chatbot = " + fxml); // <-- debug
+
+            FXMLLoader loader = new FXMLLoader(fxml);
+            Parent root = loader.load();
+
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            stage.setScene(new Scene(root));
+            stage.setTitle("FINORA - Chatbot IA");
+            stage.show();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+
+
     // ============================================================
     //  ACHAT / VENTE
     // ============================================================
