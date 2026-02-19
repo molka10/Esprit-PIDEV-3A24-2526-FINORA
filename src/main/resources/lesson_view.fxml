@@ -10,41 +10,82 @@
             styleClass="screen">
 
     <top>
-        <VBox spacing="10" styleClass="card">
-            <Label fx:id="lblTitre" text="Titre Lesson" styleClass="title"/>
+        <VBox styleClass="card" spacing="14">
 
-            <HBox spacing="10" alignment="CENTER_LEFT">
-                <Label fx:id="lblMeta" text="Formation • Ordre • Durée" styleClass="subtitle"/>
+            <!-- Row 1: eyebrow + back button -->
+            <HBox alignment="CENTER_LEFT" spacing="0">
+                <Label fx:id="lblEyebrow"
+                       text="FORMATION"
+                       styleClass="viewer-eyebrow"/>
                 <Region HBox.hgrow="ALWAYS"/>
-                <Button text="⬅ Retour" styleClass="btn-ghost" onAction="#onBack"/>
+                <Button text="← Retour"
+                        styleClass="btn-ghost"
+                        onAction="#onBack"/>
             </HBox>
 
-            <!-- Progress -->
-            <HBox spacing="10" alignment="CENTER_LEFT">
-                <Label text="Progression:" styleClass="subtitle"/>
-                <ProgressBar fx:id="progressBar" prefWidth="320"/>
-                <Label fx:id="lblProgress" text="0%" styleClass="subtitle"/>
-                <Region HBox.hgrow="ALWAYS"/>
-                <Button fx:id="btnPrev" text="◀ Précédent" styleClass="btn-ghost" onAction="#onPrev"/>
-                <Button fx:id="btnNext" text="Suivant ▶" styleClass="btn-primary" onAction="#onNext"/>
+            <!-- Row 2: big lesson title -->
+            <Label fx:id="lblTitre"
+                   text="Titre de la leçon"
+                   styleClass="viewer-title"
+                   wrapText="true"
+                   maxWidth="820"/>
+
+            <!-- Row 3: order + duration -->
+            <Label fx:id="lblMeta"
+                   text="Ordre  •  Durée"
+                   styleClass="viewer-meta"/>
+
+            <!-- Row 4: progress + navigation -->
+            <HBox alignment="CENTER_LEFT" spacing="16">
+
+                <HBox alignment="CENTER_LEFT" spacing="10" HBox.hgrow="ALWAYS">
+                    <Label text="Progression"
+                           styleClass="viewer-progress-label"/>
+                    <ProgressBar fx:id="progressBar"
+                                 prefWidth="260"
+                                 prefHeight="6"
+                                 styleClass="viewer-progress-bar"/>
+                    <Label fx:id="lblProgress"
+                           text="0%"
+                           styleClass="viewer-progress-label"/>
+                </HBox>
+
+                <HBox alignment="CENTER_RIGHT" spacing="10">
+                    <Label fx:id="lblIndex"
+                           text="01 / 01"
+                           styleClass="viewer-index-pill"/>
+                    <Button fx:id="btnPrev"
+                            text="◀ Précédent"
+                            styleClass="btn-nav-prev"
+                            onAction="#onPrev"/>
+                    <Button fx:id="btnNext"
+                            text="Suivant ▶"
+                            styleClass="btn-nav-next"
+                            onAction="#onNext"/>
+                </HBox>
+
             </HBox>
+
         </VBox>
     </top>
 
     <center>
         <ScrollPane fitToWidth="true" styleClass="scroll">
             <content>
-                <VBox spacing="12">
+                <VBox spacing="16">
                     <padding>
-                        <Insets top="16" right="16" bottom="16" left="16"/>
+                        <Insets top="28" right="36" bottom="36" left="36"/>
                     </padding>
 
-                    <Label text="Contenu" styleClass="subtitle"/>
+                    <Label text="CONTENU DE LA LEÇON"
+                           styleClass="viewer-section-label"/>
 
                     <TextArea fx:id="txtContenu"
                               editable="false"
                               wrapText="true"
-                              prefRowCount="18"/>
+                              prefRowCount="22"
+                              styleClass="viewer-content"/>
+
                 </VBox>
             </content>
         </ScrollPane>
