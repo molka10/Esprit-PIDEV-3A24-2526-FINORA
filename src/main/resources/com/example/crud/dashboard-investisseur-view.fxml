@@ -36,7 +36,8 @@
 
             <Button text="📰" style="-fx-background-color: transparent; -fx-text-fill: #6b7280; -fx-font-size: 20px; -fx-background-radius: 10; -fx-cursor: hand; -fx-pref-width: 60; -fx-pref-height: 50;"/>
             <Label text="News" style="-fx-font-size: 9px; -fx-text-fill: #6b7280; -fx-padding: -4 0 8 0;" alignment="CENTER"/>
-
+            <Button text="🎯 Prédictions IA" onAction="#ouvrirPrediction"
+                    style="-fx-background-color: #6366f1; "/>
             <Region VBox.vgrow="ALWAYS"/>
 
             <!-- User Avatar -->

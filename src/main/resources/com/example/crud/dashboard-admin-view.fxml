@@ -136,16 +136,7 @@
                             </LineChart>
 
                             <!-- Action Buttons -->
-                            <HBox spacing="12">
-                                <Button text="📊 Bourses" onAction="#ouvrirBourses"
-                                        style="-fx-background-color: #6366f1; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold; -fx-background-radius: 10; -fx-padding: 12 30; -fx-cursor: hand;"/>
-                                <Button text="📈 Actions" onAction="#ouvrirActions"
-                                        style="-fx-background-color: #10b981; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold; -fx-background-radius: 10; -fx-padding: 12 30; -fx-cursor: hand;"/>
-                                <Button text="💰 Commission" onAction="#ouvrirCommission"
-                                        style="-fx-background-color: #f59e0b22; -fx-text-fill: #f59e0b; -fx-font-size: 14px; -fx-font-weight: bold; -fx-background-radius: 10; -fx-padding: 12 20; -fx-cursor: hand; -fx-border-color: #f59e0b44; -fx-border-radius: 10; -fx-border-width: 1;"/>
-                                <Button text="🔍 Supervision" onAction="#ouvrirSupervision"
-                                        style="-fx-background-color: #ef444422; -fx-text-fill: #ef4444; -fx-font-size: 14px; -fx-font-weight: bold; -fx-background-radius: 10; -fx-padding: 12 20; -fx-cursor: hand; -fx-border-color: #ef444444; -fx-border-radius: 10; -fx-border-width: 1;"/>
-                            </HBox>
+
                         </VBox>
 
                         <!-- ACTIVITY LOG -->

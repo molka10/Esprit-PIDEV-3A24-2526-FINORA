@@ -353,8 +353,27 @@ public class DashboardInvestisseurController implements Initializable {
         }
     }
 
+    @FXML
+    private void ouvrirPrediction(ActionEvent event) {
+        naviguerVers("/com/example/crud/prediction-view.fxml",
+                "FINORA - Prédiction IA", event);
+    }
 
 
+    private void naviguerVers(String fxmlPath, String titre, ActionEvent event) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
+            Parent root = loader.load();
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            stage.setScene(new Scene(root));
+            stage.setTitle(titre);
+            stage.show();
+        } catch (Exception ex) {
+            System.err.println("❌ Erreur navigation vers " + fxmlPath);
+            ex.printStackTrace();
+            showError("Erreur de navigation : " + ex.getMessage());
+        }
+    }
     // ============================================================
     //  ACHAT / VENTE
     // ============================================================

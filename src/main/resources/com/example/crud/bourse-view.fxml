@@ -8,7 +8,7 @@
             xmlns="http://javafx.com/javafx/17"
             xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="com.example.crud.controllers.BourseController"
-            stylesheets="@bourse.css">
+            stylesheets="@finora-purple-theme.css">
 
     <!-- ===== LEFT SIDEBAR (comme dashboard) ===== -->
     <left>
