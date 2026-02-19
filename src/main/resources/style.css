@@ -337,3 +337,21 @@
     -fx-text-fill: #64748B;
     -fx-font-weight: 700;
 }
+.udemy-thumb {
+    -fx-background-radius: 12;
+    -fx-border-radius: 12;
+    -fx-border-color: rgba(15,23,42,0.08);
+    -fx-border-width: 1;
+    -fx-background-color: #f8fafc;
+}
+
+.udemy-thumb ImageView {
+    -fx-background-radius: 12;
+    -fx-border-radius: 12;
+}
+
+.udemy-title {
+    -fx-font-size: 20px;
+    -fx-font-weight: 800;
+    -fx-text-fill: #111827;
+}

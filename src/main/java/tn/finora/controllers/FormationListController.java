@@ -3,17 +3,18 @@ package tn.finora.controllers;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import tn.finora.entities.Formation;
 import tn.finora.services.FormationService;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
-import javafx.scene.layout.StackPane;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -23,7 +24,6 @@ public class FormationListController {
 
     @FXML private VBox cardsContainer;
     @FXML private Label lblInfo;
-
     @FXML private TextField txtSearch;
     @FXML private ComboBox<String> cbSort;
 
@@ -33,24 +33,36 @@ public class FormationListController {
     private List<Formation> allFormations = new ArrayList<>();
 
     @FXML
-    public void initialize() {
-        initSort();
-        refresh();
-    }
+
 
     private void initSort() {
         if (cbSort == null) return;
 
-        cbSort.setItems(FXCollections.observableArrayList(
-                "Dernier ajouté",
-                "Titre (A → Z)",
-                "Titre (Z → A)",
-                "Catégorie (A → Z)",
-                "Niveau (A → Z)",
-                "Publié d'abord"
-        ));
+        if (cbSort.getItems() == null || cbSort.getItems().isEmpty()) {
+            cbSort.setItems(FXCollections.observableArrayList(
+                    "Dernier ajouté",
+                    "Titre (A → Z)",
+                    "Titre (Z → A)",
+                    "Catégorie (A → Z)",
+                    "Niveau (A → Z)",
+                    "Publié d'abord"
+            ));
+        }
+
         cbSort.getSelectionModel().select("Dernier ajouté");
+        cbSort.setDisable(cbSort.getItems().isEmpty());
     }
+
+    @FXML
+    public void initialize() {
+        initSort();
+        // Prevent selection bug when list is empty
+        if (cbSort != null) {
+            cbSort.setDisable(cbSort.getItems().isEmpty());
+        }
+        refresh();
+    }
+
 
     private void refresh() {
         try {
@@ -62,9 +74,55 @@ public class FormationListController {
         }
     }
 
-    @FXML private void onSearch() { applySearchAndSort(); }
-    @FXML private void onSort()   { applySearchAndSort(); }
+    // ========= FXML HANDLERS (must match your FXML) =========
+    @FXML
+    private void onSearch() {
+        applySearchAndSort();
+    }
 
+    @FXML
+    private void onSort() {
+        applySearchAndSort();
+    }
+
+    @FXML
+    private void onAdd() {
+        openForm(null);
+    }
+
+    @FXML
+    private void onEdit() {
+        if (selected == null) {
+            showWarn("Sélectionne une formation (clique sur une carte)");
+            return;
+        }
+        openForm(selected);
+    }
+
+    @FXML
+    private void onDelete() {
+        if (selected == null) {
+            showWarn("Sélectionne une formation (clique sur une carte)");
+            return;
+        }
+        deleteFormation(selected);
+    }
+
+    @FXML
+    private void goLessons() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/lesson_list.fxml"));
+            Scene scene = new Scene(loader.load(), 1250, 720);
+            scene.getStylesheets().add(getClass().getResource("/style.css").toExternalForm());
+
+            Stage stage = (Stage) cardsContainer.getScene().getWindow();
+            stage.setScene(scene);
+        } catch (Exception e) {
+            showError("Impossible d'ouvrir Lessons: " + e.getMessage());
+        }
+    }
+
+    // ========= FILTER / SORT / RENDER =========
     private void applySearchAndSort() {
         if (cardsContainer == null) return;
 
@@ -72,7 +130,8 @@ public class FormationListController {
         selected = null;
 
         String q = (txtSearch == null || txtSearch.getText() == null)
-                ? "" : txtSearch.getText().trim().toLowerCase();
+                ? ""
+                : txtSearch.getText().trim().toLowerCase();
 
         String sort = (cbSort == null) ? "Dernier ajouté" : cbSort.getSelectionModel().getSelectedItem();
 
@@ -134,45 +193,41 @@ public class FormationListController {
         };
     }
 
+    // ========= UDEMY-LIKE CARD =========
     private VBox createCard(Formation f) {
-        VBox card = new VBox(12);
-        card.getStyleClass().add("item-card");
-        card.setUserData(f.getId());
+        VBox wrapper = new VBox();
+        wrapper.getStyleClass().add("item-card");
+        wrapper.setUserData(f.getId());
 
-        // ✅ Udemy-like thumbnail (ImageView)
+        HBox row = new HBox(18);
+        row.setPadding(new Insets(18));
+
+        // Image
         String imgUrl = safeRaw(f.getImageUrl()).trim();
 
         ImageView thumb = new ImageView();
-        thumb.getStyleClass().add("thumb");
-        thumb.setFitWidth(260);
-        thumb.setFitHeight(140);
+        thumb.setFitWidth(220);
+        thumb.setFitHeight(130);
         thumb.setPreserveRatio(false);
-        thumb.setSmooth(true);
-        thumb.setCache(true);
 
         if (!imgUrl.isBlank()) {
             try {
-                Image img = new Image(imgUrl, true); // background loading ✅
-                thumb.setImage(img);
-            } catch (Exception ignored) {
-            }
+                thumb.setImage(new Image(imgUrl, true));
+            } catch (Exception ignored) {}
         }
 
-        Label noImg = new Label(imgUrl.isBlank() ? "Aucune image" : "");
-        noImg.getStyleClass().add("thumb-placeholder");
+        StackPane imageBox = new StackPane(thumb);
+        imageBox.getStyleClass().add("udemy-thumb");
 
-        StackPane imageBox = new StackPane(thumb, noImg);
-        imageBox.getStyleClass().add("thumb-box");
+        // Right content
+        VBox content = new VBox(10);
 
-        // Title
         String titre = safeRaw(f.getTitre()).trim();
         Label title = new Label(titre.isBlank() ? "(Sans titre)" : titre);
-        title.getStyleClass().add("item-title");
+        title.getStyleClass().add("udemy-title");
 
-        // ===== Pinterest tags row =====
         FlowPane tagsPane = new FlowPane(8, 8);
         tagsPane.getStyleClass().add("chips-row");
-        tagsPane.setPrefWrapLength(900);
 
         List<String> tags = parseTags(f.getCategorie());
         if (tags.isEmpty()) {
@@ -187,8 +242,7 @@ public class FormationListController {
             }
         }
 
-        // ===== Meta badges =====
-        HBox badges = new HBox(8);
+        HBox meta = new HBox(8);
 
         String niveau = safeRaw(f.getNiveau()).trim();
         if (niveau.isBlank()) niveau = "Niveau ?";
@@ -199,18 +253,13 @@ public class FormationListController {
         Label pubBadge = new Label(f.isPublished() ? "Publié" : "Non publié");
         pubBadge.getStyleClass().addAll("badge", f.isPublished() ? "badge-green" : "badge-gray");
 
-        badges.getChildren().addAll(niveauBadge, pubBadge);
+        meta.getChildren().addAll(niveauBadge, pubBadge);
 
-        // Actions
-        HBox actions = new HBox(10);
+        HBox actions = new HBox(12);
 
         Button lessonsBtn = new Button("Voir lessons");
-        lessonsBtn.getStyleClass().add("btn-ghost");
+        lessonsBtn.getStyleClass().add("btn-primary");
         lessonsBtn.setOnAction(e -> openLessonsForFormation(f));
-
-        Button selectBtn = new Button("Sélectionner");
-        selectBtn.getStyleClass().add("btn-ghost");
-        selectBtn.setOnAction(e -> { selected = f; highlightSelection(); });
 
         Button editBtn = new Button("Modifier");
         editBtn.getStyleClass().add("btn-ghost");
@@ -218,71 +267,22 @@ public class FormationListController {
 
         Button deleteBtn = new Button("Supprimer");
         deleteBtn.getStyleClass().add("btn-danger");
-        deleteBtn.setOnAction(e -> { selected = f; onDelete(); });
+        deleteBtn.setOnAction(e -> deleteFormation(f));
 
-        actions.getChildren().addAll(lessonsBtn, selectBtn, editBtn, deleteBtn);
+        actions.getChildren().addAll(lessonsBtn, editBtn, deleteBtn);
 
-        // ✅ Udemy layout order: image -> title -> tags -> badges -> actions
-        card.getChildren().addAll(imageBox, title, tagsPane, badges, actions);
+        content.getChildren().addAll(title, tagsPane, meta, actions);
 
-        // click card = select
-        card.setOnMouseClicked(e -> { selected = f; highlightSelection(); });
+        row.getChildren().addAll(imageBox, content);
+        wrapper.getChildren().add(row);
 
-        return card;
-    }
+        // Click card selects (buttons still work)
+        wrapper.setOnMouseClicked(e -> {
+            selected = f;
+            highlightSelection();
+        });
 
-
-    private String niveauClass(String niveau) {
-        String n = niveau.toLowerCase();
-        if (n.contains("début")) return "badge-beginner";
-        if (n.contains("inter")) return "badge-intermediate";
-        if (n.contains("avanc")) return "badge-advanced";
-        return "badge-gray";
-    }
-
-    private String colorClassFor(String tag) {
-        int h = Math.abs(tag.toLowerCase().hashCode());
-        return switch (h % 6) {
-            case 0 -> "tag-purple";
-            case 1 -> "tag-pink";
-            case 2 -> "tag-blue";
-            case 3 -> "tag-green";
-            case 4 -> "tag-orange";
-            default -> "tag-gray";
-        };
-    }
-
-    private void highlightSelection() {
-        for (var node : cardsContainer.getChildren()) {
-            if (node instanceof VBox v) {
-                boolean isSel = selected != null && selected.getId() == (int) v.getUserData();
-                v.getStyleClass().remove("item-selected");
-                if (isSel) v.getStyleClass().add("item-selected");
-            }
-        }
-        updateInfo(cardsContainer.getChildren().size(), allFormations.size());
-    }
-
-    private void updateInfo(int shown, int total) {
-        if (lblInfo != null) {
-            lblInfo.setText("Affichées: " + shown + " / " + total
-                    + "  |  Sélection: " + (selected == null ? "-" : selected.getTitre()));
-        }
-    }
-
-    // ===== CRUD Buttons =====
-    @FXML private void onAdd() { openForm(null); }
-
-    @FXML
-    private void onEdit() {
-        if (selected == null) { showWarn("Sélectionne une formation (clique sur une carte)"); return; }
-        openForm(selected);
-    }
-
-    @FXML
-    private void onDelete() {
-        if (selected == null) { showWarn("Sélectionne une formation (clique sur une carte)"); return; }
-        deleteFormation(selected);
+        return wrapper;
     }
 
     private void deleteFormation(Formation f) {
@@ -299,21 +299,6 @@ public class FormationListController {
             } catch (Exception e) {
                 showError("Erreur suppression: " + e.getMessage());
             }
-        }
-    }
-
-    // ===== Navigation =====
-    @FXML
-    private void goLessons() {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/lesson_list.fxml"));
-            Scene scene = new Scene(loader.load(), 1250, 720);
-            scene.getStylesheets().add(getClass().getResource("/style.css").toExternalForm());
-
-            Stage stage = (Stage) cardsContainer.getScene().getWindow();
-            stage.setScene(scene);
-        } catch (Exception e) {
-            showError("Impossible d'ouvrir Lessons: " + e.getMessage());
         }
     }
 
@@ -352,7 +337,24 @@ public class FormationListController {
         }
     }
 
-    // ===== Tags Helpers =====
+    private void highlightSelection() {
+        for (var node : cardsContainer.getChildren()) {
+            if (node instanceof VBox v) {
+                boolean isSel = selected != null && selected.getId() == (int) v.getUserData();
+                v.getStyleClass().remove("item-selected");
+                if (isSel) v.getStyleClass().add("item-selected");
+            }
+        }
+        updateInfo(cardsContainer.getChildren().size(), allFormations.size());
+    }
+
+    private void updateInfo(int shown, int total) {
+        if (lblInfo != null) {
+            lblInfo.setText("Affichées: " + shown + " / " + total
+                    + "  |  Sélection: " + (selected == null ? "-" : safeRaw(selected.getTitre())));
+        }
+    }
+
     private List<String> parseTags(String raw) {
         if (raw == null) return List.of();
         raw = raw.trim();
@@ -373,7 +375,26 @@ public class FormationListController {
         return tags.get(0).toLowerCase();
     }
 
-    // ===== Utils =====
+    private String niveauClass(String niveau) {
+        String n = safeLower(niveau);
+        if (n.contains("début")) return "badge-beginner";
+        if (n.contains("inter")) return "badge-intermediate";
+        if (n.contains("avanc")) return "badge-advanced";
+        return "badge-gray";
+    }
+
+    private String colorClassFor(String tag) {
+        int h = Math.abs(tag.toLowerCase().hashCode());
+        return switch (h % 6) {
+            case 0 -> "tag-purple";
+            case 1 -> "tag-pink";
+            case 2 -> "tag-blue";
+            case 3 -> "tag-green";
+            case 4 -> "tag-orange";
+            default -> "tag-gray";
+        };
+    }
+
     private String safeLower(String s) { return s == null ? "" : s.toLowerCase(); }
     private String safeRaw(String s) { return s == null ? "" : s; }
 
