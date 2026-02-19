@@ -5,6 +5,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
@@ -15,64 +16,82 @@ import java.util.List;
 import java.util.Random;
 
 /**
- * 🎯 ServicePrediction
- * Prédiction de prix d'actions alimentée par Claude API
+ * 🎯 ServicePrediction (Gemini - Google AI Studio)
+ * Prédiction de prix d'actions alimentée par Google Gemini API
  */
 public class ServicePrediction {
 
-    private static final String API_URL = "https://api.anthropic.com/v1/messages";
-    private static final String MODEL = "claude-sonnet-4-20250514";
+    // ✅ Endpoint Gemini API (AI Studio / Generative Language)
+    // Astuce: si v1beta te pose problème, tu peux essayer v1.
+    private static final String API_BASE =
+            "https://generativelanguage.googleapis.com/v1/models/";
 
-    // ⚠️ IMPORTANT : Remplacez par votre vraie clé API Anthropic
-    private static final String API_KEY = "AIzaSyCWUpwiko52_lnqvX3MIfr5gbIVRO2Xv74";
+    private static final String MODEL =
+            "gemini-pro";
 
-    // Prompt système pour l'analyse financière
+
+
+
+
+    // ✅ Mets ta clé AI Studio ici
+    private static final String API_KEY = "AIzaSyAx4bGSoJ_X0CdaJuEUimm8A1MAK9wpqRA";
+
+    // Prompt système
     private static final String SYSTEM_PROMPT =
-            "Tu es un analyste financier expert spécialisé dans la prédiction de prix d'actions. " +
-                    "Tu analyses les données historiques et les tendances du marché pour fournir des prévisions. " +
-                    "Tes réponses doivent être :\n" +
-                    "1. Basées sur l'analyse technique (tendances, support/résistance)\n" +
-                    "2. Claires et structurées\n" +
-                    "3. Accompagnées de scénarios (optimiste, réaliste, pessimiste)\n" +
-                    "4. Avec des avertissements sur les risques\n\n" +
-                    "Format de réponse attendu :\n" +
-                    "TENDANCE: [Haussière/Baissière/Neutre]\n" +
-                    "PREDICTION_7J: [prix estimé à 7 jours]\n" +
-                    "PREDICTION_30J: [prix estimé à 30 jours]\n" +
-                    "CONFIANCE: [pourcentage de confiance]\n" +
-                    "ANALYSE: [explication détaillée]\n" +
+            "Tu es un analyste financier expert spécialisé dans l'analyse technique.\n" +
+                    "Tu dois fournir des prévisions prudentes, avec scénarios, et avertissement risques.\n" +
+                    "IMPORTANT: ceci est informatif, pas un conseil financier professionnel.\n\n" +
+                    "Format EXACT attendu :\n" +
+                    "TENDANCE: ...\n" +
+                    "PREDICTION_7J: ...\n" +
+                    "PREDICTION_30J: ...\n" +
+                    "CONFIANCE: ...\n" +
+                    "ANALYSE: ...\n" +
                     "SCENARIOS:\n" +
-                    "- Optimiste: [prix]\n" +
-                    "- Réaliste: [prix]\n" +
-                    "- Pessimiste: [prix]\n" +
-                    "RISQUES: [principaux risques identifiés]";
+                    "- Optimiste: ...\n" +
+                    "- Réaliste: ...\n" +
+                    "- Pessimiste: ...\n" +
+                    "RISQUES: ...";
 
-    /**
-     * Classe pour stocker les résultats de prédiction
-     */
     public static class ResultatPrediction {
-        public String tendance;          // Haussière, Baissière, Neutre
-        public double prediction7j;      // Prix prédit à 7 jours
-        public double prediction30j;     // Prix prédit à 30 jours
-        public int confiance;            // Pourcentage de confiance (0-100)
-        public String analyse;           // Explication détaillée
+        public String tendance;
+        public double prediction7j;
+        public double prediction30j;
+        public int confiance;
+        public String analyse;
         public double scenarioOptimiste;
         public double scenarioRealiste;
         public double scenarioPessimiste;
         public String risques;
-        public String reponseComplete;   // Réponse brute de Claude
+        public String reponseComplete;
+    }
 
-        @Override
-        public String toString() {
-            return String.format(
-                    "Tendance: %s\n" +
-                            "Prédiction 7j: %.2f\n" +
-                            "Prédiction 30j: %.2f\n" +
-                            "Confiance: %d%%",
-                    tendance, prediction7j, prediction30j, confiance
-            );
+    public boolean estConfigure() {
+        return API_KEY != null && !API_KEY.isBlank() && !API_KEY.equals("VOTRE_CLE_GEMINI_ICI");
+    }
+
+    public void debugModels() {
+        try {
+            String endpoint =
+                    "https://generativelanguage.googleapis.com/v1/models?key=" + API_KEY;
+
+            HttpURLConnection conn =
+                    (HttpURLConnection) new URL(endpoint).openConnection();
+            conn.setRequestMethod("GET");
+
+            BufferedReader br =
+                    new BufferedReader(new InputStreamReader(conn.getInputStream()));
+            String line;
+            while ((line = br.readLine()) != null) {
+                System.out.println(line);
+            }
+            br.close();
+
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
+
 
     /**
      * Génère un historique de prix simulé pour une action
@@ -82,207 +101,230 @@ public class ServicePrediction {
         double prixActuel = action.getPrixUnitaire();
         Random rand = new Random(action.getIdAction());
 
-        // Générer des prix avec tendance réaliste
         for (int i = 0; i < nbJours; i++) {
-            double variation = (rand.nextDouble() - 0.5) * (prixActuel * 0.03); // ±3% par jour
+            double variation = (rand.nextDouble() - 0.5) * (prixActuel * 0.03); // ±3%
             prixActuel += variation;
-            if (prixActuel < action.getPrixUnitaire() * 0.7) {
-                prixActuel = action.getPrixUnitaire() * 0.7; // Plancher
-            }
-            if (prixActuel > action.getPrixUnitaire() * 1.3) {
-                prixActuel = action.getPrixUnitaire() * 1.3; // Plafond
-            }
+
+            double floor = action.getPrixUnitaire() * 0.7;
+            double cap   = action.getPrixUnitaire() * 1.3;
+
+            if (prixActuel < floor) prixActuel = floor;
+            if (prixActuel > cap)   prixActuel = cap;
+
             historique.add(Math.round(prixActuel * 100.0) / 100.0);
         }
-
         return historique;
     }
 
-    /**
-     * Prédit le prix futur d'une action
-     */
     public ResultatPrediction predirePrix(Action action) {
-        // Générer l'historique
         List<Double> historique30j = genererHistoriquePrix(action, 30);
+        String promptUser = construirePromptAnalyse(action, historique30j);
 
-        // Construire le prompt avec les données
-        String userMessage = construirePromptAnalyse(action, historique30j);
-
-        // Appeler Claude API
-        String reponseIA = appellerClaudeAPI(userMessage);
-
-        // Parser la réponse
+        String reponseIA = appelerGemini(promptUser);
         return parserReponse(reponseIA, action.getPrixUnitaire());
     }
 
-    /**
-     * Construit le prompt d'analyse avec les données
-     */
     private String construirePromptAnalyse(Action action, List<Double> historique) {
-        StringBuilder prompt = new StringBuilder();
+        String devise = (action.getBourse() != null && action.getBourse().getDevise() != null)
+                ? action.getBourse().getDevise() : "TND";
 
-        prompt.append("Analyse cette action et prédis son prix futur :\n\n");
-        prompt.append("ACTION: ").append(action.getSymbole()).append(" - ").append(action.getNomEntreprise()).append("\n");
-        prompt.append("SECTEUR: ").append(action.getSecteur()).append("\n");
-        prompt.append("PRIX ACTUEL: ").append(action.getPrixUnitaire()).append(" ").append(action.getBourse().getDevise()).append("\n\n");
+        StringBuilder sb = new StringBuilder();
+        sb.append("Analyse cette action et prédis son prix futur.\n\n");
+        sb.append("ACTION: ").append(action.getSymbole()).append(" - ").append(action.getNomEntreprise()).append("\n");
+        sb.append("SECTEUR: ").append(action.getSecteur()).append("\n");
+        sb.append("PRIX ACTUEL: ").append(action.getPrixUnitaire()).append(" ").append(devise).append("\n\n");
 
-        prompt.append("HISTORIQUE DES 30 DERNIERS JOURS:\n");
-        for (int i = 0; i < historique.size(); i++) {
-            if (i % 5 == 0) { // Afficher tous les 5 jours pour ne pas surcharger
-                prompt.append("J-").append(30 - i).append(": ").append(historique.get(i)).append("\n");
-            }
+        sb.append("HISTORIQUE 30J (1 point / 5 jours):\n");
+        for (int i = 0; i < historique.size(); i += 5) {
+            sb.append("J-").append(30 - i).append(": ").append(historique.get(i)).append("\n");
         }
 
-        // Calculer quelques métriques
-        double min = historique.stream().min(Double::compare).orElse(0.0);
-        double max = historique.stream().max(Double::compare).orElse(0.0);
-        double moyenne = historique.stream().mapToDouble(Double::doubleValue).average().orElse(0.0);
+        double min = historique.stream().min(Double::compare).orElse(action.getPrixUnitaire());
+        double max = historique.stream().max(Double::compare).orElse(action.getPrixUnitaire());
+        double moy = historique.stream().mapToDouble(Double::doubleValue).average().orElse(action.getPrixUnitaire());
 
-        prompt.append("\nMÉTRIQUES:\n");
-        prompt.append("- Prix minimum: ").append(String.format("%.2f", min)).append("\n");
-        prompt.append("- Prix maximum: ").append(String.format("%.2f", max)).append("\n");
-        prompt.append("- Prix moyen: ").append(String.format("%.2f", moyenne)).append("\n");
-        prompt.append("- Volatilité: ").append(String.format("%.2f%%", ((max - min) / moyenne) * 100)).append("\n\n");
+        sb.append("\nMÉTRIQUES:\n");
+        sb.append("- Min: ").append(String.format("%.2f", min)).append("\n");
+        sb.append("- Max: ").append(String.format("%.2f", max)).append("\n");
+        sb.append("- Moyenne: ").append(String.format("%.2f", moy)).append("\n");
+        sb.append("- Volatilité approx: ").append(String.format("%.2f%%", ((max - min) / Math.max(moy, 0.0001)) * 100)).append("\n\n");
 
-        prompt.append("Fournis une prédiction de prix pour 7 jours et 30 jours, avec analyse détaillée.");
-
-        return prompt.toString();
+        sb.append("Donne une prédiction 7j et 30j, scénarios et risques, au format demandé.");
+        return sb.toString();
     }
 
     /**
-     * Appelle l'API Claude
+     * Appel Gemini : models/{model}:generateContent
      */
-    private String appellerClaudeAPI(String userMessage) {
+    private String appelerGemini(String userMessage) {
+        if (!estConfigure()) {
+            return "ERREUR: Clé Gemini manquante. Configure API_KEY avec ta clé AI Studio.";
+        }
+
         try {
-            JSONObject requestBody = new JSONObject();
-            requestBody.put("model", MODEL);
-            requestBody.put("max_tokens", 2048);
-            requestBody.put("system", SYSTEM_PROMPT);
+            JSONObject body = new JSONObject();
 
-            JSONArray messages = new JSONArray();
-            JSONObject msg = new JSONObject();
-            msg.put("role", "user");
-            msg.put("content", userMessage);
-            messages.put(msg);
-            requestBody.put("messages", messages);
+            // contents
+            JSONArray contents = new JSONArray();
 
-            // Envoyer la requête
-            URL url = new URL(API_URL);
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            // 0) SYSTEM PROMPT comme premier message user (compat v1beta)
+            JSONObject sysMsg = new JSONObject();
+            sysMsg.put("role", "user");
+            sysMsg.put("parts", new JSONArray().put(
+                    new JSONObject().put("text", SYSTEM_PROMPT)
+            ));
+            contents.put(sysMsg);
+
+            // 1) Message utilisateur
+            JSONObject user = new JSONObject();
+            user.put("role", "user");
+            user.put("parts", new JSONArray().put(
+                    new JSONObject().put("text", userMessage)
+            ));
+            contents.put(user);
+
+            body.put("contents", contents);
+
+            // generationConfig
+            JSONObject cfg = new JSONObject();
+            cfg.put("temperature", 0.4);
+            cfg.put("maxOutputTokens", 1200);
+            body.put("generationConfig", cfg);
+
+            String endpoint = API_BASE + MODEL + ":generateContent?key=" + API_KEY;
+
+            HttpURLConnection conn = (HttpURLConnection) new URL(endpoint).openConnection();
             conn.setRequestMethod("POST");
-            conn.setRequestProperty("Content-Type", "application/json");
-            conn.setRequestProperty("x-api-key", API_KEY);
-            conn.setRequestProperty("anthropic-version", "2023-06-01");
+            conn.setRequestProperty("Content-Type", "application/json; charset=utf-8");
             conn.setDoOutput(true);
 
             try (OutputStream os = conn.getOutputStream()) {
-                byte[] input = requestBody.toString().getBytes(StandardCharsets.UTF_8);
-                os.write(input, 0, input.length);
+                os.write(body.toString().getBytes(StandardCharsets.UTF_8));
             }
 
-            int responseCode = conn.getResponseCode();
+            int code = conn.getResponseCode();
+            InputStream is = (code >= 200 && code < 300) ? conn.getInputStream() : conn.getErrorStream();
+            String response = readAll(is);
 
-            if (responseCode == 200) {
-                BufferedReader br = new BufferedReader(
-                        new InputStreamReader(conn.getInputStream(), StandardCharsets.UTF_8));
-                StringBuilder response = new StringBuilder();
-                String line;
-                while ((line = br.readLine()) != null) {
-                    response.append(line);
+            if (code >= 200 && code < 300) {
+                JSONObject json = new JSONObject(response);
+
+                JSONArray candidates = json.optJSONArray("candidates");
+                if (candidates == null || candidates.isEmpty()) {
+                    return "ERREUR: Réponse Gemini vide.";
                 }
-                br.close();
 
-                JSONObject jsonResponse = new JSONObject(response.toString());
-                JSONArray content = jsonResponse.getJSONArray("content");
-                return content.getJSONObject(0).getString("text");
+                JSONObject content = candidates.getJSONObject(0).optJSONObject("content");
+                if (content == null) return "ERREUR: content manquant.";
+
+                JSONArray parts = content.optJSONArray("parts");
+                if (parts == null || parts.isEmpty()) return "ERREUR: parts manquant.";
+
+                return parts.getJSONObject(0).optString("text", "ERREUR: text manquant.");
 
             } else {
-                System.err.println("❌ Erreur API (" + responseCode + ")");
-                return "ERREUR: Impossible de contacter l'API de prédiction.";
+                System.err.println("❌ Gemini API Error (" + code + "): " + response);
+
+                if (code == 404) {
+                    return "ERREUR: Modèle Gemini introuvable (404). Change MODEL.";
+                }
+                return "ERREUR: Gemini (" + code + "). " + response;
             }
 
         } catch (Exception e) {
-            System.err.println("❌ Erreur prédiction : " + e.getMessage());
             e.printStackTrace();
             return "ERREUR: " + e.getMessage();
+        } }
+
+
+        /**
+         * Optionnel : liste les modèles disponibles (pour régler ton 404).
+         * Utilisation : appelle cette méthode une fois et regarde la console.
+         */
+    public String listerModels() {
+        if (!estConfigure()) return "Clé manquante.";
+        try {
+            String endpoint = "https://generativelanguage.googleapis.com/v1beta/models?key=" + API_KEY;
+            HttpURLConnection conn = (HttpURLConnection) new URL(endpoint).openConnection();
+            conn.setRequestMethod("GET");
+
+            int code = conn.getResponseCode();
+            InputStream is = (code >= 200 && code < 300) ? conn.getInputStream() : conn.getErrorStream();
+            String response = readAll(is);
+
+            System.out.println("🔎 ListModels code=" + code);
+            System.out.println(response);
+
+            return response;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "Erreur listModels: " + e.getMessage();
         }
     }
 
-    /**
-     * Parse la réponse de Claude en objet structuré
-     */
     private ResultatPrediction parserReponse(String reponse, double prixActuel) {
-        ResultatPrediction resultat = new ResultatPrediction();
-        resultat.reponseComplete = reponse;
+        ResultatPrediction r = new ResultatPrediction();
+        r.reponseComplete = reponse;
 
         try {
-            // Extraire les informations avec regex simple
             String[] lignes = reponse.split("\n");
-
             for (String ligne : lignes) {
-                ligne = ligne.trim();
+                String l = ligne.trim();
 
-                if (ligne.startsWith("TENDANCE:")) {
-                    resultat.tendance = ligne.substring(9).trim();
+                if (l.startsWith("TENDANCE:")) r.tendance = l.substring("TENDANCE:".length()).trim();
+
+                else if (l.startsWith("PREDICTION_7J:")) {
+                    String val = l.substring("PREDICTION_7J:".length()).trim().replaceAll("[^0-9.]", "");
+                    if (!val.isEmpty()) r.prediction7j = Double.parseDouble(val);
                 }
-                else if (ligne.startsWith("PREDICTION_7J:")) {
-                    String val = ligne.substring(14).trim().replaceAll("[^0-9.]", "");
-                    resultat.prediction7j = Double.parseDouble(val);
+                else if (l.startsWith("PREDICTION_30J:")) {
+                    String val = l.substring("PREDICTION_30J:".length()).trim().replaceAll("[^0-9.]", "");
+                    if (!val.isEmpty()) r.prediction30j = Double.parseDouble(val);
                 }
-                else if (ligne.startsWith("PREDICTION_30J:")) {
-                    String val = ligne.substring(15).trim().replaceAll("[^0-9.]", "");
-                    resultat.prediction30j = Double.parseDouble(val);
+                else if (l.startsWith("CONFIANCE:")) {
+                    String val = l.substring("CONFIANCE:".length()).trim().replaceAll("[^0-9]", "");
+                    if (!val.isEmpty()) r.confiance = Integer.parseInt(val);
                 }
-                else if (ligne.startsWith("CONFIANCE:")) {
-                    String val = ligne.substring(10).trim().replaceAll("[^0-9]", "");
-                    resultat.confiance = Integer.parseInt(val);
+                else if (l.startsWith("ANALYSE:")) {
+                    r.analyse = l.substring("ANALYSE:".length()).trim();
                 }
-                else if (ligne.startsWith("ANALYSE:")) {
-                    resultat.analyse = ligne.substring(8).trim();
+                else if (l.contains("Optimiste:")) {
+                    String val = l.substring(l.indexOf(":") + 1).trim().replaceAll("[^0-9.]", "");
+                    if (!val.isEmpty()) r.scenarioOptimiste = Double.parseDouble(val);
                 }
-                else if (ligne.contains("Optimiste:")) {
-                    String val = ligne.substring(ligne.indexOf(":") + 1).trim().replaceAll("[^0-9.]", "");
-                    resultat.scenarioOptimiste = Double.parseDouble(val);
+                else if (l.contains("Réaliste:") || l.contains("Realiste:")) {
+                    String val = l.substring(l.indexOf(":") + 1).trim().replaceAll("[^0-9.]", "");
+                    if (!val.isEmpty()) r.scenarioRealiste = Double.parseDouble(val);
                 }
-                else if (ligne.contains("Réaliste:")) {
-                    String val = ligne.substring(ligne.indexOf(":") + 1).trim().replaceAll("[^0-9.]", "");
-                    resultat.scenarioRealiste = Double.parseDouble(val);
+                else if (l.contains("Pessimiste:")) {
+                    String val = l.substring(l.indexOf(":") + 1).trim().replaceAll("[^0-9.]", "");
+                    if (!val.isEmpty()) r.scenarioPessimiste = Double.parseDouble(val);
                 }
-                else if (ligne.contains("Pessimiste:")) {
-                    String val = ligne.substring(ligne.indexOf(":") + 1).trim().replaceAll("[^0-9.]", "");
-                    resultat.scenarioPessimiste = Double.parseDouble(val);
-                }
-                else if (ligne.startsWith("RISQUES:")) {
-                    resultat.risques = ligne.substring(8).trim();
+                else if (l.startsWith("RISQUES:")) {
+                    r.risques = l.substring("RISQUES:".length()).trim();
                 }
             }
 
-            // Valeurs par défaut si parsing échoue
-            if (resultat.tendance == null) resultat.tendance = "Neutre";
-            if (resultat.prediction7j == 0) resultat.prediction7j = prixActuel;
-            if (resultat.prediction30j == 0) resultat.prediction30j = prixActuel;
-            if (resultat.confiance == 0) resultat.confiance = 50;
-            if (resultat.analyse == null) resultat.analyse = "Analyse en cours...";
+        } catch (Exception ignored) {}
 
-        } catch (Exception e) {
-            System.err.println("Erreur parsing : " + e.getMessage());
-            // Valeurs par défaut
-            resultat.tendance = "Neutre";
-            resultat.prediction7j = prixActuel;
-            resultat.prediction30j = prixActuel;
-            resultat.confiance = 50;
-            resultat.analyse = reponse;
-        }
+        // Defaults
+        if (r.tendance == null) r.tendance = "Neutre";
+        if (r.prediction7j == 0) r.prediction7j = prixActuel;
+        if (r.prediction30j == 0) r.prediction30j = prixActuel;
+        if (r.confiance <= 0) r.confiance = 50;
+        if (r.analyse == null) r.analyse = reponse;
+        if (r.risques == null) r.risques = "Risque marché, volatilité, news, liquidité.";
 
-        return resultat;
+        return r;
     }
 
-    /**
-     * Teste si l'API est configurée
-     */
-    public boolean estConfigure() {
-        return API_KEY != null
-                && !API_KEY.isEmpty()
-                && !API_KEY.equals("VOTRE_CLE_API_ICI");
+    private String readAll(InputStream is) throws Exception {
+        if (is == null) return "";
+        BufferedReader br = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8));
+        StringBuilder sb = new StringBuilder();
+        String line;
+        while ((line = br.readLine()) != null) sb.append(line);
+        br.close();
+        return sb.toString();
     }
 }

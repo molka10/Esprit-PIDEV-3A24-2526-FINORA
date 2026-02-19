@@ -37,54 +37,57 @@ public class ServiceChatbot {
                     "3) Si info insuffisante, pose 1-2 questions.\n" +
                     "4) Si tu ne sais pas, dis-le.\n" +
                     "5) Termine par: 'Ceci est informatif, pas un conseil financier professionnel.'\n";
-
     public String envoyerMessage(String userMessage) {
         if (userMessage == null || userMessage.trim().isEmpty()) return "";
 
         try {
-            // Ajouter message utilisateur
+            // 1) Ajouter message user à l'historique
             Map<String, String> u = new HashMap<>();
             u.put("role", "user");
             u.put("text", userMessage.trim());
             history.add(u);
 
-            JSONObject requestBody = new JSONObject();
-
+            // 2) Construire JSON (SANS systemInstruction)
+            JSONObject body = new JSONObject();
             JSONArray contents = new JSONArray();
 
-            // ✅ 1) System prompt en 1er message (simple & stable)
+            // ✅ On met le system prompt comme 1er message "user"
             JSONObject sys = new JSONObject();
             sys.put("role", "user");
             sys.put("parts", new JSONArray().put(new JSONObject().put("text", SYSTEM_PROMPT)));
             contents.put(sys);
 
-            // ✅ 2) Historique
+            // ✅ Ajouter l'historique
             for (Map<String, String> msg : history) {
                 JSONObject m = new JSONObject();
-                m.put("role", msg.get("role")); // "user" ou "model"
+
+                String role = msg.get("role");
+                // Gemini veut "user" et "model"
+                if ("assistant".equals(role)) role = "model";
+                if (!"user".equals(role) && !"model".equals(role)) role = "user";
+
+                m.put("role", role);
                 m.put("parts", new JSONArray().put(new JSONObject().put("text", msg.get("text"))));
                 contents.put(m);
             }
 
-            requestBody.put("contents", contents);
+            body.put("contents", contents);
 
+            // generationConfig (optionnel)
             JSONObject genCfg = new JSONObject();
             genCfg.put("temperature", 0.6);
             genCfg.put("maxOutputTokens", 800);
-            requestBody.put("generationConfig", genCfg);
+            body.put("generationConfig", genCfg);
 
-            String endpoint = BASE_URL + MODEL + ":generateContent";
-
+            // 3) Appel HTTP
+            String endpoint = BASE_URL + MODEL + ":generateContent?key=" + API_KEY;
             HttpURLConnection conn = (HttpURLConnection) new URL(endpoint).openConnection();
             conn.setRequestMethod("POST");
             conn.setRequestProperty("Content-Type", "application/json; charset=utf-8");
-
-            // ✅ Auth recommandée: x-goog-api-key (doc officielle)
-            conn.setRequestProperty("x-goog-api-key", API_KEY);
             conn.setDoOutput(true);
 
             try (OutputStream os = conn.getOutputStream()) {
-                os.write(requestBody.toString().getBytes(StandardCharsets.UTF_8));
+                os.write(body.toString().getBytes(StandardCharsets.UTF_8));
             }
 
             int code = conn.getResponseCode();
@@ -101,6 +104,7 @@ public class ServiceChatbot {
                         .getJSONObject(0)
                         .getString("text");
 
+                // Ajouter réponse à l'historique
                 Map<String, String> a = new HashMap<>();
                 a.put("role", "model");
                 a.put("text", assistantText);
@@ -110,18 +114,15 @@ public class ServiceChatbot {
             } else {
                 String err = readAll(conn.getErrorStream());
                 System.err.println("❌ Gemini API Error (" + code + "): " + err);
-
-                // Petit message plus clair
-                if (code == 403) return "Accès refusé (clé API / quota / API non activée).";
-                if (code == 404) return "Modèle introuvable. Change le MODEL (ex: gemini-2.5-flash).";
-                return "Désolé, problème technique Gemini. Réessaie.";
+                return "Désolé, problème Gemini (" + code + ").";
             }
 
         } catch (Exception e) {
             e.printStackTrace();
-            return "Erreur connexion Gemini. Vérifie internet + clé API + modèle.";
+            return "Erreur connexion Gemini. Vérifie clé + internet.";
         }
     }
+
 
     public void reinitialiserConversation() {
         history.clear();

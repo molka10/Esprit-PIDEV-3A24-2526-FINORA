@@ -8,30 +8,43 @@
             xmlns="http://javafx.com/javafx/17"
             xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="com.example.crud.controllers.BourseController"
-            stylesheets="@finora-purple-theme.css">
+            style="-fx-background-color: #ffffff;">
 
-    <!-- ===== LEFT SIDEBAR (comme dashboard) ===== -->
+    <!-- ===== LEFT SIDEBAR ===== -->
     <left>
-        <VBox styleClass="sidebar" spacing="10">
-            <Label text="FINORA" styleClass="brand"/>
-            <Label text="Admin" styleClass="muted"/>
+        <VBox spacing="10"
+              style="-fx-background-color: #f8f9fa; -fx-padding: 20 10; -fx-pref-width: 200; -fx-border-color: transparent #e9ecef transparent transparent; -fx-border-width: 0 1 0 0;">
+            <Label text="FINORA"
+                   style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #a855f7;"/>
+            <Label text="Admin"
+                   style="-fx-font-size: 12px; -fx-text-fill: #6b7280;"/>
 
-            <Button text="📊 Dashboard" styleClass="nav-btn" onAction="#retourProfil"/>
-            <Button text="🏛 Bourses" styleClass="nav-btn active"/>
-            <Button text="📈 Actions" styleClass="nav-btn" onAction="#retourProfil"/>
+            <Button text="📊 Dashboard"
+                    onAction="#retourProfil"
+                    style="-fx-background-color: transparent; -fx-text-fill: #6b7280; -fx-alignment: CENTER_LEFT; -fx-padding: 10 14; -fx-background-radius: 8; -fx-cursor: hand;"/>
+            <Button text="🏛 Bourses"
+                    style="-fx-background-color: #f3e8ff; -fx-text-fill: #a855f7; -fx-alignment: CENTER_LEFT; -fx-padding: 10 14; -fx-background-radius: 8; -fx-cursor: hand; -fx-font-weight: bold;"/>
+            <Button text="📈 Actions"
+                    onAction="#retourProfil"
+                    style="-fx-background-color: transparent; -fx-text-fill: #6b7280; -fx-alignment: CENTER_LEFT; -fx-padding: 10 14; -fx-background-radius: 8; -fx-cursor: hand;"/>
 
             <Pane VBox.vgrow="ALWAYS"/>
 
-            <Label fx:id="lblTotal" text="Total : 0 bourse(s)" styleClass="sidebar-footer"/>
+            <Label fx:id="lblTotal"
+                   text="Total : 0 bourse(s)"
+                   style="-fx-font-size: 11px; -fx-text-fill: #9ca3af;"/>
         </VBox>
     </left>
 
-    <!-- ===== TOP BAR (titre + search + actions) ===== -->
+    <!-- ===== TOP BAR ===== -->
     <top>
-        <HBox styleClass="topbar" alignment="CENTER_LEFT" spacing="14">
+        <HBox alignment="CENTER_LEFT" spacing="14"
+              style="-fx-background-color: white; -fx-padding: 20 24; -fx-border-color: transparent transparent #e9ecef transparent; -fx-border-width: 0 0 1 0;">
             <VBox spacing="2">
-                <Label text="Gestion des Bourses" styleClass="top-title"/>
-                <Label text="Marchés Financiers Internationaux" styleClass="top-sub"/>
+                <Label text="Gestion des Bourses"
+                       style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #1f2937;"/>
+                <Label text="Marchés Financiers Internationaux"
+                       style="-fx-font-size: 13px; -fx-text-fill: #6b7280;"/>
             </VBox>
 
             <Pane HBox.hgrow="ALWAYS"/>
@@ -39,37 +52,54 @@
             <HBox spacing="10" alignment="CENTER_RIGHT">
                 <TextField fx:id="searchField"
                            promptText="Rechercher un nom ou un pays..."
-                           styleClass="search"/>
+                           style="-fx-background-color: white; -fx-border-color: #e5e7eb; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 10 14; -fx-pref-width: 250; -fx-text-fill: #1f2937;"/>
 
-                <Button text="Actualiser" onAction="#handleActualiser" styleClass="btn-secondary"/>
-                <Button text="+ Nouvelle" onAction="#ouvrirDialogAjout" styleClass="btn-primary"/>
-                <Button text="Retour" onAction="#retourProfil" styleClass="btn-outline"/>
+                <Button text="Actualiser"
+                        onAction="#handleActualiser"
+                        style="-fx-background-color: #f3f4f6; -fx-text-fill: #4b5563; -fx-font-size: 13px; -fx-background-radius: 8; -fx-padding: 10 18; -fx-cursor: hand;"/>
+                <Button text="+ Nouvelle"
+                        onAction="#ouvrirDialogAjout"
+                        style="-fx-background-color: #a855f7; -fx-text-fill: white; -fx-font-size: 13px; -fx-font-weight: bold; -fx-background-radius: 8; -fx-padding: 10 20; -fx-cursor: hand;"/>
+                <Button text="Retour"
+                        onAction="#retourProfil"
+                        style="-fx-background-color: transparent; -fx-text-fill: #6b7280; -fx-font-size: 13px; -fx-border-color: #e5e7eb; -fx-border-radius: 8; -fx-background-radius: 8; -fx-border-width: 1; -fx-padding: 10 18; -fx-cursor: hand;"/>
             </HBox>
         </HBox>
     </top>
 
     <!-- ===== CENTER CONTENT ===== -->
     <center>
-        <VBox styleClass="content-wrap" spacing="14">
+        <VBox spacing="14" style="-fx-padding: 24; -fx-background-color: #f8f9fa;">
 
-            <!-- Bloc recherche + filtres (card) -->
-            <VBox styleClass="card" spacing="12">
-                <Label text="Recherche et Filtres" styleClass="card-title"/>
+            <!-- Bloc recherche + filtres -->
+            <VBox spacing="12"
+                  style="-fx-background-color: white; -fx-background-radius: 12; -fx-padding: 18; -fx-border-color: #e9ecef; -fx-border-radius: 12; -fx-border-width: 1; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 8, 0, 0, 2);">
+                <Label text="Recherche et Filtres"
+                       style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #1f2937;"/>
                 <HBox spacing="10" alignment="CENTER_LEFT">
-                    <TextField fx:id="searchField"
+                    <TextField fx:id="searchFieldFilter"
                                promptText="Rechercher par nom ou pays..."
                                HBox.hgrow="ALWAYS"
-                               styleClass="input"/>
+                               style="-fx-background-color: white; -fx-border-color: #e5e7eb; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 10 14; -fx-text-fill: #1f2937;"/>
 
-                    <Button text="Rechercher" onAction="#handleRechercher" styleClass="btn-primary"/>
-                    <Button text="Actualiser" onAction="#handleActualiser" styleClass="btn-secondary"/>
+                    <Button text="Rechercher"
+                            onAction="#handleRechercher"
+                            style="-fx-background-color: #a855f7; -fx-text-fill: white; -fx-font-size: 13px; -fx-font-weight: bold; -fx-background-radius: 8; -fx-padding: 10 20; -fx-cursor: hand;"/>
+                    <Button text="Actualiser"
+                            onAction="#handleActualiser"
+                            style="-fx-background-color: #f3f4f6; -fx-text-fill: #4b5563; -fx-font-size: 13px; -fx-background-radius: 8; -fx-padding: 10 18; -fx-cursor: hand;"/>
                 </HBox>
             </VBox>
 
             <!-- Cards zone -->
-            <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS" styleClass="scroll" hbarPolicy="NEVER">
+            <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS" hbarPolicy="NEVER"
+                        style="-fx-background-color: transparent;">
                 <content>
-                    <FlowPane fx:id="cardsContainer" hgap="14" vgap="14" prefWrapLength="900" styleClass="cards-wrap">
+                    <FlowPane fx:id="cardsContainer"
+                              hgap="14"
+                              vgap="14"
+                              prefWrapLength="900"
+                              style="-fx-background-color: transparent;">
                         <padding>
                             <Insets top="4" right="4" bottom="4" left="4"/>
                         </padding>
