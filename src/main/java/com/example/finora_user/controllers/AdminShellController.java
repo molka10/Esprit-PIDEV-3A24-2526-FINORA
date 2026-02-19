@@ -5,6 +5,7 @@ import com.example.finora_user.utils.Session;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
+import javafx.scene.control.Label;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 
@@ -12,14 +13,34 @@ public class AdminShellController {
 
     @FXML private StackPane contentArea;
 
+    // Topbar profile widgets
+    @FXML private Label avatarText;
+    @FXML private Label profileNameLabel;
+
     @FXML
     public void initialize() {
-        // Basic route protection: only ADMIN can access the admin shell
         if (!Session.isAdmin()) {
             logout();
             return;
         }
-        goBourse(); // default page
+        setupProfileHeader();
+        goBourse();
+    }
+
+    private void setupProfileHeader() {
+        if (Session.getCurrentUser() == null) return;
+
+        String username = Session.getCurrentUser().getUsername();
+        profileNameLabel.setText(username);
+
+        avatarText.setText(getInitials(username));
+    }
+
+    private String getInitials(String name) {
+        if (name == null || name.isBlank()) return "A";
+        String n = name.trim();
+        if (n.length() == 1) return n.toUpperCase();
+        return ("" + n.charAt(0) + n.charAt(n.length() - 1)).toUpperCase();
     }
 
     private void loadCenter(String fxml) {
@@ -35,6 +56,11 @@ public class AdminShellController {
     @FXML public void goPortefeuille() { loadCenter("portefeuille-view.fxml"); }
     @FXML public void goAppelOffre() { loadCenter("appeloffre-view.fxml"); }
     @FXML public void goGestionUsers() { loadCenter("users-view.fxml"); }
+
+    @FXML
+    public void goProfile() {
+        loadCenter("profile-view.fxml");
+    }
 
     @FXML
     public void logout() {

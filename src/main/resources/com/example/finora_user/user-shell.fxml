@@ -14,6 +14,19 @@
             <children>
                 <Label text="Finora • Dashboard" styleClass="topbar-title"/>
                 <Region HBox.hgrow="ALWAYS"/>
+
+                <!-- PROFILE BUTTON -->
+                <Button onAction="#goProfile" styleClass="profile-btn">
+                    <graphic>
+                        <HBox spacing="8" alignment="CENTER_LEFT">
+                            <StackPane styleClass="avatar">
+                                <Label fx:id="avatarText" text="U" styleClass="avatar-text"/>
+                            </StackPane>
+                            <Label fx:id="profileNameLabel" text="Profil" styleClass="profile-name"/>
+                        </HBox>
+                    </graphic>
+                </Button>
+
                 <Button text="Déconnexion" onAction="#logout" styleClass="btn-ghost"/>
             </children>
         </HBox>

@@ -1,113 +1,300 @@
-/* ---------- Global ---------- */
+/* =========================
+   FINORA THEME (White + Purple)
+   ========================= */
+
 .root-bg {
-    -fx-background-color: #F8F7FF; /* soft white/lavender */
+    -fx-background-color: #F8F7FF;
     -fx-font-family: "Segoe UI";
+    -fx-font-size: 13px;
 }
 
-/* ---------- Top bar ---------- */
+.muted { -fx-text-fill: #6B7280; }
+
+/* ---------- Topbar ---------- */
 .topbar {
     -fx-background-color: #FFFFFF;
     -fx-border-color: #E9D5FF;
     -fx-border-width: 0 0 1 0;
+    -fx-effect: dropshadow(gaussian, rgba(17, 24, 39, 0.08), 18, 0.2, 0, 6);
 }
 
 .topbar-title {
-    -fx-text-fill: #4C1D95; /* deep purple */
+    -fx-text-fill: #4C1D95;
     -fx-font-size: 16px;
-    -fx-font-weight: bold;
+    -fx-font-weight: 800;
 }
 
 /* ---------- Cards ---------- */
 .card {
     -fx-background-color: #FFFFFF;
-    -fx-background-radius: 15;
-    -fx-padding: 12;
-
-    /* subtle border to look premium */
+    -fx-background-radius: 16;
     -fx-border-color: #E9D5FF;
-    -fx-border-radius: 15;
+    -fx-border-radius: 16;
     -fx-border-width: 1;
+    -fx-effect: dropshadow(gaussian, rgba(17, 24, 39, 0.06), 18, 0.2, 0, 8);
 }
 
-/* Titles */
 .h2 {
-    -fx-text-fill: #6D28D9; /* primary purple */
+    -fx-text-fill: #6D28D9;
     -fx-font-size: 16px;
-    -fx-font-weight: bold;
+    -fx-font-weight: 800;
 }
 
-/* Default label */
-.label {
-    -fx-text-fill: #111827; /* dark text */
-}
+.label { -fx-text-fill: #111827; }
 
 /* ---------- Inputs ---------- */
-.text-field, .password-field, .combo-box {
+.text-field, .password-field, .combo-box, .date-picker {
     -fx-background-color: #FFFFFF;
     -fx-text-fill: #111827;
-
-    -fx-background-radius: 8;
-    -fx-border-radius: 8;
-    -fx-border-color: #D8B4FE; /* light purple border */
+    -fx-background-radius: 10;
+    -fx-border-radius: 10;
+    -fx-border-color: #D8B4FE;
     -fx-border-width: 1;
+    -fx-padding: 8 10 8 10;
 }
 
-/* focus effect */
-.text-field:focused, .password-field:focused, .combo-box:focused {
+.text-field:focused, .password-field:focused, .combo-box:focused, .date-picker:focused {
     -fx-border-color: #7C3AED;
     -fx-border-width: 2;
 }
 
-/* ---------- Buttons ---------- */
-.btn-primary {
-    -fx-background-color: #7C3AED; /* primary purple */
-    -fx-text-fill: white;
-    -fx-background-radius: 8;
+/* Disabled field (ID) */
+.field-disabled {
+    -fx-opacity: 1.0; /* keep readable */
+    -fx-background-color: #F3F4F6;
+    -fx-border-color: #E5E7EB;
+    -fx-text-fill: #6B7280;
 }
 
-.btn-primary:hover {
-    -fx-background-color: #8B5CF6;
+/* ---------- Buttons ---------- */
+.button {
+    -fx-cursor: hand;
+    -fx-padding: 9 12 9 12;
+    -fx-font-weight: 700;
+    -fx-background-radius: 10;
 }
+
+.btn-primary {
+    -fx-background-color: #7C3AED;
+    -fx-text-fill: white;
+}
+.btn-primary:hover { -fx-background-color: #8B5CF6; }
 
 .btn-secondary {
-    -fx-background-color: #EDE9FE; /* light purple */
-    -fx-text-fill: #5B21B6;        /* dark purple */
-    -fx-background-radius: 8;
+    -fx-background-color: #EDE9FE;
+    -fx-text-fill: #5B21B6;
     -fx-border-color: #D8B4FE;
-    -fx-border-radius: 8;
+    -fx-border-radius: 10;
     -fx-border-width: 1;
 }
-
-.btn-secondary:hover {
-    -fx-background-color: #DDD6FE;
-}
+.btn-secondary:hover { -fx-background-color: #DDD6FE; }
 
 .btn-danger {
     -fx-background-color: #EF4444;
     -fx-text-fill: white;
-    -fx-background-radius: 8;
 }
-
-.btn-danger:hover {
-    -fx-background-color: #DC2626;
-}
+.btn-danger:hover { -fx-background-color: #DC2626; }
 
 .btn-ghost {
     -fx-background-color: transparent;
     -fx-text-fill: #6D28D9;
+    -fx-font-weight: 700;
 }
-
 .btn-ghost:hover {
     -fx-text-fill: #5B21B6;
     -fx-underline: true;
 }
 
-/* ---------- Validation error ---------- */
+/* ---------- Validation ---------- */
 .field-error {
     -fx-border-color: #EF4444;
     -fx-border-width: 2;
-    -fx-border-radius: 8;
+    -fx-border-radius: 10;
 }
-.field {
-    -fx-background-radius: 8;
+
+/* =========================
+   USERS LIST (Card View)
+   ========================= */
+
+.users-list {
+    -fx-background-color: transparent;
+    -fx-padding: 0;
+    -fx-border-color: transparent;
+}
+
+.users-list .list-cell {
+    -fx-background-color: transparent;
+    -fx-padding: 6 0 6 0;
+}
+
+.users-list .list-cell:filled:selected,
+.users-list .list-cell:filled:selected:hover {
+    -fx-background-color: transparent;
+}
+
+.user-card {
+    -fx-background-color: #FFFFFF;
+    -fx-background-radius: 14;
+    -fx-border-color: #E9D5FF;
+    -fx-border-radius: 14;
+    -fx-border-width: 1;
+    -fx-effect: dropshadow(gaussian, rgba(17, 24, 39, 0.06), 14, 0.2, 0, 4);
+    -fx-scale-x: 1.0;
+    -fx-scale-y: 1.0;
+}
+
+.user-card:hover {
+    -fx-border-color: #A78BFA;
+    -fx-effect: dropshadow(gaussian, rgba(124, 58, 237, 0.18), 18, 0.2, 0, 8);
+
+    /* subtle hover scale */
+    -fx-scale-x: 1.01;
+    -fx-scale-y: 1.01;
+}
+
+.user-card-selected {
+    -fx-border-color: #7C3AED;
+    -fx-effect: dropshadow(gaussian, rgba(124, 58, 237, 0.25), 22, 0.25, 0, 10);
+}
+
+.user-name {
+    -fx-text-fill: #111827;
+    -fx-font-size: 14px;
+    -fx-font-weight: 800;
+}
+
+.user-email { -fx-text-fill: #6B7280; }
+
+.badge {
+    -fx-padding: 5 10 5 10;
+    -fx-background-radius: 999;
+    -fx-font-weight: 800;
+}
+
+.badge-admin {
+    -fx-background-color: #F3E8FF;
+    -fx-text-fill: #4C1D95;
+    -fx-border-color: #D8B4FE;
+    -fx-border-radius: 999;
+    -fx-border-width: 1;
+}
+
+.badge-entreprise {
+    -fx-background-color: #EDE9FE;
+    -fx-text-fill: #5B21B6;
+    -fx-border-color: #D8B4FE;
+    -fx-border-radius: 999;
+    -fx-border-width: 1;
+}
+
+.badge-user {
+    -fx-background-color: #EEF2FF;
+    -fx-text-fill: #4338CA;
+    -fx-border-color: #C7D2FE;
+    -fx-border-radius: 999;
+    -fx-border-width: 1;
+}
+
+/* =========================
+   PROFILE BUTTON (Top Right)
+   ========================= */
+
+.profile-btn {
+    -fx-background-color: transparent;
+    -fx-padding: 6 10 6 10;
+    -fx-background-radius: 999;
+    -fx-border-radius: 999;
+    -fx-border-color: #E9D5FF;
+    -fx-border-width: 1;
+}
+
+.profile-btn:hover {
+    -fx-border-color: #A78BFA;
+    -fx-effect: dropshadow(gaussian, rgba(124, 58, 237, 0.18), 16, 0.2, 0, 6);
+}
+
+.avatar {
+    -fx-min-width: 28px;
+    -fx-min-height: 28px;
+    -fx-max-width: 28px;
+    -fx-max-height: 28px;
+    -fx-background-radius: 999;
+    -fx-background-color: #7C3AED;
+    -fx-alignment: center;
+}
+
+.avatar-text {
+    -fx-text-fill: white;
+    -fx-font-weight: 900;
+}
+/* =========================
+   ScrollPane (page scroll)
+   ========================= */
+
+.content-scroll {
+    -fx-background: transparent;
+    -fx-background-color: transparent;
+    -fx-padding: 0;
+    -fx-border-color: transparent;
+}
+
+.content-scroll > .viewport {
+    -fx-background-color: transparent;
+}
+
+.content-scroll .scroll-bar:vertical .thumb {
+    -fx-background-color: rgba(124, 58, 237, 0.35);
+    -fx-background-radius: 10;
+}
+
+.content-scroll .scroll-bar:vertical .track {
+    -fx-background-color: rgba(124, 58, 237, 0.08);
+    -fx-background-radius: 10;
+}
+/* ---------- Profile button (topbar) ---------- */
+.profile-btn {
+    -fx-background-color: transparent;
+    -fx-padding: 6 10 6 10;
+    -fx-background-radius: 999;
+    -fx-border-radius: 999;
+    -fx-border-color: #E9D5FF;
+    -fx-border-width: 1;
+}
+
+.profile-btn:hover {
+    -fx-border-color: #A78BFA;
+    -fx-effect: dropshadow(gaussian, rgba(124, 58, 237, 0.18), 16, 0.2, 0, 6);
+}
+
+.profile-name {
+    -fx-text-fill: #5B21B6;
+    -fx-font-weight: 800;
+}
+
+/* Avatar */
+.avatar {
+    -fx-min-width: 28px;
+    -fx-min-height: 28px;
+    -fx-max-width: 28px;
+    -fx-max-height: 28px;
+    -fx-background-radius: 999;
+    -fx-background-color: #7C3AED;
+    -fx-alignment: center;
+}
+
+.avatar-text {
+    -fx-text-fill: white;
+    -fx-font-weight: 900;
+}
+
+/* Larger avatar for profile page */
+.avatar-lg {
+    -fx-min-width: 46px;
+    -fx-min-height: 46px;
+    -fx-max-width: 46px;
+    -fx-max-height: 46px;
+}
+
+.avatar-text-lg {
+    -fx-font-size: 16px;
 }
