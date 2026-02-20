@@ -43,12 +43,8 @@ public class Formation {
 
     @Override
     public String toString() {
-        return "Formation{" +
-                "id=" + id +
-                ", titre='" + titre + '\'' +
-                ", categorie='" + categorie + '\'' +
-                ", niveau='" + niveau + '\'' +
-                ", published=" + published +
-                '}';
+        // ✅ Important: ComboBox falls back to toString() sometimes
+        // We only want the visible title, not "Formation{id=...}"
+        return (titre == null || titre.isBlank()) ? "Formation" : titre;
     }
 }

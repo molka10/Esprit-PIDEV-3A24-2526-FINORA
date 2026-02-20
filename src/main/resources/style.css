@@ -554,3 +554,272 @@
     -fx-border-width: 2px;
     -fx-effect: dropshadow(gaussian, rgba(124, 58, 237, 0.28), 22, 0, 0, 6);
 }
+/* ═══════════════════════════════════════════════════════════════════
+   LESSON VIEWER — MAX Upgrade (Sidebar + completion + polish)
+   Append-only styles (safe)
+   ═══════════════════════════════════════════════════════════════════ */
+
+.viewer-split {
+    -fx-background-color: transparent;
+    -fx-padding: 0;
+}
+
+.viewer-sidebar-scroll {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-background: transparent;
+}
+
+.viewer-sidebar {
+    -fx-background-color: white;
+    -fx-background-radius: 16px;
+    -fx-border-radius: 16px;
+    -fx-border-color: #EDE9FE;
+    -fx-border-width: 1.5px;
+    -fx-effect: dropshadow(gaussian, rgba(109,40,217,0.06), 18, 0, 0, 4);
+}
+
+.viewer-rating {
+    -fx-text-fill: #F59E0B; /* amber-like stars */
+    -fx-font-family: "Segoe UI", Arial, sans-serif;
+    -fx-font-weight: 800;
+    -fx-font-size: 12px;
+}
+
+.viewer-instructor {
+    -fx-text-fill: #6B5A8A;
+    -fx-font-family: "Segoe UI", Arial, sans-serif;
+    -fx-font-size: 12px;
+    -fx-font-weight: 700;
+}
+
+.viewer-totalbadge {
+    -fx-text-fill: #5B21B6;
+    -fx-background-color: #EDE9FE;
+    -fx-border-color: #C4B5FD;
+    -fx-border-width: 1.5px;
+    -fx-background-radius: 999px;
+    -fx-border-radius: 999px;
+    -fx-padding: 6 14 6 14;
+    -fx-font-family: "Segoe UI", Arial, sans-serif;
+    -fx-font-size: 12px;
+    -fx-font-weight: 800;
+}
+
+.viewer-progress-detail {
+    -fx-text-fill: #6B5A8A;
+    -fx-font-family: "Segoe UI", Arial, sans-serif;
+    -fx-font-size: 12px;
+    -fx-font-weight: 700;
+}
+
+.btn-complete {
+    -fx-background-color: white;
+    -fx-text-fill: #065F46;
+    -fx-border-color: #6EE7B7;
+    -fx-border-width: 1.5px;
+    -fx-background-radius: 10px;
+    -fx-border-radius: 10px;
+    -fx-font-family: "Segoe UI", Arial, sans-serif;
+    -fx-font-weight: 800;
+    -fx-font-size: 12.5px;
+    -fx-padding: 10 16 10 16;
+}
+.btn-complete:hover {
+    -fx-background-color: #ECFDF5;
+    -fx-border-color: #10B981;
+}
+.btn-complete:selected {
+    -fx-background-color: #D1FAE5;
+    -fx-border-color: #10B981;
+    -fx-text-fill: #065F46;
+}
+
+/* Curriculum items */
+.curr-item {
+    -fx-background-color: #FAF8FF;
+    -fx-border-color: #DDD6FE;
+    -fx-border-width: 1.5px;
+    -fx-background-radius: 12px;
+    -fx-border-radius: 12px;
+    -fx-padding: 10 12 10 12;
+    -fx-cursor: hand;
+}
+.curr-item:hover {
+    -fx-background-color: #F5F3FF;
+    -fx-border-color: #A78BFA;
+}
+
+.curr-item-active {
+    -fx-background-color: #EDE9FE;
+    -fx-border-color: #7C3AED;
+    -fx-effect: dropshadow(gaussian, rgba(124,58,237,0.14), 16, 0, 0, 4);
+}
+
+.curr-item-done {
+    -fx-border-color: #10B981;
+}
+
+.curr-row { -fx-alignment: center-left; }
+
+.curr-num {
+    -fx-text-fill: #7C3AED;
+    -fx-font-family: "Segoe UI", Arial, sans-serif;
+    -fx-font-weight: 900;
+    -fx-font-size: 12px;
+    -fx-background-color: #EDE9FE;
+    -fx-background-radius: 999px;
+    -fx-padding: 4 10 4 10;
+}
+
+.curr-title {
+    -fx-text-fill: #1E0A3C;
+    -fx-font-family: "Segoe UI", Arial, sans-serif;
+    -fx-font-weight: 800;
+    -fx-font-size: 12.5px;
+}
+
+.curr-check {
+    -fx-text-fill: #10B981;
+    -fx-font-family: "Segoe UI", Arial, sans-serif;
+    -fx-font-weight: 900;
+    -fx-font-size: 13px;
+}
+/* ═══════════════════════════════════════════════════════════════════
+   LESSON VIEWER — Reader Mode Tools + TextFlow Article Rendering
+   Append-only styles (safe)
+   ═══════════════════════════════════════════════════════════════════ */
+
+.reader-card {
+    -fx-background-color: white;
+    -fx-background-radius: 16px;
+    -fx-border-radius: 16px;
+    -fx-border-color: #EDE9FE;
+    -fx-border-width: 1.5px;
+    -fx-effect: dropshadow(gaussian, rgba(109,40,217,0.05), 16, 0, 0, 4);
+}
+
+.reader-find {
+    -fx-background-color: #FAF8FF;
+    -fx-background-radius: 10px;
+    -fx-border-radius: 10px;
+    -fx-border-color: #DDD6FE;
+    -fx-border-width: 1.5px;
+    -fx-padding: 8 12 8 12;
+    -fx-font-size: 12.5px;
+    -fx-font-family: "Segoe UI", Arial, sans-serif;
+    -fx-text-fill: #1E0A3C;
+    -fx-prompt-text-fill: #A78BFA;
+}
+
+.reader-toolbtn {
+    -fx-background-color: white;
+    -fx-text-fill: #7C3AED;
+    -fx-border-color: #C4B5FD;
+    -fx-border-width: 1.5px;
+    -fx-background-radius: 10px;
+    -fx-border-radius: 10px;
+    -fx-font-family: "Segoe UI", Arial, sans-serif;
+    -fx-font-weight: 800;
+    -fx-font-size: 12px;
+    -fx-padding: 8 12 8 12;
+    -fx-cursor: hand;
+}
+.reader-toolbtn:hover {
+    -fx-background-color: #F5F3FF;
+    -fx-border-color: #7C3AED;
+}
+
+.reader-findinfo {
+    -fx-text-fill: #6B5A8A;
+    -fx-font-family: "Segoe UI", Arial, sans-serif;
+    -fx-font-weight: 800;
+    -fx-font-size: 12px;
+}
+
+.reader-flow {
+    -fx-line-spacing: 6px;
+}
+
+/* Base text style */
+.reader-text {
+    -fx-fill: #1E0A3C;
+    -fx-font-family: "Georgia", serif;
+}
+
+/* Font size presets */
+.reader-font-13 .reader-text { -fx-font-size: 13px; }
+.reader-font-14 .reader-text { -fx-font-size: 14px; }
+.reader-font-15 .reader-text { -fx-font-size: 15px; }
+.reader-font-16 .reader-text { -fx-font-size: 16px; }
+.reader-font-17 .reader-text { -fx-font-size: 17px; }
+.reader-font-18 .reader-text { -fx-font-size: 18px; }
+.reader-font-19 .reader-text { -fx-font-size: 19px; }
+.reader-font-20 .reader-text { -fx-font-size: 20px; }
+
+/* Search highlights */
+.reader-highlight {
+    -fx-fill: #1E0A3C;
+    -fx-font-weight: 900;
+    -fx-underline: false;
+}
+.reader-highlight-active {
+    -fx-fill: #5B21B6;
+    -fx-underline: true;
+}
+/* ── Focus toggle button ─────────────────────────────────────────── */
+.btn-focus {
+    -fx-background-color: white;
+    -fx-text-fill: #7C3AED;
+    -fx-border-color: #C4B5FD;
+    -fx-border-width: 1.5px;
+    -fx-background-radius: 10px;
+    -fx-border-radius: 10px;
+    -fx-font-family: "Segoe UI", Arial, sans-serif;
+    -fx-font-weight: 800;
+    -fx-font-size: 12px;
+    -fx-padding: 8 14 8 14;
+    -fx-cursor: hand;
+}
+.btn-focus:hover {
+    -fx-background-color: #F5F3FF;
+    -fx-border-color: #7C3AED;
+}
+.btn-focus:selected {
+    -fx-background-color: #EDE9FE;
+    -fx-border-color: #7C3AED;
+    -fx-text-fill: #5B21B6;
+}
+
+/* ── Reader text visuals (kept, but now font size is guaranteed in code) ── */
+.reader-text { -fx-fill: #1E0A3C; -fx-font-family: "Georgia", serif; }
+.reader-highlight { -fx-font-weight: 900; }
+.reader-highlight-active { -fx-fill: #5B21B6; -fx-underline: true; }
+/* ── Focus toggle button ─────────────────────────────────────────── */
+.btn-focus {
+    -fx-background-color: white;
+    -fx-text-fill: #7C3AED;
+    -fx-border-color: #C4B5FD;
+    -fx-border-width: 1.5px;
+    -fx-background-radius: 10px;
+    -fx-border-radius: 10px;
+    -fx-font-family: "Segoe UI", Arial, sans-serif;
+    -fx-font-weight: 800;
+    -fx-font-size: 12px;
+    -fx-padding: 8 14 8 14;
+    -fx-cursor: hand;
+}
+.btn-focus:hover {
+    -fx-background-color: #F5F3FF;
+    -fx-border-color: #7C3AED;
+}
+.btn-focus:selected {
+    -fx-background-color: #EDE9FE;
+    -fx-border-color: #7C3AED;
+    -fx-text-fill: #5B21B6;
+}
+
+/* ── Reader text visuals (kept, but now font size is guaranteed in code) ── */
+.reader-text { -fx-fill: #1E0A3C; -fx-font-family: "Georgia", serif; }
+.reader-highlight { -fx-font-weight: 900; }
+.reader-highlight-active { -fx-fill: #5B21B6; -fx-underline: true; }

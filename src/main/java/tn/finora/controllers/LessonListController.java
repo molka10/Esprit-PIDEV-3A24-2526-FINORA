@@ -22,7 +22,7 @@ public class LessonListController {
     @FXML private ComboBox<Formation> cbFormation;
     @FXML private TextField txtSearch;
     @FXML private ComboBox<String> cbSort;
-    @FXML private FlowPane cardsBox;      // ✅ Changed from VBox to FlowPane for grid
+    @FXML private FlowPane cardsBox;      // Grid layout
     @FXML private Label lblInfo;
 
     private final LessonService lessonService = new LessonService();
@@ -47,20 +47,27 @@ public class LessonListController {
             cbFormation.setItems(FXCollections.observableArrayList(formations));
 
             formationTitleById.clear();
-            for (Formation f : formations)
+            for (Formation f : formations) {
                 formationTitleById.put(f.getId(), f.getTitre());
+            }
 
-            // No ID shown — title only
+            // ✅ Cleaner UX
+            cbFormation.setPromptText("Toutes les formations");
+
+            // ✅ Always show title only (no ID)
             cbFormation.setCellFactory(list -> new ListCell<>() {
-                @Override protected void updateItem(Formation item, boolean empty) {
+                @Override
+                protected void updateItem(Formation item, boolean empty) {
                     super.updateItem(item, empty);
-                    setText(empty || item == null ? null : item.getTitre());
+                    setText(empty || item == null ? null : safe(item.getTitre()));
                 }
             });
+
             cbFormation.setButtonCell(new ListCell<>() {
-                @Override protected void updateItem(Formation item, boolean empty) {
+                @Override
+                protected void updateItem(Formation item, boolean empty) {
                     super.updateItem(item, empty);
-                    setText(empty || item == null ? "Toutes les formations" : item.getTitre());
+                    setText(empty || item == null ? "Toutes les formations" : safe(item.getTitre()));
                 }
             });
 
@@ -115,24 +122,25 @@ public class LessonListController {
 
         filtered = sortLessons(filtered, sort);
         lastDisplayed = filtered;
+
         renderCards(filtered);
 
         if (lblInfo != null) {
             lblInfo.setText("Affichées: " + filtered.size() + " / " + allLessons.size()
-                    + (fSel == null ? "" : "  |  " + fSel.getTitre()));
+                    + (fSel == null ? "" : "  |  " + safe(fSel.getTitre())));
         }
     }
 
     private List<Lesson> sortLessons(List<Lesson> list, String sort) {
         if (sort == null) sort = "Ordre (croissant)";
         return switch (sort) {
-            case "Titre (A → Z)"       -> list.stream().sorted(Comparator.comparing(l -> safeLower(l.getTitre()))).toList();
-            case "Titre (Z → A)"       -> list.stream().sorted(Comparator.comparing((Lesson l) -> safeLower(l.getTitre())).reversed()).toList();
-            case "Ordre (décroissant)" -> list.stream().sorted((a, b) -> Integer.compare(b.getOrdre(), a.getOrdre())).toList();
-            case "Durée (croissante)"  -> list.stream().sorted(Comparator.comparingInt(Lesson::getDureeMinutes)).toList();
-            case "Durée (décroissante)"-> list.stream().sorted((a, b) -> Integer.compare(b.getDureeMinutes(), a.getDureeMinutes())).toList();
-            case "Dernier ajouté"      -> list.stream().sorted((a, b) -> Integer.compare(b.getId(), a.getId())).toList();
-            default                    -> list.stream().sorted(Comparator.comparingInt(Lesson::getOrdre)).toList();
+            case "Titre (A → Z)"        -> list.stream().sorted(Comparator.comparing(l -> safeLower(l.getTitre()))).toList();
+            case "Titre (Z → A)"        -> list.stream().sorted(Comparator.comparing((Lesson l) -> safeLower(l.getTitre())).reversed()).toList();
+            case "Ordre (décroissant)"  -> list.stream().sorted((a, b) -> Integer.compare(b.getOrdre(), a.getOrdre())).toList();
+            case "Durée (croissante)"   -> list.stream().sorted(Comparator.comparingInt(Lesson::getDureeMinutes)).toList();
+            case "Durée (décroissante)" -> list.stream().sorted((a, b) -> Integer.compare(b.getDureeMinutes(), a.getDureeMinutes())).toList();
+            case "Dernier ajouté"       -> list.stream().sorted((a, b) -> Integer.compare(b.getId(), a.getId())).toList();
+            default                     -> list.stream().sorted(Comparator.comparingInt(Lesson::getOrdre)).toList();
         };
     }
 
@@ -143,7 +151,7 @@ public class LessonListController {
         }
     }
 
-    // ✅ Square card: fixed 260x260, grid layout
+    // Square card 260x260
     private VBox createCard(Lesson l) {
         VBox card = new VBox(0);
         card.getStyleClass().add("lesson-square-card");
@@ -153,7 +161,6 @@ public class LessonListController {
         card.setMaxHeight(260);
         card.setUserData(l.getId());
 
-        // ── Purple top accent bar ─────────────────────────────────
         HBox accent = new HBox();
         accent.setPrefHeight(5);
         accent.setMaxHeight(5);
@@ -162,12 +169,10 @@ public class LessonListController {
                         "-fx-background-radius: 14 14 0 0;"
         );
 
-        // ── Card body ─────────────────────────────────────────────
         VBox body = new VBox(10);
         body.setPadding(new Insets(16, 18, 16, 18));
         VBox.setVgrow(body, Priority.ALWAYS);
 
-        // Order number circle + title row
         HBox titleRow = new HBox(10);
         titleRow.setAlignment(Pos.CENTER_LEFT);
 
@@ -191,8 +196,7 @@ public class LessonListController {
                 "-fx-font-size: 14px;" +
                         "-fx-font-weight: 900;" +
                         "-fx-font-family: 'Georgia', serif;" +
-                        "-fx-text-fill: #1E0A3C;" +
-                        "-fx-wrap-text: true;"
+                        "-fx-text-fill: #1E0A3C;"
         );
         title.setWrapText(true);
         title.setMaxWidth(190);
@@ -200,13 +204,11 @@ public class LessonListController {
 
         titleRow.getChildren().addAll(orderCircle, title);
 
-        // Formation name
         String ft = formationTitleById.getOrDefault(l.getFormationId(), "Formation inconnue");
         Label formation = new Label("📌  " + ft);
         formation.getStyleClass().addAll("badge", "badge-purple");
         formation.setMaxWidth(220);
 
-        // Duration badge
         Label duree = new Label("⏱  " + l.getDureeMinutes() + " min");
         duree.getStyleClass().addAll("badge", "badge-green");
 
@@ -214,7 +216,6 @@ public class LessonListController {
         badges.setAlignment(Pos.CENTER_LEFT);
         badges.getChildren().addAll(formation, duree);
 
-        // Content preview — limited lines
         Label preview = new Label(preview(l.getContenu(), 80));
         preview.setWrapText(true);
         preview.setStyle(
@@ -224,11 +225,9 @@ public class LessonListController {
         );
         VBox.setVgrow(preview, Priority.ALWAYS);
 
-        // Spacer pushes buttons to bottom
         Region spacer = new Region();
         VBox.setVgrow(spacer, Priority.ALWAYS);
 
-        // Action buttons
         HBox actions = new HBox(6);
         actions.setAlignment(Pos.CENTER_LEFT);
 
@@ -240,7 +239,6 @@ public class LessonListController {
         editBtn.getStyleClass().add("btn-ghost");
         deleteBtn.getStyleClass().add("btn-danger");
 
-        // Compact button padding for square card
         String compactStyle = "-fx-padding: 6 12 6 12; -fx-font-size: 11px;";
         viewBtn.setStyle(compactStyle);
         editBtn.setStyle(compactStyle);
@@ -255,7 +253,6 @@ public class LessonListController {
         body.getChildren().addAll(titleRow, badges, preview, spacer, actions);
         card.getChildren().addAll(accent, body);
 
-        // Card click to select
         card.setOnMouseClicked(e -> {
             if (e.getTarget() instanceof Button) return;
             selectedLesson = l;
@@ -287,13 +284,12 @@ public class LessonListController {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/lesson_form.fxml"));
             Scene scene = new Scene(loader.load());
-            scene.getStylesheets().add(getClass().getResource("/style.css").toExternalForm());
+            scene.getStylesheets().add(Objects.requireNonNull(getClass().getResource("/style.css")).toExternalForm());
 
             LessonFormController controller = loader.getController();
             controller.setOnSaved(() -> { loadAllLessons(); applyAllFilters(); });
             controller.setData(lesson);
-            controller.setFormations(cbFormation.getItems(),
-                    cbFormation.getSelectionModel().getSelectedItem());
+            controller.setFormations(cbFormation.getItems(), cbFormation.getSelectionModel().getSelectedItem());
 
             Stage popup = new Stage();
             popup.setTitle(lesson == null ? "Ajouter Lesson" : "Modifier Lesson");
@@ -308,7 +304,7 @@ public class LessonListController {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/lesson_view.fxml"));
             Scene scene = new Scene(loader.load(), 950, 650);
-            scene.getStylesheets().add(getClass().getResource("/style.css").toExternalForm());
+            scene.getStylesheets().add(Objects.requireNonNull(getClass().getResource("/style.css")).toExternalForm());
 
             LessonViewController controller = loader.getController();
 
@@ -366,7 +362,7 @@ public class LessonListController {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/formation_list.fxml"));
             Scene scene = new Scene(loader.load(), 1250, 720);
-            scene.getStylesheets().add(getClass().getResource("/style.css").toExternalForm());
+            scene.getStylesheets().add(Objects.requireNonNull(getClass().getResource("/style.css")).toExternalForm());
             Stage stage = (Stage) cbFormation.getScene().getWindow();
             stage.setScene(scene);
         } catch (Exception e) {
@@ -375,11 +371,14 @@ public class LessonListController {
     }
 
     private String safeLower(String s) { return s == null ? "" : s.toLowerCase(); }
+    private String safe(String s) { return s == null ? "" : s; }
+
     private String preview(String s, int max) {
         if (s == null) return "";
         s = s.trim();
         return s.length() <= max ? s : s.substring(0, max) + "...";
     }
+
     private void showWarn(String msg)  { new Alert(Alert.AlertType.WARNING, msg).showAndWait(); }
     private void showError(String msg) { new Alert(Alert.AlertType.ERROR, msg).showAndWait(); }
 }
