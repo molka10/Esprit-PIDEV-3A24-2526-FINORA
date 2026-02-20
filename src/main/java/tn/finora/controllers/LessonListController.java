@@ -165,10 +165,10 @@ public class LessonListController {
         card.setMaxWidth(320);
         card.setUserData(l.getId());
 
-        // header
+        // ── Header (Udemy-style thumbnail) ─────────────────────────────
         StackPane header = new StackPane();
         header.getStyleClass().add("ud-lesson-header");
-        header.setPrefHeight(92);
+        header.setPrefHeight(96);
 
         HBox headerRow = new HBox();
         headerRow.setAlignment(Pos.TOP_LEFT);
@@ -197,6 +197,12 @@ public class LessonListController {
         headerRow.getChildren().addAll(chipNum, spacer, chipVideo);
         header.getChildren().add(headerRow);
 
+// ✅ Center play overlay (only if video exists)
+        if (hasVideo) {
+            Label play = new Label("▶");
+            play.getStyleClass().add("ud-play-overlay");
+            header.getChildren().add(play);
+        }
         // body
         VBox body = new VBox(12);
         body.getStyleClass().add("ud-lesson-body");

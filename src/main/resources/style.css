@@ -1048,3 +1048,149 @@
 .ud-lesson-card:hover {
     -fx-translate-y: -2px;
 }
+/* ═══════════════════════════════════════════════════════════
+   LESSON CARDS — Udemy Max Polish (USER Mode Friendly)
+   Append-only
+   ═══════════════════════════════════════════════════════════ */
+
+/* Card container */
+.ud-lesson-card{
+    -fx-background-color: white;
+    -fx-background-radius: 18px;
+    -fx-border-radius: 18px;
+    -fx-border-color: rgba(124,58,237,0.14);
+    -fx-border-width: 1.4px;
+    -fx-effect: dropshadow(gaussian, rgba(17, 24, 39, 0.10), 24, 0, 0, 10);
+    -fx-cursor: hand;
+    -fx-padding: 0;
+}
+
+/* Hover lift */
+.ud-lesson-card:hover{
+    -fx-border-color: rgba(124,58,237,0.35);
+    -fx-effect: dropshadow(gaussian, rgba(124, 58, 237, 0.22), 30, 0, 0, 12);
+    -fx-translate-y: -2px;
+}
+
+/* Selected */
+.ud-lesson-card.lesson-card-selected{
+    -fx-border-color: #7C3AED;
+    -fx-border-width: 2px;
+    -fx-effect: dropshadow(gaussian, rgba(124,58,237,0.28), 26, 0, 0, 10);
+}
+
+/* Header: looks like a thumbnail */
+.ud-lesson-header{
+    -fx-background-radius: 18px 18px 0 0;
+    -fx-background-color: linear-gradient(to bottom right, #7C3AED, #A855F7);
+}
+
+/* subtle "sheen" effect using border */
+.ud-lesson-header{
+    -fx-border-color: rgba(255,255,255,0.22);
+    -fx-border-width: 0 0 1 0;
+}
+
+/* Top-left lesson number pill */
+.ud-chip-num{
+    -fx-background-color: rgba(255,255,255,0.22);
+    -fx-text-fill: white;
+    -fx-font-size: 11px;
+    -fx-font-weight: 900;
+    -fx-padding: 6 12;
+    -fx-background-radius: 999px;
+}
+
+/* Video badge clickable */
+.ud-chip-video-clickable{
+    -fx-background-color: rgba(255,255,255,0.92);
+    -fx-text-fill: #6D28D9;
+    -fx-font-size: 11px;
+    -fx-font-weight: 900;
+    -fx-padding: 6 12;
+    -fx-background-radius: 999px;
+    -fx-border-radius: 999px;
+    -fx-border-width: 1.3px;
+    -fx-border-color: rgba(124,58,237,0.35);
+    -fx-cursor: hand;
+}
+.ud-chip-video-clickable:hover{
+    -fx-background-color: white;
+    -fx-border-color: #7C3AED;
+    -fx-effect: dropshadow(gaussian, rgba(255,255,255,0.45), 14, 0, 0, 0);
+    -fx-scale-x: 1.04;
+    -fx-scale-y: 1.04;
+}
+
+/* Center play overlay */
+.ud-play-overlay{
+    -fx-text-fill: rgba(255,255,255,0.95);
+    -fx-font-size: 38px;
+    -fx-font-weight: 900;
+    -fx-padding: 10 18;
+    -fx-background-color: rgba(17,24,39,0.22);
+    -fx-background-radius: 999px;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.22), 18, 0, 0, 6);
+}
+
+/* Body spacing */
+.ud-lesson-body{
+    -fx-padding: 14 14 14 14;
+}
+
+/* Title: 2-line Udemy style */
+.ud-lesson-title{
+    -fx-text-fill: #111827; /* deeper contrast */
+    -fx-font-size: 16px;
+    -fx-font-weight: 900;
+    -fx-font-family: "Georgia", serif;
+    -fx-padding: 2 0 0 0;
+}
+
+/* Meta chips */
+.ud-chip-formation{
+    -fx-background-color: #F5F3FF;
+    -fx-text-fill: #5B21B6;
+    -fx-font-size: 11px;
+    -fx-font-weight: 900;
+    -fx-padding: 5 10;
+    -fx-background-radius: 999px;
+    -fx-border-radius: 999px;
+    -fx-border-width: 1.2px;
+    -fx-border-color: rgba(124,58,237,0.18);
+}
+.ud-chip-duration{
+    -fx-background-color: #ECFDF5;
+    -fx-text-fill: #065F46;
+    -fx-font-size: 11px;
+    -fx-font-weight: 900;
+    -fx-padding: 5 10;
+    -fx-background-radius: 999px;
+    -fx-border-radius: 999px;
+    -fx-border-width: 1.2px;
+    -fx-border-color: rgba(16,185,129,0.25);
+}
+
+/* Actions pinned bottom-right */
+.ud-lesson-actions-bottom{
+    -fx-padding: 6 0 0 0;
+}
+
+/* View button nicer */
+.ud-btn-primary{
+    -fx-background-color: #7C3AED;
+    -fx-text-fill: white;
+    -fx-font-weight: 900;
+    -fx-font-size: 12px;
+    -fx-background-radius: 12px;
+    -fx-padding: 8 14;
+    -fx-effect: dropshadow(gaussian, rgba(124,58,237,0.22), 14, 0, 0, 5);
+}
+.ud-btn-primary:hover{
+    -fx-background-color: #6D28D9;
+}
+
+/* Better grid spacing */
+.cards-udemy{
+    -fx-background-color: transparent;
+}
