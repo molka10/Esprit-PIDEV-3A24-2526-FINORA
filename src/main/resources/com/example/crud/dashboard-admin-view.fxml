@@ -9,22 +9,22 @@
             xmlns="http://javafx.com/javafx/17"
             xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="com.example.crud.controllers.Dashboardadmincontroller"
-            style="-fx-background-color: #0f1117;">
+            style="-fx-background-color: #f8f9fa;">
 
     <!-- LEFT SIDEBAR -->
     <left>
         <VBox spacing="8"
-              style="-fx-background-color: #1a1d27; -fx-pref-width: 90; -fx-padding: 20 10;">
+              style="-fx-background-color: #ffffff; -fx-pref-width: 90; -fx-padding: 20 10; -fx-border-color: transparent #e9ecef transparent transparent; -fx-border-width: 0 1 0 0;">
 
             <!-- Logo -->
             <VBox alignment="CENTER" style="-fx-padding: 0 0 20 0;">
-                <Label text="F" style="-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: #6366f1; -fx-background-color: #6366f122; -fx-background-radius: 12; -fx-padding: 10 14;"/>
+                <Label text="F" style="-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: #a855f7; -fx-background-color: #f3e8ff; -fx-background-radius: 12; -fx-padding: 10 14;"/>
             </VBox>
 
             <!-- Nav items -->
             <Button fx:id="btnDashboard" text="⊞" onAction="#navDashboard"
-                    style="-fx-background-color: #6366f122; -fx-text-fill: #6366f1; -fx-font-size: 20px; -fx-background-radius: 10; -fx-cursor: hand; -fx-pref-width: 60; -fx-pref-height: 50;"/>
-            <Label text="Dashboard" style="-fx-font-size: 9px; -fx-text-fill: #6366f1; -fx-padding: -4 0 8 0;" alignment="CENTER"/>
+                    style="-fx-background-color: #f3e8ff; -fx-text-fill: #a855f7; -fx-font-size: 20px; -fx-background-radius: 10; -fx-cursor: hand; -fx-pref-width: 60; -fx-pref-height: 50;"/>
+            <Label text="Dashboard" style="-fx-font-size: 9px; -fx-text-fill: #a855f7; -fx-padding: -4 0 8 0;" alignment="CENTER"/>
 
             <Button text="📊" onAction="#ouvrirBourses" style="-fx-background-color: transparent; -fx-text-fill: #6b7280; -fx-font-size: 20px; -fx-background-radius: 10; -fx-cursor: hand; -fx-pref-width: 60; -fx-pref-height: 50;"/>
             <Label text="Bourses" style="-fx-font-size: 9px; -fx-text-fill: #6b7280; -fx-padding: -4 0 8 0;" alignment="CENTER"/>
@@ -43,23 +43,23 @@
             <!-- User Avatar -->
             <VBox alignment="CENTER" spacing="4">
                 <Label text="👤" style="-fx-font-size: 24px;"/>
-                <Label text="Admin" style="-fx-font-size: 9px; -fx-text-fill: #9ca3af; -fx-wrap-text: true;" alignment="CENTER"/>
-                <Button text="⎋" onAction="#deconnexion" style="-fx-background-color: #ef444422; -fx-text-fill: #ef4444; -fx-font-size: 12px; -fx-background-radius: 6; -fx-padding: 4 8; -fx-cursor: hand;"/>
+                <Label text="Admin" style="-fx-font-size: 9px; -fx-text-fill: #6b7280; -fx-wrap-text: true;" alignment="CENTER"/>
+                <Button text="⎋" onAction="#deconnexion" style="-fx-background-color: #fee2e2; -fx-text-fill: #ef4444; -fx-font-size: 12px; -fx-background-radius: 6; -fx-padding: 4 8; -fx-cursor: hand;"/>
             </VBox>
         </VBox>
     </left>
 
     <!-- CENTER -->
     <center>
-        <VBox spacing="0" style="-fx-background-color: #0f1117;">
+        <VBox spacing="0" style="-fx-background-color: #f8f9fa;">
 
             <!-- TOP HEADER BAR -->
             <HBox alignment="CENTER_LEFT" spacing="20"
-                  style="-fx-background-color: #1a1d27; -fx-padding: 16 24; -fx-border-color: transparent transparent #ffffff11 transparent; -fx-border-width: 0 0 1 0;">
+                  style="-fx-background-color: #ffffff; -fx-padding: 16 24; -fx-border-color: transparent transparent #e9ecef transparent; -fx-border-width: 0 0 1 0;">
 
                 <VBox>
                     <Label text="Dashboard Administrateur"
-                           style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: white;"/>
+                           style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #1f2937;"/>
                     <Label fx:id="lblDateTime" text="Mercredi, 18 Février 2026"
                            style="-fx-font-size: 12px; -fx-text-fill: #6b7280;"/>
                 </VBox>
@@ -67,46 +67,46 @@
                 <Region HBox.hgrow="ALWAYS"/>
 
                 <Button text="↻ Actualiser" onAction="#handleActualiser"
-                        style="-fx-background-color: #6366f1; -fx-text-fill: white; -fx-font-size: 13px; -fx-font-weight: bold; -fx-background-radius: 10; -fx-padding: 10 20; -fx-cursor: hand;"/>
+                        style="-fx-background-color: #a855f7; -fx-text-fill: white; -fx-font-size: 13px; -fx-font-weight: bold; -fx-background-radius: 10; -fx-padding: 10 20; -fx-cursor: hand;"/>
             </HBox>
 
             <!-- MAIN CONTENT SCROLL -->
             <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS"
-                        style="-fx-background-color: transparent; -fx-background: #0f1117;">
-                <VBox spacing="20" style="-fx-padding: 20; -fx-background-color: #0f1117;">
+                        style="-fx-background-color: transparent;">
+                <VBox spacing="20" style="-fx-padding: 20; -fx-background-color: #f8f9fa;">
 
                     <!-- STAT CARDS -->
                     <HBox spacing="16">
 
                         <VBox spacing="6" HBox.hgrow="ALWAYS"
-                              style="-fx-background-color: #1a1d27; -fx-background-radius: 14; -fx-padding: 20; -fx-border-color: #ffffff11; -fx-border-radius: 14; -fx-border-width: 1;">
+                              style="-fx-background-color: #ffffff; -fx-background-radius: 14; -fx-padding: 20; -fx-border-color: #e9ecef; -fx-border-radius: 14; -fx-border-width: 1; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 8, 0, 0, 2);">
                             <Label text="Bourses" style="-fx-font-size: 12px; -fx-text-fill: #6b7280;"/>
                             <Label fx:id="lblNbBourses" text="6"
-                                   style="-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: white;"/>
-                            <Label text="Marchés actifs" style="-fx-font-size: 12px; -fx-text-fill: #6366f1;"/>
+                                   style="-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: #1f2937;"/>
+                            <Label text="Marchés actifs" style="-fx-font-size: 12px; -fx-text-fill: #a855f7;"/>
                         </VBox>
 
                         <VBox spacing="6" HBox.hgrow="ALWAYS"
-                              style="-fx-background-color: #1a1d27; -fx-background-radius: 14; -fx-padding: 20; -fx-border-color: #ffffff11; -fx-border-radius: 14; -fx-border-width: 1;">
+                              style="-fx-background-color: #ffffff; -fx-background-radius: 14; -fx-padding: 20; -fx-border-color: #e9ecef; -fx-border-radius: 14; -fx-border-width: 1; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 8, 0, 0, 2);">
                             <Label text="Actions" style="-fx-font-size: 12px; -fx-text-fill: #6b7280;"/>
                             <Label fx:id="lblNbActions" text="4"
-                                   style="-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: white;"/>
+                                   style="-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: #1f2937;"/>
                             <Label text="Titres disponibles" style="-fx-font-size: 12px; -fx-text-fill: #10b981;"/>
                         </VBox>
 
                         <VBox spacing="6" HBox.hgrow="ALWAYS"
-                              style="-fx-background-color: #1a1d27; -fx-background-radius: 14; -fx-padding: 20; -fx-border-color: #ffffff11; -fx-border-radius: 14; -fx-border-width: 1;">
+                              style="-fx-background-color: #ffffff; -fx-background-radius: 14; -fx-padding: 20; -fx-border-color: #e9ecef; -fx-border-radius: 14; -fx-border-width: 1; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 8, 0, 0, 2);">
                             <Label text="Transactions" style="-fx-font-size: 12px; -fx-text-fill: #6b7280;"/>
                             <Label fx:id="lblNbTransactions" text="0"
-                                   style="-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: white;"/>
+                                   style="-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: #1f2937;"/>
                             <Label fx:id="lblTransactionsDetail" text="Ce mois" style="-fx-font-size: 12px; -fx-text-fill: #f59e0b;"/>
                         </VBox>
 
                         <VBox spacing="6" HBox.hgrow="ALWAYS"
-                              style="-fx-background-color: #1a1d27; -fx-background-radius: 14; -fx-padding: 20; -fx-border-color: #ffffff11; -fx-border-radius: 14; -fx-border-width: 1;">
+                              style="-fx-background-color: #ffffff; -fx-background-radius: 14; -fx-padding: 20; -fx-border-color: #e9ecef; -fx-border-radius: 14; -fx-border-width: 1; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 8, 0, 0, 2);">
                             <Label text="Commissions" style="-fx-font-size: 12px; -fx-text-fill: #6b7280;"/>
                             <Label fx:id="lblCommissions" text="0.00 TND"
-                                   style="-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: white;"/>
+                                   style="-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: #1f2937;"/>
                             <Label text="Revenus générés" style="-fx-font-size: 12px; -fx-text-fill: #f59e0b;"/>
                         </VBox>
 
@@ -115,14 +115,14 @@
                     <!-- CHARTS ROW -->
                     <HBox spacing="16">
 
-                        <!-- CHART + ACTIONS -->
+                        <!-- CHART -->
                         <VBox spacing="16" HBox.hgrow="ALWAYS"
-                              style="-fx-background-color: #1a1d27; -fx-background-radius: 14; -fx-padding: 20; -fx-border-color: #ffffff11; -fx-border-radius: 14; -fx-border-width: 1;">
+                              style="-fx-background-color: #ffffff; -fx-background-radius: 14; -fx-padding: 20; -fx-border-color: #e9ecef; -fx-border-radius: 14; -fx-border-width: 1; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 8, 0, 0, 2);">
 
                             <HBox alignment="CENTER_LEFT" spacing="12">
-                                <Label text="📊 Évolution des Transactions" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: white;"/>
+                                <Label text="📊 Évolution des Transactions" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #1f2937;"/>
                                 <Region HBox.hgrow="ALWAYS"/>
-                                <Button text="Sem" style="-fx-background-color: #6366f122; -fx-text-fill: #6366f1; -fx-background-radius: 6; -fx-font-size: 11px; -fx-padding: 4 10; -fx-cursor: hand;"/>
+                                <Button text="Sem" style="-fx-background-color: #f3e8ff; -fx-text-fill: #a855f7; -fx-background-radius: 6; -fx-font-size: 11px; -fx-padding: 4 10; -fx-cursor: hand;"/>
                                 <Button text="Mois" style="-fx-background-color: transparent; -fx-text-fill: #6b7280; -fx-background-radius: 6; -fx-font-size: 11px; -fx-padding: 4 10; -fx-cursor: hand;"/>
                             </HBox>
 
@@ -131,26 +131,24 @@
                                        prefHeight="220"
                                        style="-fx-background-color: transparent;"
                                        animated="false">
-                                <xAxis><CategoryAxis label="" tickLabelFill="gray"/></xAxis>
-                                <yAxis><NumberAxis tickLabelFill="gray"/></yAxis>
+                                <xAxis><CategoryAxis label="" tickLabelFill="#6b7280"/></xAxis>
+                                <yAxis><NumberAxis tickLabelFill="#6b7280"/></yAxis>
                             </LineChart>
-
-                            <!-- Action Buttons -->
 
                         </VBox>
 
-                        <!-- ACTIVITY LOG -->
+                        <!-- LOGS -->
                         <VBox spacing="12"
-                              style="-fx-background-color: #1a1d27; -fx-background-radius: 14; -fx-padding: 20; -fx-pref-width: 320; -fx-border-color: #ffffff11; -fx-border-radius: 14; -fx-border-width: 1;">
+                              style="-fx-background-color: #ffffff; -fx-background-radius: 14; -fx-padding: 20; -fx-pref-width: 320; -fx-border-color: #e9ecef; -fx-border-radius: 14; -fx-border-width: 1; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 8, 0, 0, 2);">
 
                             <HBox alignment="CENTER_LEFT">
-                                <Label text="📋 Logs Système" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: white;"/>
+                                <Label text="📋 Logs Système" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #1f2937;"/>
                             </HBox>
 
                             <ScrollPane fitToWidth="true" prefHeight="340"
-                                        style="-fx-background-color: transparent; -fx-background: transparent;">
+                                        style="-fx-background-color: transparent;">
                                 <VBox fx:id="logsContainer" spacing="8">
-                                    <!-- Logs générés dynamiquement -->
+                                    <!-- Logs dynamiques -->
                                 </VBox>
                             </ScrollPane>
                         </VBox>
@@ -162,20 +160,20 @@
 
                         <!-- Bourses par Pays -->
                         <VBox spacing="12" HBox.hgrow="ALWAYS"
-                              style="-fx-background-color: #1a1d27; -fx-background-radius: 14; -fx-padding: 20; -fx-border-color: #ffffff11; -fx-border-radius: 14; -fx-border-width: 1;">
-                            <Label text="🌍 Bourses par Pays" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: white;"/>
+                              style="-fx-background-color: #ffffff; -fx-background-radius: 14; -fx-padding: 20; -fx-border-color: #e9ecef; -fx-border-radius: 14; -fx-border-width: 1; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 8, 0, 0, 2);">
+                            <Label text="🌍 Bourses par Pays" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #1f2937;"/>
                             <PieChart fx:id="pieChartPays" prefHeight="280" legendVisible="true" animated="false"
                                       style="-fx-background-color: transparent;"/>
                         </VBox>
 
                         <!-- Actions par Secteur -->
                         <VBox spacing="12" HBox.hgrow="ALWAYS"
-                              style="-fx-background-color: #1a1d27; -fx-background-radius: 14; -fx-padding: 20; -fx-border-color: #ffffff11; -fx-border-radius: 14; -fx-border-width: 1;">
-                            <Label text="🏢 Actions par Secteur" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: white;"/>
+                              style="-fx-background-color: #ffffff; -fx-background-radius: 14; -fx-padding: 20; -fx-border-color: #e9ecef; -fx-border-radius: 14; -fx-border-width: 1; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 8, 0, 0, 2);">
+                            <Label text="🏢 Actions par Secteur" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #1f2937;"/>
                             <BarChart fx:id="barChartSecteur" prefHeight="280" animated="false"
                                       style="-fx-background-color: transparent;">
-                                <xAxis><CategoryAxis label="" tickLabelFill="gray"/></xAxis>
-                                <yAxis><NumberAxis label="" tickLabelFill="gray"/></yAxis>
+                                <xAxis><CategoryAxis label="" tickLabelFill="#6b7280"/></xAxis>
+                                <yAxis><NumberAxis label="" tickLabelFill="#6b7280"/></yAxis>
                             </BarChart>
                         </VBox>
 
