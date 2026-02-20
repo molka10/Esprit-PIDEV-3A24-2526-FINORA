@@ -7,12 +7,31 @@
 
 
 <StackPane prefWidth="1200" prefHeight="750"
+           alignment="CENTER"
            xmlns="http://javafx.com/javafx/8"
            xmlns:fx="http://javafx.com/fxml/1"
            fx:controller="com.example.gestionwallet.controllers.AdminController"
            style="-fx-background-color:#f4f4f8;">
 
-    <VBox spacing="30" maxWidth="1100"
+    <ScrollPane fitToWidth="true"
+                hbarPolicy="NEVER"
+                vbarPolicy="AS_NEEDED"
+                styleClass="transparent-scroll">
+
+        <content>
+
+            <StackPane alignment="CENTER">
+
+            <VBox spacing="30"
+                  maxWidth="1100"
+                  alignment="TOP_CENTER"
+                  style="-fx-background-color:white;
+                             -fx-padding:40;
+                             -fx-background-radius:25;">
+
+
+
+        <VBox spacing="30" maxWidth="1100"
           style="-fx-background-color:white; -fx-padding:40; -fx-background-radius:25;">
 
         <!-- HEADER -->
@@ -166,5 +185,12 @@
 
 
     </VBox>
+            </VBox>
+
+            </StackPane>
+
+        </content>
+
+    </ScrollPane>
 
 </StackPane>

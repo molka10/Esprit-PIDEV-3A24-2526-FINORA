@@ -18,7 +18,29 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import com.example.gestionwallet.models.transaction;
 import com.example.gestionwallet.services.servicetransaction;
-
+import com.itextpdf.text.*;
+import com.itextpdf.text.pdf.*;
+import java.io.File;
+import java.io.FileOutputStream;
+import javafx.stage.FileChooser;
+import com.itextpdf.text.Document;
+import com.itextpdf.text.Paragraph;
+import com.itextpdf.text.Font;
+import com.itextpdf.text.BaseColor;
+import com.itextpdf.text.Element;
+import com.itextpdf.text.pdf.PdfWriter;
+import com.itextpdf.text.pdf.PdfPTable;
+import javafx.scene.control.TextField;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import java.util.*;
+import com.itextpdf.text.*;
+import com.itextpdf.text.pdf.*;
+import javafx.scene.layout.FlowPane;
+import com.itextpdf.text.*;
+import com.itextpdf.text.pdf.*;
+import com.example.gestionwallet.models.categorie;
+import com.example.gestionwallet.services.servicecategorie;
 
 public class WalletController {
 
@@ -28,8 +50,12 @@ public class WalletController {
 
     @FXML private LineChart<String, Number> incomeChart;
     @FXML private LineChart<String, Number> outcomeChart;
+    @FXML private PieChart pieChart;
+    @FXML private Label averageLabel;
+    @FXML private FlowPane monthlyContainer;
 
     private final servicetransaction st = new servicetransaction();
+    private servicecategorie sc = new servicecategorie();
 
     private double balance = 0;
 
@@ -53,6 +79,8 @@ public class WalletController {
         double totalOutcome = 0;
         balance = 0;
 
+        Set<LocalDate> uniqueDays = new HashSet<>();
+
         XYChart.Series<String, Number> incomeSeries = new XYChart.Series<>();
         XYChart.Series<String, Number> outcomeSeries = new XYChart.Series<>();
 
@@ -60,25 +88,28 @@ public class WalletController {
 
             transaction currentTransaction = t;
 
-            String type = currentTransaction.getType().toUpperCase();
+            int categoryId = currentTransaction.getCategory_id();
+            categorie cat = sc.getById(categoryId);
 
-            String categorie = currentTransaction.getCategorie();
-            if (categorie == null || categorie.trim().isEmpty()) {
-                categorie = "Sans categorie";
-            }
+            if (cat == null) continue;
+
+            String categorie = cat.getNom();
+            String categoryType = cat.getType();  // 🔥 ناخذ type من categorie
 
             double montant = currentTransaction.getMontant();
+            LocalDate date = currentTransaction.getDate_transaction().toLocalDate();
+            uniqueDays.add(date);
 
             XYChart.Data<String, Number> data =
                     new XYChart.Data<>(categorie, Math.abs(montant));
 
-            if (type.equals("INCOME")) {
+            if (categoryType.equalsIgnoreCase("INCOME")) {
 
                 incomeSeries.getData().add(data);
                 totalIncome += montant;
                 balance += montant;
 
-            } else if (type.equals("OUTCOME")) {
+            } else if (categoryType.equalsIgnoreCase("OUTCOME")) {
 
                 outcomeSeries.getData().add(data);
                 totalOutcome += Math.abs(montant);
@@ -100,9 +131,107 @@ public class WalletController {
         totalOutcomeLabel.setText(totalOutcome + " DT");
 
         updateBalance();
+
+        // ================= PIE CHART EN % =================
+
+        double totalAll = totalIncome + totalOutcome;
+
+        double incomePercent = 0;
+        double outcomePercent = 0;
+
+        if (totalAll > 0) {
+            incomePercent = (totalIncome / totalAll) * 100;
+            outcomePercent = (totalOutcome / totalAll) * 100;
+        }
+
+        ObservableList<PieChart.Data> pieData =
+                FXCollections.observableArrayList(
+                        new PieChart.Data(
+                                "Income " + String.format("%.1f", incomePercent) + " %",
+                                incomePercent
+                        ),
+                        new PieChart.Data(
+                                "Outcome " + String.format("%.1f", outcomePercent) + " %",
+                                outcomePercent
+                        )
+                );
+
+        pieChart.setData(pieData);
+        pieChart.setLegendVisible(false);
+
+        if (pieChart.getData().size() >= 2) {
+            pieChart.getData().get(0).getNode().setStyle("-fx-pie-color: #8e44ad;");
+            pieChart.getData().get(1).getNode().setStyle("-fx-pie-color: #6a0dad;");
+        }
+
+        // ================= MOYENNE PAR JOUR =================
+
+        double averagePerDay = 0;
+
+        if (!uniqueDays.isEmpty()) {
+            averagePerDay = totalAll / uniqueDays.size();
+        }
+
+        averageLabel.setText("Moyenne / jour : "
+                + String.format("%.2f", averagePerDay) + " DT");
+
+        // ================= DESIGN MENSUEL =================
+
+        monthlyContainer.getChildren().clear();
+
+        Map<String, Double> monthlyIncome = new HashMap<>();
+        Map<String, Double> monthlyOutcome = new HashMap<>();
+
+        for (transaction t : st.afficher()) {
+
+            LocalDate date = t.getDate_transaction().toLocalDate();
+            String month = date.getMonth().toString();
+
+            double amount = t.getMontant();
+
+            int categoryId = t.getCategory_id();
+            categorie cat = sc.getById(categoryId);
+
+            if (cat == null) continue;
+
+            if (cat.getType().equalsIgnoreCase("INCOME")) {
+                monthlyIncome.put(month,
+                        monthlyIncome.getOrDefault(month, 0.0) + amount);
+            } else {
+                monthlyOutcome.put(month,
+                        monthlyOutcome.getOrDefault(month, 0.0) + Math.abs(amount));
+            }
+        }
+
+        Set<String> allMonths = new HashSet<>();
+        allMonths.addAll(monthlyIncome.keySet());
+        allMonths.addAll(monthlyOutcome.keySet());
+
+        for (String month : allMonths) {
+
+            double incomeValue = monthlyIncome.getOrDefault(month, 0.0);
+            double outcomeValue = monthlyOutcome.getOrDefault(month, 0.0);
+
+            Label monthLabel = new Label(month);
+            monthLabel.setStyle("-fx-font-weight:bold; -fx-text-fill:#6a0dad;");
+
+            Label incomeLabel = new Label("Income : " + incomeValue + " DT");
+            incomeLabel.setStyle("-fx-text-fill:#8e44ad;");
+
+            Label outcomeLabel = new Label("Outcome : " + outcomeValue + " DT");
+            outcomeLabel.setStyle("-fx-text-fill:#6a0dad;");
+
+            VBox monthCard = new VBox(5, monthLabel, incomeLabel, outcomeLabel);
+            monthCard.setStyle("""
+            -fx-background-color:white;
+            -fx-padding:15;
+            -fx-background-radius:15;
+            -fx-effect:dropshadow(gaussian, rgba(0,0,0,0.08), 10,0,0,3);
+        """);
+
+            monthlyContainer.getChildren().add(monthCard);
+        }
     }
-
-
     // ================= BALANCE =================
 
     private void updateBalance() {
@@ -435,6 +564,106 @@ public class WalletController {
         stage.setResizable(false);
 
     }
+    @FXML
+    private void exportPDF() {
 
+        try {
+
+            FileChooser fileChooser = new FileChooser();
+            fileChooser.setTitle("Enregistrer Rapport");
+            fileChooser.getExtensionFilters().add(
+                    new FileChooser.ExtensionFilter("PDF files", "*.pdf")
+            );
+
+            File file = fileChooser.showSaveDialog(balanceLabel.getScene().getWindow());
+            if (file == null) return;
+
+            Document document = new Document();
+            PdfWriter.getInstance(document, new FileOutputStream(file));
+            document.open();
+
+            // 🎨 Purple shades
+            BaseColor purpleDark = new BaseColor(106, 13, 173);     // #6a0dad
+            BaseColor purpleMedium = new BaseColor(142, 68, 173);   // #8e44ad
+            BaseColor purpleLight = new BaseColor(232, 224, 248);   // light purple
+
+            // ===== TITLE =====
+            Font titleFont = new Font(Font.FontFamily.HELVETICA, 20, Font.BOLD, purpleDark);
+            Paragraph title = new Paragraph("WALLET REPORT", titleFont);
+            title.setAlignment(Element.ALIGN_CENTER);
+            document.add(title);
+
+            document.add(new Paragraph(" "));
+            document.add(new Paragraph("Date d'export : " + java.time.LocalDate.now()));
+            document.add(new Paragraph(" "));
+
+            // ===== STAT BOX =====
+            Font statFont = new Font(Font.FontFamily.HELVETICA, 12, Font.BOLD, purpleMedium);
+
+            document.add(new Paragraph("Total Income : " + totalIncomeLabel.getText(), statFont));
+            document.add(new Paragraph("Total Outcome : " + totalOutcomeLabel.getText(), statFont));
+            document.add(new Paragraph("Balance : " + balanceLabel.getText(), statFont));
+
+            document.add(new Paragraph(" "));
+            document.add(new Paragraph(" "));
+
+            // ===== TABLE =====
+            PdfPTable table = new PdfPTable(4);
+            table.setWidthPercentage(100);
+
+            // Header
+            Font headerFont = new Font(Font.FontFamily.HELVETICA, 12, Font.BOLD, BaseColor.WHITE);
+
+            PdfPCell h1 = new PdfPCell(new Phrase("Nom", headerFont));
+            PdfPCell h2 = new PdfPCell(new Phrase("Type", headerFont));
+            PdfPCell h3 = new PdfPCell(new Phrase("Categorie", headerFont));
+            PdfPCell h4 = new PdfPCell(new Phrase("Montant", headerFont));
+
+            h1.setBackgroundColor(purpleDark);
+            h2.setBackgroundColor(purpleDark);
+            h3.setBackgroundColor(purpleDark);
+            h4.setBackgroundColor(purpleDark);
+
+            table.addCell(h1);
+            table.addCell(h2);
+            table.addCell(h3);
+            table.addCell(h4);
+
+            // Content
+            for (transaction t : st.afficher()) {
+
+                table.addCell(t.getNom_transaction());
+                table.addCell(t.getType());
+                table.addCell(t.getCategorie());
+
+                Font amountFont;
+
+                if ("INCOME".equalsIgnoreCase(t.getType())) {
+                    amountFont = new Font(Font.FontFamily.HELVETICA, 11, Font.BOLD, purpleMedium);
+                } else {
+                    amountFont = new Font(Font.FontFamily.HELVETICA, 11, Font.BOLD, purpleDark);
+                }
+
+                PdfPCell amountCell = new PdfPCell(
+                        new Phrase(String.valueOf(t.getMontant()) + " DT", amountFont)
+                );
+
+                amountCell.setBackgroundColor(purpleLight);
+
+                table.addCell(amountCell);
+            }
+
+            document.add(table);
+            document.close();
+
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setContentText("PDF généré avec succès 💜");
+            alert.show();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            showError("Erreur export PDF !");
+        }
+    }
 
 }

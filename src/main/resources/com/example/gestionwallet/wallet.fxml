@@ -2,8 +2,6 @@
 
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
-<?import javafx.scene.control.*?>
 <?import javafx.scene.chart.*?>
 
 <BorderPane xmlns="http://javafx.com/javafx/8"
@@ -22,7 +20,7 @@
             <Label text="💳 Wallet"
                    style="-fx-text-fill:white; -fx-font-size:22; -fx-font-weight:bold;"/>
 
-            <Button text=" 🏠 Dashboard"
+            <Button text="🏠 Dashboard"
                     style="-fx-background-color:white; -fx-text-fill:#6a0dad; -fx-background-radius:10;"/>
 
             <Button text="Admin"
@@ -32,96 +30,116 @@
         </VBox>
     </left>
 
-
-    <!-- CENTER -->
+    <!-- CENTER WITH SCROLL -->
     <center>
-        <VBox spacing="30"
-              style="-fx-padding:30; -fx-background-color:#f4f4f8;">
+        <ScrollPane fitToWidth="true"
+                    hbarPolicy="NEVER"
+                    vbarPolicy="AS_NEEDED"
+                    styleClass="transparent-scroll">
 
-            <!-- STAT CARDS -->
-            <HBox spacing="30" alignment="CENTER">
-                <VBox spacing="5"
-                      style="-fx-background-color:white; -fx-padding:20; -fx-background-radius:15; -fx-effect:dropshadow(gaussian, rgba(0,0,0,0.1), 15,0,0,3);">
+            <content>
+                <VBox spacing="30"
+                      style="-fx-padding:30; -fx-background-color:#f4f4f8;">
 
-                    <Label text="Balance" styleClass="stat-title"/>
-                    <Label fx:id="balanceLabel"
-                           text="0 DT"
-                           styleClass="stat-value"/>
+                    <!-- STAT CARDS -->
+                    <HBox spacing="30" alignment="CENTER">
+                        <VBox spacing="5"
+                              style="-fx-background-color:white; -fx-padding:20; -fx-background-radius:15; -fx-effect:dropshadow(gaussian, rgba(0,0,0,0.1), 15,0,0,3);">
 
-                </VBox>
-                <VBox spacing="5"
-                      style="-fx-background-color:white; -fx-padding:20; -fx-background-radius:15; -fx-effect:dropshadow(gaussian, rgba(0,0,0,0.1), 15,0,0,3);">
+                            <Label text="Balance" styleClass="stat-title"/>
+                            <Label fx:id="balanceLabel"
+                                   text="0 DT"
+                                   styleClass="stat-value"/>
+                        </VBox>
 
-                    <Label text="Total Income" styleClass="stat-title"/>
-                    <Label fx:id="totalIncomeLabel"
-                           text="0 DT"
-                           styleClass="income-value"/>
+                        <VBox spacing="5"
+                              style="-fx-background-color:white; -fx-padding:20; -fx-background-radius:15; -fx-effect:dropshadow(gaussian, rgba(0,0,0,0.1), 15,0,0,3);">
 
-                </VBox>
+                            <Label text="Total Income" styleClass="stat-title"/>
+                            <Label fx:id="totalIncomeLabel"
+                                   text="0 DT"
+                                   styleClass="income-value"/>
+                        </VBox>
 
-                <VBox spacing="5"
-                      style="-fx-background-color:white; -fx-padding:20; -fx-background-radius:15; -fx-effect:dropshadow(gaussian, rgba(0,0,0,0.1), 15,0,0,3);">
-                    <Label text="Total Outcome" styleClass="stat-title"/>
-                    <Label fx:id="totalOutcomeLabel"
-                           text="0 DT"
-                           styleClass="outcome-value"/>
+                        <VBox spacing="5"
+                              style="-fx-background-color:white; -fx-padding:20; -fx-background-radius:15; -fx-effect:dropshadow(gaussian, rgba(0,0,0,0.1), 15,0,0,3);">
 
-                </VBox>
-                <Button text="Historique"
-                        styleClass="btn-primary"
-                        style="-fx-background-color:#8e44ad; -fx-text-fill:white; -fx-background-radius:10;"
-                        onAction="#openHistorique"/>
+                            <Label text="Total Outcome" styleClass="stat-title"/>
+                            <Label fx:id="totalOutcomeLabel"
+                                   text="0 DT"
+                                   styleClass="outcome-value"/>
+                        </VBox>
 
+                        <Button text="Historique"
+                                style="-fx-background-color:#8e44ad; -fx-text-fill:white; -fx-background-radius:10;"
+                                onAction="#openHistorique"/>
 
-            </HBox>
+                        <Button text="Exporter PDF"
+                                onAction="#exportPDF"
+                                style="-fx-background-color:#2ecc71; -fx-text-fill:white; -fx-background-radius:10;"/>
+                    </HBox>
 
-            <!-- CHARTS -->
-            <HBox spacing="40" alignment="CENTER">
+                    <!-- CHARTS -->
+                    <HBox spacing="40" alignment="CENTER">
 
-                <!-- OUTCOME -->
-                <VBox spacing="10" alignment="CENTER">
-                    <VBox alignment="CENTER" spacing="5">
-                        <Label text="Outcome" styleClass="section-title-outcome"/>
-                        <Region styleClass="section-underline"/>
+                        <!-- OUTCOME -->
+                        <VBox spacing="10" alignment="CENTER">
+                            <Label text="Outcome" styleClass="section-title-outcome"/>
+                            <Button text="Ajouter Outcome"
+                                    onAction="#openAddOutcome"
+                                    styleClass="btn-danger"/>
+
+                            <LineChart fx:id="outcomeChart" prefWidth="450" prefHeight="300">
+                                <xAxis>
+                                    <CategoryAxis label="Categorie"/>
+                                </xAxis>
+                                <yAxis>
+                                    <NumberAxis label="Montant"/>
+                                </yAxis>
+                            </LineChart>
+                        </VBox>
+
+                        <!-- INCOME -->
+                        <VBox spacing="10" alignment="CENTER">
+                            <Label text="Income" styleClass="section-title-income"/>
+                            <Button text="Ajouter Income"
+                                    onAction="#openAddIncome"
+                                    styleClass="btn-success"/>
+
+                            <LineChart fx:id="incomeChart" prefWidth="450" prefHeight="300">
+                                <xAxis>
+                                    <CategoryAxis label="Categorie"/>
+                                </xAxis>
+                                <yAxis>
+                                    <NumberAxis label="Montant"/>
+                                </yAxis>
+                            </LineChart>
+                        </VBox>
+
+                    </HBox>
+
+                    <!-- PIE + STATS -->
+                    <VBox spacing="20" alignment="CENTER">
+
+                        <PieChart fx:id="pieChart"
+                                  prefWidth="350"
+                                  prefHeight="300"/>
+
+                        <Label fx:id="averageLabel"
+                               style="-fx-font-size:14; -fx-font-weight:bold; -fx-text-fill:#6a0dad;"/>
+
                     </VBox>
-                    <Button text="Ajouter Outcome"
-                            onAction="#openAddOutcome"
-                            styleClass="btn-danger"/>
 
-                    <LineChart fx:id="outcomeChart" prefWidth="450" prefHeight="300">
-                        <xAxis>
-                            <CategoryAxis label="Categorie"/>
-                        </xAxis>
-                        <yAxis>
-                            <NumberAxis label="Montant"/>
-                        </yAxis>
-                    </LineChart>
+                    <!-- MONTHLY CARDS -->
+                    <FlowPane fx:id="monthlyContainer"
+                              hgap="20"
+                              vgap="20"
+                              prefWrapLength="1000"
+                              style="-fx-padding:20;"/>
+
                 </VBox>
-
-                <!-- INCOME -->
-                <VBox spacing="10" alignment="CENTER">
-                    <VBox alignment="CENTER" spacing="5">
-                        <Label text="Income" styleClass="section-title-income"/>
-                        <Region styleClass="section-underline"/>
-                    </VBox>
-                    <Button text="Ajouter Income"
-                            onAction="#openAddIncome"
-                            styleClass="btn-success"/>
-
-                    <LineChart fx:id="incomeChart" prefWidth="450" prefHeight="300">
-                        <xAxis>
-                            <CategoryAxis label="Categorie"/>
-                        </xAxis>
-                        <yAxis>
-                            <NumberAxis label="Montant"/>
-                        </yAxis>
-                    </LineChart>
-                </VBox>
-
-            </HBox>
-
-        </VBox>
+            </content>
+        </ScrollPane>
     </center>
-
 
 </BorderPane>

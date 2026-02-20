@@ -382,4 +382,11 @@
     -fx-border-color: #6a0dad;
     -fx-border-width: 2;
 }
+.scroll-bar:vertical .thumb {
+    -fx-background-color: #cccccc;
+    -fx-background-radius: 8;
+}
 
+.scroll-bar:vertical .track {
+    -fx-background-color: transparent;
+}

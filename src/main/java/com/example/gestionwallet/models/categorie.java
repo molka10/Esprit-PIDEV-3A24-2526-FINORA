@@ -10,6 +10,7 @@ public class categorie {
     public categorie() {}
 
     public categorie(String nom, String priorite, String type) {
+
         this.nom = nom;
         this.priorite = priorite;
         this.type = type;

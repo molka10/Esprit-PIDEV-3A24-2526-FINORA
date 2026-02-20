@@ -36,6 +36,23 @@ public class AddTransactionController {
         amountField.setStyle("-fx-background-color:#f3f0fa; -fx-text-fill:#4b0082; -fx-background-radius:10;");
         datePicker.setStyle("-fx-background-color:#f3f0fa; -fx-background-radius:10;");
         categoryBox.setStyle("-fx-background-color:#f3f0fa; -fx-background-radius:10;");
+
+        // 🔥 Limiter date au mois actuel seulement
+        datePicker.setDayCellFactory(dp -> new DateCell() {
+            @Override
+            public void updateItem(java.time.LocalDate date, boolean empty) {
+                super.updateItem(date, empty);
+
+                java.time.LocalDate today = java.time.LocalDate.now();
+                java.time.LocalDate firstDay = today.withDayOfMonth(1);
+                java.time.LocalDate lastDay = today.withDayOfMonth(today.lengthOfMonth());
+
+                if (empty || date.isBefore(firstDay) || date.isAfter(lastDay)) {
+                    setDisable(true);
+                    setStyle("-fx-background-color:#eeeeee;");
+                }
+            }
+        });
     }
 
     public void setParentController(WalletController controller) {
@@ -56,15 +73,12 @@ public class AddTransactionController {
 
         categoryBox.getItems().clear();
 
-        List<categorie> list = sc.afficher();
+        List<categorie> list = sc.getByType(type);
 
         for (categorie c : list) {
-            if (c.getType().equals(type)) {
-                categoryBox.getItems().add(c.getNom());
-            }
+            categoryBox.getItems().add(c.getNom());
         }
     }
-
     private void showError(String message) {
 
         Alert alert = new Alert(Alert.AlertType.ERROR);
@@ -169,4 +183,6 @@ public class AddTransactionController {
             e.printStackTrace();
         }
     }
+
+
 }

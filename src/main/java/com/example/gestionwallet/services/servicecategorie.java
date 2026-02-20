@@ -147,4 +147,57 @@ public class servicecategorie implements Iservicecategorie {
 
         return list;
     }
+    public categorie getById(int id) {
+
+        String sql = "SELECT * FROM category WHERE id_category = ?";
+        categorie c = null;
+
+        try {
+
+            PreparedStatement pst = cnx.prepareStatement(sql);
+            pst.setInt(1, id);
+
+            ResultSet rs = pst.executeQuery();
+
+            if (rs.next()) {
+                c = new categorie(
+                        rs.getInt("id_category"),
+                        rs.getString("nom"),
+                        rs.getString("priorite"),
+                        rs.getString("type")
+                );
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return c;
+    }
+    public List<categorie> getByType(String type) {
+
+        List<categorie> list = new ArrayList<>();
+        String sql = "SELECT * FROM category WHERE UPPER(TRIM(type)) = UPPER(TRIM(?))";
+
+        try {
+            PreparedStatement ps = cnx.prepareStatement(sql);
+            ps.setString(1, type);
+
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+                list.add(new categorie(
+                        rs.getInt("id_category"),
+                        rs.getString("nom"),
+                        rs.getString("priorite"),
+                        rs.getString("type")
+                ));
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return list;
+    }
 }
