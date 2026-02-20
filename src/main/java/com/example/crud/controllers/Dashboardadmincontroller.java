@@ -276,7 +276,7 @@ public class Dashboardadmincontroller implements Initializable {
 
     @FXML
     private void ouvrirCommission(ActionEvent event) {
-        naviguerVers("/com/example/crud/commission-view.fxml", "FINORA - Gestion Commissions", event);
+        naviguerVers("/com/example/crud/Commission view.fxml", "FINORA - Gestion Commissions", event);
     }
 
     @FXML

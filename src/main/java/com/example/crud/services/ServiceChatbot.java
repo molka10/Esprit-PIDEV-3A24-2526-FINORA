@@ -23,7 +23,7 @@ public class ServiceChatbot {
     private static final String MODEL = "gemini-2.5-flash";
 
     // ⚠️ IMPORTANT : mets ta clé dans une variable d'environnement si possible
-    private static final String API_KEY = "AIzaSyBt_rZbStfGSKNlJk5fjccyw8UQW8OIDVY";
+    private static final String API_KEY = "AIzaSyClyQOcg46R2zDMdPHAy7LMFjafNaGdZ9M";
 
     // Historique conversation : role = "user" ou "model"
     private final List<Map<String, String>> history = new ArrayList<>();
