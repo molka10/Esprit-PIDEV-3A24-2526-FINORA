@@ -61,8 +61,7 @@
                     </columns>
                 </TableView>
 
-                <Label text="Astuce: l’appel_offre_id doit exister ."
-                       styleClass="muted"/>
+
             </VBox>
         </VBox>
     </center>

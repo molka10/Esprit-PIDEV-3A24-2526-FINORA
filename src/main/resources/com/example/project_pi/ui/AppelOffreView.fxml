@@ -86,8 +86,6 @@
                     </columns>
                 </TableView>
 
-                <Label text="Astuce: sélectionne une ligne puis clique Modifier/Supprimer."
-                       styleClass="muted"/>
             </VBox>
         </VBox>
     </center>
