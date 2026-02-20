@@ -13,7 +13,12 @@ import javafx.scene.layout.VBox;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.geometry.Insets;
-
+import com.calendarfx.view.CalendarView;
+import com.calendarfx.model.Calendar;
+import com.calendarfx.model.CalendarSource;
+import com.calendarfx.model.Entry;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import com.example.gestionwallet.models.transaction;
 import com.example.gestionwallet.services.servicetransaction;
 
@@ -344,4 +349,47 @@ public class WalletController {
         alert.setContentText(message);
         alert.showAndWait();
     }
+    @FXML
+    private void openHistorique() {
+
+        Stage stage = new Stage();
+        stage.setTitle("Historique");
+
+        CalendarView calendarView = new CalendarView();
+        calendarView.showWeekPage();
+
+        Calendar incomeCal = new Calendar("Income");
+        incomeCal.setStyle(Calendar.Style.STYLE2);
+
+        Calendar outcomeCal = new Calendar("Outcome");
+        outcomeCal.setStyle(Calendar.Style.STYLE3);
+
+        for (transaction t : st.afficher()) {
+
+            Entry<String> entry = new Entry<>(t.getNom_transaction());
+
+            LocalDate date = t.getDate_transaction().toLocalDate();
+            entry.changeStartDate(date);
+            entry.changeEndDate(date);
+
+            entry.changeStartTime(LocalTime.of(9, 0));
+            entry.changeEndTime(LocalTime.of(10, 0));
+
+            if ("INCOME".equalsIgnoreCase(t.getType())) {
+                incomeCal.addEntry(entry);
+            } else {
+                outcomeCal.addEntry(entry);
+            }
+        }
+
+        CalendarSource source = new CalendarSource("Transactions");
+        source.getCalendars().addAll(incomeCal, outcomeCal);
+
+        calendarView.getCalendarSources().add(source);
+
+        Scene scene = new Scene(calendarView, 900, 600);
+        stage.setScene(scene);
+        stage.show();
+    }
+
 }

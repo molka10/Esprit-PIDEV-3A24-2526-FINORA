@@ -5,6 +5,7 @@ module com.example.gestionwallet {
     requires java.sql;
     requires javafx.graphics;
     requires itextpdf;
+    requires com.calendarfx.view;
 
 
 

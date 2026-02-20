@@ -77,7 +77,8 @@
                 </VBox>
                 <Button text="Historique"
                         styleClass="btn-primary"
-                        style="-fx-background-color:#8e44ad; -fx-text-fill:white; -fx-background-radius:10;"/>
+                        style="-fx-background-color:#8e44ad; -fx-text-fill:white; -fx-background-radius:10;"
+                        onAction="#openHistorique"/>
 
 
             </HBox>
