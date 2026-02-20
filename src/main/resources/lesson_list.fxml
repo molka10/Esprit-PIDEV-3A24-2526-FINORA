@@ -18,7 +18,8 @@
     <center>
         <VBox spacing="14" styleClass="screen">
             <padding>
-                <Insets top="16" right="16" bottom="16" left="16"/>
+                <!-- ✅ More premium page padding (Udemy-like container) -->
+                <Insets top="18" right="26" bottom="22" left="26"/>
             </padding>
 
             <!-- Toolbar -->
@@ -26,15 +27,17 @@
                 <HBox spacing="10" alignment="CENTER_LEFT">
                     <Label text="Formation:" styleClass="subtitle"/>
                     <ComboBox fx:id="cbFormation"
-                              prefWidth="200"
+                              prefWidth="220"
                               promptText="Toutes les formations"
                               onAction="#onFilter"/>
+
                     <TextField fx:id="txtSearch"
-                               prefWidth="220"
+                               prefWidth="260"
                                promptText="Rechercher..."
                                onKeyReleased="#onSearch"/>
+
                     <ComboBox fx:id="cbSort"
-                              prefWidth="180"
+                              prefWidth="200"
                               onAction="#onSort"/>
                 </HBox>
 
@@ -48,17 +51,23 @@
                 </HBox>
             </HBox>
 
-            <!-- ✅ FlowPane grid for square cards -->
+            <!-- ✅ Grid area -->
             <ScrollPane fitToWidth="true" styleClass="scroll" VBox.vgrow="ALWAYS">
                 <content>
-                    <FlowPane fx:id="cardsBox"
-                              hgap="18"
-                              vgap="18"
-                              styleClass="cards">
-                        <padding>
-                            <Insets top="8" right="8" bottom="8" left="8"/>
-                        </padding>
-                    </FlowPane>
+                    <!-- ✅ Wrap in VBox to center the FlowPane like a dashboard -->
+                    <VBox alignment="TOP_CENTER">
+                        <FlowPane fx:id="cardsBox"
+                                  hgap="22"
+                                  vgap="22"
+                                  alignment="TOP_CENTER"
+                                  prefWrapLength="1100"
+                                  styleClass="cards cards-udemy">
+                            <padding>
+                                <!-- ✅ Bigger inner padding = premium spacing -->
+                                <Insets top="14" right="14" bottom="24" left="14"/>
+                            </padding>
+                        </FlowPane>
+                    </VBox>
                 </content>
             </ScrollPane>
 

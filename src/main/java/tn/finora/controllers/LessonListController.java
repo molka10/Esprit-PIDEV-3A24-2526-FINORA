@@ -7,6 +7,7 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
 import tn.finora.entities.Formation;
@@ -14,6 +15,7 @@ import tn.finora.entities.Lesson;
 import tn.finora.services.FormationService;
 import tn.finora.services.LessonService;
 
+import java.net.URI;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -144,110 +146,87 @@ public class LessonListController {
         }
     }
 
-    // ✅ Grid square card + 🎬 video badge
     private VBox createCard(Lesson l) {
-        VBox card = new VBox(0);
-        card.getStyleClass().add("lesson-square-card");
-        card.setPrefWidth(260);
-        card.setPrefHeight(260);
-        card.setMaxWidth(260);
-        card.setMaxHeight(260);
+        VBox card = new VBox();
+        card.getStyleClass().add("ud-lesson-card");
+        card.setPrefWidth(320);
+        card.setMaxWidth(320);
         card.setUserData(l.getId());
 
-        // Top accent
-        HBox accent = new HBox();
-        accent.setPrefHeight(5);
-        accent.setMaxHeight(5);
-        accent.setStyle(
-                "-fx-background-color: linear-gradient(to right, #7C3AED, #A855F7);" +
-                        "-fx-background-radius: 14 14 0 0;"
-        );
+        // ── Header (fake thumbnail) ─────────────────────────────
+        StackPane header = new StackPane();
+        header.getStyleClass().add("ud-lesson-header");
+        header.setPrefHeight(92);
 
-        VBox body = new VBox(10);
-        body.setPadding(new Insets(16, 18, 16, 18));
-        VBox.setVgrow(body, Priority.ALWAYS);
+        HBox headerRow = new HBox();
+        headerRow.setAlignment(Pos.TOP_LEFT);
+        headerRow.setPadding(new Insets(10, 12, 10, 12));
 
-        // Title row
-        HBox titleRow = new HBox(10);
-        titleRow.setAlignment(Pos.CENTER_LEFT);
-
-        Label orderCircle = new Label(String.valueOf(l.getOrdre()));
-        orderCircle.setStyle(
-                "-fx-background-color: #7C3AED;" +
-                        "-fx-text-fill: white;" +
-                        "-fx-font-size: 12px;" +
-                        "-fx-font-weight: 900;" +
-                        "-fx-font-family: 'Segoe UI', Arial, sans-serif;" +
-                        "-fx-background-radius: 999px;" +
-                        "-fx-min-width: 30px;" +
-                        "-fx-min-height: 30px;" +
-                        "-fx-max-width: 30px;" +
-                        "-fx-max-height: 30px;" +
-                        "-fx-alignment: center;"
-        );
-
-        Label title = new Label(l.getTitre() == null ? "(Sans titre)" : l.getTitre());
-        title.setStyle(
-                "-fx-font-size: 14px;" +
-                        "-fx-font-weight: 900;" +
-                        "-fx-font-family: 'Georgia', serif;" +
-                        "-fx-text-fill: #1E0A3C;"
-        );
-        title.setWrapText(true);
-        title.setMaxWidth(190);
-        HBox.setHgrow(title, Priority.ALWAYS);
-
-        titleRow.getChildren().addAll(orderCircle, title);
-
-        // Badges row: formation + duration + (NEW) video badge
-        String ft = formationTitleById.getOrDefault(l.getFormationId(), "Formation inconnue");
-        Label formation = new Label("📌  " + ft);
-        formation.getStyleClass().addAll("badge", "badge-purple");
-        formation.setMaxWidth(220);
-
-        Label duree = new Label("⏱  " + l.getDureeMinutes() + " min");
-        duree.getStyleClass().addAll("badge", "badge-green");
-
-        HBox badges = new HBox(8);
-        badges.setAlignment(Pos.CENTER_LEFT);
-        badges.getChildren().addAll(formation, duree);
-
-        // ✅ NEW: show badge only if video URL exists
-        if (hasVideo(l)) {
-            Label video = new Label("🎬  Vidéo");
-            video.getStyleClass().addAll("badge", "badge-video");
-            badges.getChildren().add(video);
-        }
-
-        // Preview
-        Label preview = new Label(preview(l.getContenu(), 80));
-        preview.setWrapText(true);
-        preview.setStyle(
-                "-fx-text-fill: #6B5A8A;" +
-                        "-fx-font-size: 12px;" +
-                        "-fx-font-family: 'Segoe UI', Arial, sans-serif;"
-        );
-        VBox.setVgrow(preview, Priority.ALWAYS);
+        Label chipNum = new Label("LEÇON " + String.format("%02d", l.getOrdre()));
+        chipNum.getStyleClass().add("ud-chip-num");
 
         Region spacer = new Region();
-        VBox.setVgrow(spacer, Priority.ALWAYS);
+        HBox.setHgrow(spacer, Priority.ALWAYS);
 
-        // Actions
-        HBox actions = new HBox(6);
-        actions.setAlignment(Pos.CENTER_LEFT);
+        Label chipVideo = new Label("🎬 Vidéo");
+        chipVideo.getStyleClass().add("ud-chip-video-clickable");
 
-        Button viewBtn   = new Button("Voir");
-        Button editBtn   = new Button("Modifier");
+        boolean hasVideo = hasVideo(l);
+        chipVideo.setVisible(hasVideo);
+        chipVideo.setManaged(hasVideo);
+
+        if (hasVideo) {
+            chipVideo.addEventFilter(javafx.scene.input.MouseEvent.MOUSE_CLICKED, ev -> {
+                ev.consume();
+                openVideo(l.getVideoUrl());
+            });
+        }
+
+        headerRow.getChildren().addAll(chipNum, spacer, chipVideo);
+        header.getChildren().add(headerRow);
+
+        // ── Body ────────────────────────────────────────────────
+        VBox body = new VBox(12);
+        body.getStyleClass().add("ud-lesson-body");
+        body.setPadding(new Insets(14, 14, 14, 14));
+
+        // Title
+        Label title = new Label(safe(l.getTitre(), "(Sans titre)"));
+        title.getStyleClass().add("ud-lesson-title");
+        title.setWrapText(true);
+        title.setMaxHeight(48); // visually keeps it like Udemy (2 lines)
+
+        // Chips row (formation + duration)
+        HBox meta = new HBox(8);
+        meta.setAlignment(Pos.CENTER_LEFT);
+
+        String ft = formationTitleById.getOrDefault(l.getFormationId(), "Formation inconnue");
+
+        Label chipFormation = new Label("📌 " + ft);
+        chipFormation.getStyleClass().add("ud-chip-formation");
+
+        Label chipDuration = new Label("⏱ " + l.getDureeMinutes() + " min");
+        chipDuration.getStyleClass().add("ud-chip-duration");
+
+        meta.getChildren().addAll(chipFormation, chipDuration);
+
+        // Spacer pushes actions to bottom
+        Region grow = new Region();
+        VBox.setVgrow(grow, Priority.ALWAYS);
+
+        // Footer actions (bottom-right)
+        HBox actions = new HBox(8);
+        actions.setAlignment(Pos.CENTER_RIGHT);
+        actions.getStyleClass().add("ud-lesson-actions-bottom");
+
+        Button viewBtn = new Button("Voir");
+        viewBtn.getStyleClass().add("ud-btn-primary");
+
+        Button editBtn = new Button("Modifier");
+        editBtn.getStyleClass().add("ud-btn-ghost");
+
         Button deleteBtn = new Button("Supprimer");
-
-        viewBtn.getStyleClass().add("btn-primary");
-        editBtn.getStyleClass().add("btn-ghost");
-        deleteBtn.getStyleClass().add("btn-danger");
-
-        String compactStyle = "-fx-padding: 6 12 6 12; -fx-font-size: 11px;";
-        viewBtn.setStyle(compactStyle);
-        editBtn.setStyle(compactStyle);
-        deleteBtn.setStyle(compactStyle);
+        deleteBtn.getStyleClass().add("ud-btn-danger");
 
         viewBtn.setOnAction(e -> openLessonViewer(l, lastDisplayed));
         editBtn.setOnAction(e -> { selectedLesson = l; openForm(l); });
@@ -255,23 +234,40 @@ public class LessonListController {
 
         actions.getChildren().addAll(viewBtn, editBtn, deleteBtn);
 
-        body.getChildren().addAll(titleRow, badges, preview, spacer, actions);
-        card.getChildren().addAll(accent, body);
+        // ✅ No preview text anymore
+        body.getChildren().addAll(title, meta, grow, actions);
 
-        // Selection click (buttons remain clickable)
-        card.setOnMouseClicked(e -> {
-            if (e.getTarget() instanceof Button) return;
+        card.getChildren().addAll(header, body);
+
+        // select card on click (buttons still work)
+        card.addEventFilter(javafx.scene.input.MouseEvent.MOUSE_CLICKED, e -> {
+            Object t = e.getTarget();
+            if (t instanceof Button) return;
+            if (t instanceof Label lab && lab.getStyleClass().contains("ud-chip-video-clickable")) return;
             selectedLesson = l;
             highlightSelection();
         });
 
         return card;
     }
-
     private boolean hasVideo(Lesson l) {
         if (l == null) return false;
-        String url = l.getVideoUrl(); // requires your updated Lesson.java
+        String url = l.getVideoUrl(); // ✅ requires Lesson.getVideoUrl()
         return url != null && !url.trim().isBlank();
+    }
+
+    private void openVideo(String url) {
+        if (url == null || url.isBlank()) {
+            showWarn("Aucune vidéo associée à cette leçon.");
+            return;
+        }
+
+        try {
+            // open in default browser
+            java.awt.Desktop.getDesktop().browse(new URI(url.trim()));
+        } catch (Exception e) {
+            showError("Impossible d'ouvrir la vidéo: " + e.getMessage());
+        }
     }
 
     private void highlightSelection() {
@@ -296,7 +292,7 @@ public class LessonListController {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/lesson_form.fxml"));
             Scene scene = new Scene(loader.load());
-            scene.getStylesheets().add(getClass().getResource("/style.css").toExternalForm());
+            scene.getStylesheets().add(Objects.requireNonNull(getClass().getResource("/style.css")).toExternalForm());
 
             LessonFormController controller = loader.getController();
             controller.setOnSaved(() -> { loadAllLessons(); applyAllFilters(); });
@@ -317,7 +313,7 @@ public class LessonListController {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/lesson_view.fxml"));
             Scene scene = new Scene(loader.load(), 1100, 720);
-            scene.getStylesheets().add(getClass().getResource("/style.css").toExternalForm());
+            scene.getStylesheets().add(Objects.requireNonNull(getClass().getResource("/style.css")).toExternalForm());
 
             LessonViewController controller = loader.getController();
 
@@ -375,7 +371,7 @@ public class LessonListController {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/formation_list.fxml"));
             Scene scene = new Scene(loader.load(), 1250, 720);
-            scene.getStylesheets().add(getClass().getResource("/style.css").toExternalForm());
+            scene.getStylesheets().add(Objects.requireNonNull(getClass().getResource("/style.css")).toExternalForm());
             Stage stage = (Stage) cbFormation.getScene().getWindow();
             stage.setScene(scene);
         } catch (Exception e) {
@@ -389,6 +385,10 @@ public class LessonListController {
         if (s == null) return "";
         s = s.trim();
         return s.length() <= max ? s : s.substring(0, max) + "...";
+    }
+
+    private String safe(String s, String fallback) {
+        return (s == null || s.trim().isEmpty()) ? fallback : s.trim();
     }
 
     private void showWarn(String msg)  { new Alert(Alert.AlertType.WARNING, msg).showAndWait(); }
