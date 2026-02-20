@@ -840,3 +840,9 @@
 .btn-video:hover {
     -fx-background-color: #6D28D9;
 }
+/* ✅ Video badge on lesson cards */
+.badge-video {
+    -fx-text-fill: #92400E;
+    -fx-background-color: #FEF3C7;
+    -fx-border-color: #FCD34D;
+}

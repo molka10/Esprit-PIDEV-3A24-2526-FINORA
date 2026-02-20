@@ -22,7 +22,7 @@ public class LessonListController {
     @FXML private ComboBox<Formation> cbFormation;
     @FXML private TextField txtSearch;
     @FXML private ComboBox<String> cbSort;
-    @FXML private FlowPane cardsBox;      // Grid layout
+    @FXML private FlowPane cardsBox;      // ✅ Grid container
     @FXML private Label lblInfo;
 
     private final LessonService lessonService = new LessonService();
@@ -47,27 +47,20 @@ public class LessonListController {
             cbFormation.setItems(FXCollections.observableArrayList(formations));
 
             formationTitleById.clear();
-            for (Formation f : formations) {
+            for (Formation f : formations)
                 formationTitleById.put(f.getId(), f.getTitre());
-            }
 
-            // ✅ Cleaner UX
-            cbFormation.setPromptText("Toutes les formations");
-
-            // ✅ Always show title only (no ID)
+            // Title only
             cbFormation.setCellFactory(list -> new ListCell<>() {
-                @Override
-                protected void updateItem(Formation item, boolean empty) {
+                @Override protected void updateItem(Formation item, boolean empty) {
                     super.updateItem(item, empty);
-                    setText(empty || item == null ? null : safe(item.getTitre()));
+                    setText(empty || item == null ? null : item.getTitre());
                 }
             });
-
             cbFormation.setButtonCell(new ListCell<>() {
-                @Override
-                protected void updateItem(Formation item, boolean empty) {
+                @Override protected void updateItem(Formation item, boolean empty) {
                     super.updateItem(item, empty);
-                    setText(empty || item == null ? "Toutes les formations" : safe(item.getTitre()));
+                    setText(empty || item == null ? "Toutes les formations" : item.getTitre());
                 }
             });
 
@@ -127,7 +120,7 @@ public class LessonListController {
 
         if (lblInfo != null) {
             lblInfo.setText("Affichées: " + filtered.size() + " / " + allLessons.size()
-                    + (fSel == null ? "" : "  |  " + safe(fSel.getTitre())));
+                    + (fSel == null ? "" : "  |  " + fSel.getTitre()));
         }
     }
 
@@ -151,7 +144,7 @@ public class LessonListController {
         }
     }
 
-    // Square card 260x260
+    // ✅ Grid square card + 🎬 video badge
     private VBox createCard(Lesson l) {
         VBox card = new VBox(0);
         card.getStyleClass().add("lesson-square-card");
@@ -161,6 +154,7 @@ public class LessonListController {
         card.setMaxHeight(260);
         card.setUserData(l.getId());
 
+        // Top accent
         HBox accent = new HBox();
         accent.setPrefHeight(5);
         accent.setMaxHeight(5);
@@ -173,6 +167,7 @@ public class LessonListController {
         body.setPadding(new Insets(16, 18, 16, 18));
         VBox.setVgrow(body, Priority.ALWAYS);
 
+        // Title row
         HBox titleRow = new HBox(10);
         titleRow.setAlignment(Pos.CENTER_LEFT);
 
@@ -204,6 +199,7 @@ public class LessonListController {
 
         titleRow.getChildren().addAll(orderCircle, title);
 
+        // Badges row: formation + duration + (NEW) video badge
         String ft = formationTitleById.getOrDefault(l.getFormationId(), "Formation inconnue");
         Label formation = new Label("📌  " + ft);
         formation.getStyleClass().addAll("badge", "badge-purple");
@@ -216,6 +212,14 @@ public class LessonListController {
         badges.setAlignment(Pos.CENTER_LEFT);
         badges.getChildren().addAll(formation, duree);
 
+        // ✅ NEW: show badge only if video URL exists
+        if (hasVideo(l)) {
+            Label video = new Label("🎬  Vidéo");
+            video.getStyleClass().addAll("badge", "badge-video");
+            badges.getChildren().add(video);
+        }
+
+        // Preview
         Label preview = new Label(preview(l.getContenu(), 80));
         preview.setWrapText(true);
         preview.setStyle(
@@ -228,6 +232,7 @@ public class LessonListController {
         Region spacer = new Region();
         VBox.setVgrow(spacer, Priority.ALWAYS);
 
+        // Actions
         HBox actions = new HBox(6);
         actions.setAlignment(Pos.CENTER_LEFT);
 
@@ -253,6 +258,7 @@ public class LessonListController {
         body.getChildren().addAll(titleRow, badges, preview, spacer, actions);
         card.getChildren().addAll(accent, body);
 
+        // Selection click (buttons remain clickable)
         card.setOnMouseClicked(e -> {
             if (e.getTarget() instanceof Button) return;
             selectedLesson = l;
@@ -260,6 +266,12 @@ public class LessonListController {
         });
 
         return card;
+    }
+
+    private boolean hasVideo(Lesson l) {
+        if (l == null) return false;
+        String url = l.getVideoUrl(); // requires your updated Lesson.java
+        return url != null && !url.trim().isBlank();
     }
 
     private void highlightSelection() {
@@ -284,12 +296,13 @@ public class LessonListController {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/lesson_form.fxml"));
             Scene scene = new Scene(loader.load());
-            scene.getStylesheets().add(Objects.requireNonNull(getClass().getResource("/style.css")).toExternalForm());
+            scene.getStylesheets().add(getClass().getResource("/style.css").toExternalForm());
 
             LessonFormController controller = loader.getController();
             controller.setOnSaved(() -> { loadAllLessons(); applyAllFilters(); });
             controller.setData(lesson);
-            controller.setFormations(cbFormation.getItems(), cbFormation.getSelectionModel().getSelectedItem());
+            controller.setFormations(cbFormation.getItems(),
+                    cbFormation.getSelectionModel().getSelectedItem());
 
             Stage popup = new Stage();
             popup.setTitle(lesson == null ? "Ajouter Lesson" : "Modifier Lesson");
@@ -303,8 +316,8 @@ public class LessonListController {
     private void openLessonViewer(Lesson lesson, List<Lesson> displayedList) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/lesson_view.fxml"));
-            Scene scene = new Scene(loader.load(), 950, 650);
-            scene.getStylesheets().add(Objects.requireNonNull(getClass().getResource("/style.css")).toExternalForm());
+            Scene scene = new Scene(loader.load(), 1100, 720);
+            scene.getStylesheets().add(getClass().getResource("/style.css").toExternalForm());
 
             LessonViewController controller = loader.getController();
 
@@ -362,7 +375,7 @@ public class LessonListController {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/formation_list.fxml"));
             Scene scene = new Scene(loader.load(), 1250, 720);
-            scene.getStylesheets().add(Objects.requireNonNull(getClass().getResource("/style.css")).toExternalForm());
+            scene.getStylesheets().add(getClass().getResource("/style.css").toExternalForm());
             Stage stage = (Stage) cbFormation.getScene().getWindow();
             stage.setScene(scene);
         } catch (Exception e) {
@@ -371,7 +384,6 @@ public class LessonListController {
     }
 
     private String safeLower(String s) { return s == null ? "" : s.toLowerCase(); }
-    private String safe(String s) { return s == null ? "" : s; }
 
     private String preview(String s, int max) {
         if (s == null) return "";
