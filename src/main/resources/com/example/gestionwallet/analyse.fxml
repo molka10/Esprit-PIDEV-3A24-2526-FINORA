@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.chart.*?>
+<?import javafx.geometry.Insets?>
+
+<BorderPane xmlns="http://javafx.com/javafx/8"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.example.gestionwallet.controllers.AnalyseController"
+            stylesheets="@dashboard.css">
+
+    <!-- ================= LEFT SIDEBAR ================= -->
+
+    <left>
+        <VBox spacing="30" alignment="TOP_CENTER" styleClass="sidebar">
+            <padding>
+                <Insets top="30" left="15" right="15" bottom="30"/>
+            </padding>
+
+            <Label text="Finance" style="-fx-text-fill:white; -fx-font-size:18px; -fx-font-weight:bold;"/>
+
+            <Button text="🏠" styleClass="sidebar-btn"/>
+            <Button text="💼" styleClass="sidebar-btn"  onAction="#openAdminPage" />
+            <Button text="📊" styleClass="sidebar-btn"/>
+            <Button text="⚙" styleClass="sidebar-btn"/>
+        </VBox>
+    </left>
+
+    <!-- ================= CENTER ================= -->
+
+    <center>
+        <VBox spacing="25">
+            <padding>
+                <Insets top="25" left="30" right="30" bottom="25"/>
+            </padding>
+
+            <!-- HEADER -->
+            <HBox spacing="20" alignment="CENTER_LEFT">
+
+                <Region HBox.hgrow="ALWAYS"/>
+
+                <TextField promptText="Search..." prefWidth="200"/>
+            </HBox>
+
+            <!-- CARDS -->
+            <HBox spacing="20">
+
+                <VBox spacing="10" styleClass="card-small">
+                    <Label text="Balance"/>
+                    <Label fx:id="balanceLabel" text="0 DT"
+                           style="-fx-font-size:18px; -fx-font-weight:bold;"/>
+                </VBox>
+
+                <VBox spacing="10" styleClass="card-small">
+                    <Label text="Income"/>
+                    <Label fx:id="incomeLabel" text="0 DT"
+                           style="-fx-font-size:18px; -fx-font-weight:bold;"/>
+                </VBox>
+
+                <VBox spacing="10" styleClass="card-small">
+                    <Label text="Outcome"/>
+                    <Label fx:id="outcomeLabel" text="0 DT"
+                           style="-fx-font-size:18px; -fx-font-weight:bold;"/>
+                </VBox>
+
+            </HBox>
+
+            <!-- BAR CHART -->
+            <BarChart fx:id="barChart" prefHeight="300">
+                <xAxis>
+                    <CategoryAxis label="Month"/>
+                </xAxis>
+                <yAxis>
+                    <NumberAxis label="Amount"/>
+                </yAxis>
+            </BarChart>
+
+        </VBox>
+    </center>
+
+    <!-- ================= RIGHT SIDE ================= -->
+
+    <right>
+        <VBox spacing="20">
+            <padding>
+                <Insets top="30" left="20" right="30" bottom="30"/>
+            </padding>
+
+
+            <!-- RECENT PAYMENTS -->
+            <VBox spacing="10" styleClass="card">
+                <Label text="Recent Payments"
+                       style="-fx-font-size:16px; -fx-font-weight:bold;"/>
+                <Label text="Electric Bill - 221 DT"/>
+                <Label text="Water Bill - 189 DT"/>
+                <Label text="Internet - 75 DT"/>
+            </VBox>
+
+        </VBox>
+    </right>
+
+</BorderPane>

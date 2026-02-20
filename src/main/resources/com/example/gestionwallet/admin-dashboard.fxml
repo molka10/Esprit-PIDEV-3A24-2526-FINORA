@@ -2,60 +2,168 @@
 
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.control.*?>
+<?import javafx.scene.chart.*?>
+<?import javafx.scene.chart.*?>
+
 
 <StackPane prefWidth="1200" prefHeight="750"
-           stylesheets="@dashboard.css"
            xmlns="http://javafx.com/javafx/8"
            xmlns:fx="http://javafx.com/fxml/1"
            fx:controller="com.example.gestionwallet.controllers.AdminController"
            style="-fx-background-color:#f4f4f8;">
 
-    <VBox spacing="30" maxWidth="1000"
-          style="-fx-background-color:white; -fx-padding:40; -fx-background-radius:25; -fx-effect:dropshadow(gaussian, rgba(0,0,0,0.1), 20,0,0,5);">
+    <VBox spacing="30" maxWidth="1100"
+          style="-fx-background-color:white; -fx-padding:40; -fx-background-radius:25;">
 
         <!-- HEADER -->
-        <HBox alignment="CENTER_LEFT">
+        <HBox alignment="CENTER_LEFT" spacing="20">
+
             <Label text="Admin Dashboard"
-                   style="-fx-font-size:26; -fx-font-weight:bold; -fx-text-fill:#6a0dad;"/>
+                   style="-fx-font-size:26;
+                  -fx-font-weight:bold;
+                  -fx-text-fill:#6a0dad;"/>
 
             <Region HBox.hgrow="ALWAYS"/>
+            
 
-            <Button text="Download PDF"
-                    style="-fx-background-color:#8e44ad; -fx-text-fill:white; -fx-background-radius:10;"/>
+            <VBox spacing="8" alignment="CENTER_RIGHT">
+
+                <TextField fx:id="userSearchField"
+                           promptText="Rechercher user..."
+                           prefWidth="200"/>
+
+                <HBox spacing="5">
+                    <Button text="Search"
+                            onAction="#rechercheUser"/>
+
+                    <Button text="Reset"
+                            onAction="#resetSearch"/>
+                </HBox>
+
+                <Button text="Download PDF"
+                        onAction="#downloadPDF"
+                        prefWidth="200"
+                        style="-fx-background-color:#8e44ad;
+                       -fx-text-fill:white;"/>
+            </VBox>
+
         </HBox>
 
-        <!-- MAIN CONTENT -->
+        <!-- CHARTS SECTION -->
+        <HBox spacing="50" alignment="CENTER">
+
+            <!-- PIE CHART -->
+            <VBox alignment="CENTER" spacing="15"
+                  style="-fx-background-color:white;
+                 -fx-padding:25;
+                 -fx-background-radius:20;
+                 -fx-effect:dropshadow(gaussian, rgba(0,0,0,0.08), 15,0,0,5);">
+
+                <Label text="Répartition"
+                       style="-fx-text-fill:#6a0dad;
+                      -fx-font-size:18;
+                      -fx-font-weight:bold;"/>
+
+                <PieChart fx:id="walletChart"
+                          prefWidth="360"
+                          prefHeight="300"
+                          legendVisible="true"
+                          labelsVisible="true"/>
+
+            </VBox>
+
+
+            <!-- LINE CHART -->
+            <VBox alignment="CENTER" spacing="15"
+                  style="-fx-background-color:white;
+                 -fx-padding:25;
+                 -fx-background-radius:20;
+                 -fx-effect:dropshadow(gaussian, rgba(0,0,0,0.08), 15,0,0,5);">
+
+                <Label text="Transactions par date"
+                       style="-fx-text-fill:#6a0dad;
+                      -fx-font-size:18;
+                      -fx-font-weight:bold;"/>
+
+                <LineChart fx:id="transactionLineChart"
+                           prefHeight="280"
+                           prefWidth="550"
+                           legendVisible="false">
+
+                    <xAxis>
+                        <CategoryAxis label="Date"/>
+                    </xAxis>
+
+                    <yAxis>
+                        <NumberAxis label="Montant"/>
+                    </yAxis>
+
+                </LineChart>
+
+            </VBox>
+
+        </HBox>
+
+
+
+
+
         <HBox spacing="40">
 
-            <!-- WALLET CARD -->
-            <VBox spacing="20" prefWidth="450"
-                  style="-fx-background-color:white; -fx-padding:25; -fx-background-radius:20; -fx-effect:dropshadow(gaussian, rgba(0,0,0,0.1), 15,0,0,4);">
+
+            <!-- WALLET -->
+            <VBox spacing="20" prefWidth="600">
 
                 <Label text="Wallet"
                        style="-fx-text-fill:#6a0dad; -fx-font-size:18; -fx-font-weight:bold;"/>
 
-                <ScrollPane fitToWidth="true" prefHeight="400"
-                            style="-fx-background-color:transparent;">
-                    <VBox fx:id="walletContainer" spacing="15"/>
-                </ScrollPane>
+                <VBox fx:id="walletContainer" spacing="15"/>
+
+                <!-- 4 STAT CARDS -->
+                <HBox spacing="15">
+
+                    <VBox fx:id="totalBox" prefWidth="110"
+                          style="-fx-background-color:white; -fx-padding:15; -fx-background-radius:15;
+                                 -fx-effect:dropshadow(gaussian, rgba(0,0,0,0.1), 10,0,0,3);"/>
+
+                    <VBox fx:id="incomeBox" prefWidth="110"
+                          style="-fx-background-color:white; -fx-padding:15; -fx-background-radius:15;
+                                 -fx-effect:dropshadow(gaussian, rgba(0,0,0,0.1), 10,0,0,3);"/>
+
+                    <VBox fx:id="outcomeBox" prefWidth="110"
+                          style="-fx-background-color:white; -fx-padding:15; -fx-background-radius:15;
+                                 -fx-effect:dropshadow(gaussian, rgba(0,0,0,0.1), 10,0,0,3);"/>
+
+                    <VBox fx:id="countBox" prefWidth="110"
+                          style="-fx-background-color:white; -fx-padding:15; -fx-background-radius:15;
+                                 -fx-effect:dropshadow(gaussian, rgba(0,0,0,0.1), 10,0,0,3);"/>
+
+                </HBox>
 
             </VBox>
 
-            <!-- TRANSACTION CARD -->
-            <VBox spacing="20" prefWidth="450"
-                  style="-fx-background-color:white; -fx-padding:25; -fx-background-radius:20; -fx-effect:dropshadow(gaussian, rgba(0,0,0,0.1), 15,0,0,4);">
+            <!-- TRANSACTIONS -->
+            <VBox spacing="20" prefWidth="500">
 
                 <Label text="Transactions"
                        style="-fx-text-fill:#6a0dad; -fx-font-size:18; -fx-font-weight:bold;"/>
 
-                <ScrollPane fitToWidth="true" prefHeight="400"
-                            style="-fx-background-color:transparent;">
+                <HBox spacing="10">
+                    <ComboBox fx:id="filterBox" prefWidth="120"/>
+                    <DatePicker fx:id="datePicker"/>
+                    <Button text="Filtrer" onAction="#applyFilter"/>
+                    <Button text="Reset" onAction="#resetFilter"/>
+                </HBox>
+
+                <ScrollPane fitToWidth="true" prefHeight="350">
                     <VBox fx:id="transactionContainer" spacing="15"/>
                 </ScrollPane>
 
             </VBox>
 
         </HBox>
+
+
 
     </VBox>
 

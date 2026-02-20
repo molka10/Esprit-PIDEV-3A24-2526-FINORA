@@ -9,6 +9,10 @@ import javafx.scene.layout.*;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
+import javafx.scene.Parent;
+
+
+
 import com.example.gestionwallet.models.transaction;
 import com.example.gestionwallet.services.servicetransaction;
 
@@ -283,4 +287,23 @@ public class WalletController {
             e.printStackTrace();
         }
     }
+
+
+    @FXML
+    private void goToAnalyse() {
+        try {
+
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/gestionwallet/analyse.fxml"));
+            Parent root = loader.load();
+
+            Stage stage = (Stage) balanceLabel.getScene().getWindow();
+            stage.setScene(new Scene(root));
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+
+
 }

@@ -19,7 +19,7 @@
             <Label text="💳 Wallet"
                    style="-fx-text-fill:white; -fx-font-size:22; -fx-font-weight:bold;"/>
 
-            <Button text="Dashboard"
+            <Button text=" 🏠 Dashboard"
                     style="-fx-background-color:white; -fx-text-fill:#6a0dad; -fx-background-radius:10;"/>
 
             <Button text="Admin"
@@ -41,7 +41,7 @@
 
             <Region HBox.hgrow="ALWAYS"/>
 
-            <Button text="Analyse"
+            <Button text="📊 Analyse" onAction="#goToAnalyse"
                     style="-fx-background-color:#dcd6f7; -fx-text-fill:#6a0dad; -fx-background-radius:10;"/>
 
             <Button text="Historique"
