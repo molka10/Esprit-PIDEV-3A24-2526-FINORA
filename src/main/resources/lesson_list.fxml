@@ -18,11 +18,9 @@
     <center>
         <VBox spacing="14" styleClass="screen">
             <padding>
-                <!-- ✅ More premium page padding (Udemy-like container) -->
                 <Insets top="18" right="26" bottom="22" left="26"/>
             </padding>
 
-            <!-- Toolbar -->
             <HBox spacing="12" alignment="CENTER_LEFT" styleClass="toolbar">
                 <HBox spacing="10" alignment="CENTER_LEFT">
                     <Label text="Formation:" styleClass="subtitle"/>
@@ -44,17 +42,16 @@
                 <Region HBox.hgrow="ALWAYS"/>
 
                 <HBox spacing="10" alignment="CENTER_RIGHT">
-                    <Button text="➕ Ajouter"    styleClass="btn-primary" onAction="#onAdd"/>
-                    <Button text="✏ Modifier"   styleClass="btn-ghost"   onAction="#onEdit"/>
-                    <Button text="🗑 Supprimer"  styleClass="btn-danger"  onAction="#onDelete"/>
-                    <Button text="⬅ Formations" styleClass="btn-ghost"   onAction="#goFormations"/>
+                    <Button fx:id="btnAdd" text="➕ Ajouter"    styleClass="btn-primary" onAction="#onAdd"/>
+                    <Button fx:id="btnEdit" text="✏ Modifier"   styleClass="btn-ghost"   onAction="#onEdit"/>
+                    <Button fx:id="btnDelete" text="🗑 Supprimer"  styleClass="btn-danger"  onAction="#onDelete"/>
+                    <Button text="⬅ Formations" styleClass="btn-ghost" onAction="#goFormations"/>
+                    <Button text="🔁 Changer rôle" styleClass="btn-ghost" onAction="#goRoleChoice"/>
                 </HBox>
             </HBox>
 
-            <!-- ✅ Grid area -->
             <ScrollPane fitToWidth="true" styleClass="scroll" VBox.vgrow="ALWAYS">
                 <content>
-                    <!-- ✅ Wrap in VBox to center the FlowPane like a dashboard -->
                     <VBox alignment="TOP_CENTER">
                         <FlowPane fx:id="cardsBox"
                                   hgap="22"
@@ -63,7 +60,6 @@
                                   prefWrapLength="1100"
                                   styleClass="cards cards-udemy">
                             <padding>
-                                <!-- ✅ Bigger inner padding = premium spacing -->
                                 <Insets top="14" right="14" bottom="24" left="14"/>
                             </padding>
                         </FlowPane>

@@ -7,13 +7,14 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
 import tn.finora.entities.Formation;
 import tn.finora.entities.Lesson;
+import tn.finora.finoraformation.HelloApplication;
 import tn.finora.services.FormationService;
 import tn.finora.services.LessonService;
+import tn.finora.utils.UserSession;
 
 import java.net.URI;
 import java.util.*;
@@ -24,8 +25,13 @@ public class LessonListController {
     @FXML private ComboBox<Formation> cbFormation;
     @FXML private TextField txtSearch;
     @FXML private ComboBox<String> cbSort;
-    @FXML private FlowPane cardsBox;      // ✅ Grid container
+    @FXML private FlowPane cardsBox;
     @FXML private Label lblInfo;
+
+    // ✅ admin toolbar buttons
+    @FXML private Button btnAdd;
+    @FXML private Button btnEdit;
+    @FXML private Button btnDelete;
 
     private final LessonService lessonService = new LessonService();
     private final FormationService formationService = new FormationService();
@@ -39,8 +45,17 @@ public class LessonListController {
     public void initialize() {
         initFormationCombo();
         initSort();
+        applyRolePermissions();
         loadAllLessons();
         applyAllFilters();
+    }
+
+    private void applyRolePermissions() {
+        boolean admin = UserSession.isAdmin();
+
+        if (btnAdd != null)    { btnAdd.setVisible(admin); btnAdd.setManaged(admin); }
+        if (btnEdit != null)   { btnEdit.setVisible(admin); btnEdit.setManaged(admin); }
+        if (btnDelete != null) { btnDelete.setVisible(admin); btnDelete.setManaged(admin); }
     }
 
     private void initFormationCombo() {
@@ -49,16 +64,15 @@ public class LessonListController {
             cbFormation.setItems(FXCollections.observableArrayList(formations));
 
             formationTitleById.clear();
-            for (Formation f : formations)
-                formationTitleById.put(f.getId(), f.getTitre());
+            for (Formation f : formations) formationTitleById.put(f.getId(), f.getTitre());
 
-            // Title only
             cbFormation.setCellFactory(list -> new ListCell<>() {
                 @Override protected void updateItem(Formation item, boolean empty) {
                     super.updateItem(item, empty);
                     setText(empty || item == null ? null : item.getTitre());
                 }
             });
+
             cbFormation.setButtonCell(new ListCell<>() {
                 @Override protected void updateItem(Formation item, boolean empty) {
                     super.updateItem(item, empty);
@@ -141,9 +155,7 @@ public class LessonListController {
 
     private void renderCards(List<Lesson> list) {
         cardsBox.getChildren().clear();
-        for (Lesson l : list) {
-            cardsBox.getChildren().add(createCard(l));
-        }
+        for (Lesson l : list) cardsBox.getChildren().add(createCard(l));
     }
 
     private VBox createCard(Lesson l) {
@@ -153,7 +165,7 @@ public class LessonListController {
         card.setMaxWidth(320);
         card.setUserData(l.getId());
 
-        // ── Header (fake thumbnail) ─────────────────────────────
+        // header
         StackPane header = new StackPane();
         header.getStyleClass().add("ud-lesson-header");
         header.setPrefHeight(92);
@@ -185,18 +197,16 @@ public class LessonListController {
         headerRow.getChildren().addAll(chipNum, spacer, chipVideo);
         header.getChildren().add(headerRow);
 
-        // ── Body ────────────────────────────────────────────────
+        // body
         VBox body = new VBox(12);
         body.getStyleClass().add("ud-lesson-body");
         body.setPadding(new Insets(14, 14, 14, 14));
 
-        // Title
         Label title = new Label(safe(l.getTitre(), "(Sans titre)"));
         title.getStyleClass().add("ud-lesson-title");
         title.setWrapText(true);
-        title.setMaxHeight(48); // visually keeps it like Udemy (2 lines)
+        title.setMaxHeight(48);
 
-        // Chips row (formation + duration)
         HBox meta = new HBox(8);
         meta.setAlignment(Pos.CENTER_LEFT);
 
@@ -210,35 +220,36 @@ public class LessonListController {
 
         meta.getChildren().addAll(chipFormation, chipDuration);
 
-        // Spacer pushes actions to bottom
         Region grow = new Region();
         VBox.setVgrow(grow, Priority.ALWAYS);
 
-        // Footer actions (bottom-right)
         HBox actions = new HBox(8);
         actions.setAlignment(Pos.CENTER_RIGHT);
         actions.getStyleClass().add("ud-lesson-actions-bottom");
 
         Button viewBtn = new Button("Voir");
         viewBtn.getStyleClass().add("ud-btn-primary");
+        viewBtn.setOnAction(e -> openLessonViewer(l, lastDisplayed));
 
         Button editBtn = new Button("Modifier");
         editBtn.getStyleClass().addAll("ud-btn-ghost", "ud-hover-action");
+        editBtn.setOnAction(e -> { selectedLesson = l; openForm(l); });
 
         Button deleteBtn = new Button("Supprimer");
         deleteBtn.getStyleClass().addAll("ud-btn-danger", "ud-hover-action");
-
-        viewBtn.setOnAction(e -> openLessonViewer(l, lastDisplayed));
-        editBtn.setOnAction(e -> { selectedLesson = l; openForm(l); });
         deleteBtn.setOnAction(e -> { selectedLesson = l; onDelete(); });
 
+        // ✅ USER mode: hide edit/delete everywhere
+        if (!UserSession.isAdmin()) {
+            editBtn.setVisible(false); editBtn.setManaged(false);
+            deleteBtn.setVisible(false); deleteBtn.setManaged(false);
+        }
+
         actions.getChildren().addAll(viewBtn, editBtn, deleteBtn);
-        // ✅ No preview text anymore
         body.getChildren().addAll(title, meta, grow, actions);
 
         card.getChildren().addAll(header, body);
 
-        // select card on click (buttons still work)
         card.addEventFilter(javafx.scene.input.MouseEvent.MOUSE_CLICKED, e -> {
             Object t = e.getTarget();
             if (t instanceof Button) return;
@@ -249,20 +260,16 @@ public class LessonListController {
 
         return card;
     }
+
     private boolean hasVideo(Lesson l) {
         if (l == null) return false;
-        String url = l.getVideoUrl(); // ✅ requires Lesson.getVideoUrl()
+        String url = l.getVideoUrl();
         return url != null && !url.trim().isBlank();
     }
 
     private void openVideo(String url) {
-        if (url == null || url.isBlank()) {
-            showWarn("Aucune vidéo associée à cette leçon.");
-            return;
-        }
-
+        if (url == null || url.isBlank()) { showWarn("Aucune vidéo associée."); return; }
         try {
-            // open in default browser
             java.awt.Desktop.getDesktop().browse(new URI(url.trim()));
         } catch (Exception e) {
             showError("Impossible d'ouvrir la vidéo: " + e.getMessage());
@@ -272,8 +279,7 @@ public class LessonListController {
     private void highlightSelection() {
         for (var node : cardsBox.getChildren()) {
             if (node instanceof VBox v) {
-                boolean isSel = selectedLesson != null
-                        && selectedLesson.getId() == (int) v.getUserData();
+                boolean isSel = selectedLesson != null && selectedLesson.getId() == (int) v.getUserData();
                 v.getStyleClass().remove("lesson-card-selected");
                 if (isSel) v.getStyleClass().add("lesson-card-selected");
             }
@@ -288,6 +294,8 @@ public class LessonListController {
     }
 
     private void openForm(Lesson lesson) {
+        if (!UserSession.isAdmin()) return;
+
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/lesson_form.fxml"));
             Scene scene = new Scene(loader.load());
@@ -339,21 +347,25 @@ public class LessonListController {
         }
     }
 
-    @FXML private void onAdd() { openForm(null); }
+    @FXML private void onAdd() { if (UserSession.isAdmin()) openForm(null); }
 
     @FXML
     private void onEdit() {
+        if (!UserSession.isAdmin()) return;
         if (selectedLesson == null) { showWarn("Sélectionne une lesson"); return; }
         openForm(selectedLesson);
     }
 
     @FXML
     private void onDelete() {
+        if (!UserSession.isAdmin()) return;
         if (selectedLesson == null) { showWarn("Sélectionne une lesson"); return; }
+
         Alert confirm = new Alert(Alert.AlertType.CONFIRMATION,
                 "Supprimer cette lesson ?", ButtonType.YES, ButtonType.NO);
         confirm.setHeaderText(null);
         confirm.showAndWait();
+
         if (confirm.getResult() == ButtonType.YES) {
             try {
                 lessonService.delete(selectedLesson.getId());
@@ -367,28 +379,17 @@ public class LessonListController {
 
     @FXML
     private void goFormations() {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/formation_list.fxml"));
-            Scene scene = new Scene(loader.load(), 1250, 720);
-            scene.getStylesheets().add(Objects.requireNonNull(getClass().getResource("/style.css")).toExternalForm());
-            Stage stage = (Stage) cbFormation.getScene().getWindow();
-            stage.setScene(scene);
-        } catch (Exception e) {
-            showError("Impossible d'ouvrir Formations: " + e.getMessage());
-        }
+        HelloApplication.showFormations();
+    }
+
+    // ✅ NEW: role choice
+    @FXML
+    private void goRoleChoice() {
+        HelloApplication.showRoleChoice();
     }
 
     private String safeLower(String s) { return s == null ? "" : s.toLowerCase(); }
-
-    private String preview(String s, int max) {
-        if (s == null) return "";
-        s = s.trim();
-        return s.length() <= max ? s : s.substring(0, max) + "...";
-    }
-
-    private String safe(String s, String fallback) {
-        return (s == null || s.trim().isEmpty()) ? fallback : s.trim();
-    }
+    private String safe(String s, String fallback) { return (s == null || s.trim().isEmpty()) ? fallback : s.trim(); }
 
     private void showWarn(String msg)  { new Alert(Alert.AlertType.WARNING, msg).showAndWait(); }
     private void showError(String msg) { new Alert(Alert.AlertType.ERROR, msg).showAndWait(); }

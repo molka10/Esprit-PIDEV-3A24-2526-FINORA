@@ -38,6 +38,7 @@
                 <Region HBox.hgrow="ALWAYS"/>
 
                 <Button fx:id="btnLessons" text="📚 Lessons" styleClass="btn-ghost" onAction="#goLessons"/>
+                <Button fx:id="btnRole" text="🔁 Changer espace" styleClass="btn-ghost" onAction="#goRoleChoice"/>
             </HBox>
 
             <ScrollPane fitToWidth="true" styleClass="scroll">

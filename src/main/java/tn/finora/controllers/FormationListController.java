@@ -10,17 +10,18 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import tn.finora.entities.Formation;
+import tn.finora.finoraformation.HelloApplication;
 import tn.finora.services.FormationService;
 import tn.finora.utils.UserSession;
 
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 
 public class FormationListController {
 
@@ -29,7 +30,6 @@ public class FormationListController {
     @FXML private TextField txtSearch;
     @FXML private ComboBox<String> cbSort;
 
-    // ✅ role-based buttons
     @FXML private Button btnAdd;
     @FXML private Button btnEdit;
     @FXML private Button btnDelete;
@@ -118,16 +118,13 @@ public class FormationListController {
 
     @FXML
     private void goLessons() {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/lesson_list.fxml"));
-            Scene scene = new Scene(loader.load(), 1250, 720);
-            scene.getStylesheets().add(getClass().getResource("/style.css").toExternalForm());
+        HelloApplication.showLessons();
+    }
 
-            Stage stage = (Stage) cardsContainer.getScene().getWindow();
-            stage.setScene(scene);
-        } catch (Exception e) {
-            showError("Impossible d'ouvrir Lessons: " + e.getMessage());
-        }
+    // ✅ NEW: go back to role choice
+    @FXML
+    private void goRoleChoice() {
+        HelloApplication.showRoleChoice();
     }
 
     private void applySearchAndSort() {
@@ -271,7 +268,7 @@ public class FormationListController {
         deleteBtn.getStyleClass().add("btn-danger");
         deleteBtn.setOnAction(e -> deleteFormation(f));
 
-        // ✅ User mode: only allow "Voir lessons"
+        // ✅ USER mode: hide edit/delete inside cards too
         if (!UserSession.isAdmin()) {
             editBtn.setVisible(false); editBtn.setManaged(false);
             deleteBtn.setVisible(false); deleteBtn.setManaged(false);
@@ -292,6 +289,22 @@ public class FormationListController {
         return wrapper;
     }
 
+    private void openLessonsForFormation(Formation formation) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/lesson_list.fxml"));
+            Scene scene = new Scene(loader.load(), 1250, 720);
+            scene.getStylesheets().add(Objects.requireNonNull(getClass().getResource("/style.css")).toExternalForm());
+
+            LessonListController controller = loader.getController();
+            controller.setSelectedFormation(formation);
+
+            Stage stage = (Stage) cardsContainer.getScene().getWindow();
+            stage.setScene(scene);
+        } catch (Exception e) {
+            showError("Impossible d'ouvrir Lessons: " + e.getMessage());
+        }
+    }
+
     private void deleteFormation(Formation f) {
         Alert confirm = new Alert(Alert.AlertType.CONFIRMATION,
                 "Supprimer cette formation ? (les lessons seront supprimées aussi)",
@@ -309,27 +322,11 @@ public class FormationListController {
         }
     }
 
-    private void openLessonsForFormation(Formation formation) {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/lesson_list.fxml"));
-            Scene scene = new Scene(loader.load(), 1250, 720);
-            scene.getStylesheets().add(getClass().getResource("/style.css").toExternalForm());
-
-            LessonListController controller = loader.getController();
-            controller.setSelectedFormation(formation);
-
-            Stage stage = (Stage) cardsContainer.getScene().getWindow();
-            stage.setScene(scene);
-        } catch (Exception e) {
-            showError("Impossible d'ouvrir Lessons: " + e.getMessage());
-        }
-    }
-
     private void openForm(Formation formation) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/formation_form.fxml"));
             Scene scene = new Scene(loader.load());
-            scene.getStylesheets().add(getClass().getResource("/style.css").toExternalForm());
+            scene.getStylesheets().add(Objects.requireNonNull(getClass().getResource("/style.css")).toExternalForm());
 
             FormationFormController controller = loader.getController();
             controller.setData(formation);
