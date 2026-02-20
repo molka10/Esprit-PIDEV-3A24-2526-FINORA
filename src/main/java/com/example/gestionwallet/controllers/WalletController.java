@@ -356,13 +356,17 @@ public class WalletController {
         stage.setTitle("Historique");
 
         CalendarView calendarView = new CalendarView();
+
         calendarView.showWeekPage();
+        calendarView.setShowAddCalendarButton(false);
+        calendarView.setShowSearchField(false);
+        calendarView.setShowSourceTray(false);
 
         Calendar incomeCal = new Calendar("Income");
-        incomeCal.setStyle(Calendar.Style.STYLE2);
+        incomeCal.setStyle(Calendar.Style.STYLE2); // green
 
         Calendar outcomeCal = new Calendar("Outcome");
-        outcomeCal.setStyle(Calendar.Style.STYLE3);
+        outcomeCal.setStyle(Calendar.Style.STYLE3); // red
 
         for (transaction t : st.afficher()) {
 
@@ -387,9 +391,15 @@ public class WalletController {
 
         calendarView.getCalendarSources().add(source);
 
-        Scene scene = new Scene(calendarView, 900, 600);
+        Scene scene = new Scene(calendarView, 1000, 650);
+
         stage.setScene(scene);
         stage.show();
+        scene.getStylesheets().add(getClass().getResource("/com/example/gestionwallet/dashboard.css").toExternalForm());
+        scene.getRoot().setStyle("-fx-background-radius:20;");
+        stage.setResizable(false);
+
     }
+
 
 }

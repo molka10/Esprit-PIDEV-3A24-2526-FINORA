@@ -32,14 +32,6 @@
         </VBox>
     </left>
 
-    <!-- TOP -->
-    <top>
-        <HBox spacing="20"
-              alignment="CENTER_LEFT"
-              style="-fx-padding:20; -fx-background-color:white;">
-
-        </HBox>
-    </top>
 
     <!-- CENTER -->
     <center>

@@ -312,4 +312,74 @@
     -fx-pref-height: 2;
     -fx-max-width: 120;
 }
+.calendar-view {
+    -fx-font-family: "Segoe UI";
+}
+
+.calendar-header {
+    -fx-background-color: white;
+}
+
+.date-label {
+    -fx-font-weight: bold;
+}
+
+.week-day-header {
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+}
+
+.entry {
+    -fx-background-radius: 8;
+}
+/* ===== Calendar Background ===== */
+.calendar-view {
+    -fx-background-color: #f5f0ff;
+    -fx-font-family: "Segoe UI";
+}
+
+/* ===== Header ===== */
+.calendar-header {
+    -fx-background-color: #6a0dad;
+}
+
+.calendar-header .label {
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+}
+
+/* ===== Month / Week Day Names ===== */
+.week-day-header {
+    -fx-text-fill: #6a0dad;
+    -fx-font-weight: bold;
+}
+
+/* ===== Today Highlight ===== */
+.today {
+    -fx-background-color: #d8b4fe;
+}
+
+/* ===== Entry Base ===== */
+.entry {
+    -fx-background-radius: 10;
+    -fx-padding: 5;
+}
+
+/* Income Style (Soft Purple) */
+.style2-entry {
+    -fx-background-color: #c084fc;
+    -fx-text-fill: white;
+}
+
+/* Outcome Style (Dark Purple) */
+.style3-entry {
+    -fx-background-color: #7e22ce;
+    -fx-text-fill: white;
+}
+
+/* Selection */
+.selected {
+    -fx-border-color: #6a0dad;
+    -fx-border-width: 2;
+}
 
