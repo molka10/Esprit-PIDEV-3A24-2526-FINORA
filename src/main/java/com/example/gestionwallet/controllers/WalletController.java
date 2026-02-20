@@ -9,10 +9,7 @@ import javafx.scene.control.*;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.scene.layout.VBox;
-import javafx.scene.layout.VBox;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
-import javafx.geometry.Insets;
 import com.calendarfx.view.CalendarView;
 import com.calendarfx.model.Calendar;
 import com.calendarfx.model.CalendarSource;
@@ -21,6 +18,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import com.example.gestionwallet.models.transaction;
 import com.example.gestionwallet.services.servicetransaction;
+
 
 public class WalletController {
 
@@ -60,34 +58,37 @@ public class WalletController {
 
         for (transaction t : st.afficher()) {
 
-            // ✅ Protection contre null
-            String categorie = t.getCategorie();
+            transaction currentTransaction = t;
+
+            String type = currentTransaction.getType().toUpperCase();
+
+            String categorie = currentTransaction.getCategorie();
             if (categorie == null || categorie.trim().isEmpty()) {
                 categorie = "Sans categorie";
             }
 
-            double montant = Math.abs(t.getMontant());
+            double montant = currentTransaction.getMontant();
 
             XYChart.Data<String, Number> data =
-                    new XYChart.Data<>(categorie, montant);
+                    new XYChart.Data<>(categorie, Math.abs(montant));
 
-            if ("INCOME".equals(t.getType())) {
+            if (type.equals("INCOME")) {
 
                 incomeSeries.getData().add(data);
-                totalIncome += t.getMontant();
-                balance += t.getMontant();
+                totalIncome += montant;
+                balance += montant;
 
-            } else {
+            } else if (type.equals("OUTCOME")) {
 
                 outcomeSeries.getData().add(data);
-                totalOutcome += montant;
-                balance += t.getMontant();
+                totalOutcome += Math.abs(montant);
+                balance += montant;
             }
 
             data.nodeProperty().addListener((obs, oldNode, newNode) -> {
                 if (newNode != null) {
                     newNode.setOnMouseClicked(e ->
-                            showTransactionDetails(t));
+                            showTransactionDetails(currentTransaction));
                 }
             });
         }
@@ -109,7 +110,7 @@ public class WalletController {
         balanceLabel.setText( balance + " DT");
 
         if (balance >= 0) {
-            balanceLabel.setStyle("-fx-font-size:24; -fx-font-weight:bold; -fx-text-fill:#2ecc71;");
+            balanceLabel.setStyle("-fx-font-size:24; -fx-font-weight:bold; -fx-text-fill:#6a0dad;");
         } else {
             balanceLabel.setStyle("-fx-font-size:24; -fx-font-weight:bold; -fx-text-fill:#e74c3c;");
         }
@@ -180,24 +181,38 @@ public class WalletController {
     private void openEditPopup(transaction t) {
 
         Stage dialogStage = new Stage();
+        dialogStage.initOwner(balanceLabel.getScene().getWindow());
+        dialogStage.setResizable(false);
         dialogStage.initModality(Modality.APPLICATION_MODAL);
         dialogStage.setTitle("Modifier Transaction");
 
         Label title = new Label("Modifier Transaction");
         title.setStyle("-fx-font-size:18; -fx-font-weight:bold; -fx-text-fill:#6a0dad;");
 
+        // ---------- NOM ----------
         Label nameLabel = new Label("Nom");
         nameLabel.setStyle("-fx-text-fill:#4b0082;");
 
         TextField nameField = new TextField(t.getNom_transaction());
         nameField.setStyle("-fx-background-radius:10; -fx-padding:8;");
 
+        // ---------- MONTANT ----------
         Label amountLabel = new Label("Montant");
         amountLabel.setStyle("-fx-text-fill:#4b0082;");
 
-        TextField amountField = new TextField(String.valueOf(Math.abs(t.getMontant())));
+        TextField amountField =
+                new TextField(String.valueOf(Math.abs(t.getMontant())));
         amountField.setStyle("-fx-background-radius:10; -fx-padding:8;");
 
+        // ---------- DATE ----------
+        Label dateLabel = new Label("Date");
+        dateLabel.setStyle("-fx-text-fill:#4b0082;");
+
+        DatePicker datePicker = new DatePicker();
+        datePicker.setValue(t.getDate_transaction().toLocalDate());
+        datePicker.setStyle("-fx-background-radius:10;");
+
+        // ---------- BOUTONS ----------
         Button saveBtn = new Button("Enregistrer");
         saveBtn.setStyle("""
         -fx-background-color:#8e44ad;
@@ -220,6 +235,7 @@ public class WalletController {
                 title,
                 nameLabel, nameField,
                 amountLabel, amountField,
+                dateLabel, datePicker,
                 buttons
         );
 
@@ -230,31 +246,50 @@ public class WalletController {
         -fx-effect:dropshadow(gaussian, rgba(0,0,0,0.15), 20,0,0,5);
     """);
 
-        Scene scene = new Scene(card, 350, 320);
+        Scene scene = new Scene(card, 350, 400);
         dialogStage.setScene(scene);
+        nameField.requestFocus();
+
+        // ================= SAVE ACTION =================
 
         saveBtn.setOnAction(ev -> {
 
-            String newName = nameField.getText();
-            String amountText = amountField.getText();
+            try {
 
-            if (newName.isEmpty() || amountText.isEmpty()) {
-                showError("Champs obligatoires !");
-                return;
+                String newName = nameField.getText();
+                String amountText = amountField.getText();
+
+                if (newName.isEmpty() || amountText.isEmpty()
+                        || datePicker.getValue() == null) {
+                    showError("Champs obligatoires !");
+                    return;
+                }
+
+                double newAmount = Double.parseDouble(amountText);
+
+                if ("OUTCOME".equalsIgnoreCase(t.getType())) {
+                    newAmount = -Math.abs(newAmount);
+                }
+
+                t.setNom_transaction(newName);
+                t.setMontant(newAmount);
+                t.setDate_transaction(
+                        java.sql.Date.valueOf(datePicker.getValue())
+                );
+
+                System.out.println("ID: " + t.getId_transaction());
+                System.out.println("Category ID = " + t.getCategory_id());
+                st.modifier(t);
+
+                System.out.println("UPDATE DONE");
+
+                loadTransactions();
+                dialogStage.close();
+
+            } catch (Exception e) {
+                e.printStackTrace();
+                showError("Erreur pendant modification !");
             }
-
-            double newAmount = Double.parseDouble(amountText);
-
-            if ("OUTCOME".equalsIgnoreCase(t.getType())) {
-                newAmount = -Math.abs(newAmount);
-            }
-
-            t.setNom_transaction(newName);
-            t.setMontant(newAmount);
-
-            st.modifier(t);
-            loadTransactions();
-            dialogStage.close();
         });
 
         cancelBtn.setOnAction(ev -> dialogStage.close());

@@ -45,20 +45,20 @@ public class servicetransaction implements Iservicetransaction {
     public void modifier(transaction t) {
 
         String sql = """
-            UPDATE transaction
-            SET nom_transaction=?, type=?, montant=?, date_transaction=?, category_id=?
-            WHERE id_transaction=?
-        """;
+        UPDATE transaction
+        SET nom_transaction=?, montant=?, date_transaction=?
+        WHERE id_transaction=?
+    """;
 
         try {
             PreparedStatement ps = cnx.prepareStatement(sql);
             ps.setString(1, t.getNom_transaction());
-            ps.setString(2, t.getType());
-            ps.setDouble(3, t.getMontant());
-            ps.setDate(4, t.getDate_transaction());
-            ps.setInt(5, t.getCategory_id());
-            ps.setInt(6, t.getId_transaction());
-            ps.executeUpdate();
+            ps.setDouble(2, t.getMontant());
+            ps.setDate(3, t.getDate_transaction());
+            ps.setInt(4, t.getId_transaction());
+
+            int rows = ps.executeUpdate();
+            System.out.println("Rows updated = " + rows);
 
         } catch (SQLException e) {
             e.printStackTrace();
