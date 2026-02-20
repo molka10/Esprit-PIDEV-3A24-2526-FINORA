@@ -80,34 +80,42 @@ public class servicetransaction implements Iservicetransaction {
         }
     }
 
-    @Override
     public List<transaction> afficher() {
 
         List<transaction> list = new ArrayList<>();
 
-        String sql = "SELECT * FROM transaction";
-
         try {
-            Statement st = cnx.createStatement();
-            ResultSet rs = st.executeQuery(sql);
+
+            String query = """
+                SELECT t.*, c.nom AS categorie_nom
+                FROM transaction t
+                LEFT JOIN category c
+                ON t.category_id = c.id_category
+                """;
+
+            Statement stt = cnx.createStatement();
+            ResultSet rs = stt.executeQuery(query);
 
             while (rs.next()) {
 
-                transaction t = new transaction(
-                        rs.getInt("id_transaction"),
-                        rs.getString("nom_transaction"),
-                        rs.getString("type"),
-                        rs.getDouble("montant"),
-                        rs.getDate("date_transaction"),
-                        rs.getString("source"),
-                        rs.getInt("user_id"),
-                        rs.getInt("category_id")
-                );
+                transaction t = new transaction();
+
+                t.setId_transaction(rs.getInt("id_transaction"));
+                t.setNom_transaction(rs.getString("nom_transaction"));
+                t.setType(rs.getString("type"));
+                t.setMontant(rs.getDouble("montant"));
+                t.setDate_transaction(rs.getDate("date_transaction"));
+                t.setSource(rs.getString("source"));
+                t.setUser_id(rs.getInt("user_id"));
+                t.setCategory_id(rs.getInt("category_id"));
+
+                // 🔥 HEDHI ELLI KENET NA9SA
+                t.setCategorie(rs.getString("categorie_nom"));
 
                 list.add(t);
             }
 
-        } catch (SQLException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
 

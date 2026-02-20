@@ -24,7 +24,7 @@
                   -fx-text-fill:#6a0dad;"/>
 
             <Region HBox.hgrow="ALWAYS"/>
-            
+
 
             <VBox spacing="8" alignment="CENTER_RIGHT">
 

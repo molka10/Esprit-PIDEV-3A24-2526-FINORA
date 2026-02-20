@@ -207,4 +207,109 @@
 .chart-title {
     -fx-text-fill: #6a0dad;
 }
+/* ===== GENERAL ===== */
+.root {
+    -fx-font-family: "Segoe UI";
+}
+
+/* ===== TITLES ===== */
+.section-title {
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #4b0082;
+}
+
+/* ===== STAT CARDS ===== */
+.stat-title {
+    -fx-font-size: 14px;
+    -fx-text-fill: #888;
+}
+
+.stat-value {
+    -fx-font-size: 26px;
+    -fx-font-weight: bold;
+}
+
+/* ===== PRIMARY BUTTON ===== */
+.btn-primary {
+    -fx-background-color: #8e44ad;
+    -fx-text-fill: white;
+    -fx-background-radius: 20;
+    -fx-padding: 8 20;
+    -fx-font-weight: bold;
+}
+
+.btn-primary:hover {
+    -fx-background-color: #6a0dad;
+}
+
+/* ===== SUCCESS BUTTON ===== */
+.btn-success {
+    -fx-background-color: #2ecc71;
+    -fx-text-fill: white;
+    -fx-background-radius: 20;
+    -fx-padding: 8 20;
+    -fx-font-weight: bold;
+}
+
+.btn-success:hover {
+    -fx-background-color: #27ae60;
+}
+
+/* ===== DANGER BUTTON ===== */
+.btn-danger {
+    -fx-background-color: #e74c3c;
+    -fx-text-fill: white;
+    -fx-background-radius: 20;
+    -fx-padding: 8 20;
+    -fx-font-weight: bold;
+}
+
+.btn-danger:hover {
+    -fx-background-color: #c0392b;
+}
+
+/* ===== CHART TITLE ===== */
+.chart-title {
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #333;
+}
+.income-value {
+    -fx-text-fill: #2ecc71;
+    -fx-font-size: 26px;
+    -fx-font-weight: bold;
+}
+
+.outcome-value {
+    -fx-text-fill: #e74c3c;
+    -fx-font-size: 26px;
+    -fx-font-weight: bold;
+}
+.btn-primary {
+    -fx-background-color: #8e44ad;
+    -fx-text-fill: white;
+    -fx-background-radius: 25;
+    -fx-padding: 10 30;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+}
+/* ===== SECTION TITLES ===== */
+.section-title-outcome {
+    -fx-font-size: 22px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #e74c3c;
+}
+
+.section-title-income {
+    -fx-font-size: 22px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #2ecc71;
+}
+
+.section-underline {
+    -fx-background-color: #ddd;
+    -fx-pref-height: 2;
+    -fx-max-width: 120;
+}
 

@@ -64,6 +64,15 @@ public class transaction {
 
     public int getCategory_id() { return category_id; }
     public void setCategory_id(int category_id) { this.category_id = category_id; }
+    private String categorie;
+
+    public String getCategorie() {
+        return categorie;
+    }
+
+    public void setCategorie(String categorie) {
+        this.categorie = categorie;
+    }
 
     @Override
     public String toString() {

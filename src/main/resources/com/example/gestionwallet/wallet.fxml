@@ -2,6 +2,9 @@
 
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.chart.*?>
 
 <BorderPane xmlns="http://javafx.com/javafx/8"
             xmlns:fx="http://javafx.com/fxml/1"
@@ -35,38 +38,97 @@
               alignment="CENTER_LEFT"
               style="-fx-padding:20; -fx-background-color:white;">
 
-            <Label fx:id="balanceLabel"
-                   text="Balance: 0 DT"
-                   style="-fx-font-size:26; -fx-font-weight:bold; -fx-text-fill:#6a0dad;"/>
-
-            <Region HBox.hgrow="ALWAYS"/>
-
-            <Button text="📊 Analyse" onAction="#goToAnalyse"
-                    style="-fx-background-color:#dcd6f7; -fx-text-fill:#6a0dad; -fx-background-radius:10;"/>
-
-            <Button text="Historique"
-                    style="-fx-background-color:#8e44ad; -fx-text-fill:white; -fx-background-radius:10;"/>
-
         </HBox>
     </top>
 
     <!-- CENTER -->
     <center>
-        <HBox spacing="40"
-              alignment="CENTER"
-              style="-fx-padding:40; -fx-background-color:#f4f4f8;">
+        <VBox spacing="30"
+              style="-fx-padding:30; -fx-background-color:#f4f4f8;">
 
-            <VBox fx:id="outcomeBox"
-                  spacing="30"
-                  prefWidth="550"
-                  style="-fx-background-color:white; -fx-background-radius:20; -fx-padding:20; -fx-effect:dropshadow(gaussian, rgba(0,0,0,0.1), 20,0,0,5);"/>
+            <!-- STAT CARDS -->
+            <HBox spacing="30" alignment="CENTER">
+                <VBox spacing="5"
+                      style="-fx-background-color:white; -fx-padding:20; -fx-background-radius:15; -fx-effect:dropshadow(gaussian, rgba(0,0,0,0.1), 15,0,0,3);">
 
-            <VBox fx:id="incomeBox"
-                  spacing="30"
-                  prefWidth="550"
-                  style="-fx-background-color:white; -fx-background-radius:20; -fx-padding:20; -fx-effect:dropshadow(gaussian, rgba(0,0,0,0.1), 20,0,0,5);"/>
+                    <Label text="Balance" styleClass="stat-title"/>
+                    <Label fx:id="balanceLabel"
+                           text="0 DT"
+                           styleClass="stat-value"/>
 
-        </HBox>
+                </VBox>
+                <VBox spacing="5"
+                      style="-fx-background-color:white; -fx-padding:20; -fx-background-radius:15; -fx-effect:dropshadow(gaussian, rgba(0,0,0,0.1), 15,0,0,3);">
+
+                    <Label text="Total Income" styleClass="stat-title"/>
+                    <Label fx:id="totalIncomeLabel"
+                           text="0 DT"
+                           styleClass="income-value"/>
+
+                </VBox>
+
+                <VBox spacing="5"
+                      style="-fx-background-color:white; -fx-padding:20; -fx-background-radius:15; -fx-effect:dropshadow(gaussian, rgba(0,0,0,0.1), 15,0,0,3);">
+                    <Label text="Total Outcome" styleClass="stat-title"/>
+                    <Label fx:id="totalOutcomeLabel"
+                           text="0 DT"
+                           styleClass="outcome-value"/>
+
+                </VBox>
+                <Button text="Historique"
+                        styleClass="btn-primary"
+                        style="-fx-background-color:#8e44ad; -fx-text-fill:white; -fx-background-radius:10;"/>
+
+
+            </HBox>
+
+            <!-- CHARTS -->
+            <HBox spacing="40" alignment="CENTER">
+
+                <!-- OUTCOME -->
+                <VBox spacing="10" alignment="CENTER">
+                    <VBox alignment="CENTER" spacing="5">
+                        <Label text="Outcome" styleClass="section-title-outcome"/>
+                        <Region styleClass="section-underline"/>
+                    </VBox>
+                    <Button text="Ajouter Outcome"
+                            onAction="#openAddOutcome"
+                            styleClass="btn-danger"/>
+
+                    <LineChart fx:id="outcomeChart" prefWidth="450" prefHeight="300">
+                        <xAxis>
+                            <CategoryAxis label="Categorie"/>
+                        </xAxis>
+                        <yAxis>
+                            <NumberAxis label="Montant"/>
+                        </yAxis>
+                    </LineChart>
+                </VBox>
+
+                <!-- INCOME -->
+                <VBox spacing="10" alignment="CENTER">
+                    <VBox alignment="CENTER" spacing="5">
+                        <Label text="Income" styleClass="section-title-income"/>
+                        <Region styleClass="section-underline"/>
+                    </VBox>
+                    <Button text="Ajouter Income"
+                            onAction="#openAddIncome"
+                            styleClass="btn-success"/>
+
+                    <LineChart fx:id="incomeChart" prefWidth="450" prefHeight="300">
+                        <xAxis>
+                            <CategoryAxis label="Categorie"/>
+                        </xAxis>
+                        <yAxis>
+                            <NumberAxis label="Montant"/>
+                        </yAxis>
+                    </LineChart>
+                </VBox>
+
+            </HBox>
+
+        </VBox>
     </center>
+
 
 </BorderPane>
