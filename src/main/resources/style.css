@@ -1027,3 +1027,24 @@
 .ud-lesson-title {
     -fx-padding: 2 0 2 0;
 }
+/* ════════════════════════════════════════
+   Hover-only edit/delete (Udemy style)
+   ════════════════════════════════════════ */
+
+/* Hide hover buttons by default */
+.ud-hover-action {
+    -fx-opacity: 0;
+    -fx-translate-y: 4px;
+    -fx-transition: all 0.2s ease-in-out;
+}
+
+/* When card is hovered → reveal them */
+.ud-lesson-card:hover .ud-hover-action {
+    -fx-opacity: 1;
+    -fx-translate-y: 0;
+}
+
+/* Optional: smoother feel */
+.ud-lesson-card:hover {
+    -fx-translate-y: -2px;
+}

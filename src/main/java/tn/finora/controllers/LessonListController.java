@@ -223,17 +223,16 @@ public class LessonListController {
         viewBtn.getStyleClass().add("ud-btn-primary");
 
         Button editBtn = new Button("Modifier");
-        editBtn.getStyleClass().add("ud-btn-ghost");
+        editBtn.getStyleClass().addAll("ud-btn-ghost", "ud-hover-action");
 
         Button deleteBtn = new Button("Supprimer");
-        deleteBtn.getStyleClass().add("ud-btn-danger");
+        deleteBtn.getStyleClass().addAll("ud-btn-danger", "ud-hover-action");
 
         viewBtn.setOnAction(e -> openLessonViewer(l, lastDisplayed));
         editBtn.setOnAction(e -> { selectedLesson = l; openForm(l); });
         deleteBtn.setOnAction(e -> { selectedLesson = l; onDelete(); });
 
         actions.getChildren().addAll(viewBtn, editBtn, deleteBtn);
-
         // ✅ No preview text anymore
         body.getChildren().addAll(title, meta, grow, actions);
 
