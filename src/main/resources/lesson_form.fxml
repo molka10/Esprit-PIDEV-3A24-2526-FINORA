@@ -25,11 +25,17 @@
         <Label text="Contenu:" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
         <TextArea fx:id="txtContenu" prefRowCount="4" promptText="Contenu..." GridPane.rowIndex="2" GridPane.columnIndex="1"/>
 
-        <Label text="Ordre:" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
-        <TextField fx:id="txtOrdre" promptText="ex: 1" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+        <!-- ✅ NEW -->
+        <Label text="Vidéo URL:" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
+        <TextField fx:id="txtVideoUrl"
+                   promptText="YouTube / https://...  ou  MP4 direct (https://.../video.mp4)"
+                   GridPane.rowIndex="3" GridPane.columnIndex="1"/>
 
-        <Label text="Durée (min):" GridPane.rowIndex="4" GridPane.columnIndex="0"/>
-        <TextField fx:id="txtDuree" promptText="ex: 30" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
+        <Label text="Ordre:" GridPane.rowIndex="4" GridPane.columnIndex="0"/>
+        <TextField fx:id="txtOrdre" promptText="ex: 1" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
+
+        <Label text="Durée (min):" GridPane.rowIndex="5" GridPane.columnIndex="0"/>
+        <TextField fx:id="txtDuree" promptText="ex: 30" GridPane.rowIndex="5" GridPane.columnIndex="1"/>
     </GridPane>
 
     <Label fx:id="lblError" text="" styleClass="error"/>

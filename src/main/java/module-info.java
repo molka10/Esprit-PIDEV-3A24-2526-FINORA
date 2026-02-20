@@ -2,6 +2,8 @@ module tn.finora.finoraformation {
     requires javafx.controls;
     requires javafx.fxml;
     requires java.sql;
+    requires javafx.media;
+    requires java.desktop;
 
     // ✅ FXML needs access to controllers (reflection)
     opens tn.finora.controllers to javafx.fxml;

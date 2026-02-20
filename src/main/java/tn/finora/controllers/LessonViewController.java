@@ -7,11 +7,11 @@ import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 import javafx.stage.Stage;
@@ -19,11 +19,16 @@ import javafx.util.Duration;
 import tn.finora.entities.Formation;
 import tn.finora.entities.Lesson;
 
+import javafx.scene.media.Media;
+import javafx.scene.media.MediaPlayer;
+import javafx.scene.media.MediaView;
+
+import java.awt.Desktop;
+import java.net.URI;
 import java.util.*;
 
 public class LessonViewController {
 
-    // Header
     @FXML private Label lblEyebrow;
     @FXML private Label lblTitre;
     @FXML private Label lblMeta;
@@ -41,36 +46,31 @@ public class LessonViewController {
     @FXML private Label lblTotalDuration;
     @FXML private ToggleButton btnComplete;
 
-    // Sidebar / Layout
     @FXML private VBox sidebarBox;
     @FXML private SplitPane splitPane;
     @FXML private ScrollPane sidebarScroll;
     @FXML private ToggleButton btnFocus;
 
-    // Reader
     @FXML private VBox contentWrap;
     @FXML private TextFlow contentFlow;
     @FXML private TextField txtFind;
     @FXML private Label lblFindInfo;
 
-    // State
+    @FXML private Button btnWatchVideo; // ✅ NEW
+
     private Runnable onBack;
     private List<Lesson> lessons = new ArrayList<>();
     private int index = 0;
     private Formation formation;
 
-    // completion tracking (session)
     private final Set<Integer> completedLessonIds = new HashSet<>();
     private final Map<Integer, Node> sidebarNodeByLessonId = new HashMap<>();
 
-    // reader state
     private String currentContent = "";
     private String currentQuery = "";
     private int currentMatch = -1;
     private int fontSizePx = 16;
 
-    // focus mode state
-    private boolean focusMode = false;
     private double lastDividerPos = 0.28;
 
     public void setOnBack(Runnable onBack) {
@@ -81,7 +81,6 @@ public class LessonViewController {
         this.lessons = (lessons == null) ? new ArrayList<>() : new ArrayList<>(lessons);
         this.index = clamp(index, 0, Math.max(0, this.lessons.size() - 1));
         this.formation = formation;
-
         buildSidebar();
         render(false);
     }
@@ -91,12 +90,10 @@ public class LessonViewController {
         if (lesson != null) this.lessons.add(lesson);
         this.index = 0;
         this.formation = formation;
-
         buildSidebar();
         render(false);
     }
 
-    // Sidebar
     private void buildSidebar() {
         if (sidebarBox == null) return;
 
@@ -110,13 +107,10 @@ public class LessonViewController {
             item.getStyleClass().add("curr-item");
             item.setMaxWidth(Double.MAX_VALUE);
 
-            String num = String.format("%02d", i + 1);
-            String title = safe(l.getTitre(), "(Sans titre)");
-
-            Label left = new Label(num);
+            Label left = new Label(String.format("%02d", i + 1));
             left.getStyleClass().add("curr-num");
 
-            Label mid = new Label(title);
+            Label mid = new Label(safe(l.getTitre(), "(Sans titre)"));
             mid.getStyleClass().add("curr-title");
             mid.setWrapText(true);
 
@@ -125,7 +119,7 @@ public class LessonViewController {
 
             HBox row = new HBox(10, left, mid);
             row.getStyleClass().add("curr-row");
-            HBox.setHgrow(mid, javafx.scene.layout.Priority.ALWAYS);
+            HBox.setHgrow(mid, Priority.ALWAYS);
             row.getChildren().add(right);
 
             item.setGraphic(row);
@@ -169,7 +163,6 @@ public class LessonViewController {
         return l != null && completedLessonIds.contains(l.getId());
     }
 
-    // Render
     private void render(boolean animate) {
         if (lessons.isEmpty()) return;
 
@@ -196,6 +189,14 @@ public class LessonViewController {
             btnComplete.setText(done ? "✓ Terminé" : "Marquer comme terminé");
         }
 
+        // ✅ Show/hide video button
+        if (btnWatchVideo != null) {
+            String url = safeRaw(lesson.getVideoUrl()).trim();
+            boolean has = !url.isBlank();
+            btnWatchVideo.setVisible(has);
+            btnWatchVideo.setManaged(has);
+        }
+
         Runnable applyContent = () -> {
             currentContent = safe(lesson.getContenu(), "");
             currentMatch = -1;
@@ -210,7 +211,7 @@ public class LessonViewController {
         updateSidebarStyles();
     }
 
-    // Reader render (guaranteed font size)
+    // Reader
     private void renderReader() {
         if (contentFlow == null) return;
 
@@ -276,10 +277,7 @@ public class LessonViewController {
     private Text makeText(String s, boolean highlight, boolean active) {
         Text t = new Text(s);
         t.getStyleClass().add("reader-text");
-
-        // ✅ GUARANTEED font sizing (no CSS selector dependency)
         t.setStyle("-fx-font-size: " + fontSizePx + "px;");
-
         if (highlight) t.getStyleClass().add("reader-highlight");
         if (active) t.getStyleClass().add("reader-highlight-active");
         return t;
@@ -312,6 +310,31 @@ public class LessonViewController {
     @FXML private void onPrev() { if (index > 0) { index--; render(true); } }
     @FXML private void onNext() { if (index < lessons.size() - 1) { index++; render(true); } }
 
+    @FXML private void onFindChanged() { currentMatch = -1; renderReader(); }
+    @FXML private void onFindNext() {
+        if (currentQuery == null || currentQuery.isBlank()) { renderReader(); return; }
+        List<int[]> matches = findAllMatches(currentContent, currentQuery);
+        if (matches.isEmpty()) { renderReader(); return; }
+        currentMatch = (currentMatch < 0) ? 0 : (currentMatch + 1) % matches.size();
+        renderReader();
+    }
+    @FXML private void onFindPrev() {
+        if (currentQuery == null || currentQuery.isBlank()) { renderReader(); return; }
+        List<int[]> matches = findAllMatches(currentContent, currentQuery);
+        if (matches.isEmpty()) { renderReader(); return; }
+        currentMatch = (currentMatch < 0) ? (matches.size() - 1) : (currentMatch - 1 + matches.size()) % matches.size();
+        renderReader();
+    }
+
+    @FXML private void onCopy() {
+        ClipboardContent cc = new ClipboardContent();
+        cc.putString(currentContent == null ? "" : currentContent);
+        Clipboard.getSystemClipboard().setContent(cc);
+    }
+
+    @FXML private void onFontMinus() { fontSizePx = Math.max(13, fontSizePx - 1); renderReader(); }
+    @FXML private void onFontPlus() { fontSizePx = Math.min(22, fontSizePx + 1); renderReader(); }
+
     @FXML
     private void onToggleComplete() {
         if (lessons.isEmpty()) return;
@@ -324,73 +347,147 @@ public class LessonViewController {
         render(false);
     }
 
-    @FXML
-    private void onFindChanged() {
-        currentMatch = -1;
-        renderReader();
-    }
-
-    @FXML
-    private void onFindNext() {
-        if (currentQuery == null || currentQuery.isBlank()) { renderReader(); return; }
-        List<int[]> matches = findAllMatches(currentContent, currentQuery);
-        if (matches.isEmpty()) { renderReader(); return; }
-        currentMatch = (currentMatch < 0) ? 0 : (currentMatch + 1) % matches.size();
-        renderReader();
-    }
-
-    @FXML
-    private void onFindPrev() {
-        if (currentQuery == null || currentQuery.isBlank()) { renderReader(); return; }
-        List<int[]> matches = findAllMatches(currentContent, currentQuery);
-        if (matches.isEmpty()) { renderReader(); return; }
-        currentMatch = (currentMatch < 0) ? (matches.size() - 1) : (currentMatch - 1 + matches.size()) % matches.size();
-        renderReader();
-    }
-
-    @FXML
-    private void onCopy() {
-        ClipboardContent cc = new ClipboardContent();
-        cc.putString(currentContent == null ? "" : currentContent);
-        Clipboard.getSystemClipboard().setContent(cc);
-    }
-
-    @FXML
-    private void onFontMinus() {
-        fontSizePx = Math.max(13, fontSizePx - 1);
-        renderReader();
-    }
-
-    @FXML
-    private void onFontPlus() {
-        fontSizePx = Math.min(22, fontSizePx + 1);
-        renderReader();
-    }
-
     // ✅ Focus Mode
     @FXML
     private void onToggleFocus() {
-        focusMode = btnFocus != null && btnFocus.isSelected();
-
+        boolean focus = btnFocus != null && btnFocus.isSelected();
         if (splitPane == null || sidebarScroll == null) return;
 
-        if (focusMode) {
-            // remember last divider
-            if (splitPane.getDividers().size() > 0) {
-                lastDividerPos = splitPane.getDividers().get(0).getPosition();
-            }
+        if (focus) {
+            if (!splitPane.getDividers().isEmpty()) lastDividerPos = splitPane.getDividers().get(0).getPosition();
             sidebarScroll.setVisible(false);
             sidebarScroll.setManaged(false);
-
-            // push divider to 0 (reader full width)
             splitPane.setDividerPositions(0.0);
         } else {
             sidebarScroll.setManaged(true);
             sidebarScroll.setVisible(true);
-
-            // restore divider
             splitPane.setDividerPositions(lastDividerPos <= 0 ? 0.28 : lastDividerPos);
         }
+    }
+
+    // ✅ Watch video (A + C)
+    @FXML
+    private void onWatchVideo() {
+        if (lessons.isEmpty()) return;
+
+        Lesson lesson = lessons.get(index);
+        String url = safeRaw(lesson.getVideoUrl()).trim();
+        if (url.isBlank()) { showWarn("Aucune vidéo pour cette leçon."); return; }
+
+        if (looksLikeMp4(url)) {
+            // Try internal player
+            try {
+                openMp4Player(url);
+                return;
+            } catch (Exception ex) {
+                // fallback
+                showWarn("Lecture interne impossible. Ouverture dans le navigateur...");
+                openInBrowser(url);
+                return;
+            }
+        }
+
+        // Non-mp4 → browser
+        openInBrowser(url);
+    }
+
+    private boolean looksLikeMp4(String url) {
+        String u = url.toLowerCase(Locale.ROOT).trim();
+        int q = u.indexOf('?');
+        if (q > 0) u = u.substring(0, q);
+        return u.endsWith(".mp4");
+    }
+
+    private void openInBrowser(String url) {
+        try {
+            if (Desktop.isDesktopSupported()) {
+                Desktop.getDesktop().browse(new URI(url));
+            } else {
+                showError("Desktop non supporté pour ouvrir le navigateur.");
+            }
+        } catch (Exception e) {
+            showError("Impossible d'ouvrir le lien: " + e.getMessage());
+        }
+    }
+
+    private void openMp4Player(String url) {
+        Media media = new Media(url);
+        MediaPlayer player = new MediaPlayer(media);
+        MediaView view = new MediaView(player);
+
+        view.setPreserveRatio(true);
+        view.setFitWidth(900);
+
+        Button btnPlayPause = new Button("⏯");
+        btnPlayPause.getStyleClass().add("reader-toolbtn");
+
+        Slider time = new Slider(0, 100, 0);
+        time.setMaxWidth(Double.MAX_VALUE);
+        HBox.setHgrow(time, Priority.ALWAYS);
+
+        Label lblTime = new Label("00:00 / 00:00");
+        lblTime.getStyleClass().add("viewer-meta");
+
+        Button btnExternal = new Button("↗ Ouvrir");
+        btnExternal.getStyleClass().add("reader-toolbtn");
+        btnExternal.setOnAction(e -> openInBrowser(url));
+
+        btnPlayPause.setOnAction(e -> {
+            MediaPlayer.Status st = player.getStatus();
+            if (st == MediaPlayer.Status.PLAYING) player.pause();
+            else player.play();
+        });
+
+        player.currentTimeProperty().addListener((obs, oldV, newV) -> {
+            if (!time.isValueChanging() && player.getTotalDuration() != null && !player.getTotalDuration().isUnknown()) {
+                double p = newV.toMillis() / player.getTotalDuration().toMillis();
+                time.setValue(p * 100.0);
+            }
+            lblTime.setText(fmt(player.getCurrentTime().toMillis()) + " / " + fmtTotal(player));
+        });
+
+        time.valueChangingProperty().addListener((obs, was, is) -> {
+            if (!is && player.getTotalDuration() != null && !player.getTotalDuration().isUnknown()) {
+                double target = time.getValue() / 100.0 * player.getTotalDuration().toMillis();
+                player.seek(Duration.millis(target));
+            }
+        });
+
+        HBox controls = new HBox(10, btnPlayPause, time, lblTime, btnExternal);
+        controls.setPadding(new javafx.geometry.Insets(12));
+        controls.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+
+        VBox root = new VBox(10, view, controls);
+        root.setPadding(new javafx.geometry.Insets(16));
+        root.getStyleClass().add("card");
+
+        Stage stage = new Stage();
+        stage.setTitle("Vidéo - " + safe(lessons.get(index).getTitre(), "Lesson"));
+        Scene scene = new Scene(root, 980, 620);
+
+        // attach same stylesheet
+        scene.getStylesheets().add(getClass().getResource("/style.css").toExternalForm());
+        stage.setScene(scene);
+
+        stage.setOnCloseRequest(e -> {
+            try { player.stop(); } catch (Exception ignored) {}
+            try { player.dispose(); } catch (Exception ignored) {}
+        });
+
+        stage.show();
+        player.play();
+    }
+
+    private String fmt(double ms) {
+        int total = (int) Math.floor(ms / 1000.0);
+        int m = total / 60;
+        int s = total % 60;
+        return String.format("%02d:%02d", m, s);
+    }
+
+    private String fmtTotal(MediaPlayer p) {
+        if (p.getTotalDuration() == null || p.getTotalDuration().isUnknown()) return "00:00";
+        return fmt(p.getTotalDuration().toMillis());
     }
 
     @FXML
@@ -400,7 +497,6 @@ public class LessonViewController {
         stage.close();
     }
 
-    // Animation helper
     private void fadeSwap(Node node, Runnable apply) {
         FadeTransition out = new FadeTransition(Duration.millis(140), node);
         out.setToValue(0);
@@ -431,12 +527,11 @@ public class LessonViewController {
         return sb.toString();
     }
 
-    private String safe(String s, String fallback) {
-        return (s == null || s.trim().isEmpty()) ? fallback : s.trim();
-    }
+    private String safe(String s, String fallback) { return (s == null || s.trim().isEmpty()) ? fallback : s.trim(); }
+    private String safeRaw(String s) { return s == null ? "" : s; }
 
-    private int clamp(int v, int min, int max) {
-        if (v < min) return min;
-        return Math.min(v, max);
-    }
+    private int clamp(int v, int min, int max) { return Math.max(min, Math.min(max, v)); }
+
+    private void showWarn(String msg) { new Alert(Alert.AlertType.WARNING, msg).showAndWait(); }
+    private void showError(String msg) { new Alert(Alert.AlertType.ERROR, msg).showAndWait(); }
 }

@@ -12,10 +12,12 @@ import java.util.List;
 
 public class LessonFormController {
 
-    @FXML private ComboBox<Formation> cbFormation;
+    @FXML private Label lblTitle;
 
+    @FXML private ComboBox<Formation> cbFormation;
     @FXML private TextField txtTitre;
     @FXML private TextArea txtContenu;
+    @FXML private TextField txtVideoUrl; // ✅ NEW
     @FXML private TextField txtOrdre;
     @FXML private TextField txtDuree;
 
@@ -26,21 +28,20 @@ public class LessonFormController {
 
     public void setOnSaved(Runnable onSaved) { this.onSaved = onSaved; }
 
-    // called from LessonListController
     public void setFormations(List<Formation> formations, Formation preselected) {
         cbFormation.setItems(FXCollections.observableArrayList(formations));
 
-        // show nice text in combobox
+        // ✅ Title only
         cbFormation.setCellFactory(list -> new ListCell<>() {
             @Override protected void updateItem(Formation item, boolean empty) {
                 super.updateItem(item, empty);
-                setText(empty || item == null ? null : ("#" + item.getId() + " - " + item.getTitre()));
+                setText(empty || item == null ? null : item.getTitre());
             }
         });
         cbFormation.setButtonCell(new ListCell<>() {
             @Override protected void updateItem(Formation item, boolean empty) {
                 super.updateItem(item, empty);
-                setText(empty || item == null ? "Choisir une formation..." : ("#" + item.getId() + " - " + item.getTitre()));
+                setText(empty || item == null ? "Choisir une formation..." : item.getTitre());
             }
         });
 
@@ -51,35 +52,38 @@ public class LessonFormController {
         this.current = l;
 
         if (l != null) {
+            if (lblTitle != null) lblTitle.setText("Modifier Lesson");
             txtTitre.setText(l.getTitre());
             txtContenu.setText(l.getContenu());
+            txtVideoUrl.setText(l.getVideoUrl());
             txtOrdre.setText(String.valueOf(l.getOrdre()));
             txtDuree.setText(String.valueOf(l.getDureeMinutes()));
-            // cbFormation selection handled below if formations already loaded
+        } else {
+            if (lblTitle != null) lblTitle.setText("Ajouter Lesson");
         }
     }
 
     @FXML
     private void onSave() {
         try {
-            // ✅ must choose formation (no typing ID)
             Formation selectedFormation = cbFormation.getSelectionModel().getSelectedItem();
-            if (selectedFormation == null) {
-                showWarn("Choisis une formation");
-                return;
-            }
+            if (selectedFormation == null) { showWarn("Choisis une formation"); return; }
 
-            String titre = txtTitre.getText().trim();
+            String titre = txtTitre.getText() == null ? "" : txtTitre.getText().trim();
             if (titre.isEmpty()) { showWarn("Titre obligatoire"); return; }
 
             int ordre = parseInt(txtOrdre.getText(), "ordre");
             int duree = parseInt(txtDuree.getText(), "durée");
+
+            String video = (txtVideoUrl == null || txtVideoUrl.getText() == null) ? null : txtVideoUrl.getText().trim();
+            if (video != null && video.isBlank()) video = null;
 
             Lesson l = (current == null) ? new Lesson() : current;
 
             l.setFormationId(selectedFormation.getId());
             l.setTitre(titre);
             l.setContenu(txtContenu.getText());
+            l.setVideoUrl(video);
             l.setOrdre(ordre);
             l.setDureeMinutes(duree);
 

@@ -823,3 +823,20 @@
 .reader-text { -fx-fill: #1E0A3C; -fx-font-family: "Georgia", serif; }
 .reader-highlight { -fx-font-weight: 900; }
 .reader-highlight-active { -fx-fill: #5B21B6; -fx-underline: true; }
+/* Video button */
+.btn-video {
+    -fx-background-color: #7C3AED;
+    -fx-text-fill: white;
+    -fx-border-color: transparent;
+    -fx-background-radius: 10px;
+    -fx-border-radius: 10px;
+    -fx-font-family: "Segoe UI", Arial, sans-serif;
+    -fx-font-weight: 800;
+    -fx-font-size: 12px;
+    -fx-padding: 8 14 8 14;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(124,58,237,0.30), 10, 0, 0, 3);
+}
+.btn-video:hover {
+    -fx-background-color: #6D28D9;
+}

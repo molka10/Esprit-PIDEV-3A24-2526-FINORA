@@ -12,13 +12,14 @@ public class LessonService {
     private final Connection cnx = DBConnection.getInstance().getCnx();
 
     public void add(Lesson l) throws SQLException {
-        String sql = "INSERT INTO lesson(formation_id, titre, contenu, ordre, duree_minutes) VALUES (?,?,?,?,?)";
+        String sql = "INSERT INTO lesson(formation_id, titre, contenu, video_url, ordre, duree_minutes) VALUES (?,?,?,?,?,?)";
         PreparedStatement ps = cnx.prepareStatement(sql);
         ps.setInt(1, l.getFormationId());
         ps.setString(2, l.getTitre());
         ps.setString(3, l.getContenu());
-        ps.setInt(4, l.getOrdre());
-        ps.setInt(5, l.getDureeMinutes());
+        ps.setString(4, l.getVideoUrl());
+        ps.setInt(5, l.getOrdre());
+        ps.setInt(6, l.getDureeMinutes());
         ps.executeUpdate();
     }
 
@@ -29,13 +30,7 @@ public class LessonService {
         ResultSet rs = st.executeQuery(sql);
 
         while (rs.next()) {
-            Lesson l = new Lesson();
-            l.setId(rs.getInt("id"));
-            l.setFormationId(rs.getInt("formation_id"));
-            l.setTitre(rs.getString("titre"));
-            l.setContenu(rs.getString("contenu"));
-            l.setOrdre(rs.getInt("ordre"));
-            l.setDureeMinutes(rs.getInt("duree_minutes"));
+            Lesson l = map(rs);
             list.add(l);
         }
         return list;
@@ -49,27 +44,22 @@ public class LessonService {
         ResultSet rs = ps.executeQuery();
 
         while (rs.next()) {
-            Lesson l = new Lesson();
-            l.setId(rs.getInt("id"));
-            l.setFormationId(rs.getInt("formation_id"));
-            l.setTitre(rs.getString("titre"));
-            l.setContenu(rs.getString("contenu"));
-            l.setOrdre(rs.getInt("ordre"));
-            l.setDureeMinutes(rs.getInt("duree_minutes"));
+            Lesson l = map(rs);
             list.add(l);
         }
         return list;
     }
 
     public void update(Lesson l) throws SQLException {
-        String sql = "UPDATE lesson SET formation_id=?, titre=?, contenu=?, ordre=?, duree_minutes=? WHERE id=?";
+        String sql = "UPDATE lesson SET formation_id=?, titre=?, contenu=?, video_url=?, ordre=?, duree_minutes=? WHERE id=?";
         PreparedStatement ps = cnx.prepareStatement(sql);
         ps.setInt(1, l.getFormationId());
         ps.setString(2, l.getTitre());
         ps.setString(3, l.getContenu());
-        ps.setInt(4, l.getOrdre());
-        ps.setInt(5, l.getDureeMinutes());
-        ps.setInt(6, l.getId());
+        ps.setString(4, l.getVideoUrl());
+        ps.setInt(5, l.getOrdre());
+        ps.setInt(6, l.getDureeMinutes());
+        ps.setInt(7, l.getId());
 
         int rows = ps.executeUpdate();
         if (rows == 0) System.out.println("⚠️ Aucun lesson trouvé avec id=" + l.getId());
@@ -82,5 +72,18 @@ public class LessonService {
 
         int rows = ps.executeUpdate();
         if (rows == 0) System.out.println("⚠️ Aucun lesson trouvé avec id=" + id);
+    }
+
+    private Lesson map(ResultSet rs) throws SQLException {
+        Lesson l = new Lesson();
+        l.setId(rs.getInt("id"));
+        l.setFormationId(rs.getInt("formation_id"));
+        l.setTitre(rs.getString("titre"));
+        l.setContenu(rs.getString("contenu"));
+        // ✅ NEW (null-safe)
+        try { l.setVideoUrl(rs.getString("video_url")); } catch (SQLException ignored) { l.setVideoUrl(null); }
+        l.setOrdre(rs.getInt("ordre"));
+        l.setDureeMinutes(rs.getInt("duree_minutes"));
+        return l;
     }
 }
