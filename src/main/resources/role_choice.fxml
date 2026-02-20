@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="tn.finora.controllers.RoleChoiceController"
+            styleClass="screen">
+
+    <center>
+        <VBox alignment="CENTER" spacing="18">
+            <padding>
+                <Insets top="60" right="60" bottom="60" left="60"/>
+            </padding>
+
+            <Label text="Bienvenue sur FINORA" styleClass="title"/>
+            <Label text="Choisissez votre espace" styleClass="subtitle"/>
+
+            <HBox spacing="18" alignment="CENTER">
+                <Button text="👑 Admin"
+                        onAction="#chooseAdmin"
+                        styleClass="btn-primary"
+                        prefWidth="220"
+                        prefHeight="54"/>
+
+                <Button text="🎓 User"
+                        onAction="#chooseUser"
+                        styleClass="btn-ghost"
+                        prefWidth="220"
+                        prefHeight="54"/>
+            </HBox>
+
+            <Label text="Admin : gestion complète • User : lecture uniquement"
+                   styleClass="hint"/>
+        </VBox>
+    </center>
+
+</BorderPane>

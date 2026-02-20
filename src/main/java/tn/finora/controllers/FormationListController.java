@@ -10,11 +10,13 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import tn.finora.entities.Formation;
 import tn.finora.services.FormationService;
+import tn.finora.utils.UserSession;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -27,13 +29,30 @@ public class FormationListController {
     @FXML private TextField txtSearch;
     @FXML private ComboBox<String> cbSort;
 
+    // ✅ role-based buttons
+    @FXML private Button btnAdd;
+    @FXML private Button btnEdit;
+    @FXML private Button btnDelete;
+
     private final FormationService service = new FormationService();
 
     private Formation selected;
     private List<Formation> allFormations = new ArrayList<>();
 
     @FXML
+    public void initialize() {
+        initSort();
+        applyRolePermissions();
+        refresh();
+    }
 
+    private void applyRolePermissions() {
+        boolean admin = UserSession.isAdmin();
+
+        if (btnAdd != null)   { btnAdd.setVisible(admin); btnAdd.setManaged(admin); }
+        if (btnEdit != null)  { btnEdit.setVisible(admin); btnEdit.setManaged(admin); }
+        if (btnDelete != null){ btnDelete.setVisible(admin); btnDelete.setManaged(admin); }
+    }
 
     private void initSort() {
         if (cbSort == null) return;
@@ -53,17 +72,6 @@ public class FormationListController {
         cbSort.setDisable(cbSort.getItems().isEmpty());
     }
 
-    @FXML
-    public void initialize() {
-        initSort();
-        // Prevent selection bug when list is empty
-        if (cbSort != null) {
-            cbSort.setDisable(cbSort.getItems().isEmpty());
-        }
-        refresh();
-    }
-
-
     private void refresh() {
         try {
             selected = null;
@@ -74,24 +82,22 @@ public class FormationListController {
         }
     }
 
-    // ========= FXML HANDLERS (must match your FXML) =========
     @FXML
-    private void onSearch() {
-        applySearchAndSort();
-    }
+    private void onSearch() { applySearchAndSort(); }
 
     @FXML
-    private void onSort() {
-        applySearchAndSort();
-    }
+    private void onSort() { applySearchAndSort(); }
 
     @FXML
     private void onAdd() {
+        if (!UserSession.isAdmin()) return;
         openForm(null);
     }
 
     @FXML
     private void onEdit() {
+        if (!UserSession.isAdmin()) return;
+
         if (selected == null) {
             showWarn("Sélectionne une formation (clique sur une carte)");
             return;
@@ -101,6 +107,8 @@ public class FormationListController {
 
     @FXML
     private void onDelete() {
+        if (!UserSession.isAdmin()) return;
+
         if (selected == null) {
             showWarn("Sélectionne une formation (clique sur une carte)");
             return;
@@ -122,7 +130,6 @@ public class FormationListController {
         }
     }
 
-    // ========= FILTER / SORT / RENDER =========
     private void applySearchAndSort() {
         if (cardsContainer == null) return;
 
@@ -193,7 +200,6 @@ public class FormationListController {
         };
     }
 
-    // ========= UDEMY-LIKE CARD =========
     private VBox createCard(Formation f) {
         VBox wrapper = new VBox();
         wrapper.getStyleClass().add("item-card");
@@ -202,7 +208,6 @@ public class FormationListController {
         HBox row = new HBox(18);
         row.setPadding(new Insets(18));
 
-        // Image
         String imgUrl = safeRaw(f.getImageUrl()).trim();
 
         ImageView thumb = new ImageView();
@@ -211,15 +216,12 @@ public class FormationListController {
         thumb.setPreserveRatio(false);
 
         if (!imgUrl.isBlank()) {
-            try {
-                thumb.setImage(new Image(imgUrl, true));
-            } catch (Exception ignored) {}
+            try { thumb.setImage(new Image(imgUrl, true)); } catch (Exception ignored) {}
         }
 
         StackPane imageBox = new StackPane(thumb);
         imageBox.getStyleClass().add("udemy-thumb");
 
-        // Right content
         VBox content = new VBox(10);
 
         String titre = safeRaw(f.getTitre()).trim();
@@ -269,6 +271,12 @@ public class FormationListController {
         deleteBtn.getStyleClass().add("btn-danger");
         deleteBtn.setOnAction(e -> deleteFormation(f));
 
+        // ✅ User mode: only allow "Voir lessons"
+        if (!UserSession.isAdmin()) {
+            editBtn.setVisible(false); editBtn.setManaged(false);
+            deleteBtn.setVisible(false); deleteBtn.setManaged(false);
+        }
+
         actions.getChildren().addAll(lessonsBtn, editBtn, deleteBtn);
 
         content.getChildren().addAll(title, tagsPane, meta, actions);
@@ -276,7 +284,6 @@ public class FormationListController {
         row.getChildren().addAll(imageBox, content);
         wrapper.getChildren().add(row);
 
-        // Click card selects (buttons still work)
         wrapper.setOnMouseClicked(e -> {
             selected = f;
             highlightSelection();

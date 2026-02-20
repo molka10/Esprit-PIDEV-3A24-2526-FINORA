@@ -31,11 +31,13 @@
                           prefWidth="220"
                           onAction="#onSort"/>
 
-                <Button text="➕ Ajouter" styleClass="btn-primary" onAction="#onAdd"/>
-                <Button text="✏ Modifier" styleClass="btn-ghost" onAction="#onEdit"/>
-                <Button text="🗑 Supprimer" styleClass="btn-danger" onAction="#onDelete"/>
+                <Button fx:id="btnAdd" text="➕ Ajouter" styleClass="btn-primary" onAction="#onAdd"/>
+                <Button fx:id="btnEdit" text="✏ Modifier" styleClass="btn-ghost" onAction="#onEdit"/>
+                <Button fx:id="btnDelete" text="🗑 Supprimer" styleClass="btn-danger" onAction="#onDelete"/>
+
                 <Region HBox.hgrow="ALWAYS"/>
-                <Button text="📚 Lessons" styleClass="btn-ghost" onAction="#goLessons"/>
+
+                <Button fx:id="btnLessons" text="📚 Lessons" styleClass="btn-ghost" onAction="#goLessons"/>
             </HBox>
 
             <ScrollPane fitToWidth="true" styleClass="scroll">
