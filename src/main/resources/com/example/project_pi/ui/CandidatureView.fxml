@@ -43,23 +43,18 @@
                     <Button text="Supprimer" styleClass="danger-btn" onAction="#onDelete"/>
                 </HBox>
 
-                <HBox spacing="10">
-                    <Label text="Filtrer par AppelOffre ID:" styleClass="muted"/>
-                    <TextField fx:id="appelOffreIdFilterField" promptText="ex: 1" prefWidth="140"/>
+                <HBox spacing="10" alignment="CENTER_LEFT">
+                    <Label text="Filtrer par Appel d’Offre:" styleClass="muted"/>
+
+                    <ComboBox fx:id="appelOffreFilterCombo"
+                              promptText="Choisir un appel d’offre..."
+                              prefWidth="280"/>
+
                     <Button text="Appliquer" styleClass="ghost-btn" onAction="#onApplyFilter"/>
                     <Button text="Reset" styleClass="ghost-btn" onAction="#onResetFilter"/>
                 </HBox>
 
-                <TableView fx:id="table" styleClass="table">
-                    <columns>
-                        <TableColumn fx:id="colAppelOffreId" text="AppelOffre ID" prefWidth="110"/>
-                        <TableColumn fx:id="colNom" text="Nom" prefWidth="180"/>
-                        <TableColumn fx:id="colEmail" text="Email" prefWidth="220"/>
-                        <TableColumn fx:id="colMontant" text="Montant" prefWidth="120"/>
-                        <TableColumn fx:id="colStatut" text="Statut" prefWidth="120"/>
-                        <TableColumn fx:id="colCreatedAt" text="Créé le" prefWidth="130"/>
-                    </columns>
-                </TableView>
+                <ListView fx:id="listView" styleClass="list-cards" VBox.vgrow="ALWAYS"/>
 
 
             </VBox>

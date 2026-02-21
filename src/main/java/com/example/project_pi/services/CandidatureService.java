@@ -108,6 +108,10 @@ public class CandidatureService {
 
         c.setMessage(rs.getString("message"));
         c.setStatut(rs.getString("statut"));
+
+        // ✅ ADD THIS
+        c.setCreatedAt(rs.getTimestamp("created_at"));
+
         return c;
     }
 }
