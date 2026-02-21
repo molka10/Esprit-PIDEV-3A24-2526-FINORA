@@ -20,7 +20,8 @@
                        style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #1f2937;"/>
 
                 <Region HBox.hgrow="ALWAYS"/>
-
+                //<Button text="📊 Actualiser Prix"  />
+                        style="-fx-background-color: #10b981; -fx-text-fill: white; -fx-font-size: 13px; -fx-font-weight: bold; -fx-background-radius: 8; -fx-padding: 10 20; -fx-cursor: hand;"/>
                 <Button text="⬅ Retour"
                         onAction="#retourBourses"
                         style="-fx-background-color: #f3f4f6; -fx-text-fill: #4b5563; -fx-font-size: 13px; -fx-font-weight: bold; -fx-background-radius: 8; -fx-padding: 10 20; -fx-cursor: hand;"/>

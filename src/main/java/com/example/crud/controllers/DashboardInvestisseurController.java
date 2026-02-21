@@ -29,7 +29,8 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.*;
-
+import com.example.crud.services.ServiceAlphaVantage;
+import com.example.crud.services.ServiceAlphaVantage.DonneesAction;
 /**
  * 🏦 DashboardInvestisseurController
  * Dashboard Investisseur/Entreprise style Bourse Desktop
@@ -71,7 +72,10 @@ public class DashboardInvestisseurController implements Initializable {
     private final Map<Integer, Integer> portfolio = new HashMap<>();
     // Prix d'achat moyen (local UI)
     private final Map<Integer, Double> prixAchat = new HashMap<>();
+    private final ServiceAlphaVantage alphaVantage = new ServiceAlphaVantage();
 
+    // Cache UI : symbole -> données AV (pour éviter de rappeler alphaVantage partout)
+    private final Map<String, DonneesAction> avData = new ConcurrentHashMap<>();
     private List<Action> toutesActions = new ArrayList<>();
     private final Random random = new Random();
 
@@ -128,6 +132,57 @@ public class DashboardInvestisseurController implements Initializable {
         });
 
         task.setOnFailed(e -> System.err.println("Erreur : " + task.getException()));
+        new Thread(task).start();
+    }
+
+
+
+    @FXML
+    private void chargerPrixReels() {
+
+        if (!alphaVantage.estConfigure()) {
+            showError("Clé Alpha Vantage non configurée !");
+            return;
+        }
+
+        Task<Void> task = new Task<>() {
+            @Override
+            protected Void call() {
+
+                // ⚠️ ton controller utilise serviceAction.getAll()
+                List<Action> actions = serviceAction.getAll();
+
+                for (Action action : actions) {
+
+                    // Appel AV (cache + anti-spam déjà gérés dans ton service)
+                    DonneesAction d = alphaVantage.getDonneesAction(action.getSymbole());
+
+                    if (d != null) {
+                        avData.put(action.getSymbole(), d);
+
+                        // ✅ Mise à jour prix côté UI (en mémoire)
+                        action.setPrixUnitaire(d.prix);
+                    }
+
+                    // Si AV renvoie null (delai anti-spam), on continue sans casser
+                }
+
+                return null;
+            }
+        };
+
+        task.setOnSucceeded(e -> {
+            // Rafraîchir ton tableau + watchlist + stats portfolio
+            afficherTableauMarche(toutesActions);
+            rafraichirWatchlist();
+            calculerPortfolio();
+        });
+
+        task.setOnFailed(e -> {
+            task.getException().printStackTrace();
+            showError("Erreur Alpha Vantage : " + task.getException().getMessage());
+        });
+
         new Thread(task).start();
     }
 

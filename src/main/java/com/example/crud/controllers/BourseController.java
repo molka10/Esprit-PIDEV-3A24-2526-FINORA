@@ -23,7 +23,7 @@ import java.net.URL;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.stream.Collectors;
-
+import com.example.crud.services.ServiceDevise;
 /**
  * 🎨 BourseController - Version Finale
  *
@@ -40,7 +40,7 @@ public class BourseController implements Initializable {
     @FXML private FlowPane cardsContainer;
 
     private final ServiceBourse service = new ServiceBourse();
-
+    private ServiceDevise serviceDevise = new ServiceDevise();
 
     private final ExecutorService dbExecutor = Executors.newSingleThreadExecutor(r -> {
         Thread t = new Thread(r); t.setDaemon(true); return t;
@@ -50,6 +50,11 @@ public class BourseController implements Initializable {
     public void initialize(URL url, ResourceBundle rb) {
         afficherBourses(null);
     }
+
+
+
+
+
 
     // ============================================================
     //  CHARGEMENT
