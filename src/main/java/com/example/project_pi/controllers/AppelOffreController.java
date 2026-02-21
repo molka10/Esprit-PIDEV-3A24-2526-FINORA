@@ -2,19 +2,16 @@ package com.example.project_pi.controllers;
 
 import com.example.project_pi.entities.AppelOffre;
 import com.example.project_pi.services.AppelOffreService;
+import com.example.project_pi.utils.ThemeManager;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.scene.control.*;
-import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.*;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-
-// IMPORTANT: import your controller
-import com.example.project_pi.controllers.AppelOffreFormController;
 
 import java.sql.SQLException;
 import java.time.format.DateTimeFormatter;
@@ -23,55 +20,39 @@ import java.util.List;
 public class AppelOffreController {
 
     @FXML private TextField searchField;
-    @FXML private TableView<AppelOffre> table;
 
-    @FXML private TableColumn<AppelOffre, String> colTitre;
-    @FXML private TableColumn<AppelOffre, String> colCategorie;
-    @FXML private TableColumn<AppelOffre, String> colType;
-    @FXML private TableColumn<AppelOffre, String> colBudget;
-    @FXML private TableColumn<AppelOffre, String> colDateLimite;
-    @FXML private TableColumn<AppelOffre, String> colStatut;
+    // ✅ replaced TableView by ListView
+    @FXML private ListView<AppelOffre> listView;
 
     @FXML private Label totalLabel;
     @FXML private Label publishedLabel;
     @FXML private Label draftLabel;
 
     private final AppelOffreService service = new AppelOffreService();
+
+    // main source list (loaded from DB)
     private final ObservableList<AppelOffre> data = FXCollections.observableArrayList();
+
+    // selected item cache
+    private AppelOffre selected;
 
     @FXML
     private void initialize() {
 
-        // 1) Bind columns to AppelOffre getters
-        // Property names must match getter names:
-        // getAppelOffreId -> "appelOffreId", getTitre -> "titre", etc.
-        colTitre.setCellValueFactory(new PropertyValueFactory<>("titre"));
-        colCategorie.setCellValueFactory(new PropertyValueFactory<>("categorie"));
-        colType.setCellValueFactory(new PropertyValueFactory<>("type"));
-        colStatut.setCellValueFactory(new PropertyValueFactory<>("statut"));
+        // ✅ Card UI renderer (no table columns anymore)
+        listView.setCellFactory(lv -> new AppelOffreCardCell());
 
-        // 2) Custom display for budget (min-max devise)
-        colBudget.setCellValueFactory(cell -> {
-            AppelOffre a = cell.getValue();
-            String dev = (a.getDevise() == null || a.getDevise().isBlank()) ? "" : " " + a.getDevise();
-            String min = (a.getBudgetMin() == 0) ? "-" : String.valueOf(a.getBudgetMin());
-            String max = (a.getBudgetMax() == 0) ? "-" : String.valueOf(a.getBudgetMax());
-            return new javafx.beans.property.SimpleStringProperty(min + " - " + max + dev);
+        listView.getSelectionModel().selectedItemProperty().addListener((obs, oldV, newV) -> {
+            selected = newV;
         });
 
-        // 3) Custom display for date
-        colDateLimite.setCellValueFactory(cell -> {
-            AppelOffre a = cell.getValue();
-            String s = (a.getDateLimite() == null) ? "-" : a.getDateLimite().format(DateTimeFormatter.ISO_DATE);
-            return new javafx.beans.property.SimpleStringProperty(s);
-        });
+        // attach main list
+        listView.setItems(data);
 
-        table.setItems(data);
-
-        // 4) Load from DB
+        // load DB
         loadData();
 
-        // 5) Search filter (simple)
+        // live search filter
         searchField.textProperty().addListener((obs, oldV, newV) -> applyFilter(newV));
     }
 
@@ -80,20 +61,24 @@ public class AppelOffreController {
             List<AppelOffre> all = service.getAll();
             data.setAll(all);
 
-            // IMPORTANT: always re-attach table to the main list
-            table.setItems(data);
+            // ensure list view shows main list
+            listView.setItems(data);
 
             updateStats(all);
+
+            // optional: clear selection after reload
+            listView.getSelectionModel().clearSelection();
+            selected = null;
+
         } catch (SQLException e) {
             showError("Erreur DB", "Impossible de charger les appels d'offres", e.getMessage());
         }
     }
 
-
     private void applyFilter(String keyword) {
         if (keyword == null || keyword.isBlank()) {
-            //  Back to original data without staying stuck on filtered list
-            table.setItems(data);
+            // back to original list
+            listView.setItems(data);
             updateStats(data);
             return;
         }
@@ -109,10 +94,13 @@ public class AppelOffreController {
             }
         }
 
-        table.setItems(filtered);
+        listView.setItems(filtered);
         updateStats(filtered);
-    }
 
+        // keep selection coherent
+        listView.getSelectionModel().clearSelection();
+        selected = null;
+    }
 
     private void updateStats(List<AppelOffre> list) {
         long total = list.size();
@@ -126,7 +114,6 @@ public class AppelOffreController {
 
     @FXML
     private void onRefresh() {
-        table.setItems(data);
         searchField.clear();
         loadData();
     }
@@ -137,22 +124,20 @@ public class AppelOffreController {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/project_pi/ui/AppelOffreForm.fxml"));
             Parent root = loader.load();
 
-            //  Get controller of the form
             AppelOffreFormController formController = loader.getController();
 
             Stage dialog = new Stage();
             dialog.setTitle("Nouveau Appel d’Offre");
             dialog.initModality(Modality.APPLICATION_MODAL);
+
             Scene scene = new Scene(root, 820, 600);
-            com.example.project_pi.utils.ThemeManager.apply(scene);
+            ThemeManager.apply(scene);
             dialog.setScene(scene);
 
-            // Give the dialog stage to form controller (so it can close itself)
             formController.setDialogStage(dialog);
 
             dialog.showAndWait();
 
-            //  After closing, if saved => refresh
             if (formController.isSaved()) {
                 loadData();
             }
@@ -163,13 +148,12 @@ public class AppelOffreController {
         }
     }
 
-
     @FXML
     private void onEdit() {
-        AppelOffre selected = table.getSelectionModel().getSelectedItem();
+        AppelOffre current = getSelectedFromList();
 
-        if (selected == null) {
-            showInfo("Sélection", "Aucune sélection", "Sélectionne un appel d'offre dans la table.");
+        if (current == null) {
+            showInfo("Sélection", "Aucune sélection", "Sélectionne un appel d'offre dans la liste.");
             return;
         }
 
@@ -177,23 +161,21 @@ public class AppelOffreController {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/project_pi/ui/AppelOffreForm.fxml"));
             Parent root = loader.load();
 
-            // get form controller
             AppelOffreFormController formController = loader.getController();
 
-            // pass dialog stage + selected object (prefill)
             Stage dialog = new Stage();
             dialog.setTitle("Modifier Appel d’Offre");
             dialog.initModality(Modality.APPLICATION_MODAL);
+
             Scene scene = new Scene(root, 820, 600);
-            com.example.project_pi.utils.ThemeManager.apply(scene);
+            ThemeManager.apply(scene);
             dialog.setScene(scene);
 
             formController.setDialogStage(dialog);
-            formController.setAppelOffre(selected); //  this pre-fills the form
+            formController.setAppelOffre(current); // prefill
 
             dialog.showAndWait();
 
-            // if saved => refresh
             if (formController.isSaved()) {
                 loadData();
             }
@@ -204,20 +186,24 @@ public class AppelOffreController {
         }
     }
 
-
     @FXML
     private void onDelete() {
-        AppelOffre selected = table.getSelectionModel().getSelectedItem();
+        AppelOffre current = getSelectedFromList();
 
-        if (selected == null) {
-            showInfo("Sélection", "Aucune sélection", "Sélectionne un appel d'offre dans la table.");
+        if (current == null) {
+            showInfo("Sélection", "Aucune sélection", "Sélectionne un appel d'offre dans la liste.");
             return;
         }
 
         Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
         confirm.setTitle("Confirmation");
         confirm.setHeaderText("Supprimer l'appel d'offre ?");
-        confirm.setContentText("ID: " + selected.getAppelOffreId() + "\nTitre: " + selected.getTitre());
+        confirm.setContentText(
+                "Titre: " + safe(current.getTitre()) + "\n" +
+                        "Catégorie: " + safe(current.getCategorie()) + "\n" +
+                        "Date limite: " + formatDate(current) + "\n" +
+                        "Statut: " + safe(current.getStatut())
+        );
 
         ButtonType yes = new ButtonType("Oui", ButtonBar.ButtonData.YES);
         ButtonType no = new ButtonType("Non", ButtonBar.ButtonData.NO);
@@ -226,8 +212,8 @@ public class AppelOffreController {
         confirm.showAndWait().ifPresent(btn -> {
             if (btn == yes) {
                 try {
-                    service.delete(selected.getAppelOffreId());
-                    loadData(); // refresh
+                    service.delete(current.getAppelOffreId());
+                    loadData();
                     showInfo("Succès", "Supprimé", "L'appel d'offre a été supprimé.");
                 } catch (Exception e) {
                     showError("Erreur DB", "Suppression impossible", e.getMessage());
@@ -236,6 +222,23 @@ public class AppelOffreController {
         });
     }
 
+    // ---- helpers ----
+
+    private AppelOffre getSelectedFromList() {
+        // prefer live selection from listView, fallback to cached field
+        AppelOffre lvSelected = listView.getSelectionModel().getSelectedItem();
+        if (lvSelected != null) return lvSelected;
+        return selected;
+    }
+
+    private String safe(String s) {
+        return (s == null || s.isBlank()) ? "-" : s;
+    }
+
+    private String formatDate(AppelOffre a) {
+        if (a == null || a.getDateLimite() == null) return "-";
+        return a.getDateLimite().format(DateTimeFormatter.ISO_DATE);
+    }
 
     private void showError(String title, String header, String content) {
         Alert a = new Alert(Alert.AlertType.ERROR);

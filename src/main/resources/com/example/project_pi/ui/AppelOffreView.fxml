@@ -75,17 +75,7 @@
                     <Button text="Supprimer" styleClass="danger-btn" onAction="#onDelete"/>
                 </HBox>
 
-                <TableView fx:id="table" styleClass="table">
-                    <columns>
-                        <TableColumn fx:id="colTitre" text="Titre" prefWidth="260"/>
-                        <TableColumn fx:id="colCategorie" text="Catégorie" prefWidth="140"/>
-                        <TableColumn fx:id="colType" text="Type" prefWidth="140"/>
-                        <TableColumn fx:id="colBudget" text="Budget" prefWidth="140"/>
-                        <TableColumn fx:id="colDateLimite" text="Date limite" prefWidth="120"/>
-                        <TableColumn fx:id="colStatut" text="Statut" prefWidth="110"/>
-                    </columns>
-                </TableView>
-
+                <ListView fx:id="listView" styleClass="list-cards" VBox.vgrow="ALWAYS"/>
             </VBox>
         </VBox>
     </center>
