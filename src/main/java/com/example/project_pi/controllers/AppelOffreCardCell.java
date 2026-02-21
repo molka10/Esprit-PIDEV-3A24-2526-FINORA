@@ -11,7 +11,7 @@ import java.time.format.DateTimeFormatter;
 public class AppelOffreCardCell extends ListCell<AppelOffre> {
 
     private final VBox root = new VBox(6);
-    private final Label titre = new Label();
+    private final Label titleLine = new Label();
     private final Label meta1 = new Label();
     private final Label meta2 = new Label();
 
@@ -19,11 +19,11 @@ public class AppelOffreCardCell extends ListCell<AppelOffre> {
         root.getStyleClass().add("ao-card");
         root.setPadding(new Insets(12));
 
-        titre.getStyleClass().add("ao-title");
+        titleLine.getStyleClass().add("ao-title");
         meta1.getStyleClass().add("ao-meta");
         meta2.getStyleClass().add("ao-meta");
 
-        root.getChildren().addAll(titre, meta1, meta2);
+        root.getChildren().addAll(titleLine, meta1, meta2);
     }
 
     @Override
@@ -36,20 +36,23 @@ public class AppelOffreCardCell extends ListCell<AppelOffre> {
             return;
         }
 
-        titre.setText(a.getTitre() == null ? "-" : a.getTitre());
+        titleLine.setText("📌 " + safe(a.getTitre()));
 
         meta1.setText(
-                safe(a.getCategorie()) + " • " + safe(a.getType()) + " • " + safe(a.getStatut())
+                "🏷 " + safe(a.getCategorie()) +
+                        " • 🧩 " + safe(a.getType()) +
+                        " • 📊 " + safe(a.getStatut())
         );
+
+        String dev = (a.getDevise() == null || a.getDevise().isBlank()) ? "" : " " + a.getDevise();
+        String min = (a.getBudgetMin() == 0) ? "-" : String.valueOf(a.getBudgetMin());
+        String max = (a.getBudgetMax() == 0) ? "-" : String.valueOf(a.getBudgetMax());
 
         String date = (a.getDateLimite() == null)
                 ? "-"
                 : a.getDateLimite().format(DateTimeFormatter.ISO_DATE);
 
-        String dev = (a.getDevise() == null || a.getDevise().isBlank()) ? "" : " " + a.getDevise();
-        String budget = a.getBudgetMin() + " - " + a.getBudgetMax() + dev;
-
-        meta2.setText("Budget: " + budget + " • Limite: " + date);
+        meta2.setText("💰 " + min + " - " + max + dev + " • 🗓 " + date);
 
         setText(null);
         setGraphic(root);

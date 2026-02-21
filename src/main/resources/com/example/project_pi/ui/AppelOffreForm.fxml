@@ -53,8 +53,10 @@
 
                     <!-- Catégorie -->
                     <Label text="Catégorie" GridPane.rowIndex="2"/>
-                    <TextField fx:id="categorieField" promptText="Ex: Informatique" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
-
+                    <ComboBox fx:id="categorieCombo"
+                              promptText="Choisir une catégorie"
+                              GridPane.rowIndex="2"
+                              GridPane.columnIndex="1"/>
                     <!-- Type -->
                     <Label text="Type" GridPane.rowIndex="3"/>
                     <ComboBox fx:id="typeCombo" GridPane.rowIndex="3" GridPane.columnIndex="1" promptText="Choisir type"/>
@@ -83,7 +85,7 @@
                     <Label fx:id="errorLabel" text="" styleClass="error-text"/>
                     <Pane HBox.hgrow="ALWAYS"/>
                     <Button text="Annuler" styleClass="ghost-btn" onAction="#onCancel"/>
-                    <Button text="Enregistrer" styleClass="primary-btn" onAction="#onSave"/>
+                    <Button fx:id="saveBtn" text="Enregistrer" styleClass="primary-btn" onAction="#onSave"/>
                 </HBox>
             </VBox>
         </VBox>

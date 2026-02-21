@@ -16,20 +16,26 @@ public class AppelOffreFormController {
     @FXML private Label formTitle;
     @FXML private TextField titreField;
     @FXML private TextArea descriptionArea;
-    @FXML private TextField categorieField;
+
+    // ✅ category combo (no free text)
+    @FXML private ComboBox<String> categorieCombo;
+
     @FXML private ComboBox<String> typeCombo;
     @FXML private TextField budgetMinField;
     @FXML private TextField budgetMaxField;
     @FXML private ComboBox<String> deviseCombo;
     @FXML private DatePicker dateLimitePicker;
     @FXML private ComboBox<String> statutCombo;
+
     @FXML private Label errorLabel;
+
+    // ✅ Save button to disable until valid
+    @FXML private Button saveBtn;
 
     private final AppelOffreService service = new AppelOffreService();
 
     private Stage dialogStage;
     private boolean saved = false;
-
     private AppelOffre current = null;
 
     @FXML
@@ -38,9 +44,44 @@ public class AppelOffreFormController {
         deviseCombo.getItems().setAll("TND", "EUR", "USD");
         statutCombo.getItems().setAll("draft", "published", "closed");
 
-        // ✅ restrict typing to money (0-2 decimals)
+        // ✅ logical categories (static, teacher friendly)
+        categorieCombo.getItems().setAll(
+                "Informatique / Développement",
+                "Réseaux / Sécurité",
+                "Matériel informatique",
+                "Bureautique / Fournitures",
+                "Maintenance / Support",
+                "Construction / BTP",
+                "Électricité / Énergie",
+                "Transport / Logistique",
+                "Nettoyage / Hygiène",
+                "Marketing / Communication",
+                "Design / Multimédia",
+                "Formation / Coaching",
+                "Conseil / Audit",
+                "Services juridiques",
+                "Ressources humaines",
+                "Événementiel",
+                "Autres"
+        );
+        categorieCombo.setEditable(false);
+
+        // ✅ restrict typing to money
         allowMoneyOnly(budgetMinField);
         allowMoneyOnly(budgetMaxField);
+
+        // ✅ live validation hooks
+        titreField.textProperty().addListener((o,a,b) -> refreshLiveValidation());
+        descriptionArea.textProperty().addListener((o,a,b) -> refreshLiveValidation());
+        categorieCombo.valueProperty().addListener((o,a,b) -> refreshLiveValidation());
+        typeCombo.valueProperty().addListener((o,a,b) -> refreshLiveValidation());
+        budgetMinField.textProperty().addListener((o,a,b) -> refreshLiveValidation());
+        budgetMaxField.textProperty().addListener((o,a,b) -> refreshLiveValidation());
+        deviseCombo.valueProperty().addListener((o,a,b) -> refreshLiveValidation());
+        dateLimitePicker.valueProperty().addListener((o,a,b) -> refreshLiveValidation());
+        statutCombo.valueProperty().addListener((o,a,b) -> refreshLiveValidation());
+
+        refreshLiveValidation();
     }
 
     public void setDialogStage(Stage dialogStage) {
@@ -57,7 +98,7 @@ public class AppelOffreFormController {
 
         titreField.setText(a.getTitre());
         descriptionArea.setText(a.getDescription());
-        categorieField.setText(a.getCategorie());
+        categorieCombo.setValue(a.getCategorie());
         typeCombo.setValue(a.getType());
 
         budgetMinField.setText(a.getBudgetMin() == 0 ? "" : String.valueOf(a.getBudgetMin()));
@@ -66,6 +107,8 @@ public class AppelOffreFormController {
         deviseCombo.setValue(a.getDevise());
         dateLimitePicker.setValue(a.getDateLimite());
         statutCombo.setValue(a.getStatut());
+
+        refreshLiveValidation();
     }
 
     @FXML
@@ -95,7 +138,7 @@ public class AppelOffreFormController {
             AppelOffre a = new AppelOffre(
                     titreField.getText().trim(),
                     descriptionArea.getText().trim(),
-                    categorieField.getText().trim(),
+                    categorieCombo.getValue(),
                     typeCombo.getValue(),
                     budgetMin,
                     budgetMax,
@@ -121,14 +164,25 @@ public class AppelOffreFormController {
         }
     }
 
-    // ---------------- Validation ----------------
+    // ---------------- Live validation ----------------
+
+    private void refreshLiveValidation() {
+        List<String> errors = validateForm();
+        boolean ok = errors.isEmpty();
+
+        if (saveBtn != null) saveBtn.setDisable(!ok);
+
+        // show first error only (clean)
+        errorLabel.setText(ok ? "" : "• " + errors.get(0));
+    }
+
+    // ---------------- Validation rules ----------------
 
     private List<String> validateForm() {
         List<String> errors = new ArrayList<>();
 
         String titre = safe(titreField.getText());
         String desc = safe(descriptionArea.getText());
-        String cat = safe(categorieField.getText());
         String type = typeCombo.getValue();
         String devise = deviseCombo.getValue();
         LocalDate dateLimite = dateLimitePicker.getValue();
@@ -137,13 +191,13 @@ public class AppelOffreFormController {
         // required + lengths
         requireText(errors, "Titre", titre, 3, 100);
         requireText(errors, "Description", desc, 5, 1000);
-        requireText(errors, "Catégorie", cat, 2, 50);
 
+        if (categorieCombo.getValue() == null) errors.add("Choisissez une catégorie.");
         if (type == null) errors.add("Choisissez un type.");
         if (devise == null) errors.add("Choisissez une devise.");
         if (statut == null) errors.add("Choisissez un statut.");
 
-        // budgets required and numeric >= 0
+        // budgets: required + numeric + >= 0 + min<=max
         Double min = parseMoney(errors, "Budget min", budgetMinField.getText(), true);
         Double max = parseMoney(errors, "Budget max", budgetMaxField.getText(), true);
 
@@ -151,12 +205,9 @@ public class AppelOffreFormController {
         if (max != null && max < 0) errors.add("Budget max doit être ≥ 0.");
         if (min != null && max != null && min > max) errors.add("Budget min doit être ≤ Budget max.");
 
-        // date required and not past
-        if (dateLimite == null) {
-            errors.add("Date limite est obligatoire.");
-        } else if (dateLimite.isBefore(LocalDate.now())) {
-            errors.add("Date limite ne peut pas être dans le passé.");
-        }
+        // date: required + not past
+        if (dateLimite == null) errors.add("Date limite est obligatoire.");
+        else if (dateLimite.isBefore(LocalDate.now())) errors.add("Date limite ne peut pas être dans le passé.");
 
         return errors;
     }
@@ -196,7 +247,6 @@ public class AppelOffreFormController {
     private void allowMoneyOnly(TextField tf) {
         tf.textProperty().addListener((obs, oldV, newV) -> {
             if (newV == null) return;
-            // allow empty, digits, optional decimal with up to 2 digits
             if (!newV.matches("\\d*(?:[\\.,]\\d{0,2})?")) {
                 tf.setText(oldV);
             }

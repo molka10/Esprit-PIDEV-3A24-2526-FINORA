@@ -5,6 +5,7 @@ import com.example.project_pi.services.AppelOffreService;
 import com.example.project_pi.utils.ThemeManager;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.collections.transformation.FilteredList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -14,14 +15,13 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 import java.sql.SQLException;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 public class AppelOffreController {
 
     @FXML private TextField searchField;
+    @FXML private ComboBox<String> categoryFilterCombo;
 
-    // ✅ replaced TableView by ListView
     @FXML private ListView<AppelOffre> listView;
 
     @FXML private Label totalLabel;
@@ -30,30 +30,28 @@ public class AppelOffreController {
 
     private final AppelOffreService service = new AppelOffreService();
 
-    // main source list (loaded from DB)
     private final ObservableList<AppelOffre> data = FXCollections.observableArrayList();
+    private FilteredList<AppelOffre> filtered;
 
-    // selected item cache
     private AppelOffre selected;
 
     @FXML
     private void initialize() {
-
-        // ✅ Card UI renderer (no table columns anymore)
+        // cards
         listView.setCellFactory(lv -> new AppelOffreCardCell());
 
-        listView.getSelectionModel().selectedItemProperty().addListener((obs, oldV, newV) -> {
-            selected = newV;
-        });
+        // base list
+        filtered = new FilteredList<>(data, p -> true);
+        listView.setItems(filtered);
 
-        // attach main list
-        listView.setItems(data);
+        // selection
+        listView.getSelectionModel().selectedItemProperty().addListener((obs, oldV, newV) -> selected = newV);
 
-        // load DB
+        // listeners
+        searchField.textProperty().addListener((obs, oldV, newV) -> applyFilters());
+        categoryFilterCombo.setOnAction(e -> applyFilters());
+
         loadData();
-
-        // live search filter
-        searchField.textProperty().addListener((obs, oldV, newV) -> applyFilter(newV));
     }
 
     private void loadData() {
@@ -61,43 +59,53 @@ public class AppelOffreController {
             List<AppelOffre> all = service.getAll();
             data.setAll(all);
 
-            // ensure list view shows main list
-            listView.setItems(data);
+            // fill category combo
+            categoryFilterCombo.getItems().clear();
+            categoryFilterCombo.getItems().add("Toutes");
 
-            updateStats(all);
+            all.stream()
+                    .map(AppelOffre::getCategorie)
+                    .filter(s -> s != null && !s.isBlank())
+                    .distinct()
+                    .sorted()
+                    .forEach(categoryFilterCombo.getItems()::add);
 
-            // optional: clear selection after reload
-            listView.getSelectionModel().clearSelection();
-            selected = null;
+            if (categoryFilterCombo.getValue() == null) {
+                categoryFilterCombo.setValue("Toutes");
+            }
+
+            applyFilters();
 
         } catch (SQLException e) {
             showError("Erreur DB", "Impossible de charger les appels d'offres", e.getMessage());
         }
     }
 
-    private void applyFilter(String keyword) {
-        if (keyword == null || keyword.isBlank()) {
-            // back to original list
-            listView.setItems(data);
-            updateStats(data);
-            return;
-        }
+    private void applyFilters() {
+        String keyword = (searchField.getText() == null) ? "" : searchField.getText().trim().toLowerCase();
+        String selectedCat = categoryFilterCombo.getValue();
 
-        String k = keyword.toLowerCase().trim();
-        ObservableList<AppelOffre> filtered = FXCollections.observableArrayList();
+        filtered.setPredicate(a -> {
+            if (a == null) return false;
 
-        for (AppelOffre a : data) {
-            String t = (a.getTitre() == null) ? "" : a.getTitre().toLowerCase();
-            String c = (a.getCategorie() == null) ? "" : a.getCategorie().toLowerCase();
-            if (t.contains(k) || c.contains(k)) {
-                filtered.add(a);
+            boolean catOk = true;
+            if (selectedCat != null && !"Toutes".equalsIgnoreCase(selectedCat)) {
+                String cat = (a.getCategorie() == null) ? "" : a.getCategorie();
+                catOk = cat.equalsIgnoreCase(selectedCat);
             }
-        }
 
-        listView.setItems(filtered);
+            boolean searchOk = true;
+            if (!keyword.isBlank()) {
+                String t = (a.getTitre() == null) ? "" : a.getTitre().toLowerCase();
+                String c = (a.getCategorie() == null) ? "" : a.getCategorie().toLowerCase();
+                searchOk = t.contains(keyword) || c.contains(keyword);
+            }
+
+            return catOk && searchOk;
+        });
+
         updateStats(filtered);
-
-        // keep selection coherent
+        listView.refresh();
         listView.getSelectionModel().clearSelection();
         selected = null;
     }
@@ -115,6 +123,7 @@ public class AppelOffreController {
     @FXML
     private void onRefresh() {
         searchField.clear();
+        categoryFilterCombo.setValue("Toutes");
         loadData();
     }
 
@@ -150,7 +159,8 @@ public class AppelOffreController {
 
     @FXML
     private void onEdit() {
-        AppelOffre current = getSelectedFromList();
+        AppelOffre current = listView.getSelectionModel().getSelectedItem();
+        if (current == null) current = selected;
 
         if (current == null) {
             showInfo("Sélection", "Aucune sélection", "Sélectionne un appel d'offre dans la liste.");
@@ -172,7 +182,7 @@ public class AppelOffreController {
             dialog.setScene(scene);
 
             formController.setDialogStage(dialog);
-            formController.setAppelOffre(current); // prefill
+            formController.setAppelOffre(current);
 
             dialog.showAndWait();
 
@@ -188,22 +198,20 @@ public class AppelOffreController {
 
     @FXML
     private void onDelete() {
-        AppelOffre current = getSelectedFromList();
+        AppelOffre selectedItem = listView.getSelectionModel().getSelectedItem();
+        if (selectedItem == null) selectedItem = selected;
 
-        if (current == null) {
+        if (selectedItem == null) {
             showInfo("Sélection", "Aucune sélection", "Sélectionne un appel d'offre dans la liste.");
             return;
         }
 
+        final AppelOffre finalItem = selectedItem; // ✅ make it final
+
         Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
         confirm.setTitle("Confirmation");
         confirm.setHeaderText("Supprimer l'appel d'offre ?");
-        confirm.setContentText(
-                "Titre: " + safe(current.getTitre()) + "\n" +
-                        "Catégorie: " + safe(current.getCategorie()) + "\n" +
-                        "Date limite: " + formatDate(current) + "\n" +
-                        "Statut: " + safe(current.getStatut())
-        );
+        confirm.setContentText("Titre: " + safe(finalItem.getTitre()));
 
         ButtonType yes = new ButtonType("Oui", ButtonBar.ButtonData.YES);
         ButtonType no = new ButtonType("Non", ButtonBar.ButtonData.NO);
@@ -212,7 +220,7 @@ public class AppelOffreController {
         confirm.showAndWait().ifPresent(btn -> {
             if (btn == yes) {
                 try {
-                    service.delete(current.getAppelOffreId());
+                    service.delete(finalItem.getAppelOffreId());
                     loadData();
                     showInfo("Succès", "Supprimé", "L'appel d'offre a été supprimé.");
                 } catch (Exception e) {
@@ -222,22 +230,8 @@ public class AppelOffreController {
         });
     }
 
-    // ---- helpers ----
-
-    private AppelOffre getSelectedFromList() {
-        // prefer live selection from listView, fallback to cached field
-        AppelOffre lvSelected = listView.getSelectionModel().getSelectedItem();
-        if (lvSelected != null) return lvSelected;
-        return selected;
-    }
-
     private String safe(String s) {
         return (s == null || s.isBlank()) ? "-" : s;
-    }
-
-    private String formatDate(AppelOffre a) {
-        if (a == null || a.getDateLimite() == null) return "-";
-        return a.getDateLimite().format(DateTimeFormatter.ISO_DATE);
     }
 
     private void showError(String title, String header, String content) {

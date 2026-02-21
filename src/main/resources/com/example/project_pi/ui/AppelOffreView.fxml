@@ -3,16 +3,12 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<?import javafx.scene.text.*?>
 
 <BorderPane xmlns="http://javafx.com/javafx/17"
             xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="com.example.project_pi.controllers.AppelOffreController"
-
             styleClass="root">
 
-
-    <!-- TOP BAR -->
     <top>
         <HBox spacing="12" styleClass="topbar">
             <padding>
@@ -26,14 +22,20 @@
 
             <Pane HBox.hgrow="ALWAYS"/>
 
-            <TextField fx:id="searchField" promptText="Rechercher par titre / catégorie..."
+            <!-- ✅ Category filter -->
+            <ComboBox fx:id="categoryFilterCombo"
+                      promptText="Catégorie..."
+                      prefWidth="220"
+                      styleClass="search"/>
+
+            <TextField fx:id="searchField"
+                       promptText="Rechercher par titre / catégorie..."
                        styleClass="search"/>
 
             <Button text="Nouveau" styleClass="primary-btn" onAction="#onNew"/>
         </HBox>
     </top>
 
-    <!-- CENTER CONTENT -->
     <center>
         <VBox spacing="12" styleClass="content">
             <padding>
@@ -64,7 +66,7 @@
                 </HBox>
             </HBox>
 
-            <!-- Table Card -->
+            <!-- List Card -->
             <VBox spacing="10" styleClass="card">
                 <HBox spacing="10">
                     <Label text="Liste des appels d’offres" styleClass="section-title"/>
@@ -75,8 +77,10 @@
                     <Button text="Supprimer" styleClass="danger-btn" onAction="#onDelete"/>
                 </HBox>
 
+                <!-- ✅ ListView cards -->
                 <ListView fx:id="listView" styleClass="list-cards" VBox.vgrow="ALWAYS"/>
             </VBox>
         </VBox>
     </center>
+
 </BorderPane>

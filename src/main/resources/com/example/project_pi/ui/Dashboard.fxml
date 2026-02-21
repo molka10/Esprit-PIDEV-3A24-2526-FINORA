@@ -17,7 +17,7 @@
                 <Insets top="22" right="16" bottom="22" left="16"/>
             </padding>
 
-            <Label text="PROJECT" styleClass="brand"/>
+            <Label text="FINORA" styleClass="brand"/>
             <Separator opacity="0.25"/>
 
             <Button fx:id="btnAppelOffre"
