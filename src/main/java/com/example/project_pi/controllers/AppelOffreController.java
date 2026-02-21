@@ -35,6 +35,7 @@ public class AppelOffreController {
 
     @FXML private TextField searchField;
     @FXML private ComboBox<String> categoryFilterCombo;
+    @FXML private TabPane tabPane;
 
     @FXML private ListView<AppelOffre> listView;
     @FXML private PieChart statutPie;
@@ -69,6 +70,12 @@ public class AppelOffreController {
         categoryFilterCombo.setOnAction(e -> applyFilters());
 
         loadData();
+        tabPane.getSelectionModel().selectedItemProperty().addListener((obs, oldTab, newTab) -> {
+            if (newTab != null && "Statistiques".equals(newTab.getText())) {
+                updateStats(filtered);          // or updateStats(data)
+                updateCharts(data);             // your charts method
+            }
+        });
     }
 
     private void loadData() {
