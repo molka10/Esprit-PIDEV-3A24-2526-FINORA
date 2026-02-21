@@ -41,6 +41,7 @@ public class BourseController implements Initializable {
 
     private final ServiceBourse service = new ServiceBourse();
 
+
     private final ExecutorService dbExecutor = Executors.newSingleThreadExecutor(r -> {
         Thread t = new Thread(r); t.setDaemon(true); return t;
     });
