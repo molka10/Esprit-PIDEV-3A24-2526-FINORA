@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
+<?import javafx.scene.chart.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
@@ -22,7 +23,6 @@
 
             <Pane HBox.hgrow="ALWAYS"/>
 
-            <!-- ✅ Category filter -->
             <ComboBox fx:id="categoryFilterCombo"
                       promptText="Catégorie..."
                       prefWidth="220"
@@ -42,29 +42,57 @@
                 <Insets top="16" right="18" bottom="18" left="18"/>
             </padding>
 
-            <!-- Quick Stats -->
-            <HBox spacing="12">
-                <HBox spacing="10" styleClass="stat-card" HBox.hgrow="ALWAYS">
-                    <VBox spacing="2">
-                        <Label text="Total" styleClass="stat-label"/>
-                        <Label fx:id="totalLabel" text="0" styleClass="stat-value"/>
-                    </VBox>
+
+            <!-- ✅ Charts card -->
+            <VBox spacing="10" styleClass="card">
+                <Label text="Statistiques" styleClass="section-title"/>
+
+                <!-- Quick Stats -->
+                <HBox spacing="12">
+                    <HBox spacing="10" styleClass="stat-card" HBox.hgrow="ALWAYS">
+                        <VBox spacing="2">
+                            <Label text="Total" styleClass="stat-label"/>
+                            <Label fx:id="totalLabel" text="0" styleClass="stat-value"/>
+                        </VBox>
+                    </HBox>
+
+                    <HBox spacing="10" styleClass="stat-card" HBox.hgrow="ALWAYS">
+                        <VBox spacing="2">
+                            <Label text="Published" styleClass="stat-label"/>
+                            <Label fx:id="publishedLabel" text="0" styleClass="stat-value"/>
+                        </VBox>
+                    </HBox>
+
+                    <HBox spacing="10" styleClass="stat-card" HBox.hgrow="ALWAYS">
+                        <VBox spacing="2">
+                            <Label text="Draft" styleClass="stat-label"/>
+                            <Label fx:id="draftLabel" text="0" styleClass="stat-value"/>
+                        </VBox>
+                    </HBox>
                 </HBox>
 
-                <HBox spacing="10" styleClass="stat-card" HBox.hgrow="ALWAYS">
-                    <VBox spacing="2">
-                        <Label text="Published" styleClass="stat-label"/>
-                        <Label fx:id="publishedLabel" text="0" styleClass="stat-value"/>
-                    </VBox>
-                </HBox>
 
-                <HBox spacing="10" styleClass="stat-card" HBox.hgrow="ALWAYS">
-                    <VBox spacing="2">
-                        <Label text="Draft" styleClass="stat-label"/>
-                        <Label fx:id="draftLabel" text="0" styleClass="stat-value"/>
+                <HBox spacing="14">
+                    <!-- PieChart -->
+                    <VBox spacing="6" HBox.hgrow="ALWAYS">
+                        <Label text="Appels d’Offres par statut" styleClass="muted"/>
+                        <PieChart fx:id="statutPie" prefHeight="260"/>
+                    </VBox>
+
+                    <!-- BarChart -->
+                    <VBox spacing="6" HBox.hgrow="ALWAYS">
+                        <Label text="Candidatures par appel d’offre (Top 8)" styleClass="muted"/>
+                        <BarChart fx:id="candidatureBar" prefHeight="260">
+                            <xAxis>
+                                <CategoryAxis />
+                            </xAxis>
+                            <yAxis>
+                                <NumberAxis />
+                            </yAxis>
+                        </BarChart>
                     </VBox>
                 </HBox>
-            </HBox>
+            </VBox>
 
             <!-- List Card -->
             <VBox spacing="10" styleClass="card">
@@ -77,7 +105,6 @@
                     <Button text="Supprimer" styleClass="danger-btn" onAction="#onDelete"/>
                 </HBox>
 
-                <!-- ✅ ListView cards -->
                 <ListView fx:id="listView" styleClass="list-cards" VBox.vgrow="ALWAYS"/>
             </VBox>
         </VBox>

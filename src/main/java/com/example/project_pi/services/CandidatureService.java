@@ -114,4 +114,17 @@ public class CandidatureService {
 
         return c;
     }
+    public java.util.Map<Integer, Integer> getCountsByAppelOffreId() throws SQLException {
+        java.util.Map<Integer, Integer> map = new java.util.HashMap<>();
+
+        String sql = "SELECT appel_offre_id, COUNT(*) AS cnt FROM candidature GROUP BY appel_offre_id";
+
+        try (Statement st = cnx.createStatement();
+             ResultSet rs = st.executeQuery(sql)) {
+            while (rs.next()) {
+                map.put(rs.getInt("appel_offre_id"), rs.getInt("cnt"));
+            }
+        }
+        return map;
+    }
 }

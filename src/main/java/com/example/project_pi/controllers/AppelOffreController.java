@@ -13,7 +13,14 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import com.example.project_pi.services.CandidatureService;
+import javafx.scene.chart.BarChart;
+import javafx.scene.chart.PieChart;
+import javafx.scene.chart.XYChart;
 
+import java.util.Comparator;
+import java.util.Map;
+import java.util.stream.Collectors;
 import java.sql.SQLException;
 import java.util.List;
 
@@ -23,7 +30,10 @@ public class AppelOffreController {
     @FXML private ComboBox<String> categoryFilterCombo;
 
     @FXML private ListView<AppelOffre> listView;
+    @FXML private PieChart statutPie;
+    @FXML private BarChart<String, Number> candidatureBar;
 
+    private final CandidatureService candidatureService = new CandidatureService();
     @FXML private Label totalLabel;
     @FXML private Label publishedLabel;
     @FXML private Label draftLabel;
@@ -58,7 +68,7 @@ public class AppelOffreController {
         try {
             List<AppelOffre> all = service.getAll();
             data.setAll(all);
-
+            updateCharts(all);
             // fill category combo
             categoryFilterCombo.getItems().clear();
             categoryFilterCombo.getItems().add("Toutes");
@@ -248,5 +258,52 @@ public class AppelOffreController {
         a.setHeaderText(header);
         a.setContentText(content);
         a.showAndWait();
+    }
+    private void updateCharts(List<AppelOffre> all) {
+        // ---------- PieChart: statut distribution ----------
+        long draft = all.stream().filter(a -> "draft".equalsIgnoreCase(a.getStatut())).count();
+        long published = all.stream().filter(a -> "published".equalsIgnoreCase(a.getStatut())).count();
+        long closed = all.stream().filter(a -> "closed".equalsIgnoreCase(a.getStatut())).count();
+
+        statutPie.getData().setAll(
+                new PieChart.Data("Draft", draft),
+                new PieChart.Data("Published", published),
+                new PieChart.Data("Closed", closed)
+        );
+        statutPie.setLabelsVisible(true);
+
+        // ---------- BarChart: candidatures per appel offre (Top 8) ----------
+        candidatureBar.getData().clear();
+
+        Map<Integer, Integer> counts;
+        try {
+            counts = candidatureService.getCountsByAppelOffreId();
+        } catch (Exception e) {
+            // if DB fails, keep chart empty but don't crash UI
+            return;
+        }
+
+        // Build list (title -> count), sort desc, take top 8
+        var top = all.stream()
+                .map(a -> Map.entry(a.getTitre(), counts.getOrDefault(a.getAppelOffreId(), 0)))
+                .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
+                .limit(8)
+                .collect(Collectors.toList());
+
+        XYChart.Series<String, Number> series = new XYChart.Series<>();
+        series.setName("Candidatures");
+
+        for (var entry : top) {
+            String title = entry.getKey() == null ? "-" : entry.getKey();
+            int cnt = entry.getValue();
+
+            // make labels shorter so x-axis doesn't explode
+            String shortTitle = title.length() > 18 ? title.substring(0, 18) + "…" : title;
+            series.getData().add(new XYChart.Data<>(shortTitle, cnt));
+        }
+
+        candidatureBar.getData().add(series);
+        candidatureBar.setLegendVisible(false);
+        candidatureBar.setAnimated(false);
     }
 }
