@@ -6,6 +6,7 @@ module com.example.project_pi {
     requires java.desktop;
     // ===== Required for JDBC =====
     requires java.sql;
+    requires java.net.http;
 
     // ===== Allow FXML to access controllers =====
     opens com.example.project_pi.controllers to javafx.fxml;
