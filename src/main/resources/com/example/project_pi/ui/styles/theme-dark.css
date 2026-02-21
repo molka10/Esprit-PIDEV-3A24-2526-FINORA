@@ -317,3 +317,68 @@
 .error-text {
     -fx-text-fill: #f87171;
 }
+/* =========================
+   FINORA TabPane (Dark Mode)
+   ========================= */
+
+.finora-tabs {
+    -fx-background-color: transparent;
+}
+
+/* Header container */
+.finora-tabs .tab-header-area {
+    -fx-background-color: transparent;
+    -fx-padding: 0 0 12 0;
+}
+
+.finora-tabs .tab-header-background {
+    -fx-background-color: transparent;
+}
+
+.finora-tabs .headers-region {
+    -fx-background-color: transparent;
+}
+
+/* =========================
+   Individual tab (pill)
+   ========================= */
+
+.finora-tabs .tab {
+    -fx-background-color: #1e293b;       /* dark card color */
+    -fx-background-radius: 10;
+    -fx-border-radius: 10;
+    -fx-border-color: #334155;           /* subtle border */
+    -fx-border-width: 1;
+    -fx-padding: 6 16 6 16;
+}
+
+/* Hover effect */
+.finora-tabs .tab:hover {
+    -fx-background-color: #273449;
+    -fx-border-color: #a855f7;
+}
+
+/* Tab label */
+.finora-tabs .tab .tab-label {
+    -fx-text-fill: #cbd5e1;              /* light text */
+    -fx-font-weight: bold;
+}
+
+/* =========================
+   Selected tab
+   ========================= */
+
+.finora-tabs .tab:selected {
+    -fx-background-color: #a855f7;       /* purple */
+    -fx-border-color: #a855f7;
+}
+
+.finora-tabs .tab:selected .tab-label {
+    -fx-text-fill: white;
+}
+
+/* Remove default focus glow */
+.finora-tabs .tab:focused {
+    -fx-focus-color: transparent;
+    -fx-faint-focus-color: transparent;
+}
