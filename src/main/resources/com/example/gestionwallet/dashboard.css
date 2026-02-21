@@ -390,3 +390,6 @@
 .scroll-bar:vertical .track {
     -fx-background-color: transparent;
 }
+.list-view {
+    -fx-background-radius:15;
+}

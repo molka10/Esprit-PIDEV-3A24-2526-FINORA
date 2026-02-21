@@ -6,7 +6,8 @@ module com.example.gestionwallet {
     requires javafx.graphics;
     requires itextpdf;
     requires com.calendarfx.view;
-
+    requires org.apache.poi.poi;
+    requires org.apache.poi.ooxml;
 
 
     opens com.example.gestionwallet.controllers to javafx.fxml;

@@ -41,6 +41,9 @@ import com.itextpdf.text.*;
 import com.itextpdf.text.pdf.*;
 import com.example.gestionwallet.models.categorie;
 import com.example.gestionwallet.services.servicecategorie;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+
 
 public class WalletController {
 
@@ -53,6 +56,17 @@ public class WalletController {
     @FXML private PieChart pieChart;
     @FXML private Label averageLabel;
     @FXML private FlowPane monthlyContainer;
+    @FXML private Label totalTransactionsLabel;
+    @FXML private TextField itemField;
+    @FXML private TextField priceField;
+    @FXML private ListView<HBox> wishlistView;
+
+    private ObservableList<HBox> wishlist = FXCollections.observableArrayList();
+
+    @FXML private ComboBox<String> currencyBox;
+
+    private String currentCurrency = "DT";
+    private double conversionRate = 1.0;
 
     private final servicetransaction st = new servicetransaction();
     private servicecategorie sc = new servicecategorie();
@@ -66,23 +80,39 @@ public class WalletController {
         outcomeChart.setLegendVisible(false);
 
         loadTransactions();
+        wishlistView.setItems(wishlist);
+        currencyBox.getItems().addAll("DT", "EUR", "USD");
+        currencyBox.setValue("DT");
     }
 
-
+    @FXML
+    private void handleSearch() {
+        loadTransactions();
+    }
     // ================= LOAD DATA =================
     public void loadTransactions() {
 
         incomeChart.getData().clear();
         outcomeChart.getData().clear();
-
+        int totalTransactions = 0;
         double totalIncome = 0;
         double totalOutcome = 0;
         balance = 0;
+        double currentMonthIncome = 0;
+        double previousMonthIncome = 0;
 
+        double currentMonthOutcome = 0;
+        double previousMonthOutcome = 0;
+
+        LocalDate today = LocalDate.now();
+        int currentMonth = today.getMonthValue();
+        int previousMonth = today.minusMonths(1).getMonthValue();
+        int currentYear = today.getYear();
         Set<LocalDate> uniqueDays = new HashSet<>();
 
         XYChart.Series<String, Number> incomeSeries = new XYChart.Series<>();
         XYChart.Series<String, Number> outcomeSeries = new XYChart.Series<>();
+
 
         for (transaction t : st.afficher()) {
 
@@ -122,13 +152,21 @@ public class WalletController {
                             showTransactionDetails(currentTransaction));
                 }
             });
+            totalTransactions++;
+            totalTransactionsLabel.setText(String.valueOf(totalTransactions));
+
         }
 
         incomeChart.getData().add(incomeSeries);
         outcomeChart.getData().add(outcomeSeries);
 
-        totalIncomeLabel.setText(totalIncome + " DT");
-        totalOutcomeLabel.setText(totalOutcome + " DT");
+        totalIncomeLabel.setText(String.format("%.2f %s",
+                totalIncome * conversionRate, currentCurrency));
+        totalOutcomeLabel.setText(
+                String.format("%.2f %s",
+                        totalOutcome * conversionRate,
+                        currentCurrency)
+        );
 
         updateBalance();
 
@@ -171,10 +209,12 @@ public class WalletController {
         if (!uniqueDays.isEmpty()) {
             averagePerDay = totalAll / uniqueDays.size();
         }
-
-        averageLabel.setText("Moyenne / jour : "
-                + String.format("%.2f", averagePerDay) + " DT");
-
+        averageLabel.setText(
+                "Moyenne / jour : " +
+                        String.format("%.2f %s",
+                                averagePerDay * conversionRate,
+                                currentCurrency)
+        );
         // ================= DESIGN MENSUEL =================
 
         monthlyContainer.getChildren().clear();
@@ -215,11 +255,17 @@ public class WalletController {
             Label monthLabel = new Label(month);
             monthLabel.setStyle("-fx-font-weight:bold; -fx-text-fill:#6a0dad;");
 
-            Label incomeLabel = new Label("Income : " + incomeValue + " DT");
-            incomeLabel.setStyle("-fx-text-fill:#8e44ad;");
+            Label incomeLabel = new Label(
+                    String.format("Income : %.2f %s",
+                            incomeValue * conversionRate,
+                            currentCurrency)
+            );            incomeLabel.setStyle("-fx-text-fill:#8e44ad;");
 
-            Label outcomeLabel = new Label("Outcome : " + outcomeValue + " DT");
-            outcomeLabel.setStyle("-fx-text-fill:#6a0dad;");
+            Label outcomeLabel = new Label(
+                    String.format("Outcome : %.2f %s",
+                            outcomeValue * conversionRate,
+                            currentCurrency)
+            );            outcomeLabel.setStyle("-fx-text-fill:#6a0dad;");
 
             VBox monthCard = new VBox(5, monthLabel, incomeLabel, outcomeLabel);
             monthCard.setStyle("""
@@ -236,7 +282,11 @@ public class WalletController {
 
     private void updateBalance() {
 
-        balanceLabel.setText( balance + " DT");
+        balanceLabel.setText(
+                String.format("%.2f %s",
+                        balance * conversionRate,
+                        currentCurrency)
+        );
 
         if (balance >= 0) {
             balanceLabel.setStyle("-fx-font-size:24; -fx-font-weight:bold; -fx-text-fill:#6a0dad;");
@@ -244,6 +294,7 @@ public class WalletController {
             balanceLabel.setStyle("-fx-font-size:24; -fx-font-weight:bold; -fx-text-fill:#e74c3c;");
         }
     }
+
 
     // ================= DETAILS =================
 
@@ -258,8 +309,13 @@ public class WalletController {
         Label title = new Label(t.getNom_transaction());
         title.setStyle("-fx-font-size:18; -fx-font-weight:bold; -fx-text-fill:#6a0dad;");
 
-        Label montant = new Label("Montant : " + t.getMontant() + " DT");
-        montant.setStyle(
+        double convertedAmount = t.getMontant() * conversionRate;
+
+        Label montant = new Label(
+                String.format("Montant : %.2f %s",
+                        convertedAmount,
+                        currentCurrency)
+        );        montant.setStyle(
                 t.getType().equals("INCOME")
                         ? "-fx-text-fill:#2ecc71; -fx-font-weight:bold;"
                         : "-fx-text-fill:#e74c3c; -fx-font-weight:bold;"
@@ -666,6 +722,149 @@ public class WalletController {
             e.printStackTrace();
             showError("Erreur export PDF !");
         }
+    }
+    @FXML
+    private void exportExcel() {
+
+        try {
+
+            FileChooser fileChooser = new FileChooser();
+            fileChooser.setTitle("Enregistrer Excel");
+            fileChooser.getExtensionFilters().add(
+                    new FileChooser.ExtensionFilter("Excel files", "*.xlsx")
+            );
+
+            File file = fileChooser.showSaveDialog(balanceLabel.getScene().getWindow());
+            if (file == null) return;
+
+            // ===== Workbook =====
+            org.apache.poi.ss.usermodel.Workbook workbook =
+                    new org.apache.poi.xssf.usermodel.XSSFWorkbook();
+
+            org.apache.poi.ss.usermodel.Sheet sheet =
+                    workbook.createSheet("Transactions");
+
+            // ===== Header Style =====
+            org.apache.poi.ss.usermodel.CellStyle headerStyle =
+                    workbook.createCellStyle();
+
+            org.apache.poi.ss.usermodel.Font headerFont =
+                    workbook.createFont();
+
+            headerFont.setBold(true);
+            headerStyle.setFont(headerFont);
+
+            // ===== Header Row =====
+            org.apache.poi.ss.usermodel.Row header =
+                    sheet.createRow(0);
+
+            String[] columns = {"Nom", "Type", "Categorie", "Montant", "Date"};
+
+            for (int i = 0; i < columns.length; i++) {
+
+                org.apache.poi.ss.usermodel.Cell cell =
+                        header.createCell(i);
+
+                cell.setCellValue(columns[i]);
+                cell.setCellStyle(headerStyle);
+            }
+
+            // ===== Data Rows =====
+            int rowNum = 1;
+
+            for (transaction t : st.afficher()) {
+
+                org.apache.poi.ss.usermodel.Row row =
+                        sheet.createRow(rowNum++);
+
+                row.createCell(0).setCellValue(t.getNom_transaction());
+                row.createCell(1).setCellValue(t.getType());
+                row.createCell(2).setCellValue(t.getCategorie());
+                row.createCell(3).setCellValue(t.getMontant());
+                row.createCell(4).setCellValue(
+                        t.getDate_transaction().toLocalDate().toString()
+                );
+            }
+
+            // ===== Auto size =====
+            for (int i = 0; i < columns.length; i++) {
+                sheet.autoSizeColumn(i);
+            }
+
+            // ===== Save file =====
+            java.io.FileOutputStream fileOut =
+                    new java.io.FileOutputStream(file);
+
+            workbook.write(fileOut);
+            fileOut.close();
+            workbook.close();
+
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setContentText("Excel généré avec succès 💜");
+            alert.show();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            showError("Erreur export Excel !");
+        }
+    }
+    @FXML
+    private void addWishlistItem() {
+
+        try {
+
+            String name = itemField.getText();
+            String priceText = priceField.getText();
+
+            if (name.isEmpty() || priceText.isEmpty()) return;
+
+            double price = Double.parseDouble(priceText);
+
+            Label itemLabel = new Label( name);
+            itemLabel.setStyle("-fx-font-weight:bold;");
+
+            Label priceLabel = new Label(price + " DT");
+            priceLabel.setStyle("-fx-text-fill:#6a0dad;");
+
+            Button deleteBtn = new Button("✖");
+            deleteBtn.setStyle("-fx-background-color:#e74c3c; -fx-text-fill:white; -fx-background-radius:20;");
+
+            HBox itemBox = new HBox(15, itemLabel, priceLabel, deleteBtn);
+            itemBox.setStyle("""
+            -fx-background-color:#f9f6ff;
+            -fx-padding:10;
+            -fx-background-radius:10;
+        """);
+
+            deleteBtn.setOnAction(e -> wishlistView.getItems().remove(itemBox));
+
+            wishlistView.getItems().add(itemBox);
+
+            itemField.clear();
+            priceField.clear();
+
+        } catch (Exception e) {
+            showError("Montant invalide !");
+        }
+    }
+
+    @FXML
+    private void changeCurrency() {
+
+        currentCurrency = currencyBox.getValue();
+
+        switch (currentCurrency) {
+            case "EUR":
+                conversionRate = 0.30; // exemple 1 DT ≈ 0.30 EUR
+                break;
+            case "USD":
+                conversionRate = 0.32; // exemple
+                break;
+            default:
+                conversionRate = 1.0;
+        }
+
+        loadTransactions(); // refresh affichage
     }
 
 }
