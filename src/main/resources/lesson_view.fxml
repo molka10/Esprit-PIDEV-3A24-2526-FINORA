@@ -89,6 +89,12 @@
                                     text="🎬 Regarder"
                                     styleClass="btn-video"
                                     onAction="#onWatchVideo"/>
+                            <Button fx:id="btnQuiz"
+                                    text="🧠  Quiz"
+                                    styleClass="btn-primary"
+                                    onAction="#onQuiz"
+                                    visible="false"
+                                    managed="false"/>
 
                             <ToggleButton fx:id="btnFocus"
                                           text="🎯 Focus"

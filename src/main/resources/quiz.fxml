@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx/17"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="tn.finora.controllers.QuizController"
+      fx:id="mainContainer"
+      spacing="16"
+      styleClass="screen">
+
+    <padding>
+        <Insets top="0" right="0" bottom="0" left="0"/>
+    </padding>
+
+    <!-- Header -->
+    <VBox styleClass="card" spacing="6">
+        <Label text="Quiz de la Leçon" styleClass="title"/>
+        <Label fx:id="lblStatus"
+               text="Chargement..."
+               styleClass="subtitle"/>
+    </VBox>
+
+    <!-- Quiz questions area -->
+    <ScrollPane fitToWidth="true"
+                styleClass="scroll"
+                VBox.vgrow="ALWAYS">
+        <content>
+            <VBox fx:id="quizArea" spacing="14">
+                <padding>
+                    <Insets top="16" right="20" bottom="16" left="20"/>
+                </padding>
+            </VBox>
+        </content>
+    </ScrollPane>
+
+    <!-- Bottom buttons -->
+    <HBox spacing="12" alignment="CENTER_RIGHT">
+        <padding>
+            <Insets top="0" right="20" bottom="16" left="20"/>
+        </padding>
+        <Button fx:id="btnSubmit"
+                text="✅  Soumettre mes réponses"
+                styleClass="btn-primary"
+                onAction="#onSubmit"
+                disable="true"/>
+        <Button fx:id="btnClose"
+                text="Fermer"
+                styleClass="btn-ghost"
+                onAction="#onClose"/>
+    </HBox>
+
+</VBox>

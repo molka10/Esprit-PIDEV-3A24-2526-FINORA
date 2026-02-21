@@ -56,6 +56,9 @@ public class LessonViewController {
     @FXML private TextField txtFind;
     @FXML private Label lblFindInfo;
 
+    @FXML private Button btnQuiz;         // quiz button in FXML
+    private Lesson currentLesson;         // track current lesson for quiz
+
     @FXML private Button btnWatchVideo; // ✅ NEW
 
     private Runnable onBack;
@@ -167,6 +170,14 @@ public class LessonViewController {
         if (lessons.isEmpty()) return;
 
         Lesson lesson = lessons.get(index);
+
+        currentLesson = lesson;
+
+        if (btnQuiz != null) {
+            boolean isUser = tn.finora.utils.UserSession.isUser();
+            btnQuiz.setVisible(isUser);
+            btnQuiz.setManaged(isUser);
+        }
 
         if (lblEyebrow != null) {
             String name = (formation != null && formation.getTitre() != null && !formation.getTitre().isBlank())
@@ -525,6 +536,30 @@ public class LessonViewController {
         for (int i = 0; i < full; i++) sb.append("★");
         while (sb.length() < 5) sb.append("☆");
         return sb.toString();
+    }
+    // ── ADD this new method ──
+    @FXML
+    private void onQuiz() {
+        if (currentLesson == null) return;
+
+        try {
+            javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(
+                    getClass().getResource("/quiz.fxml"));
+            javafx.scene.Scene scene = new javafx.scene.Scene(loader.load(), 700, 620);
+            scene.getStylesheets().add(
+                    getClass().getResource("/style.css").toExternalForm());
+
+            QuizController ctrl = loader.getController();
+            ctrl.setData(currentLesson, formation);
+
+            Stage stage = new Stage();
+            stage.setTitle("Quiz — " + currentLesson.getTitre());
+            stage.setScene(scene);
+            stage.show();
+
+        } catch (Exception e) {
+            showError("Erreur ouverture quiz: " + e.getMessage());
+        }
     }
 
     private String safe(String s, String fallback) { return (s == null || s.trim().isEmpty()) ? fallback : s.trim(); }
