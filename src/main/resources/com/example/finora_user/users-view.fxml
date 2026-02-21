@@ -25,15 +25,10 @@
 
             <children>
                 <Label text="Finora - Gestion Utilisateurs" styleClass="topbar-title"/>
-
                 <Region HBox.hgrow="ALWAYS"/>
 
                 <ToggleButton fx:id="toggleText" text="Nom/Email"
                               toggleGroup="$searchModeGroup" selected="true"
-                              onAction="#handleSearchMode" styleClass="btn-ghost"/>
-
-                <ToggleButton fx:id="toggleId" text="ID"
-                              toggleGroup="$searchModeGroup"
                               onAction="#handleSearchMode" styleClass="btn-ghost"/>
 
                 <ToggleButton fx:id="toggleRole" text="Role"
@@ -41,8 +36,8 @@
                               onAction="#handleSearchMode" styleClass="btn-ghost"/>
 
                 <TextField fx:id="searchField"
-                           promptText="Rechercher..."
-                           prefWidth="260"
+                           promptText="Rechercher par username/email..."
+                           prefWidth="280"
                            onKeyReleased="#handleSearchDynamic"
                            styleClass="field"/>
 
@@ -50,7 +45,7 @@
                           promptText="Choisir role"
                           visible="false"
                           managed="false"
-                          prefWidth="150"
+                          prefWidth="160"
                           onAction="#handleRoleFilter"
                           styleClass="field"/>
 
@@ -59,12 +54,9 @@
         </HBox>
     </top>
 
-    <!-- CENTER (NOW SCROLLABLE) -->
+    <!-- CENTER -->
     <center>
         <ScrollPane fitToWidth="true"
-                    fitToHeight="false"
-                    pannable="true"
-                    hbarPolicy="NEVER"
                     vbarPolicy="AS_NEEDED"
                     styleClass="content-scroll">
 
@@ -74,7 +66,7 @@
                         <Insets top="20" right="20" bottom="20" left="20"/>
                     </padding>
 
-                    <!-- LIST (CARD VIEW) -->
+                    <!-- LIST -->
                     <VBox spacing="10" styleClass="card" HBox.hgrow="ALWAYS">
                         <padding>
                             <Insets top="15" right="15" bottom="15" left="15"/>
@@ -87,8 +79,6 @@
                                 <Label fx:id="countLabel" text="" styleClass="muted"/>
                             </HBox>
 
-                            <!-- Give it a preferred height so it shows nicely,
-                                 but the PAGE still scrolls if needed -->
                             <ListView fx:id="usersList"
                                       prefHeight="620"
                                       styleClass="users-list">
@@ -107,9 +97,6 @@
 
                         <children>
                             <Label text="Détails utilisateur" styleClass="h2"/>
-
-                            <Label text="ID"/>
-                            <TextField fx:id="idField" editable="false" disable="true" styleClass="field-disabled"/>
 
                             <Label text="Username"/>
                             <TextField fx:id="usernameField" promptText="Entrer username"/>

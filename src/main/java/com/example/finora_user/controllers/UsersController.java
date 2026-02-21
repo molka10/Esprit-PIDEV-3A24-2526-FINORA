@@ -18,37 +18,36 @@ import java.time.LocalDate;
 
 public class UsersController {
 
+    // LIST
     @FXML private ListView<User> usersList;
+    @FXML private Label countLabel;
 
-    @FXML private TextField idField;
+    // DETAILS
     @FXML private TextField usernameField;
     @FXML private TextField emailField;
     @FXML private ComboBox<String> roleCombo;
-
     @FXML private TextField phoneField;
     @FXML private TextField addressField;
     @FXML private DatePicker dobPicker;
 
     @FXML private Label statusLabel;
 
+    // SEARCH
     @FXML private ToggleGroup searchModeGroup;
     @FXML private ToggleButton toggleText;
-    @FXML private ToggleButton toggleId;
     @FXML private ToggleButton toggleRole;
 
     @FXML private TextField searchField;
     @FXML private ComboBox<String> roleFilterCombo;
 
-    @FXML private Label countLabel;
-
     private UserService userService;
     private final ObservableList<User> data = FXCollections.observableArrayList();
 
-    private enum SearchMode { TEXT, ID, ROLE }
+    private User selectedUser;
+
+    private enum SearchMode { TEXT, ROLE }
     private SearchMode mode = SearchMode.TEXT;
 
-    // Admin-added users need a password in DB.
-    // Since you removed password field from Admin form, we set a safe default.
     private static final String DEFAULT_PASSWORD = "ChangeMe123!";
 
     @FXML
@@ -61,88 +60,22 @@ public class UsersController {
 
             usersList.setItems(data);
             usersList.setCellFactory(lv -> new UserCardCell());
-            usersList.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
 
             usersList.getSelectionModel().selectedItemProperty().addListener((obs, oldV, newV) -> {
+                selectedUser = newV;
                 if (newV != null) loadUserToForm(newV);
             });
 
-            if (searchModeGroup != null && toggleText != null) {
-                toggleText.setSelected(true);
-                handleSearchMode();
-            }
+            // default = TEXT search
+            if (toggleText != null) toggleText.setSelected(true);
+            handleSearchMode();
 
             handleRefresh();
 
         } catch (SQLException e) {
-            statusLabel.setText("❌ Erreur DB: " + e.getMessage());
+            statusLabel.setText("❌ DB: " + e.getMessage());
             e.printStackTrace();
         }
-    }
-
-    // -------------------- Form validation --------------------
-    private void clearErrors() {
-        usernameField.getStyleClass().remove("field-error");
-        emailField.getStyleClass().remove("field-error");
-        roleCombo.getStyleClass().remove("field-error");
-        phoneField.getStyleClass().remove("field-error");
-        addressField.getStyleClass().remove("field-error");
-        dobPicker.getStyleClass().remove("field-error");
-    }
-
-    private void markError(Control c) {
-        if (!c.getStyleClass().contains("field-error")) {
-            c.getStyleClass().add("field-error");
-        }
-    }
-
-    private String validateDetailsForm() {
-        clearErrors();
-
-        String username = safe(usernameField.getText());
-        String email = safe(emailField.getText());
-        String role = roleCombo.getValue();
-        String phone = safe(phoneField.getText());
-        String address = safe(addressField.getText());
-        LocalDate dob = dobPicker.getValue();
-
-        boolean ok = true;
-
-        if (username.isEmpty()) { markError(usernameField); ok = false; }
-        if (email.isEmpty()) { markError(emailField); ok = false; }
-        if (role == null || role.isBlank()) { markError(roleCombo); ok = false; }
-        if (address.isEmpty()) { markError(addressField); ok = false; }
-
-        if (!ok) return "⚠️ Veuillez remplir correctement tous les champs obligatoires.";
-
-        if (!username.matches("^[A-Za-z0-9_]{3,20}$")) {
-            markError(usernameField);
-            return "⚠️ Username invalide (3-20 caractères, lettres/chiffres/_).";
-        }
-
-        if (!email.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$")) {
-            markError(emailField);
-            return "⚠️ Email invalide. Exemple: user@mail.com";
-        }
-
-        if (!phone.isEmpty() && !phone.matches("^\\d{8,15}$")) {
-            markError(phoneField);
-            return "⚠️ Téléphone invalide (8 à 15 chiffres).";
-        }
-
-        if (dob != null) {
-            LocalDate min = LocalDate.now().minusYears(18);
-            if (dob.isAfter(min)) {
-                markError(dobPicker);
-                return "⚠️ L'utilisateur doit avoir au moins 18 ans.";
-            }
-        }
-
-        return null;
-    }
-
-    private static String safe(String s) {
-        return s == null ? "" : s.trim();
     }
 
     // -------------------- CRUD --------------------
@@ -152,7 +85,6 @@ public class UsersController {
             data.setAll(userService.getAllUsers());
             updateCount();
             statusLabel.setText("");
-            clearErrors();
         } catch (SQLException e) {
             statusLabel.setText("❌ Erreur chargement: " + e.getMessage());
             e.printStackTrace();
@@ -162,7 +94,7 @@ public class UsersController {
     @FXML
     private void handleAdd() {
         try {
-            String err = validateDetailsForm();
+            String err = validateForm();
             if (err != null) {
                 statusLabel.setText(err);
                 return;
@@ -172,23 +104,19 @@ public class UsersController {
             u.setUsername(usernameField.getText().trim());
             u.setEmail(emailField.getText().trim());
             u.setRole(roleCombo.getValue());
-
             u.setPhone(safe(phoneField.getText()));
             u.setAddress(addressField.getText().trim());
             u.setDateOfBirth(dobPicker.getValue());
 
-            // Since password is removed from admin form:
-            // Insert with a default password (BCrypt hashing handled by service).
             u.setMotDePasse(DEFAULT_PASSWORD);
-
             userService.addUserReturnId(u);
 
-            statusLabel.setText("✅ Utilisateur ajouté. Mot de passe par défaut: " + DEFAULT_PASSWORD);
+            statusLabel.setText("✅ Utilisateur ajouté. MDP défaut: " + DEFAULT_PASSWORD);
             handleRefresh();
             handleClear();
 
         } catch (SQLException e) {
-            statusLabel.setText("❌ Erreur DB: " + e.getMessage());
+            statusLabel.setText("❌ DB: " + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -196,41 +124,31 @@ public class UsersController {
     @FXML
     private void handleUpdate() {
         try {
-            if (idField.getText() == null || idField.getText().trim().isEmpty()) {
-                statusLabel.setText("⚠️ Sélectionnez un utilisateur dans la liste.");
+            if (selectedUser == null) {
+                statusLabel.setText("⚠️ Sélectionnez un utilisateur.");
                 return;
             }
 
-            String err = validateDetailsForm();
+            String err = validateForm();
             if (err != null) {
                 statusLabel.setText(err);
                 return;
             }
 
-            int id = Integer.parseInt(idField.getText().trim());
+            selectedUser.setUsername(usernameField.getText().trim());
+            selectedUser.setEmail(emailField.getText().trim());
+            selectedUser.setRole(roleCombo.getValue());
+            selectedUser.setPhone(safe(phoneField.getText()));
+            selectedUser.setAddress(addressField.getText().trim());
+            selectedUser.setDateOfBirth(dobPicker.getValue());
 
-            User u = new User();
-            u.setId(id);
-            u.setUsername(usernameField.getText().trim());
-            u.setEmail(emailField.getText().trim());
-            u.setRole(roleCombo.getValue());
-            u.setPhone(safe(phoneField.getText()));
-            u.setAddress(addressField.getText().trim());
-            u.setDateOfBirth(dobPicker.getValue());
+            boolean ok = userService.updateUser(selectedUser);
+            statusLabel.setText(ok ? "✅ Utilisateur modifié." : "⚠️ Modification échouée.");
 
-            boolean ok = userService.updateUser(u);
+            handleRefresh();
 
-            if (ok) {
-                statusLabel.setText("✅ Utilisateur modifié.");
-                handleRefresh();
-            } else {
-                statusLabel.setText("⚠️ Modification échouée (ID introuvable).");
-            }
-
-        } catch (NumberFormatException e) {
-            statusLabel.setText("⚠️ ID invalide.");
         } catch (SQLException e) {
-            statusLabel.setText("❌ Erreur DB: " + e.getMessage());
+            statusLabel.setText("❌ DB: " + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -238,12 +156,10 @@ public class UsersController {
     @FXML
     private void handleDelete() {
         try {
-            if (idField.getText() == null || idField.getText().trim().isEmpty()) {
-                statusLabel.setText("⚠️ Sélectionner un utilisateur.");
+            if (selectedUser == null) {
+                statusLabel.setText("⚠️ Sélectionnez un utilisateur.");
                 return;
             }
-
-            int id = Integer.parseInt(idField.getText().trim());
 
             Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
             confirm.setTitle("Confirmation");
@@ -252,20 +168,14 @@ public class UsersController {
 
             if (confirm.showAndWait().orElse(ButtonType.CANCEL) != ButtonType.OK) return;
 
-            boolean ok = userService.deleteUser(id);
+            boolean ok = userService.deleteUser(selectedUser.getId());
+            statusLabel.setText(ok ? "✅ Utilisateur supprimé." : "⚠️ Suppression échouée.");
 
-            if (ok) {
-                handleRefresh();
-                handleClear();
-                statusLabel.setText("✅ Utilisateur supprimé.");
-            } else {
-                statusLabel.setText("⚠️ ID introuvable.");
-            }
+            handleRefresh();
+            handleClear();
 
-        } catch (NumberFormatException e) {
-            statusLabel.setText("⚠️ ID invalide.");
         } catch (SQLException e) {
-            statusLabel.setText("❌ Erreur DB: " + e.getMessage());
+            statusLabel.setText("❌ DB: " + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -273,52 +183,38 @@ public class UsersController {
     @FXML
     private void handleClear() {
         usersList.getSelectionModel().clearSelection();
-        idField.clear();
+        selectedUser = null;
+
         usernameField.clear();
         emailField.clear();
         roleCombo.setValue(null);
         phoneField.clear();
         addressField.clear();
         dobPicker.setValue(null);
+
         statusLabel.setText("");
-        clearErrors();
     }
 
-    private void loadUserToForm(User selected) {
-        idField.setText(String.valueOf(selected.getId()));
-        usernameField.setText(selected.getUsername());
-        emailField.setText(selected.getEmail());
-        roleCombo.setValue(selected.getRole());
-        phoneField.setText(selected.getPhone() == null ? "" : selected.getPhone());
-        addressField.setText(selected.getAddress() == null ? "" : selected.getAddress());
-        dobPicker.setValue(selected.getDateOfBirth());
-        clearErrors();
+    private void loadUserToForm(User u) {
+        usernameField.setText(u.getUsername());
+        emailField.setText(u.getEmail());
+        roleCombo.setValue(u.getRole());
+        phoneField.setText(u.getPhone() == null ? "" : u.getPhone());
+        addressField.setText(u.getAddress() == null ? "" : u.getAddress());
+        dobPicker.setValue(u.getDateOfBirth());
     }
 
     // -------------------- SEARCH --------------------
     @FXML
     private void handleSearchMode() {
-        Toggle selected = (searchModeGroup == null) ? null : searchModeGroup.getSelectedToggle();
-        if (selected == null) selected = toggleText;
+        Toggle t = (searchModeGroup == null) ? null : searchModeGroup.getSelectedToggle();
 
-        if (selected == toggleId) {
-            mode = SearchMode.ID;
-
-            searchField.setDisable(false);
-            searchField.clear();
-            searchField.setPromptText("Rechercher par ID...");
-
-            roleFilterCombo.setVisible(false);
-            roleFilterCombo.setManaged(false);
-
-            handleRefresh();
-
-        } else if (selected == toggleRole) {
+        if (t == toggleRole) {
             mode = SearchMode.ROLE;
 
+            // disable text field, show role combo
             searchField.setDisable(true);
             searchField.clear();
-            searchField.setPromptText("Mode role: utiliser la liste");
 
             roleFilterCombo.setVisible(true);
             roleFilterCombo.setManaged(true);
@@ -330,8 +226,8 @@ public class UsersController {
             mode = SearchMode.TEXT;
 
             searchField.setDisable(false);
-            searchField.clear();
             searchField.setPromptText("Rechercher par username/email...");
+            searchField.clear();
 
             roleFilterCombo.setVisible(false);
             roleFilterCombo.setManaged(false);
@@ -343,27 +239,15 @@ public class UsersController {
     @FXML
     private void handleSearchDynamic() {
         try {
-            if (mode == SearchMode.ROLE) return;
+            if (mode != SearchMode.TEXT) return;
 
             String q = safe(searchField.getText());
-
             if (q.isEmpty()) {
                 handleRefresh();
                 return;
             }
 
-            if (mode == SearchMode.ID) {
-                if (!q.matches("\\d+")) return;
-
-                int id = Integer.parseInt(q);
-                User u = userService.getUserById(id);
-                data.clear();
-                if (u != null) data.add(u);
-
-            } else {
-                data.setAll(userService.searchText(q));
-            }
-
+            data.setAll(userService.searchText(q));
             updateCount();
 
         } catch (SQLException e) {
@@ -376,17 +260,16 @@ public class UsersController {
     private void handleRoleFilter() {
         try {
             String role = roleFilterCombo.getValue();
-            if (role == null || role.trim().isEmpty()) {
+            if (role == null || role.isBlank()) {
                 handleRefresh();
                 return;
             }
 
-            data.setAll(userService.searchByRole(role.trim()));
+            data.setAll(userService.searchByRole(role));
             updateCount();
-            statusLabel.setText("✅ Filtre role: " + role + " (" + data.size() + ")");
 
         } catch (SQLException e) {
-            statusLabel.setText("❌ Erreur filtre role: " + e.getMessage());
+            statusLabel.setText("❌ Erreur filtre: " + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -395,9 +278,44 @@ public class UsersController {
         if (countLabel != null) countLabel.setText(data.size() + " utilisateurs");
     }
 
-    // -------------------- CARD CELL --------------------
-    private static class UserCardCell extends ListCell<User> {
+    // -------------------- VALIDATION --------------------
+    private String validateForm() {
+        String username = safe(usernameField.getText());
+        String email = safe(emailField.getText());
+        String role = roleCombo.getValue();
+        String phone = safe(phoneField.getText());
+        String address = safe(addressField.getText());
+        LocalDate dob = dobPicker.getValue();
 
+        if (username.isEmpty() || email.isEmpty() || role == null || role.isBlank() || address.isEmpty()) {
+            return "⚠️ Champs obligatoires: username, email, role, adresse.";
+        }
+
+        if (!username.matches("^[A-Za-z0-9_]{3,20}$")) {
+            return "⚠️ Username invalide (3-20 caractères, lettres/chiffres/_).";
+        }
+
+        if (!email.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$")) {
+            return "⚠️ Email invalide.";
+        }
+
+        if (!phone.isEmpty() && !phone.matches("^\\d{8,15}$")) {
+            return "⚠️ Téléphone invalide (8 à 15 chiffres).";
+        }
+
+        if (dob != null && dob.isAfter(LocalDate.now().minusYears(18))) {
+            return "⚠️ L'utilisateur doit avoir au moins 18 ans.";
+        }
+
+        return null;
+    }
+
+    private static String safe(String s) {
+        return s == null ? "" : s.trim();
+    }
+
+    // -------------------- CARD CELL (NO ID) --------------------
+    private static class UserCardCell extends ListCell<User> {
         @Override
         protected void updateItem(User user, boolean empty) {
             super.updateItem(user, empty);
@@ -431,7 +349,6 @@ public class UsersController {
 
             Label role = new Label(user.getRole());
             role.getStyleClass().addAll("badge", roleClass(user.getRole()));
-
             right.getChildren().add(role);
 
             card.getChildren().addAll(left, spacer, right);
