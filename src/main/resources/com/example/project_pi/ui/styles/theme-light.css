@@ -372,3 +372,8 @@
     -fx-focus-color: transparent;
     -fx-faint-focus-color: transparent;
 }
+.conversion-box {
+    -fx-background-color: #f3e8ff;
+    -fx-background-radius: 8;
+    -fx-padding: 8;
+}

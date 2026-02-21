@@ -70,15 +70,41 @@
 
                     <!-- Devise -->
                     <Label text="Devise" GridPane.rowIndex="6"/>
-                    <ComboBox fx:id="deviseCombo" GridPane.rowIndex="6" GridPane.columnIndex="1" promptText="Ex: TND"/>
+                    <ComboBox fx:id="deviseCombo"
+                              GridPane.rowIndex="6"
+                              GridPane.columnIndex="1"
+                              promptText="Ex: TND"/>
+
+                    <!-- Conversion Info -->
+                    <Label text="Taux &amp; Conversion" GridPane.rowIndex="7"/>
+                    <VBox spacing="4"
+                          styleClass="conversion-box"
+                          GridPane.rowIndex="7"
+                          GridPane.columnIndex="1">
+                        <Label fx:id="rateLabel" text="-" styleClass="muted"/>
+                        <Label fx:id="convertedMinLabel" text="-" styleClass="muted"/>
+                        <Label fx:id="convertedMaxLabel" text="-" styleClass="muted"/>
+                    </VBox>
 
                     <!-- Date limite -->
-                    <Label text="Date limite" GridPane.rowIndex="7"/>
-                    <DatePicker fx:id="dateLimitePicker" GridPane.rowIndex="7" GridPane.columnIndex="1"/>
+                    <Label text="Date limite" GridPane.rowIndex="8"/>
+                    <DatePicker fx:id="dateLimitePicker"
+                                GridPane.rowIndex="8"
+                                GridPane.columnIndex="1"/>
+
+                    <!-- Deadline Warning -->
+                    <Label fx:id="deadlineWarningLabel"
+                           text=""
+                           styleClass="error-text"
+                           GridPane.rowIndex="9"
+                           GridPane.columnIndex="1"/>
 
                     <!-- Statut -->
-                    <Label text="Statut" GridPane.rowIndex="8"/>
-                    <ComboBox fx:id="statutCombo" GridPane.rowIndex="8" GridPane.columnIndex="1" promptText="draft / published / closed"/>
+                    <Label text="Statut" GridPane.rowIndex="10"/>
+                    <ComboBox fx:id="statutCombo"
+                              GridPane.rowIndex="10"
+                              GridPane.columnIndex="1"
+                              promptText="draft / published / closed"/>
                 </GridPane>
 
                 <HBox spacing="10" alignment="CENTER_RIGHT">

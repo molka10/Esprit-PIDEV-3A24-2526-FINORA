@@ -10,7 +10,8 @@ import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-
+import com.example.project_pi.services.CurrencyApiService;
+import com.example.project_pi.services.HolidayApiService;
 public class AppelOffreFormController {
 
     @FXML private Label formTitle;
@@ -26,14 +27,18 @@ public class AppelOffreFormController {
     @FXML private ComboBox<String> deviseCombo;
     @FXML private DatePicker dateLimitePicker;
     @FXML private ComboBox<String> statutCombo;
-
+    @FXML private Label rateLabel;
+    @FXML private Label convertedMinLabel;
+    @FXML private Label convertedMaxLabel;
+    @FXML private Label deadlineWarningLabel;
     @FXML private Label errorLabel;
 
     // ✅ Save button to disable until valid
     @FXML private Button saveBtn;
 
     private final AppelOffreService service = new AppelOffreService();
-
+    private final CurrencyApiService currencyApi = new CurrencyApiService();
+    private final HolidayApiService holidayApi = new HolidayApiService();
     private Stage dialogStage;
     private boolean saved = false;
     private AppelOffre current = null;
@@ -43,7 +48,19 @@ public class AppelOffreFormController {
         typeCombo.getItems().setAll("achat", "partenariat", "donnant_donnant", "don");
         deviseCombo.getItems().setAll("TND", "EUR", "USD");
         statutCombo.getItems().setAll("draft", "published", "closed");
+        // Live conversion when budget/devise changes
+        budgetMinField.textProperty().addListener((o,a,b) -> refreshConversion());
+        budgetMaxField.textProperty().addListener((o,a,b) -> refreshConversion());
+        deviseCombo.valueProperty().addListener((o,a,b) -> refreshConversion());
 
+        // Deadline validation (weekend + holiday)
+        dateLimitePicker.valueProperty().addListener((o,a,b) -> refreshDeadlineWarning());
+
+        // init labels
+        rateLabel.setText("-");
+        convertedMinLabel.setText("-");
+        convertedMaxLabel.setText("-");
+        deadlineWarningLabel.setText("");
         // ✅ logical categories (static, teacher friendly)
         categorieCombo.getItems().setAll(
                 "Informatique / Développement",
@@ -251,5 +268,89 @@ public class AppelOffreFormController {
                 tf.setText(oldV);
             }
         });
+    }
+    private void refreshConversion() {
+        String from = deviseCombo.getValue();
+        if (from == null || from.isBlank()) {
+            rateLabel.setText("-");
+            convertedMinLabel.setText("-");
+            convertedMaxLabel.setText("-");
+            return;
+        }
+
+        // Choose a reference currency to show (example: always show TND)
+        String to = "TND";
+
+        double min = parseDoubleSafe(budgetMinField.getText());
+        double max = parseDoubleSafe(budgetMaxField.getText());
+
+        // If both empty → show only rate
+        new Thread(() -> {
+            try {
+                var opt = currencyApi.getRate(from, to);
+                if (opt.isEmpty()) {
+                    javafx.application.Platform.runLater(() -> rateLabel.setText("Taux indisponible"));
+                    return;
+                }
+                double rate = opt.getAsDouble();
+
+                javafx.application.Platform.runLater(() -> {
+                    rateLabel.setText("1 " + from + " = " + String.format("%.4f", rate) + " " + to);
+
+                    if (min > 0) convertedMinLabel.setText("Budget min ≈ " + String.format("%.2f", min * rate) + " " + to);
+                    else convertedMinLabel.setText("Budget min ≈ -");
+
+                    if (max > 0) convertedMaxLabel.setText("Budget max ≈ " + String.format("%.2f", max * rate) + " " + to);
+                    else convertedMaxLabel.setText("Budget max ≈ -");
+                });
+            } catch (Exception e) {
+                javafx.application.Platform.runLater(() -> rateLabel.setText("Erreur taux: " + e.getMessage()));
+            }
+        }).start();
+    }
+
+    private void refreshDeadlineWarning() {
+        var date = dateLimitePicker.getValue();
+        if (date == null) {
+            deadlineWarningLabel.setText("");
+            return;
+        }
+
+        // Tunisia ISO code is "TN"
+        String country = "TN";
+
+        new Thread(() -> {
+            try {
+                boolean weekend = holidayApi.isWeekend(date);
+                boolean holiday = holidayApi.isPublicHoliday(date, country);
+
+                javafx.application.Platform.runLater(() -> {
+                    if (holiday && weekend) {
+                        deadlineWarningLabel.setText("⚠ Date limite sur un weekend ET un jour férié.");
+                    } else if (holiday) {
+                        deadlineWarningLabel.setText("⚠ Date limite sur un jour férié.");
+                    } else if (weekend) {
+                        deadlineWarningLabel.setText("⚠ Date limite sur un weekend.");
+                    } else {
+                        deadlineWarningLabel.setText("");
+                    }
+                });
+            } catch (Exception e) {
+                javafx.application.Platform.runLater(() ->
+                        deadlineWarningLabel.setText("Info jours fériés indisponible.")
+                );
+            }
+        }).start();
+    }
+
+    private double parseDoubleSafe(String s) {
+        if (s == null) return 0;
+        String t = s.trim().replace(",", ".");
+        if (t.isEmpty()) return 0;
+        try {
+            return Double.parseDouble(t);
+        } catch (Exception e) {
+            return 0;
+        }
     }
 }
