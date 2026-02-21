@@ -1,17 +1,25 @@
 package com.example.project_pi.controllers;
 
+import com.example.project_pi.entities.AppelOffre;
 import com.example.project_pi.entities.Candidature;
+import com.example.project_pi.services.AppelOffreService;
 import com.example.project_pi.services.CandidatureService;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Pattern;
 
 public class CandidatureFormController {
 
+    private static final Pattern EMAIL =
+            Pattern.compile("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$");
+
     @FXML private Label formTitle;
-    @FXML private TextField appelOffreIdField;
+    @FXML private ComboBox<AppelOffre> appelOffreCombo;
     @FXML private TextField nomField;
     @FXML private TextField emailField;
     @FXML private TextField montantField;
@@ -20,17 +28,47 @@ public class CandidatureFormController {
     @FXML private Label errorLabel;
 
     private final CandidatureService service = new CandidatureService();
+    private final AppelOffreService appelOffreService = new AppelOffreService();
 
     private Stage dialogStage;
     private boolean saved = false;
 
-    // edit mode
     private Candidature current = null;
 
     @FXML
     private void initialize() {
-        statutCombo.getItems().setAll("submitted", "accepted", "rejected");
-        statutCombo.setValue("submitted");
+
+        if (statutCombo.getItems().isEmpty()) {
+            statutCombo.getItems().setAll("submitted", "accepted", "rejected");
+        }
+
+        // ✅ money typing
+        allowMoneyOnly(montantField);
+
+        try {
+            var offres = appelOffreService.getAll();
+            appelOffreCombo.getItems().setAll(offres);
+
+            // show titles
+            appelOffreCombo.setCellFactory(cb -> new ListCell<>() {
+                @Override
+                protected void updateItem(AppelOffre item, boolean empty) {
+                    super.updateItem(item, empty);
+                    setText(empty || item == null ? "" : item.getTitre());
+                }
+            });
+            appelOffreCombo.setButtonCell(new ListCell<>() {
+                @Override
+                protected void updateItem(AppelOffre item, boolean empty) {
+                    super.updateItem(item, empty);
+                    setText(empty || item == null ? "" : item.getTitre());
+                }
+            });
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            errorLabel.setText("Erreur: impossible de charger les Appels d’Offres.");
+        }
     }
 
     public void setDialogStage(Stage dialogStage) {
@@ -41,12 +79,19 @@ public class CandidatureFormController {
         return saved;
     }
 
-    // called when editing (next step)
     public void setCandidature(Candidature c) {
         this.current = c;
         formTitle.setText("Modifier Candidature");
 
-        appelOffreIdField.setText(String.valueOf(c.getAppelOffreId()));
+        if (c != null) {
+            for (AppelOffre ao : appelOffreCombo.getItems()) {
+                if (ao.getAppelOffreId() == c.getAppelOffreId()) {
+                    appelOffreCombo.setValue(ao);
+                    break;
+                }
+            }
+        }
+
         nomField.setText(c.getNomCandidat());
         emailField.setText(c.getEmailCandidat());
         montantField.setText(c.getMontantPropose() == 0 ? "" : String.valueOf(c.getMontantPropose()));
@@ -66,49 +111,32 @@ public class CandidatureFormController {
 
     @FXML
     private void onSave() {
-
         errorLabel.setText("");
 
-        // ===== Validation =====
-        if (appelOffreIdField.getText() == null || appelOffreIdField.getText().isBlank()) {
-            errorLabel.setText("appel_offre_id est obligatoire.");
-            return;
-        }
-        if (nomField.getText() == null || nomField.getText().isBlank()) {
-            errorLabel.setText("Nom candidat est obligatoire.");
-            return;
-        }
-        if (emailField.getText() == null || emailField.getText().isBlank()) {
-            errorLabel.setText("Email est obligatoire.");
-            return;
-        }
-        if (statutCombo.getValue() == null) {
-            errorLabel.setText("Choisissez un statut.");
+        List<String> errors = validateForm();
+        if (!errors.isEmpty()) {
+            errorLabel.setText("• " + String.join("\n• ", errors));
             return;
         }
 
         try {
-            int appelOffreId = Integer.parseInt(appelOffreIdField.getText().trim());
+            AppelOffre selectedOffre = appelOffreCombo.getValue();
+            int appelOffreId = selectedOffre.getAppelOffreId();
 
-            double montant = 0;
-            if (!montantField.getText().isBlank()) {
-                montant = Double.parseDouble(montantField.getText().trim());
-            }
+            double montant = parseDoubleMoney(montantField.getText());
 
             Candidature c = new Candidature(
                     appelOffreId,
                     nomField.getText().trim(),
                     emailField.getText().trim(),
                     montant,
-                    messageArea.getText(),
+                    messageArea.getText() == null ? "" : messageArea.getText().trim(),
                     statutCombo.getValue()
             );
 
             if (current == null) {
-                // INSERT
                 service.add(c);
             } else {
-                // UPDATE
                 c.setCandidatureId(current.getCandidatureId());
                 service.update(c);
             }
@@ -117,10 +145,73 @@ public class CandidatureFormController {
             dialogStage.close();
 
         } catch (NumberFormatException e) {
-            errorLabel.setText("appel_offre_id / montant doivent être des nombres.");
+            errorLabel.setText("Montant doit être un nombre valide (ex: 1500 ou 1500.50).");
         } catch (SQLException e) {
-            // FK error example: appel_offre_id doesn't exist
             errorLabel.setText("Erreur DB: " + e.getMessage());
         }
+    }
+
+    // ---------------- Validation ----------------
+
+    private List<String> validateForm() {
+        List<String> errors = new ArrayList<>();
+
+        AppelOffre ao = appelOffreCombo.getValue();
+        String nom = safe(nomField.getText());
+        String email = safe(emailField.getText());
+        String montant = safe(montantField.getText());
+        String statut = statutCombo.getValue();
+
+        if (ao == null) errors.add("Veuillez sélectionner un Appel d’Offre.");
+
+        requireText(errors, "Nom candidat", nom, 2, 80);
+
+        requireText(errors, "Email candidat", email, 6, 120);
+        if (!email.isEmpty() && !EMAIL.matcher(email).matches()) {
+            errors.add("Email candidat n’est pas valide (ex: nom@domaine.com).");
+        }
+
+        // montant required, numeric, > 0
+        if (montant.isEmpty()) {
+            errors.add("Montant proposé est obligatoire.");
+        } else {
+            try {
+                double m = parseDoubleMoney(montant);
+                if (m <= 0) errors.add("Montant proposé doit être > 0.");
+            } catch (Exception e) {
+                errors.add("Montant proposé doit être un nombre valide.");
+            }
+        }
+
+        if (statut == null) errors.add("Choisissez un statut.");
+
+        return errors;
+    }
+
+    private void requireText(List<String> errors, String field, String value, int min, int max) {
+        if (value.isEmpty()) {
+            errors.add(field + " est obligatoire.");
+            return;
+        }
+        if (value.length() < min) errors.add(field + " doit contenir au moins " + min + " caractères.");
+        if (value.length() > max) errors.add(field + " ne doit pas dépasser " + max + " caractères.");
+    }
+
+    private double parseDoubleMoney(String txt) {
+        String cleaned = safe(txt).replace(",", ".");
+        return Double.parseDouble(cleaned);
+    }
+
+    private String safe(String s) {
+        return s == null ? "" : s.trim();
+    }
+
+    private void allowMoneyOnly(TextField tf) {
+        tf.textProperty().addListener((obs, oldV, newV) -> {
+            if (newV == null) return;
+            if (!newV.matches("\\d*(?:[\\.,]\\d{0,2})?")) {
+                tf.setText(oldV);
+            }
+        });
     }
 }

@@ -7,6 +7,9 @@ import javafx.scene.control.*;
 import javafx.stage.Stage;
 
 import java.sql.SQLException;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 public class AppelOffreFormController {
 
@@ -27,7 +30,6 @@ public class AppelOffreFormController {
     private Stage dialogStage;
     private boolean saved = false;
 
-    //  if not null => EDIT mode
     private AppelOffre current = null;
 
     @FXML
@@ -35,6 +37,10 @@ public class AppelOffreFormController {
         typeCombo.getItems().setAll("achat", "partenariat", "donnant_donnant", "don");
         deviseCombo.getItems().setAll("TND", "EUR", "USD");
         statutCombo.getItems().setAll("draft", "published", "closed");
+
+        // ✅ restrict typing to money (0-2 decimals)
+        allowMoneyOnly(budgetMinField);
+        allowMoneyOnly(budgetMaxField);
     }
 
     public void setDialogStage(Stage dialogStage) {
@@ -45,10 +51,8 @@ public class AppelOffreFormController {
         return saved;
     }
 
-    //  Called from onEdit(): sets EDIT mode + fills fields
     public void setAppelOffre(AppelOffre a) {
-        this.current = a;  // IMPORTANT: now current is NOT NULL
-
+        this.current = a;
         formTitle.setText("Modifier Appel d’Offre");
 
         titreField.setText(a.getTitre());
@@ -76,31 +80,22 @@ public class AppelOffreFormController {
 
     @FXML
     private void onSave() {
-
         errorLabel.setText("");
 
-        // ===== VALIDATION =====
-        if (titreField.getText() == null || titreField.getText().isBlank()) {
-            errorLabel.setText("Le titre est obligatoire.");
-            return;
-        }
-        if (typeCombo.getValue() == null) {
-            errorLabel.setText("Choisissez un type.");
-            return;
-        }
-        if (statutCombo.getValue() == null) {
-            errorLabel.setText("Choisissez un statut.");
+        List<String> errors = validateForm();
+        if (!errors.isEmpty()) {
+            errorLabel.setText("• " + String.join("\n• ", errors));
             return;
         }
 
         try {
-            double budgetMin = budgetMinField.getText().isBlank() ? 0 : Double.parseDouble(budgetMinField.getText());
-            double budgetMax = budgetMaxField.getText().isBlank() ? 0 : Double.parseDouble(budgetMaxField.getText());
+            double budgetMin = parseDoubleMoney(budgetMinField.getText());
+            double budgetMax = parseDoubleMoney(budgetMaxField.getText());
 
             AppelOffre a = new AppelOffre(
-                    titreField.getText(),
-                    descriptionArea.getText(),
-                    categorieField.getText(),
+                    titreField.getText().trim(),
+                    descriptionArea.getText().trim(),
+                    categorieField.getText().trim(),
                     typeCombo.getValue(),
                     budgetMin,
                     budgetMax,
@@ -109,12 +104,9 @@ public class AppelOffreFormController {
                     statutCombo.getValue()
             );
 
-            //  Decide INSERT vs UPDATE
             if (current == null) {
-                // NEW => INSERT
                 service.add(a);
             } else {
-                // EDIT => UPDATE (keep same ID)
                 a.setAppelOffreId(current.getAppelOffreId());
                 service.update(a);
             }
@@ -123,9 +115,91 @@ public class AppelOffreFormController {
             dialogStage.close();
 
         } catch (NumberFormatException e) {
-            errorLabel.setText("Budget invalide (ex: 15000).");
+            errorLabel.setText("Budget invalide (ex: 15000 ou 15000.50).");
         } catch (SQLException e) {
             errorLabel.setText("Erreur DB: " + e.getMessage());
         }
+    }
+
+    // ---------------- Validation ----------------
+
+    private List<String> validateForm() {
+        List<String> errors = new ArrayList<>();
+
+        String titre = safe(titreField.getText());
+        String desc = safe(descriptionArea.getText());
+        String cat = safe(categorieField.getText());
+        String type = typeCombo.getValue();
+        String devise = deviseCombo.getValue();
+        LocalDate dateLimite = dateLimitePicker.getValue();
+        String statut = statutCombo.getValue();
+
+        // required + lengths
+        requireText(errors, "Titre", titre, 3, 100);
+        requireText(errors, "Description", desc, 5, 1000);
+        requireText(errors, "Catégorie", cat, 2, 50);
+
+        if (type == null) errors.add("Choisissez un type.");
+        if (devise == null) errors.add("Choisissez une devise.");
+        if (statut == null) errors.add("Choisissez un statut.");
+
+        // budgets required and numeric >= 0
+        Double min = parseMoney(errors, "Budget min", budgetMinField.getText(), true);
+        Double max = parseMoney(errors, "Budget max", budgetMaxField.getText(), true);
+
+        if (min != null && min < 0) errors.add("Budget min doit être ≥ 0.");
+        if (max != null && max < 0) errors.add("Budget max doit être ≥ 0.");
+        if (min != null && max != null && min > max) errors.add("Budget min doit être ≤ Budget max.");
+
+        // date required and not past
+        if (dateLimite == null) {
+            errors.add("Date limite est obligatoire.");
+        } else if (dateLimite.isBefore(LocalDate.now())) {
+            errors.add("Date limite ne peut pas être dans le passé.");
+        }
+
+        return errors;
+    }
+
+    private void requireText(List<String> errors, String field, String value, int min, int max) {
+        if (value.isEmpty()) {
+            errors.add(field + " est obligatoire.");
+            return;
+        }
+        if (value.length() < min) errors.add(field + " doit contenir au moins " + min + " caractères.");
+        if (value.length() > max) errors.add(field + " ne doit pas dépasser " + max + " caractères.");
+    }
+
+    private Double parseMoney(List<String> errors, String field, String value, boolean required) {
+        String v = safe(value);
+        if (v.isEmpty()) {
+            if (required) errors.add(field + " est obligatoire.");
+            return null;
+        }
+        try {
+            return parseDoubleMoney(v);
+        } catch (Exception e) {
+            errors.add(field + " doit être un nombre valide.");
+            return null;
+        }
+    }
+
+    private double parseDoubleMoney(String txt) {
+        String cleaned = safe(txt).replace(",", ".");
+        return Double.parseDouble(cleaned);
+    }
+
+    private String safe(String s) {
+        return s == null ? "" : s.trim();
+    }
+
+    private void allowMoneyOnly(TextField tf) {
+        tf.textProperty().addListener((obs, oldV, newV) -> {
+            if (newV == null) return;
+            // allow empty, digits, optional decimal with up to 2 digits
+            if (!newV.matches("\\d*(?:[\\.,]\\d{0,2})?")) {
+                tf.setText(oldV);
+            }
+        });
     }
 }

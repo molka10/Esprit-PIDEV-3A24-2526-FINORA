@@ -41,8 +41,10 @@
                         <ColumnConstraints percentWidth="75"/>
                     </columnConstraints>
 
-                    <Label text="AppelOffre ID"/>
-                    <TextField fx:id="appelOffreIdField" promptText="Doit exister (FK)" GridPane.columnIndex="1"/>
+                    <Label text="Appel d’Offre"/>
+                    <ComboBox fx:id="appelOffreCombo"
+                              promptText="Sélectionner un appel d’offre..."
+                              prefWidth="300"/>
 
                     <Label text="Nom candidat" GridPane.rowIndex="1"/>
                     <TextField fx:id="nomField" promptText="Ex: Sami Ben Ali" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
