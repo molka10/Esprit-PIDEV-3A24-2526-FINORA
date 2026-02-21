@@ -7,6 +7,7 @@ public class InvestmentManagement {
 
     private int managementId;
     private int investmentId;
+    private String investmentName; // 🔥 AJOUT
     private String investmentType;
     private BigDecimal amountInvested;
     private BigDecimal ownershipPercentage;
@@ -40,11 +41,16 @@ public class InvestmentManagement {
         this.status = status;
     }
 
+    // Getters & Setters
+
     public int getManagementId() { return managementId; }
     public void setManagementId(int managementId) { this.managementId = managementId; }
 
     public int getInvestmentId() { return investmentId; }
     public void setInvestmentId(int investmentId) { this.investmentId = investmentId; }
+
+    public String getInvestmentName() { return investmentName; }
+    public void setInvestmentName(String investmentName) { this.investmentName = investmentName; }
 
     public String getInvestmentType() { return investmentType; }
     public void setInvestmentType(String investmentType) { this.investmentType = investmentType; }
@@ -60,17 +66,4 @@ public class InvestmentManagement {
 
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
-
-    @Override
-    public String toString() {
-        return "InvestmentManagement{" +
-                "managementId=" + managementId +
-                ", investmentId=" + investmentId +
-                ", investmentType='" + investmentType + '\'' +
-                ", amountInvested=" + amountInvested +
-                ", ownershipPercentage=" + ownershipPercentage +
-                ", startDate=" + startDate +
-                ", status='" + status + '\'' +
-                '}';
-    }
 }

@@ -14,7 +14,6 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class InvestmentManagementServiceTest {
 
-    // ✅ met un investment_id qui existe dans table investment
     private final int existingInvestmentId = 1;
 
     private int insertRow() throws Exception {
@@ -36,7 +35,7 @@ public class InvestmentManagementServiceTest {
             ps.executeUpdate();
 
             try (ResultSet keys = ps.getGeneratedKeys()) {
-                assertTrue(keys.next(), "❌ No generated key returned!");
+                assertTrue(keys.next(), " No generated key returned!");
                 return keys.getInt(1);
             }
         }
@@ -74,7 +73,7 @@ public class InvestmentManagementServiceTest {
         try (Statement st = cnx.createStatement();
              ResultSet rs = st.executeQuery(sql)) {
 
-            assertTrue(rs.next(), "❌ No row found after add!");
+            assertTrue(rs.next(), " No row found after add!");
             insertedId = rs.getInt("management_id");
 
             assertEquals(existingInvestmentId, rs.getInt("investment_id"));

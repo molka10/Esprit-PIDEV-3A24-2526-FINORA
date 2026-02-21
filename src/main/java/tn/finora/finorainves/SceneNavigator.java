@@ -23,7 +23,12 @@ public class SceneNavigator {
             }
 
             Parent root = FXMLLoader.load(url);
-            Scene scene = new Scene(root);
+            Scene scene = stage.getScene();
+            if (scene == null) {
+                scene = new Scene(root, 900, 500);
+            } else {
+                scene.setRoot(root);
+            }
 
             var cssUrl = SceneNavigator.class.getResource("/tn/finora/finorainves/styles/style.css");
             if (cssUrl != null) {
@@ -34,7 +39,7 @@ public class SceneNavigator {
             stage.setScene(scene);
             stage.show();
         } catch (Exception e) {
-            throw new RuntimeException("❌ Navigation error: " + e.getMessage(), e);
+            throw new RuntimeException("Navigation error: " + e.getMessage(), e);
         }
-    }}
-
+    }
+}

@@ -32,33 +32,44 @@ public class    InvestmentManagementService {
             }
             return -1;
         } catch (SQLException e) {
-            throw new RuntimeException("❌ add management: " + e.getMessage(), e);
+            throw new RuntimeException(" add management: " + e.getMessage(), e);
         }
     }
     public List<InvestmentManagement> getAll() {
         List<InvestmentManagement> list = new ArrayList<>();
-        String sql = "SELECT * FROM investment_management ORDER BY management_id DESC";
+
+        String sql = """
+        SELECT im.*, i.name AS investment_name
+        FROM investment_management im
+        JOIN investment i ON im.investment_id = i.investment_id
+        ORDER BY im.management_id DESC
+        """;
 
         try (PreparedStatement ps = cnx.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
 
             while (rs.next()) {
                 InvestmentManagement im = new InvestmentManagement();
+
                 im.setManagementId(rs.getInt("management_id"));
                 im.setInvestmentId(rs.getInt("investment_id"));
+                im.setInvestmentName(rs.getString("investment_name")); // 🔥 IMPORTANT
                 im.setInvestmentType(rs.getString("investment_type"));
                 im.setAmountInvested(rs.getBigDecimal("amount_invested"));
                 im.setOwnershipPercentage(rs.getBigDecimal("ownership_percentage"));
 
                 Date d = rs.getDate("start_date");
-                if (d != null) im.setStartDate(d.toLocalDate());
+                if (d != null) {
+                    im.setStartDate(d.toLocalDate());
+                }
 
                 im.setStatus(rs.getString("status"));
+
                 list.add(im);
             }
 
         } catch (SQLException e) {
-            throw new RuntimeException("❌ getAll: " + e.getMessage(), e);
+            throw new RuntimeException("getAll with JOIN error: " + e.getMessage(), e);
         }
 
         return list;
@@ -84,7 +95,7 @@ public class    InvestmentManagementService {
                 }
             }
         } catch (SQLException e) {
-            throw new RuntimeException("❌ getAllByInvestment: " + e.getMessage(), e);
+            throw new RuntimeException(" getAllByInvestment: " + e.getMessage(), e);
         }
         return list;
     }
@@ -102,7 +113,7 @@ public class    InvestmentManagementService {
             ps.setInt(7, im.getManagementId());
             ps.executeUpdate();
         } catch (SQLException e) {
-            throw new RuntimeException("❌ update management: " + e.getMessage(), e);
+            throw new RuntimeException(" update management: " + e.getMessage(), e);
         }
     }
 
@@ -112,7 +123,7 @@ public class    InvestmentManagementService {
             ps.setInt(1, id);
             ps.executeUpdate();
         } catch (SQLException e) {
-            throw new RuntimeException("❌ delete management: " + e.getMessage(), e);
+            throw new RuntimeException(" delete management: " + e.getMessage(), e);
         }
     }
 }

@@ -17,10 +17,14 @@ public class Investment {
 
     public Investment() {}
 
-    // ✅ INSERT
-    public Investment(String name, String category, String location,
-                      BigDecimal estimatedValue, String riskLevel,
-                      String imageUrl, String description, LocalDateTime createdAt) {
+    // Constructor WITHOUT createdAt
+    public Investment(String name,
+                      String category,
+                      String location,
+                      BigDecimal estimatedValue,
+                      String riskLevel,
+                      String imageUrl,
+                      String description) {
         this.name = name;
         this.category = category;
         this.location = location;
@@ -28,10 +32,8 @@ public class Investment {
         this.riskLevel = riskLevel;
         this.imageUrl = imageUrl;
         this.description = description;
-        this.createdAt = createdAt;
     }
 
-    // ✅ UPDATE / FULL
     public Investment(int investmentId, String name, String category, String location,
                       BigDecimal estimatedValue, String riskLevel,
                       String imageUrl, String description, LocalDateTime createdAt) {
@@ -46,6 +48,7 @@ public class Investment {
         this.createdAt = createdAt;
     }
 
+    // Getters & Setters
     public int getInvestmentId() { return investmentId; }
     public void setInvestmentId(int investmentId) { this.investmentId = investmentId; }
 
@@ -72,19 +75,4 @@ public class Investment {
 
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
-
-    @Override
-    public String toString() {
-        return "Investment{" +
-                "investmentId=" + investmentId +
-                ", name='" + name + '\'' +
-                ", category='" + category + '\'' +
-                ", location='" + location + '\'' +
-                ", estimatedValue=" + estimatedValue +
-                ", riskLevel='" + riskLevel + '\'' +
-                ", imageUrl='" + imageUrl + '\'' +
-                ", description='" + description + '\'' +
-                ", createdAt=" + createdAt +
-                '}';
-    }
 }

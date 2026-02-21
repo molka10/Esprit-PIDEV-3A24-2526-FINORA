@@ -19,7 +19,7 @@
 
             <GridPane hgap="12" vgap="10">
 
-                <!-- ✅ FIX: ColumnConstraints must be inside columnConstraints tag -->
+
                 <columnConstraints>
                     <ColumnConstraints percentWidth="28"/>
                     <ColumnConstraints percentWidth="72"/>
@@ -56,7 +56,7 @@
             <Label fx:id="errorLabel" text="" styleClass="error-text"/>
 
             <HBox spacing="10">
-                <Button text="💾 Save" onAction="#onSave" styleClass="btn-primary"/>
+                <Button text=" Save" onAction="#onSave" styleClass="btn-primary"/>
                 <Button text="✖ Cancel" onAction="#onCancel" styleClass="btn-secondary"/>
             </HBox>
         </VBox>

@@ -9,8 +9,6 @@ public class HelloApplication extends Application {
 
     @Override
     public void start(Stage stage) throws Exception {
-
-        // ✅ IMPORTANT : donner le stage au SceneNavigator
         SceneNavigator.setStage(stage);
 
         FXMLLoader loader = new FXMLLoader(

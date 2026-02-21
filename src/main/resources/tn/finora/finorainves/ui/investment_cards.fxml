@@ -15,10 +15,10 @@
                 <Insets top="12" right="12" bottom="12" left="12"/>
             </padding>
 
-            <Button text="➕ Add Investment" onAction="#onAdd" styleClass="btn-primary"/>
-            <Button text="🔄 Refresh" onAction="#onRefresh" styleClass="btn-secondary"/>
+            <Button text=" Add Investment" onAction="#onAdd" styleClass="btn-primary"/>
+            <Button text=" Refresh" onAction="#onRefresh" styleClass="btn-secondary"/>
             <Region HBox.hgrow="ALWAYS"/>
-            <Button text="📌 Investment Management" onAction="#goToManagement" styleClass="btn-secondary"/>
+            <Button text=" Investment Management" onAction="#goToManagement" styleClass="btn-secondary"/>
         </HBox>
     </top>
 

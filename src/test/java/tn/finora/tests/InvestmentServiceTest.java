@@ -13,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class InvestmentServiceTest {
 
-    // ✅ Helper: insert row directly and return generated id
+
     private int insertRow() throws Exception {
         Connection cnx = DBConnection.getInstance().getCnx();
 
@@ -32,13 +32,13 @@ public class InvestmentServiceTest {
             ps.executeUpdate();
 
             try (ResultSet keys = ps.getGeneratedKeys()) {
-                assertTrue(keys.next(), "❌ No generated key returned!");
+                assertTrue(keys.next(), " No generated key returned!");
                 return keys.getInt(1);
             }
         }
     }
 
-    // ✅ Helper: delete row by id
+
     private void deleteRow(int id) throws Exception {
         Connection cnx = DBConnection.getInstance().getCnx();
         try (PreparedStatement ps = cnx.prepareStatement("DELETE FROM investment WHERE investment_id=?")) {
@@ -47,7 +47,7 @@ public class InvestmentServiceTest {
         }
     }
 
-    // ✅ CREATE TEST
+
     @Test
     void testAddInvestment() throws Exception {
         InvestmentService service = new InvestmentService();
@@ -72,7 +72,7 @@ public class InvestmentServiceTest {
         try (Statement st = cnx.createStatement();
              ResultSet rs = st.executeQuery(sql)) {
 
-            assertTrue(rs.next(), "❌ No row found after add!");
+            assertTrue(rs.next(), " No row found after add!");
 
             insertedId = rs.getInt("investment_id");
 
@@ -87,7 +87,7 @@ public class InvestmentServiceTest {
         deleteRow(insertedId);
     }
 
-    // ✅ READ TEST
+
     @Test
     void testGetAllInvestments() throws Exception {
         InvestmentService service = new InvestmentService();
@@ -105,7 +105,7 @@ public class InvestmentServiceTest {
         deleteRow(insertedId);
     }
 
-    // ✅ UPDATE TEST
+
     @Test
     void testUpdateInvestment() throws Exception {
         InvestmentService service = new InvestmentService();
@@ -141,7 +141,6 @@ public class InvestmentServiceTest {
         deleteRow(insertedId);
     }
 
-    // ✅ DELETE TEST
     @Test
     void testDeleteInvestment() throws Exception {
         InvestmentService service = new InvestmentService();
