@@ -2,176 +2,240 @@ package com.example.project_pi.services;
 
 import com.example.project_pi.entities.AppelOffre;
 import com.example.project_pi.entities.Candidature;
-import org.apache.pdfbox.pdmodel.PDDocument;
-import org.apache.pdfbox.pdmodel.PDPage;
+import org.apache.pdfbox.pdmodel.*;
 import org.apache.pdfbox.pdmodel.common.PDRectangle;
 import org.apache.pdfbox.pdmodel.font.PDType1Font;
 import org.apache.pdfbox.pdmodel.font.Standard14Fonts;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
 
+import java.awt.Color;
 import java.io.File;
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
 public class PdfExportService {
 
-    private static final float MARGIN = 48f;
-    private static final float LEADING = 14f;
+    private static final float MARGIN = 50f;
+    private static final float HEADER_HEIGHT = 60f;
 
-    // PDFBox 3.x fonts (no more PDType1Font.HELVETICA_BOLD constants)
     private static final PDType1Font FONT_REGULAR =
             new PDType1Font(Standard14Fonts.FontName.HELVETICA);
     private static final PDType1Font FONT_BOLD =
             new PDType1Font(Standard14Fonts.FontName.HELVETICA_BOLD);
 
-    /**
-     * Export 1 AppelOffre + its candidatures into a PDF file.
-     * No JOIN needed: candidatures list is passed in.
-     */
-    public void exportAppelOffreWithCandidatures(AppelOffre ao, List<Candidature> cands, File outFile) throws IOException {
-        try (PDDocument doc = new PDDocument()) {
-            buildDocumentRobust(doc, ao, cands);
-            doc.save(outFile);
-        }
-    }
+    private static final Color PURPLE = new Color(168, 85, 247);
+    private static final Color LIGHT_GRAY = new Color(245, 245, 250);
+    private static final Color DARK_TEXT = new Color(31, 41, 55);
 
-    // ---------------- Robust builder (handles paging cleanly) ----------------
+    public void exportAppelOffreWithCandidatures(AppelOffre ao,
+                                                 List<Candidature> cands,
+                                                 File file) throws IOException {
 
-    private void buildDocumentRobust(PDDocument doc, AppelOffre ao, List<Candidature> cands) throws IOException {
-        PDPage page = new PDPage(PDRectangle.A4);
-        doc.addPage(page);
+        try (PDDocument document = new PDDocument()) {
 
-        PDPageContentStream cs = new PDPageContentStream(doc, page);
-        float y = page.getMediaBox().getHeight() - MARGIN;
+            PDPage page = new PDPage(PDRectangle.A4);
+            document.addPage(page);
 
-        // Header
-        y = writeLine(cs, "Gestion Appel d’Offre - Export PDF", FONT_BOLD, 16, y);
-        y = writeLine(cs, "------------------------------------------------------------", FONT_REGULAR, 11, y);
+            PDPageContentStream cs = new PDPageContentStream(document, page);
 
-        // AppelOffre section
-        y = gap(y, 8);
-        y = writeLine(cs, "Appel d’Offre", FONT_BOLD, 14, y);
+            float pageWidth = page.getMediaBox().getWidth();
+            float pageHeight = page.getMediaBox().getHeight();
 
-        y = writeKeyValue(cs, "Titre", safe(ao.getTitre()), y);
-        y = writeKeyValue(cs, "Catégorie", safe(ao.getCategorie()), y);
-        y = writeKeyValue(cs, "Type", safe(ao.getType()), y);
-        y = writeKeyValue(cs, "Budget", formatBudget(ao), y);
+            // ===== HEADER =====
+            cs.setNonStrokingColor(PURPLE);
+            cs.addRect(0, pageHeight - HEADER_HEIGHT, pageWidth, HEADER_HEIGHT);
+            cs.fill();
 
-        String dateLimite = (ao.getDateLimite() == null)
-                ? "-"
-                : ao.getDateLimite().format(DateTimeFormatter.ISO_DATE);
-        y = writeKeyValue(cs, "Date limite", dateLimite, y);
+            drawText(cs,
+                    "FINORA - Export Appel d'Offre",
+                    MARGIN,
+                    pageHeight - 30,
+                    FONT_BOLD,
+                    16,
+                    Color.WHITE);
 
-        y = writeKeyValue(cs, "Statut", safe(ao.getStatut()), y);
+            String now = LocalDateTime.now()
+                    .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
 
-        y = gap(y, 6);
-        y = writeLine(cs, "Description:", FONT_BOLD, 12, y);
-        y = writeWrapped(cs, safe(ao.getDescription()), FONT_REGULAR, 11, y, 95);
+            drawText(cs,
+                    "Generated on: " + now,
+                    MARGIN,
+                    pageHeight - 45,
+                    FONT_REGULAR,
+                    10,
+                    Color.WHITE);
 
-        // Candidatures section
-        y = gap(y, 12);
-        y = writeLine(cs, "Candidatures (" + cands.size() + ")", FONT_BOLD, 14, y);
-        y = writeLine(cs, "------------------------------------------------------------", FONT_REGULAR, 11, y);
+            float y = pageHeight - HEADER_HEIGHT - 30;
 
-        if (cands.isEmpty()) {
-            y = gap(y, 6);
-            writeLine(cs, "Aucune candidature pour cet appel d’offre.", FONT_REGULAR, 11, y);
-            cs.close();
-            return;
-        }
+            // ===== SECTION: APPEL OFFRE =====
+            drawSectionTitle(cs, "Appel d'Offre", y);
+            y -= 20;
 
-        int i = 1;
-        for (Candidature c : cands) {
-            // Need space for a candidature block
-            if (y < 120) {
-                cs.close();
-                page = new PDPage(PDRectangle.A4);
-                doc.addPage(page);
-                cs = new PDPageContentStream(doc, page);
-                y = page.getMediaBox().getHeight() - MARGIN;
+            y = drawKeyValue(cs, "Titre", ao.getTitre(), y);
+            y = drawKeyValue(cs, "Categorie", ao.getCategorie(), y);
+            y = drawKeyValue(cs, "Type", ao.getType(), y);
+            y = drawKeyValue(cs, "Budget", formatBudget(ao), y);
 
-                y = writeLine(cs, "Suite - Candidatures", FONT_BOLD, 13, y);
-                y = writeLine(cs, "------------------------------------------------------------", FONT_REGULAR, 11, y);
+            String dateLimite = (ao.getDateLimite() == null)
+                    ? "-"
+                    : ao.getDateLimite().format(DateTimeFormatter.ISO_DATE);
+
+            y = drawKeyValue(cs, "Date limite", dateLimite, y);
+            y = drawKeyValue(cs, "Statut", ao.getStatut(), y);
+
+            y -= 10;
+            drawSectionTitle(cs, "Description", y);
+            y -= 20;
+
+            y = drawWrappedText(cs, ao.getDescription(), MARGIN, y, 90);
+
+            // ===== SECTION: CANDIDATURES =====
+            y -= 30;
+            drawSectionTitle(cs,
+                    "Candidatures (" + cands.size() + ")",
+                    y);
+            y -= 25;
+
+            for (Candidature c : cands) {
+
+                if (y < 80) {
+                    cs.close();
+                    page = new PDPage(PDRectangle.A4);
+                    document.addPage(page);
+                    cs = new PDPageContentStream(document, page);
+                    y = page.getMediaBox().getHeight() - MARGIN;
+                }
+
+                cs.setNonStrokingColor(LIGHT_GRAY);
+                cs.addRect(MARGIN, y - 55,
+                        pageWidth - 2 * MARGIN,
+                        50);
+                cs.fill();
+
+                y -= 15;
+                y = drawKeyValue(cs, "Nom", c.getNomCandidat(), y);
+                y = drawKeyValue(cs, "Email", c.getEmailCandidat(), y);
+
+                String montant = c.getMontantPropose() == 0
+                        ? "-"
+                        : String.valueOf(c.getMontantPropose());
+
+                y = drawKeyValue(cs, "Montant", montant, y);
+                y = drawKeyValue(cs, "Statut", c.getStatut(), y);
+
+                y -= 10;
             }
 
-            y = writeCandidatureBlock(cs, c, i, y);
-            i++;
-            y = gap(y, 6);
+            cs.close();
+            document.save(file);
         }
-
-        cs.close();
     }
 
-    private float writeCandidatureBlock(PDPageContentStream cs, Candidature c, int index, float y) throws IOException {
-        y = gap(y, 6);
-        y = writeLine(cs, "Candidature #" + index, FONT_BOLD, 12, y);
+    // ==============================
+    // TEXT HELPERS
+    // ==============================
 
-        y = writeKeyValue(cs, "Nom", safe(c.getNomCandidat()), y);
-        y = writeKeyValue(cs, "Email", safe(c.getEmailCandidat()), y);
+    private void drawSectionTitle(PDPageContentStream cs,
+                                  String text,
+                                  float y) throws IOException {
+        drawText(cs, text, MARGIN, y, FONT_BOLD, 13, DARK_TEXT);
+    }
 
-        String montant = (c.getMontantPropose() == 0) ? "-" : String.valueOf(c.getMontantPropose());
-        y = writeKeyValue(cs, "Montant proposé", montant, y);
+    private float drawKeyValue(PDPageContentStream cs,
+                               String key,
+                               String value,
+                               float y) throws IOException {
 
-        y = writeKeyValue(cs, "Statut", safe(c.getStatut()), y);
+        drawText(cs,
+                key + ": " + sanitize(value),
+                MARGIN,
+                y,
+                FONT_REGULAR,
+                11,
+                DARK_TEXT);
 
-        y = writeLine(cs, "Message:", FONT_BOLD, 11, y);
-        y = writeWrapped(cs, safe(c.getMessage()), FONT_REGULAR, 11, y, 95);
+        return y - 15;
+    }
+
+    private float drawWrappedText(PDPageContentStream cs,
+                                  String text,
+                                  float x,
+                                  float y,
+                                  int maxChars) throws IOException {
+
+        List<String> lines = wrap(sanitize(text), maxChars);
+
+        for (String line : lines) {
+            drawText(cs, line, x, y, FONT_REGULAR, 10, DARK_TEXT);
+            y -= 12;
+        }
 
         return y;
     }
 
-    // ---------------- Text helpers ----------------
+    private void drawText(PDPageContentStream cs,
+                          String text,
+                          float x,
+                          float y,
+                          PDType1Font font,
+                          int size,
+                          Color color) throws IOException {
 
-    private float writeKeyValue(PDPageContentStream cs, String k, String v, float y) throws IOException {
-        return writeLine(cs, k + " : " + v, FONT_REGULAR, 11, y);
-    }
-
-    private float writeLine(PDPageContentStream cs, String text, PDType1Font font, int size, float y) throws IOException {
         cs.beginText();
         cs.setFont(font, size);
-        cs.newLineAtOffset(MARGIN, y);
-        cs.showText(text);
+        cs.setNonStrokingColor(color);
+        cs.newLineAtOffset(x, y);
+        cs.showText(sanitize(text));
         cs.endText();
-        return y - LEADING;
     }
 
-    private float writeWrapped(PDPageContentStream cs, String text, PDType1Font font, int size, float y, int maxCharsPerLine) throws IOException {
-        List<String> lines = wrap(text, maxCharsPerLine);
-        for (String line : lines) {
-            y = writeLine(cs, line, font, size, y);
-        }
-        return y;
+    // ==============================
+    // SANITIZER (IMPORTANT)
+    // ==============================
+
+    private String sanitize(String s) {
+        if (s == null) return "-";
+        String t = s.trim();
+        if (t.isEmpty()) return "-";
+
+        t = t.replace('\u2019', '\'')
+                .replace('\u2018', '\'')
+                .replace('\u201C', '"')
+                .replace('\u201D', '"')
+                .replace('\u2022', '-')
+                .replace('\u2013', '-')
+                .replace('\u2014', '-');
+
+        // remove unsupported unicode (including emojis)
+        t = t.replaceAll("[^\\x09\\x0A\\x0D\\x20-\\x7E\\xA0-\\xFF]", "");
+
+        return t.isEmpty() ? "-" : t;
     }
 
     private List<String> wrap(String text, int maxChars) {
-        String t = (text == null) ? "" : text.trim();
-        if (t.isEmpty()) return List.of("-");
+        List<String> lines = new ArrayList<>();
+        if (text == null) return List.of("-");
 
-        List<String> out = new ArrayList<>();
+        String t = text;
+
         while (t.length() > maxChars) {
             int cut = t.lastIndexOf(' ', maxChars);
             if (cut <= 0) cut = maxChars;
-            out.add(t.substring(0, cut).trim());
+            lines.add(t.substring(0, cut));
             t = t.substring(cut).trim();
         }
-        if (!t.isEmpty()) out.add(t);
-        return out;
-    }
 
-    private float gap(float y, float px) {
-        return y - px;
-    }
-
-    private String safe(String s) {
-        return (s == null || s.isBlank()) ? "-" : s;
+        if (!t.isEmpty()) lines.add(t);
+        return lines;
     }
 
     private String formatBudget(AppelOffre ao) {
-        String dev = (ao.getDevise() == null || ao.getDevise().isBlank()) ? "" : " " + ao.getDevise();
-        String min = (ao.getBudgetMin() == 0) ? "-" : String.valueOf(ao.getBudgetMin());
-        String max = (ao.getBudgetMax() == 0) ? "-" : String.valueOf(ao.getBudgetMax());
+        String dev = ao.getDevise() == null ? "" : " " + ao.getDevise();
+        String min = ao.getBudgetMin() == 0 ? "-" : String.valueOf(ao.getBudgetMin());
+        String max = ao.getBudgetMax() == 0 ? "-" : String.valueOf(ao.getBudgetMax());
         return min + " - " + max + dev;
     }
 }

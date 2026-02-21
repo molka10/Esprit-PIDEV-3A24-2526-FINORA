@@ -3,7 +3,7 @@ module com.example.project_pi {
     // ===== Required JavaFX modules =====
     requires javafx.controls;
     requires javafx.fxml;
-
+    requires java.desktop;
     // ===== Required for JDBC =====
     requires java.sql;
 
