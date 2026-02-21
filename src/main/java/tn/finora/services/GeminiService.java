@@ -10,7 +10,7 @@ import java.util.*;
 public class GeminiService {
 
     // ✅ Paste your Gemini API key here
-    private static final String API_KEY = "PASTE_YOUR_KEY_HERE";
+    private static final String API_KEY = "AIzaSyBBiK8-M0g-soi4QNl0tOx--6cpm8YVN6E";
 
     private static final String API_URL =
             "https://generativelanguage.googleapis.com/v1beta/models/" +

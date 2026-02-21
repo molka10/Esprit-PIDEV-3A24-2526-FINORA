@@ -10,6 +10,7 @@ module tn.finora.finoraformation {
     requires itextpdf;
 
     opens tn.finora.finoraformation to javafx.fxml;
+    opens tn.finora.controllers to javafx.fxml;
 
 
 

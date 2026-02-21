@@ -4,52 +4,72 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<VBox xmlns="http://javafx.com/javafx/17"
-      xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="tn.finora.controllers.QuizController"
-      fx:id="mainContainer"
-      spacing="16"
-      styleClass="screen">
-
-    <padding>
-        <Insets top="0" right="0" bottom="0" left="0"/>
-    </padding>
+<BorderPane xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="tn.finora.controllers.QuizController">
 
     <!-- Header -->
-    <VBox styleClass="card" spacing="6">
-        <Label text="Quiz de la Leçon" styleClass="title"/>
-        <Label fx:id="lblStatus"
-               text="Chargement..."
-               styleClass="subtitle"/>
-    </VBox>
+    <top>
+        <VBox styleClass="card" spacing="16">
 
-    <!-- Quiz questions area -->
-    <ScrollPane fitToWidth="true"
-                styleClass="scroll"
-                VBox.vgrow="ALWAYS">
-        <content>
-            <VBox fx:id="quizArea" spacing="14">
-                <padding>
-                    <Insets top="16" right="20" bottom="16" left="20"/>
-                </padding>
-            </VBox>
-        </content>
-    </ScrollPane>
+            <HBox alignment="CENTER_LEFT" spacing="0">
+                <Label text="Résultats des Quiz" styleClass="title"/>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Button text="⬅ Retour" styleClass="btn-ghost" onAction="#onBack"/>
+            </HBox>
 
-    <!-- Bottom buttons -->
-    <HBox spacing="12" alignment="CENTER_RIGHT">
-        <padding>
-            <Insets top="0" right="20" bottom="16" left="20"/>
-        </padding>
-        <Button fx:id="btnSubmit"
-                text="✅  Soumettre mes réponses"
-                styleClass="btn-primary"
-                onAction="#onSubmit"
-                disable="true"/>
-        <Button fx:id="btnClose"
-                text="Fermer"
-                styleClass="btn-ghost"
-                onAction="#onClose"/>
-    </HBox>
+            <Label text="Tableau de bord des performances étudiantes"
+                   styleClass="subtitle"/>
 
-</VBox>
+            <!-- Stats row -->
+            <HBox spacing="16">
+
+                <VBox styleClass="item-card" spacing="4" prefWidth="200">
+                    <padding><Insets top="14" right="18" bottom="14" left="18"/></padding>
+                    <Label text="TOTAL QUIZ" styleClass="viewer-eyebrow"/>
+                    <Label fx:id="lblTotal" text="0" styleClass="title"/>
+                </VBox>
+
+                <VBox styleClass="item-card" spacing="4" prefWidth="260">
+                    <padding><Insets top="14" right="18" bottom="14" left="18"/></padding>
+                    <Label text="RÉUSSIS" styleClass="viewer-eyebrow"/>
+                    <Label fx:id="lblPassed" text="0" styleClass="title"/>
+                </VBox>
+
+                <VBox styleClass="item-card" spacing="4" prefWidth="200">
+                    <padding><Insets top="14" right="18" bottom="14" left="18"/></padding>
+                    <Label text="SCORE MOYEN" styleClass="viewer-eyebrow"/>
+                    <Label fx:id="lblAverage" text="0%" styleClass="title"/>
+                </VBox>
+
+            </HBox>
+
+            <!-- Search + refresh toolbar -->
+            <HBox spacing="12" alignment="CENTER_LEFT" styleClass="toolbar">
+                <TextField fx:id="txtSearch"
+                           promptText="Rechercher par étudiant, leçon, formation..."
+                           prefWidth="380"
+                           onKeyReleased="#onSearch"/>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Button text="🔄 Actualiser"
+                        styleClass="btn-ghost"
+                        onAction="#onRefresh"/>
+            </HBox>
+
+        </VBox>
+    </top>
+
+    <!-- Results list -->
+    <center>
+        <ScrollPane fitToWidth="true" styleClass="scroll">
+            <content>
+                <VBox fx:id="cardsContainer" spacing="12">
+                    <padding>
+                        <Insets top="16" right="20" bottom="20" left="20"/>
+                    </padding>
+                </VBox>
+            </content>
+        </ScrollPane>
+    </center>
+
+</BorderPane>

@@ -31,14 +31,34 @@
                           prefWidth="220"
                           onAction="#onSort"/>
 
-                <Button fx:id="btnAdd" text="➕ Ajouter" styleClass="btn-primary" onAction="#onAdd"/>
-                <Button fx:id="btnEdit" text="✏ Modifier" styleClass="btn-ghost" onAction="#onEdit"/>
-                <Button fx:id="btnDelete" text="🗑 Supprimer" styleClass="btn-danger" onAction="#onDelete"/>
+                <!-- Admin only buttons -->
+                <Button fx:id="btnAdd"
+                        text="➕ Ajouter"
+                        styleClass="btn-primary"
+                        onAction="#onAdd"/>
+                <Button fx:id="btnEdit"
+                        text="✏ Modifier"
+                        styleClass="btn-ghost"
+                        onAction="#onEdit"/>
+                <Button fx:id="btnDelete"
+                        text="🗑 Supprimer"
+                        styleClass="btn-danger"
+                        onAction="#onDelete"/>
+
+                <!-- ✅ FIX: added fx:id so controller can show/hide it -->
+                <Button fx:id="btnQuizResults"
+                        text="📊 Résultats Quiz"
+                        styleClass="btn-ghost"
+                        onAction="#goQuizResults"/>
 
                 <Region HBox.hgrow="ALWAYS"/>
 
-                <Button fx:id="btnLessons" text="📚 Lessons" styleClass="btn-ghost" onAction="#goLessons"/>
-                <Button fx:id="btnRole" text="🔁 Changer espace" styleClass="btn-ghost" onAction="#goRoleChoice"/>
+                <Button text="📚 Lessons"
+                        styleClass="btn-ghost"
+                        onAction="#goLessons"/>
+                <Button text="🔁 Changer espace"
+                        styleClass="btn-ghost"
+                        onAction="#goRoleChoice"/>
             </HBox>
 
             <ScrollPane fitToWidth="true" styleClass="scroll">
