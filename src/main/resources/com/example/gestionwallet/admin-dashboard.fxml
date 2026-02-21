@@ -19,10 +19,9 @@
                 styleClass="transparent-scroll">
 
         <content>
+             <StackPane alignment="CENTER">
 
-            <StackPane alignment="CENTER">
-
-            <VBox spacing="30"
+                 <VBox spacing="30"
                   maxWidth="1100"
                   alignment="TOP_CENTER"
                   style="-fx-background-color:white;
@@ -30,12 +29,19 @@
                              -fx-background-radius:25;">
 
 
-
         <VBox spacing="30" maxWidth="1100"
           style="-fx-background-color:white; -fx-padding:40; -fx-background-radius:25;">
 
         <!-- HEADER -->
         <HBox alignment="CENTER_LEFT" spacing="20">
+            <Button
+                    text="Retour"
+                    fx:id="backButton"
+                    onAction="#goBack"
+                    prefWidth="120.0"
+                    prefHeight="35.0"
+                    style="-fx-background-color:#6a0dad; -fx-text-fill:white; -fx-background-radius:10;" />
+
 
             <Label text="Admin Dashboard"
                    style="-fx-font-size:26;

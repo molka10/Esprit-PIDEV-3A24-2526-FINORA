@@ -29,9 +29,10 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import javafx.application.Platform;
-
-
-
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.stage.Stage;
 
 
 import javafx.scene.control.TextField;
@@ -59,7 +60,7 @@ public class AdminController {
     @FXML private PieChart walletChart;
     @FXML private LineChart<String, Number> transactionLineChart;
 
-
+    @FXML private Button backButton;
     private servicetransaction st = new servicetransaction();
 
     @FXML
@@ -551,5 +552,25 @@ public class AdminController {
 
     }
 
+
+    @FXML
+    private void goBack() {
+
+        try {
+
+            Parent root = FXMLLoader.load(
+                    getClass().getResource(
+                            "/com/example/gestionwallet/integ.fxml"
+                    )
+            );
+
+            Stage stage = (Stage) backButton.getScene().getWindow();
+            stage.getScene().setRoot(root);
+            stage.show();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
 }

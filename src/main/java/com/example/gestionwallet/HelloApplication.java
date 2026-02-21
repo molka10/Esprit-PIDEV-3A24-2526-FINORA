@@ -12,12 +12,12 @@ public class HelloApplication extends Application {
 
 
         var url = HelloApplication.class.getResource(
-                "/com/example/gestionwallet/wallet.fxml"
+                "/com/example/gestionwallet/integ.fxml"
         );
 
 
         if (url == null) {
-            throw new RuntimeException("wallet.fxml NOT FOUND");
+            throw new RuntimeException("integ.fxml NOT FOUND");
         }
 
         FXMLLoader loader = new FXMLLoader(url);
@@ -25,6 +25,7 @@ public class HelloApplication extends Application {
 
         stage.setTitle("Wallet");
         stage.setScene(scene);
+        stage.setMaximized(true);
         stage.show();
     }
 

@@ -43,7 +43,10 @@ import com.example.gestionwallet.models.categorie;
 import com.example.gestionwallet.services.servicecategorie;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.stage.Stage;
 
 public class WalletController {
 
@@ -60,7 +63,7 @@ public class WalletController {
     @FXML private TextField itemField;
     @FXML private TextField priceField;
     @FXML private ListView<HBox> wishlistView;
-
+    @FXML private Button backButton;
     private ObservableList<HBox> wishlist = FXCollections.observableArrayList();
 
     @FXML private ComboBox<String> currencyBox;
@@ -865,6 +868,27 @@ public class WalletController {
         }
 
         loadTransactions(); // refresh affichage
+    }
+
+
+    @FXML
+    private void goBack() {
+
+        try {
+
+            Parent root = FXMLLoader.load(
+                    getClass().getResource(
+                            "/com/example/gestionwallet/integ.fxml"
+                    )
+            );
+
+            Stage stage = (Stage) backButton.getScene().getWindow();
+            stage.getScene().setRoot(root);
+            stage.show();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
 }

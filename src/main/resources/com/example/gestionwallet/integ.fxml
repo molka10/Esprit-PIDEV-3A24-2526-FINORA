@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<AnchorPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.example.gestionwallet.controllers.integController"
+            prefHeight="500.0" prefWidth="700.0"
+            style="-fx-background-color: linear-gradient(to bottom, #2c003e, #5e239d);">
+
+    <children>
+
+        <VBox alignment="TOP_CENTER"
+              spacing="50"
+              AnchorPane.topAnchor="40.0"
+              AnchorPane.leftAnchor="0.0"
+              AnchorPane.rightAnchor="0.0"
+              AnchorPane.bottomAnchor="0.0">
+
+            <!-- Titre -->
+            <Label text="WALLET"
+                   style="-fx-text-fill: white; -fx-font-size: 40px; -fx-font-weight: bold;" />
+
+            <!-- Boutons -->
+            <VBox alignment="CENTER" spacing="25">
+
+                <Button
+                        text="USER"
+                        fx:id="userButton"
+                        onAction="#goToUser"
+                        prefWidth="250.0"
+                        prefHeight="50.0"
+                        style="-fx-background-color: #7b2cbf; -fx-text-fill: white; -fx-font-size: 16px; -fx-background-radius: 15;" />
+
+                <Button text="ENTREPRISE"
+                        prefWidth="250" prefHeight="50"
+                        style="-fx-background-color: #7b2cbf; -fx-text-fill: white; -fx-font-size: 16px; -fx-background-radius: 15;" />
+
+                <Button text="ADMIN"
+                        prefWidth="250" prefHeight="50"
+                        fx:id="adminButton"
+                        onAction="#goToAdmin"
+                        style="-fx-background-color: #5a189a; -fx-text-fill: white; -fx-font-size: 16px; -fx-background-radius: 15;" />
+
+            </VBox>
+
+        </VBox>
+
+    </children>
+</AnchorPane>

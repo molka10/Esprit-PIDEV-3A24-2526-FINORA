@@ -12,24 +12,7 @@
             stylesheets="@dashboard.css">
 
 
-    <!-- LEFT SIDEBAR -->
-    <left>
-        <VBox prefWidth="220"
-              spacing="30"
-              style="-fx-background-color: linear-gradient(to bottom, #8e44ad, #6a0dad); -fx-padding:30;">
 
-            <Label text="💳 Wallet"
-                   style="-fx-text-fill:white; -fx-font-size:22; -fx-font-weight:bold;"/>
-
-            <Button text="🏠 Dashboard"
-                    style="-fx-background-color:white; -fx-text-fill:#6a0dad; -fx-background-radius:10;"/>
-
-            <Button text="Admin"
-                    style="-fx-background-color:#e8e3f8; -fx-text-fill:#6a0dad; -fx-background-radius:10;"
-                    onAction="#openAdminPage"/>
-
-        </VBox>
-    </left>
 
     <!-- CENTER WITH SCROLL -->
     <center>
@@ -39,9 +22,18 @@
                     styleClass="transparent-scroll">
 
             <content>
-                <VBox spacing="30"
+                      <VBox spacing="30"
                       style="-fx-padding:30; -fx-background-color:#f4f4f8;">
-                    <ComboBox fx:id="currencyBox"
+
+                          <Button
+                                  text="Retour"
+                                  fx:id="backButton"
+                                  onAction="#goBack"
+                                  prefWidth="120.0"
+                                  prefHeight="35.0"
+                                  style="-fx-background-color:#6a0dad; -fx-text-fill:white; -fx-background-radius:10;" />
+
+                          <ComboBox fx:id="currencyBox"
                               prefWidth="100"
                               onAction="#changeCurrency"/>
                     <!-- STAT CARDS -->
