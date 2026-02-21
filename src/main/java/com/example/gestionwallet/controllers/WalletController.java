@@ -251,7 +251,9 @@ public class WalletController {
 
         Stage stage = new Stage();
         stage.initModality(Modality.APPLICATION_MODAL);
+        stage.initOwner(balanceLabel.getScene().getWindow());
         stage.setTitle("Transaction");
+
 
         Label title = new Label(t.getNom_transaction());
         title.setStyle("-fx-font-size:18; -fx-font-weight:bold; -fx-text-fill:#6a0dad;");
@@ -265,6 +267,7 @@ public class WalletController {
 
         Label categorie = new Label("Catégorie : " + t.getCategorie());
         Label type = new Label("Type : " + t.getType());
+        Label date = new Label("Date : " + t.getDate_transaction().toLocalDate());
 
         Button modifier = new Button("Modifier");
         modifier.setStyle("-fx-background-color:#8e44ad; -fx-text-fill:white; -fx-background-radius:10;");
@@ -277,7 +280,7 @@ public class WalletController {
 
         HBox buttons = new HBox(15, modifier, supprimer, close);
 
-        VBox root = new VBox(15, title, montant, categorie, type, buttons);
+        VBox root = new VBox(15, title, montant, categorie, type, date, buttons);
         root.setStyle("""
         -fx-padding:25;
         -fx-background-color:white;
@@ -285,7 +288,7 @@ public class WalletController {
         -fx-effect:dropshadow(gaussian, rgba(0,0,0,0.15), 20,0,0,5);
     """);
 
-        Scene scene = new Scene(root, 350, 220);
+        Scene scene = new Scene(root, 400, 300);
         stage.setScene(scene);
 
         // Actions
@@ -296,17 +299,18 @@ public class WalletController {
         });
 
         modifier.setOnAction(e -> {
-            stage.close();
             openEditPopup(t);
+            stage.close();
         });
 
         close.setOnAction(e -> stage.close());
 
-        stage.showAndWait();
+        stage.show();
     }
 
 
     // ================= EDIT POPUP =================
+
     private void openEditPopup(transaction t) {
 
         Stage dialogStage = new Stage();
@@ -340,6 +344,23 @@ public class WalletController {
         DatePicker datePicker = new DatePicker();
         datePicker.setValue(t.getDate_transaction().toLocalDate());
         datePicker.setStyle("-fx-background-radius:10;");
+        LocalDate today = LocalDate.now();
+        LocalDate firstDayOfMonth = today.withDayOfMonth(1);
+        LocalDate lastDayOfMonth = today.withDayOfMonth(today.lengthOfMonth());
+
+        datePicker.setDayCellFactory(picker -> new DateCell() {
+            @Override
+            public void updateItem(LocalDate date, boolean empty) {
+                super.updateItem(date, empty);
+
+                if (empty) return;
+
+                if (date.isBefore(firstDayOfMonth) || date.isAfter(lastDayOfMonth)) {
+                    setDisable(true);
+                    setStyle("-fx-background-color:#f2f2f2;");
+                }
+            }
+        });
 
         // ---------- BOUTONS ----------
         Button saveBtn = new Button("Enregistrer");
@@ -375,7 +396,7 @@ public class WalletController {
         -fx-effect:dropshadow(gaussian, rgba(0,0,0,0.15), 20,0,0,5);
     """);
 
-        Scene scene = new Scene(card, 350, 400);
+        Scene scene = new Scene(card, 400, 350);
         dialogStage.setScene(scene);
         nameField.requestFocus();
 
@@ -483,25 +504,6 @@ public class WalletController {
         }
     }
 
-    // ================= NAVIGATION =================
-
-    @FXML
-    private void goToAnalyse() {
-
-        try {
-
-            FXMLLoader loader = new FXMLLoader(
-                    getClass().getResource("/com/example/gestionwallet/analyse.fxml")
-            );
-
-            Parent root = loader.load();
-            Stage stage = (Stage) balanceLabel.getScene().getWindow();
-            stage.setScene(new Scene(root));
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
 
     // ================= ERROR =================
 

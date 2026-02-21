@@ -7,9 +7,10 @@
 <BorderPane xmlns="http://javafx.com/javafx/8"
             xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="com.example.gestionwallet.controllers.WalletController"
-            prefWidth="1200"
-            prefHeight="700"
+            prefWidth="1366"
+            prefHeight="768"
             stylesheets="@dashboard.css">
+
 
     <!-- LEFT SIDEBAR -->
     <left>

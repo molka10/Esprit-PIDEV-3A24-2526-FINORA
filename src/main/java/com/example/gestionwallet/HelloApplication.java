@@ -10,6 +10,7 @@ public class HelloApplication extends Application {
     @Override
     public void start(Stage stage) throws Exception {
 
+
         var url = HelloApplication.class.getResource(
                 "/com/example/gestionwallet/wallet.fxml"
         );
