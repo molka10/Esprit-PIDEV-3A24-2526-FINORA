@@ -2,7 +2,10 @@ target/
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
+<<<<<<< HEAD
 .kotlin
+=======
+>>>>>>> 1887bb665258b7b8e6d48e72b39b0ddefb674861
 
 ### IntelliJ IDEA ###
 .idea/modules.xml

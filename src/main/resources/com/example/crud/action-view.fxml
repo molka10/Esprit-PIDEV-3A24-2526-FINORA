@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+
+<BorderPane prefHeight="700.0" prefWidth="1100.0"
+            style="-fx-background-color: #ecf0f1;"
+            xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.example.crud.controllers.ActionController">
+
+    <!-- HEADER -->
+    <top>
+        <VBox style="-fx-background-color: linear-gradient(to right, #2c3e50, #34495e); -fx-padding: 25;" spacing="10">
+            <Label text="📈 Gestion des Actions" style="-fx-text-fill: white; -fx-font-weight: bold;">
+                <font><Font size="28.0"/></font>
+            </Label>
+
+            <HBox spacing="10">
+                <Label text="Module FINORA - Actions par Bourse" style="-fx-text-fill: #bdc3c7;">
+                    <font><Font size="14.0"/></font>
+                </Label>
+
+                <Region HBox.hgrow="ALWAYS"/>
+
+                <!-- ✅ Retour -->
+                <Button text="⬅ Retour" onAction="#retourBourses"
+                        style="-fx-background-color:#16a085; -fx-text-fill:white; -fx-font-weight:bold; -fx-background-radius:8;"/>
+            </HBox>
+        </VBox>
+    </top>
+
+    <!-- LEFT FORM -->
+    <left>
+        <VBox prefWidth="350" spacing="15"
+              style="-fx-background-color: white; -fx-padding: 25; -fx-border-color: #dfe6e9; -fx-border-width: 0 1 0 0;">
+
+            <Label text="📝 Formulaire Action"
+                   style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;" />
+            <Separator />
+
+            <TextField fx:id="tfId" promptText="ID (modifier/supprimer)" style="-fx-pref-height:35px;"/>
+
+            <ComboBox fx:id="cbBourse" promptText="Bourse *" prefWidth="300" style="-fx-pref-height:35px;"/>
+
+            <TextField fx:id="tfSymbole" promptText="Symbole *" style="-fx-pref-height:35px;"/>
+            <TextField fx:id="tfNomEntreprise" promptText="Entreprise *" style="-fx-pref-height:35px;"/>
+
+            <ComboBox fx:id="cbSecteur" promptText="Secteur *" prefWidth="300" style="-fx-pref-height:35px;"/>
+
+            <TextField fx:id="tfPrix" promptText="Prix *" style="-fx-pref-height:35px;"/>
+            <TextField fx:id="tfQuantite" promptText="Quantité *" style="-fx-pref-height:35px;"/>
+
+            <ComboBox fx:id="cbStatut" promptText="Statut *" prefWidth="300" style="-fx-pref-height:35px;"/>
+
+            <Separator />
+
+            <Button text="✚ Ajouter" onAction="#ajouterAction" prefWidth="300" prefHeight="40"
+                    style="-fx-background-color:#27ae60; -fx-text-fill:white; -fx-font-weight:bold; -fx-background-radius:8;"/>
+
+            <HBox spacing="10">
+                <Button text="✎ Modifier" onAction="#modifierAction" prefWidth="145" prefHeight="40"
+                        style="-fx-background-color:#3498db; -fx-text-fill:white; -fx-font-weight:bold; -fx-background-radius:8;"/>
+                <Button text="🗑 Supprimer" onAction="#supprimerAction" prefWidth="145" prefHeight="40"
+                        style="-fx-background-color:#e74c3c; -fx-text-fill:white; -fx-font-weight:bold; -fx-background-radius:8;"/>
+            </HBox>
+
+            <Button text="↻ Vider" onAction="#viderFormulaire" prefWidth="300" prefHeight="40"
+                    style="-fx-background-color:#95a5a6; -fx-text-fill:white; -fx-font-weight:bold; -fx-background-radius:8;"/>
+
+            <Region VBox.vgrow="ALWAYS"/>
+        </VBox>
+    </left>
+
+    <!-- CENTER -->
+    <center>
+        <VBox spacing="20" style="-fx-padding: 30;">
+
+            <HBox alignment="CENTER_LEFT" spacing="15"
+                  style="-fx-background-color: white; -fx-padding: 15; -fx-background-radius: 10;">
+                <Label text="🔍" style="-fx-font-size: 20px;" />
+                <TextField fx:id="searchField" promptText="Rechercher symbole / entreprise..." HBox.hgrow="ALWAYS"
+                           style="-fx-pref-height:35px;"/>
+                <Button text="Rechercher" onAction="#handleRechercher"
+                        style="-fx-background-color:#34495e; -fx-text-fill:white; -fx-font-weight:bold; -fx-pref-height:35px;"/>
+                <Button text="↻ Actualiser" onAction="#handleActualiser"
+                        style="-fx-background-color:#16a085; -fx-text-fill:white; -fx-font-weight:bold; -fx-pref-height:35px;"/>
+            </HBox>
+
+            <Label fx:id="lblTotal" text="📋 Total : 0 action(s)"
+                   style="-fx-font-weight:bold; -fx-font-size:18px; -fx-text-fill:#2c3e50;" />
+
+            <ScrollPane fitToWidth="true" style="-fx-background-color: transparent; -fx-border-color: transparent;" VBox.vgrow="ALWAYS">
+                <content>
+                    <FlowPane fx:id="cardsContainer" hgap="20" vgap="20" prefWrapLength="650"
+                              style="-fx-background-color: transparent; -fx-padding: 10;" />
+                </content>
+            </ScrollPane>
+
+        </VBox>
+    </center>
+
+</BorderPane>

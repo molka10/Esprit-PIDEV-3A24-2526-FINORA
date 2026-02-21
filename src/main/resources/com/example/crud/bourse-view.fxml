@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+
+<BorderPane prefHeight="700.0" prefWidth="1100.0"
+            style="-fx-background-color: #ecf0f1;"
+            xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.example.crud.controllers.BourseController">
+
+    <!-- HEADER -->
+    <top>
+        <VBox style="-fx-background-color: linear-gradient(to right, #2c3e50, #34495e); -fx-padding: 25;">
+            <Label style="-fx-text-fill: white; -fx-font-weight: bold;" text="📊 Gestion des Bourses">
+                <font><Font size="28.0"/></font>
+            </Label>
+            <Label style="-fx-text-fill: #bdc3c7;" text="Module FINORA - Marchés Financiers Internationaux">
+                <font><Font size="14.0"/></font>
+                <VBox.margin><Insets top="5"/></VBox.margin>
+            </Label>
+        </VBox>
+    </top>
+
+    <!-- LEFT FORM -->
+    <left>
+        <VBox prefWidth="350" spacing="12"
+              style="-fx-background-color: white; -fx-padding: 25; -fx-border-color: #dfe6e9; -fx-border-width: 0 1 0 0;">
+
+            <Label style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;" text="📝 Formulaire Bourse"/>
+            <Separator/>
+
+            <Label style="-fx-font-weight: bold;" text="ID (modifier/supprimer)"/>
+            <TextField fx:id="tfId" promptText="ID" style="-fx-pref-height: 35px;"/>
+
+            <Label style="-fx-font-weight: bold;" text="Nom *"/>
+            <TextField fx:id="tfNom" promptText="Ex: NYSE, Euronext" style="-fx-pref-height: 35px;"/>
+
+            <Label style="-fx-font-weight: bold;" text="Pays *"/>
+            <ComboBox fx:id="cbPays" promptText="Sélectionner un pays" prefWidth="300"
+                      style="-fx-pref-height: 35px;"/>
+
+            <Label style="-fx-font-weight: bold;" text="Devise *"/>
+            <ComboBox fx:id="cbDevise" promptText="Sélectionner" prefWidth="300"
+                      style="-fx-pref-height: 35px;"/>
+
+            <Label style="-fx-font-weight: bold;" text="Statut *"/>
+            <ComboBox fx:id="cbStatut" promptText="Sélectionner" prefWidth="300"
+                      style="-fx-pref-height: 35px;"/>
+
+            <Separator/>
+
+            <Button text="✚ Ajouter" onAction="#ajouterBourse" prefWidth="300"
+                    style="-fx-background-color: #27ae60; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 8;"/>
+
+            <Button text="✎ Modifier" onAction="#modifierBourse" prefWidth="300"
+                    style="-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 8;"/>
+
+            <Button text="🗑 Supprimer" onAction="#supprimerBourse" prefWidth="300"
+                    style="-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 8;"/>
+
+            <Button text="↻ Vider" onAction="#viderFormulaire" prefWidth="300"
+                    style="-fx-background-color: #95a5a6; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 8;"/>
+
+            <Region VBox.vgrow="ALWAYS"/>
+
+            <Button text="⬅ Retour" onAction="#retourProfil" prefWidth="300"
+                    style="-fx-background-color: #2c3e50; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 8;"/>
+        </VBox>
+    </left>
+
+    <!-- CENTER -->
+    <center>
+        <VBox spacing="14" style="-fx-padding: 18;">
+
+            <HBox spacing="10" alignment="CENTER_LEFT"
+                  style="-fx-background-color: white; -fx-padding: 12; -fx-background-radius: 10;">
+                <TextField fx:id="searchField" promptText="Rechercher..."
+                           HBox.hgrow="ALWAYS" style="-fx-pref-height: 35px;"/>
+                <Button text="Rechercher" onAction="#handleRechercher"/>
+                <Button text="Actualiser" onAction="#handleActualiser"/>
+            </HBox>
+
+            <Label fx:id="lblTotal" text="📋 Total : 0 bourse(s)"
+                   style="-fx-font-weight: bold; -fx-font-size: 18px; -fx-text-fill: #2c3e50;"/>
+
+            <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS"
+                        style="-fx-background-color: transparent; -fx-border-color: transparent;">
+                <content>
+                    <FlowPane fx:id="cardsContainer" hgap="16" vgap="16" prefWrapLength="700"
+                              style="-fx-padding: 8;"/>
+                </content>
+            </ScrollPane>
+        </VBox>
+    </center>
+
+</BorderPane>
