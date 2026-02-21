@@ -9,17 +9,22 @@ import java.util.*;
 
 public class GeminiService {
 
-    // ✅ Paste your Gemini API key here
-    private static final String API_KEY = "AIzaSyBBiK8-M0g-soi4QNl0tOx--6cpm8YVN6E";
+    private static String apiKey() {
+        String k = System.getenv("GEMINI_API_KEY");
+        if (k == null || k.isBlank()) k = System.getProperty("GEMINI_API_KEY");
+        if (k == null || k.isBlank()) {
+            throw new IllegalStateException(
+                    "Gemini API key missing. Set env GEMINI_API_KEY or JVM -DGEMINI_API_KEY=..."
+            );
+        }
+        return k.trim();
+    }
 
-    private static final String API_URL =
-            "https://generativelanguage.googleapis.com/v1beta/models/" +
-                    "gemini-2.0-flash:generateContent?key=" + API_KEY;
+    private static String apiUrl() {
+        return "https://generativelanguage.googleapis.com/v1beta/models/" +
+                "gemini-2.0-flash:generateContent?key=" + apiKey();
+    }
 
-    /**
-     * Generates 5 MCQ questions from lesson content.
-     * Returns a list of QuizQuestion objects.
-     */
     public List<QuizQuestion> generateQuiz(String lessonTitle, String lessonContent) throws Exception {
 
         String prompt = """
@@ -43,10 +48,8 @@ public class GeminiService {
 
             - "correct" est l'index (0-3) de la bonne réponse dans "options"
             - 5 questions obligatoires
-            - Questions claires et précises basées sur le contenu fourni
             """.formatted(lessonTitle, lessonContent);
 
-        // Build request body
         JsonObject requestBody = new JsonObject();
         JsonArray contents = new JsonArray();
         JsonObject content = new JsonObject();
@@ -58,8 +61,7 @@ public class GeminiService {
         contents.add(content);
         requestBody.add("contents", contents);
 
-        // Make HTTP POST request
-        HttpURLConnection conn = (HttpURLConnection) new URL(API_URL).openConnection();
+        HttpURLConnection conn = (HttpURLConnection) new URL(apiUrl()).openConnection();
         conn.setRequestMethod("POST");
         conn.setRequestProperty("Content-Type", "application/json");
         conn.setDoOutput(true);
@@ -70,19 +72,24 @@ public class GeminiService {
             os.write(requestBody.toString().getBytes(StandardCharsets.UTF_8));
         }
 
-        // Read response
+        // handle non-200 safely
+        int code = conn.getResponseCode();
+        InputStream is = (code >= 200 && code < 300) ? conn.getInputStream() : conn.getErrorStream();
+
         StringBuilder response = new StringBuilder();
-        try (BufferedReader br = new BufferedReader(
-                new InputStreamReader(conn.getInputStream(), StandardCharsets.UTF_8))) {
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))) {
             String line;
             while ((line = br.readLine()) != null) response.append(line);
+        }
+
+        if (code < 200 || code >= 300) {
+            throw new RuntimeException("Gemini error HTTP " + code + ": " + response);
         }
 
         return parseQuizResponse(response.toString());
     }
 
     private List<QuizQuestion> parseQuizResponse(String rawResponse) throws Exception {
-        // Extract JSON from Gemini response
         JsonObject root = JsonParser.parseString(rawResponse).getAsJsonObject();
         String text = root
                 .getAsJsonArray("candidates").get(0).getAsJsonObject()
@@ -90,7 +97,6 @@ public class GeminiService {
                 .getAsJsonArray("parts").get(0).getAsJsonObject()
                 .get("text").getAsString();
 
-        // Clean up markdown code blocks if present
         text = text.replaceAll("```json", "").replaceAll("```", "").trim();
 
         JsonObject quizJson = JsonParser.parseString(text).getAsJsonObject();
@@ -106,14 +112,11 @@ public class GeminiService {
             for (JsonElement opt : q.getAsJsonArray("options")) {
                 options.add(opt.getAsString());
             }
-
             questions.add(new QuizQuestion(question, options, correct));
         }
-
         return questions;
     }
 
-    // ── Inner model class ─────────────────────────────────────────
     public static class QuizQuestion {
         public final String question;
         public final List<String> options;

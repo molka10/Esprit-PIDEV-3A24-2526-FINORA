@@ -6,7 +6,6 @@ import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
@@ -19,7 +18,6 @@ import javafx.stage.Stage;
 import javafx.util.Duration;
 import tn.finora.entities.Formation;
 import tn.finora.entities.Lesson;
-import tn.finora.utils.UserSession;
 
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
@@ -174,11 +172,10 @@ public class LessonViewController {
         Lesson lesson = lessons.get(index);
         currentLesson = lesson;
 
-        // ✅ Quiz button visible for BOTH roles + label changes
+        // ✅ Quiz button should show for BOTH roles
         if (btnQuiz != null) {
             btnQuiz.setVisible(true);
             btnQuiz.setManaged(true);
-            btnQuiz.setText(UserSession.isAdmin() ? "📊 Résultats Quiz" : "🧠 Quiz");
         }
 
         if (lblEyebrow != null) {
@@ -224,6 +221,7 @@ public class LessonViewController {
         updateSidebarStyles();
     }
 
+    // Reader
     private void renderReader() {
         if (contentFlow == null) return;
 
@@ -295,6 +293,7 @@ public class LessonViewController {
         return t;
     }
 
+    // Progress
     private void updateProgressAnimated() {
         if (progressBar == null) return;
 
@@ -317,11 +316,11 @@ public class LessonViewController {
         if (btnNext != null) btnNext.setDisable(index >= lessons.size() - 1);
     }
 
+    // Actions
     @FXML private void onPrev() { if (index > 0) { index--; render(true); } }
     @FXML private void onNext() { if (index < lessons.size() - 1) { index++; render(true); } }
 
     @FXML private void onFindChanged() { currentMatch = -1; renderReader(); }
-
     @FXML private void onFindNext() {
         if (currentQuery == null || currentQuery.isBlank()) { renderReader(); return; }
         List<int[]> matches = findAllMatches(currentContent, currentQuery);
@@ -329,7 +328,6 @@ public class LessonViewController {
         currentMatch = (currentMatch < 0) ? 0 : (currentMatch + 1) % matches.size();
         renderReader();
     }
-
     @FXML private void onFindPrev() {
         if (currentQuery == null || currentQuery.isBlank()) { renderReader(); return; }
         List<int[]> matches = findAllMatches(currentContent, currentQuery);
@@ -359,6 +357,7 @@ public class LessonViewController {
         render(false);
     }
 
+    // Focus Mode
     @FXML
     private void onToggleFocus() {
         boolean focus = btnFocus != null && btnFocus.isSelected();
@@ -376,6 +375,7 @@ public class LessonViewController {
         }
     }
 
+    // Watch video
     @FXML
     private void onWatchVideo() {
         if (lessons.isEmpty()) return;
@@ -533,33 +533,35 @@ public class LessonViewController {
         return sb.toString();
     }
 
-    // ✅ FIX: Quiz routes by role
+    // ✅ Quiz button action: USER -> quiz_take, ADMIN -> quiz_results
     @FXML
     private void onQuiz() {
         if (currentLesson == null) return;
 
         try {
-            if (UserSession.isAdmin()) {
-                // ADMIN → results dashboard
-                FXMLLoader loader = new FXMLLoader(getClass().getResource("/quiz_results.fxml"));
-                Scene scene = new Scene(loader.load(), 1100, 720);
+            if (tn.finora.utils.UserSession.isAdmin()) {
+                // ADMIN: open dashboard
+                javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(
+                        getClass().getResource("/quiz_results.fxml")
+                );
+                javafx.scene.Scene scene = new javafx.scene.Scene(loader.load(), 1100, 720);
                 scene.getStylesheets().add(getClass().getResource("/style.css").toExternalForm());
 
                 Stage stage = new Stage();
-                stage.setTitle("Résultats Quiz");
+                stage.setTitle("Résultats Quiz (Admin)");
                 stage.setScene(scene);
                 stage.show();
                 return;
             }
 
-            // USER → quiz popup (Gemini)
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/quiz_results.fxml"));
-            Scene scene = new Scene(loader.load(), 700, 620);
+            // USER: open quiz taking screen
+            javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(
+                    getClass().getResource("/quiz_take.fxml")
+            );
+            javafx.scene.Scene scene = new javafx.scene.Scene(loader.load(), 700, 620);
             scene.getStylesheets().add(getClass().getResource("/style.css").toExternalForm());
 
-            // IMPORTANT: this must be your USER quiz controller
-            // If your user-quiz controller is not QuizController, change the type below.
-            tn.finora.controllers.QuizController ctrl = loader.getController();
+            QuizTakeController ctrl = loader.getController();
             ctrl.setData(currentLesson, formation);
 
             Stage stage = new Stage();

@@ -1,17 +1,13 @@
 package tn.finora.controllers;
 
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
 import tn.finora.services.QuizResultService;
 import tn.finora.services.QuizResultService.QuizResult;
-import tn.finora.entities.Lesson;
-import tn.finora.entities.Formation;
 
 import java.util.List;
 
@@ -26,20 +22,10 @@ public class QuizResultsController {
     private final QuizResultService service = new QuizResultService();
     private List<QuizResult> allResults;
 
-    // optional (for future filtering per lesson/formation)
-    private Lesson lesson;
-    private Formation formation;
-
     @FXML
     public void initialize() {
         loadStats();
         loadResults();
-    }
-
-    public void setData(Lesson lesson, Formation formation) {
-        this.lesson = lesson;
-        this.formation = formation;
-        // Optional: later you can filter results by lesson_id here
     }
 
     private void loadStats() {
@@ -77,7 +63,7 @@ public class QuizResultsController {
         if (cardsContainer == null) return;
         cardsContainer.getChildren().clear();
 
-        if (results.isEmpty()) {
+        if (results == null || results.isEmpty()) {
             Label empty = new Label("Aucun résultat de quiz pour le moment.");
             empty.setStyle("-fx-text-fill: #6B5A8A; -fx-font-size: 14px; -fx-padding: 30;");
             cardsContainer.getChildren().add(empty);
@@ -117,12 +103,7 @@ public class QuizResultsController {
         topRow.setAlignment(Pos.CENTER_LEFT);
 
         Label nameLabel = new Label("👤  " + r.studentName);
-        nameLabel.setStyle(
-                "-fx-font-size: 15px;" +
-                        "-fx-font-weight: 900;" +
-                        "-fx-font-family: 'Georgia', serif;" +
-                        "-fx-text-fill: #1E0A3C;"
-        );
+        nameLabel.setStyle("-fx-font-size: 15px; -fx-font-weight: 900; -fx-font-family: 'Georgia', serif; -fx-text-fill: #1E0A3C;");
         HBox.setHgrow(nameLabel, Priority.ALWAYS);
 
         Label scoreBadge = new Label(r.score + "%");
@@ -130,50 +111,27 @@ public class QuizResultsController {
                 "-fx-background-color: " + (r.passed ? "#D1FAE5" : "#FEE2E2") + ";" +
                         "-fx-text-fill: " + (r.passed ? "#065F46" : "#991B1B") + ";" +
                         "-fx-border-color: " + (r.passed ? "#6EE7B7" : "#FCA5A5") + ";" +
-                        "-fx-border-width: 1.5px;" +
-                        "-fx-background-radius: 999px;" +
-                        "-fx-border-radius: 999px;" +
-                        "-fx-padding: 4 14 4 14;" +
-                        "-fx-font-size: 13px;" +
-                        "-fx-font-weight: 900;"
+                        "-fx-border-width: 1.5px; -fx-background-radius: 999px; -fx-border-radius: 999px;" +
+                        "-fx-padding: 4 14 4 14; -fx-font-size: 13px; -fx-font-weight: 900;"
         );
 
         Label passedBadge = new Label(r.passed ? "✅ Réussi" : "❌ Échoué");
-        passedBadge.setStyle(
-                "-fx-font-size: 12px;" +
-                        "-fx-font-weight: 700;" +
-                        "-fx-text-fill: " + (r.passed ? "#065F46" : "#991B1B") + ";"
-        );
+        passedBadge.setStyle("-fx-font-size: 12px; -fx-font-weight: 700; -fx-text-fill: " + (r.passed ? "#065F46" : "#991B1B") + ";");
 
         topRow.getChildren().addAll(nameLabel, scoreBadge, passedBadge);
 
         Label lessonLabel = new Label("📖  " + r.lessonTitle + "   •   🎓  " + r.formationTitle);
-        lessonLabel.setStyle(
-                "-fx-font-size: 12px;" +
-                        "-fx-text-fill: #6B5A8A;" +
-                        "-fx-font-family: 'Segoe UI', Arial, sans-serif;"
-        );
+        lessonLabel.setStyle("-fx-font-size: 12px; -fx-text-fill: #6B5A8A; -fx-font-family: 'Segoe UI', Arial, sans-serif;");
 
         Label dateLabel = new Label("🕐  " + r.takenAt);
-        dateLabel.setStyle(
-                "-fx-font-size: 11px;" +
-                        "-fx-text-fill: #9CA3AF;" +
-                        "-fx-font-family: 'Segoe UI', Arial, sans-serif;"
-        );
+        dateLabel.setStyle("-fx-font-size: 11px; -fx-text-fill: #9CA3AF; -fx-font-family: 'Segoe UI', Arial, sans-serif;");
 
         content.getChildren().addAll(topRow, lessonLabel, dateLabel);
 
         Button deleteBtn = new Button("🗑");
-        deleteBtn.setStyle(
-                "-fx-background-color: transparent;" +
-                        "-fx-text-fill: #EF4444;" +
-                        "-fx-font-size: 16px;" +
-                        "-fx-cursor: hand;" +
-                        "-fx-padding: 8 14 8 14;"
-        );
+        deleteBtn.setStyle("-fx-background-color: transparent; -fx-text-fill: #EF4444; -fx-font-size: 16px; -fx-cursor: hand; -fx-padding: 8 14 8 14;");
         deleteBtn.setOnAction(e -> {
-            Alert confirm = new Alert(Alert.AlertType.CONFIRMATION,
-                    "Supprimer ce résultat ?", ButtonType.YES, ButtonType.NO);
+            Alert confirm = new Alert(Alert.AlertType.CONFIRMATION, "Supprimer ce résultat ?", ButtonType.YES, ButtonType.NO);
             confirm.setHeaderText(null);
             confirm.showAndWait().ifPresent(btn -> {
                 if (btn == ButtonType.YES) {
@@ -197,14 +155,7 @@ public class QuizResultsController {
 
     @FXML
     private void onBack() {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/formation_list.fxml"));
-            Scene scene = new Scene(loader.load(), 1250, 720);
-            scene.getStylesheets().add(getClass().getResource("/style.css").toExternalForm());
-            Stage stage = (Stage) cardsContainer.getScene().getWindow();
-            stage.setScene(scene);
-        } catch (Exception e) {
-            new Alert(Alert.AlertType.ERROR, "Erreur: " + e.getMessage()).showAndWait();
-        }
+        Stage stage = (Stage) cardsContainer.getScene().getWindow();
+        stage.close();
     }
 }

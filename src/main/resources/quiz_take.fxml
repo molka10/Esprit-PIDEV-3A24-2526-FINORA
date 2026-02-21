@@ -1,14 +1,39 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import java.lang.*?>
-<?import java.util.*?>
-<?import javafx.scene.*?>
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<AnchorPane xmlns="http://javafx.com/javafx"
-            xmlns:fx="http://javafx.com/fxml"
-            fx:controller="QuizTake"
-            prefHeight="400.0" prefWidth="600.0">
+<BorderPane xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="tn.finora.controllers.QuizTakeController"
+            styleClass="screen">
 
-</AnchorPane>
+    <top>
+        <VBox styleClass="card" spacing="12">
+            <HBox alignment="CENTER_LEFT">
+                <Label text="Quiz" styleClass="title"/>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Button fx:id="btnClose" text="✖ Fermer" styleClass="btn-ghost" onAction="#onClose"/>
+            </HBox>
+            <Label fx:id="lblStatus" text="..." styleClass="subtitle"/>
+        </VBox>
+    </top>
+
+    <center>
+        <ScrollPane fitToWidth="true" styleClass="scroll">
+            <content>
+                <VBox fx:id="mainContainer" spacing="14">
+                    <padding><Insets top="16" right="18" bottom="18" left="18"/></padding>
+
+                    <VBox fx:id="quizArea" spacing="12"/>
+
+                    <HBox alignment="CENTER_RIGHT">
+                        <Button fx:id="btnSubmit" text="✅ Soumettre" styleClass="btn-primary" onAction="#onSubmit"/>
+                    </HBox>
+                </VBox>
+            </content>
+        </ScrollPane>
+    </center>
+
+</BorderPane>

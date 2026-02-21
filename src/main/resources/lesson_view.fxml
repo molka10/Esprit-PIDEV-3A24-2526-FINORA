@@ -87,9 +87,9 @@
                                     styleClass="btn-video"
                                     onAction="#onWatchVideo"/>
 
-                            <!-- ✅ now controlled by controller -->
+                            <!-- ✅ removed visible/managed attributes -->
                             <Button fx:id="btnQuiz"
-                                    text="🧠 Quiz"
+                                    text="🧠  Quiz"
                                     styleClass="btn-primary"
                                     onAction="#onQuiz"/>
 
