@@ -1,5 +1,5 @@
 module com.example.project_pi {
-
+    requires org.apache.pdfbox;
     // ===== Required JavaFX modules =====
     requires javafx.controls;
     requires javafx.fxml;
