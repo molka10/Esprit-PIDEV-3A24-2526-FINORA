@@ -374,6 +374,10 @@ public class DashboardInvestisseurController implements Initializable {
             showError("Erreur de navigation : " + ex.getMessage());
         }
     }
+
+
+
+
     // ============================================================
     //  ACHAT / VENTE
     // ============================================================

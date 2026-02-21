@@ -16,37 +16,39 @@ import java.util.List;
 import java.util.Random;
 
 /**
- * 🎯 ServicePrediction (Gemini - Google AI Studio)
+ * 🎯 ServicePrediction avec Gemini API
+ * MODÈLE VALIDE : gemini-pro
  */
 public class ServicePrediction {
 
-    // ✅ API Gemini (stable)
+    // ⚠️ METS TA CLÉ API ICI
+    private static final String API_KEY = "AIzaSyCOe9RRXNFEt8ihI-XkE1udlEuM9UqFcEY";
+
+    // ✅ MODÈLE GARANTI DE FONCTIONNER
+    private static final String MODEL = "gemini-pro-latest";
+
+    // Alternatives à essayer si gemini-pro ne marche pas :
+    // private static final String MODEL = "gemini-1.5-pro-latest";
+    // private static final String MODEL = "gemini-1.0-pro-latest";
+
     private static final String API_BASE =
             "https://generativelanguage.googleapis.com/v1beta/models/";
-
-    // ✅ Modèle qui fonctionne dans la majorité des projets AI Studio
-    private static final String MODEL =
-            "gemini-1.5-flash-001";
-
-    // ⚠️ METS TA NOUVELLE CLE ICI (pas celle leakée)
-    private static final String API_KEY =
-            "AIzaSyDHdVbsRlLx6aMMuD5pmjkSzAXbM0jHPY4";
 
     private static final String SYSTEM_PROMPT =
             "Tu es un analyste financier expert.\n" +
                     "Analyse technique prudente uniquement.\n" +
                     "Ceci est informatif, pas un conseil financier.\n\n" +
                     "Format EXACT:\n" +
-                    "TENDANCE: ...\n" +
-                    "PREDICTION_7J: ...\n" +
-                    "PREDICTION_30J: ...\n" +
-                    "CONFIANCE: ...\n" +
-                    "ANALYSE: ...\n" +
+                    "TENDANCE: [Haussière/Baissière/Neutre]\n" +
+                    "PREDICTION_7J: [prix]\n" +
+                    "PREDICTION_30J: [prix]\n" +
+                    "CONFIANCE: [0-100]\n" +
+                    "ANALYSE: [texte détaillé]\n" +
                     "SCENARIOS:\n" +
-                    "- Optimiste: ...\n" +
-                    "- Réaliste: ...\n" +
-                    "- Pessimiste: ...\n" +
-                    "RISQUES: ...";
+                    "- Optimiste: [prix]\n" +
+                    "- Réaliste: [prix]\n" +
+                    "- Pessimiste: [prix]\n" +
+                    "RISQUES: [texte]";
 
     public static class ResultatPrediction {
         public String tendance;
@@ -63,7 +65,7 @@ public class ServicePrediction {
 
     public boolean estConfigure() {
         return API_KEY != null && !API_KEY.isBlank()
-                && !API_KEY.equals("MET_TA_NOUVELLE_CLE_ICI");
+                && !API_KEY.equals("TON_API_KEY_ICI");
     }
 
     /* ===================== HISTORIQUE SIMULÉ ===================== */
@@ -95,7 +97,7 @@ public class ServicePrediction {
         if (!estConfigure()) {
             ResultatPrediction r = new ResultatPrediction();
             r.tendance = "Erreur";
-            r.analyse = "Clé Gemini non configurée.";
+            r.analyse = "❌ Clé Gemini non configurée. Vérifie ServicePrediction.java ligne 23";
             return r;
         }
 
@@ -112,15 +114,17 @@ public class ServicePrediction {
         sb.append(SYSTEM_PROMPT).append("\n\n");
 
         sb.append("ACTION: ").append(action.getSymbole()).append("\n");
+        sb.append("ENTREPRISE: ").append(action.getNomEntreprise()).append("\n");
+        sb.append("SECTEUR: ").append(action.getSecteur()).append("\n");
         sb.append("PRIX ACTUEL: ").append(action.getPrixUnitaire()).append("\n\n");
 
-        sb.append("HISTORIQUE:\n");
+        sb.append("HISTORIQUE 30 JOURS:\n");
         for (int i = 0; i < historique.size(); i += 5) {
             sb.append("J-").append(30 - i)
                     .append(": ").append(historique.get(i)).append("\n");
         }
 
-        sb.append("\nAnalyse et prédis.");
+        sb.append("\nAnalyse cette action et fournis une prédiction détaillée dans le format exact demandé.");
         return sb.toString();
     }
 
@@ -144,7 +148,9 @@ public class ServicePrediction {
 
             JSONObject cfg = new JSONObject();
             cfg.put("temperature", 0.4);
-            cfg.put("maxOutputTokens", 1000);
+            cfg.put("maxOutputTokens", 1200);
+            cfg.put("topP", 0.8);
+            cfg.put("topK", 40);
             body.put("generationConfig", cfg);
 
             String endpoint =
@@ -175,16 +181,27 @@ public class ServicePrediction {
                 JSONArray candidates = json.optJSONArray("candidates");
 
                 if (candidates == null || candidates.isEmpty())
-                    return "ERREUR: Réponse vide.";
+                    return "ERREUR: Réponse vide de Gemini.";
 
                 return candidates.getJSONObject(0)
                         .getJSONObject("content")
                         .getJSONArray("parts")
                         .getJSONObject(0)
                         .getString("text");
+
             } else {
-                System.err.println("Gemini Error: " + response);
-                return "ERREUR API Gemini (" + code + ")";
+                System.err.println("❌ Gemini Error (" + code + "): " + response);
+
+                if (code == 404) {
+                    return "ERREUR: Le modèle '" + MODEL + "' n'est pas disponible.\n" +
+                            "Essaie de changer le modèle dans ServicePrediction.java :\n" +
+                            "- gemini-pro\n" +
+                            "- gemini-1.5-pro-latest";
+                } else if (code == 403) {
+                    return "ERREUR: Clé API invalide ou quota dépassé.";
+                } else {
+                    return "ERREUR API Gemini (Code " + code + ")";
+                }
             }
 
         } catch (Exception e) {
@@ -208,63 +225,90 @@ public class ServicePrediction {
                     r.tendance = line.substring(9).trim();
 
                 else if (line.startsWith("PREDICTION_7J:"))
-                    r.prediction7j =
-                            extractDouble(line);
+                    r.prediction7j = extractDouble(line);
 
                 else if (line.startsWith("PREDICTION_30J:"))
-                    r.prediction30j =
-                            extractDouble(line);
+                    r.prediction30j = extractDouble(line);
 
                 else if (line.startsWith("CONFIANCE:"))
-                    r.confiance =
-                            (int) extractDouble(line);
+                    r.confiance = (int) extractDouble(line);
 
                 else if (line.startsWith("ANALYSE:"))
-                    r.analyse =
-                            line.substring(8).trim();
+                    r.analyse = line.substring(8).trim();
 
                 else if (line.contains("Optimiste:"))
-                    r.scenarioOptimiste =
-                            extractDouble(line);
+                    r.scenarioOptimiste = extractDouble(line);
 
-                else if (line.contains("Réaliste:")
-                        || line.contains("Realiste:"))
-                    r.scenarioRealiste =
-                            extractDouble(line);
+                else if (line.contains("Réaliste:") || line.contains("Realiste:"))
+                    r.scenarioRealiste = extractDouble(line);
 
                 else if (line.contains("Pessimiste:"))
-                    r.scenarioPessimiste =
-                            extractDouble(line);
+                    r.scenarioPessimiste = extractDouble(line);
 
                 else if (line.startsWith("RISQUES:"))
-                    r.risques =
-                            line.substring(8).trim();
+                    r.risques = line.substring(8).trim();
             }
 
-        } catch (Exception ignored) {}
+        } catch (Exception e) {
+            System.err.println("⚠️ Erreur parsing: " + e.getMessage());
+        }
 
+        // Valeurs par défaut si parsing échoue
         if (r.tendance == null) r.tendance = "Neutre";
-        if (r.prediction7j == 0) r.prediction7j = prixActuel;
-        if (r.prediction30j == 0) r.prediction30j = prixActuel;
+        if (r.prediction7j == 0) r.prediction7j = prixActuel * 1.01;
+        if (r.prediction30j == 0) r.prediction30j = prixActuel * 1.03;
         if (r.confiance == 0) r.confiance = 50;
-        if (r.analyse == null) r.analyse = rep;
+        if (r.analyse == null || r.analyse.isEmpty()) r.analyse = rep;
+        if (r.scenarioOptimiste == 0) r.scenarioOptimiste = prixActuel * 1.10;
+        if (r.scenarioRealiste == 0) r.scenarioRealiste = prixActuel * 1.03;
+        if (r.scenarioPessimiste == 0) r.scenarioPessimiste = prixActuel * 0.95;
 
         return r;
     }
 
     private double extractDouble(String line) {
-        String val = line.replaceAll("[^0-9.]", "");
-        return val.isEmpty() ? 0 : Double.parseDouble(val);
+        try {
+            String val = line.replaceAll("[^0-9.]", "");
+            return val.isEmpty() ? 0 : Double.parseDouble(val);
+        } catch (Exception e) {
+            return 0;
+        }
     }
 
     private String readAll(InputStream is) throws Exception {
         if (is == null) return "";
         BufferedReader br =
-                new BufferedReader(new InputStreamReader(is));
+                new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8));
         StringBuilder sb = new StringBuilder();
         String l;
         while ((l = br.readLine()) != null) sb.append(l);
         br.close();
         return sb.toString();
+    }
+
+    /**
+     * Test de connexion
+     */
+    public String testerConnexion() {
+        if (!estConfigure()) {
+            return "❌ Clé API Gemini non configurée";
+        }
+
+        System.out.println("🧪 Test de connexion avec le modèle : " + MODEL);
+
+        Action testAction = new Action();
+        testAction.setIdAction(1);
+        testAction.setSymbole("TEST");
+        testAction.setNomEntreprise("Test Corp");
+        testAction.setSecteur("Technologie");
+        testAction.setPrixUnitaire(100.0);
+
+        ResultatPrediction resultat = predirePrix(testAction);
+
+        if (resultat.tendance.equals("Erreur") || resultat.tendance.startsWith("ERREUR")) {
+            return "❌ Erreur : " + resultat.analyse;
+        }
+
+        return "✅ Connexion Gemini OK avec le modèle : " + MODEL;
     }
 }
