@@ -80,6 +80,8 @@
                         style="-fx-background-color: #a855f7; -fx-text-fill: white; -fx-font-size: 13px; -fx-font-weight: bold; -fx-background-radius: 10; -fx-padding: 10 20; -fx-cursor: hand;"/>
                 <Button text="🎯 Prédictions" onAction="#ouvrirPrediction"
                         style="-fx-background-color: #f59e0b; -fx-text-fill: white; -fx-font-size: 13px; -fx-font-weight: bold; -fx-background-radius: 10; -fx-padding: 10 20; -fx-cursor: hand;"/>
+                <Button text="📊 Prix Réels" onAction="#chargerPrixReels"
+                        style="-fx-background-color: #10b981; -fx-text-fill: white; -fx-font-size: 13px; -fx-font-weight: bold; -fx-background-radius: 8; -fx-padding: 10 20; -fx-cursor: hand;"/>
 
             </HBox>
 

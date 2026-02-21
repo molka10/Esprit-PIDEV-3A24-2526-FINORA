@@ -4,6 +4,8 @@ import com.example.crud.models.Action;
 import com.example.crud.models.Bourse;
 import com.example.crud.services.ServiceAction;
 import com.example.crud.services.ServiceBourse;
+import com.example.crud.services.ServiceAlphaVantage;
+import com.example.crud.services.ServiceAlphaVantage.DonneesAction;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.concurrent.Task;
@@ -13,14 +15,11 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
-import javafx.scene.control.Spinner;
-import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
 
@@ -33,17 +32,12 @@ import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 /**
- * 🎨 ActionController - Version Finale avec Dialog
+ * 📈 ActionController - Version avec APIs intégrées
  *
- * Fonctionnalités :
- * - ✅ Dialog modal pour ajout/modification
- * - ✅ Boutons Modifier/Supprimer sur chaque ligne
- * - ✅ Interface liste style mobile
- * - ✅ Variations en couleur
+ * ✅ ServiceAlphaVantage pour prix boursiers réels
  */
 public class ActionController implements Initializable {
 
-    // UI Components
     @FXML private ComboBox<Bourse> cbBourse;
     @FXML private TextField searchField;
     @FXML private Label lblTotal;
@@ -51,6 +45,7 @@ public class ActionController implements Initializable {
 
     private final ServiceAction serviceAction = new ServiceAction();
     private final ServiceBourse serviceBourse = new ServiceBourse();
+    private final ServiceAlphaVantage alphaVantage = new ServiceAlphaVantage();
 
     private Integer pendingPreselectBourseId = null;
 
@@ -79,9 +74,15 @@ public class ActionController implements Initializable {
 
         chargerBoursesAsync();
         chargerActionsAsync(null);
+
+        // Test Alpha Vantage
+        if (alphaVantage.estConfigure()) {
+            System.out.println("✅ ServiceAlphaVantage configuré et prêt");
+        } else {
+            System.err.println("⚠️ ServiceAlphaVantage non configuré - Prix réels désactivés");
+        }
     }
 
-    // ✅ Préselection depuis BourseController
     public void preselectionnerBourseParId(int idBourse) {
         pendingPreselectBourseId = idBourse;
 
@@ -98,7 +99,6 @@ public class ActionController implements Initializable {
         });
     }
 
-    // ✅ Bouton retour
     @FXML
     private void retourBourses(ActionEvent event) {
         try {
@@ -117,44 +117,115 @@ public class ActionController implements Initializable {
     }
 
     // ======================
+    // 📊 ACTUALISER PRIX ALPHA VANTAGE
+    // ======================
+
+    @FXML
+    private void actualiserPrix() {
+        if (!alphaVantage.estConfigure()) {
+            showError("ServiceAlphaVantage non configuré !\n\nConfigurer la clé API dans ServiceAlphaVantage.java (ligne 23)");
+            return;
+        }
+
+        Alert loading = new Alert(Alert.AlertType.INFORMATION);
+        loading.setTitle("Alpha Vantage");
+        loading.setHeaderText("Actualisation des prix en cours...");
+        loading.setContentText("Cela peut prendre 30-60 secondes.\n(Limite : 25 requêtes/jour)");
+        loading.show();
+
+        Task<Integer> task = new Task<>() {
+            @Override
+            protected Integer call() {
+                List<Action> actions = serviceAction.getAll();
+                int compteur = 0;
+                int limite = 10; // Limite pour ne pas dépasser quota gratuit
+
+                for (Action action : actions) {
+                    if (compteur >= limite) {
+                        System.out.println("⚠️ Limite de " + limite + " actions atteinte");
+                        break;
+                    }
+
+                    // 🌐 APPEL API ALPHA VANTAGE
+                    DonneesAction donnees = alphaVantage.getDonneesAction(action.getSymbole());
+
+                    if (donnees != null) {
+                        if (!donnees.fromCache) {
+                            // Prix récupéré depuis l'API
+                            action.setPrixUnitaire(donnees.prix);
+                            serviceAction.update(action);
+                            compteur++;
+                            System.out.println("✅ Prix mis à jour: " + action.getSymbole() + " = $" + donnees.prix);
+                        } else {
+                            // Prix depuis le cache
+                            action.setPrixUnitaire(donnees.prix);
+                            System.out.println("💾 Cache: " + action.getSymbole() + " = $" + donnees.prix);
+                        }
+                    } else {
+                        System.out.println("⚠️ Pas de données pour: " + action.getSymbole());
+                    }
+
+                    // Pause pour respecter les limites (5 req/min)
+                    if (compteur > 0 && compteur % 5 == 0) {
+                        try {
+                            Thread.sleep(60000); // 1 minute
+                        } catch (InterruptedException e) {
+                            break;
+                        }
+                    }
+                }
+
+                return compteur;
+            }
+        };
+
+        task.setOnSucceeded(e -> {
+            loading.close();
+            int nbMisAJour = task.getValue();
+            showSuccess("✅ Prix mis à jour depuis Alpha Vantage !\n\n" +
+                    nbMisAJour + " action(s) actualisée(s)");
+            afficherActions(null);
+        });
+
+        task.setOnFailed(e -> {
+            loading.close();
+            showError("Erreur: " + task.getException().getMessage());
+            task.getException().printStackTrace();
+        });
+
+        new Thread(task).start();
+    }
+
+    // ======================
     // DIALOG AJOUT/MODIFICATION
     // ======================
 
-    /**
-     * ✅ Ouvrir dialog pour ajouter une action
-     */
     @FXML
     private void ouvrirDialogAjout(ActionEvent event) {
-        ouvrirDialog(null); // null = mode ajout
+        ouvrirDialog(null);
     }
 
-    /**
-     * ✅ Dialog générique pour ajout/modification
-     */
     private void ouvrirDialog(Action actionAModifier) {
         Dialog<ButtonType> dialog = new Dialog<>();
         dialog.setTitle(actionAModifier == null ? "➕ Nouvelle Action" : "✏️ Modifier Action");
         dialog.setHeaderText(actionAModifier == null ? "Ajouter une nouvelle action" : "Modifier l'action " + actionAModifier.getSymbole());
 
-        // Boutons
         ButtonType btnSave = new ButtonType(actionAModifier == null ? "Ajouter" : "Modifier", ButtonBar.ButtonData.OK_DONE);
         ButtonType btnCancel = new ButtonType("Annuler", ButtonBar.ButtonData.CANCEL_CLOSE);
         dialog.getDialogPane().getButtonTypes().addAll(btnSave, btnCancel);
 
-        // Formulaire
         GridPane grid = new GridPane();
         grid.setHgap(15);
         grid.setVgap(12);
         grid.setPadding(new Insets(20));
 
-        // Champs
         ComboBox<Bourse> cbDialogBourse = new ComboBox<>();
         cbDialogBourse.setItems(cbBourse.getItems());
         cbDialogBourse.setConverter(cbBourse.getConverter());
         cbDialogBourse.setPrefWidth(300);
 
         TextField tfSymbole = new TextField();
-        tfSymbole.setPromptText("Ex: AAPL, MSFT");
+        tfSymbole.setPromptText("Ex: AAPL, MSFT, GOOGL");
 
         TextField tfNomEntreprise = new TextField();
         tfNomEntreprise.setPromptText("Ex: Apple Inc.");
@@ -175,7 +246,6 @@ public class ActionController implements Initializable {
         cbStatut.setItems(FXCollections.observableArrayList("DISPONIBLE", "INDISPONIBLE"));
         cbStatut.getSelectionModel().selectFirst();
 
-        // Pré-remplir si modification
         if (actionAModifier != null) {
             cbDialogBourse.setValue(actionAModifier.getBourse());
             tfSymbole.setText(actionAModifier.getSymbole());
@@ -188,7 +258,6 @@ public class ActionController implements Initializable {
             cbSecteur.getSelectionModel().selectFirst();
         }
 
-        // Ajouter au grid
         int row = 0;
         grid.add(new Label("Bourse *"), 0, row);
         grid.add(cbDialogBourse, 1, row++);
@@ -213,11 +282,9 @@ public class ActionController implements Initializable {
 
         dialog.getDialogPane().setContent(grid);
 
-        // Validation et sauvegarde
         dialog.showAndWait().ifPresent(response -> {
             if (response == btnSave) {
                 try {
-                    // Validation
                     if (cbDialogBourse.getValue() == null) {
                         showError("Veuillez sélectionner une bourse");
                         return;
@@ -245,12 +312,10 @@ public class ActionController implements Initializable {
                     );
 
                     if (actionAModifier != null) {
-                        // Modification
                         action.setIdAction(actionAModifier.getIdAction());
                         serviceAction.update(action);
                         showSuccess("✏️ Action modifiée avec succès !");
                     } else {
-                        // Ajout
                         serviceAction.add(action);
                         showSuccess("✅ Action ajoutée avec succès !");
                     }
@@ -368,7 +433,7 @@ public class ActionController implements Initializable {
     }
 
     // ======================
-    // AFFICHAGE LISTE MOBILE
+    // AFFICHAGE LISTE
     // ======================
 
     private void afficherCartes(List<Action> actions) {
@@ -389,9 +454,6 @@ public class ActionController implements Initializable {
         lblTotal.setText("📊 Total : " + actions.size() + " action(s)");
     }
 
-    /**
-     * ✅ Créer un item d'action avec boutons Modifier/Supprimer
-     */
     private HBox creerItemAction(Action action) {
         HBox item = new HBox(15);
         item.setPadding(new Insets(16));
@@ -403,7 +465,7 @@ public class ActionController implements Initializable {
                         "-fx-border-width: 0 0 1 0;"
         );
 
-        // === GAUCHE : Symbole + Nom ===
+        // Gauche
         VBox gauche = new VBox(4);
         gauche.setPrefWidth(200);
 
@@ -415,7 +477,7 @@ public class ActionController implements Initializable {
 
         gauche.getChildren().addAll(symbole, nom);
 
-        // === CENTRE : Prix + Détails ===
+        // Centre
         VBox centre = new VBox(4);
         HBox.setHgrow(centre, Priority.ALWAYS);
 
@@ -428,11 +490,10 @@ public class ActionController implements Initializable {
 
         centre.getChildren().addAll(prix, details);
 
-        // === DROITE : Variation + Boutons ===
+        // Droite
         HBox droite = new HBox(14);
         droite.setAlignment(Pos.CENTER_RIGHT);
 
-        // Variation
         Random rand = new Random(action.getIdAction());
         double variation = (rand.nextDouble() * 10) - 5;
         String couleur = variation >= 0 ? "#10b981" : "#ef4444";
@@ -442,7 +503,6 @@ public class ActionController implements Initializable {
         varBox.setAlignment(Pos.CENTER_RIGHT);
         varBox.setPrefWidth(110);
 
-        // Barre de progression colorée
         Region barBackground = new Region();
         barBackground.setPrefSize(90, 5);
         barBackground.setStyle("-fx-background-color: #e5e7eb; -fx-background-radius: 3;");
@@ -461,7 +521,6 @@ public class ActionController implements Initializable {
 
         varBox.getChildren().addAll(barPane, varLabel);
 
-        // Bouton Modifier — texte clair
         Button btnModifier = new Button("Modifier");
         btnModifier.setStyle(
                 "-fx-background-color: #3b82f6;" +
@@ -474,7 +533,6 @@ public class ActionController implements Initializable {
         );
         btnModifier.setOnAction(e -> ouvrirDialog(action));
 
-        // Bouton Supprimer — texte clair
         Button btnSupprimer = new Button("Supprimer");
         btnSupprimer.setStyle(
                 "-fx-background-color: #ef4444;" +
@@ -489,10 +547,8 @@ public class ActionController implements Initializable {
 
         droite.getChildren().addAll(varBox, btnModifier, btnSupprimer);
 
-        // === ASSEMBLER ===
         item.getChildren().addAll(gauche, centre, droite);
 
-        // Effet hover
         item.setOnMouseEntered(e ->
                 item.setStyle("-fx-background-color: #f9fafb; -fx-border-color: transparent transparent #e5e7eb transparent; -fx-border-width: 0 0 1 0;")
         );
@@ -504,9 +560,6 @@ public class ActionController implements Initializable {
         return item;
     }
 
-    /**
-     * ✅ Supprimer une action
-     */
     private void supprimerAction(Action action) {
         Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
         confirm.setTitle("Confirmation");

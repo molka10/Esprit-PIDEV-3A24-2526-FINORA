@@ -2,6 +2,7 @@ package com.example.crud.controllers;
 
 import com.example.crud.models.Bourse;
 import com.example.crud.services.ServiceBourse;
+import com.example.crud.services.ServiceDevise;
 import javafx.collections.FXCollections;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
@@ -23,15 +24,11 @@ import java.net.URL;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.stream.Collectors;
-import com.example.crud.services.ServiceDevise;
+
 /**
- * 🎨 BourseController - Version Finale
+ * 🏛 BourseController - Version avec APIs intégrées
  *
- * - ✅ Formulaire invisible (Dialog)
- * - ✅ Bouton "Détails" sur chaque carte
- * - ✅ Bouton "Actions" filtre les actions
- * - ✅ Modifier / Supprimer sur chaque carte
- * - ✅ Mini-graphiques + badges statut
+ * ✅ ServiceDevise pour conversions automatiques
  */
 public class BourseController implements Initializable {
 
@@ -40,7 +37,7 @@ public class BourseController implements Initializable {
     @FXML private FlowPane cardsContainer;
 
     private final ServiceBourse service = new ServiceBourse();
-    private ServiceDevise serviceDevise = new ServiceDevise();
+    private final ServiceDevise serviceDevise = new ServiceDevise();
 
     private final ExecutorService dbExecutor = Executors.newSingleThreadExecutor(r -> {
         Thread t = new Thread(r); t.setDaemon(true); return t;
@@ -49,12 +46,14 @@ public class BourseController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         afficherBourses(null);
+
+        // Test ServiceDevise
+        if (serviceDevise.estConfigure()) {
+            System.out.println("✅ ServiceDevise configuré et prêt");
+        } else {
+            System.err.println("⚠️ ServiceDevise non configuré - Conversions désactivées");
+        }
     }
-
-
-
-
-
 
     // ============================================================
     //  CHARGEMENT
@@ -88,7 +87,7 @@ public class BourseController implements Initializable {
     }
 
     // ============================================================
-    //  CARTE BOURSE
+    //  CARTE BOURSE AVEC CONVERSIONS
     // ============================================================
 
     private VBox creerCarte(Bourse b) {
@@ -125,6 +124,9 @@ public class BourseController implements Initializable {
         deviseLabel.setStyle("-fx-font-size: 13px; -fx-text-fill: #6b7280;");
         infos.getChildren().addAll(paysLabel, deviseLabel);
 
+        // === 💱 CONVERSIONS DEVISES ===
+        VBox conversionBox = creerBoxConversion(b.getDevise());
+
         // === MINI GRAPHIQUE ===
         Pane chartPane = new Pane();
         chartPane.setPrefHeight(45);
@@ -132,7 +134,6 @@ public class BourseController implements Initializable {
         chartPane.getChildren().add(path);
 
         // === BOUTONS ===
-        // Ligne 1 : Détails + Actions
         HBox row1 = new HBox(8);
         row1.setAlignment(Pos.CENTER_LEFT);
 
@@ -156,7 +157,6 @@ public class BourseController implements Initializable {
 
         row1.getChildren().addAll(btnDetails, btnActions);
 
-        // Ligne 2 : Modifier + Supprimer
         HBox row2 = new HBox(8);
         row2.setAlignment(Pos.CENTER_LEFT);
 
@@ -192,12 +192,63 @@ public class BourseController implements Initializable {
                         "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 12, 0, 0, 2);"
         ));
 
-        card.getChildren().addAll(header, infos, chartPane, row1, row2);
+        card.getChildren().addAll(header, infos, conversionBox, chartPane, row1, row2);
         return card;
     }
 
     // ============================================================
-    //  PANEL DÉTAILS (Dialog riche)
+    //  💱 BOX CONVERSION DEVISES (API)
+    // ============================================================
+
+    private VBox creerBoxConversion(String deviseOrigine) {
+        VBox box = new VBox(4);
+        box.setPadding(new Insets(10));
+        box.setStyle(
+                "-fx-background-color: #f8f9fa;" +
+                        "-fx-background-radius: 8;" +
+                        "-fx-border-color: #e5e7eb;" +
+                        "-fx-border-radius: 8;" +
+                        "-fx-border-width: 1;"
+        );
+
+        Label titre = new Label("💱 Taux de change");
+        titre.setStyle("-fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: #6b7280;");
+
+        if (!serviceDevise.estConfigure()) {
+            Label erreur = new Label("API non configurée");
+            erreur.setStyle("-fx-font-size: 10px; -fx-text-fill: #ef4444;");
+            box.getChildren().addAll(titre, erreur);
+            return box;
+        }
+
+        // Conversions vers USD, EUR, TND
+        String[] devisesTarget = {"USD", "EUR", "TND"};
+
+        for (String target : devisesTarget) {
+            if (target.equals(deviseOrigine)) continue;
+
+            HBox ligne = new HBox(6);
+            ligne.setAlignment(Pos.CENTER_LEFT);
+
+            Label deviseLabel = new Label("1 " + deviseOrigine + " =");
+            deviseLabel.setStyle("-fx-font-size: 10px; -fx-text-fill: #6b7280;");
+
+            // 🌐 APPEL API
+            double taux = serviceDevise.getTaux(deviseOrigine, target);
+
+            Label tauxLabel = new Label(String.format("%.4f %s", taux, target));
+            tauxLabel.setStyle("-fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: #10b981;");
+
+            ligne.getChildren().addAll(deviseLabel, tauxLabel);
+            box.getChildren().add(ligne);
+        }
+
+        box.getChildren().add(0, titre);
+        return box;
+    }
+
+    // ============================================================
+    //  PANEL DÉTAILS AVEC CONVERSIONS COMPLÈTES
     // ============================================================
 
     private void ouvrirPanelDetails(Bourse b) {
@@ -209,7 +260,7 @@ public class BourseController implements Initializable {
         VBox content = new VBox(0);
         content.setStyle("-fx-background-color: #f5f7fa;");
 
-        // ─ Header coloré ─
+        // Header
         VBox headerBox = new VBox(6);
         headerBox.setPadding(new Insets(24));
         headerBox.setStyle("-fx-background-color: linear-gradient(to right, #6366f1, #8b5cf6);");
@@ -223,7 +274,7 @@ public class BourseController implements Initializable {
         titreRow.setAlignment(Pos.CENTER_LEFT);
         headerBox.getChildren().add(titreRow);
 
-        // ─ Corps des infos ─
+        // Corps
         VBox body = new VBox(0);
         body.setPadding(new Insets(0));
 
@@ -236,7 +287,49 @@ public class BourseController implements Initializable {
                         b.getDateCreation() != null ? b.getDateCreation().toString() : "N/A", "#6b7280")
         );
 
-        // ─ Mini graphique en grand ─
+        // 💱 Box Conversions détaillées
+        VBox convBox = new VBox(10);
+        convBox.setPadding(new Insets(20));
+        convBox.setStyle("-fx-background-color: white;");
+
+        Label convTitre = new Label("💱 Conversions de devises");
+        convTitre.setStyle("-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #374151;");
+
+        if (serviceDevise.estConfigure()) {
+            String[] devises = {"USD", "EUR", "TND", "GBP", "JPY"};
+
+            for (String devise : devises) {
+                if (devise.equals(b.getDevise())) continue;
+
+                // 🌐 APPEL API
+                double taux = serviceDevise.getTaux(b.getDevise(), devise);
+
+                HBox ligneTaux = new HBox(10);
+                ligneTaux.setAlignment(Pos.CENTER_LEFT);
+                ligneTaux.setPadding(new Insets(8));
+                ligneTaux.setStyle("-fx-background-color: #f8f9fa; -fx-background-radius: 6;");
+
+                Label from = new Label("1 " + b.getDevise());
+                from.setStyle("-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #374151;");
+
+                Label arrow = new Label("→");
+                arrow.setStyle("-fx-font-size: 13px; -fx-text-fill: #9ca3af;");
+
+                Label to = new Label(String.format("%.4f %s", taux, devise));
+                to.setStyle("-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #10b981;");
+
+                ligneTaux.getChildren().addAll(from, arrow, to);
+                convBox.getChildren().add(ligneTaux);
+            }
+        } else {
+            Label erreur = new Label("⚠️ API de conversion non configurée");
+            erreur.setStyle("-fx-font-size: 12px; -fx-text-fill: #ef4444;");
+            convBox.getChildren().add(erreur);
+        }
+
+        convBox.getChildren().add(0, convTitre);
+
+        // Graphique
         VBox chartBox = new VBox(8);
         chartBox.setPadding(new Insets(20));
         chartBox.setStyle("-fx-background-color: white;");
@@ -252,7 +345,7 @@ public class BourseController implements Initializable {
 
         chartBox.getChildren().addAll(chartTitle, bigChart);
 
-        content.getChildren().addAll(headerBox, body, chartBox);
+        content.getChildren().addAll(headerBox, body, convBox, chartBox);
         dialog.getDialogPane().setContent(content);
         dialog.showAndWait();
     }
@@ -263,7 +356,6 @@ public class BourseController implements Initializable {
         ligne.setAlignment(Pos.CENTER_LEFT);
         ligne.setStyle("-fx-background-color: white; -fx-border-color: transparent transparent #f3f4f6 transparent; -fx-border-width: 0 0 1 0;");
 
-        // Barre colorée à gauche
         Region bar = new Region();
         bar.setPrefSize(4, 30);
         bar.setStyle("-fx-background-color: " + couleur + "; -fx-background-radius: 2;");
@@ -306,18 +398,15 @@ public class BourseController implements Initializable {
         dialog.getDialogPane().getButtonTypes().addAll(btnSave, ButtonType.CANCEL);
         dialog.getDialogPane().setMinWidth(460);
 
-        // Formulaire
         GridPane grid = new GridPane();
         grid.setHgap(15);
         grid.setVgap(14);
         grid.setPadding(new Insets(24));
 
-        // Champs
         TextField tfNom = new TextField();
         tfNom.setPromptText("Ex: NYSE, Euronext, NASDAQ");
         tfNom.setPrefWidth(310);
 
-        // Pays
         TreeSet<String> paysSet = new TreeSet<>();
         for (String code : java.util.Locale.getISOCountries()) {
             String nom = new java.util.Locale("", code).getDisplayCountry(java.util.Locale.FRENCH);
@@ -334,7 +423,6 @@ public class BourseController implements Initializable {
         ComboBox<String> cbStatut = new ComboBox<>(FXCollections.observableArrayList("ACTIVE", "INACTIVE"));
         cbStatut.setPrefWidth(310);
 
-        // Pré-remplir si modification
         if (bourseAModifier != null) {
             tfNom.setText(bourseAModifier.getNomBourse());
             cbPays.setValue(bourseAModifier.getPays());
@@ -368,12 +456,10 @@ public class BourseController implements Initializable {
 
             try {
                 if (bourseAModifier == null) {
-                    // AJOUT
                     Bourse newBourse = new Bourse(nom, pays, devise, statut);
                     service.add(newBourse);
                     showSuccess("✅ Bourse ajoutée !");
                 } else {
-                    // MODIFICATION
                     bourseAModifier.setNomBourse(nom);
                     bourseAModifier.setPays(pays);
                     bourseAModifier.setDevise(devise);
@@ -411,7 +497,7 @@ public class BourseController implements Initializable {
     }
 
     // ============================================================
-    //  NAVIGATION → Actions filtrées
+    //  NAVIGATION
     // ============================================================
 
     private void ouvrirActionsPourBourse(Bourse bourse) {
@@ -468,7 +554,7 @@ public class BourseController implements Initializable {
     }
 
     // ============================================================
-    //  HELPERS VISUELS
+    //  HELPERS
     // ============================================================
 
     private Label creerBadgeStatut(String statut) {
