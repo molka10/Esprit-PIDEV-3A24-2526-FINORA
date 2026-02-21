@@ -101,8 +101,10 @@
                     <Pane HBox.hgrow="ALWAYS"/>
 
                     <Button text="Actualiser" styleClass="ghost-btn" onAction="#onRefresh"/>
+                    <Button text="Exporter PDF" styleClass="ghost-btn" onAction="#onExportPdf"/>
                     <Button text="Modifier" styleClass="ghost-btn" onAction="#onEdit"/>
                     <Button text="Supprimer" styleClass="danger-btn" onAction="#onDelete"/>
+
                 </HBox>
 
                 <ListView fx:id="listView" styleClass="list-cards" VBox.vgrow="ALWAYS"/>

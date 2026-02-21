@@ -17,7 +17,14 @@ import com.example.project_pi.services.CandidatureService;
 import javafx.scene.chart.BarChart;
 import javafx.scene.chart.PieChart;
 import javafx.scene.chart.XYChart;
+import com.example.project_pi.entities.Candidature;
+import com.example.project_pi.services.CandidatureService;
+import com.example.project_pi.services.PdfExportService;
+import javafx.stage.FileChooser;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.List;
 import java.util.Comparator;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -39,7 +46,7 @@ public class AppelOffreController {
     @FXML private Label draftLabel;
 
     private final AppelOffreService service = new AppelOffreService();
-
+    private final PdfExportService pdfExportService = new PdfExportService();
     private final ObservableList<AppelOffre> data = FXCollections.observableArrayList();
     private FilteredList<AppelOffre> filtered;
 
@@ -305,5 +312,36 @@ public class AppelOffreController {
         candidatureBar.getData().add(series);
         candidatureBar.setLegendVisible(false);
         candidatureBar.setAnimated(false);
+    }
+    @FXML
+    private void onExportPdf() {
+        AppelOffre current = listView.getSelectionModel().getSelectedItem();
+
+        if (current == null) {
+            showInfo("Sélection", "Aucune sélection", "Sélectionne un appel d'offre dans la liste.");
+            return;
+        }
+
+        FileChooser chooser = new FileChooser();
+        chooser.setTitle("Exporter PDF");
+        chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("PDF Files", "*.pdf"));
+
+        String safeName = (current.getTitre() == null ? "appel_offre" : current.getTitre())
+                .replaceAll("[\\\\/:*?\"<>|]", "_");
+
+        chooser.setInitialFileName("AppelOffre_" + safeName + ".pdf");
+
+        File file = chooser.showSaveDialog(listView.getScene().getWindow());
+        if (file == null) return;
+
+        try {
+            List<Candidature> cands = candidatureService.getByAppelOffreId(current.getAppelOffreId());
+            pdfExportService.exportAppelOffreWithCandidatures(current, cands, file);
+            showInfo("Export PDF", "Succès", "PDF exporté avec succès:\n" + file.getAbsolutePath());
+        } catch (IOException e) {
+            showError("Export PDF", "Erreur fichier", e.getMessage());
+        } catch (Exception e) {
+            showError("Export PDF", "Erreur", e.getMessage());
+        }
     }
 }
