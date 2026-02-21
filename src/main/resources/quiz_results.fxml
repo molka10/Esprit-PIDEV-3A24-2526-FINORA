@@ -6,9 +6,8 @@
 
 <BorderPane xmlns="http://javafx.com/javafx/17"
             xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="tn.finora.controllers.QuizController">
+            fx:controller="tn.finora.controllers.QuizResultsController">
 
-    <!-- Header -->
     <top>
         <VBox styleClass="card" spacing="16">
 
@@ -21,7 +20,6 @@
             <Label text="Tableau de bord des performances étudiantes"
                    styleClass="subtitle"/>
 
-            <!-- Stats row -->
             <HBox spacing="16">
 
                 <VBox styleClass="item-card" spacing="4" prefWidth="200">
@@ -44,7 +42,6 @@
 
             </HBox>
 
-            <!-- Search + refresh toolbar -->
             <HBox spacing="12" alignment="CENTER_LEFT" styleClass="toolbar">
                 <TextField fx:id="txtSearch"
                            promptText="Rechercher par étudiant, leçon, formation..."
@@ -59,7 +56,6 @@
         </VBox>
     </top>
 
-    <!-- Results list -->
     <center>
         <ScrollPane fitToWidth="true" styleClass="scroll">
             <content>

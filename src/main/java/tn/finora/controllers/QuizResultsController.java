@@ -15,7 +15,7 @@ import tn.finora.entities.Formation;
 
 import java.util.List;
 
-public class QuizController {
+public class QuizResultsController {
 
     @FXML private VBox cardsContainer;
     @FXML private Label lblTotal;
@@ -25,6 +25,8 @@ public class QuizController {
 
     private final QuizResultService service = new QuizResultService();
     private List<QuizResult> allResults;
+
+    // optional (for future filtering per lesson/formation)
     private Lesson lesson;
     private Formation formation;
 
@@ -32,6 +34,12 @@ public class QuizController {
     public void initialize() {
         loadStats();
         loadResults();
+    }
+
+    public void setData(Lesson lesson, Formation formation) {
+        this.lesson = lesson;
+        this.formation = formation;
+        // Optional: later you can filter results by lesson_id here
     }
 
     private void loadStats() {
@@ -93,7 +101,6 @@ public class QuizController {
                         "-fx-effect: dropshadow(gaussian, rgba(109,40,217,0.07), 14, 0, 0, 3);"
         );
 
-        // Left accent bar — green if passed, red if failed
         VBox accent = new VBox();
         accent.setPrefWidth(6);
         accent.setMinWidth(6);
@@ -102,12 +109,10 @@ public class QuizController {
                         "-fx-background-radius: 14 0 0 14;"
         );
 
-        // Content
         VBox content = new VBox(6);
         content.setPadding(new Insets(14, 18, 14, 18));
         HBox.setHgrow(content, Priority.ALWAYS);
 
-        // Row 1: student name + score badge
         HBox topRow = new HBox(10);
         topRow.setAlignment(Pos.CENTER_LEFT);
 
@@ -123,8 +128,8 @@ public class QuizController {
         Label scoreBadge = new Label(r.score + "%");
         scoreBadge.setStyle(
                 "-fx-background-color: " + (r.passed ? "#D1FAE5" : "#FEE2E2") + ";" +
-                        "-fx-text-fill: "         + (r.passed ? "#065F46" : "#991B1B") + ";" +
-                        "-fx-border-color: "      + (r.passed ? "#6EE7B7" : "#FCA5A5") + ";" +
+                        "-fx-text-fill: " + (r.passed ? "#065F46" : "#991B1B") + ";" +
+                        "-fx-border-color: " + (r.passed ? "#6EE7B7" : "#FCA5A5") + ";" +
                         "-fx-border-width: 1.5px;" +
                         "-fx-background-radius: 999px;" +
                         "-fx-border-radius: 999px;" +
@@ -142,17 +147,13 @@ public class QuizController {
 
         topRow.getChildren().addAll(nameLabel, scoreBadge, passedBadge);
 
-        // Row 2: lesson + formation
-        Label lessonLabel = new Label(
-                "📖  " + r.lessonTitle + "   •   🎓  " + r.formationTitle
-        );
+        Label lessonLabel = new Label("📖  " + r.lessonTitle + "   •   🎓  " + r.formationTitle);
         lessonLabel.setStyle(
                 "-fx-font-size: 12px;" +
                         "-fx-text-fill: #6B5A8A;" +
                         "-fx-font-family: 'Segoe UI', Arial, sans-serif;"
         );
 
-        // Row 3: date
         Label dateLabel = new Label("🕐  " + r.takenAt);
         dateLabel.setStyle(
                 "-fx-font-size: 11px;" +
@@ -162,7 +163,6 @@ public class QuizController {
 
         content.getChildren().addAll(topRow, lessonLabel, dateLabel);
 
-        // Delete button
         Button deleteBtn = new Button("🗑");
         deleteBtn.setStyle(
                 "-fx-background-color: transparent;" +
@@ -194,21 +194,13 @@ public class QuizController {
         loadResults();
         if (txtSearch != null) txtSearch.clear();
     }
-    public void setData(Lesson lesson, Formation formation) {
-        this.lesson = lesson;
-        this.formation = formation;
-
-        // if needed, update UI here
-    }
 
     @FXML
     private void onBack() {
         try {
-            FXMLLoader loader = new FXMLLoader(
-                    getClass().getResource("/formation_list.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/formation_list.fxml"));
             Scene scene = new Scene(loader.load(), 1250, 720);
-            scene.getStylesheets().add(
-                    getClass().getResource("/style.css").toExternalForm());
+            scene.getStylesheets().add(getClass().getResource("/style.css").toExternalForm());
             Stage stage = (Stage) cardsContainer.getScene().getWindow();
             stage.setScene(scene);
         } catch (Exception e) {

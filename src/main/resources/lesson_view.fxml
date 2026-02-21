@@ -62,7 +62,6 @@
     <center>
         <SplitPane fx:id="splitPane" dividerPositions="0.28" styleClass="viewer-split">
 
-            <!-- Sidebar -->
             <ScrollPane fx:id="sidebarScroll" fitToWidth="true" styleClass="viewer-sidebar-scroll">
                 <content>
                     <VBox spacing="12" styleClass="viewer-sidebar">
@@ -74,13 +73,11 @@
                 </content>
             </ScrollPane>
 
-            <!-- Reader -->
             <ScrollPane fitToWidth="true" styleClass="scroll">
                 <content>
                     <VBox fx:id="contentWrap" spacing="14">
                         <padding><Insets top="22" right="28" bottom="28" left="28"/></padding>
 
-                        <!-- Row 1: label + focus + watch -->
                         <HBox alignment="CENTER_LEFT" spacing="10">
                             <Label text="CONTENU DE LA LEÇON" styleClass="viewer-section-label"/>
                             <Region HBox.hgrow="ALWAYS"/>
@@ -89,12 +86,12 @@
                                     text="🎬 Regarder"
                                     styleClass="btn-video"
                                     onAction="#onWatchVideo"/>
+
+                            <!-- ✅ now controlled by controller -->
                             <Button fx:id="btnQuiz"
-                                    text="🧠  Quiz"
+                                    text="🧠 Quiz"
                                     styleClass="btn-primary"
-                                    onAction="#onQuiz"
-                                    visible="false"
-                                    managed="false"/>
+                                    onAction="#onQuiz"/>
 
                             <ToggleButton fx:id="btnFocus"
                                           text="🎯 Focus"
@@ -102,7 +99,6 @@
                                           onAction="#onToggleFocus"/>
                         </HBox>
 
-                        <!-- Row 2: search row -->
                         <HBox alignment="CENTER_LEFT" spacing="10">
                             <TextField fx:id="txtFind"
                                        promptText="Rechercher dans la leçon..."
@@ -116,7 +112,6 @@
                             <Label fx:id="lblFindInfo" text="" styleClass="reader-findinfo"/>
                         </HBox>
 
-                        <!-- Row 3: tools -->
                         <HBox alignment="CENTER_LEFT" spacing="10">
                             <Button text="⎘ Copier" onAction="#onCopy" styleClass="reader-toolbtn"/>
                             <Button text="A-" onAction="#onFontMinus" styleClass="reader-toolbtn"/>

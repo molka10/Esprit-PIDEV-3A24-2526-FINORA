@@ -6,6 +6,7 @@ import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
@@ -18,6 +19,7 @@ import javafx.stage.Stage;
 import javafx.util.Duration;
 import tn.finora.entities.Formation;
 import tn.finora.entities.Lesson;
+import tn.finora.utils.UserSession;
 
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
@@ -59,7 +61,7 @@ public class LessonViewController {
     @FXML private Button btnQuiz;         // quiz button in FXML
     private Lesson currentLesson;         // track current lesson for quiz
 
-    @FXML private Button btnWatchVideo; // ✅ NEW
+    @FXML private Button btnWatchVideo;
 
     private Runnable onBack;
     private List<Lesson> lessons = new ArrayList<>();
@@ -170,13 +172,13 @@ public class LessonViewController {
         if (lessons.isEmpty()) return;
 
         Lesson lesson = lessons.get(index);
-
         currentLesson = lesson;
 
+        // ✅ Quiz button visible for BOTH roles + label changes
         if (btnQuiz != null) {
-            boolean isUser = tn.finora.utils.UserSession.isUser();
-            btnQuiz.setVisible(isUser);
-            btnQuiz.setManaged(isUser);
+            btnQuiz.setVisible(true);
+            btnQuiz.setManaged(true);
+            btnQuiz.setText(UserSession.isAdmin() ? "📊 Résultats Quiz" : "🧠 Quiz");
         }
 
         if (lblEyebrow != null) {
@@ -222,7 +224,6 @@ public class LessonViewController {
         updateSidebarStyles();
     }
 
-    // Reader
     private void renderReader() {
         if (contentFlow == null) return;
 
@@ -294,7 +295,6 @@ public class LessonViewController {
         return t;
     }
 
-    // Progress
     private void updateProgressAnimated() {
         if (progressBar == null) return;
 
@@ -317,11 +317,11 @@ public class LessonViewController {
         if (btnNext != null) btnNext.setDisable(index >= lessons.size() - 1);
     }
 
-    // Actions
     @FXML private void onPrev() { if (index > 0) { index--; render(true); } }
     @FXML private void onNext() { if (index < lessons.size() - 1) { index++; render(true); } }
 
     @FXML private void onFindChanged() { currentMatch = -1; renderReader(); }
+
     @FXML private void onFindNext() {
         if (currentQuery == null || currentQuery.isBlank()) { renderReader(); return; }
         List<int[]> matches = findAllMatches(currentContent, currentQuery);
@@ -329,6 +329,7 @@ public class LessonViewController {
         currentMatch = (currentMatch < 0) ? 0 : (currentMatch + 1) % matches.size();
         renderReader();
     }
+
     @FXML private void onFindPrev() {
         if (currentQuery == null || currentQuery.isBlank()) { renderReader(); return; }
         List<int[]> matches = findAllMatches(currentContent, currentQuery);
@@ -358,7 +359,6 @@ public class LessonViewController {
         render(false);
     }
 
-    // ✅ Focus Mode
     @FXML
     private void onToggleFocus() {
         boolean focus = btnFocus != null && btnFocus.isSelected();
@@ -376,7 +376,6 @@ public class LessonViewController {
         }
     }
 
-    // ✅ Watch video (A + C)
     @FXML
     private void onWatchVideo() {
         if (lessons.isEmpty()) return;
@@ -386,19 +385,16 @@ public class LessonViewController {
         if (url.isBlank()) { showWarn("Aucune vidéo pour cette leçon."); return; }
 
         if (looksLikeMp4(url)) {
-            // Try internal player
             try {
                 openMp4Player(url);
                 return;
             } catch (Exception ex) {
-                // fallback
                 showWarn("Lecture interne impossible. Ouverture dans le navigateur...");
                 openInBrowser(url);
                 return;
             }
         }
 
-        // Non-mp4 → browser
         openInBrowser(url);
     }
 
@@ -476,7 +472,6 @@ public class LessonViewController {
         stage.setTitle("Vidéo - " + safe(lessons.get(index).getTitre(), "Lesson"));
         Scene scene = new Scene(root, 980, 620);
 
-        // attach same stylesheet
         scene.getStylesheets().add(getClass().getResource("/style.css").toExternalForm());
         stage.setScene(scene);
 
@@ -537,19 +532,34 @@ public class LessonViewController {
         while (sb.length() < 5) sb.append("☆");
         return sb.toString();
     }
-    // ── ADD this new method ──
+
+    // ✅ FIX: Quiz routes by role
     @FXML
     private void onQuiz() {
         if (currentLesson == null) return;
 
         try {
-            javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(
-                    getClass().getResource("/quiz.fxml"));
-            javafx.scene.Scene scene = new javafx.scene.Scene(loader.load(), 700, 620);
-            scene.getStylesheets().add(
-                    getClass().getResource("/style.css").toExternalForm());
+            if (UserSession.isAdmin()) {
+                // ADMIN → results dashboard
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/quiz_results.fxml"));
+                Scene scene = new Scene(loader.load(), 1100, 720);
+                scene.getStylesheets().add(getClass().getResource("/style.css").toExternalForm());
 
-            QuizController ctrl = loader.getController();
+                Stage stage = new Stage();
+                stage.setTitle("Résultats Quiz");
+                stage.setScene(scene);
+                stage.show();
+                return;
+            }
+
+            // USER → quiz popup (Gemini)
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/quiz_results.fxml"));
+            Scene scene = new Scene(loader.load(), 700, 620);
+            scene.getStylesheets().add(getClass().getResource("/style.css").toExternalForm());
+
+            // IMPORTANT: this must be your USER quiz controller
+            // If your user-quiz controller is not QuizController, change the type below.
+            tn.finora.controllers.QuizController ctrl = loader.getController();
             ctrl.setData(currentLesson, formation);
 
             Stage stage = new Stage();
