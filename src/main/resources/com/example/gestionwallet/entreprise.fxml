@@ -48,19 +48,19 @@
                         <!-- STATS -->
                         <VBox spacing="20" prefWidth="230">
 
-                            <VBox spacing="5" style="-fx-background-color:white; -fx-padding:20; -fx-background-radius:15;
+                            <VBox spacing="5" alignment="CENTER" style="-fx-background-color:white; -fx-padding:20; -fx-background-radius:15;
                                     -fx-effect:dropshadow(gaussian, rgba(0,0,0,0.1), 10,0,0,3);">
                                 <Label text="Balance" styleClass="stat-title"/>
                                 <Label fx:id="balanceLabel" text="0 DT" styleClass="stat-value"/>
                             </VBox>
 
-                            <VBox spacing="5" style="-fx-background-color:white; -fx-padding:20; -fx-background-radius:15;
+                            <VBox spacing="5" alignment="CENTER" style="-fx-background-color:white; -fx-padding:20; -fx-background-radius:15;
                                     -fx-effect:dropshadow(gaussian, rgba(0,0,0,0.1), 10,0,0,3);">
                                 <Label text="Total Income" styleClass="stat-title"/>
                                 <Label fx:id="totalIncomeLabel" text="0 DT" styleClass="income-value"/>
                             </VBox>
 
-                            <VBox spacing="5" style="-fx-background-color:white; -fx-padding:20; -fx-background-radius:15;
+                            <VBox spacing="5" alignment="CENTER" style="-fx-background-color:white; -fx-padding:20; -fx-background-radius:15;
                                     -fx-effect:dropshadow(gaussian, rgba(0,0,0,0.1), 10,0,0,3);">
                                 <Label text="Total Outcome" styleClass="stat-title"/>
                                 <Label fx:id="totalOutcomeLabel" text="0 DT" styleClass="outcome-value"/>
