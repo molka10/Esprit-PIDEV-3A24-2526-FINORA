@@ -29,6 +29,7 @@ public class PasswordResetService {
             ps.setTimestamp(3, expires);
             ps.executeUpdate();
         }
+
         return code;
     }
 
@@ -66,8 +67,26 @@ public class PasswordResetService {
         }
     }
 
+    /**
+     * Reset password (bcrypt) + send email (non-blocking).
+     */
     public boolean resetPassword(int userId, String newPlainPassword, UserService userService) throws SQLException {
         if (newPlainPassword == null || newPlainPassword.length() < 8) return false;
-        return userService.updatePassword(userId, PasswordUtils.hash(newPlainPassword));
+
+        boolean ok = userService.updatePassword(userId, PasswordUtils.hash(newPlainPassword));
+        if (!ok) return false;
+
+        // Send email confirmation (don’t fail reset if email fails)
+        try {
+            var u = userService.getUserById(userId);
+            if (u != null) {
+                EmailService emailService = new EmailService();
+                emailService.sendPasswordResetEmail(u.getEmail(), u.getUsername());
+            }
+        } catch (Exception ex) {
+            System.out.println("[FINORA] Email failed (password reset): " + ex.getMessage());
+        }
+
+        return true;
     }
 }

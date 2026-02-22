@@ -4,6 +4,7 @@ module com.example.finora_user {
     requires java.sql;
     requires jbcrypt;
     requires twilio;
+    requires jakarta.mail;
 
 
     // allow FXMLLoader to create controllers via reflection

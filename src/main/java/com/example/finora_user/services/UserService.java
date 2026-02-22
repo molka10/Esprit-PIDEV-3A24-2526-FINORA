@@ -3,7 +3,6 @@ package com.example.finora_user.services;
 import com.example.finora_user.entities.User;
 import com.example.finora_user.utils.DBConnection;
 import com.example.finora_user.utils.PasswordUtils;
-import com.example.finora_user.utils.PasswordUtils;
 
 import java.sql.*;
 import java.time.LocalDate;
@@ -12,75 +11,196 @@ import java.util.List;
 
 public class UserService {
 
-    private Connection cn;
+    private final Connection cn;
 
     public UserService() throws SQLException {
-        cn = DBConnection.getInstance().getConnection();
+        this.cn = DBConnection.getInstance().getConnection();
     }
 
-    // ================= CREATE =================
-    public int addUserReturnId(User u) throws SQLException {
+    // -------------------- CRUD --------------------
 
+    public int addUserReturnId(User u) throws SQLException {
         String sql = """
-                INSERT INTO users 
-                (username, email, mot_de_passe, role, phone, address, date_of_birth)
+                INSERT INTO users (username, email, mot_de_passe, role, phone, address, date_of_birth)
                 VALUES (?, ?, ?, ?, ?, ?, ?)
                 """;
 
-        PreparedStatement ps = cn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+        try (PreparedStatement ps = cn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            ps.setString(1, u.getUsername());
+            ps.setString(2, u.getEmail());
 
-        ps.setString(1, u.getUsername());
-        ps.setString(2, u.getEmail());
-        // Store hashed password (PBKDF2)
-        ps.setString(3, PasswordUtils.hash(u.getMotDePasse()));
-        ps.setString(4, u.getRole());
-        ps.setString(5, u.getPhone());
-        ps.setString(6, u.getAddress());
+            // Store hashed password if not already hashed
+            String pwd = u.getMotDePasse();
+            if (pwd == null) pwd = "";
+            ps.setString(3, PasswordUtils.isHashed(pwd) ? pwd : PasswordUtils.hash(pwd));
 
-        if (u.getDateOfBirth() != null) {
-            ps.setDate(7, Date.valueOf(u.getDateOfBirth()));
-        } else {
-            ps.setNull(7, Types.DATE);
-        }
+            ps.setString(4, u.getRole());
+            ps.setString(5, u.getPhone());
+            ps.setString(6, u.getAddress());
 
-        ps.executeUpdate();
+            if (u.getDateOfBirth() != null) {
+                ps.setDate(7, Date.valueOf(u.getDateOfBirth()));
+            } else {
+                ps.setNull(7, Types.DATE);
+            }
 
-        ResultSet rs = ps.getGeneratedKeys();
-        if (rs.next()) {
-            return rs.getInt(1);
+            ps.executeUpdate();
+
+            try (ResultSet rs = ps.getGeneratedKeys()) {
+                if (rs.next()) {
+                    int id = rs.getInt(1);
+                    u.setId(id);
+                    return id;
+                }
+            }
         }
 
         return -1;
     }
 
-    // ================= READ ALL =================
+    public boolean updateUser(User u) throws SQLException {
+        String sql = """
+                UPDATE users
+                SET username=?, email=?, role=?, phone=?, address=?, date_of_birth=?
+                WHERE id=?
+                """;
+
+        try (PreparedStatement ps = cn.prepareStatement(sql)) {
+            ps.setString(1, u.getUsername());
+            ps.setString(2, u.getEmail());
+            ps.setString(3, u.getRole());
+            ps.setString(4, u.getPhone());
+            ps.setString(5, u.getAddress());
+
+            if (u.getDateOfBirth() != null) {
+                ps.setDate(6, Date.valueOf(u.getDateOfBirth()));
+            } else {
+                ps.setNull(6, Types.DATE);
+            }
+
+            ps.setInt(7, u.getId());
+
+            return ps.executeUpdate() > 0;
+        }
+    }
+
+    public boolean deleteUser(int id) throws SQLException {
+        String sql = "DELETE FROM users WHERE id=?";
+        try (PreparedStatement ps = cn.prepareStatement(sql)) {
+            ps.setInt(1, id);
+            return ps.executeUpdate() > 0;
+        }
+    }
+
     public List<User> getAllUsers() throws SQLException {
-
+        String sql = "SELECT * FROM users ORDER BY created_at DESC";
         List<User> list = new ArrayList<>();
-        String sql = "SELECT * FROM users ORDER BY id DESC";
 
-        Statement st = cn.createStatement();
-        ResultSet rs = st.executeQuery(sql);
+        try (PreparedStatement ps = cn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
 
-        while (rs.next()) {
-            list.add(map(rs));
+            while (rs.next()) {
+                list.add(map(rs));
+            }
         }
 
         return list;
     }
-    // -------------------- NEW: get user by email --------------------
+
+    // -------------------- SEARCH --------------------
+
+    public List<User> searchText(String q) throws SQLException {
+        String sql = """
+                SELECT * FROM users
+                WHERE username LIKE ? OR email LIKE ?
+                ORDER BY created_at DESC
+                """;
+
+        List<User> list = new ArrayList<>();
+        String like = "%" + (q == null ? "" : q.trim()) + "%";
+
+        try (PreparedStatement ps = cn.prepareStatement(sql)) {
+            ps.setString(1, like);
+            ps.setString(2, like);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) list.add(map(rs));
+            }
+        }
+
+        return list;
+    }
+
+    public List<User> searchByRole(String role) throws SQLException {
+        String sql = "SELECT * FROM users WHERE role=? ORDER BY created_at DESC";
+        List<User> list = new ArrayList<>();
+
+        try (PreparedStatement ps = cn.prepareStatement(sql)) {
+            ps.setString(1, role);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) list.add(map(rs));
+            }
+        }
+
+        return list;
+    }
+
+    // -------------------- FINDERS --------------------
+
+    public User getUserById(int id) throws SQLException {
+        String sql = "SELECT * FROM users WHERE id=?";
+        try (PreparedStatement ps = cn.prepareStatement(sql)) {
+            ps.setInt(1, id);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) return map(rs);
+            }
+        }
+        return null;
+    }
+
     public User getUserByEmail(String email) throws SQLException {
         String sql = "SELECT * FROM users WHERE email=?";
         try (PreparedStatement ps = cn.prepareStatement(sql)) {
             ps.setString(1, email);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) return map(rs);
+            }
+        }
+        return null;
+    }
+    public User login(String email, String plainPassword) throws SQLException {
+        String sql = "SELECT * FROM users WHERE email=?";
+        try (PreparedStatement ps = cn.prepareStatement(sql)) {
+            ps.setString(1, email);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (!rs.next()) return null;
+
+                User u = map(rs);
+
+                String stored = u.getMotDePasse();
+                if (stored == null) return null;
+
+                // If stored is bcrypt hash (normal)
+                if (PasswordUtils.isHashed(stored)) {
+                    return PasswordUtils.verify(plainPassword, stored) ? u : null;
+                }
+
+                // If old users stored plain text, allow login and upgrade to bcrypt once
+                if (stored.equals(plainPassword)) {
+                    updatePassword(u.getId(), PasswordUtils.hash(plainPassword));
+                    // refresh user data (optional)
+                    return getUserById(u.getId());
+                }
+
                 return null;
             }
         }
     }
 
-    // -------------------- NEW: update password hash directly --------------------
+    // -------------------- PASSWORD --------------------
+
     public boolean updatePassword(int userId, String hashedPassword) throws SQLException {
         String sql = "UPDATE users SET mot_de_passe=? WHERE id=?";
         try (PreparedStatement ps = cn.prepareStatement(sql)) {
@@ -90,183 +210,56 @@ public class UserService {
         }
     }
 
-    // -------------------- NEW: change password with old verification --------------------
+    /**
+     * Change password after verifying old password.
+     * Sends email after success (non-blocking).
+     */
     public boolean changePassword(int userId, String oldPlain, String newPlain) throws SQLException {
-        String sql = "SELECT mot_de_passe FROM users WHERE id=?";
+        String sql = "SELECT email, username, mot_de_passe FROM users WHERE id=?";
         try (PreparedStatement ps = cn.prepareStatement(sql)) {
             ps.setInt(1, userId);
+
             try (ResultSet rs = ps.executeQuery()) {
                 if (!rs.next()) return false;
 
+                String email = rs.getString("email");
+                String username = rs.getString("username");
                 String stored = rs.getString("mot_de_passe");
 
-                // stored must be bcrypt hash in your project
+                // One-time upgrade if old accounts were plain text
                 if (!PasswordUtils.isHashed(stored)) {
-                    // In case old accounts were plain text, support one-time upgrade
                     if (stored != null && stored.equals(oldPlain)) {
-                        return updatePassword(userId, PasswordUtils.hash(newPlain));
+                        boolean ok = updatePassword(userId, PasswordUtils.hash(newPlain));
+                        if (ok) safeSendChangedEmail(email, username);
+                        return ok;
                     }
                     return false;
                 }
 
+                // Normal bcrypt verification
                 if (!PasswordUtils.verify(oldPlain, stored)) return false;
 
-                return updatePassword(userId, PasswordUtils.hash(newPlain));
+                boolean ok = updatePassword(userId, PasswordUtils.hash(newPlain));
+                if (ok) safeSendChangedEmail(email, username);
+
+                return ok;
             }
         }
     }
 
-    // ================= READ BY ID =================
-    public User getUserById(int id) throws SQLException {
-
-        String sql = "SELECT * FROM users WHERE id=?";
-        PreparedStatement ps = cn.prepareStatement(sql);
-        ps.setInt(1, id);
-
-        ResultSet rs = ps.executeQuery();
-
-        if (rs.next()) {
-            return map(rs);
-        }
-
-        return null;
-    }
-
-    // ================= UPDATE =================
-    public boolean updateUser(User u) throws SQLException {
-
-        String sql = """
-                UPDATE users 
-                SET username=?, email=?, role=?, phone=?, address=?, date_of_birth=?
-                WHERE id=?
-                """;
-
-        PreparedStatement ps = cn.prepareStatement(sql);
-
-        ps.setString(1, u.getUsername());
-        ps.setString(2, u.getEmail());
-        ps.setString(3, u.getRole());
-        ps.setString(4, u.getPhone());
-        ps.setString(5, u.getAddress());
-
-        if (u.getDateOfBirth() != null) {
-            ps.setDate(6, Date.valueOf(u.getDateOfBirth()));
-        } else {
-            ps.setNull(6, Types.DATE);
-        }
-
-        ps.setInt(7, u.getId());
-
-        return ps.executeUpdate() > 0;
-    }
-
-    // ================= DELETE =================
-    public boolean deleteUser(int id) throws SQLException {
-
-        String sql = "DELETE FROM users WHERE id=?";
-        PreparedStatement ps = cn.prepareStatement(sql);
-        ps.setInt(1, id);
-
-        return ps.executeUpdate() > 0;
-    }
-
-    // ================= LOGIN =================
-    public User login(String email, String motDePasse) throws SQLException {
-
-        String sql = "SELECT * FROM users WHERE email=?";
-        PreparedStatement ps = cn.prepareStatement(sql);
-        ps.setString(1, email);
-
-        ResultSet rs = ps.executeQuery();
-
-        if (!rs.next()) {
-            return null;
-        }
-
-        User user = map(rs);
-        String storedPassword = user.getMotDePasse();
-
-        // If already BCrypt hashed
-        if (PasswordUtils.isHashed(storedPassword)) {
-            return PasswordUtils.verify(motDePasse, storedPassword) ? user : null;
-        }
-
-        // Legacy plain-text support (auto-upgrade)
-        if (storedPassword != null && storedPassword.equals(motDePasse)) {
-
-            String newHash = PasswordUtils.hash(motDePasse);
-
-            // Upgrade password in DB
-            String updateSql = "UPDATE users SET mot_de_passe=? WHERE id=?";
-            PreparedStatement ups = cn.prepareStatement(updateSql);
-            ups.setString(1, newHash);
-            ups.setInt(2, user.getId());
-            ups.executeUpdate();
-
-            user.setMotDePasse(newHash);
-            return user;
-        }
-
-        return null;
-    }
-
-
-    private void upgradePasswordHash(int userId, String hashed) throws SQLException {
-        String sql = "UPDATE users SET mot_de_passe=? WHERE id=?";
-        try (PreparedStatement ps = cn.prepareStatement(sql)) {
-            ps.setString(1, hashed);
-            ps.setInt(2, userId);
-            ps.executeUpdate();
+    private void safeSendChangedEmail(String toEmail, String username) {
+        try {
+            EmailService emailService = new EmailService();
+            emailService.sendPasswordChangedEmail(toEmail, username);
+        } catch (Exception ex) {
+            // Don’t fail password change if email fails
+            System.out.println("[FINORA] Email failed (password changed): " + ex.getMessage());
         }
     }
 
-    // ================= SEARCH TEXT =================
-    public List<User> searchText(String q) throws SQLException {
+    // -------------------- MAPPER --------------------
 
-        List<User> list = new ArrayList<>();
-
-        String sql = """
-                SELECT * FROM users
-                WHERE username LIKE ? OR email LIKE ?
-                ORDER BY id DESC
-                """;
-
-        PreparedStatement ps = cn.prepareStatement(sql);
-
-        String like = "%" + q + "%";
-        ps.setString(1, like);
-        ps.setString(2, like);
-
-        ResultSet rs = ps.executeQuery();
-
-        while (rs.next()) {
-            list.add(map(rs));
-        }
-
-        return list;
-    }
-
-    // ================= SEARCH BY ROLE =================
-    public List<User> searchByRole(String role) throws SQLException {
-
-        List<User> list = new ArrayList<>();
-
-        String sql = "SELECT * FROM users WHERE role=? ORDER BY id DESC";
-        PreparedStatement ps = cn.prepareStatement(sql);
-        ps.setString(1, role);
-
-        ResultSet rs = ps.executeQuery();
-
-        while (rs.next()) {
-            list.add(map(rs));
-        }
-
-        return list;
-    }
-
-    // ================= MAP RESULTSET =================
     private User map(ResultSet rs) throws SQLException {
-
         User u = new User();
 
         u.setId(rs.getInt("id"));
@@ -280,6 +273,8 @@ public class UserService {
         Date dob = rs.getDate("date_of_birth");
         if (dob != null) {
             u.setDateOfBirth(dob.toLocalDate());
+        } else {
+            u.setDateOfBirth((LocalDate) null);
         }
 
         return u;
