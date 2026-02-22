@@ -48,9 +48,13 @@
 
                     <!-- Description -->
                     <Label text="Description" GridPane.rowIndex="1"/>
-                    <TextArea fx:id="descriptionArea" promptText="Décris le besoin..." prefRowCount="4"
-                              GridPane.rowIndex="1" GridPane.columnIndex="1"/>
-
+                    <VBox spacing="8" GridPane.rowIndex="1" GridPane.columnIndex="1">
+                        <TextArea fx:id="descriptionArea" promptText="Décris le besoin..." prefRowCount="4"/>
+                        <HBox spacing="10" alignment="CENTER_LEFT">
+                            <Button fx:id="aiBtn" text="Générer avec IA" styleClass="ghost-btn" onAction="#onGenerateDescription"/>
+                            <Label fx:id="aiStatusLabel" text="" styleClass="muted"/>
+                        </HBox>
+                    </VBox>
                     <!-- Catégorie -->
                     <Label text="Catégorie" GridPane.rowIndex="2"/>
                     <ComboBox fx:id="categorieCombo"
