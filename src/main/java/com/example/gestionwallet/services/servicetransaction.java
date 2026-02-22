@@ -16,6 +16,7 @@ public class servicetransaction implements Iservicetransaction {
         cnx = database.getInstance().getConnection();
     }
 
+
     @Override
     public void ajouter(transaction t) {
 
@@ -107,8 +108,6 @@ public class servicetransaction implements Iservicetransaction {
                 t.setUser_id(rs.getInt("user_id"));
                 t.setCategory_id(rs.getInt("category_id"));
                 t.setRole(rs.getString("role"));
-
-                // 🔥 HEDHI ELLI KENET NA9SA
                 t.setCategorie(rs.getString("categorie_nom"));
 
                 list.add(t);
@@ -121,7 +120,6 @@ public class servicetransaction implements Iservicetransaction {
         return list;
     }
 
-    // 🔵 TOTAL INCOME
     public double getTotalIncome() {
         double total = 0;
 
@@ -141,7 +139,6 @@ public class servicetransaction implements Iservicetransaction {
         return total;
     }
 
-    // 🔴 TOTAL OUTCOME
     public double getTotalOutcome() {
         double total = 0;
 

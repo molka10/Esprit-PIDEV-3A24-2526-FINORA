@@ -236,6 +236,7 @@ public class servicecategorie implements Iservicecategorie {
 
         return list;
     }
+    
     public List<categorie> getByRoleAndType(String role, String type) {
 
         List<categorie> list = new ArrayList<>();
