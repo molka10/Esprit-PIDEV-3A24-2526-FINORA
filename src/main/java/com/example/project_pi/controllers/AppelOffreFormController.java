@@ -5,7 +5,9 @@ import com.example.project_pi.services.AppelOffreService;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
-
+import com.example.project_pi.services.EmailService;
+import com.example.project_pi.services.OpenAiDescriptionService;
+import javafx.application.Platform;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -17,7 +19,8 @@ public class AppelOffreFormController {
     @FXML private Label formTitle;
     @FXML private TextField titreField;
     @FXML private TextArea descriptionArea;
-
+    @FXML private Button aiBtn;
+    @FXML private Label aiStatusLabel;
     // ✅ category combo (no free text)
     @FXML private ComboBox<String> categorieCombo;
 
@@ -36,6 +39,9 @@ public class AppelOffreFormController {
     // ✅ Save button to disable until valid
     @FXML private Button saveBtn;
 
+    private final OpenAiDescriptionService aiService = new OpenAiDescriptionService();
+    private final EmailService emailService = new EmailService();
+    private String oldStatut = null;
     private final AppelOffreService service = new AppelOffreService();
     private boolean deadlineInvalid = false;   // ✅ tracks if date is not allowed
     private final CurrencyApiService currencyApi = new CurrencyApiService();
@@ -111,7 +117,7 @@ public class AppelOffreFormController {
     }
 
     public void setAppelOffre(AppelOffre a) {
-        this.current = a;
+        this.oldStatut = a.getStatut();
         formTitle.setText("Modifier Appel d’Offre");
 
         titreField.setText(a.getTitre());
