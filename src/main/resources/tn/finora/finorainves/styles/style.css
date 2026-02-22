@@ -1,60 +1,284 @@
+/* ===== GLOBAL THEME ===== */
 .root {
-    -fx-font-family: "Segoe UI";
-    -fx-base: #ffffff;
+    -fx-font-family: "Segoe UI", "Inter", Arial;
+    -fx-background-color: #F6F2FF;
 }
 
+/* ===== TOP BAR ===== */
 .top-bar {
-    -fx-background-color: #ffffff;
-    -fx-border-color: #e6e0f5;
+    -fx-background-color: rgba(255,255,255,0.95);
+    -fx-border-color: rgba(168,85,247,0.18);
     -fx-border-width: 0 0 1 0;
+    -fx-effect: dropshadow(gaussian, rgba(22,18,38,0.08), 18, 0.2, 0, 6);
 }
 
+/* ===== SCROLL AREA ===== */
 .scroll-bg {
-    -fx-background: #ffffff;
-    -fx-background-color: #ffffff;
+    -fx-background: transparent;
+    -fx-background-color: transparent;
 }
 
+.scroll-pane > .viewport {
+    -fx-background-color: transparent;
+}
+
+/* ===== CARD ZONE ===== */
 .cards-zone {
-    -fx-background-color: #ffffff;
+    -fx-background-color: transparent;
 }
 
+/* ===== FORM CARD ===== */
 .form-box {
-    -fx-background-color: #ffffff;
-    -fx-border-color: #e6e0f5;
-    -fx-border-radius: 16;
-    -fx-background-radius: 16;
-    -fx-padding: 18;
-    -fx-max-width: 650;
-    -fx-effect: dropshadow(gaussian, rgba(120, 80, 200, 0.15), 20, 0.2, 0, 6);
+    -fx-background-color: white;
+    -fx-background-radius: 24;
+    -fx-border-radius: 24;
+    -fx-border-color: rgba(124,58,237,0.15);
+    -fx-border-width: 1.5;
+    -fx-padding: 28;
+    -fx-effect: dropshadow(gaussian, rgba(124,58,237,0.12), 24, 0.2, 0, 8);
 }
 
+/* ===== TITLES ===== */
 .title {
-    -fx-font-size: 18px;
-    -fx-font-weight: 700;
-    -fx-text-fill: #3d2a6e;
+    -fx-font-size: 26px;
+    -fx-font-weight: 800;
+    -fx-text-fill: #171129;
 }
 
+.subtitle {
+    -fx-font-size: 14px;
+    -fx-text-fill: #6B5A8A;
+}
+
+/* ===== ERROR ===== */
 .error-text {
-    -fx-text-fill: #b00020;
+    -fx-text-fill: #B42318;
     -fx-font-weight: 600;
 }
 
+/* ===== PRIMARY BUTTON ===== */
 .btn-primary {
-    -fx-background-color: #6d3df2;
     -fx-text-fill: white;
     -fx-font-weight: 700;
-    -fx-background-radius: 10;
-    -fx-padding: 8 14;
+    -fx-background-radius: 16;
+    -fx-padding: 10 18;
+    -fx-background-color: linear-gradient(to right, #7C3AED, #A855F7);
+    -fx-effect: dropshadow(gaussian, rgba(124,58,237,0.30), 18, 0.2, 0, 6);
+    -fx-cursor: hand;
 }
 
-.btn-primary:hover { -fx-background-color: #5b2fe0; }
+.btn-primary:hover {
+    -fx-background-color: linear-gradient(to right, #6D28D9, #9333EA);
+}
 
+/* ===== SECONDARY BUTTON ===== */
 .btn-secondary {
-    -fx-background-color: #f4f1ff;
-    -fx-text-fill: #3d2a6e;
+    -fx-text-fill: #5B21B6;
     -fx-font-weight: 700;
-    -fx-background-radius: 10;
-    -fx-padding: 8 14;
-    -fx-border-color: #e6e0f5;
-    -fx-border-radius: 10;
+    -fx-background-radius: 16;
+    -fx-padding: 10 18;
+    -fx-background-color: rgba(255,255,255,0.9);
+    -fx-border-color: rgba(124,58,237,0.35);
+    -fx-border-width: 1;
+    -fx-border-radius: 16;
+    -fx-cursor: hand;
+}
+
+.btn-secondary:hover {
+    -fx-background-color: rgba(124,58,237,0.08);
+}
+.btn-ghost {
+    -fx-text-fill: #7C3AED; /* couleur principale */
+    -fx-font-weight: 700;
+    -fx-background-color: rgba(124,58,237,0.08);
+    -fx-background-radius: 16;
+    -fx-padding: 10 18;
+    -fx-border-color: rgba(124,58,237,0.3);
+    -fx-border-width: 1;
+    -fx-border-radius: 16;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(124,58,237,0.15), 10, 0.1, 0, 2);
+    -fx-transition: all 0.2s ease-in-out;
+}
+
+.btn-ghost:hover {
+    -fx-background-color: rgba(124,58,237,0.15);
+    -fx-effect: dropshadow(gaussian, rgba(124,58,237,0.25), 14, 0.15, 0, 4);
+    -fx-scale-x: 1.05;
+    -fx-scale-y: 1.05;
+}
+.btn-update {
+    -fx-background-color: linear-gradient(from 0% 0% to 100% 0%, #7C3AED, #A855F7);
+    -fx-text-fill: white;
+    -fx-font-weight: 700;
+    -fx-background-radius: 16;
+    -fx-padding: 8 16;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(124,58,237,0.35), 18, 0.2, 0, 4);
+    -fx-transition: all 0.2s ease-in-out;
+}
+
+.btn-update:hover {
+    -fx-background-color: linear-gradient(from 0% 0% to 100% 0%, #6D28D9, #9333EA);
+    -fx-effect: dropshadow(gaussian, rgba(124,58,237,0.5), 22, 0.25, 0, 6);
+    -fx-scale-x: 1.05;
+    -fx-scale-y: 1.05;
+}
+.btn-delete {
+    -fx-background-color: #F44336;
+    -fx-text-fill: white;
+    -fx-font-weight: 700;
+    -fx-background-radius: 16;
+    -fx-padding: 8 16;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(244,67,54,0.3), 14, 0.2, 0, 4);
+    -fx-transition: all 0.2s ease-in-out;
+}
+
+.btn-delete:hover {
+    -fx-background-color: #D32F2F;
+    -fx-effect: dropshadow(gaussian, rgba(244,67,54,0.5), 18, 0.25, 0, 6);
+    -fx-scale-x: 1.05;
+    -fx-scale-y: 1.05;
+}
+/* ===== INVESTMENT CARD ===== */
+.item-card {
+    -fx-background-color: linear-gradient(to right, #A78BFA, #C4B5FD); /* violet doux */
+    -fx-background-radius: 20;
+    -fx-padding: 16;
+    -fx-spacing: 10;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 12, 0.1, 0, 4); /* ombre douce */
+    -fx-border-color: rgba(167,139,250,0.25);
+    -fx-border-width: 1;
+    -fx-border-radius: 20;
+    -fx-cursor: hand;
+    -fx-transition: all 0.3s ease-in-out;
+}
+
+
+.item-card:hover {
+    -fx-effect: dropshadow(gaussian, rgba(124,58,237,0.25), 24, 0.25, 0, 12);
+    -fx-scale-x: 1.02;
+    -fx-scale-y: 1.02;
+}
+
+.btn-update {
+    -fx-background-color: #7C3AED;
+    -fx-text-fill: white;
+    -fx-background-radius: 12;
+    -fx-padding: 6 14;
+}
+.btn-update:hover {
+    -fx-background-color: #5B21B6;
+}
+
+.btn-delete {
+    -fx-background-color: #F44336;
+    -fx-text-fill: white;
+    -fx-background-radius: 12;
+    -fx-padding: 6 14;
+}
+.btn-delete:hover {
+    -fx-background-color: #D32F2F;
+}
+
+.badge-low {
+    -fx-background-color: linear-gradient(to right, #4CAF50, #81C784);
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-background-radius: 12;
+    -fx-padding: 4 12;
+}
+
+.badge-medium {
+    -fx-background-color: linear-gradient(to right, #FF9800, #FFB74D);
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-background-radius: 12;
+    -fx-padding: 4 12;
+    -fx-alignment: center;
+}
+
+.badge-high {
+    -fx-background-color: linear-gradient(to right, #F44336, #E57373);
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-background-radius: 12;
+    -fx-padding: 4 12;
+    -fx-alignment: center;
+}
+
+/* ===== SELECTED CARD ===== */
+.selected-card {
+    -fx-border-color: #7C3AED;
+    -fx-border-width: 2;
+}
+.card-image {
+    -fx-background-color: white; /* fond pour la bordure */
+    -fx-background-radius: 16;
+    -fx-border-radius: 16;
+    -fx-border-color: rgba(124,58,237,0.2); /* violet clair */
+    -fx-border-width: 2;
+    -fx-padding: 3; /* espace entre image et bordure */
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.12), 8, 0.1, 0, 2);
+}
+/* ===== INVESTMENT MANAGEMENT CARD ===== */
+.management-card {
+    -fx-background-color: linear-gradient(to right, #A78BFA, #C4B5FD); /* violet doux */
+    -fx-background-radius: 20;
+    -fx-padding: 16;
+    -fx-spacing: 8;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 12, 0.1, 0, 4); /* ombre douce */
+    -fx-border-color: rgba(167,139,250,0.25);
+    -fx-border-width: 1;
+    -fx-border-radius: 20;
+    -fx-cursor: hand;
+    -fx-transition: all 0.3s ease-in-out;
+    -fx-pref-width: 320;
+}
+
+.management-card:hover {
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.12), 16, 0.15, 0, 6);
+    -fx-scale-x: 1.01;
+    -fx-scale-y: 1.01;
+}
+
+/* ===== CARD TITLES ===== */
+.management-title {
+    -fx-font-size: 16px;
+    -fx-font-weight: 600;
+    -fx-text-fill: #2B1B3A; /* violet très foncé mais doux */
+}
+
+/* ===== LABELS ===== */
+.management-label {
+    -fx-font-size: 12px;
+    -fx-text-fill: #4B3C65; /* violet doux */
+}
+
+/* ===== BUTTONS ===== */
+.btn-edit {
+    -fx-background-color: #A78BFA; /* violet doux */
+    -fx-text-fill: white;
+    -fx-background-radius: 12;
+    -fx-font-size: 12px;
+    -fx-font-weight: 600;
+    -fx-padding: 6 14;
+}
+
+.btn-edit:hover {
+    -fx-background-color: #8B5CF6;
+}
+
+.btn-delete {
+    -fx-background-color: #F87171; /* rouge doux */
+    -fx-text-fill: white;
+    -fx-background-radius: 12;
+    -fx-font-size: 12px;
+    -fx-font-weight: 600;
+    -fx-padding: 6 14;
+}
+
+.btn-delete:hover {
+    -fx-background-color: #EF4444;
 }

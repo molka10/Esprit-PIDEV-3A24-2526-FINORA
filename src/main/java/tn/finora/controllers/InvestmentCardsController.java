@@ -1,9 +1,7 @@
 package tn.finora.controllers;
 
 import javafx.fxml.FXML;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
+import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.FlowPane;
@@ -13,7 +11,6 @@ import tn.finora.entities.Investment;
 import tn.finora.utils.DBConnection;
 import tn.finora.finorainves.AppState;
 import tn.finora.finorainves.SceneNavigator;
-import javafx.scene.control.ButtonType;
 
 import java.math.BigDecimal;
 import java.sql.*;
@@ -26,7 +23,11 @@ public class InvestmentCardsController {
     @FXML
     private FlowPane cardsPane;
 
+    @FXML
+    private TextField searchField;
+
     private final Connection cnx;
+    private List<Investment> allInvestments; // liste complète pour recherche
 
     public InvestmentCardsController() {
         cnx = DBConnection.getInstance().getCnx();
@@ -45,7 +46,8 @@ public class InvestmentCardsController {
 
     @FXML
     private void onRefresh() {
-        loadCards();
+        allInvestments = getAll();
+        loadCards(allInvestments);
     }
 
     @FXML
@@ -57,17 +59,18 @@ public class InvestmentCardsController {
         }
     }
 
-    // ================= CARDS LOADING =================
+    // ================= INITIALIZE =================
 
     @FXML
     public void initialize() {
-        loadCards();
+        allInvestments = getAll();
+        loadCards(allInvestments);
     }
 
-    private void loadCards() {
-        cardsPane.getChildren().clear();
-        List<Investment> investments = getAll();
+    // ================= LOAD CARDS =================
 
+    private void loadCards(List<Investment> investments) {
+        cardsPane.getChildren().clear();
         for (Investment inv : investments) {
             VBox card = createCard(inv);
             cardsPane.getChildren().add(card);
@@ -76,25 +79,37 @@ public class InvestmentCardsController {
 
     private VBox createCard(Investment inv) {
         VBox card = new VBox(10);
-        card.getStyleClass().add("card");
+        card.getStyleClass().add("item-card"); // style CSS
+        card.setPrefWidth(220);
 
-        // Image
+        // ===== IMAGE =====
         ImageView imgView = new ImageView();
-        imgView.setFitWidth(150);
-        imgView.setFitHeight(100);
+        imgView.setFitWidth(200);
+        imgView.setFitHeight(120);
+        imgView.setPreserveRatio(true);
+        imgView.getStyleClass().add("card-image");
         if (inv.getImageUrl() != null && !inv.getImageUrl().isEmpty()) {
             try {
                 imgView.setImage(new Image(inv.getImageUrl(), true));
             } catch (Exception ignored) {}
         }
 
-        // Labels
+        // ===== LABELS =====
         Label nameLabel = new Label(inv.getName());
-        nameLabel.getStyleClass().add("card-title");
+        nameLabel.getStyleClass().add("title");
 
         Label infoLabel = new Label(inv.getCategory() + " | " + inv.getLocation());
+        infoLabel.getStyleClass().add("subtitle");
+
         Label valueLabel = new Label("Value: " + inv.getEstimatedValue());
-        Label riskLabel = new Label("Risk: " + inv.getRiskLevel());
+
+        Label riskLabel = new Label(inv.getRiskLevel());
+        switch (inv.getRiskLevel().toLowerCase()) {
+            case "low" -> riskLabel.getStyleClass().add("badge-low");
+            case "medium" -> riskLabel.getStyleClass().add("badge-medium");
+            case "high" -> riskLabel.getStyleClass().add("badge-high");
+        }
+
         Label descLabel = new Label(inv.getDescription());
         descLabel.setWrapText(true);
 
@@ -103,15 +118,16 @@ public class InvestmentCardsController {
             created = inv.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
         Label createdLabel = new Label("Created: " + created);
 
-        // ================= BOUTONS =================
-        Button updateBtn = new Button("✎ Update");
-        Button deleteBtn = new Button("🗑 Delete");
-
+        // ===== BUTTONS =====
+        Button updateBtn = new Button(" Update");
+        updateBtn.getStyleClass().add("btn-update");
         updateBtn.setOnAction(e -> {
             AppState.setSelectedInvestment(inv);
             SceneNavigator.goTo("investment_form.fxml", "Edit Investment");
         });
 
+        Button deleteBtn = new Button(" Delete");
+        deleteBtn.getStyleClass().add("btn-delete");
         deleteBtn.setOnAction(e -> {
             Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
             alert.setTitle("Confirm Delete");
@@ -120,27 +136,23 @@ public class InvestmentCardsController {
             alert.showAndWait().ifPresent(response -> {
                 if (response == ButtonType.OK) {
                     delete(inv.getInvestmentId());
-                    loadCards(); // rafraîchir les cartes
+                    allInvestments = getAll(); // rafraîchir la liste complète
+                    loadCards(allInvestments);
                 }
             });
         });
 
         HBox buttonsBox = new HBox(10, updateBtn, deleteBtn);
 
-        // Ajouter tous les éléments à la carte
         card.getChildren().addAll(imgView, nameLabel, infoLabel, valueLabel, riskLabel, descLabel, createdLabel, buttonsBox);
-
         return card;
     }
 
     // ================= CRUD =================
 
     public int add(Investment inv) {
-        String sql = "INSERT INTO investment (name, category, location, estimated_value, risk_level, image_url, description, created_at) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-
+        String sql = "INSERT INTO investment (name, category, location, estimated_value, risk_level, image_url, description, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         try (PreparedStatement ps = cnx.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-
             ps.setString(1, inv.getName());
             ps.setString(2, inv.getCategory());
             ps.setString(3, inv.getLocation());
@@ -149,7 +161,6 @@ public class InvestmentCardsController {
             ps.setString(6, inv.getImageUrl());
             ps.setString(7, inv.getDescription());
             ps.setTimestamp(8, inv.getCreatedAt() != null ? Timestamp.valueOf(inv.getCreatedAt()) : new Timestamp(System.currentTimeMillis()));
-
             ps.executeUpdate();
 
             try (ResultSet keys = ps.getGeneratedKeys()) {
@@ -219,6 +230,27 @@ public class InvestmentCardsController {
         }
 
         return list;
+    }
+
+    // ================= SEARCH =================
+
+    @FXML
+    private void onSearch() {
+        String query = searchField.getText().trim().toLowerCase();
+        if (query.isEmpty()) {
+            loadCards(allInvestments);
+            return;
+        }
+        List<Investment> filtered = allInvestments.stream()
+                .filter(inv -> inv.getName() != null && inv.getName().toLowerCase().contains(query))
+                .toList();
+        loadCards(filtered);
+    }
+
+    @FXML
+    private void onClearSearch() {
+        searchField.clear();
+        loadCards(allInvestments);
     }
 
     // ================= UTILS =================

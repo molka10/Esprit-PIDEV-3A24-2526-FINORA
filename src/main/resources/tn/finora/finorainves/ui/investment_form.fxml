@@ -7,58 +7,94 @@
 <BorderPane xmlns="http://javafx.com/javafx/17"
             xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="tn.finora.controllers.InvestmentFormController"
-            stylesheets="@../styles/style.css">
+            stylesheets="@../styles/style.css"
+            styleClass="screen">
 
     <center>
-        <VBox spacing="14" styleClass="form-box">
-            <padding>
-                <Insets top="18" right="18" bottom="18" left="18"/>
-            </padding>
+        <VBox spacing="18" alignment="TOP_CENTER">
 
-            <Label fx:id="titleLabel" text="Add Investment" styleClass="title"/>
+            <!-- CARD CONTAINER -->
+            <VBox spacing="16" styleClass="form-box">
+                <padding>
+                    <Insets top="28" right="28" bottom="28" left="28"/>
+                </padding>
 
-            <GridPane hgap="12" vgap="10">
+                <!-- Title -->
+                <Label fx:id="titleLabel"
+                       text="Add New Investment"
+                       styleClass="title"/>
 
+                <Label text="Fill the information below to create a new investment"
+                       styleClass="subtitle"/>
 
-                <columnConstraints>
-                    <ColumnConstraints percentWidth="28"/>
-                    <ColumnConstraints percentWidth="72"/>
-                </columnConstraints>
+                <!-- FORM GRID -->
+                <GridPane hgap="14" vgap="14">
 
-                <Label text="Name:" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
-                <TextField fx:id="nameField" promptText="ex: Land Project"
-                           GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+                    <columnConstraints>
+                        <ColumnConstraints percentWidth="30"/>
+                        <ColumnConstraints percentWidth="70"/>
+                    </columnConstraints>
 
-                <Label text="Category:" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
-                <TextField fx:id="categoryField" promptText="ex: terrain / maison"
-                           GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+                    <Label text="Name:" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+                    <TextField fx:id="nameField"
+                               promptText="ex: Land Project"
+                               GridPane.rowIndex="0" GridPane.columnIndex="1"/>
 
-                <Label text="Location:" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
-                <TextField fx:id="locationField" promptText="ex: Tunis"
-                           GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+                    <Label text="Category:" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+                    <TextField fx:id="categoryField"
+                               promptText="ex: Real Estate"
+                               GridPane.rowIndex="1"
+                               GridPane.columnIndex="1"/>
 
-                <Label text="Estimated Value:" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
-                <TextField fx:id="valueField" promptText="ex: 15000.50"
-                           GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+                    <Label text="Location:" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+                    <TextField fx:id="locationField"
+                               promptText="ex: Tunis"
+                               GridPane.rowIndex="2"
+                               GridPane.columnIndex="1"/>
 
-                <Label text="Risk Level:" GridPane.rowIndex="4" GridPane.columnIndex="0"/>
-                <ComboBox fx:id="riskCombo" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
+                    <Label text="Estimated Value:" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
+                    <TextField fx:id="valueField"
+                               promptText="ex: 15000.50"
+                               GridPane.rowIndex="3"
+                               GridPane.columnIndex="1"/>
 
-                <Label text="Image URL:" GridPane.rowIndex="5" GridPane.columnIndex="0"/>
-                <TextField fx:id="imageField" promptText="https://..."
-                           GridPane.rowIndex="5" GridPane.columnIndex="1"/>
+                    <Label text="Risk Level:" GridPane.rowIndex="4" GridPane.columnIndex="0"/>
+                    <ComboBox fx:id="riskCombo"
+                              GridPane.rowIndex="4"
+                              GridPane.columnIndex="1"/>
 
-                <Label text="Description:" GridPane.rowIndex="6" GridPane.columnIndex="0"/>
-                <TextArea fx:id="descArea" promptText="Short description..." prefRowCount="3"
-                          GridPane.rowIndex="6" GridPane.columnIndex="1"/>
-            </GridPane>
+                    <Label text="Image URL:" GridPane.rowIndex="5" GridPane.columnIndex="0"/>
+                    <TextField fx:id="imageField"
+                               promptText="https://..."
+                               GridPane.rowIndex="5"
+                               GridPane.columnIndex="1"/>
 
-            <Label fx:id="errorLabel" text="" styleClass="error-text"/>
+                    <Label text="Description:" GridPane.rowIndex="6" GridPane.columnIndex="0"/>
+                    <TextArea fx:id="descArea"
+                              promptText="Short description..."
+                              prefRowCount="3"
+                              GridPane.rowIndex="6"
+                              GridPane.columnIndex="1"/>
+                </GridPane>
 
-            <HBox spacing="10">
-                <Button text=" Save" onAction="#onSave" styleClass="btn-primary"/>
-                <Button text="✖ Cancel" onAction="#onCancel" styleClass="btn-secondary"/>
-            </HBox>
+                <!-- ERROR -->
+                <Label fx:id="errorLabel"
+                       text=""
+                       styleClass="error-text"/>
+
+                <!-- BUTTONS -->
+                <HBox spacing="12" alignment="CENTER_RIGHT">
+                    <Button text=" Save Investment"
+                            onAction="#onSave"
+                            styleClass="btn-primary"/>
+
+                    <Button text="Cancel"
+                            onAction="#onCancel"
+                            styleClass="btn-secondary"/>
+                </HBox>
+
+            </VBox>
+
         </VBox>
     </center>
 </BorderPane>
