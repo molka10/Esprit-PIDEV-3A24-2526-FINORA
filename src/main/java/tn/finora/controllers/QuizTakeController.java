@@ -33,6 +33,9 @@ public class QuizTakeController {
     private List<QuizQuestion> questions = new ArrayList<>();
     private final List<ToggleGroup> toggleGroups = new ArrayList<>();
 
+
+
+
     private final GeminiService geminiService     = new GeminiService();
     private final CertificateService certService  = new CertificateService();
     private final QuizResultService resultService = new QuizResultService();
