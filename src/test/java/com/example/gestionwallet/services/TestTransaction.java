@@ -23,14 +23,14 @@ public class TestTransaction {
     @Test
     void testAjouterTransaction() {
 
-        // ===== ADD CATEGORY =====
+        // ADD CATEGORY
         categorie c = new categorie("TempTest", "BASSE", "INCOME", "USER");
         sc.ajouter(c);
 
         int categoryId = sc.getIdByName("TempTest");
         assertTrue(categoryId > 0);
 
-        // ===== ADD TRANSACTION =====
+        // ADD TRANSACTION
         Date date = Date.valueOf("2025-02-10");
 
         transaction t = new transaction(
@@ -41,7 +41,7 @@ public class TestTransaction {
                 "MANUAL",
                 1,
                 categoryId,
-                "USER"   // 🔥 مهم
+                "USER"
         );
 
         service.ajouter(t);
@@ -74,8 +74,7 @@ public class TestTransaction {
 
         service.ajouter(t);
 
-        // هنا كان عندك getLastInsertedId تنجم تستعملو
-        // sinon نعمل assertion بسيط
+
 
         assertNotNull(t);
         assertEquals("OUTCOME", t.getType());

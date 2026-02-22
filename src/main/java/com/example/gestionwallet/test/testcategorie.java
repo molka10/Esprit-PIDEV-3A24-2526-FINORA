@@ -9,14 +9,14 @@ public class testcategorie {
 
         servicecategorie sc = new servicecategorie();
 
-        // ADD (zidna role)
+        // ADD
         categorie c1 = new categorie("Transport", "MOYENNE", "OUTCOME", "USER");
         categorie c2 = new categorie("Salary", "HAUTE", "INCOME", "ENTREPRISE");
 
         sc.ajouter(c1);
         sc.ajouter(c2);
 
-        // UPDATE (zidna role zeda)
+        // UPDATE
         categorie c3 = new categorie(1, "Groceries", "HAUTE", "OUTCOME", "USER");
         sc.modifier(c3);
 

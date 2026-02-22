@@ -15,14 +15,14 @@ public class testtransaction {
         servicecategorie sc = new servicecategorie();
         servicetransaction st = new servicetransaction();
 
-        // ===== ADD CATEGORY =====
+        // ADD CATEGORY
         categorie cat = new categorie("TestCategory", "HAUTE", "INCOME", "USER");
         sc.ajouter(cat);
 
         List<categorie> categories = sc.afficher();
         int lastCategoryId = categories.get(categories.size() - 1).getId_category();
 
-        // ===== ADD TRANSACTION =====
+        // ADD TRANSACTION
         transaction t1 = new transaction(
                 "Freelance Work",
                 "INCOME",
@@ -31,7 +31,7 @@ public class testtransaction {
                 "MANUAL",
                 1,
                 lastCategoryId,
-                "USER"          // 🔥 مهم جدا
+                "USER"
         );
 
         st.ajouter(t1);
@@ -39,7 +39,7 @@ public class testtransaction {
         System.out.println(" LISTE TRANSACTIONS ");
         st.afficher().forEach(System.out::println);
 
-        // ===== UPDATE =====
+        // UPDATE
         transaction t2 = new transaction(
                 1,
                 "Freelance Updated",
@@ -49,7 +49,7 @@ public class testtransaction {
                 "MANUAL",
                 1,
                 lastCategoryId,
-                "USER"          // 🔥 لازمها زادة
+                "USER"
         );
 
         st.modifier(t2);
