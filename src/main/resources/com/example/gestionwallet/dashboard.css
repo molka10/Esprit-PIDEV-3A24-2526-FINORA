@@ -551,3 +551,14 @@
     -fx-background-color: transparent;
 }
 
+.simple-purple {
+    -fx-background-color: #ede7f6;   /* purple très clair */
+    -fx-border-color: #8e44ad;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-font-weight: bold;
+}
+
+.simple-purple:hover {
+    -fx-background-color: #d1c4e9;
+}
