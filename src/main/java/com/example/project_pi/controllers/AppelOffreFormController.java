@@ -182,6 +182,27 @@ public class AppelOffreFormController {
                 a.setAppelOffreId(current.getAppelOffreId());
                 service.update(a);
             }
+            // ✅ Email when Appel d'Offre becomes published
+            try {
+                String newStatut = a.getStatut();
+                boolean becamePublished = "published".equalsIgnoreCase(newStatut)
+                        && (oldStatut == null || !"published".equalsIgnoreCase(oldStatut));
+
+                if (becamePublished) {
+                    String admin = System.getenv("ADMIN_EMAIL");
+                    if (admin != null && !admin.isBlank()) {
+                        String subject = "Appel d'Offre publié: " + a.getTitre();
+                        String body = "Votre appel d'offre vient d'être publié.\n\n"
+                                + "Titre: " + a.getTitre() + "\n"
+                                + "Catégorie: " + a.getCategorie() + "\n"
+                                + "Type: " + a.getType() + "\n"
+                                + "Statut: " + a.getStatut() + "\n";
+                        emailService.send(admin, subject, body);
+                    }
+                }
+            } catch (Exception ignored) {
+                // optional: you can show info if you want
+            }
 
             saved = true;
             dialogStage.close();
@@ -369,5 +390,47 @@ public class AppelOffreFormController {
         } catch (Exception e) {
             return 0;
         }
+    }
+    @FXML
+    private void onGenerateDescription() {
+        aiStatusLabel.setText("");
+        aiBtn.setDisable(true);
+        aiStatusLabel.setText("Génération en cours...");
+
+        String titre = titreField.getText();
+        String categorie = (categorieField != null) ? categorieField.getText() : "";
+        String type = typeCombo.getValue();
+        String devise = deviseCombo.getValue();
+
+        double bmin = parseDoubleSafe(budgetMinField.getText());
+        double bmax = parseDoubleSafe(budgetMaxField.getText());
+
+        String dateIso = (dateLimitePicker.getValue() == null) ? "-" : dateLimitePicker.getValue().toString();
+
+        new Thread(() -> {
+            try {
+                String desc = aiService.generateDescription(
+                        titre, categorie, type, bmin, bmax, devise, dateIso,
+                        "Écris un texte clair et professionnel."
+                );
+                Platform.runLater(() -> {
+                    descriptionArea.setText(desc);
+                    aiStatusLabel.setText("✅ Description générée");
+                    aiBtn.setDisable(false);
+                });
+            } catch (Exception e) {
+                Platform.runLater(() -> {
+                    aiStatusLabel.setText("❌ IA indisponible: " + e.getMessage());
+                    aiBtn.setDisable(false);
+                });
+            }
+        }).start();
+    }
+
+    private double parseDoubleSafe(String s) {
+        if (s == null) return 0;
+        String t = s.trim().replace(",", ".");
+        if (t.isEmpty()) return 0;
+        try { return Double.parseDouble(t); } catch (Exception e) { return 0; }
     }
 }
