@@ -1,8 +1,26 @@
-/* ================= ROOT ================= */
+/* ================= ULTRA MODERN BACKGROUND ================= */
 
 .root {
-    -fx-background-color: #f4f4f8; /* blanc très clair */
-    -fx-font-family: "Segoe UI";
+    -fx-background-color:
+            radial-gradient(
+                    center 20% 10%,
+                    radius 80%,
+                    rgba(255,255,255,0.7),
+                    rgba(255,255,255,0.0)
+            ),
+            radial-gradient(
+                    center 80% 20%,
+                    radius 70%,
+                    rgba(196,181,253,0.5),
+                    rgba(196,181,253,0.0)
+            ),
+            linear-gradient(
+                    to bottom right,
+                    #f5f3ff 0%,
+                    #ede9fe 40%,
+                    #ddd6fe 75%,
+                    #c4b5fd 100%
+            );
 }
 
 /* ================= CARD ================= */
@@ -207,10 +225,7 @@
 .chart-title {
     -fx-text-fill: #6a0dad;
 }
-/* ===== GENERAL ===== */
-.root {
-    -fx-font-family: "Segoe UI";
-}
+
 
 /* ===== TITLES ===== */
 .section-title {
@@ -393,3 +408,146 @@
 .list-view {
     -fx-background-radius:15;
 }
+
+
+/* MAIN CONTAINER */
+.main-container {
+    -fx-padding: 50;
+}
+
+/* TITLES */
+.title {
+    -fx-font-size: 32;
+    -fx-font-weight: bold;
+    -fx-text-fill: #4b0082;
+}
+
+.section-title {
+    -fx-font-size: 20;
+    -fx-font-weight: bold;
+    -fx-text-fill: #6a0dad;
+}
+
+.card-title {
+    -fx-font-size: 18;
+    -fx-font-weight: bold;
+    -fx-text-fill: #6a0dad;
+}
+
+/* CARDS */
+.card {
+    -fx-background-color: white;
+    -fx-background-radius: 25;
+    -fx-padding: 30;
+    -fx-effect: dropshadow(gaussian, rgba(106,13,173,0.25), 25,0,0,8);
+}
+
+/* BUTTONS */
+.btn-primary {
+    -fx-background-color: linear-gradient(to right,#6a0dad,#9b59b6);
+    -fx-text-fill: white;
+    -fx-background-radius: 20;
+    -fx-padding: 10 25;
+}
+
+.btn-secondary {
+    -fx-background-color: #8e44ad;
+    -fx-text-fill: white;
+    -fx-background-radius: 20;
+    -fx-padding: 10 25;
+}
+
+.btn-small {
+    -fx-background-color: #9b59b6;
+    -fx-text-fill: white;
+    -fx-background-radius: 15;
+    -fx-padding: 6 15;
+}
+
+.button:hover {
+    -fx-opacity: 0.85;
+    -fx-cursor: hand;
+}
+
+/* SCROLL */
+.scroll-pane {
+    -fx-background-color: transparent;
+}
+
+.inner-scroll {
+    -fx-background-color: transparent;
+}
+
+/* CHART STYLE */
+.chart-plot-background {
+    -fx-background-color: transparent;
+}
+
+.chart-legend {
+    -fx-background-color: transparent;
+}
+
+.main-container {
+    -fx-padding: 50;
+}
+
+.title {
+    -fx-font-size: 32;
+    -fx-font-weight: bold;
+    -fx-text-fill: #4b0082;
+}
+
+.section-title {
+    -fx-font-size: 20;
+    -fx-font-weight: bold;
+    -fx-text-fill: #6a0dad;
+}
+
+.card {
+    -fx-background-color: white;
+    -fx-background-radius: 25;
+    -fx-padding: 30;
+    -fx-effect: dropshadow(gaussian, rgba(106,13,173,0.25), 25,0,0,8);
+}
+
+.stat-card {
+    -fx-background-color: white;
+    -fx-background-radius: 20;
+    -fx-padding: 20;
+    -fx-effect: dropshadow(gaussian, rgba(106,13,173,0.2), 15,0,0,5);
+}
+
+.btn-primary {
+    -fx-background-color: linear-gradient(to right,#6a0dad,#9b59b6);
+    -fx-text-fill: white;
+    -fx-background-radius: 20;
+    -fx-padding: 10 25;
+}
+
+.btn-secondary {
+    -fx-background-color: #8e44ad;
+    -fx-text-fill: white;
+    -fx-background-radius: 20;
+    -fx-padding: 10 25;
+}
+
+.btn-small {
+    -fx-background-color: #9b59b6;
+    -fx-text-fill: white;
+    -fx-background-radius: 15;
+    -fx-padding: 6 15;
+}
+
+.button:hover {
+    -fx-opacity: 0.85;
+    -fx-cursor: hand;
+}
+
+.chart-legend {
+    -fx-background-color: transparent;
+}
+
+.chart-plot-background {
+    -fx-background-color: transparent;
+}
+

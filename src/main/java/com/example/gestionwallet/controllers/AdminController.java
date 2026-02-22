@@ -6,7 +6,6 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.geometry.Insets;
 import javafx.stage.FileChooser;
-
 import com.itextpdf.text.*;
 import com.itextpdf.text.pdf.*;
 import com.itextpdf.text.Document;
@@ -23,22 +22,19 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Side;
 import javafx.scene.chart.LineChart;
-
 import javafx.scene.chart.XYChart;
 import java.util.Map;
 import java.util.TreeMap;
-
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.stage.Stage;
-
-
 import javafx.scene.control.TextField;
-
 import java.io.File;
 import java.io.FileOutputStream;
+import java.net.http.*;
+import java.util.Set;
+import java.util.HashSet;
 
 import com.example.gestionwallet.models.transaction;
 import com.example.gestionwallet.services.servicetransaction;
@@ -47,21 +43,15 @@ public class AdminController {
 
     @FXML private VBox transactionContainer;
     @FXML private VBox walletContainer;
-
-    @FXML private VBox totalBox;
-    @FXML private VBox incomeBox;
-    @FXML private VBox outcomeBox;
-    @FXML private VBox countBox;
-
     @FXML private TextField userSearchField;
-
     @FXML private ComboBox<String> filterBox;
     @FXML private DatePicker datePicker;
     @FXML private PieChart walletChart;
     @FXML private LineChart<String, Number> transactionLineChart;
-
     @FXML private Button backButton;
-    private servicetransaction st = new servicetransaction();
+    @FXML private HBox statsContainer;
+
+    private final servicetransaction st = new servicetransaction();
 
     @FXML
     public void initialize() {
@@ -73,11 +63,10 @@ public class AdminController {
         loadWallet();
         loadChart();
         loadLineChart();
-
-
+        loadStatsUsers();
     }
 
-    // ================= TRANSACTIONS =================
+
     private void loadTransactions() {
 
         transactionContainer.getChildren().clear();
@@ -98,6 +87,7 @@ public class AdminController {
         for (transaction t : st.afficher()) {
             addTransactionRow(t);
         }
+
     }
 
     private void addTransactionRow(transaction t){
@@ -152,7 +142,7 @@ public class AdminController {
         loadTransactions();
     }
 
-    // ================= WALLET + 4 STATS =================
+
     private void loadWallet(){
 
         walletContainer.getChildren().clear();
@@ -167,10 +157,8 @@ public class AdminController {
             String role = t.getRole();
 
             if(role == null || role.trim().isEmpty()){
-                continue; // نتجاوز أي transaction بدون role
+                continue;
             }
-
-
 
             totalMap.put(role,
                     totalMap.getOrDefault(role,0.0) + t.getMontant());
@@ -226,11 +214,10 @@ public class AdminController {
     }
 
 
-    // ================= PDF =================
     @FXML
     private void downloadPDF() {
 
-        // ===== CHOICE DIALOG =====
+
         ChoiceDialog<String> dialog = new ChoiceDialog<>("Wallet",
                 "Wallet",
                 "Transactions",
@@ -240,7 +227,7 @@ public class AdminController {
         dialog.setHeaderText("Que veux-tu exporter ?");
         dialog.setContentText("Choisir :");
 
-        // ✅ appliquer ton dashboard.css
+
         dialog.getDialogPane().getStylesheets().add(
                 getClass().getResource("/com/example/gestionwallet/dashboard.css").toExternalForm()
         );
@@ -254,7 +241,7 @@ public class AdminController {
 
         try {
 
-            // ===== FILE CHOOSER =====
+
             FileChooser fc = new FileChooser();
             fc.getExtensionFilters().add(
                     new FileChooser.ExtensionFilter("PDF", "*.pdf")
@@ -263,12 +250,12 @@ public class AdminController {
             File file = fc.showSaveDialog(null);
             if (file == null) return;
 
-            // ===== PDF CREATION =====
+
             Document doc = new Document();
             PdfWriter.getInstance(doc, new FileOutputStream(file));
             doc.open();
 
-            // ===== BIG TITLE =====
+
             BaseColor violet = new BaseColor(106,13,173);
             Font bigTitle = new Font(Font.FontFamily.HELVETICA,22,Font.BOLD,violet);
 
@@ -280,12 +267,12 @@ public class AdminController {
             doc.add(new Paragraph(" "));
             doc.add(new Paragraph(" "));
 
-            // ===== WALLET =====
+
             if (choix.equals("Wallet") || choix.equals("Wallet + Transactions")) {
                 generateWalletSection(doc);
             }
 
-            // ===== TRANSACTIONS =====
+
             if (choix.equals("Transactions") || choix.equals("Wallet + Transactions")) {
                 generateTransactionSection(doc);
             }
@@ -364,6 +351,7 @@ public class AdminController {
 
         doc.add(table);
     }
+
     private void generateTransactionSection(Document doc) throws Exception {
 
         BaseColor violet = new BaseColor(106,13,173);
@@ -408,10 +396,6 @@ public class AdminController {
     }
 
 
-
-
-
-    // ================= HELPERS =================
     private Label createHeaderLabel(String t,double w){
         Label l=new Label(t);
         l.setPrefWidth(w);
@@ -457,10 +441,8 @@ public class AdminController {
             if(t.getRole() != null &&
                     t.getRole().toLowerCase().contains(userSearch.toLowerCase())){
 
-                // عرض transaction
                 addTransactionRow(t);
 
-                // حساب wallet
                 String role = t.getRole();
 
                 totalMap.put(role,
@@ -478,7 +460,6 @@ public class AdminController {
             }
         }
 
-        // ===== header wallet =====
         HBox header = new HBox(30);
         header.setPadding(new Insets(10));
         header.setStyle("-fx-background-color:#8e44ad; -fx-background-radius:10;");
@@ -493,7 +474,7 @@ public class AdminController {
 
         walletContainer.getChildren().add(header);
 
-        // ===== rows =====
+
         for(String role : totalMap.keySet()){
 
             HBox row = new HBox(30);
@@ -511,16 +492,14 @@ public class AdminController {
             walletContainer.getChildren().add(row);
         }
     }
+
     @FXML
     private void resetSearch(){
 
-        // vider champ recherche
         userSearchField.clear();
 
-        // recharger transactions normales
         loadTransactions();
 
-        // recharger wallet normal
         loadWallet();
     }
 
@@ -538,7 +517,6 @@ public class AdminController {
 
         double total = income + outcome;
 
-        // éviter division par zéro
         if(total == 0){
             walletChart.setData(null);
             return;
@@ -561,8 +539,8 @@ public class AdminController {
         walletChart.setLegendSide(Side.BOTTOM);
         walletChart.setLabelsVisible(true);
 
-        data.get(0).getNode().setStyle("-fx-pie-color: #6a0dad;");   // violet foncé
-        data.get(1).getNode().setStyle("-fx-pie-color: #b39ddb;");   // violet clair
+        data.get(0).getNode().setStyle("-fx-pie-color: #6a0dad;");
+        data.get(1).getNode().setStyle("-fx-pie-color: #b39ddb;");
 
     }
     private void loadLineChart() {
@@ -572,7 +550,6 @@ public class AdminController {
         XYChart.Series<String, Number> series = new XYChart.Series<>();
         series.setName("Total par date");
 
-        // Map pour regrouper par date
         Map<String, Double> totalParDate = new TreeMap<>();
 
         for (transaction t : st.afficher()) {
@@ -588,7 +565,6 @@ public class AdminController {
             );
         }
 
-        // Ajouter au chart
         for (Map.Entry<String, Double> entry : totalParDate.entrySet()) {
 
             series.getData().add(
@@ -605,7 +581,6 @@ public class AdminController {
         transactionLineChart.setLegendVisible(false);
         transactionLineChart.setCreateSymbols(true);
 
-        // Style violet
         Platform.runLater(() -> {
             series.getNode().setStyle(
                     "-fx-stroke: #6a0dad; -fx-stroke-width: 3px;"
@@ -626,18 +601,66 @@ public class AdminController {
         try {
 
             Parent root = FXMLLoader.load(
-                    getClass().getResource(
-                            "/com/example/gestionwallet/integ.fxml"
-                    )
+                    getClass().getResource("/com/example/gestionwallet/integ.fxml")
             );
 
             Stage stage = (Stage) backButton.getScene().getWindow();
             stage.getScene().setRoot(root);
+            stage.setMaximized(true);
             stage.show();
 
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
+    private VBox createStatCard(String title, int value, String color) {
+
+        VBox box = new VBox(10);
+        box.setPadding(new Insets(15));
+        box.setStyle(
+                "-fx-background-color:#f3f0fa;" +
+                        "-fx-background-radius:15;" +
+                        "-fx-border-radius:15;"
+        );
+
+        Label titleLabel = new Label(title);
+        titleLabel.setStyle("-fx-text-fill:" + color + "; -fx-font-size:16px; -fx-font-weight:bold;");
+
+        Label valueLabel = new Label(String.valueOf(value));
+        valueLabel.setStyle("-fx-text-fill:" + color + "; -fx-font-size:22px; -fx-font-weight:bold;");
+
+        box.getChildren().addAll(titleLabel, valueLabel);
+
+        return box;
+    }
+    private void loadStatsUsers() {
+
+        Set<String> users = new HashSet<>();
+        Set<String> entreprises = new HashSet<>();
+
+        for (transaction t : st.afficher()) {
+
+            if (t.getRole() == null) continue;
+
+            if (t.getRole().equalsIgnoreCase("USER")) {
+                users.add(t.getRole());
+            }
+            else if (t.getRole().equalsIgnoreCase("ENTREPRISE")) {
+                entreprises.add(t.getRole());
+            }
+        }
+
+        int nbrUser = users.size();
+        int nbrEntreprise = entreprises.size();
+
+        statsContainer.getChildren().clear();
+
+        statsContainer.getChildren().addAll(
+                createStatCard("Users", nbrUser, "#6a0dad"),
+                createStatCard("Entreprises", nbrEntreprise, "#8e44ad"),
+                createStatCard("Total", nbrUser + nbrEntreprise, "#4b0082")
+        );
+    }
+
 
 }

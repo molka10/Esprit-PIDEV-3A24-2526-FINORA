@@ -44,6 +44,7 @@
                               onAction="#changeCurrency"/>
                     <!-- STAT CARDS -->
                     <HBox spacing="30" alignment="CENTER">
+
                         <VBox spacing="5"
                               style="-fx-background-color:white; -fx-padding:20; -fx-background-radius:15; -fx-effect:dropshadow(gaussian, rgba(0,0,0,0.1), 15,0,0,3);">
 
@@ -200,6 +201,14 @@
                                   style="-fx-background-radius:15;"/>
 
                     </VBox>
+                          <Button text="Analyse IA"
+                                  onAction="#analyzeWithAI"
+                                  styleClass="btn-secondary"
+                                  prefWidth="150"/>
+                          <Label fx:id="aiResultLabel"
+                                 wrapText="true"
+                                 text="Cliquez sur Analyse IA..."
+                                 style="-fx-font-size:14px;"/>
 
                 </VBox>
 

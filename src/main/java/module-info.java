@@ -8,7 +8,8 @@ module com.example.gestionwallet {
     requires com.calendarfx.view;
     requires org.apache.poi.poi;
     requires org.apache.poi.ooxml;
-
+    requires java.net.http;
+    requires org.json;
 
     opens com.example.gestionwallet.controllers to javafx.fxml;
     opens com.example.gestionwallet.models to javafx.base;

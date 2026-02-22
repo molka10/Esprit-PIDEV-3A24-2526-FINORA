@@ -14,6 +14,11 @@ import com.calendarfx.view.CalendarView;
 import com.calendarfx.model.Calendar;
 import com.calendarfx.model.CalendarSource;
 import com.calendarfx.model.Entry;
+
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import com.example.gestionwallet.models.transaction;
@@ -34,7 +39,10 @@ import javafx.scene.control.TextField;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import java.util.*;
-
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import javafx.scene.layout.FlowPane;
 import com.example.gestionwallet.models.categorie;
 import com.example.gestionwallet.services.servicecategorie;
@@ -58,6 +66,8 @@ public class UserController {
     private ObservableList<HBox> wishlist = FXCollections.observableArrayList();
 
     @FXML private ComboBox<String> currencyBox;
+    @FXML private Label aiResultLabel;
+
 
     private String currentCurrency = "DT";
     private double conversionRate = 1.0;
@@ -862,6 +872,135 @@ public class UserController {
 
         } catch (Exception e) {
             e.printStackTrace();
+        }
+    }
+
+
+
+    @FXML
+    private void analyzeWithAI() {
+
+        double totalIncome = 0;
+        double totalOutcome = 0;
+
+        for (transaction t : st.afficherParRole("USER")) {
+            if (t.getMontant() >= 0) {
+                totalIncome += t.getMontant();
+            } else {
+                totalOutcome += Math.abs(t.getMontant());
+            }
+        }
+
+        double surplus = totalIncome - totalOutcome;
+
+        double ratio = 0;
+        if (totalIncome > 0) {
+            ratio = (totalOutcome / totalIncome) * 100;
+        }
+
+        // 🔒 Java décide le risque (logique fixe)
+        String riskLevel;
+        if (ratio < 50) {
+            riskLevel = "Faible";
+        } else if (ratio < 75) {
+            riskLevel = "Modéré";
+        } else {
+            riskLevel = "Élevé";
+        }
+
+        // ================= PROMPT SIMPLE =================
+        String prompt = """
+Explique brièvement la situation financière.
+Ne modifie aucun chiffre.
+Ne parle pas de dette.
+Ne parle pas d’endettement.
+Ne fais aucun calcul.
+Phrases courtes.
+
+Revenus : %.2f DT
+Dépenses : %.2f DT
+Excédent : %.2f DT
+Ratio : %.2f %%
+"""
+                .formatted(totalIncome, totalOutcome, surplus, ratio);
+
+        try {
+
+            HttpClient client = HttpClient.newHttpClient();
+
+            String cleanPrompt = prompt
+                    .replace("\\", "\\\\")
+                    .replace("\"", "\\\"")
+                    .replace("\n", "\\n")
+                    .replace("\r", "");
+
+            String requestBody = """
+{
+  "model": "phi3",
+  "prompt": "%s",
+  "stream": false
+}
+""".formatted(cleanPrompt);
+
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create("http://localhost:11434/api/generate"))
+                    .header("Content-Type", "application/json")
+                    .POST(HttpRequest.BodyPublishers.ofString(requestBody))
+                    .build();
+
+            HttpResponse<String> response =
+                    client.send(request, HttpResponse.BodyHandlers.ofString());
+
+            if (response.statusCode() != 200) {
+                aiResultLabel.setText("Erreur Ollama:\n" + response.body());
+                return;
+            }
+
+            String body = response.body();
+
+            org.json.JSONObject json = new org.json.JSONObject(body);
+            String aiExplanation = json.getString("response");
+            aiExplanation = aiExplanation
+                    .replace("€", "DT")
+                    .replace("euros", "DT")
+                    .replace("Euro", "DT")
+                    .replace("EUR", "DT")
+                    .replace("dollar", "DT")
+                    .replace("dollars", "DT")
+                    .replace("USD", "DT")
+                    .replace("millions de", "")
+                    .replace("million de", "");
+
+            // ================= STRUCTURE FIXE =================
+            String finalText = """
+ANALYSE FINANCIÈRE
+
+RÉSULTAT
+
+- Revenus mensuels : %.2f DT
+- Dépenses mensuelles : %.2f DT
+- Excédent mensuel : %.2f DT
+- Ratio dépenses/revenus : %.2f %%
+
+NIVEAU DE RISQUE
+
+- %s
+
+EXPLICATION
+
+%s
+
+CONSEILS
+
+- Maintenir le niveau actuel de dépenses.
+- Continuer à épargner une partie de l’excédent.
+"""
+                    .formatted(totalIncome, totalOutcome, surplus, ratio, riskLevel, aiExplanation);
+
+            aiResultLabel.setText(finalText);
+
+        } catch (Exception e) {
+            aiResultLabel.setText("Erreur : " + e.getMessage());
         }
     }
 
