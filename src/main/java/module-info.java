@@ -7,6 +7,8 @@ module com.example.project_pi {
     // ===== Required for JDBC =====
     requires java.sql;
     requires java.net.http;
+    requires java.net.http;     // AI calls (HTTP)
+    requires jakarta.mail;      // Email
 
     // ===== Allow FXML to access controllers =====
     opens com.example.project_pi.controllers to javafx.fxml;
