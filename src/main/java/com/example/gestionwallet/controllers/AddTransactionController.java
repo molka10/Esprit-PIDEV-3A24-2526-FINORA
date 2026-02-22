@@ -6,13 +6,14 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import java.util.List;
 
 import com.example.gestionwallet.models.transaction;
 import com.example.gestionwallet.models.categorie;
 import com.example.gestionwallet.services.servicetransaction;
 import com.example.gestionwallet.services.servicecategorie;
 
-import java.util.List;
+
 
 public class AddTransactionController {
 
@@ -24,23 +25,23 @@ public class AddTransactionController {
 
     private Object parentController;
     private String currentType;
-
     private servicetransaction st = new servicetransaction();
     private servicecategorie sc = new servicecategorie();
     private String role;
+
     public void setRole(String role){
         this.role = role;
+    }
+    public void setParentController(Object controller) {
+        this.parentController = controller;
     }
     @FXML
     public void initialize() {
 
-        // Style général blanc + violet
         nameField.setStyle("-fx-background-color:#f3f0fa; -fx-text-fill:#4b0082; -fx-background-radius:10;");
         amountField.setStyle("-fx-background-color:#f3f0fa; -fx-text-fill:#4b0082; -fx-background-radius:10;");
         datePicker.setStyle("-fx-background-color:#f3f0fa; -fx-background-radius:10;");
         categoryBox.setStyle("-fx-background-color:#f3f0fa; -fx-background-radius:10;");
-
-        // 🔥 Limiter date au mois actuel seulement
         datePicker.setDayCellFactory(dp -> new DateCell() {
             @Override
             public void updateItem(java.time.LocalDate date, boolean empty) {
@@ -58,9 +59,8 @@ public class AddTransactionController {
         });
     }
 
-    public void setParentController(Object controller) {
-        this.parentController = controller;
-    }
+
+
     public void setType(String type) {
 
         this.currentType = type;
@@ -75,12 +75,10 @@ public class AddTransactionController {
 
         categoryBox.getItems().clear();
 
-        // نجيب كان categories حسب role
         List<categorie> list = sc.getByRole(role);
 
         for (categorie c : list) {
 
-            // و نفلتر حسب type زادة
             if (c.getType().equalsIgnoreCase(type)) {
                 categoryBox.getItems().add(c.getNom());
             }
@@ -196,8 +194,7 @@ public class AddTransactionController {
 
             AddCategoryController controller = loader.getController();
 
-            // 🔥 هذا هو المهم
-            controller.setRole(role);           // USER أو ENTREPRISE
+            controller.setRole(role);
             controller.setCategoryType(currentType);
 
             stage.showAndWait();

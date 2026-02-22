@@ -36,6 +36,7 @@ import java.net.http.*;
 import java.util.Set;
 import java.util.HashSet;
 import java.net.URI;
+
 import com.example.gestionwallet.models.transaction;
 import com.example.gestionwallet.services.servicetransaction;
 
@@ -51,6 +52,7 @@ public class AdminController {
     @FXML private Button backButton;
     @FXML private HBox statsContainer;
     @FXML private Label currencyRatesLabel;
+
     private final servicetransaction st = new servicetransaction();
 
     @FXML

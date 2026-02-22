@@ -4,11 +4,11 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.geometry.Insets;
+import java.util.List;
 
 import com.example.gestionwallet.models.categorie;
 import com.example.gestionwallet.services.servicecategorie;
 
-import java.util.List;
 
 public class AddCategoryController {
 
@@ -27,8 +27,6 @@ public class AddCategoryController {
     public void initialize() {
 
         priorityBox.getItems().addAll("HAUTE", "MOYENNE", "BASSE");
-
-        // Style blanc + violet
         nameField.setStyle("-fx-background-color:#f3f0fa; -fx-text-fill:#4b0082; -fx-background-radius:10;");
         priorityBox.setStyle("-fx-background-color:#f3f0fa; -fx-background-radius:10;");
     }
@@ -169,11 +167,11 @@ public class AddCategoryController {
 
         switch (priority) {
             case "HAUTE":
-                return "-fx-text-fill:#2ecc71; -fx-font-weight:bold;"; // vert
+                return "-fx-text-fill:#2ecc71; -fx-font-weight:bold;";
             case "MOYENNE":
-                return "-fx-text-fill:#f39c12; -fx-font-weight:bold;"; // orange
+                return "-fx-text-fill:#f39c12; -fx-font-weight:bold;";
             case "BASSE":
-                return "-fx-text-fill:#e74c3c; -fx-font-weight:bold;"; // rouge
+                return "-fx-text-fill:#e74c3c; -fx-font-weight:bold;";
             default:
                 return "-fx-text-fill:#4b0082;";
         }

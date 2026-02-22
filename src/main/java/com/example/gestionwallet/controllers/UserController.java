@@ -14,7 +14,6 @@ import com.calendarfx.view.CalendarView;
 import com.calendarfx.model.Calendar;
 import com.calendarfx.model.CalendarSource;
 import com.calendarfx.model.Entry;
-
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -39,11 +38,8 @@ import javafx.scene.control.TextField;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import java.util.*;
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
 import javafx.scene.layout.FlowPane;
+
 import com.example.gestionwallet.models.categorie;
 import com.example.gestionwallet.services.servicecategorie;
 
@@ -52,7 +48,6 @@ public class UserController {
     @FXML private Label balanceLabel;
     @FXML private Label totalIncomeLabel;
     @FXML private Label totalOutcomeLabel;
-
     @FXML private LineChart<String, Number> incomeChart;
     @FXML private LineChart<String, Number> outcomeChart;
     @FXML private PieChart pieChart;
@@ -63,19 +58,16 @@ public class UserController {
     @FXML private TextField priceField;
     @FXML private ListView<HBox> wishlistView;
     @FXML private Button backButton;
-    private ObservableList<HBox> wishlist = FXCollections.observableArrayList();
-
     @FXML private ComboBox<String> currencyBox;
     @FXML private Label aiResultLabel;
 
-
+    private ObservableList<HBox> wishlist = FXCollections.observableArrayList();
     private String currentCurrency = "DT";
     private double conversionRate = 1.0;
-
     private final servicetransaction st = new servicetransaction();
     private servicecategorie sc = new servicecategorie();
-
     private double balance = 0;
+
     @FXML
     public void initialize() {
 
@@ -94,7 +86,7 @@ public class UserController {
     private void handleSearch() {
         loadTransactions();
     }
-    // ================= LOAD DATA =================
+
     public void loadTransactions() {
 
         incomeChart.getData().clear();
@@ -129,7 +121,7 @@ public class UserController {
             if (cat == null) continue;
 
             String categorie = cat.getNom();
-            String categoryType = cat.getType();  // 🔥 ناخذ type من categorie
+            String categoryType = cat.getType();
 
             double montant = currentTransaction.getMontant() * conversionRate;
             LocalDate date = currentTransaction.getDate_transaction().toLocalDate();
@@ -175,7 +167,7 @@ public class UserController {
 
         updateBalance();
 
-        // ================= PIE CHART EN % =================
+
 
         double totalAll = totalIncome + totalOutcome;
 
@@ -207,7 +199,7 @@ public class UserController {
             pieChart.getData().get(1).getNode().setStyle("-fx-pie-color: #6a0dad;");
         }
 
-        // ================= MOYENNE PAR JOUR =================
+
 
         double averagePerDay = 0;
 
@@ -220,7 +212,7 @@ public class UserController {
                                 averagePerDay * conversionRate,
                                 currentCurrency)
         );
-        // ================= DESIGN MENSUEL =================
+
 
         monthlyContainer.getChildren().clear();
 
@@ -283,7 +275,7 @@ public class UserController {
             monthlyContainer.getChildren().add(monthCard);
         }
     }
-    // ================= BALANCE =================
+
 
     private void updateBalance() {
 
@@ -301,7 +293,7 @@ public class UserController {
     }
 
 
-    // ================= DETAILS =================
+
 
     private void showTransactionDetails(transaction t) {
 
@@ -352,7 +344,6 @@ public class UserController {
         Scene scene = new Scene(root, 400, 300);
         stage.setScene(scene);
 
-        // Actions
         supprimer.setOnAction(e -> {
             st.supprimer(t.getId_transaction());
             loadTransactions();
@@ -370,7 +361,7 @@ public class UserController {
     }
 
 
-    // ================= EDIT POPUP =================
+
 
     private void openEditPopup(transaction t) {
 
@@ -383,14 +374,14 @@ public class UserController {
         Label title = new Label("Modifier Transaction");
         title.setStyle("-fx-font-size:18; -fx-font-weight:bold; -fx-text-fill:#6a0dad;");
 
-        // ---------- NOM ----------
+
         Label nameLabel = new Label("Nom");
         nameLabel.setStyle("-fx-text-fill:#4b0082;");
 
         TextField nameField = new TextField(t.getNom_transaction());
         nameField.setStyle("-fx-background-radius:10; -fx-padding:8;");
 
-        // ---------- MONTANT ----------
+
         Label amountLabel = new Label("Montant");
         amountLabel.setStyle("-fx-text-fill:#4b0082;");
 
@@ -398,7 +389,7 @@ public class UserController {
                 new TextField(String.valueOf(Math.abs(t.getMontant())));
         amountField.setStyle("-fx-background-radius:10; -fx-padding:8;");
 
-        // ---------- DATE ----------
+
         Label dateLabel = new Label("Date");
         dateLabel.setStyle("-fx-text-fill:#4b0082;");
 
@@ -423,7 +414,6 @@ public class UserController {
             }
         });
 
-        // ---------- BOUTONS ----------
         Button saveBtn = new Button("Enregistrer");
         saveBtn.setStyle("""
         -fx-background-color:#8e44ad;
@@ -461,7 +451,6 @@ public class UserController {
         dialogStage.setScene(scene);
         nameField.requestFocus();
 
-        // ================= SAVE ACTION =================
 
         saveBtn.setOnAction(ev -> {
 
@@ -509,7 +498,6 @@ public class UserController {
     }
 
 
-    // ================= ADD =================
 
     @FXML
     private void openAddIncome() {
@@ -548,7 +536,7 @@ public class UserController {
     }
 
 
-    // ================= ERROR =================
+
 
     private void showError(String message) {
 
@@ -572,10 +560,10 @@ public class UserController {
         calendarView.setShowSourceTray(false);
 
         Calendar incomeCal = new Calendar("Income");
-        incomeCal.setStyle(Calendar.Style.STYLE2); // green
+        incomeCal.setStyle(Calendar.Style.STYLE2);
 
         Calendar outcomeCal = new Calendar("Outcome");
-        outcomeCal.setStyle(Calendar.Style.STYLE3); // red
+        outcomeCal.setStyle(Calendar.Style.STYLE3);
 
         for (transaction t : st.afficherParRole("USER")) {
 
@@ -627,12 +615,12 @@ public class UserController {
             PdfWriter.getInstance(document, new FileOutputStream(file));
             document.open();
 
-            // 🎨 Purple shades
-            BaseColor purpleDark = new BaseColor(106, 13, 173);     // #6a0dad
-            BaseColor purpleMedium = new BaseColor(142, 68, 173);   // #8e44ad
-            BaseColor purpleLight = new BaseColor(232, 224, 248);   // light purple
 
-            // ===== TITLE =====
+            BaseColor purpleDark = new BaseColor(106, 13, 173);
+            BaseColor purpleMedium = new BaseColor(142, 68, 173);
+            BaseColor purpleLight = new BaseColor(232, 224, 248);
+
+
             Font titleFont = new Font(Font.FontFamily.HELVETICA, 20, Font.BOLD, purpleDark);
             Paragraph title = new Paragraph("WALLET REPORT", titleFont);
             title.setAlignment(Element.ALIGN_CENTER);
@@ -642,7 +630,6 @@ public class UserController {
             document.add(new Paragraph("Date d'export : " + java.time.LocalDate.now()));
             document.add(new Paragraph(" "));
 
-            // ===== STAT BOX =====
             Font statFont = new Font(Font.FontFamily.HELVETICA, 12, Font.BOLD, purpleMedium);
 
             document.add(new Paragraph("Total Income : " + totalIncomeLabel.getText(), statFont));
@@ -652,11 +639,11 @@ public class UserController {
             document.add(new Paragraph(" "));
             document.add(new Paragraph(" "));
 
-            // ===== TABLE =====
+
             PdfPTable table = new PdfPTable(4);
             table.setWidthPercentage(100);
 
-            // Header
+
             Font headerFont = new Font(Font.FontFamily.HELVETICA, 12, Font.BOLD, BaseColor.WHITE);
 
             PdfPCell h1 = new PdfPCell(new Phrase("Nom", headerFont));
@@ -674,7 +661,7 @@ public class UserController {
             table.addCell(h3);
             table.addCell(h4);
 
-            // Content
+
             for (transaction t : st.afficherParRole("USER")) {
 
                 table.addCell(t.getNom_transaction());
@@ -710,6 +697,7 @@ public class UserController {
             showError("Erreur export PDF !");
         }
     }
+
     @FXML
     private void exportExcel() {
 
@@ -724,14 +712,13 @@ public class UserController {
             File file = fileChooser.showSaveDialog(balanceLabel.getScene().getWindow());
             if (file == null) return;
 
-            // ===== Workbook =====
             org.apache.poi.ss.usermodel.Workbook workbook =
                     new org.apache.poi.xssf.usermodel.XSSFWorkbook();
 
             org.apache.poi.ss.usermodel.Sheet sheet =
                     workbook.createSheet("Transactions");
 
-            // ===== Header Style =====
+
             org.apache.poi.ss.usermodel.CellStyle headerStyle =
                     workbook.createCellStyle();
 
@@ -741,7 +728,7 @@ public class UserController {
             headerFont.setBold(true);
             headerStyle.setFont(headerFont);
 
-            // ===== Header Row =====
+
             org.apache.poi.ss.usermodel.Row header =
                     sheet.createRow(0);
 
@@ -756,7 +743,7 @@ public class UserController {
                 cell.setCellStyle(headerStyle);
             }
 
-            // ===== Data Rows =====
+
             int rowNum = 1;
 
             for (transaction t : st.afficherParRole("USER")) {
@@ -773,12 +760,11 @@ public class UserController {
                 );
             }
 
-            // ===== Auto size =====
+
             for (int i = 0; i < columns.length; i++) {
                 sheet.autoSizeColumn(i);
             }
 
-            // ===== Save file =====
             java.io.FileOutputStream fileOut =
                     new java.io.FileOutputStream(file);
 
@@ -927,7 +913,6 @@ public class UserController {
             ratio = (totalOutcome / totalIncome) * 100;
         }
 
-        // 🔒 Java décide le risque (logique fixe)
         String riskLevel;
         if (ratio < 50) {
             riskLevel = "Faible";
@@ -937,7 +922,6 @@ public class UserController {
             riskLevel = "Élevé";
         }
 
-        // ================= PROMPT SIMPLE =================
         String prompt = """
 Explique brièvement la situation financière.
 Ne modifie aucun chiffre.
@@ -1000,7 +984,7 @@ Ratio : %.2f %%
                     .replace("millions de", "")
                     .replace("million de", "");
 
-            // ================= STRUCTURE FIXE =================
+
             String finalText = """
 ANALYSE FINANCIÈRE
 

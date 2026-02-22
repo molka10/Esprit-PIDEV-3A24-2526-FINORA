@@ -27,10 +27,7 @@ public class integController {
         try {
 
             Parent root = FXMLLoader.load(
-                    getClass().getResource(
-                            "/com/example/gestionwallet/user.fxml"
-                    )
-            );
+                    getClass().getResource("/com/example/gestionwallet/user.fxml"));
 
             Stage stage = (Stage) userButton.getScene().getWindow();
             stage.getScene().setRoot(root);
@@ -46,10 +43,7 @@ public class integController {
         try {
 
             Parent root = FXMLLoader.load(
-                    getClass().getResource(
-                            "/com/example/gestionwallet/entreprise.fxml"
-                    )
-            );
+                    getClass().getResource("/com/example/gestionwallet/entreprise.fxml"));
 
             Stage stage = (Stage) userButton.getScene().getWindow();
             stage.getScene().setRoot(root);
@@ -57,7 +51,8 @@ public class integController {
 
         } catch (Exception e) {
             e.printStackTrace();
-        }    }
+        }
+    }
 
 
     @FXML
@@ -66,10 +61,7 @@ public class integController {
         try {
 
             Parent root = FXMLLoader.load(
-                    getClass().getResource(
-                            "/com/example/gestionwallet/admin-dashboard.fxml"
-                    )
-            );
+                    getClass().getResource("/com/example/gestionwallet/admin-dashboard.fxml"));
 
             Stage stage = (Stage) adminButton.getScene().getWindow();
             stage.getScene().setRoot(root);
