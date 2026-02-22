@@ -1,10 +1,11 @@
 package tn.finora.controllers;
 
+import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
-import javafx.scene.control.Label;
+import javafx.scene.chart.*;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
@@ -12,23 +13,38 @@ import tn.finora.entities.InvestmentManagement;
 import tn.finora.finorainves.AppState;
 import tn.finora.finorainves.SceneNavigator;
 import tn.finora.services.InvestmentManagementService;
+import javafx.scene.control.Label;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class InvestmentManagementCardsController {
 
     @FXML
     private FlowPane cardsPane;
 
+    @FXML
+    private PieChart statusPieChart;
+
+    @FXML
+    private BarChart<String, Number> amountBarChart;
+
+    @FXML
+    private CategoryAxis typeAxis;
+
+    @FXML
+    private NumberAxis amountAxis;
+
     private final InvestmentManagementService service = new InvestmentManagementService();
 
+    // ================= INITIALIZE =================
     @FXML
     public void initialize() {
         loadCards();
     }
 
-    // ================= Navigation =================
-
+    // ================= NAVIGATION =================
     @FXML
     private void onAdd() {
         AppState.setSelectedManagement(null);
@@ -45,18 +61,17 @@ public class InvestmentManagementCardsController {
         SceneNavigator.goTo("investment_cards.fxml", "Investments");
     }
 
-    // ================= Load Cards =================
-
+    // ================= LOAD CARDS =================
     private void loadCards() {
         cardsPane.getChildren().clear();
         List<InvestmentManagement> list = service.getAll();
         for (InvestmentManagement m : list) {
             cardsPane.getChildren().add(buildCard(m));
         }
+        loadStatistics(list); // mettre à jour les graphiques
     }
 
-    // ================= Build Card =================
-
+    // ================= BUILD CARD =================
     private VBox buildCard(InvestmentManagement m) {
         VBox card = new VBox(8);
         card.getStyleClass().add("management-card");
@@ -99,8 +114,7 @@ public class InvestmentManagementCardsController {
         return card;
     }
 
-    // ================= Delete =================
-
+    // ================= DELETE =================
     private void onDelete(InvestmentManagement m) {
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
         alert.setTitle("Confirm Delete");
@@ -110,14 +124,44 @@ public class InvestmentManagementCardsController {
         alert.showAndWait().ifPresent(btn -> {
             if (btn == ButtonType.OK) {
                 service.delete(m.getManagementId());
-                loadCards();
+                loadCards(); // refresh cards and stats
             }
         });
     }
 
-    // ================= Safe String =================
-
+    // ================= SAFE STRING =================
     private String safe(String s) {
         return (s == null || s.isBlank()) ? "-" : s;
+    }
+
+    // ================= STATISTICS =================
+    private void loadStatistics(List<InvestmentManagement> list) {
+        // PieChart: répartition par status
+        long activeCount = list.stream()
+                .filter(m -> "Active".equalsIgnoreCase(m.getStatus()))
+                .count();
+
+        long closedCount = list.stream()
+                .filter(m -> "Closed".equalsIgnoreCase(m.getStatus()))
+                .count();
+
+        statusPieChart.setData(FXCollections.observableArrayList(
+                new PieChart.Data("Active", activeCount),
+                new PieChart.Data("Closed", closedCount)
+        ));
+
+        // BarChart: montant total par type
+        Map<String, Double> totalByType = new HashMap<>();
+        for (InvestmentManagement m : list) {
+            String type = safe(m.getInvestmentType());
+            double amount = m.getAmountInvested() != null ? m.getAmountInvested().doubleValue() : 0;
+            totalByType.put(type, totalByType.getOrDefault(type, 0.0) + amount);
+        }
+
+        amountBarChart.getData().clear();
+        XYChart.Series<String, Number> series = new XYChart.Series<>();
+        series.setName("Total Invested");
+        totalByType.forEach((type, total) -> series.getData().add(new XYChart.Data<>(type, total)));
+        amountBarChart.getData().add(series);
     }
 }

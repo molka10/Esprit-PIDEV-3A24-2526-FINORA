@@ -6,8 +6,8 @@
   <component name="ChangeListManager">
     <list default="true" id="c29a7d9c-7ce5-447a-8626-457253968d65" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/tn/finora/controllers/InvestmentCardsController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/tn/finora/controllers/InvestmentCardsController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/tn/finora/finorainves/ui/investment_cards.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/tn/finora/finorainves/ui/investment_cards.fxml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/tn/finora/controllers/InvestmentManagementCardsController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/tn/finora/controllers/InvestmentManagementCardsController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/tn/finora/finorainves/ui/investment_management_cards.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/tn/finora/finorainves/ui/investment_management_cards.fxml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -61,7 +61,7 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1771756030130</updated>
-      <workItem from="1771756031381" duration="9210000" />
+      <workItem from="1771756031381" duration="13106000" />
     </task>
     <servers />
   </component>

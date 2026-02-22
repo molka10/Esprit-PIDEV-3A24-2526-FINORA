@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
+<?import javafx.scene.chart.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
@@ -9,6 +10,7 @@
             fx:controller="tn.finora.controllers.InvestmentManagementCardsController"
             stylesheets="@../styles/style.css">
 
+    <!-- ================= TOP BAR ================= -->
     <top>
         <HBox spacing="10" styleClass="top-bar">
             <padding>
@@ -22,16 +24,33 @@
         </HBox>
     </top>
 
+    <!-- ================= CENTER ================= -->
     <center>
-        <ScrollPane fitToWidth="true" styleClass="scroll-bg">
-            <content>
-                <FlowPane fx:id="cardsPane" hgap="14" vgap="14" prefWrapLength="980" styleClass="cards-zone">
-                    <padding>
-                        <Insets top="14" right="14" bottom="14" left="14"/>
-                    </padding>
-                </FlowPane>
-            </content>
-        </ScrollPane>
+        <VBox spacing="16" style="-fx-padding: 12;">
+            <!-- Charts -->
+            <HBox spacing="20">
+                <PieChart fx:id="statusPieChart" prefWidth="300" prefHeight="250" title="Status Distribution"/>
+                <BarChart fx:id="amountBarChart" title="Total Amount by Type" prefWidth="500" prefHeight="250">
+                    <xAxis>
+                        <CategoryAxis fx:id="typeAxis" label="Investment Type"/>
+                    </xAxis>
+                    <yAxis>
+                        <NumberAxis fx:id="amountAxis" label="Amount Invested"/>
+                    </yAxis>
+                </BarChart>
+            </HBox>
+
+            <!-- Cards ScrollPane -->
+            <ScrollPane fitToWidth="true" styleClass="scroll-bg" prefHeight="400">
+                <content>
+                    <FlowPane fx:id="cardsPane" hgap="14" vgap="14" prefWrapLength="980" styleClass="cards-zone">
+                        <padding>
+                            <Insets top="14" right="14" bottom="14" left="14"/>
+                        </padding>
+                    </FlowPane>
+                </content>
+            </ScrollPane>
+        </VBox>
     </center>
 
 </BorderPane>
