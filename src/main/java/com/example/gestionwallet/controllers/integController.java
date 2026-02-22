@@ -4,7 +4,6 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.stage.Stage;
 public class integController {
 
@@ -29,7 +28,7 @@ public class integController {
 
             Parent root = FXMLLoader.load(
                     getClass().getResource(
-                            "/com/example/gestionwallet/wallet.fxml"
+                            "/com/example/gestionwallet/user.fxml"
                     )
             );
 
@@ -44,8 +43,21 @@ public class integController {
 
     @FXML
     private void goToEntreprise() {
-        System.out.println("Entreprise clicked");
-    }
+        try {
+
+            Parent root = FXMLLoader.load(
+                    getClass().getResource(
+                            "/com/example/gestionwallet/entreprise.fxml"
+                    )
+            );
+
+            Stage stage = (Stage) userButton.getScene().getWindow();
+            stage.getScene().setRoot(root);
+
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }    }
 
 
     @FXML

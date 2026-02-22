@@ -36,9 +36,11 @@
                         style="-fx-background-color: #7b2cbf; -fx-text-fill: white; -fx-font-size: 16px; -fx-background-radius: 15;" />
 
                 <Button text="ENTREPRISE"
-                        prefWidth="250" prefHeight="50"
+                        fx:id="entrepriseButton"
+                        onAction="#goToEntreprise"
+                        prefWidth="250.0"
+                        prefHeight="50.0"
                         style="-fx-background-color: #7b2cbf; -fx-text-fill: white; -fx-font-size: 16px; -fx-background-radius: 15;" />
-
                 <Button text="ADMIN"
                         prefWidth="250" prefHeight="50"
                         fx:id="adminButton"

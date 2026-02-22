@@ -34,21 +34,12 @@ import javafx.scene.control.TextField;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import java.util.*;
-import com.itextpdf.text.*;
-import com.itextpdf.text.pdf.*;
+
 import javafx.scene.layout.FlowPane;
-import com.itextpdf.text.*;
-import com.itextpdf.text.pdf.*;
 import com.example.gestionwallet.models.categorie;
 import com.example.gestionwallet.services.servicecategorie;
-import org.apache.poi.ss.usermodel.*;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
-import javafx.stage.Stage;
 
-public class WalletController {
+public class UserController {
 
     @FXML private Label balanceLabel;
     @FXML private Label totalIncomeLabel;
@@ -537,26 +528,6 @@ public class WalletController {
             stage.setScene(scene);
             stage.initModality(Modality.APPLICATION_MODAL);
             stage.showAndWait();
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    // ================= ADMIN =================
-
-    @FXML
-    private void openAdminPage() {
-
-        try {
-            FXMLLoader loader = new FXMLLoader(
-                    getClass().getResource("/com/example/gestionwallet/admin-dashboard.fxml")
-            );
-
-            Stage stage = new Stage();
-            stage.setScene(new Scene(loader.load()));
-            stage.setTitle("Admin Dashboard");
-            stage.show();
 
         } catch (Exception e) {
             e.printStackTrace();

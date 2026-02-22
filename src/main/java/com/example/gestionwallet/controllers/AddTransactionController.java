@@ -22,7 +22,7 @@ public class AddTransactionController {
     @FXML private ComboBox<String> categoryBox;
     @FXML private Label typeLabel;
 
-    private WalletController parentController;
+    private Object parentController;
     private String currentType;
 
     private servicetransaction st = new servicetransaction();
@@ -55,10 +55,9 @@ public class AddTransactionController {
         });
     }
 
-    public void setParentController(WalletController controller) {
+    public void setParentController(Object controller) {
         this.parentController = controller;
     }
-
     public void setType(String type) {
 
         this.currentType = type;
@@ -149,7 +148,12 @@ public class AddTransactionController {
 
             st.ajouter(t);
 
-            parentController.loadTransactions();
+            if (parentController instanceof UserController) {
+                ((UserController) parentController).loadTransactions();
+            }
+            if (parentController instanceof EntrepriseController) {
+                ((EntrepriseController) parentController).loadTransactions();
+            }
 
             ((Stage) nameField.getScene().getWindow()).close();
 

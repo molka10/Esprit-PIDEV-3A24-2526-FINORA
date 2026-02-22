@@ -6,7 +6,7 @@
 
 <BorderPane xmlns="http://javafx.com/javafx/8"
             xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="com.example.gestionwallet.controllers.WalletController"
+            fx:controller="com.example.gestionwallet.controllers.EntrepriseController"
             prefWidth="1366"
             prefHeight="768"
             stylesheets="@dashboard.css">
@@ -21,19 +21,24 @@
                     vbarPolicy="AS_NEEDED"
                     styleClass="transparent-scroll">
 
+
             <content>
-                      <VBox spacing="30"
+
+                <VBox spacing="30"
                       style="-fx-padding:30; -fx-background-color:#f4f4f8;">
+                    <Label text="ENTREPRISE"
+                           style="-fx-font-size:26;
+                  -fx-font-weight:bold;
+                  -fx-text-fill:#6a0dad;"/>
+                    <Button
+                            text="Retour"
+                            fx:id="backButton"
+                            onAction="#goBack"
+                            prefWidth="120.0"
+                            prefHeight="35.0"
+                            style="-fx-background-color:#6a0dad; -fx-text-fill:white; -fx-background-radius:10;" />
 
-                          <Button
-                                  text="Retour"
-                                  fx:id="backButton"
-                                  onAction="#goBack"
-                                  prefWidth="120.0"
-                                  prefHeight="35.0"
-                                  style="-fx-background-color:#6a0dad; -fx-text-fill:white; -fx-background-radius:10;" />
-
-                          <ComboBox fx:id="currencyBox"
+                    <ComboBox fx:id="currencyBox"
                               prefWidth="100"
                               onAction="#changeCurrency"/>
                     <!-- STAT CARDS -->
