@@ -34,7 +34,7 @@
                 <Region HBox.hgrow="ALWAYS"/>
 
 
-                <Button text="Download PDF"
+                <Button text=" 📄 Download PDF"
                         onAction="#downloadPDF"
                         styleClass="btn-secondary"
                         prefWidth="200"/>
