@@ -131,7 +131,7 @@ public class UserController {
             String categorie = cat.getNom();
             String categoryType = cat.getType();  // 🔥 ناخذ type من categorie
 
-            double montant = currentTransaction.getMontant();
+            double montant = currentTransaction.getMontant() * conversionRate;
             LocalDate date = currentTransaction.getDate_transaction().toLocalDate();
             uniqueDays.add(date);
 
@@ -232,7 +232,7 @@ public class UserController {
             LocalDate date = t.getDate_transaction().toLocalDate();
             String month = date.getMonth().toString();
 
-            double amount = t.getMontant();
+            double amount = t.getMontant() * conversionRate;
 
             int categoryId = t.getCategory_id();
             categorie cat = sc.getById(categoryId);
@@ -834,26 +834,55 @@ public class UserController {
             showError("Montant invalide !");
         }
     }
+    private double getExchangeRate(String from, String to) {
 
+        try {
+
+            String url = "https://open.er-api.com/v6/latest/" + from;
+
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(url))
+                    .GET()
+                    .build();
+
+            HttpClient client = HttpClient.newHttpClient();
+
+            HttpResponse<String> response =
+                    client.send(request, HttpResponse.BodyHandlers.ofString());
+
+            org.json.JSONObject json =
+                    new org.json.JSONObject(response.body());
+
+            org.json.JSONObject rates = json.getJSONObject("rates");
+
+            return rates.getDouble(to);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return 1.0;
+        }
+    }
     @FXML
     private void changeCurrency() {
 
         currentCurrency = currencyBox.getValue();
 
         switch (currentCurrency) {
+
             case "EUR":
-                conversionRate = 0.30; // exemple 1 DT ≈ 0.30 EUR
+                conversionRate = getExchangeRate("TND", "EUR");
                 break;
+
             case "USD":
-                conversionRate = 0.32; // exemple
+                conversionRate = getExchangeRate("TND", "USD");
                 break;
+
             default:
                 conversionRate = 1.0;
         }
 
-        loadTransactions(); // refresh affichage
+        loadTransactions();
     }
-
 
     @FXML
     private void goBack() {

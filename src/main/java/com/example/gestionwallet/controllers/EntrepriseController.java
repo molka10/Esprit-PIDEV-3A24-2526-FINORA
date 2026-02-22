@@ -833,23 +833,54 @@ public class EntrepriseController {
         }
     }
 
+    private double getExchangeRate(String from, String to) {
+
+        try {
+
+            String url = "https://open.er-api.com/v6/latest/" + from;
+
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(url))
+                    .GET()
+                    .build();
+
+            HttpClient client = HttpClient.newHttpClient();
+
+            HttpResponse<String> response =
+                    client.send(request, HttpResponse.BodyHandlers.ofString());
+
+            org.json.JSONObject json =
+                    new org.json.JSONObject(response.body());
+
+            org.json.JSONObject rates = json.getJSONObject("rates");
+
+            return rates.getDouble(to);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return 1.0;
+        }
+    }
     @FXML
     private void changeCurrency() {
 
         currentCurrency = currencyBox.getValue();
 
         switch (currentCurrency) {
+
             case "EUR":
-                conversionRate = 0.30; // exemple 1 DT ≈ 0.30 EUR
+                conversionRate = getExchangeRate("TND", "EUR");
                 break;
+
             case "USD":
-                conversionRate = 0.32; // exemple
+                conversionRate = getExchangeRate("TND", "USD");
                 break;
+
             default:
                 conversionRate = 1.0;
         }
 
-        loadTransactions(); // refresh affichage
+        loadTransactions();
     }
 
 
