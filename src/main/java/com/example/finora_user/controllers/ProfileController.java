@@ -6,6 +6,7 @@ import com.example.finora_user.utils.Session;
 import javafx.fxml.FXML;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
+import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 
 import java.sql.SQLException;
@@ -22,6 +23,12 @@ public class ProfileController {
     @FXML private DatePicker dobPicker;
 
     @FXML private Label statusLabel;
+
+    // Change password fields
+    @FXML private PasswordField oldPasswordField;
+    @FXML private PasswordField newPasswordField;
+    @FXML private PasswordField confirmPasswordField;
+    @FXML private Label pwdStatusLabel;
 
     private UserService userService;
 
@@ -43,9 +50,7 @@ public class ProfileController {
             return;
         }
 
-        String initials = getInitials(u.getUsername());
-        avatarText.setText(initials);
-
+        avatarText.setText(getInitials(u.getUsername()));
         fullNameLabel.setText(u.getUsername());
         emailLabel.setText(u.getEmail());
 
@@ -70,19 +75,59 @@ public class ProfileController {
             current.setDateOfBirth(dobPicker.getValue());
 
             boolean ok = userService.updateUser(current);
-            if (ok) {
-                statusLabel.setText("✅ Profil mis à jour.");
-                // refresh avatar + title
-                loadFromSession();
-            } else {
-                statusLabel.setText("⚠️ Mise à jour échouée.");
-            }
+            statusLabel.setText(ok ? "✅ Profil mis à jour." : "⚠️ Mise à jour échouée.");
+
+            // refresh header + avatar
+            loadFromSession();
 
         } catch (SQLException e) {
             statusLabel.setText("❌ Erreur DB: " + e.getMessage());
             e.printStackTrace();
-        } catch (Exception e) {
-            statusLabel.setText("❌ Erreur: " + e.getMessage());
+        }
+    }
+
+    @FXML
+    private void handleChangePassword() {
+        try {
+            User current = Session.getCurrentUser();
+            if (current == null) {
+                pwdStatusLabel.setText("⚠️ Session expirée.");
+                return;
+            }
+
+            String oldPass = oldPasswordField.getText();
+            String newPass = newPasswordField.getText();
+            String confirm = confirmPasswordField.getText();
+
+            if (oldPass == null || oldPass.isBlank() ||
+                    newPass == null || newPass.isBlank() ||
+                    confirm == null || confirm.isBlank()) {
+                pwdStatusLabel.setText("⚠️ Remplissez tous les champs.");
+                return;
+            }
+
+            if (newPass.length() < 8) {
+                pwdStatusLabel.setText("⚠️ Nouveau mot de passe (min 8 caractères).");
+                return;
+            }
+
+            if (!newPass.equals(confirm)) {
+                pwdStatusLabel.setText("⚠️ Confirmation incorrecte.");
+                return;
+            }
+
+            boolean ok = userService.changePassword(current.getId(), oldPass, newPass);
+            if (ok) {
+                pwdStatusLabel.setText("✅ Mot de passe mis à jour.");
+                oldPasswordField.clear();
+                newPasswordField.clear();
+                confirmPasswordField.clear();
+            } else {
+                pwdStatusLabel.setText("❌ Ancien mot de passe incorrect.");
+            }
+
+        } catch (SQLException e) {
+            pwdStatusLabel.setText("❌ DB: " + e.getMessage());
             e.printStackTrace();
         }
     }

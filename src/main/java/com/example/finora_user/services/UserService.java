@@ -3,6 +3,7 @@ package com.example.finora_user.services;
 import com.example.finora_user.entities.User;
 import com.example.finora_user.utils.DBConnection;
 import com.example.finora_user.utils.PasswordUtils;
+import com.example.finora_user.utils.PasswordUtils;
 
 import java.sql.*;
 import java.time.LocalDate;
@@ -66,6 +67,53 @@ public class UserService {
         }
 
         return list;
+    }
+    // -------------------- NEW: get user by email --------------------
+    public User getUserByEmail(String email) throws SQLException {
+        String sql = "SELECT * FROM users WHERE email=?";
+        try (PreparedStatement ps = cn.prepareStatement(sql)) {
+            ps.setString(1, email);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) return map(rs);
+                return null;
+            }
+        }
+    }
+
+    // -------------------- NEW: update password hash directly --------------------
+    public boolean updatePassword(int userId, String hashedPassword) throws SQLException {
+        String sql = "UPDATE users SET mot_de_passe=? WHERE id=?";
+        try (PreparedStatement ps = cn.prepareStatement(sql)) {
+            ps.setString(1, hashedPassword);
+            ps.setInt(2, userId);
+            return ps.executeUpdate() > 0;
+        }
+    }
+
+    // -------------------- NEW: change password with old verification --------------------
+    public boolean changePassword(int userId, String oldPlain, String newPlain) throws SQLException {
+        String sql = "SELECT mot_de_passe FROM users WHERE id=?";
+        try (PreparedStatement ps = cn.prepareStatement(sql)) {
+            ps.setInt(1, userId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (!rs.next()) return false;
+
+                String stored = rs.getString("mot_de_passe");
+
+                // stored must be bcrypt hash in your project
+                if (!PasswordUtils.isHashed(stored)) {
+                    // In case old accounts were plain text, support one-time upgrade
+                    if (stored != null && stored.equals(oldPlain)) {
+                        return updatePassword(userId, PasswordUtils.hash(newPlain));
+                    }
+                    return false;
+                }
+
+                if (!PasswordUtils.verify(oldPlain, stored)) return false;
+
+                return updatePassword(userId, PasswordUtils.hash(newPlain));
+            }
+        }
     }
 
     // ================= READ BY ID =================

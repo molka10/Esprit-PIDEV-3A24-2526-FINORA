@@ -28,6 +28,11 @@ public class LoginController {
             e.printStackTrace();
         }
     }
+    @FXML
+    private void goForgotPassword() {
+        Stage stage = (Stage) emailField.getScene().getWindow();
+        Navigator.goTo(stage, "forgot-password-view.fxml", "Mot de passe oublié");
+    }
 
     @FXML
     private void handleLogin() {

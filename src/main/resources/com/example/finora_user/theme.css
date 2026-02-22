@@ -298,3 +298,11 @@
 .avatar-text-lg {
     -fx-font-size: 16px;
 }
+.link {
+    -fx-text-fill: #6D28D9;
+    -fx-font-weight: 700;
+}
+.link:hover {
+    -fx-text-fill: #5B21B6;
+    -fx-underline: true;
+}

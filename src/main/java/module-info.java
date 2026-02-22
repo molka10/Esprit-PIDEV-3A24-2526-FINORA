@@ -3,6 +3,7 @@ module com.example.finora_user {
     requires javafx.fxml;
     requires java.sql;
     requires jbcrypt;
+    requires twilio;
 
 
     // allow FXMLLoader to create controllers via reflection

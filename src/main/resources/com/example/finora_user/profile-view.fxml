@@ -8,12 +8,14 @@
       xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="com.example.finora_user.controllers.ProfileController"
       spacing="14"
-      styleClass="root-bg">
+      styleClass="root-bg"
+      stylesheets="@theme.css">
 
     <padding>
         <Insets top="20" right="20" bottom="20" left="20"/>
     </padding>
 
+    <!-- PROFILE INFO -->
     <VBox styleClass="card" spacing="12">
         <padding>
             <Insets top="18" right="18" bottom="18" left="18"/>
@@ -52,9 +54,41 @@
                 <DatePicker fx:id="dobPicker" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
             </GridPane>
 
-            <HBox spacing="10">
+            <HBox spacing="10" alignment="CENTER_LEFT">
                 <Button text="Enregistrer" onAction="#handleSave" styleClass="btn-primary"/>
                 <Label fx:id="statusLabel" text="" styleClass="muted"/>
+            </HBox>
+        </children>
+    </VBox>
+
+    <!-- CHANGE PASSWORD -->
+    <VBox styleClass="card" spacing="12">
+        <padding>
+            <Insets top="18" right="18" bottom="18" left="18"/>
+        </padding>
+
+        <children>
+            <Label text="Changer le mot de passe" styleClass="h2"/>
+
+            <GridPane hgap="12" vgap="12">
+                <columnConstraints>
+                    <ColumnConstraints percentWidth="30"/>
+                    <ColumnConstraints percentWidth="70"/>
+                </columnConstraints>
+
+                <Label text="Ancien" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+                <PasswordField fx:id="oldPasswordField" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+
+                <Label text="Nouveau" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+                <PasswordField fx:id="newPasswordField" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+
+                <Label text="Confirmer" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+                <PasswordField fx:id="confirmPasswordField" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+            </GridPane>
+
+            <HBox spacing="10" alignment="CENTER_LEFT">
+                <Button text="Mettre à jour" onAction="#handleChangePassword" styleClass="btn-secondary"/>
+                <Label fx:id="pwdStatusLabel" text="" styleClass="muted"/>
             </HBox>
         </children>
     </VBox>

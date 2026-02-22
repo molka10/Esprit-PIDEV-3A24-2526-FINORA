@@ -23,6 +23,7 @@
 
                 <Button text="Se connecter" onAction="#handleLogin" styleClass="btn-primary" maxWidth="Infinity"/>
                 <Button text="Créer un compte" onAction="#goToSignup" styleClass="btn-ghost" maxWidth="Infinity"/>
+                <Hyperlink text="Mot de passe oublié ?" onAction="#goForgotPassword" styleClass="link"/>
 
                 <Label fx:id="statusLabel" text="" wrapText="true" styleClass="muted"/>
             </VBox>
