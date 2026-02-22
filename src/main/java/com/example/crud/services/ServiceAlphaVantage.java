@@ -7,33 +7,33 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
- * 📊 ServiceAlphaVantage - Prix boursiers en temps réel
+ * 📊 ServiceAlphaVantage - Prix boursiers en temps réel (AMÉLIORÉ)
  * API : https://www.alphavantage.co/
- *
- * Limites gratuites :
- * - 25 requêtes/jour
- * - 5 requêtes/minute
  */
 public class ServiceAlphaVantage {
 
-    // ⚠️ METS TA CLÉ API ICI
-    // Obtiens-la sur : https://www.alphavantage.co/support/#api-key
-    private static final String API_KEY = " 13FYK3XSWHB578NR";
-
+    private static final String API_KEY = "13FYK3XSWHB578NR";
     private static final String BASE_URL = "https://www.alphavantage.co/query";
 
-    // 💾 CACHE (important car seulement 25 requêtes/jour)
+    // Cache
     private static Map<String, DonneesAction> cache = new HashMap<>();
     private static Map<String, Long> cacheTimestamp = new HashMap<>();
     private static final long CACHE_DUREE = 3600000; // 1 heure
 
-    // ⏱️ Anti-spam (5 req/min max)
+    // Anti-spam
     private static long dernierAppel = 0;
-    private static final long DELAI_MIN = 12000; // 12 secondes entre chaque requête
+    private static final long DELAI_MIN = 12000; // 12 secondes
+
+    // 🆕 Liste symboles valides (actions US principales)
+    private static final Set<String> SYMBOLES_VALIDES = new HashSet<>(Arrays.asList(
+            "AAPL", "MSFT", "GOOGL", "AMZN", "TSLA", "META", "NVDA", "JPM",
+            "V", "WMT", "MA", "JNJ", "PG", "DIS", "NFLX", "ADBE", "CRM",
+            "PYPL", "INTC", "CSCO", "VZ", "T", "PFE", "KO", "PEP", "NKE",
+            "MCD", "BA", "CAT", "GE", "IBM", "ORCL", "AMD", "QCOM", "TXN"
+    ));
 
     public static class DonneesAction {
         public String symbole;
@@ -46,72 +46,97 @@ public class ServiceAlphaVantage {
         public long volume;
         public String derniereUpdate;
         public boolean fromCache;
+        public boolean estValide;
     }
 
-    /**
-     * Vérifie si la clé API est configurée
-     */
     public boolean estConfigure() {
         return API_KEY != null && !API_KEY.isBlank()
                 && !API_KEY.equals("TON_API_KEY_ICI");
     }
 
     /**
-     * Récupère le prix actuel d'une action
-     * @param symbole Code de l'action (ex: "AAPL", "MSFT", "GOOGL")
-     * @return Prix actuel
+     * 🆕 Vérifier si le symbole est valide
      */
+    public boolean estSymboleValide(String symbole) {
+        if (symbole == null || symbole.isBlank()) return false;
+        return SYMBOLES_VALIDES.contains(symbole.toUpperCase());
+    }
+
+    /**
+     * 🆕 Suggérer un symbole valide
+     */
+    public String suggererSymbole(String symboleInvalide) {
+        if (symboleInvalide == null || symboleInvalide.isBlank()) {
+            return "AAPL";
+        }
+
+        String upper = symboleInvalide.toUpperCase();
+
+        // Recherche par préfixe
+        for (String valid : SYMBOLES_VALIDES) {
+            if (valid.startsWith(upper.substring(0, Math.min(2, upper.length())))) {
+                return valid;
+            }
+        }
+
+        return "AAPL"; // Par défaut
+    }
+
     public double getPrixActuel(String symbole) {
         DonneesAction donnees = getDonneesAction(symbole);
         return donnees != null ? donnees.prix : 0.0;
     }
 
     /**
-     * Récupère toutes les données d'une action
-     * @param symbole Code de l'action
-     * @return Objet DonneesAction complet
+     * 🔧 getDonneesAction AMÉLIORÉ avec validation
      */
     public DonneesAction getDonneesAction(String symbole) {
 
         if (!estConfigure()) {
             System.err.println("❌ Clé Alpha Vantage non configurée");
-            return null;
+            return creerDonneesErreur(symbole, "API non configurée");
         }
 
-        // Vérifier le cache
+        // 🆕 Vérification symbole valide
+        if (!estSymboleValide(symbole)) {
+            System.err.println("⚠️ Symbole invalide : " + symbole + " (non supporté par Alpha Vantage)");
+            String suggestion = suggererSymbole(symbole);
+            System.err.println("💡 Suggestion : Utilise " + suggestion + " à la place");
+            return creerDonneesErreur(symbole, "Symbole invalide - US uniquement");
+        }
+
+        // Cache
         if (cache.containsKey(symbole)) {
             long timestamp = cacheTimestamp.get(symbole);
             if (System.currentTimeMillis() - timestamp < CACHE_DUREE) {
-                System.out.println("✅ Données chargées depuis le cache pour " + symbole);
+                System.out.println("✅ Cache : " + symbole);
                 DonneesAction data = cache.get(symbole);
                 data.fromCache = true;
                 return data;
             }
         }
 
-        // Vérifier le délai entre requêtes
+        // Délai anti-spam
         long maintenant = System.currentTimeMillis();
         if (maintenant - dernierAppel < DELAI_MIN) {
             long attente = (DELAI_MIN - (maintenant - dernierAppel)) / 1000;
-            System.out.println("⏱️ Attente de " + attente + " secondes avant la prochaine requête...");
+            System.out.println("⏱️ Attente " + attente + "s...");
 
-            // Si donnée en cache (même expirée), la retourner
             if (cache.containsKey(symbole)) {
                 return cache.get(symbole);
             }
-            return null;
+            return creerDonneesErreur(symbole, "Attente anti-spam");
         }
 
         dernierAppel = maintenant;
 
         try {
-            // Construire l'URL
             String urlString = BASE_URL +
                     "?function=GLOBAL_QUOTE" +
                     "&symbol=" + symbole +
                     "&apikey=" + API_KEY;
 
-            System.out.println("🌐 Appel API Alpha Vantage pour " + symbole);
+            System.out.println("🌐 API Alpha Vantage : " + symbole);
 
             URL url = new URL(urlString);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -122,7 +147,6 @@ public class ServiceAlphaVantage {
             int responseCode = conn.getResponseCode();
 
             if (responseCode == 200) {
-                // Lire la réponse
                 BufferedReader in = new BufferedReader(
                         new InputStreamReader(conn.getInputStream(), StandardCharsets.UTF_8));
                 String inputLine;
@@ -133,32 +157,34 @@ public class ServiceAlphaVantage {
                 }
                 in.close();
 
-                // Parser le JSON
                 JSONObject json = new JSONObject(response.toString());
 
-                // Vérifier si l'API retourne une erreur
                 if (json.has("Note")) {
-                    System.err.println("⚠️ Limite de requêtes atteinte : " + json.getString("Note"));
-                    // Retourner cache si disponible
+                    System.err.println("⚠️ Quota atteint : " + json.getString("Note"));
                     if (cache.containsKey(symbole)) {
                         return cache.get(symbole);
                     }
-                    return null;
+                    return creerDonneesErreur(symbole, "Quota dépassé");
                 }
 
                 if (json.has("Error Message")) {
                     System.err.println("❌ Erreur API : " + json.getString("Error Message"));
-                    return null;
+                    return creerDonneesErreur(symbole, "Erreur API");
                 }
 
                 if (!json.has("Global Quote")) {
-                    System.err.println("❌ Symbole introuvable : " + symbole);
-                    return null;
+                    System.err.println("❌ Aucune donnée pour : " + symbole);
+                    return creerDonneesErreur(symbole, "Données introuvables");
                 }
 
                 JSONObject quote = json.getJSONObject("Global Quote");
 
-                // Créer l'objet de données
+                // 🔧 Vérification quote non vide
+                if (quote.isEmpty() || !quote.has("05. price")) {
+                    System.err.println("❌ Quote vide pour : " + symbole);
+                    return creerDonneesErreur(symbole, "Quote vide");
+                }
+
                 DonneesAction donnees = new DonneesAction();
                 donnees.symbole = symbole;
                 donnees.prix = quote.getDouble("05. price");
@@ -170,48 +196,55 @@ public class ServiceAlphaVantage {
                 donnees.volume = quote.getLong("06. volume");
                 donnees.derniereUpdate = quote.getString("07. latest trading day");
                 donnees.fromCache = false;
+                donnees.estValide = true;
 
-                // Sauvegarder en cache
                 cache.put(symbole, donnees);
                 cacheTimestamp.put(symbole, System.currentTimeMillis());
 
-                System.out.println("✅ Données récupérées pour " + symbole + " : " + donnees.prix);
+                System.out.println("✅ Récupéré : " + symbole + " = $" + donnees.prix);
 
                 return donnees;
 
             } else {
-                System.err.println("❌ Erreur HTTP " + responseCode);
-                return null;
+                System.err.println("❌ HTTP " + responseCode);
+                return creerDonneesErreur(symbole, "HTTP " + responseCode);
             }
 
         } catch (Exception e) {
-            System.err.println("❌ Erreur lors de l'appel à Alpha Vantage : " + e.getMessage());
-            e.printStackTrace();
+            System.err.println("❌ Exception : " + e.getMessage());
 
-            // Retourner cache si disponible
             if (cache.containsKey(symbole)) {
                 return cache.get(symbole);
             }
-            return null;
+            return creerDonneesErreur(symbole, "Erreur réseau");
         }
     }
 
     /**
-     * Récupère les données de plusieurs actions (optimisé)
-     * @param symboles Liste des symboles
-     * @return Map symbole -> données
+     * 🆕 Créer des données d'erreur
      */
+    private DonneesAction creerDonneesErreur(String symbole, String raison) {
+        DonneesAction erreur = new DonneesAction();
+        erreur.symbole = symbole;
+        erreur.prix = 0.0;
+        erreur.variation = 0.0;
+        erreur.variationPourcent = 0.0;
+        erreur.estValide = false;
+        erreur.fromCache = false;
+        erreur.derniereUpdate = "Erreur: " + raison;
+        return erreur;
+    }
+
     public Map<String, DonneesAction> getDonneesMultiples(String... symboles) {
         Map<String, DonneesAction> resultats = new HashMap<>();
 
         for (String symbole : symboles) {
             DonneesAction donnees = getDonneesAction(symbole);
-            if (donnees != null) {
+            if (donnees != null && donnees.estValide) {
                 resultats.put(symbole, donnees);
             }
 
-            // Pause de 12 secondes entre chaque requête (sauf si cache)
-            if (!donnees.fromCache && symboles.length > 1) {
+            if (donnees != null && !donnees.fromCache && symboles.length > 1) {
                 try {
                     Thread.sleep(DELAI_MIN);
                 } catch (InterruptedException e) {
@@ -224,43 +257,38 @@ public class ServiceAlphaVantage {
     }
 
     /**
-     * Vide le cache
+     * 🆕 Lister tous les symboles valides
      */
+    public List<String> getSymbolesValides() {
+        return new ArrayList<>(SYMBOLES_VALIDES);
+    }
+
     public static void viderCache() {
         cache.clear();
         cacheTimestamp.clear();
-        System.out.println("🗑️ Cache Alpha Vantage vidé");
+        System.out.println("🗑️ Cache vidé");
     }
 
-    /**
-     * Taille du cache
-     */
     public static int tailleCache() {
         return cache.size();
     }
 
-    /**
-     * Test de connexion
-     */
     public String testerConnexion() {
         if (!estConfigure()) {
-            return "❌ Clé API Alpha Vantage non configurée";
+            return "❌ Clé API non configurée";
         }
 
-        System.out.println("🧪 Test de connexion Alpha Vantage avec symbole AAPL...");
+        System.out.println("🧪 Test avec AAPL...");
 
         DonneesAction apple = getDonneesAction("AAPL");
 
-        if (apple == null) {
-            return "❌ Échec du test - Vérifiez votre clé API et votre connexion internet";
+        if (apple == null || !apple.estValide) {
+            return "❌ Échec - Vérifier clé API";
         }
 
-        return "✅ Connexion Alpha Vantage OK - Prix Apple (AAPL) : $" + apple.prix;
+        return "✅ OK - Prix AAPL : $" + apple.prix;
     }
 
-    /**
-     * Parse un double depuis une string (gère les erreurs)
-     */
     private double parseDouble(String value) {
         try {
             return Double.parseDouble(value);
@@ -269,12 +297,14 @@ public class ServiceAlphaVantage {
         }
     }
 
-    /**
-     * Méthode utilitaire pour afficher les informations
-     */
     public static void afficherDonnees(DonneesAction donnees) {
         if (donnees == null) {
-            System.out.println("Aucune donnée disponible");
+            System.out.println("Aucune donnée");
+            return;
+        }
+
+        if (!donnees.estValide) {
+            System.out.println("❌ " + donnees.symbole + " : " + donnees.derniereUpdate);
             return;
         }
 
@@ -291,25 +321,24 @@ public class ServiceAlphaVantage {
         System.out.println("╚══════════════════════════════════════╝");
     }
 
-    /**
-     * Exemple d'utilisation
-     */
     public static void main(String[] args) {
         ServiceAlphaVantage service = new ServiceAlphaVantage();
 
-        // Test de connexion
         System.out.println(service.testerConnexion());
         System.out.println();
 
-        // Récupérer données Apple
+        // Test symboles valides
+        System.out.println("📋 Symboles valides :");
+        service.getSymbolesValides().stream()
+                .limit(10)
+                .forEach(s -> System.out.println("  - " + s));
+
+        System.out.println("\n🧪 Test AAPL :");
         DonneesAction apple = service.getDonneesAction("AAPL");
         afficherDonnees(apple);
 
-        System.out.println("\n" + service.testerConnexion());
-
-        // Tester le cache
-        System.out.println("\n🔄 Test du cache...");
-        DonneesAction appleCache = service.getDonneesAction("AAPL");
-        afficherDonnees(appleCache);
+        System.out.println("\n🧪 Test symbole invalide (MC) :");
+        DonneesAction invalid = service.getDonneesAction("MC");
+        afficherDonnees(invalid);
     }
 }
