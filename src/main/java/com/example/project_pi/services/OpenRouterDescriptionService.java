@@ -127,7 +127,7 @@ Contexte:
         // Find "choices"
         int choicesIdx = json.indexOf("\"choices\"");
         if (choicesIdx < 0) return null;
-
+        //slm allo 
         // Find first "content" after that
         int contentIdx = json.indexOf("\"content\"", choicesIdx);
         if (contentIdx < 0) return null;
