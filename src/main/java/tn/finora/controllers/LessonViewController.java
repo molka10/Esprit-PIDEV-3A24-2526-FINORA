@@ -18,7 +18,7 @@ import javafx.stage.Stage;
 import javafx.util.Duration;
 import tn.finora.entities.Formation;
 import tn.finora.entities.Lesson;
-
+import tn.finora.controllers.YoutubeSearchController;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.scene.media.MediaView;
