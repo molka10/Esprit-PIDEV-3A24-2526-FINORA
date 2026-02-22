@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.collections.FXCollections?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
@@ -16,12 +17,8 @@
             <padding>
                 <Insets top="20" right="24" bottom="20" left="24"/>
             </padding>
-
-            <Label text="Investment Portfolio"
-                   styleClass="title"/>
-
-            <Label text="Manage and monitor your investments efficiently"
-                   styleClass="subtitle"/>
+            <Label text="Investment Portfolio" styleClass="title"/>
+            <Label text="Manage and monitor your investments efficiently" styleClass="subtitle"/>
         </VBox>
     </top>
 
@@ -34,58 +31,55 @@
 
             <!-- ===== TOOLBAR ===== -->
             <HBox spacing="12" alignment="CENTER_LEFT" styleClass="toolbar">
-                <Button text=" Add"
-                        onAction="#onAdd"
-                        styleClass="btn-primary"/>
-                <Button text=" Refresh"
-                        onAction="#onRefresh"
-                        styleClass="btn-ghost"/>
+                <Button text=" Add" onAction="#onAdd" styleClass="btn-primary"/>
+                <Button text=" Refresh" onAction="#onRefresh" styleClass="btn-ghost"/>
                 <Region HBox.hgrow="ALWAYS"/>
-                <Button text=" Management"
-                        onAction="#goToManagement"
-                        styleClass="btn-ghost"/>
+                <Button text=" Management" onAction="#goToManagement" styleClass="btn-ghost"/>
             </HBox>
 
-            <!-- ===== SEARCH + CARDS AREA ===== -->
+            <!-- ===== SEARCH + FILTER ===== -->
+            <HBox spacing="16" alignment="CENTER_LEFT" style="-fx-padding: 12 0 12 0;">
+
+                <!-- Barre de recherche -->
+                <HBox alignment="CENTER_LEFT" spacing="8"
+                      style="-fx-background-color: #f0f0f0; -fx-background-radius: 16; -fx-padding: 6 12 6 12;"
+                      HBox.hgrow="ALWAYS">
+
+                    <Label text="🔍" style="-fx-font-size: 16; -fx-text-fill: #888888;"/>
+                    <TextField fx:id="searchField"
+                               promptText="Search investments by name..."
+                               style="-fx-background-color: transparent; -fx-border-width: 0; -fx-padding: 4 0 4 0; -fx-font-size: 14;"
+                               HBox.hgrow="ALWAYS"
+                               prefHeight="36"/>
+                </HBox>
+
+                <!-- Boutons Search et Clear -->
+                <Button text="Search" onAction="#onSearch" styleClass="btn-primary" prefWidth="90" prefHeight="36"/>
+                <Button text="Clear" onAction="#onClearSearch" styleClass="btn-secondary" prefWidth="90" prefHeight="36"/>
+
+                <!-- ComboBox pour trier par risque -->
+                <VBox spacing="4" alignment="CENTER_LEFT">
+                    <Label text="Sort by Risk" style="-fx-font-weight: bold; -fx-font-size: 13; -fx-text-fill: #333333;"/>
+                    <ComboBox fx:id="riskFilter" prefWidth="140" prefHeight="36"
+                              promptText="Select Risk"
+                              style="-fx-background-radius: 16; -fx-border-radius: 16; -fx-border-color: #cccccc; -fx-border-width: 1; -fx-font-size: 14;"
+                              onAction="#onFilterRisk"/>
+                </VBox>
+
+            </HBox>
+
+            <!-- ===== CARDS AREA ===== -->
             <ScrollPane fitToWidth="true" styleClass="card">
                 <content>
-                    <VBox spacing="12">
-                        <!-- Search bar -->
-                        <!-- ===== SEARCH BAR ===== -->
-                        <!-- ===== SEARCH BAR PROFESSIONNELLE ===== -->
-                        <HBox spacing="10" alignment="CENTER_LEFT" style="-fx-padding: 10 0 10 0;">
-
-                            <!-- Barre de recherche avec icône -->
-                            <HBox alignment="CENTER_LEFT" spacing="6"
-                                  style="-fx-background-color: #f5f5f5; -fx-background-radius: 12; -fx-padding: 6 12 6 12;"
-                                  HBox.hgrow="ALWAYS">
-
-                                <!-- Icône Loupe -->
-                                <Label text="🔍" style="-fx-font-size: 16; -fx-text-fill: #888888;"/>
-
-                                <!-- Champ texte -->
-                                <TextField fx:id="searchField"
-                                           promptText="Search investments by name..."
-                                           style="-fx-background-color: transparent; -fx-border-width: 0; -fx-padding: 4 0 4 0;"
-                                           HBox.hgrow="ALWAYS"/>
-                            </HBox>
-
-                            <!-- Boutons Search et Clear -->
-                            <Button text="Search" onAction="#onSearch" styleClass="btn-primary" minWidth="80"/>
-                            <Button text="Clear" onAction="#onClearSearch" styleClass="btn-secondary" minWidth="80"/>
-                        </HBox>
-
-                        <!-- Cards -->
-                        <FlowPane fx:id="cardsPane"
-                                  hgap="16"
-                                  vgap="16"
-                                  prefWrapLength="1100"
-                                  styleClass="cards-zone">
-                            <padding>
-                                <Insets top="18" right="18" bottom="18" left="18"/>
-                            </padding>
-                        </FlowPane>
-                    </VBox>
+                    <FlowPane fx:id="cardsPane"
+                              hgap="16"
+                              vgap="16"
+                              prefWrapLength="1100"
+                              styleClass="cards-zone">
+                        <padding>
+                            <Insets top="18" right="18" bottom="18" left="18"/>
+                        </padding>
+                    </FlowPane>
                 </content>
             </ScrollPane>
 

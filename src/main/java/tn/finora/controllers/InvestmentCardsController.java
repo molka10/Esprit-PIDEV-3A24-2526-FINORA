@@ -1,5 +1,6 @@
 package tn.finora.controllers;
 
+import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
@@ -26,15 +27,29 @@ public class InvestmentCardsController {
     @FXML
     private TextField searchField;
 
+    @FXML
+    private ComboBox<String> riskFilter;
+
     private final Connection cnx;
-    private List<Investment> allInvestments; // liste complète pour recherche
+    private List<Investment> allInvestments; // Liste complète pour recherche et filtre
 
     public InvestmentCardsController() {
         cnx = DBConnection.getInstance().getCnx();
     }
 
-    // ================= FXML BUTTON HANDLERS =================
+    // ================= INITIALIZE =================
+    @FXML
+    public void initialize() {
+        // Charger tous les investissements
+        allInvestments = getAll();
+        loadCards(allInvestments);
 
+        // Initialiser le ComboBox pour le tri par risque
+        riskFilter.setItems(FXCollections.observableArrayList("All", "Low", "Medium", "High"));
+        riskFilter.setValue("All");
+    }
+
+    // ================= FXML BUTTON HANDLERS =================
     @FXML
     private void onAdd() {
         try {
@@ -48,6 +63,8 @@ public class InvestmentCardsController {
     private void onRefresh() {
         allInvestments = getAll();
         loadCards(allInvestments);
+        searchField.clear();
+        riskFilter.setValue("All");
     }
 
     @FXML
@@ -59,30 +76,20 @@ public class InvestmentCardsController {
         }
     }
 
-    // ================= INITIALIZE =================
-
-    @FXML
-    public void initialize() {
-        allInvestments = getAll();
-        loadCards(allInvestments);
-    }
-
     // ================= LOAD CARDS =================
-
     private void loadCards(List<Investment> investments) {
         cardsPane.getChildren().clear();
         for (Investment inv : investments) {
-            VBox card = createCard(inv);
-            cardsPane.getChildren().add(card);
+            cardsPane.getChildren().add(createCard(inv));
         }
     }
 
     private VBox createCard(Investment inv) {
         VBox card = new VBox(10);
-        card.getStyleClass().add("item-card"); // style CSS
+        card.getStyleClass().add("item-card");
         card.setPrefWidth(220);
 
-        // ===== IMAGE =====
+        // IMAGE
         ImageView imgView = new ImageView();
         imgView.setFitWidth(200);
         imgView.setFitHeight(120);
@@ -94,7 +101,7 @@ public class InvestmentCardsController {
             } catch (Exception ignored) {}
         }
 
-        // ===== LABELS =====
+        // LABELS
         Label nameLabel = new Label(inv.getName());
         nameLabel.getStyleClass().add("title");
 
@@ -118,7 +125,7 @@ public class InvestmentCardsController {
             created = inv.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
         Label createdLabel = new Label("Created: " + created);
 
-        // ===== BUTTONS =====
+        // BUTTONS
         Button updateBtn = new Button(" Update");
         updateBtn.getStyleClass().add("btn-update");
         updateBtn.setOnAction(e -> {
@@ -136,20 +143,19 @@ public class InvestmentCardsController {
             alert.showAndWait().ifPresent(response -> {
                 if (response == ButtonType.OK) {
                     delete(inv.getInvestmentId());
-                    allInvestments = getAll(); // rafraîchir la liste complète
+                    allInvestments = getAll();
                     loadCards(allInvestments);
                 }
             });
         });
 
         HBox buttonsBox = new HBox(10, updateBtn, deleteBtn);
-
         card.getChildren().addAll(imgView, nameLabel, infoLabel, valueLabel, riskLabel, descLabel, createdLabel, buttonsBox);
+
         return card;
     }
 
     // ================= CRUD =================
-
     public int add(Investment inv) {
         String sql = "INSERT INTO investment (name, category, location, estimated_value, risk_level, image_url, description, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         try (PreparedStatement ps = cnx.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
@@ -167,7 +173,6 @@ public class InvestmentCardsController {
                 if (keys.next()) return keys.getInt(1);
             }
             return -1;
-
         } catch (SQLException e) {
             showAlert("Erreur", "Impossible d'ajouter l'investment: " + e.getMessage());
             return -1;
@@ -232,29 +237,44 @@ public class InvestmentCardsController {
         return list;
     }
 
-    // ================= SEARCH =================
-
+    // ================= SEARCH & FILTER =================
     @FXML
     private void onSearch() {
-        String query = searchField.getText().trim().toLowerCase();
-        if (query.isEmpty()) {
-            loadCards(allInvestments);
-            return;
-        }
-        List<Investment> filtered = allInvestments.stream()
-                .filter(inv -> inv.getName() != null && inv.getName().toLowerCase().contains(query))
-                .toList();
-        loadCards(filtered);
+        applyFilters();
     }
 
     @FXML
     private void onClearSearch() {
         searchField.clear();
+        riskFilter.setValue("All");
         loadCards(allInvestments);
     }
 
-    // ================= UTILS =================
+    @FXML
+    private void onFilterRisk() {
+        applyFilters();
+    }
 
+    private void applyFilters() {
+        String query = searchField.getText().trim().toLowerCase();
+        String selectedRisk = riskFilter.getValue();
+
+        List<Investment> filtered = new ArrayList<>(allInvestments);
+
+        // Filtrer par nom
+        if (!query.isEmpty()) {
+            filtered.removeIf(inv -> inv.getName() == null || !inv.getName().toLowerCase().contains(query));
+        }
+
+        // Filtrer par risque
+        if (selectedRisk != null && !"All".equals(selectedRisk)) {
+            filtered.removeIf(inv -> inv.getRiskLevel() == null || !inv.getRiskLevel().equalsIgnoreCase(selectedRisk));
+        }
+
+        loadCards(filtered);
+    }
+
+    // ================= UTILS =================
     private void showAlert(String title, String message) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle(title);
