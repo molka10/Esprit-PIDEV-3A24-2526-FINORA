@@ -9,20 +9,19 @@ public class testcategorie {
 
         servicecategorie sc = new servicecategorie();
 
-        // ADD
-        categorie c1 = new categorie("Transport", "MOYENNE", "OUTCOME");
-        categorie c2 = new categorie("Salary", "HAUTE", "INCOME");
+        // ADD (zidna role)
+        categorie c1 = new categorie("Transport", "MOYENNE", "OUTCOME", "USER");
+        categorie c2 = new categorie("Salary", "HAUTE", "INCOME", "ENTREPRISE");
 
         sc.ajouter(c1);
         sc.ajouter(c2);
 
-        // UPDATE
-        categorie c3 = new categorie(1, "Groceries", "HAUTE", "OUTCOME");
+        // UPDATE (zidna role zeda)
+        categorie c3 = new categorie(1, "Groceries", "HAUTE", "OUTCOME", "USER");
         sc.modifier(c3);
 
         // READ
         sc.afficher().forEach(System.out::println);
-
 
         // DELETE
         sc.supprimer(9);

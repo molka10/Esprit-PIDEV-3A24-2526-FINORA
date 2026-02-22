@@ -66,7 +66,6 @@ public class UserController {
     private servicecategorie sc = new servicecategorie();
 
     private double balance = 0;
-
     @FXML
     public void initialize() {
 
@@ -77,7 +76,9 @@ public class UserController {
         wishlistView.setItems(wishlist);
         currencyBox.getItems().addAll("DT", "EUR", "USD");
         currencyBox.setValue("DT");
+
     }
+
 
     @FXML
     private void handleSearch() {

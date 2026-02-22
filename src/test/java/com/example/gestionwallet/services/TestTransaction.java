@@ -24,7 +24,7 @@ public class TestTransaction {
         servicecategorie sc = new servicecategorie();
 
 
-        categorie c = new categorie("Test", "HAUTE", "INCOME");
+        categorie c = new categorie("TempDelete", "BASSE", "OUTCOME", "USER");
         sc.ajouter(c);
 
         int categoryId = sc.getIdByName("Test");

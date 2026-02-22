@@ -66,13 +66,14 @@ public class servicecategorie implements Iservicecategorie {
             return;
         }
 
-        String sql = "INSERT INTO category (nom, priorite, type) VALUES (?, ?, ?)";
+        String sql = "INSERT INTO category (nom, priorite, type, role) VALUES (?, ?, ?, ?)";
 
         try {
             PreparedStatement ps = cnx.prepareStatement(sql);
             ps.setString(1, c.getNom());
             ps.setString(2, c.getPriorite());
             ps.setString(3, c.getType());
+            ps.setString(4, c.getRole());
             ps.executeUpdate();
 
             System.out.println("Catégorie ajoutée");
@@ -135,7 +136,8 @@ public class servicecategorie implements Iservicecategorie {
                         rs.getInt("id_category"),
                         rs.getString("nom"),
                         rs.getString("priorite"),
-                        rs.getString("type")
+                        rs.getString("type"),
+                        rs.getString("role")
                 );
 
                 list.add(c);
@@ -164,7 +166,8 @@ public class servicecategorie implements Iservicecategorie {
                         rs.getInt("id_category"),
                         rs.getString("nom"),
                         rs.getString("priorite"),
-                        rs.getString("type")
+                        rs.getString("type"),
+                        rs.getString("role")
                 );
             }
 
@@ -190,8 +193,39 @@ public class servicecategorie implements Iservicecategorie {
                         rs.getInt("id_category"),
                         rs.getString("nom"),
                         rs.getString("priorite"),
-                        rs.getString("type")
+                        rs.getString("type"),
+                        rs.getString("role")
                 ));
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return list;
+    }
+    public List<categorie> getByRole(String role) {
+
+        List<categorie> list = new ArrayList<>();
+        String sql = "SELECT * FROM category WHERE role = ?";
+
+        try {
+            PreparedStatement ps = cnx.prepareStatement(sql);
+            ps.setString(1, role);
+
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+
+                categorie c = new categorie(
+                        rs.getInt("id_category"),
+                        rs.getString("nom"),
+                        rs.getString("priorite"),
+                        rs.getString("type"),
+                        rs.getString("role")
+                );
+
+                list.add(c);
             }
 
         } catch (SQLException e) {

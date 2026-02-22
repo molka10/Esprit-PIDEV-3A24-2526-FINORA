@@ -20,7 +20,7 @@ public class TestCategorie {
     @Test
     void testAjouterCategorie() {
 
-        categorie c = new categorie("FoodTest", "HAUTE", "INCOME");
+        categorie c = new categorie("FoodTest", "HAUTE", "INCOME", "USER");
         service.ajouter(c);
 
         List<categorie> list = service.afficher();
@@ -34,7 +34,7 @@ public class TestCategorie {
     @Test
     void testSupprimerCategorie() {
 
-        categorie c = new categorie("TempDelete", "BASSE", "OUTCOME");
+        categorie c = new categorie("TempDelete", "BASSE", "OUTCOME", "USER");
         service.ajouter(c);
 
         int id = service.getIdByName("TempDelete");

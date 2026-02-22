@@ -78,6 +78,7 @@ public class EntrepriseController {
         currencyBox.getItems().addAll("DT", "EUR", "USD");
         currencyBox.setValue("DT");
     }
+    
 
     @FXML
     private void handleSearch() {

@@ -161,4 +161,45 @@ public class servicetransaction implements Iservicetransaction {
 
         return total;
     }
+    public List<transaction> afficherParRole(String role) {
+
+        List<transaction> list = new ArrayList<>();
+
+        try {
+
+            String query = """
+            SELECT t.*, c.nom AS categorie_nom
+            FROM transaction t
+            JOIN category c ON t.category_id = c.id_category
+            WHERE c.role = ?
+        """;
+
+            PreparedStatement ps = cnx.prepareStatement(query);
+            ps.setString(1, role);
+
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+
+                transaction t = new transaction();
+
+                t.setId_transaction(rs.getInt("id_transaction"));
+                t.setNom_transaction(rs.getString("nom_transaction"));
+                t.setType(rs.getString("type"));
+                t.setMontant(rs.getDouble("montant"));
+                t.setDate_transaction(rs.getDate("date_transaction"));
+                t.setSource(rs.getString("source"));
+                t.setUser_id(rs.getInt("user_id"));
+                t.setCategory_id(rs.getInt("category_id"));
+                t.setCategorie(rs.getString("categorie_nom"));
+
+                list.add(t);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return list;
+    }
 }

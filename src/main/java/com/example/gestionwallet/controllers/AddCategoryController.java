@@ -19,6 +19,11 @@ public class AddCategoryController {
     private servicecategorie sc = new servicecategorie();
     private String categoryType;
     private int editingId = -1;
+    private String role;
+
+    public void setRole(String role) {
+        this.role = role;
+    }
 
     @FXML
     public void initialize() {
@@ -29,6 +34,7 @@ public class AddCategoryController {
         nameField.setStyle("-fx-background-color:#f3f0fa; -fx-text-fill:#4b0082; -fx-background-radius:10;");
         priorityBox.setStyle("-fx-background-color:#f3f0fa; -fx-background-radius:10;");
     }
+
 
     public void setCategoryType(String type) {
         this.categoryType = type;
@@ -67,12 +73,12 @@ public class AddCategoryController {
 
         if (editingId == -1) {
 
-            categorie c = new categorie(name, priority, categoryType);
+            categorie c = new categorie(name, priority, categoryType, role);
             sc.ajouter(c);
 
         } else {
 
-            categorie c = new categorie(editingId, name, priority, categoryType);
+            categorie c = new categorie(editingId, name, priority, categoryType, role);
             sc.modifier(c);
             editingId = -1;
         }
