@@ -35,7 +35,7 @@ import java.io.FileOutputStream;
 import java.net.http.*;
 import java.util.Set;
 import java.util.HashSet;
-
+import java.net.URI;
 import com.example.gestionwallet.models.transaction;
 import com.example.gestionwallet.services.servicetransaction;
 
@@ -50,7 +50,7 @@ public class AdminController {
     @FXML private LineChart<String, Number> transactionLineChart;
     @FXML private Button backButton;
     @FXML private HBox statsContainer;
-
+    @FXML private Label currencyRatesLabel;
     private final servicetransaction st = new servicetransaction();
 
     @FXML
@@ -661,6 +661,50 @@ public class AdminController {
                 createStatCard("Total", nbrUser + nbrEntreprise, "#4b0082")
         );
     }
+    @FXML
+    private void loadCurrencyRates() {
 
+        if (!currencyRatesLabel.getText().isEmpty()) {
+            currencyRatesLabel.setText("");
+            return;
+        }
+
+        try {
+
+            HttpClient client = HttpClient.newHttpClient();
+
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create("https://open.er-api.com/v6/latest/TND"))
+                    .GET()
+                    .build();
+
+            HttpResponse<String> response =
+                    client.send(request, HttpResponse.BodyHandlers.ofString());
+
+            org.json.JSONObject json =
+                    new org.json.JSONObject(response.body());
+
+            org.json.JSONObject rates =
+                    json.getJSONObject("rates");
+
+            double eur = rates.getDouble("EUR");
+            double usd = rates.getDouble("USD");
+            double gbp = rates.getDouble("GBP");
+            double cad = rates.getDouble("CAD");
+            double jpy = rates.getDouble("JPY");
+
+            currencyRatesLabel.setText(
+                    "Taux de change (Base: TND)\n\n" +
+                            "EUR : " + eur + "\n" +
+                            "USD : " + usd + "\n" +
+                            "GBP : " + gbp + "\n" +
+                            "CAD : " + cad + "\n" +
+                            "JPY : " + jpy
+            );
+
+        } catch (Exception e) {
+            currencyRatesLabel.setText("Erreur API devises");
+        }
+    }
 
 }

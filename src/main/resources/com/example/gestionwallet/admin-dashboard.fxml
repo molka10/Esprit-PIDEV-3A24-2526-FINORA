@@ -48,7 +48,26 @@
                 <VBox spacing="30"
                       prefWidth="600"
                       HBox.hgrow="ALWAYS">
+                    <VBox spacing="10">
 
+                        <Label text="Marché Devises"
+                               style="-fx-font-size:18px; -fx-font-weight:bold; -fx-text-fill:#6a0dad;" />
+
+                        <HBox spacing="20" alignment="CENTER_LEFT">
+
+                            <Button text="Charger taux de change"
+                                    onAction="#loadCurrencyRates"
+                                    style="-fx-background-color:#8e44ad; -fx-text-fill:white;" />
+
+                            <Label fx:id="currencyRatesLabel"
+                                   wrapText="true"
+                                   style="-fx-background-color:#f3f0fa;
+                      -fx-padding:15;
+                      -fx-background-radius:15;" />
+
+                        </HBox>
+
+                    </VBox>
                     <!-- PIE -->
                     <VBox alignment="CENTER"
                           spacing="20"
@@ -155,6 +174,8 @@
 
                             <VBox fx:id="transactionContainer"
                                   spacing="12"/>
+
+
                         </ScrollPane>
 
                     </VBox>
