@@ -5,7 +5,7 @@ public class categorie {
     private int id_category;
     private String nom;
     private String priorite;
-    private String type; // INCOME / OUTCOME
+    private String type;
     private String role;
 
     public categorie() {}
@@ -47,7 +47,9 @@ public class categorie {
         return "ID: " + id_category +
                 " | Nom : " + nom +
                 " | Priorité : " + priorite +
-                " | Type : " + type;
+                " | Type : " + type+
+                " | Role : " + role;
+
     }
 
 }

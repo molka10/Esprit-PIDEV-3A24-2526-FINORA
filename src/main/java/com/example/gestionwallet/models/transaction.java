@@ -17,7 +17,6 @@ public class transaction {
 
     public transaction() {}
 
-    // Constructor sans id
     public transaction(String nom_transaction, String type, double montant,
                        Date date_transaction, String source,
                        int user_id, int category_id, String role) {
@@ -32,7 +31,6 @@ public class transaction {
         this.role = role;
     }
 
-    // Constructor avec id
     public transaction(int id_transaction, String nom_transaction, String type,
                        double montant, Date date_transaction,
                        String source, int user_id, int category_id, String role) {
@@ -48,7 +46,6 @@ public class transaction {
         this.role = role;
     }
 
-    // ===== GETTERS & SETTERS =====
 
     public int getId_transaction() { return id_transaction; }
     public void setId_transaction(int id_transaction) { this.id_transaction = id_transaction; }
