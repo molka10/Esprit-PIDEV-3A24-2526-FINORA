@@ -6,12 +6,13 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
 import com.example.project_pi.services.EmailService;
-import com.example.project_pi.services.OpenAiDescriptionService;
+
 import javafx.application.Platform;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import com.example.project_pi.services.OpenRouterDescriptionService;
 import com.example.project_pi.services.CurrencyApiService;
 import com.example.project_pi.services.HolidayApiService;
 public class AppelOffreFormController {
@@ -39,7 +40,7 @@ public class AppelOffreFormController {
     // ✅ Save button to disable until valid
     @FXML private Button saveBtn;
 
-    private final OpenAiDescriptionService aiService = new OpenAiDescriptionService();
+    private final OpenRouterDescriptionService aiService = new OpenRouterDescriptionService();
     private final EmailService emailService = new EmailService();
     private String oldStatut = null;
     private final AppelOffreService service = new AppelOffreService();
@@ -398,7 +399,7 @@ public class AppelOffreFormController {
         aiStatusLabel.setText("Génération en cours...");
 
         String titre = titreField.getText();
-        String categorie = (categorieField != null) ? categorieField.getText() : "";
+        String categorie = categorieCombo.getValue();
         String type = typeCombo.getValue();
         String devise = deviseCombo.getValue();
 
@@ -427,10 +428,5 @@ public class AppelOffreFormController {
         }).start();
     }
 
-    private double parseDoubleSafe(String s) {
-        if (s == null) return 0;
-        String t = s.trim().replace(",", ".");
-        if (t.isEmpty()) return 0;
-        try { return Double.parseDouble(t); } catch (Exception e) { return 0; }
-    }
+
 }

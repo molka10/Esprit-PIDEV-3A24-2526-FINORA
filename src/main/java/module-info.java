@@ -6,7 +6,7 @@ module com.example.project_pi {
     requires java.desktop;
     // ===== Required for JDBC =====
     requires java.sql;
-    requires java.net.http;
+
     requires java.net.http;     // AI calls (HTTP)
     requires jakarta.mail;      // Email
 

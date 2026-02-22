@@ -7,7 +7,7 @@ import com.example.project_pi.services.CandidatureService;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
-
+import com.example.project_pi.services.EmailService;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -29,6 +29,9 @@ public class CandidatureFormController {
 
     private final CandidatureService service = new CandidatureService();
     private final AppelOffreService appelOffreService = new AppelOffreService();
+
+    private final EmailService emailService = new EmailService();
+    private String oldStatut = null;
 
     private Stage dialogStage;
     private boolean saved = false;
@@ -81,6 +84,7 @@ public class CandidatureFormController {
 
     public void setCandidature(Candidature c) {
         this.current = c;
+        oldStatut = c.getStatut();
         formTitle.setText("Modifier Candidature");
 
         if (c != null) {
@@ -136,6 +140,23 @@ public class CandidatureFormController {
 
             if (current == null) {
                 service.add(c);
+                // ✅ Email when candidature becomes accepted/rejected
+                try {
+                    String newStatut = c.getStatut();
+                    boolean changed = (oldStatut == null) || !oldStatut.equalsIgnoreCase(newStatut);
+
+                    if (current != null && changed) {
+                        if ("accepted".equalsIgnoreCase(newStatut) || "rejected".equalsIgnoreCase(newStatut)) {
+                            String subject = "Mise à jour de votre candidature";
+                            String body = "Bonjour " + c.getNomCandidat() + ",\n\n"
+                                    + "Votre candidature a été mise à jour.\n"
+                                    + "Nouveau statut: " + newStatut + "\n\n"
+                                    + "Merci.";
+                            emailService.send(c.getEmailCandidat(), subject, body);
+                        }
+                    }
+                } catch (Exception ignored) {
+                }
             } else {
                 c.setCandidatureId(current.getCandidatureId());
                 service.update(c);
