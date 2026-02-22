@@ -37,6 +37,7 @@ public class AppelOffreFormController {
     @FXML private Button saveBtn;
 
     private final AppelOffreService service = new AppelOffreService();
+    private boolean deadlineInvalid = false;   // ✅ tracks if date is not allowed
     private final CurrencyApiService currencyApi = new CurrencyApiService();
     private final HolidayApiService holidayApi = new HolidayApiService();
     private Stage dialogStage;
@@ -149,6 +150,11 @@ public class AppelOffreFormController {
         }
 
         try {
+            // ✅ Block saving if deadline is weekend/holiday
+            if (dateLimitePicker.getValue() != null && deadlineInvalid) {
+                errorLabel.setText("Date limite invalide (weekend / jour férié). Choisissez une autre date.");
+                return;
+            }
             double budgetMin = parseDoubleMoney(budgetMinField.getText());
             double budgetMax = parseDoubleMoney(budgetMaxField.getText());
 
@@ -326,19 +332,24 @@ public class AppelOffreFormController {
 
                 javafx.application.Platform.runLater(() -> {
                     if (holiday && weekend) {
-                        deadlineWarningLabel.setText("⚠ Date limite sur un weekend ET un jour férié.");
+                        deadlineWarningLabel.setText("Date limite sur un weekend ET un jour férié.");
+                        deadlineInvalid = true;
                     } else if (holiday) {
-                        deadlineWarningLabel.setText("⚠ Date limite sur un jour férié.");
+                        deadlineWarningLabel.setText("Date limite sur un jour férié.");
+                        deadlineInvalid = true;
                     } else if (weekend) {
-                        deadlineWarningLabel.setText("⚠ Date limite sur un weekend.");
+                        deadlineWarningLabel.setText("Date limite sur un weekend.");
+                        deadlineInvalid = true;
                     } else {
                         deadlineWarningLabel.setText("");
+                        deadlineInvalid = false;
                     }
                 });
             } catch (Exception e) {
-                javafx.application.Platform.runLater(() ->
-                        deadlineWarningLabel.setText("Info jours fériés indisponible.")
-                );
+                javafx.application.Platform.runLater(() -> {
+                    deadlineWarningLabel.setText("Info jours fériés indisponible.");
+                    deadlineInvalid = false;
+                });
             }
         }).start();
     }
