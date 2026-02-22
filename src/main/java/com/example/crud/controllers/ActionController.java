@@ -55,7 +55,6 @@ public class ActionController implements Initializable {
         t.setName("db-executor");
         return t;
     });
-
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
 
@@ -72,6 +71,17 @@ public class ActionController implements Initializable {
             else chargerActionsAsync(n.getIdBourse());
         });
 
+        // 🆕 RECHERCHE DYNAMIQUE EN TEMPS RÉEL
+        searchField.textProperty().addListener((observable, oldValue, newValue) -> {
+            filtrerActionsDynamique(newValue);
+        });
+
+
+
+
+
+
+
         chargerBoursesAsync();
         chargerActionsAsync(null);
 
@@ -82,7 +92,6 @@ public class ActionController implements Initializable {
             System.err.println("⚠️ ServiceAlphaVantage non configuré - Prix réels désactivés");
         }
     }
-
     public void preselectionnerBourseParId(int idBourse) {
         pendingPreselectBourseId = idBourse;
 
@@ -97,6 +106,35 @@ public class ActionController implements Initializable {
                 }
             }
         });
+    }
+
+
+    private void filtrerActionsDynamique(String motCle) {
+        Task<List<Action>> task = new Task<>() {
+            @Override
+            protected List<Action> call() {
+                List<Action> toutes = serviceAction.getAll();
+
+                if (motCle == null || motCle.isBlank()) {
+                    return toutes;
+                }
+
+                String kw = motCle.toLowerCase();
+                return toutes.stream()
+                        .filter(a -> a.getSymbole().toLowerCase().contains(kw) ||
+                                a.getNomEntreprise().toLowerCase().contains(kw) ||
+                                a.getSecteur().toLowerCase().contains(kw))
+                        .collect(Collectors.toList());
+            }
+        };
+
+        task.setOnSucceeded(e -> {
+            List<Action> resultats = task.getValue();
+            afficherCartes(resultats);
+        });
+
+        task.setOnFailed(e -> System.err.println("Erreur filtre: " + task.getException()));
+        dbExecutor.submit(task);
     }
 
     @FXML

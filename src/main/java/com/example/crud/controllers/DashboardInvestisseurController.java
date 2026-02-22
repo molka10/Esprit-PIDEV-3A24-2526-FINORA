@@ -1,6 +1,7 @@
 package com.example.crud.controllers;
 
 import com.example.crud.models.Action;
+import com.example.crud.models.Transaction;
 import com.example.crud.services.ServiceAction;
 import com.example.crud.services.ServiceBourse;
 import com.example.crud.services.ServiceTransaction;
@@ -31,9 +32,11 @@ import java.util.*;
 import java.util.concurrent.*;
 import com.example.crud.services.ServiceAlphaVantage;
 import com.example.crud.services.ServiceAlphaVantage.DonneesAction;
+
 /**
- * 🏦 DashboardInvestisseurController
- * Dashboard Investisseur/Entreprise style Bourse Desktop
+ * 🏦 DashboardInvestisseurController - VERSION COMPLÈTE
+ * ✅ Alerte >50000 avec 3 beeps
+ * ✅ Toutes fonctionnalités intégrées
  */
 public class DashboardInvestisseurController implements Initializable {
 
@@ -63,21 +66,24 @@ public class DashboardInvestisseurController implements Initializable {
     @FXML private TextField searchField;
 
     private final ServiceAction serviceAction = new ServiceAction();
-    private final ServiceBourse serviceBourse = new ServiceBourse(); // (ok si utilisé ailleurs)
+    private final ServiceBourse serviceBourse = new ServiceBourse();
     private final ServiceTransaction serviceTransaction = new ServiceTransaction();
 
     // Watchlist en mémoire
     private final Set<Integer> watchlistIds = new HashSet<>();
-    // Portfolio : idAction → quantité possédée (local UI)
+    // Portfolio : idAction → quantité possédée
     private final Map<Integer, Integer> portfolio = new HashMap<>();
-    // Prix d'achat moyen (local UI)
+    // Prix d'achat moyen
     private final Map<Integer, Double> prixAchat = new HashMap<>();
     private final ServiceAlphaVantage alphaVantage = new ServiceAlphaVantage();
 
-    // Cache UI : symbole -> données AV (pour éviter de rappeler alphaVantage partout)
+    // Cache UI : symbole -> données AV
     private final Map<String, DonneesAction> avData = new ConcurrentHashMap<>();
     private List<Action> toutesActions = new ArrayList<>();
     private final Random random = new Random();
+
+    // 🆕 Flag pour éviter alertes multiples
+    private boolean alerteDejaAffichee = false;
 
     private final ScheduledExecutorService scheduler =
             Executors.newScheduledThreadPool(2, r -> {
@@ -94,6 +100,9 @@ public class DashboardInvestisseurController implements Initializable {
         configureChart();
         chargerDonnees();
         chargerNews();
+
+        // 🆕 DÉMARRER SURVEILLANCE ALERTE >50000
+        demarrerSurveillanceAlerte();
 
         // Refresh toutes les 4 secondes
         scheduler.scheduleAtFixedRate(() ->
@@ -135,8 +144,6 @@ public class DashboardInvestisseurController implements Initializable {
         new Thread(task).start();
     }
 
-
-
     @FXML
     private void chargerPrixReels() {
 
@@ -148,23 +155,15 @@ public class DashboardInvestisseurController implements Initializable {
         Task<Void> task = new Task<>() {
             @Override
             protected Void call() {
-
-                // ⚠️ ton controller utilise serviceAction.getAll()
                 List<Action> actions = serviceAction.getAll();
 
                 for (Action action : actions) {
-
-                    // Appel AV (cache + anti-spam déjà gérés dans ton service)
                     DonneesAction d = alphaVantage.getDonneesAction(action.getSymbole());
 
                     if (d != null) {
                         avData.put(action.getSymbole(), d);
-
-                        // ✅ Mise à jour prix côté UI (en mémoire)
                         action.setPrixUnitaire(d.prix);
                     }
-
-                    // Si AV renvoie null (delai anti-spam), on continue sans casser
                 }
 
                 return null;
@@ -172,7 +171,6 @@ public class DashboardInvestisseurController implements Initializable {
         };
 
         task.setOnSucceeded(e -> {
-            // Rafraîchir ton tableau + watchlist + stats portfolio
             afficherTableauMarche(toutesActions);
             rafraichirWatchlist();
             calculerPortfolio();
@@ -203,7 +201,6 @@ public class DashboardInvestisseurController implements Initializable {
         row.setAlignment(Pos.CENTER_LEFT);
         row.setStyle("-fx-background-color: #0f111733; -fx-background-radius: 8; -fx-cursor: hand;");
 
-        // Badge couleur
         String[] colors = {"#6366f1", "#f59e0b", "#10b981", "#ef4444", "#3b82f6", "#8b5cf6"};
         String color = colors[Math.abs(action.getSymbole().hashCode()) % colors.length];
 
@@ -228,7 +225,6 @@ public class DashboardInvestisseurController implements Initializable {
         Label prixLabel = new Label(String.format("%.2f", action.getPrixUnitaire()));
         prixLabel.setStyle("-fx-font-size: 13px; -fx-text-fill: white; -fx-font-weight: bold; -fx-pref-width: 100; -fx-alignment: CENTER_RIGHT;");
 
-        // Variation simulée
         double var = (new Random(action.getIdAction() + System.currentTimeMillis() / 4000)
                 .nextDouble() * 8) - 4;
         Label varLabel = new Label(String.format("%+.2f%%", var));
@@ -388,13 +384,10 @@ public class DashboardInvestisseurController implements Initializable {
         });
     }
 
-
     @FXML
     private void ouvrirChatbot(ActionEvent event) {
         try {
             URL fxml = getClass().getResource("/com/example/crud/Chatbot view.fxml");
-            System.out.println("FXML chatbot = " + fxml); // <-- debug
-
             FXMLLoader loader = new FXMLLoader(fxml);
             Parent root = loader.load();
 
@@ -414,7 +407,6 @@ public class DashboardInvestisseurController implements Initializable {
                 "FINORA - Prédiction IA", event);
     }
 
-
     private void naviguerVers(String fxmlPath, String titre, ActionEvent event) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
@@ -430,16 +422,12 @@ public class DashboardInvestisseurController implements Initializable {
         }
     }
 
-
-
-
     // ============================================================
     //  ACHAT / VENTE
     // ============================================================
 
     private void executerAchat(Action action, int quantite) {
         try {
-            // ✅ DB : update stock + insert transaction
             serviceTransaction.acheter(
                     action.getIdAction(),
                     quantite,
@@ -447,7 +435,6 @@ public class DashboardInvestisseurController implements Initializable {
                     Session.getDisplayName()
             );
 
-            // ✅ UI (local)
             portfolio.merge(action.getIdAction(), quantite, Integer::sum);
             prixAchat.put(action.getIdAction(), action.getPrixUnitaire());
 
@@ -461,7 +448,6 @@ public class DashboardInvestisseurController implements Initializable {
                     quantite, action.getPrixUnitaire(), devise, total, devise, commission, devise
             ));
 
-            // refresh actions + stats
             chargerDonnees();
             calculerPortfolio();
             rafraichirWatchlist();
@@ -485,7 +471,6 @@ public class DashboardInvestisseurController implements Initializable {
         }
 
         try {
-            // ✅ DB : update stock + insert transaction
             serviceTransaction.vendre(
                     action.getIdAction(),
                     quantite,
@@ -493,7 +478,6 @@ public class DashboardInvestisseurController implements Initializable {
                     Session.getDisplayName()
             );
 
-            // ✅ UI (local)
             int nouvQte = possede - quantite;
             if (nouvQte == 0) portfolio.remove(idAction);
             else portfolio.put(idAction, nouvQte);
@@ -524,7 +508,7 @@ public class DashboardInvestisseurController implements Initializable {
     }
 
     // ============================================================
-    //  NAVIGATION → HISTORIQUE
+    //  NAVIGATION
     // ============================================================
 
     @FXML
@@ -532,8 +516,7 @@ public class DashboardInvestisseurController implements Initializable {
         try {
             URL url = getClass().getResource("/com/example/crud/Historique view.fxml");
             if (url == null) {
-                showError("FXML introuvable : /com/example/crud/Historique view.fxml\n" +
-                        "Vérifie : src/main/resources/com/example/crud/");
+                showError("FXML introuvable");
                 return;
             }
 
@@ -553,6 +536,7 @@ public class DashboardInvestisseurController implements Initializable {
             showError("Erreur ouverture historique : " + ex.getMessage());
         }
     }
+
     @FXML
     private void retourProfil(ActionEvent event) {
         try {
@@ -570,7 +554,6 @@ public class DashboardInvestisseurController implements Initializable {
             showError("Erreur retour : " + e.getMessage());
         }
     }
-
 
     // ============================================================
     //  WATCHLIST
@@ -750,7 +733,88 @@ public class DashboardInvestisseurController implements Initializable {
     }
 
     @FXML
-    private void navDashboard(ActionEvent event) { /* navigation interne */ }
+    private void navDashboard(ActionEvent event) { }
+
+    // ============================================================
+    //  🔔 ALERTE MONTANT >50000 (NOUVEAU)
+    // ============================================================
+
+    private void demarrerSurveillanceAlerte() {
+        scheduler.scheduleAtFixedRate(() -> {
+            verifierSeuilInvestissement();
+        }, 10, 30, TimeUnit.SECONDS);
+    }
+
+    private void verifierSeuilInvestissement() {
+        if (alerteDejaAffichee) return;
+
+        Task<Double> task = new Task<>() {
+            @Override
+            protected Double call() {
+                List<Transaction> transactions = serviceTransaction.getAll();
+                double totalAchats = 0;
+
+                for (Transaction t : transactions) {
+                    if (t.getTypeTransaction().equals("ACHAT")) {
+                        totalAchats += t.getMontantTotal();
+                    }
+                }
+
+                return totalAchats;
+            }
+        };
+
+        task.setOnSucceeded(e -> {
+            Double montantTotal = task.getValue();
+
+            if (montantTotal > 50000) {
+                alerteDejaAffichee = true;
+                Platform.runLater(() -> {
+                    declencherAlerteInvestissement(montantTotal);
+                });
+            }
+        });
+
+        new Thread(task).start();
+    }
+
+    private void declencherAlerteInvestissement(double montant) {
+        try {
+            // 🔊 JOUER 3 BEEPS
+            java.awt.Toolkit.getDefaultToolkit().beep();
+
+            scheduler.schedule(() -> {
+                java.awt.Toolkit.getDefaultToolkit().beep();
+            }, 500, TimeUnit.MILLISECONDS);
+
+            scheduler.schedule(() -> {
+                java.awt.Toolkit.getDefaultToolkit().beep();
+            }, 1000, TimeUnit.MILLISECONDS);
+
+        } catch (Exception e) {
+            System.err.println("Impossible de jouer le son");
+        }
+
+        // 📢 AFFICHER ALERT
+        Alert alert = new Alert(Alert.AlertType.WARNING);
+        alert.setTitle("🚨 ALERTE INVESTISSEMENT");
+        alert.setHeaderText("Seuil critique dépassé !");
+        alert.setContentText(
+                "💰 Montant total investi : " + String.format("%.2f TND", montant) + "\n\n" +
+                        "⚠️ Vous avez dépassé le seuil de 50,000 TND !\n\n" +
+                        "📊 Veuillez :\n" +
+                        "- Consulter votre conseiller financier\n" +
+                        "- Revoir votre stratégie d'investissement\n" +
+                        "- Diversifier votre portfolio"
+        );
+
+        alert.getDialogPane().setStyle(
+                "-fx-font-size: 14px;" +
+                        "-fx-background-color: #fff8e1;"
+        );
+
+        alert.showAndWait();
+    }
 
     // ============================================================
     //  UTILS

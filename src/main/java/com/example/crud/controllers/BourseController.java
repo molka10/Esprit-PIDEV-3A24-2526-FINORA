@@ -47,6 +47,11 @@ public class BourseController implements Initializable {
     public void initialize(URL url, ResourceBundle rb) {
         afficherBourses(null);
 
+        // 🆕 RECHERCHE DYNAMIQUE EN TEMPS RÉEL
+        searchField.textProperty().addListener((observable, oldValue, newValue) -> {
+            filtrerBoursesDynamique(newValue);
+        });
+
         // Test ServiceDevise
         if (serviceDevise.estConfigure()) {
             System.out.println("✅ ServiceDevise configuré et prêt");
@@ -348,6 +353,39 @@ public class BourseController implements Initializable {
         content.getChildren().addAll(headerBox, body, convBox, chartBox);
         dialog.getDialogPane().setContent(content);
         dialog.showAndWait();
+    }
+
+
+    private void filtrerBoursesDynamique(String motCle) {
+        Task<List<Bourse>> task = new Task<>() {
+            @Override
+            protected List<Bourse> call() {
+                List<Bourse> toutes = service.getAll();
+
+                if (motCle == null || motCle.isBlank()) {
+                    return toutes;
+                }
+
+                String kw = motCle.toLowerCase();
+                return toutes.stream()
+                        .filter(b -> b.getNomBourse().toLowerCase().contains(kw) ||
+                                b.getPays().toLowerCase().contains(kw) ||
+                                b.getDevise().toLowerCase().contains(kw))
+                        .collect(Collectors.toList());
+            }
+        };
+
+        task.setOnSucceeded(e -> {
+            List<Bourse> resultats = task.getValue();
+            cardsContainer.getChildren().clear();
+            for (Bourse b : resultats) {
+                cardsContainer.getChildren().add(creerCarte(b));
+            }
+            lblTotal.setText("📊 Total : " + resultats.size() + " bourse(s)");
+        });
+
+        task.setOnFailed(e -> System.err.println("Erreur filtre: " + task.getException()));
+        dbExecutor.submit(task);
     }
 
     private HBox creerLigneDetail(String cle, String valeur, String couleur) {

@@ -12,6 +12,6 @@ module com.example.crud {
 
     opens com.example.crud.controllers to javafx.fxml;
 
-
+    requires java.desktop;
 
 }
