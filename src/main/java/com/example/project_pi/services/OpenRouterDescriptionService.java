@@ -10,7 +10,7 @@ import java.time.Duration;
  * Docs: https://openrouter.ai/docs (OpenAI-compatible schema)
  */
 public class OpenRouterDescriptionService {
-
+    private static final String API_KEY = System.getenv("OPENROUTER_API_KEY");
     private final HttpClient http = HttpClient.newBuilder()
             .connectTimeout(Duration.ofSeconds(10))
             .build();
@@ -26,8 +26,8 @@ public class OpenRouterDescriptionService {
             String extraNotes
     ) throws IOException, InterruptedException {
 
-        String apiKey = "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";
-        if (apiKey == null || apiKey.isBlank()) {
+
+        if (API_KEY == null || API_KEY.isBlank()) {
             throw new IOException("OPENROUTER_API_KEY not set (Environment variables).");
         }
 
@@ -77,7 +77,7 @@ Contexte:
         HttpRequest req = HttpRequest.newBuilder()
                 .uri(URI.create("https://openrouter.ai/api/v1/chat/completions"))
                 .timeout(Duration.ofSeconds(30))
-                .header("Authorization", "Bearer " + apiKey)
+                .header("Authorization", "Bearer " + API_KEY)
                 .header("Content-Type", "application/json")
                 // Optional but recommended headers on OpenRouter:
                 .header("HTTP-Referer", "http://localhost") // can be anything for local app

@@ -139,27 +139,28 @@ public class CandidatureFormController {
             );
 
             if (current == null) {
+                // ✅ INSERT (usually "submitted")
                 service.add(c);
-                // ✅ Email when candidature becomes accepted/rejected
-                try {
-                    String newStatut = c.getStatut();
-                    boolean changed = (oldStatut == null) || !oldStatut.equalsIgnoreCase(newStatut);
-
-                    if (current != null && changed) {
-                        if ("accepted".equalsIgnoreCase(newStatut) || "rejected".equalsIgnoreCase(newStatut)) {
-                            String subject = "Mise à jour de votre candidature";
-                            String body = "Bonjour " + c.getNomCandidat() + ",\n\n"
-                                    + "Votre candidature a été mise à jour.\n"
-                                    + "Nouveau statut: " + newStatut + "\n\n"
-                                    + "Merci.";
-                            emailService.send(c.getEmailCandidat(), subject, body);
-                        }
-                    }
-                } catch (Exception ignored) {
-                }
             } else {
+                // ✅ UPDATE
                 c.setCandidatureId(current.getCandidatureId());
                 service.update(c);
+
+                // ✅ Email when status changes to accepted/rejected
+                String newStatut = c.getStatut();
+                boolean changed = (oldStatut == null) || !oldStatut.equalsIgnoreCase(newStatut);
+
+                if (changed && ("accepted".equalsIgnoreCase(newStatut) || "rejected".equalsIgnoreCase(newStatut))) {
+                    String subject = "Mise à jour de votre candidature";
+                    String body = "Bonjour " + c.getNomCandidat() + ",\n\n"
+                            + "Votre candidature a été mise à jour.\n"
+                            + "Nouveau statut: " + newStatut + "\n\n"
+                            + "Merci.";
+
+                    System.out.println(">>> Sending decision email to: " + c.getEmailCandidat());
+                    emailService.send(c.getEmailCandidat(), subject, body);
+                    System.out.println(">>> Decision email sent OK");
+                }
             }
 
             saved = true;
@@ -169,6 +170,9 @@ public class CandidatureFormController {
             errorLabel.setText("Montant doit être un nombre valide (ex: 1500 ou 1500.50).");
         } catch (SQLException e) {
             errorLabel.setText("Erreur DB: " + e.getMessage());
+        } catch (Exception e) {
+            e.printStackTrace();
+            errorLabel.setText("Erreur email: " + e.getMessage());
         }
     }
 

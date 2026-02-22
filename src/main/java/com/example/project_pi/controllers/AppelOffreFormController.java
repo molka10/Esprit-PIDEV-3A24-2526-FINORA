@@ -190,19 +190,22 @@ public class AppelOffreFormController {
                         && (oldStatut == null || !"published".equalsIgnoreCase(oldStatut));
 
                 if (becamePublished) {
-                    String admin = System.getenv("ADMIN_EMAIL");
-                    if (admin != null && !admin.isBlank()) {
-                        String subject = "Appel d'Offre publié: " + a.getTitre();
-                        String body = "Votre appel d'offre vient d'être publié.\n\n"
-                                + "Titre: " + a.getTitre() + "\n"
-                                + "Catégorie: " + a.getCategorie() + "\n"
-                                + "Type: " + a.getType() + "\n"
-                                + "Statut: " + a.getStatut() + "\n";
-                        emailService.send(admin, subject, body);
-                    }
+                    String admin = "jalloulyoussef5@gmail.com"; // ✅ hardcoded admin (no env vars)
+
+                    String subject = "Appel d'Offre publié: " + a.getTitre();
+                    String body = "Votre appel d'offre vient d'être publié.\n\n"
+                            + "Titre: " + a.getTitre() + "\n"
+                            + "Catégorie: " + a.getCategorie() + "\n"
+                            + "Type: " + a.getType() + "\n"
+                            + "Statut: " + a.getStatut() + "\n";
+
+                    System.out.println(">>> Sending publish email to admin: " + admin);
+                    emailService.send(admin, subject, body);
+                    System.out.println(">>> Publish email sent OK");
                 }
-            } catch (Exception ignored) {
-                // optional: you can show info if you want
+            } catch (Exception e) {
+                e.printStackTrace(); // ✅ do not ignore
+                errorLabel.setText("Erreur email: " + e.getMessage());
             }
 
             saved = true;

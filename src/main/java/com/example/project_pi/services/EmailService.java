@@ -1,48 +1,59 @@
 package com.example.project_pi.services;
 
-import jakarta.mail.*;
+import jakarta.mail.Authenticator;
+import jakarta.mail.Message;
+import jakarta.mail.MessagingException;
+import jakarta.mail.PasswordAuthentication;
+import jakarta.mail.Session;
+import jakarta.mail.Transport;
 import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Properties;
 
 public class EmailService {
 
-    private final String host = env("SMTP_HOST", "smtp.gmail.com");
-    private final int port = Integer.parseInt(env("SMTP_PORT", "587"));
-    private final String user = env("SMTP_USER", "");
-    private final String pass = env("SMTP_PASS", "");
-    private final String from = env("SMTP_FROM", user);
+    // ✅ Gmail SMTP (TLS)
+    private static final String SMTP_HOST = "smtp.gmail.com";
+    private static final int SMTP_PORT = 587;
+
+
+    private static final String SMTP_USER = System.getenv("SMTP_USER");
+    private static final String SMTP_PASS = System.getenv("SMTP_PASS");
+
+    private static final String FROM_EMAIL = SMTP_USER;
 
     public void send(String to, String subject, String body) throws MessagingException {
-        if (to == null || to.isBlank()) return;
-        if (user.isBlank() || pass.isBlank()) {
-            throw new MessagingException("SMTP_USER / SMTP_PASS missing (env).");
+        if (to == null || to.isBlank()) {
+            throw new MessagingException("Recipient email is empty.");
+        }
+        if (SMTP_USER.isBlank() || SMTP_PASS.isBlank()) {
+            throw new MessagingException("SMTP credentials are missing in EmailService.java");
         }
 
         Properties props = new Properties();
         props.put("mail.smtp.auth", "true");
         props.put("mail.smtp.starttls.enable", "true");
-        props.put("mail.smtp.host", host);
-        props.put("mail.smtp.port", String.valueOf(port));
+        props.put("mail.smtp.host", SMTP_HOST);
+        props.put("mail.smtp.port", String.valueOf(SMTP_PORT));
+        props.put("mail.smtp.ssl.protocols", "TLSv1.2"); // helps on some machines
 
         Session session = Session.getInstance(props, new Authenticator() {
-            @Override protected PasswordAuthentication getPasswordAuthentication() {
-                return new PasswordAuthentication(user, pass);
+            @Override
+            protected PasswordAuthentication getPasswordAuthentication() {
+                return new PasswordAuthentication(SMTP_USER, SMTP_PASS);
             }
         });
 
-        Message msg = new MimeMessage(session);
-        msg.setFrom(new InternetAddress(from));
-        msg.setRecipients(Message.RecipientType.TO, InternetAddress.parse(to));
-        msg.setSubject(subject);
-        msg.setText(body);
+        MimeMessage msg = new MimeMessage(session);
+        msg.setFrom(new InternetAddress(FROM_EMAIL));
+        msg.setRecipients(Message.RecipientType.TO, InternetAddress.parse(to, false));
+        msg.setSubject(subject == null ? "" : subject, StandardCharsets.UTF_8.name());
+        msg.setText(body == null ? "" : body, StandardCharsets.UTF_8.name());
 
         Transport.send(msg);
     }
 
-    private String env(String k, String def) {
-        String v = System.getenv(k);
-        return (v == null || v.isBlank()) ? def : v;
-    }
+
 }
