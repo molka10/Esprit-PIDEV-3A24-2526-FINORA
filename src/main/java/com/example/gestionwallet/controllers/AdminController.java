@@ -107,7 +107,7 @@ public class AdminController {
         row.setStyle("-fx-background-color:#f3f0fa; -fx-background-radius:10;");
 
         row.getChildren().addAll(
-                createCell("User",120),
+                createCell(t.getRole(),120),
                 createCell(t.getType(),120),
                 createMontantCell(t.getMontant(),150),
                 createCell(t.getDate_transaction().toString(),180)
@@ -157,63 +157,72 @@ public class AdminController {
 
         walletContainer.getChildren().clear();
 
-        double total = 0;
-        double income = 0;
-        double outcome = 0;
-        int count = 0;
+        Map<String, Double> totalMap = new TreeMap<>();
+        Map<String, Double> incomeMap = new TreeMap<>();
+        Map<String, Double> outcomeMap = new TreeMap<>();
+        Map<String, Integer> countMap = new TreeMap<>();
 
         for(transaction t : st.afficher()){
-            total += t.getMontant();
-            if(t.getMontant() >= 0) income += t.getMontant();
-            else outcome += t.getMontant();
-            count++;
+
+            String role = t.getRole();
+
+            if(role == null || role.trim().isEmpty()){
+                continue; // نتجاوز أي transaction بدون role
+            }
+
+
+
+            totalMap.put(role,
+                    totalMap.getOrDefault(role,0.0) + t.getMontant());
+
+            if(t.getMontant() >= 0)
+                incomeMap.put(role,
+                        incomeMap.getOrDefault(role,0.0) + t.getMontant());
+            else
+                outcomeMap.put(role,
+                        outcomeMap.getOrDefault(role,0.0) + t.getMontant());
+
+            countMap.put(role,
+                    countMap.getOrDefault(role,0) + 1);
         }
 
-        // ===== HEADER ROW =====
-        HBox header = new HBox();
+        HBox header = new HBox(30);
         header.setPadding(new Insets(10));
-        header.setSpacing(30);
         header.setStyle("-fx-background-color:#8e44ad; -fx-background-radius:10;");
 
         header.getChildren().addAll(
-                createHeaderLabel("User",100),
                 createHeaderLabel("Role",120),
-                createHeaderLabel("Total",100),
-                createHeaderLabel("Income",100),
-                createHeaderLabel("Outcome",100),
+                createHeaderLabel("Total",120),
+                createHeaderLabel("Income",120),
+                createHeaderLabel("Outcome",120),
                 createHeaderLabel("Transactions",120)
         );
 
         walletContainer.getChildren().add(header);
 
-        // ===== DATA ROW =====
-        HBox row = new HBox();
-        row.setPadding(new Insets(10));
-        row.setSpacing(30);
-        row.setStyle("-fx-background-color:#f3f0fa; -fx-background-radius:10;");
+        for(String role : totalMap.keySet()){
 
-        Label user = createCell("User",100);
-        Label role = createCell("Utilisateur",120);
-        Label totalLabel = createCell(total + " DT",100);
-        Label incomeLabel = createCell(income + " DT",100);
-        Label outcomeLabel = createCell(outcome + " DT",100);
-        Label countLabel = createCell(String.valueOf(count),120);
+            HBox row = new HBox(30);
+            row.setPadding(new Insets(10));
+            row.setStyle("-fx-background-color:#f3f0fa; -fx-background-radius:10;");
 
-        incomeLabel.setStyle("-fx-text-fill:#2ecc71; -fx-font-weight:bold;");
-        outcomeLabel.setStyle("-fx-text-fill:#e74c3c; -fx-font-weight:bold;");
-        totalLabel.setStyle("-fx-text-fill:#6a0dad; -fx-font-weight:bold;");
-        countLabel.setStyle("-fx-text-fill:#6a0dad; -fx-font-weight:bold;");
+            Label roleLabel = createCell(role,120);
+            Label totalLabel = createCell(totalMap.get(role)+" DT",120);
+            Label incomeLabel = createCell(incomeMap.getOrDefault(role,0.0)+" DT",120);
+            Label outcomeLabel = createCell(outcomeMap.getOrDefault(role,0.0)+" DT",120);
+            Label countLabel = createCell(String.valueOf(countMap.get(role)),120);
 
-        row.getChildren().addAll(
-                user,
-                role,
-                totalLabel,
-                incomeLabel,
-                outcomeLabel,
-                countLabel
-        );
+            incomeLabel.setStyle("-fx-text-fill:#2ecc71; -fx-font-weight:bold;");
+            outcomeLabel.setStyle("-fx-text-fill:#e74c3c; -fx-font-weight:bold;");
+            totalLabel.setStyle("-fx-text-fill:#6a0dad; -fx-font-weight:bold;");
+            countLabel.setStyle("-fx-text-fill:#6a0dad; -fx-font-weight:bold;");
 
-        walletContainer.getChildren().add(row);
+            row.getChildren().addAll(
+                    roleLabel,totalLabel,incomeLabel,outcomeLabel,countLabel
+            );
+
+            walletContainer.getChildren().add(row);
+        }
     }
 
 
@@ -299,30 +308,15 @@ public class AdminController {
         BaseColor green = new BaseColor(46,204,113);
         BaseColor red = new BaseColor(231,76,60);
 
-        Font titleFont = new Font(Font.FontFamily.HELVETICA,18,Font.BOLD,violet);
         Font headerFont = new Font(Font.FontFamily.HELVETICA,12,Font.BOLD,BaseColor.WHITE);
         Font normalFont = new Font(Font.FontFamily.HELVETICA,11);
         Font greenFont = new Font(Font.FontFamily.HELVETICA,11,Font.BOLD,green);
         Font redFont = new Font(Font.FontFamily.HELVETICA,11,Font.BOLD,red);
 
-        Paragraph title = new Paragraph("WALLET SUMMARY", titleFont);
-        doc.add(title);
-        doc.add(new Paragraph(" "));
-
-        double total=0,income=0,outcome=0;
-        int count=0;
-
-        for(transaction t: st.afficher()){
-            total+=t.getMontant();
-            if(t.getMontant()>=0) income+=t.getMontant();
-            else outcome+=t.getMontant();
-            count++;
-        }
-
-        PdfPTable table = new PdfPTable(6);
+        PdfPTable table = new PdfPTable(5);
         table.setWidthPercentage(100);
 
-        String[] headers = {"User","Role","Total","Income","Outcome","Transactions"};
+        String[] headers = {"Role","Total","Income","Outcome","Transactions"};
 
         for(String h:headers){
             PdfPCell cell = new PdfPCell(new Phrase(h,headerFont));
@@ -330,17 +324,46 @@ public class AdminController {
             table.addCell(cell);
         }
 
-        table.addCell(new Phrase("User",normalFont));
-        table.addCell(new Phrase("Utilisateur",normalFont));
-        table.addCell(new Phrase(total+" DT",normalFont));
-        table.addCell(new Phrase(income+" DT",greenFont));
-        table.addCell(new Phrase(outcome+" DT",redFont));
-        table.addCell(new Phrase(String.valueOf(count),normalFont));
+        Map<String, Double> totalMap = new TreeMap<>();
+        Map<String, Double> incomeMap = new TreeMap<>();
+        Map<String, Double> outcomeMap = new TreeMap<>();
+        Map<String, Integer> countMap = new TreeMap<>();
+
+        for(transaction t: st.afficher()){
+
+            String role = t.getRole();
+
+            if(role == null || role.trim().isEmpty()){
+                continue;
+            }
+
+
+
+            totalMap.put(role,
+                    totalMap.getOrDefault(role,0.0) + t.getMontant());
+
+            if(t.getMontant()>=0)
+                incomeMap.put(role,
+                        incomeMap.getOrDefault(role,0.0)+t.getMontant());
+            else
+                outcomeMap.put(role,
+                        outcomeMap.getOrDefault(role,0.0)+t.getMontant());
+
+            countMap.put(role,
+                    countMap.getOrDefault(role,0)+1);
+        }
+
+        for(String role : totalMap.keySet()){
+
+            table.addCell(new Phrase(role,normalFont));
+            table.addCell(new Phrase(totalMap.get(role)+" DT",normalFont));
+            table.addCell(new Phrase(incomeMap.getOrDefault(role,0.0)+" DT",greenFont));
+            table.addCell(new Phrase(outcomeMap.getOrDefault(role,0.0)+" DT",redFont));
+            table.addCell(new Phrase(String.valueOf(countMap.get(role)),normalFont));
+        }
 
         doc.add(table);
-        doc.add(new Paragraph(" "));
     }
-
     private void generateTransactionSection(Document doc) throws Exception {
 
         BaseColor violet = new BaseColor(106,13,173);
@@ -370,7 +393,7 @@ public class AdminController {
 
         for(transaction t: st.afficher()){
 
-            table.addCell(new Phrase("User",normalFont));
+            table.addCell(new Phrase(t.getRole(),normalFont));
             table.addCell(new Phrase(t.getType(),normalFont));
 
             if(t.getMontant()>=0)
@@ -415,33 +438,77 @@ public class AdminController {
 
         String userSearch = userSearchField.getText();
 
-        // ===== TRANSACTIONS =====
         transactionContainer.getChildren().clear();
-
-        for(transaction t : st.afficher()){
-
-            if(userSearch == null || userSearch.isEmpty()){
-                addTransactionRow(t);
-            }
-            else{
-                if("User".toLowerCase()
-                        .contains(userSearch.toLowerCase())){
-                    addTransactionRow(t);
-                }
-            }
-        }
-
-        // ===== WALLET =====
         walletContainer.getChildren().clear();
 
         if(userSearch == null || userSearch.isEmpty()){
+            loadTransactions();
             loadWallet();
             return;
         }
 
-        if("User".toLowerCase()
-                .contains(userSearch.toLowerCase())){
-            loadWallet();
+        Map<String, Double> totalMap = new TreeMap<>();
+        Map<String, Double> incomeMap = new TreeMap<>();
+        Map<String, Double> outcomeMap = new TreeMap<>();
+        Map<String, Integer> countMap = new TreeMap<>();
+
+        for(transaction t : st.afficher()){
+
+            if(t.getRole() != null &&
+                    t.getRole().toLowerCase().contains(userSearch.toLowerCase())){
+
+                // عرض transaction
+                addTransactionRow(t);
+
+                // حساب wallet
+                String role = t.getRole();
+
+                totalMap.put(role,
+                        totalMap.getOrDefault(role,0.0) + t.getMontant());
+
+                if(t.getMontant() >= 0)
+                    incomeMap.put(role,
+                            incomeMap.getOrDefault(role,0.0) + t.getMontant());
+                else
+                    outcomeMap.put(role,
+                            outcomeMap.getOrDefault(role,0.0) + t.getMontant());
+
+                countMap.put(role,
+                        countMap.getOrDefault(role,0) + 1);
+            }
+        }
+
+        // ===== header wallet =====
+        HBox header = new HBox(30);
+        header.setPadding(new Insets(10));
+        header.setStyle("-fx-background-color:#8e44ad; -fx-background-radius:10;");
+
+        header.getChildren().addAll(
+                createHeaderLabel("Role",120),
+                createHeaderLabel("Total",120),
+                createHeaderLabel("Income",120),
+                createHeaderLabel("Outcome",120),
+                createHeaderLabel("Transactions",120)
+        );
+
+        walletContainer.getChildren().add(header);
+
+        // ===== rows =====
+        for(String role : totalMap.keySet()){
+
+            HBox row = new HBox(30);
+            row.setPadding(new Insets(10));
+            row.setStyle("-fx-background-color:#f3f0fa; -fx-background-radius:10;");
+
+            row.getChildren().addAll(
+                    createCell(role,120),
+                    createCell(totalMap.get(role)+" DT",120),
+                    createCell(incomeMap.getOrDefault(role,0.0)+" DT",120),
+                    createCell(outcomeMap.getOrDefault(role,0.0)+" DT",120),
+                    createCell(String.valueOf(countMap.get(role)),120)
+            );
+
+            walletContainer.getChildren().add(row);
         }
     }
     @FXML

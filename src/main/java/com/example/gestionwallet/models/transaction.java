@@ -12,12 +12,16 @@ public class transaction {
     private String source;
     private int user_id;
     private int category_id;
+    private String role;
+    private String categorie;
 
     public transaction() {}
 
+    // Constructor sans id
     public transaction(String nom_transaction, String type, double montant,
                        Date date_transaction, String source,
-                       int user_id, int category_id) {
+                       int user_id, int category_id, String role) {
+
         this.nom_transaction = nom_transaction;
         this.type = type;
         this.montant = montant;
@@ -25,11 +29,13 @@ public class transaction {
         this.source = source;
         this.user_id = user_id;
         this.category_id = category_id;
+        this.role = role;
     }
 
+    // Constructor avec id
     public transaction(int id_transaction, String nom_transaction, String type,
                        double montant, Date date_transaction,
-                       String source, int user_id, int category_id) {
+                       String source, int user_id, int category_id, String role) {
 
         this.id_transaction = id_transaction;
         this.nom_transaction = nom_transaction;
@@ -39,7 +45,10 @@ public class transaction {
         this.source = source;
         this.user_id = user_id;
         this.category_id = category_id;
+        this.role = role;
     }
+
+    // ===== GETTERS & SETTERS =====
 
     public int getId_transaction() { return id_transaction; }
     public void setId_transaction(int id_transaction) { this.id_transaction = id_transaction; }
@@ -64,15 +73,12 @@ public class transaction {
 
     public int getCategory_id() { return category_id; }
     public void setCategory_id(int category_id) { this.category_id = category_id; }
-    private String categorie;
 
-    public String getCategorie() {
-        return categorie;
-    }
+    public String getRole() { return role; }
+    public void setRole(String role) { this.role = role; }
 
-    public void setCategorie(String categorie) {
-        this.categorie = categorie;
-    }
+    public String getCategorie() { return categorie; }
+    public void setCategorie(String categorie) { this.categorie = categorie; }
 
     @Override
     public String toString() {
@@ -81,8 +87,6 @@ public class transaction {
                 " | Type : " + type +
                 " | Montant : " + montant + " DT" +
                 " | Date : " + date_transaction +
-                " | Source : " + source +
-                " | Category ID : " + category_id;
+                " | Role : " + role;
     }
-
 }

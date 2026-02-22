@@ -15,14 +15,14 @@ public class testtransaction {
         servicecategorie sc = new servicecategorie();
         servicetransaction st = new servicetransaction();
 
-        // add category (zidna role)
+        // ===== ADD CATEGORY =====
         categorie cat = new categorie("TestCategory", "HAUTE", "INCOME", "USER");
         sc.ajouter(cat);
 
         List<categorie> categories = sc.afficher();
         int lastCategoryId = categories.get(categories.size() - 1).getId_category();
 
-        // add transaction
+        // ===== ADD TRANSACTION =====
         transaction t1 = new transaction(
                 "Freelance Work",
                 "INCOME",
@@ -30,16 +30,16 @@ public class testtransaction {
                 Date.valueOf("2026-02-12"),
                 "MANUAL",
                 1,
-                lastCategoryId
+                lastCategoryId,
+                "USER"          // 🔥 مهم جدا
         );
 
         st.ajouter(t1);
 
-        // list transactions
         System.out.println(" LISTE TRANSACTIONS ");
         st.afficher().forEach(System.out::println);
 
-        // update
+        // ===== UPDATE =====
         transaction t2 = new transaction(
                 1,
                 "Freelance Updated",
@@ -48,7 +48,8 @@ public class testtransaction {
                 Date.valueOf("2026-02-13"),
                 "MANUAL",
                 1,
-                lastCategoryId
+                lastCategoryId,
+                "USER"          // 🔥 لازمها زادة
         );
 
         st.modifier(t2);

@@ -19,11 +19,8 @@ public class servicetransaction implements Iservicetransaction {
     @Override
     public void ajouter(transaction t) {
 
-        String sql = """
-            INSERT INTO transaction
-            (nom_transaction, type, montant, date_transaction, source, user_id, category_id)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
-        """;
+        String sql = "INSERT INTO transaction (nom_transaction, type, montant, date_transaction, source, user_id, category_id, role) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 
         try {
             PreparedStatement ps = cnx.prepareStatement(sql);
@@ -34,6 +31,7 @@ public class servicetransaction implements Iservicetransaction {
             ps.setString(5, t.getSource());
             ps.setInt(6, t.getUser_id());
             ps.setInt(7, t.getCategory_id());
+            ps.setString(8, t.getRole());
             ps.executeUpdate();
 
         } catch (SQLException e) {
@@ -108,6 +106,7 @@ public class servicetransaction implements Iservicetransaction {
                 t.setSource(rs.getString("source"));
                 t.setUser_id(rs.getInt("user_id"));
                 t.setCategory_id(rs.getInt("category_id"));
+                t.setRole(rs.getString("role"));
 
                 // 🔥 HEDHI ELLI KENET NA9SA
                 t.setCategorie(rs.getString("categorie_nom"));

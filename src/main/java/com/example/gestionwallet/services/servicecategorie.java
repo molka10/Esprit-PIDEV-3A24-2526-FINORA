@@ -36,14 +36,15 @@ public class servicecategorie implements Iservicecategorie {
         return -1;
     }
 
-    public boolean existsByName(String nom, String type) {
+    public boolean existsByName(String nom, String type, String role) {
 
-        String sql = "SELECT COUNT(*) FROM category WHERE LOWER(nom)=LOWER(?) AND type=?";
+        String sql = "SELECT COUNT(*) FROM category WHERE LOWER(nom)=LOWER(?) AND type=? AND role=?";
 
         try {
             PreparedStatement ps = cnx.prepareStatement(sql);
             ps.setString(1, nom);
             ps.setString(2, type);
+            ps.setString(3, role);
 
             ResultSet rs = ps.executeQuery();
 
@@ -61,7 +62,7 @@ public class servicecategorie implements Iservicecategorie {
     @Override
     public void ajouter(categorie c) {
 
-        if (existsByName(c.getNom(), c.getType())) {
+        if (existsByName(c.getNom(), c.getType(), c.getRole())) {
             System.out.println(" Catégorie déjà existante ");
             return;
         }
@@ -86,14 +87,15 @@ public class servicecategorie implements Iservicecategorie {
     @Override
     public void modifier(categorie c) {
 
-        String sql = "UPDATE category SET nom=?, priorite=?, type=? WHERE id_category=?";
+        String sql = "UPDATE category SET nom=?, priorite=?, type=?, role=? WHERE id_category=?";
 
         try {
             PreparedStatement ps = cnx.prepareStatement(sql);
             ps.setString(1, c.getNom());
             ps.setString(2, c.getPriorite());
             ps.setString(3, c.getType());
-            ps.setInt(4, c.getId_category());
+            ps.setString(4, c.getRole());
+            ps.setInt(5, c.getId_category());
             ps.executeUpdate();
 
             System.out.println("Catégorie modifiée");
@@ -212,6 +214,39 @@ public class servicecategorie implements Iservicecategorie {
         try {
             PreparedStatement ps = cnx.prepareStatement(sql);
             ps.setString(1, role);
+
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+
+                categorie c = new categorie(
+                        rs.getInt("id_category"),
+                        rs.getString("nom"),
+                        rs.getString("priorite"),
+                        rs.getString("type"),
+                        rs.getString("role")
+                );
+
+                list.add(c);
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return list;
+    }
+    public List<categorie> getByRoleAndType(String role, String type) {
+
+        List<categorie> list = new ArrayList<>();
+
+        String sql = "SELECT * FROM category WHERE role = ? AND type = ?";
+
+        try {
+
+            PreparedStatement ps = cnx.prepareStatement(sql);
+            ps.setString(1, role);
+            ps.setString(2, type);
 
             ResultSet rs = ps.executeQuery();
 

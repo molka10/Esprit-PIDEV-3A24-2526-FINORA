@@ -78,7 +78,7 @@ public class EntrepriseController {
         currencyBox.getItems().addAll("DT", "EUR", "USD");
         currencyBox.setValue("DT");
     }
-    
+
 
     @FXML
     private void handleSearch() {
@@ -109,7 +109,7 @@ public class EntrepriseController {
         XYChart.Series<String, Number> outcomeSeries = new XYChart.Series<>();
 
 
-        for (transaction t : st.afficher()) {
+        for (transaction t : st.afficherParRole("ENTREPRISE")) {
 
             transaction currentTransaction = t;
 
@@ -217,7 +217,7 @@ public class EntrepriseController {
         Map<String, Double> monthlyIncome = new HashMap<>();
         Map<String, Double> monthlyOutcome = new HashMap<>();
 
-        for (transaction t : st.afficher()) {
+        for (transaction t : st.afficherParRole("ENTREPRISE")) {
 
             LocalDate date = t.getDate_transaction().toLocalDate();
             String month = date.getMonth().toString();
@@ -525,6 +525,8 @@ public class EntrepriseController {
             AddTransactionController controller = loader.getController();
             controller.setType(type);
             controller.setParentController(this);
+            controller.setRole("ENTREPRISE");
+            controller.setType(type);
 
             stage.setScene(scene);
             stage.initModality(Modality.APPLICATION_MODAL);
@@ -565,7 +567,7 @@ public class EntrepriseController {
         Calendar outcomeCal = new Calendar("Outcome");
         outcomeCal.setStyle(Calendar.Style.STYLE3); // red
 
-        for (transaction t : st.afficher()) {
+        for (transaction t : st.afficherParRole("ENTREPRISE")) {
 
             Entry<String> entry = new Entry<>(t.getNom_transaction());
 
@@ -663,7 +665,7 @@ public class EntrepriseController {
             table.addCell(h4);
 
             // Content
-            for (transaction t : st.afficher()) {
+            for (transaction t : st.afficherParRole("ENTREPRISE")) {
 
                 table.addCell(t.getNom_transaction());
                 table.addCell(t.getType());
@@ -747,7 +749,7 @@ public class EntrepriseController {
             // ===== Data Rows =====
             int rowNum = 1;
 
-            for (transaction t : st.afficher()) {
+            for (transaction t : st.afficherParRole("ENTREPRISE")) {
 
                 org.apache.poi.ss.usermodel.Row row =
                         sheet.createRow(rowNum++);

@@ -27,7 +27,10 @@ public class AddTransactionController {
 
     private servicetransaction st = new servicetransaction();
     private servicecategorie sc = new servicecategorie();
-
+    private String role;
+    public void setRole(String role){
+        this.role = role;
+    }
     @FXML
     public void initialize() {
 
@@ -72,10 +75,15 @@ public class AddTransactionController {
 
         categoryBox.getItems().clear();
 
-        List<categorie> list = sc.getByType(type);
+        // نجيب كان categories حسب role
+        List<categorie> list = sc.getByRole(role);
 
         for (categorie c : list) {
-            categoryBox.getItems().add(c.getNom());
+
+            // و نفلتر حسب type زادة
+            if (c.getType().equalsIgnoreCase(type)) {
+                categoryBox.getItems().add(c.getNom());
+            }
         }
     }
     private void showError(String message) {
@@ -134,7 +142,17 @@ public class AddTransactionController {
                 amount = -Math.abs(amount);
             }
 
-            int categoryId = sc.getIdByName(categoryName);
+            List<categorie> list = sc.getByRole(role);
+
+            int categoryId = -1;
+
+            for (categorie c : list) {
+                if (c.getNom().equals(categoryName)
+                        && c.getType().equalsIgnoreCase(currentType)) {
+                    categoryId = c.getId_category();
+                    break;
+                }
+            }
 
             transaction t = new transaction(
                     name,
@@ -143,7 +161,8 @@ public class AddTransactionController {
                     java.sql.Date.valueOf(datePicker.getValue()),
                     "MANUAL",
                     1,
-                    categoryId
+                    categoryId,
+                    role
             );
 
             st.ajouter(t);
@@ -174,9 +193,11 @@ public class AddTransactionController {
             Stage stage = new Stage();
             stage.setScene(new Scene(loader.load()));
             stage.initModality(Modality.APPLICATION_MODAL);
-            stage.setTitle("Ajouter Catégorie");
 
             AddCategoryController controller = loader.getController();
+
+            // 🔥 هذا هو المهم
+            controller.setRole(role);           // USER أو ENTREPRISE
             controller.setCategoryType(currentType);
 
             stage.showAndWait();

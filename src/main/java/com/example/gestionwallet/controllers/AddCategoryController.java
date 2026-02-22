@@ -21,9 +21,7 @@ public class AddCategoryController {
     private int editingId = -1;
     private String role;
 
-    public void setRole(String role) {
-        this.role = role;
-    }
+
 
     @FXML
     public void initialize() {
@@ -35,11 +33,22 @@ public class AddCategoryController {
         priorityBox.setStyle("-fx-background-color:#f3f0fa; -fx-background-radius:10;");
     }
 
+    public void setRole(String role) {
+        this.role = role;
+        tryLoad();
+    }
 
     public void setCategoryType(String type) {
         this.categoryType = type;
-        loadCategories();
+        tryLoad();
     }
+
+    private void tryLoad() {
+        if (role != null && categoryType != null) {
+            loadCategories();
+        }
+    }
+
 
     private void showError(String message) {
 
@@ -115,7 +124,7 @@ public class AddCategoryController {
 
         int row = 1;
 
-        List<categorie> list = sc.afficher();
+        List<categorie> list = sc.getByRole(role);
 
         for (categorie c : list) {
 
