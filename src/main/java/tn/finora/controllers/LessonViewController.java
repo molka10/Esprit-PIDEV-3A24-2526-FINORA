@@ -55,6 +55,7 @@ public class LessonViewController {
     @FXML private TextFlow contentFlow;
     @FXML private TextField txtFind;
     @FXML private Label lblFindInfo;
+    @FXML private Button btnYoutube;
 
     @FXML private Button btnQuiz;         // quiz button in FXML
     private Lesson currentLesson;         // track current lesson for quiz
@@ -176,6 +177,11 @@ public class LessonViewController {
         if (btnQuiz != null) {
             btnQuiz.setVisible(true);
             btnQuiz.setManaged(true);
+        }
+        if (btnYoutube != null) {
+            boolean admin = tn.finora.utils.UserSession.isAdmin();
+            btnYoutube.setVisible(admin);
+            btnYoutube.setManaged(admin);
         }
 
         if (lblEyebrow != null) {
@@ -571,6 +577,29 @@ public class LessonViewController {
 
         } catch (Exception e) {
             showError("Erreur ouverture quiz: " + e.getMessage());
+        }
+    }
+    @FXML
+    private void onYoutubeSuggestions() {
+        if (currentLesson == null) return;
+
+        try {
+            javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(
+                    getClass().getResource("/youtube_search.fxml")
+            );
+            javafx.scene.Scene scene = new javafx.scene.Scene(loader.load(), 800, 600);
+            scene.getStylesheets().add(getClass().getResource("/style.css").toExternalForm());
+
+            YoutubeSearchController ctrl = loader.getController();
+            ctrl.setLesson(currentLesson);
+
+            Stage stage = new Stage();
+            stage.setTitle("YouTube — " + currentLesson.getTitre());
+            stage.setScene(scene);
+            stage.show();
+
+        } catch (Exception e) {
+            new Alert(Alert.AlertType.ERROR, "Erreur: " + e.getMessage()).showAndWait();
         }
     }
 

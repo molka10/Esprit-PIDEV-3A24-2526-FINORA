@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="tn.finora.controllers.YoutubeSearchController"
+            styleClass="screen">
+
+    <top>
+        <VBox styleClass="card" spacing="10">
+            <padding><Insets top="14" right="16" bottom="14" left="16"/></padding>
+
+            <HBox alignment="CENTER_LEFT" spacing="10">
+                <Label text="YouTube Suggestions" styleClass="title"/>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Button text="✖ Fermer" onAction="#onClose" styleClass="btn-ghost"/>
+            </HBox>
+
+            <HBox spacing="10" alignment="CENTER_LEFT">
+                <TextField fx:id="txtQuery" promptText="Rechercher..." HBox.hgrow="ALWAYS" onAction="#onSearch"/>
+                <Button text="🔎 Rechercher" onAction="#onSearch" styleClass="btn-primary"/>
+            </HBox>
+
+            <Label fx:id="lblStatus" text="" styleClass="subtitle"/>
+        </VBox>
+    </top>
+
+    <center>
+        <VBox spacing="12">
+            <padding><Insets top="14" right="16" bottom="16" left="16"/></padding>
+
+            <ListView fx:id="listResults" prefHeight="420"/>
+
+            <HBox alignment="CENTER_RIGHT" spacing="10">
+                <Button text="✅ Choisir & enregistrer" onAction="#onChoose" styleClass="btn-primary"/>
+            </HBox>
+        </VBox>
+    </center>
+
+</BorderPane>

@@ -92,6 +92,10 @@
                                     text="🧠  Quiz"
                                     styleClass="btn-primary"
                                     onAction="#onQuiz"/>
+                            <Button fx:id="btnYoutube"
+                                    text="🔎 YouTube Suggestions"
+                                    styleClass="btn-ghost"
+                                    onAction="#onYoutubeSuggestions"/>
 
                             <ToggleButton fx:id="btnFocus"
                                           text="🎯 Focus"

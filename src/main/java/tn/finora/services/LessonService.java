@@ -86,4 +86,11 @@ public class LessonService {
         l.setDureeMinutes(rs.getInt("duree_minutes"));
         return l;
     }
+    public void updateVideoUrl(int lessonId, String videoUrl) throws SQLException {
+        String sql = "UPDATE lesson SET video_url=? WHERE id=?";
+        PreparedStatement ps = cnx.prepareStatement(sql);
+        ps.setString(1, videoUrl);
+        ps.setInt(2, lessonId);
+        ps.executeUpdate();
+    }
 }
