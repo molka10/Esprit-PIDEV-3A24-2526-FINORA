@@ -88,9 +88,18 @@ public class LessonService {
     }
     public void updateVideoUrl(int lessonId, String videoUrl) throws SQLException {
         String sql = "UPDATE lesson SET video_url=? WHERE id=?";
-        PreparedStatement ps = cnx.prepareStatement(sql);
-        ps.setString(1, videoUrl);
-        ps.setInt(2, lessonId);
-        ps.executeUpdate();
+        try (PreparedStatement ps = cnx.prepareStatement(sql)) {
+            ps.setString(1, videoUrl);
+            ps.setInt(2, lessonId);
+            ps.executeUpdate();
+        }
+    }
+
+    public void removeVideoUrl(int lessonId) throws SQLException {
+        String sql = "UPDATE lesson SET video_url=NULL WHERE id=?";
+        try (PreparedStatement ps = cnx.prepareStatement(sql)) {
+            ps.setInt(1, lessonId);
+            ps.executeUpdate();
+        }
     }
 }
