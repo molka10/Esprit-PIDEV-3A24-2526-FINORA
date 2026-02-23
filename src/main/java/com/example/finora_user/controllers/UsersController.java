@@ -249,19 +249,30 @@ public class UsersController {
 
     @FXML
     private void handleSearchMode() {
-        Toggle t = searchModeGroup.getSelectedToggle();
+        Toggle t = (searchModeGroup == null) ? null : searchModeGroup.getSelectedToggle();
 
         if (t == toggleRole) {
             mode = SearchMode.ROLE;
+
             searchField.setDisable(true);
+            searchField.clear();
+
             roleFilterCombo.setVisible(true);
             roleFilterCombo.setManaged(true);
+
+            if (roleFilterCombo.getValue() == null) roleFilterCombo.setValue("USER");
             handleRoleFilter();
+
         } else {
             mode = SearchMode.TEXT;
+
             searchField.setDisable(false);
+            searchField.setPromptText("Rechercher par username/email...");
+            searchField.clear();
+
             roleFilterCombo.setVisible(false);
             roleFilterCombo.setManaged(false);
+
             handleRefresh();
         }
     }
@@ -284,6 +295,7 @@ public class UsersController {
 
         } catch (SQLException e) {
             statusLabel.setText("❌ Erreur recherche.");
+            e.printStackTrace();
         }
     }
 
@@ -291,7 +303,7 @@ public class UsersController {
     private void handleRoleFilter() {
         try {
             String role = roleFilterCombo.getValue();
-            if (role == null) {
+            if (role == null || role.isBlank()) {
                 handleRefresh();
                 return;
             }
@@ -303,24 +315,29 @@ public class UsersController {
 
         } catch (SQLException e) {
             statusLabel.setText("❌ Erreur filtre.");
+            e.printStackTrace();
         }
     }
 
     private void updateCount() {
-        countLabel.setText(data.size() + " utilisateurs");
+        if (countLabel != null) countLabel.setText(data.size() + " utilisateurs");
     }
 
     // ===================== RISK =====================
 
     private void recomputeRisk(List<User> users) {
         riskCache.clear();
-        for (User u : users) {
-            try {
-                riskCache.put(u.getId(), riskService.compute(u));
-            } catch (Exception ignored) {
-                riskCache.put(u.getId(), new RiskResult(0, RiskResult.Level.LOW, List.of()));
+
+        if (users != null) {
+            for (User u : users) {
+                try {
+                    riskCache.put(u.getId(), riskService.compute(u));
+                } catch (Exception ex) {
+                    riskCache.put(u.getId(), new RiskResult(0, RiskResult.Level.LOW, List.of("Risque indisponible")));
+                }
             }
         }
+
         usersList.refresh();
     }
 
@@ -329,13 +346,12 @@ public class UsersController {
     private boolean confirmDuplicates(String title, List<DuplicateMatch> matches) {
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
         alert.setTitle(title);
-        alert.setHeaderText("Des comptes similaires existent déjà.");
+        alert.setHeaderText("Des comptes similaires existent déjà.\nVoulez-vous continuer ?");
 
         StringBuilder sb = new StringBuilder();
         for (DuplicateMatch m : matches) {
             sb.append("• ")
-                    .append(m.username())
-                    .append(" (").append(m.email()).append(")\n")
+                    .append(m.username()).append(" (").append(m.email()).append(")\n")
                     .append("  ").append(String.join(", ", m.reasons()))
                     .append("\n\n");
         }
@@ -343,13 +359,12 @@ public class UsersController {
         TextArea area = new TextArea(sb.toString().trim());
         area.setEditable(false);
         area.setWrapText(true);
-        area.setPrefRowCount(8);
+        area.setPrefRowCount(9);
 
         alert.getDialogPane().setContent(area);
 
         ButtonType proceed = new ButtonType("Continuer", ButtonBar.ButtonData.OK_DONE);
         ButtonType cancel = new ButtonType("Annuler", ButtonBar.ButtonData.CANCEL_CLOSE);
-
         alert.getButtonTypes().setAll(proceed, cancel);
 
         return alert.showAndWait().orElse(cancel) == proceed;
@@ -361,17 +376,29 @@ public class UsersController {
         String username = safe(usernameField.getText());
         String email = safe(emailField.getText());
         String role = roleCombo.getValue();
+        String phone = safe(phoneField.getText());
         String address = safe(addressField.getText());
         LocalDate dob = dobPicker.getValue();
 
-        if (username.isEmpty() || email.isEmpty() || role == null || address.isEmpty())
-            return "⚠️ Champs obligatoires manquants.";
+        if (username.isEmpty() || email.isEmpty() || role == null || role.isBlank() || address.isEmpty()) {
+            return "⚠️ Champs obligatoires: username, email, role, adresse.";
+        }
 
-        if (!email.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$"))
+        if (!username.matches("^[A-Za-z0-9_]{3,20}$")) {
+            return "⚠️ Username invalide (3-20 caractères, lettres/chiffres/_).";
+        }
+
+        if (!email.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$")) {
             return "⚠️ Email invalide.";
+        }
 
-        if (dob != null && dob.isAfter(LocalDate.now().minusYears(18)))
+        if (!phone.isEmpty() && !phone.matches("^\\d{8,15}$")) {
+            return "⚠️ Téléphone invalide (8 à 15 chiffres).";
+        }
+
+        if (dob != null && dob.isAfter(LocalDate.now().minusYears(18))) {
             return "⚠️ L'utilisateur doit avoir au moins 18 ans.";
+        }
 
         return null;
     }
@@ -380,7 +407,7 @@ public class UsersController {
         return s == null ? "" : s.trim();
     }
 
-    // ===================== CARD =====================
+    // ===================== CARD CELL (COLORS + TOOLTIP) =====================
 
     private static class UserCardCell extends ListCell<User> {
 
@@ -395,39 +422,98 @@ public class UsersController {
             super.updateItem(user, empty);
 
             if (empty || user == null) {
+                setText(null);
                 setGraphic(null);
                 return;
             }
 
             HBox card = new HBox(12);
             card.getStyleClass().add("user-card");
-            card.setPadding(new Insets(12));
+            card.setPadding(new Insets(12, 12, 12, 12));
 
-            VBox left = new VBox(4);
-            left.getChildren().addAll(
-                    new Label(user.getUsername()),
-                    new Label(user.getEmail())
-            );
+            VBox left = new VBox(3);
+
+            Label name = new Label(user.getUsername());
+            name.getStyleClass().add("user-name");
+
+            Label email = new Label(user.getEmail());
+            email.getStyleClass().add("user-email");
+
+            left.getChildren().addAll(name, email);
 
             Region spacer = new Region();
             HBox.setHgrow(spacer, Priority.ALWAYS);
 
-            VBox right = new VBox(6);
-            Label role = new Label(user.getRole());
-            role.getStyleClass().add("badge");
+            VBox right = new VBox(8);
+            right.setMinWidth(170);
+            right.setMaxWidth(170);
 
-            Label risk = new Label();
-            RiskResult rr = riskCache.get(user.getId());
-            if (rr != null) {
-                risk.setText(rr.level() + " • " + rr.score());
-                risk.getStyleClass().add("risk-badge");
-            }
+            // Role badge
+            Label role = new Label(user.getRole());
+            role.getStyleClass().addAll("badge", roleClass(user.getRole()));
+
+            // Risk badge (colored + tooltip)
+            Label risk = buildRiskBadge(user);
 
             right.getChildren().addAll(role, risk);
 
             card.getChildren().addAll(left, spacer, right);
 
+            setText(null);
             setGraphic(card);
+
+            Node g = getGraphic();
+            if (isSelected()) g.getStyleClass().add("user-card-selected");
+            else g.getStyleClass().remove("user-card-selected");
+        }
+
+        private Label buildRiskBadge(User user) {
+            RiskResult rr = (user == null) ? null : riskCache.get(user.getId());
+
+            Label risk = new Label();
+            risk.getStyleClass().add("risk-badge");
+
+            if (rr == null) {
+                risk.setText("LOW • 0");
+                risk.getStyleClass().add("risk-low");
+                Tooltip.install(risk, new Tooltip("Aucun signal de risque détecté"));
+                return risk;
+            }
+
+            risk.setText(rr.level().name() + " • " + rr.score());
+
+            switch (rr.level()) {
+                case LOW -> risk.getStyleClass().add("risk-low");
+                case MEDIUM -> risk.getStyleClass().add("risk-medium");
+                case HIGH -> risk.getStyleClass().add("risk-high");
+            }
+
+            if (rr.reasons() != null && !rr.reasons().isEmpty()) {
+                StringBuilder sb = new StringBuilder("Raisons:\n");
+                for (String r : rr.reasons()) sb.append("• ").append(r).append("\n");
+                Tooltip.install(risk, new Tooltip(sb.toString().trim()));
+            } else {
+                Tooltip.install(risk, new Tooltip("Aucun signal de risque détecté"));
+            }
+
+            return risk;
+        }
+
+        @Override
+        public void updateSelected(boolean selected) {
+            super.updateSelected(selected);
+            if (getGraphic() == null) return;
+            if (selected) getGraphic().getStyleClass().add("user-card-selected");
+            else getGraphic().getStyleClass().remove("user-card-selected");
+        }
+
+        private static String roleClass(String role) {
+            if (role == null) return "badge-user";
+            return switch (role.toUpperCase()) {
+                case "ADMIN" -> "badge-admin";
+                case "ENTREPRISE" -> "badge-entreprise";
+                default -> "badge-user";
+            };
         }
     }
 }
