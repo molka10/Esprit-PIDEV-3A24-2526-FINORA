@@ -1,5 +1,6 @@
 package tn.finora.controllers;
 
+import javafx.animation.ScaleTransition;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
@@ -8,31 +9,37 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-import javafx.scene.input.MouseEvent;
+import javafx.util.Duration;
 import tn.finora.entities.Investment;
-import tn.finora.utils.DBConnection;
 import tn.finora.finorainves.AppState;
 import tn.finora.finorainves.SceneNavigator;
+import tn.finora.utils.DBConnection;
 
 import java.math.BigDecimal;
 import java.sql.*;
+import java.text.NumberFormat;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
-
+import java.util.Locale;
+import javafx.scene.layout.Region;
+import javafx.scene.layout.Priority;
+import javafx.geometry.Pos;
 public class InvestmentCardsController {
 
-    @FXML
-    private FlowPane cardsPane;
+    @FXML private FlowPane cardsPane;
+    @FXML private TextField searchField;
+    @FXML private ComboBox<String> riskFilter;
 
-    @FXML
-    private TextField searchField;
-
-    @FXML
-    private ComboBox<String> riskFilter;
+    // Dashboard KPI
+    @FXML private Label totalValueLabel;
+    @FXML private Label totalCountLabel;
 
     private final Connection cnx;
-    private List<Investment> allInvestments;
+    private List<Investment> allInvestments = new ArrayList<>();
+
+    private final NumberFormat currencyFormat =
+            NumberFormat.getCurrencyInstance(Locale.US);
 
     public InvestmentCardsController() {
         cnx = DBConnection.getInstance().getCnx();
@@ -40,227 +47,213 @@ public class InvestmentCardsController {
 
     @FXML
     public void initialize() {
-        allInvestments = getAll();
-        loadCards(allInvestments);
 
-        riskFilter.setItems(FXCollections.observableArrayList("All", "Low", "Medium", "High"));
+        riskFilter.setItems(
+                FXCollections.observableArrayList("All", "Low", "Medium", "High")
+        );
         riskFilter.setValue("All");
+
+        refreshData();
     }
 
-    // ================= FXML BUTTON HANDLERS =================
+    // =====================================================
+    // NAVIGATION
+    // =====================================================
+
     @FXML
     private void onAdd() {
-        try {
-            SceneNavigator.goTo("investment_form.fxml", "Add Investment");
-        } catch (RuntimeException e) {
-            showAlert("Erreur", "Impossible d'ouvrir le formulaire d'ajout: " + e.getMessage());
-        }
+        SceneNavigator.goTo("investment_form.fxml", "Add Investment");
     }
 
     @FXML
     private void onRefresh() {
-        allInvestments = getAll();
-        loadCards(allInvestments);
         searchField.clear();
         riskFilter.setValue("All");
+        refreshData();
     }
 
     @FXML
     private void goToManagement() {
-        try {
-            SceneNavigator.goTo("investment_management_cards.fxml", "Investment Management");
-        } catch (RuntimeException e) {
-            showAlert("Erreur", "Impossible de charger Investment Management: " + e.getMessage());
+        SceneNavigator.goTo("investment_management_cards.fxml",
+                "Investment Management");
+    }
+
+    @FXML
+    private void toggleDarkMode() {
+        if (cardsPane.getScene().getRoot().getStyleClass().contains("dark-root")) {
+            cardsPane.getScene().getRoot().getStyleClass().remove("dark-root");
+        } else {
+            cardsPane.getScene().getRoot().getStyleClass().add("dark-root");
         }
     }
 
-    // ================= LOAD CARDS =================
+    private void refreshData() {
+        allInvestments = getAll();
+        loadCards(allInvestments);
+        updateDashboard();
+    }
+
+    // =====================================================
+    // DASHBOARD KPI
+    // =====================================================
+
+    private void updateDashboard() {
+
+        BigDecimal total = BigDecimal.ZERO;
+
+        for (Investment inv : allInvestments) {
+            if (inv.getEstimatedValue() != null) {
+                total = total.add(inv.getEstimatedValue());
+            }
+        }
+
+        totalValueLabel.setText(currencyFormat.format(total));
+        totalCountLabel.setText(String.valueOf(allInvestments.size()));
+    }
+
+    // =====================================================
+    // LOAD CARDS
+    // =====================================================
+
     private void loadCards(List<Investment> investments) {
+
         cardsPane.getChildren().clear();
+
+        if (investments.isEmpty()) {
+            Label empty = new Label("No investments found.");
+            cardsPane.getChildren().add(empty);
+            return;
+        }
+
         for (Investment inv : investments) {
             cardsPane.getChildren().add(createCard(inv));
         }
     }
 
     private VBox createCard(Investment inv) {
-        VBox card = new VBox(10);
-        card.setPrefWidth(220);
-        card.setStyle(
-                "-fx-background-color: white;" +
-                        "-fx-padding: 15;" +
-                        "-fx-background-radius: 15;" +
-                        "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 0);"
-        );
 
-        // Hover effect sur toute la card
-        card.setOnMouseEntered(e -> card.setStyle(
-                "-fx-background-color: #f0f0ff;" +
-                        "-fx-padding: 15;" +
-                        "-fx-background-radius: 15;" +
-                        "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 15, 0, 0, 0);"
-        ));
-        card.setOnMouseExited(e -> card.setStyle(
-                "-fx-background-color: white;" +
-                        "-fx-padding: 15;" +
-                        "-fx-background-radius: 15;" +
-                        "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 0);"
-        ));
+        VBox card = new VBox();
+        card.getStyleClass().add("investment-card");
+        card.setPrefWidth(260);
 
-        // ------------------ IMAGE ------------------
+        // -------- IMAGE --------
         ImageView imgView = new ImageView();
-        imgView.setFitWidth(200);
-        imgView.setFitHeight(120);
-        imgView.setPreserveRatio(true);
-        if (inv.getImageUrl() != null && !inv.getImageUrl().isEmpty()) {
-            try {
-                imgView.setImage(new Image(inv.getImageUrl(), true));
-            } catch (Exception ignored) {}
+        imgView.setFitWidth(260);
+        imgView.setFitHeight(150);
+        imgView.setPreserveRatio(false);
+        imgView.getStyleClass().add("card-image-modern");
+
+        if (inv.getImageUrl() != null && !inv.getImageUrl().isBlank()) {
+            imgView.setImage(new Image(inv.getImageUrl(), true));
         }
 
-        // ------------------ LABELS ------------------
+        // -------- CONTENT --------
         Label nameLabel = new Label(inv.getName());
-        nameLabel.setStyle("-fx-font-size: 16; -fx-font-weight: bold; -fx-text-fill: #4B0082;");
+        nameLabel.getStyleClass().add("card-title");
 
-        Label infoLabel = new Label(inv.getCategory() + " | " + inv.getLocation());
-        infoLabel.setStyle("-fx-font-size: 13; -fx-text-fill: #555555;");
+        Label categoryLabel = new Label(
+                safe(inv.getCategory()) + " • " + safe(inv.getLocation())
+        );
+        categoryLabel.getStyleClass().add("card-subtitle");
 
-        Label valueLabel = new Label("Value: " + inv.getEstimatedValue());
-        valueLabel.setStyle("-fx-font-size: 13; -fx-text-fill: #333333;");
+        Label valueLabel = new Label(
+                currencyFormat.format(
+                        inv.getEstimatedValue() != null ?
+                                inv.getEstimatedValue() :
+                                BigDecimal.ZERO
+                )
+        );
+        valueLabel.getStyleClass().add("card-value");
 
-        Label riskLabel = new Label(inv.getRiskLevel());
-        riskLabel.setStyle("-fx-font-size: 12; -fx-font-weight: bold; -fx-text-fill: white; -fx-padding: 2 6; -fx-background-radius: 8;");
-        switch (inv.getRiskLevel().toLowerCase()) {
-            case "low" -> riskLabel.setStyle(riskLabel.getStyle() + "-fx-background-color: #28a745;");
-            case "medium" -> riskLabel.setStyle(riskLabel.getStyle() + "-fx-background-color: #ffc107;");
-            case "high" -> riskLabel.setStyle(riskLabel.getStyle() + "-fx-background-color: #dc3545;");
+        Label riskLabel = new Label(safe(inv.getRiskLevel()).toUpperCase());
+        riskLabel.getStyleClass().add("risk-badge");
+
+        switch (safe(inv.getRiskLevel()).toLowerCase()) {
+            case "low" -> riskLabel.getStyleClass().add("badge-low-modern");
+            case "medium" -> riskLabel.getStyleClass().add("badge-medium-modern");
+            case "high" -> riskLabel.getStyleClass().add("badge-high-modern");
         }
 
-        Label descLabel = new Label(inv.getDescription());
-        descLabel.setWrapText(true);
-        descLabel.setStyle("-fx-font-size: 12; -fx-text-fill: #666666;");
+        Button updateBtn = new Button("Edit");
+        updateBtn.getStyleClass().add("btn-primary");
+        updateBtn.setPrefWidth(100);
+        updateBtn.setPrefHeight(36);
 
-        String created = "";
-        if (inv.getCreatedAt() != null)
-            created = inv.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
-        Label createdLabel = new Label("Created: " + created);
-        createdLabel.setStyle("-fx-font-size: 11; -fx-text-fill: #999999;");
-
-        // ------------------ BUTTONS ------------------
-        Button updateBtn = new Button("✏ Update");
-        updateBtn.setStyle(
-                "-fx-background-color: #17a2b8; -fx-text-fill: white; -fx-font-weight: bold;" +
-                        "-fx-background-radius: 10; -fx-padding: 5 10;"
-        );
         updateBtn.setOnAction(e -> {
             AppState.setSelectedInvestment(inv);
             SceneNavigator.goTo("investment_form.fxml", "Edit Investment");
         });
 
-        Button deleteBtn = new Button("🗑 Delete");
-        deleteBtn.setStyle(
-                "-fx-background-color: #dc3545; -fx-text-fill: white; -fx-font-weight: bold;" +
-                        "-fx-background-radius: 10; -fx-padding: 5 10;"
-        );
-        deleteBtn.setOnAction(e -> {
-            Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-            alert.setTitle("Confirm Delete");
-            alert.setHeaderText(null);
-            alert.setContentText("Are you sure you want to delete this investment?");
-            alert.showAndWait().ifPresent(response -> {
-                if (response == ButtonType.OK) {
-                    delete(inv.getInvestmentId());
-                    allInvestments = getAll();
-                    loadCards(allInvestments);
-                }
-            });
-        });
+        Button deleteBtn = new Button("Delete");
+        deleteBtn.getStyleClass().add("btn-outline");
+        deleteBtn.setPrefWidth(100);
+        deleteBtn.setPrefHeight(36);
 
-        Button detailsBtn = new Button("👁 Details");
-        detailsBtn.setStyle(
-                "-fx-background-color: #4B0082; -fx-text-fill: white; -fx-font-weight: bold;" +
-                        "-fx-background-radius: 10; -fx-padding: 5 10;"
-        );
-        detailsBtn.setOnMouseEntered(e -> detailsBtn.setStyle(
-                "-fx-background-color: #6A0DAD; -fx-text-fill: white; -fx-font-weight: bold;" +
-                        "-fx-background-radius: 10; -fx-padding: 5 10;"
-        ));
-        detailsBtn.setOnMouseExited(e -> detailsBtn.setStyle(
-                "-fx-background-color: #4B0082; -fx-text-fill: white; -fx-font-weight: bold;" +
-                        "-fx-background-radius: 10; -fx-padding: 5 10;"
-        ));
-        detailsBtn.setOnAction(e -> {
-            AppState.setSelectedInvestment(inv);
-            SceneNavigator.goTo("investment_details.fxml", "Investment Details");
-        });
+        deleteBtn.setOnAction(e -> confirmDelete(inv));
 
-        HBox buttonsBox = new HBox(10, updateBtn, deleteBtn, detailsBtn);
+// Spacer intelligent
+        Region spacer = new Region();
+        HBox.setHgrow(spacer, Priority.ALWAYS);
 
-        // ------------------ ASSEMBLY ------------------
-        card.getChildren().addAll(imgView, nameLabel, infoLabel, valueLabel, riskLabel, descLabel, createdLabel, buttonsBox);
+        HBox buttons = new HBox(12, updateBtn, spacer, deleteBtn);
+        buttons.setAlignment(Pos.CENTER_LEFT);
+        buttons.setStyle("-fx-padding: 12 0 0 0;");
+
+        VBox content = new VBox(10, nameLabel, categoryLabel, valueLabel, riskLabel, buttons);
+        content.setStyle("-fx-padding: 18;");
+
+        card.getChildren().addAll(imgView, content);
+
+        addSmoothHoverAnimation(card);
 
         return card;
     }
 
-    // ================= CRUD =================
-    public int add(Investment inv) {
-        String sql = "INSERT INTO investment (name, category, location, estimated_value, risk_level, image_url, description, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-        try (PreparedStatement ps = cnx.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-            ps.setString(1, inv.getName());
-            ps.setString(2, inv.getCategory());
-            ps.setString(3, inv.getLocation());
-            ps.setBigDecimal(4, inv.getEstimatedValue() != null ? inv.getEstimatedValue() : BigDecimal.ZERO);
-            ps.setString(5, inv.getRiskLevel());
-            ps.setString(6, inv.getImageUrl());
-            ps.setString(7, inv.getDescription());
-            ps.setTimestamp(8, inv.getCreatedAt() != null ? Timestamp.valueOf(inv.getCreatedAt()) : new Timestamp(System.currentTimeMillis()));
-            ps.executeUpdate();
+    // Animation fluide professionnelle
+    private void addSmoothHoverAnimation(VBox card) {
 
-            try (ResultSet keys = ps.getGeneratedKeys()) {
-                if (keys.next()) return keys.getInt(1);
+        ScaleTransition scaleUp = new ScaleTransition(Duration.millis(200), card);
+        scaleUp.setToX(1.03);
+        scaleUp.setToY(1.03);
+
+        ScaleTransition scaleDown = new ScaleTransition(Duration.millis(200), card);
+        scaleDown.setToX(1);
+        scaleDown.setToY(1);
+
+        card.setOnMouseEntered(e -> scaleUp.playFromStart());
+        card.setOnMouseExited(e -> scaleDown.playFromStart());
+    }
+
+    private void confirmDelete(Investment inv) {
+
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("Confirm Delete");
+        alert.setContentText("Delete this investment?");
+        alert.showAndWait().ifPresent(response -> {
+            if (response == ButtonType.OK) {
+                delete(inv.getInvestmentId());
+                refreshData();
             }
-            return -1;
-        } catch (SQLException e) {
-            showAlert("Erreur", "Impossible d'ajouter l'investment: " + e.getMessage());
-            return -1;
-        }
+        });
     }
 
-    public void update(Investment inv) {
-        String sql = "UPDATE investment SET name=?, category=?, location=?, estimated_value=?, risk_level=?, image_url=?, description=? WHERE investment_id=?";
-        try (PreparedStatement ps = cnx.prepareStatement(sql)) {
-            ps.setString(1, inv.getName());
-            ps.setString(2, inv.getCategory());
-            ps.setString(3, inv.getLocation());
-            ps.setBigDecimal(4, inv.getEstimatedValue() != null ? inv.getEstimatedValue() : BigDecimal.ZERO);
-            ps.setString(5, inv.getRiskLevel());
-            ps.setString(6, inv.getImageUrl());
-            ps.setString(7, inv.getDescription());
-            ps.setInt(8, inv.getInvestmentId());
-            ps.executeUpdate();
-        } catch (SQLException e) {
-            showAlert("Erreur", "Impossible de mettre à jour l'investment: " + e.getMessage());
-        }
-    }
-
-    public void delete(int id) {
-        String sql = "DELETE FROM investment WHERE investment_id=?";
-        try (PreparedStatement ps = cnx.prepareStatement(sql)) {
-            ps.setInt(1, id);
-            ps.executeUpdate();
-        } catch (SQLException e) {
-            showAlert("Erreur", "Impossible de supprimer l'investment: " + e.getMessage());
-        }
-    }
+    // =====================================================
+    // CRUD
+    // =====================================================
 
     public List<Investment> getAll() {
+
         List<Investment> list = new ArrayList<>();
+
         String sql = "SELECT * FROM investment ORDER BY investment_id DESC";
 
         try (PreparedStatement ps = cnx.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
 
             while (rs.next()) {
+
                 Investment inv = new Investment();
+
                 inv.setInvestmentId(rs.getInt("investment_id"));
                 inv.setName(rs.getString("name"));
                 inv.setCategory(rs.getString("category"));
@@ -271,19 +264,35 @@ public class InvestmentCardsController {
                 inv.setDescription(rs.getString("description"));
 
                 Timestamp t = rs.getTimestamp("created_at");
-                if (t != null) inv.setCreatedAt(t.toLocalDateTime());
+                if (t != null)
+                    inv.setCreatedAt(t.toLocalDateTime());
 
                 list.add(inv);
             }
 
         } catch (SQLException e) {
-            showAlert("Erreur", "Impossible de charger les investments: " + e.getMessage());
+            showError("Database Error", e.getMessage());
         }
 
         return list;
     }
 
-    // ================= SEARCH & FILTER =================
+    public void delete(int id) {
+
+        String sql = "DELETE FROM investment WHERE investment_id=?";
+
+        try (PreparedStatement ps = cnx.prepareStatement(sql)) {
+            ps.setInt(1, id);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            showError("Delete Error", e.getMessage());
+        }
+    }
+
+    // =====================================================
+    // SEARCH & FILTER
+    // =====================================================
+
     @FXML
     private void onSearch() {
         applyFilters();
@@ -302,28 +311,41 @@ public class InvestmentCardsController {
     }
 
     private void applyFilters() {
-        String query = searchField.getText().trim().toLowerCase();
+
+        String query = searchField.getText().toLowerCase().trim();
         String selectedRisk = riskFilter.getValue();
 
         List<Investment> filtered = new ArrayList<>(allInvestments);
 
         if (!query.isEmpty()) {
-            filtered.removeIf(inv -> inv.getName() == null || !inv.getName().toLowerCase().contains(query));
+            filtered.removeIf(inv ->
+                    inv.getName() == null ||
+                            !inv.getName().toLowerCase().contains(query)
+            );
         }
 
         if (selectedRisk != null && !"All".equals(selectedRisk)) {
-            filtered.removeIf(inv -> inv.getRiskLevel() == null || !inv.getRiskLevel().equalsIgnoreCase(selectedRisk));
+            filtered.removeIf(inv ->
+                    inv.getRiskLevel() == null ||
+                            !inv.getRiskLevel().equalsIgnoreCase(selectedRisk)
+            );
         }
 
         loadCards(filtered);
     }
 
-    // ================= UTILS =================
-    private void showAlert(String title, String message) {
+    // =====================================================
+    // UTILS
+    // =====================================================
+
+    private void showError(String title, String msg) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.setContentText(message);
+        alert.setContentText(msg);
         alert.showAndWait();
+    }
+
+    private String safe(String value) {
+        return value == null ? "" : value;
     }
 }

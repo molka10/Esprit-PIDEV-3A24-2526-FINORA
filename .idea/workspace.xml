@@ -5,13 +5,15 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="c29a7d9c-7ce5-447a-8626-457253968d65" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/src/main/java/tn/finora/services/HistoryService.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/module-info.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/module-info.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/tn/finora/controllers/InvestmentCardsController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/tn/finora/controllers/InvestmentCardsController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/tn/finora/controllers/InvestmentDetailsController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/tn/finora/controllers/InvestmentDetailsController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/tn/finora/finorainves/SceneNavigator.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/tn/finora/finorainves/SceneNavigator.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/tn/finora/finorainves/ui/investment_details.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/tn/finora/finorainves/ui/investment_details.fxml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/tn/finora/controllers/InvestmentDetailsController.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/tn/finora/entities/InvestmentPredictionResponse.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/tn/finora/services/HistoryService.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/tn/finora/services/PredictionService.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/tn/finora/finorainves/styles/style.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/tn/finora/finorainves/styles/style.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/tn/finora/finorainves/ui/investment_cards.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/tn/finora/finorainves/ui/investment_cards.fxml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/tn/finora/finorainves/ui/investment_details.fxml" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -45,20 +47,20 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "Application.HelloApplication.executor": "Run",
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
-    "git-widget-placeholder": "investissement",
-    "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "C:/Users/khemi/Documents/FinoraInves(crud kdim)",
-    "nodejs_package_manager_path": "npm",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Application.HelloApplication.executor&quot;: &quot;Run&quot;,
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;investissement&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/khemi/Documents/FinoraInves(crud kdim)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
@@ -75,7 +77,9 @@
       <option name="presentableId" value="Default" />
       <updated>1771756030130</updated>
       <workItem from="1771756031381" duration="18845000" />
-      <workItem from="1771807092518" duration="5456000" />
+      <workItem from="1771807092518" duration="6056000" />
+      <workItem from="1771832799685" duration="3195000" />
+      <workItem from="1771875108923" duration="3295000" />
     </task>
     <servers />
   </component>
