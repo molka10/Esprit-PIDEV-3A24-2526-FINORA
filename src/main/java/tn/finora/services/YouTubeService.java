@@ -21,13 +21,14 @@ public class YouTubeService {
 
     public List<YouTubeVideo> search(String query, int maxResults, String order) throws Exception {
         String encoded = URLEncoder.encode(query, StandardCharsets.UTF_8);
-        String safeOrder = (order == null || order.isBlank()) ? "relevance" : order.trim();
+
+        String ord = (order == null || order.isBlank()) ? "relevance" : order.trim();
 
         String urlStr =
                 "https://www.googleapis.com/youtube/v3/search" +
                         "?part=snippet&type=video" +
                         "&maxResults=" + Math.min(Math.max(maxResults, 1), 10) +
-                        "&order=" + URLEncoder.encode(safeOrder, StandardCharsets.UTF_8) +
+                        "&order=" + URLEncoder.encode(ord, StandardCharsets.UTF_8) +
                         "&q=" + encoded +
                         "&key=" + apiKey();
 

@@ -13,25 +13,26 @@ public class LessonService {
 
     public void add(Lesson l) throws SQLException {
         String sql = "INSERT INTO lesson(formation_id, titre, contenu, video_url, ordre, duree_minutes) VALUES (?,?,?,?,?,?)";
-        PreparedStatement ps = cnx.prepareStatement(sql);
-        ps.setInt(1, l.getFormationId());
-        ps.setString(2, l.getTitre());
-        ps.setString(3, l.getContenu());
-        ps.setString(4, l.getVideoUrl());
-        ps.setInt(5, l.getOrdre());
-        ps.setInt(6, l.getDureeMinutes());
-        ps.executeUpdate();
+        try (PreparedStatement ps = cnx.prepareStatement(sql)) {
+            ps.setInt(1, l.getFormationId());
+            ps.setString(2, l.getTitre());
+            ps.setString(3, l.getContenu());
+            ps.setString(4, l.getVideoUrl()); // can be null
+            ps.setInt(5, l.getOrdre());
+            ps.setInt(6, l.getDureeMinutes());
+            ps.executeUpdate();
+        }
     }
 
     public List<Lesson> getAll() throws SQLException {
         List<Lesson> list = new ArrayList<>();
         String sql = "SELECT * FROM lesson ORDER BY id DESC";
-        Statement st = cnx.createStatement();
-        ResultSet rs = st.executeQuery(sql);
+        try (Statement st = cnx.createStatement();
+             ResultSet rs = st.executeQuery(sql)) {
 
-        while (rs.next()) {
-            Lesson l = map(rs);
-            list.add(l);
+            while (rs.next()) {
+                list.add(map(rs));
+            }
         }
         return list;
     }
@@ -39,39 +40,59 @@ public class LessonService {
     public List<Lesson> getByFormation(int formationId) throws SQLException {
         List<Lesson> list = new ArrayList<>();
         String sql = "SELECT * FROM lesson WHERE formation_id=? ORDER BY ordre ASC, id ASC";
-        PreparedStatement ps = cnx.prepareStatement(sql);
-        ps.setInt(1, formationId);
-        ResultSet rs = ps.executeQuery();
-
-        while (rs.next()) {
-            Lesson l = map(rs);
-            list.add(l);
+        try (PreparedStatement ps = cnx.prepareStatement(sql)) {
+            ps.setInt(1, formationId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    list.add(map(rs));
+                }
+            }
         }
         return list;
     }
 
     public void update(Lesson l) throws SQLException {
         String sql = "UPDATE lesson SET formation_id=?, titre=?, contenu=?, video_url=?, ordre=?, duree_minutes=? WHERE id=?";
-        PreparedStatement ps = cnx.prepareStatement(sql);
-        ps.setInt(1, l.getFormationId());
-        ps.setString(2, l.getTitre());
-        ps.setString(3, l.getContenu());
-        ps.setString(4, l.getVideoUrl());
-        ps.setInt(5, l.getOrdre());
-        ps.setInt(6, l.getDureeMinutes());
-        ps.setInt(7, l.getId());
+        try (PreparedStatement ps = cnx.prepareStatement(sql)) {
+            ps.setInt(1, l.getFormationId());
+            ps.setString(2, l.getTitre());
+            ps.setString(3, l.getContenu());
+            ps.setString(4, l.getVideoUrl()); // can be null
+            ps.setInt(5, l.getOrdre());
+            ps.setInt(6, l.getDureeMinutes());
+            ps.setInt(7, l.getId());
 
-        int rows = ps.executeUpdate();
-        if (rows == 0) System.out.println("⚠️ Aucun lesson trouvé avec id=" + l.getId());
+            int rows = ps.executeUpdate();
+            if (rows == 0) System.out.println("⚠️ Aucun lesson trouvé avec id=" + l.getId());
+        }
     }
 
     public void delete(int id) throws SQLException {
         String sql = "DELETE FROM lesson WHERE id=?";
-        PreparedStatement ps = cnx.prepareStatement(sql);
-        ps.setInt(1, id);
+        try (PreparedStatement ps = cnx.prepareStatement(sql)) {
+            ps.setInt(1, id);
+            int rows = ps.executeUpdate();
+            if (rows == 0) System.out.println("⚠️ Aucun lesson trouvé avec id=" + id);
+        }
+    }
 
-        int rows = ps.executeUpdate();
-        if (rows == 0) System.out.println("⚠️ Aucun lesson trouvé avec id=" + id);
+    // ✅ Update only video_url (link or unlink)
+    public void updateVideoUrl(int lessonId, String videoUrl) throws SQLException {
+        String sql = "UPDATE lesson SET video_url = ? WHERE id = ?";
+        try (PreparedStatement ps = cnx.prepareStatement(sql)) {
+            ps.setString(1, videoUrl); // can be null => removes
+            ps.setInt(2, lessonId);
+            ps.executeUpdate();
+        }
+    }
+
+    // ✅ Explicit remove
+    public void removeVideoUrl(int lessonId) throws SQLException {
+        String sql = "UPDATE lesson SET video_url = NULL WHERE id = ?";
+        try (PreparedStatement ps = cnx.prepareStatement(sql)) {
+            ps.setInt(1, lessonId);
+            ps.executeUpdate();
+        }
     }
 
     private Lesson map(ResultSet rs) throws SQLException {
@@ -80,26 +101,9 @@ public class LessonService {
         l.setFormationId(rs.getInt("formation_id"));
         l.setTitre(rs.getString("titre"));
         l.setContenu(rs.getString("contenu"));
-        // ✅ NEW (null-safe)
-        try { l.setVideoUrl(rs.getString("video_url")); } catch (SQLException ignored) { l.setVideoUrl(null); }
+        l.setVideoUrl(rs.getString("video_url")); // returns null if NULL -> OK
         l.setOrdre(rs.getInt("ordre"));
         l.setDureeMinutes(rs.getInt("duree_minutes"));
         return l;
-    }
-    public void updateVideoUrl(int lessonId, String videoUrl) throws SQLException {
-        String sql = "UPDATE lesson SET video_url=? WHERE id=?";
-        try (PreparedStatement ps = cnx.prepareStatement(sql)) {
-            ps.setString(1, videoUrl);
-            ps.setInt(2, lessonId);
-            ps.executeUpdate();
-        }
-    }
-
-    public void removeVideoUrl(int lessonId) throws SQLException {
-        String sql = "UPDATE lesson SET video_url=NULL WHERE id=?";
-        try (PreparedStatement ps = cnx.prepareStatement(sql)) {
-            ps.setInt(1, lessonId);
-            ps.executeUpdate();
-        }
     }
 }
