@@ -65,8 +65,6 @@ public class QuizTakeController {
         generateQuiz();
     }
 
-    // ================= QUIZ GENERATION =================
-
     private void generateQuiz() {
 
         quizReady = false;
@@ -111,8 +109,6 @@ public class QuizTakeController {
         thread.start();
     }
 
-    // ================= DISPLAY QUESTION =================
-
     private void showQuestion() {
 
         if (!quizReady || questions.isEmpty()) return;
@@ -129,7 +125,6 @@ public class QuizTakeController {
         group.selectToggle(null);
 
         for (int i = 0; i < 4; i++) {
-
             RadioButton rb = buttons.get(i);
 
             if (i < q.options.size()) {
@@ -143,7 +138,6 @@ public class QuizTakeController {
             rb.setSelected(false);
         }
 
-        // Restore saved answer
         if (userAnswers.containsKey(currentIndex)) {
             int saved = userAnswers.get(currentIndex);
             if (saved >= 0 && saved < 4) {
@@ -154,8 +148,6 @@ public class QuizTakeController {
         btnPrevious.setDisable(currentIndex == 0);
         btnNext.setText(currentIndex == questions.size() - 1 ? "Finish ✅" : "Next ➡");
     }
-
-    // ================= NEXT =================
 
     @FXML
     private void onNext() {
@@ -181,11 +173,8 @@ public class QuizTakeController {
         showQuestion();
     }
 
-    // ================= PREVIOUS =================
-
     @FXML
     private void onPrevious() {
-
         if (!quizReady) return;
 
         if (currentIndex > 0) {
@@ -193,8 +182,6 @@ public class QuizTakeController {
             showQuestion();
         }
     }
-
-    // ================= RESULT =================
 
     private void calculateResult() {
 
@@ -214,7 +201,6 @@ public class QuizTakeController {
 
         Dialog<Void> dialog = new Dialog<>();
         dialog.setTitle("Quiz Result");
-
         dialog.initOwner(lblQuestion.getScene().getWindow());
 
         VBox box = new VBox(15);
@@ -232,18 +218,22 @@ public class QuizTakeController {
         Label lblMessage = new Label(getPerformanceMessage(percent));
         lblMessage.setStyle("-fx-font-size: 14px; -fx-text-fill: #555;");
 
-        Button btnCertificate = new Button("🏆 Download Certificate");
-        btnCertificate.setStyle(
-                "-fx-background-color: #7C3AED;" +
-                        "-fx-text-fill: white;" +
-                        "-fx-padding: 8 20;" +
-                        "-fx-background-radius: 8;"
-        );
+        box.getChildren().addAll(lblTitle, lblScore, lblDetails, lblMessage);
 
-        btnCertificate.setOnAction(e ->
-                System.out.println("Certificate button clicked ✅"));
+        if (percent >= 80) {
+            Button btnCertificate = new Button("🏆 Download Certificate");
+            btnCertificate.setStyle(
+                    "-fx-background-color: #7C3AED;" +
+                            "-fx-text-fill: white;" +
+                            "-fx-padding: 8 20;" +
+                            "-fx-background-radius: 8;"
+            );
 
-        box.getChildren().addAll(lblTitle, lblScore, lblDetails, lblMessage, btnCertificate);
+            btnCertificate.setOnAction(e ->
+                    System.out.println("Certificate generated ✅"));
+
+            box.getChildren().add(btnCertificate);
+        }
 
         dialog.getDialogPane().setContent(box);
         dialog.getDialogPane().getButtonTypes().add(ButtonType.OK);
@@ -254,7 +244,12 @@ public class QuizTakeController {
         stage.close();
     }
 
-    // ================= UTIL =================
+    private String getPerformanceMessage(int percent) {
+        if (percent >= 90) return "🔥 Excellent performance!";
+        if (percent >= 70) return "👏 Great job!";
+        if (percent >= 50) return "🙂 Not bad, keep improving!";
+        return "📚 Keep studying and try again!";
+    }
 
     @FXML
     private void onClose() {
@@ -268,12 +263,5 @@ public class QuizTakeController {
         alert.setHeaderText(null);
         alert.setContentText(msg);
         alert.showAndWait();
-    }
-
-    private String getPerformanceMessage(int percent) {
-        if (percent >= 90) return "🔥 Excellent performance!";
-        if (percent >= 70) return "👏 Great job!";
-        if (percent >= 50) return "🙂 Not bad, keep improving!";
-        return "📚 Keep studying and try again!";
     }
 }
