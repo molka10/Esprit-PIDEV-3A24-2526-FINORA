@@ -1,6 +1,8 @@
 package com.example.finora_user.controllers;
 
 import com.example.finora_user.entities.User;
+import com.example.finora_user.services.RiskResult;
+import com.example.finora_user.services.RiskScoringService;
 import com.example.finora_user.services.UserService;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -15,6 +17,9 @@ import javafx.scene.layout.VBox;
 
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class UsersController {
 
@@ -41,7 +46,10 @@ public class UsersController {
     @FXML private ComboBox<String> roleFilterCombo;
 
     private UserService userService;
+    private RiskScoringService riskService;
+
     private final ObservableList<User> data = FXCollections.observableArrayList();
+    private final Map<Integer, RiskResult> riskCache = new HashMap<>();
 
     private User selectedUser;
 
@@ -54,12 +62,13 @@ public class UsersController {
     public void initialize() {
         try {
             userService = new UserService();
+            riskService = new RiskScoringService();
 
             roleCombo.setItems(FXCollections.observableArrayList("ADMIN", "ENTREPRISE", "USER"));
             roleFilterCombo.setItems(FXCollections.observableArrayList("ADMIN", "ENTREPRISE", "USER"));
 
             usersList.setItems(data);
-            usersList.setCellFactory(lv -> new UserCardCell());
+            usersList.setCellFactory(lv -> new UserCardCell(riskCache));
 
             usersList.getSelectionModel().selectedItemProperty().addListener((obs, oldV, newV) -> {
                 selectedUser = newV;
@@ -82,9 +91,13 @@ public class UsersController {
     @FXML
     private void handleRefresh() {
         try {
-            data.setAll(userService.getAllUsers());
+            List<User> users = userService.getAllUsers();
+            data.setAll(users);
+            recomputeRisk(users);
+
             updateCount();
             statusLabel.setText("");
+
         } catch (SQLException e) {
             statusLabel.setText("❌ Erreur chargement: " + e.getMessage());
             e.printStackTrace();
@@ -247,7 +260,9 @@ public class UsersController {
                 return;
             }
 
-            data.setAll(userService.searchText(q));
+            List<User> users = userService.searchText(q);
+            data.setAll(users);
+            recomputeRisk(users);
             updateCount();
 
         } catch (SQLException e) {
@@ -265,7 +280,9 @@ public class UsersController {
                 return;
             }
 
-            data.setAll(userService.searchByRole(role));
+            List<User> users = userService.searchByRole(role);
+            data.setAll(users);
+            recomputeRisk(users);
             updateCount();
 
         } catch (SQLException e) {
@@ -276,6 +293,27 @@ public class UsersController {
 
     private void updateCount() {
         if (countLabel != null) countLabel.setText(data.size() + " utilisateurs");
+    }
+
+    // -------------------- RISK SCORING --------------------
+    private void recomputeRisk(List<User> users) {
+        riskCache.clear();
+
+        if (users == null || users.isEmpty()) {
+            usersList.refresh();
+            return;
+        }
+
+        for (User u : users) {
+            try {
+                riskCache.put(u.getId(), riskService.compute(u));
+            } catch (Exception ex) {
+                // don’t break UI
+                riskCache.put(u.getId(), new RiskResult(0, RiskResult.Level.LOW, List.of("Impossible de calculer le risque")));
+            }
+        }
+
+        usersList.refresh();
     }
 
     // -------------------- VALIDATION --------------------
@@ -314,8 +352,15 @@ public class UsersController {
         return s == null ? "" : s.trim();
     }
 
-    // -------------------- CARD CELL (NO ID) --------------------
+    // -------------------- CARD CELL (NO ID + RISK BADGE) --------------------
     private static class UserCardCell extends ListCell<User> {
+
+        private final Map<Integer, RiskResult> riskCache;
+
+        private UserCardCell(Map<Integer, RiskResult> riskCache) {
+            this.riskCache = riskCache;
+        }
+
         @Override
         protected void updateItem(User user, boolean empty) {
             super.updateItem(user, empty);
@@ -343,13 +388,18 @@ public class UsersController {
             Region spacer = new Region();
             HBox.setHgrow(spacer, Priority.ALWAYS);
 
-            VBox right = new VBox(6);
-            right.setMinWidth(160);
-            right.setMaxWidth(160);
+            VBox right = new VBox(8);
+            right.setMinWidth(170);
+            right.setMaxWidth(170);
 
+            // Role badge
             Label role = new Label(user.getRole());
             role.getStyleClass().addAll("badge", roleClass(user.getRole()));
-            right.getChildren().add(role);
+
+            // Risk badge
+            Label risk = buildRiskBadge(user);
+
+            right.getChildren().addAll(role, risk);
 
             card.getChildren().addAll(left, spacer, right);
 
@@ -359,6 +409,41 @@ public class UsersController {
             Node g = getGraphic();
             if (isSelected()) g.getStyleClass().add("user-card-selected");
             else g.getStyleClass().remove("user-card-selected");
+        }
+
+        private Label buildRiskBadge(User user) {
+            RiskResult rr = (user == null) ? null : riskCache.get(user.getId());
+
+            Label risk = new Label();
+            risk.getStyleClass().add("risk-badge");
+
+            if (rr == null) {
+                risk.setText("LOW • 0");
+                risk.getStyleClass().add("risk-low");
+                return risk;
+            }
+
+            risk.setText(rr.level().name() + " • " + rr.score());
+
+            switch (rr.level()) {
+                case LOW -> risk.getStyleClass().add("risk-low");
+                case MEDIUM -> risk.getStyleClass().add("risk-medium");
+                case HIGH -> risk.getStyleClass().add("risk-high");
+            }
+
+            if (rr.reasons() != null && !rr.reasons().isEmpty()) {
+                StringBuilder sb = new StringBuilder("Raisons:\n");
+                for (String r : rr.reasons()) {
+                    sb.append("• ").append(r).append("\n");
+                }
+                Tooltip tip = new Tooltip(sb.toString().trim());
+                Tooltip.install(risk, tip);
+            } else {
+                Tooltip tip = new Tooltip("Aucun signal de risque détecté");
+                Tooltip.install(risk, tip);
+            }
+
+            return risk;
         }
 
         @Override
