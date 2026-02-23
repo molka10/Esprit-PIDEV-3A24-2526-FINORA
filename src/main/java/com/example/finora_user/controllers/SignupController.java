@@ -1,6 +1,8 @@
 package com.example.finora_user.controllers;
 
 import com.example.finora_user.entities.User;
+import com.example.finora_user.services.DuplicateDetectionService;
+import com.example.finora_user.services.DuplicateMatch;
 import com.example.finora_user.services.UserService;
 import com.example.finora_user.utils.InputValidator;
 import com.example.finora_user.utils.Navigator;
@@ -9,7 +11,9 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
 
+import java.sql.SQLException;
 import java.time.LocalDate;
+import java.util.List;
 
 public class SignupController {
 
@@ -27,13 +31,17 @@ public class SignupController {
     @FXML private Label statusLabel;
 
     private UserService service;
+    private DuplicateDetectionService duplicateService;
 
     @FXML
     public void initialize() {
         try {
             service = new UserService();
+            duplicateService = new DuplicateDetectionService(service);
+
             roleCombo.setItems(FXCollections.observableArrayList("USER", "ENTREPRISE"));
             roleCombo.setValue("USER");
+
         } catch (Exception e) {
             statusLabel.setText("❌ Erreur DB: " + e.getMessage());
             e.printStackTrace();
@@ -49,18 +57,19 @@ public class SignupController {
                 return;
             }
 
-            String username = usernameField.getText().trim();
-            String email = emailField.getText().trim();
+            String username = safe(usernameField.getText());
+            String email = safe(emailField.getText());
             String pass = passwordField.getText();
             String confirmPass = confirmPasswordField.getText();
 
-            String phone = phoneField.getText().trim();
-            String address = addressField.getText().trim();
+            String phone = safe(phoneField.getText());
+            String address = safe(addressField.getText());
             LocalDate dob = dobPicker.getValue();
 
             String role = roleCombo.getValue();
             boolean termsAccepted = termsCheck.isSelected();
 
+            // ✅ Use YOUR signature (8 params, no role)
             String err = InputValidator.validateSignup(
                     username, email, pass, confirmPass,
                     phone, address, dob, termsAccepted
@@ -71,6 +80,17 @@ public class SignupController {
                 return;
             }
 
+            // ✅ Duplicate detection BEFORE insert (username + email only)
+            List<DuplicateMatch> dups = duplicateService.findDuplicates(username, email, -1);
+            if (!dups.isEmpty()) {
+                boolean proceed = confirmDuplicates("Comptes similaires détectés", dups);
+                if (!proceed) {
+                    statusLabel.setText("⚠️ Inscription annulée (doublon possible).");
+                    return;
+                }
+            }
+
+            // ✅ Create user as your project does
             User u = new User(username, email, pass, role);
             u.setPhone(phone);
             u.setAddress(address);
@@ -80,11 +100,21 @@ public class SignupController {
 
             if (id != -1) {
                 statusLabel.setText("✅ Compte créé ! Retour au login...");
-                Navigator.goTo((Stage) usernameField.getScene().getWindow(),
-                        "login-view.fxml", "Connexion");
+
+                Stage stage = (Stage) usernameField.getScene().getWindow();
+                Navigator.goTo(stage, "login-view.fxml", "Connexion");
             } else {
                 statusLabel.setText("❌ Échec création compte.");
             }
+
+        } catch (SQLException e) {
+            // ✅ Friendly message for unique constraint (email already exists)
+            if ("23000".equals(e.getSQLState())) {
+                statusLabel.setText("⚠️ Cet email existe déjà. Essayez un autre.");
+            } else {
+                statusLabel.setText("❌ Erreur base de données: " + e.getMessage());
+            }
+            e.printStackTrace();
 
         } catch (Exception e) {
             statusLabel.setText("❌ Erreur: " + e.getMessage());
@@ -96,5 +126,38 @@ public class SignupController {
     private void goToLogin() {
         Stage stage = (Stage) usernameField.getScene().getWindow();
         Navigator.goTo(stage, "login-view.fxml", "Connexion");
+    }
+
+    // -------------------- UI: duplicates dialog --------------------
+
+    private boolean confirmDuplicates(String title, List<DuplicateMatch> matches) {
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle(title);
+        alert.setHeaderText("Des comptes similaires existent déjà.\nVoulez-vous continuer ?");
+
+        StringBuilder sb = new StringBuilder();
+        for (DuplicateMatch m : matches) {
+            sb.append("• ")
+                    .append(m.username()).append(" (").append(m.email()).append(")\n")
+                    .append("  ").append(String.join(", ", m.reasons()))
+                    .append("\n\n");
+        }
+
+        TextArea area = new TextArea(sb.toString().trim());
+        area.setEditable(false);
+        area.setWrapText(true);
+        area.setPrefRowCount(9);
+
+        alert.getDialogPane().setContent(area);
+
+        ButtonType proceed = new ButtonType("Continuer", ButtonBar.ButtonData.OK_DONE);
+        ButtonType cancel = new ButtonType("Annuler", ButtonBar.ButtonData.CANCEL_CLOSE);
+        alert.getButtonTypes().setAll(proceed, cancel);
+
+        return alert.showAndWait().orElse(cancel) == proceed;
+    }
+
+    private static String safe(String s) {
+        return s == null ? "" : s.trim();
     }
 }
