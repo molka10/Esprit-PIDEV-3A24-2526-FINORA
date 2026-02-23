@@ -2,7 +2,6 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
-<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.*?>
 
 <BorderPane xmlns="http://javafx.com/javafx/17"
@@ -23,22 +22,28 @@
             <Label fx:id="lblLessonTitle" text="Leçon: ..." styleClass="subtitle"/>
 
             <!-- Current linked video row -->
-            <HBox fx:id="currentVideoRow" alignment="CENTER_LEFT" spacing="10" visible="false" managed="false">
-                <Label fx:id="lblCurrentVideo" text="Current video: ..." styleClass="viewer-meta"/>
+            <HBox fx:id="currentVideoRow" alignment="CENTER_LEFT" spacing="10"
+                  visible="false" managed="false">
+                <Label fx:id="lblCurrentVideo" text="Vidéo actuelle: ..." styleClass="viewer-meta"/>
                 <Region HBox.hgrow="ALWAYS"/>
                 <Button text="🗑 Supprimer le lien" styleClass="btn-ghost" onAction="#onRemoveVideo"/>
             </HBox>
 
             <!-- Search toolbar -->
             <HBox spacing="10" alignment="CENTER_LEFT">
-                <TextField fx:id="txtQuery" promptText="Rechercher sur YouTube..." HBox.hgrow="ALWAYS"/>
-                <ComboBox fx:id="cmbSort" prefWidth="160"/>
+                <TextField fx:id="txtQuery"
+                           promptText="Rechercher sur YouTube..."
+                           HBox.hgrow="ALWAYS"/>
+
+                <ComboBox fx:id="cmbSort" prefWidth="170"/>
+
                 <Button text="🔎 Rechercher" styleClass="btn-primary" onAction="#onSearch"/>
             </HBox>
 
-            <!-- Loading / error line -->
+            <!-- Loading / status line -->
             <HBox spacing="10" alignment="CENTER_LEFT">
-                <ProgressIndicator fx:id="loader" prefWidth="18" prefHeight="18" visible="false" managed="false"/>
+                <ProgressIndicator fx:id="loader" prefWidth="18" prefHeight="18"
+                                   visible="false" managed="false"/>
                 <Label fx:id="lblStatus" text="" styleClass="viewer-meta"/>
             </HBox>
         </VBox>
