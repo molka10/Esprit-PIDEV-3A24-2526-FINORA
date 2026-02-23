@@ -27,6 +27,36 @@ public class Lesson {
         this.ordre = ordre;
         this.dureeMinutes = dureeMinutes;
     }
+    public String getYouTubeVideoId() {
+        if (videoUrl == null) return null;
+        String url = videoUrl.trim();
+
+        // watch?v=xxxx
+        int v = url.indexOf("v=");
+        if (v >= 0) {
+            String id = url.substring(v + 2);
+            int amp = id.indexOf('&');
+            if (amp >= 0) id = id.substring(0, amp);
+            return id.isBlank() ? null : id;
+        }
+
+        // youtu.be/xxxx
+        int shortIdx = url.indexOf("youtu.be/");
+        if (shortIdx >= 0) {
+            String id = url.substring(shortIdx + "youtu.be/".length());
+            int q = id.indexOf('?');
+            if (q >= 0) id = id.substring(0, q);
+            return id.isBlank() ? null : id;
+        }
+
+        return null;
+    }
+
+    public String getYouTubeThumbnailUrl() {
+        String id = getYouTubeVideoId();
+        if (id == null) return null;
+        return "https://img.youtube.com/vi/" + id + "/hqdefault.jpg";
+    }
 
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }

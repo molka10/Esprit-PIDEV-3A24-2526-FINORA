@@ -17,7 +17,7 @@ public class LessonService {
             ps.setInt(1, l.getFormationId());
             ps.setString(2, l.getTitre());
             ps.setString(3, l.getContenu());
-            ps.setString(4, l.getVideoUrl()); // can be null
+            ps.setString(4, l.getVideoUrl());
             ps.setInt(5, l.getOrdre());
             ps.setInt(6, l.getDureeMinutes());
             ps.executeUpdate();
@@ -29,7 +29,6 @@ public class LessonService {
         String sql = "SELECT * FROM lesson ORDER BY id DESC";
         try (Statement st = cnx.createStatement();
              ResultSet rs = st.executeQuery(sql)) {
-
             while (rs.next()) {
                 list.add(map(rs));
             }
@@ -57,7 +56,7 @@ public class LessonService {
             ps.setInt(1, l.getFormationId());
             ps.setString(2, l.getTitre());
             ps.setString(3, l.getContenu());
-            ps.setString(4, l.getVideoUrl()); // can be null
+            ps.setString(4, l.getVideoUrl());
             ps.setInt(5, l.getOrdre());
             ps.setInt(6, l.getDureeMinutes());
             ps.setInt(7, l.getId());
@@ -76,34 +75,34 @@ public class LessonService {
         }
     }
 
-    // ✅ Update only video_url (link or unlink)
-    public void updateVideoUrl(int lessonId, String videoUrl) throws SQLException {
-        String sql = "UPDATE lesson SET video_url = ? WHERE id = ?";
-        try (PreparedStatement ps = cnx.prepareStatement(sql)) {
-            ps.setString(1, videoUrl); // can be null => removes
-            ps.setInt(2, lessonId);
-            ps.executeUpdate();
-        }
-    }
-
-    // ✅ Explicit remove
-    public void removeVideoUrl(int lessonId) throws SQLException {
-        String sql = "UPDATE lesson SET video_url = NULL WHERE id = ?";
-        try (PreparedStatement ps = cnx.prepareStatement(sql)) {
-            ps.setInt(1, lessonId);
-            ps.executeUpdate();
-        }
-    }
-
     private Lesson map(ResultSet rs) throws SQLException {
         Lesson l = new Lesson();
         l.setId(rs.getInt("id"));
         l.setFormationId(rs.getInt("formation_id"));
         l.setTitre(rs.getString("titre"));
         l.setContenu(rs.getString("contenu"));
-        l.setVideoUrl(rs.getString("video_url")); // returns null if NULL -> OK
+        l.setVideoUrl(rs.getString("video_url")); // null ok
         l.setOrdre(rs.getInt("ordre"));
         l.setDureeMinutes(rs.getInt("duree_minutes"));
         return l;
+    }
+
+    // ✅ Update video_url (set / change / remove if null)
+    public void updateVideoUrl(int lessonId, String videoUrl) throws SQLException {
+        String sql = "UPDATE lesson SET video_url = ? WHERE id = ?";
+        try (PreparedStatement ps = cnx.prepareStatement(sql)) {
+            ps.setString(1, videoUrl); // can be null
+            ps.setInt(2, lessonId);
+            ps.executeUpdate();
+        }
+    }
+
+    // ✅ Remove link explicitly
+    public void removeVideoUrl(int lessonId) throws SQLException {
+        String sql = "UPDATE lesson SET video_url = NULL WHERE id = ?";
+        try (PreparedStatement ps = cnx.prepareStatement(sql)) {
+            ps.setInt(1, lessonId);
+            ps.executeUpdate();
+        }
     }
 }
