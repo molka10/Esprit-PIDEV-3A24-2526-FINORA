@@ -8,9 +8,8 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.scene.input.MouseEvent;
 import tn.finora.entities.Investment;
-import tn.finora.entities.InvestmentPredictionResponse;
-import tn.finora.services.PredictionService;
 import tn.finora.utils.DBConnection;
 import tn.finora.finorainves.AppState;
 import tn.finora.finorainves.SceneNavigator;
@@ -33,14 +32,12 @@ public class InvestmentCardsController {
     private ComboBox<String> riskFilter;
 
     private final Connection cnx;
-    private final PredictionService predictionService = new PredictionService();
     private List<Investment> allInvestments;
 
     public InvestmentCardsController() {
         cnx = DBConnection.getInstance().getCnx();
     }
 
-    // ================= INITIALIZE =================
     @FXML
     public void initialize() {
         allInvestments = getAll();
@@ -87,69 +84,83 @@ public class InvestmentCardsController {
 
     private VBox createCard(Investment inv) {
         VBox card = new VBox(10);
-        card.getStyleClass().add("item-card");
         card.setPrefWidth(220);
+        card.setStyle(
+                "-fx-background-color: white;" +
+                        "-fx-padding: 15;" +
+                        "-fx-background-radius: 15;" +
+                        "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 0);"
+        );
 
-        // IMAGE
+        // Hover effect sur toute la card
+        card.setOnMouseEntered(e -> card.setStyle(
+                "-fx-background-color: #f0f0ff;" +
+                        "-fx-padding: 15;" +
+                        "-fx-background-radius: 15;" +
+                        "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 15, 0, 0, 0);"
+        ));
+        card.setOnMouseExited(e -> card.setStyle(
+                "-fx-background-color: white;" +
+                        "-fx-padding: 15;" +
+                        "-fx-background-radius: 15;" +
+                        "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 0);"
+        ));
+
+        // ------------------ IMAGE ------------------
         ImageView imgView = new ImageView();
         imgView.setFitWidth(200);
         imgView.setFitHeight(120);
         imgView.setPreserveRatio(true);
-        imgView.getStyleClass().add("card-image");
         if (inv.getImageUrl() != null && !inv.getImageUrl().isEmpty()) {
-            try { imgView.setImage(new Image(inv.getImageUrl(), true)); } catch (Exception ignored) {}
+            try {
+                imgView.setImage(new Image(inv.getImageUrl(), true));
+            } catch (Exception ignored) {}
         }
 
-        // LABELS
+        // ------------------ LABELS ------------------
         Label nameLabel = new Label(inv.getName());
-        nameLabel.getStyleClass().add("title");
+        nameLabel.setStyle("-fx-font-size: 16; -fx-font-weight: bold; -fx-text-fill: #4B0082;");
 
         Label infoLabel = new Label(inv.getCategory() + " | " + inv.getLocation());
-        infoLabel.getStyleClass().add("subtitle");
+        infoLabel.setStyle("-fx-font-size: 13; -fx-text-fill: #555555;");
 
         Label valueLabel = new Label("Value: " + inv.getEstimatedValue());
+        valueLabel.setStyle("-fx-font-size: 13; -fx-text-fill: #333333;");
 
         Label riskLabel = new Label(inv.getRiskLevel());
+        riskLabel.setStyle("-fx-font-size: 12; -fx-font-weight: bold; -fx-text-fill: white; -fx-padding: 2 6; -fx-background-radius: 8;");
         switch (inv.getRiskLevel().toLowerCase()) {
-            case "low" -> riskLabel.getStyleClass().add("badge-low");
-            case "medium" -> riskLabel.getStyleClass().add("badge-medium");
-            case "high" -> riskLabel.getStyleClass().add("badge-high");
+            case "low" -> riskLabel.setStyle(riskLabel.getStyle() + "-fx-background-color: #28a745;");
+            case "medium" -> riskLabel.setStyle(riskLabel.getStyle() + "-fx-background-color: #ffc107;");
+            case "high" -> riskLabel.setStyle(riskLabel.getStyle() + "-fx-background-color: #dc3545;");
         }
 
         Label descLabel = new Label(inv.getDescription());
         descLabel.setWrapText(true);
+        descLabel.setStyle("-fx-font-size: 12; -fx-text-fill: #666666;");
 
         String created = "";
         if (inv.getCreatedAt() != null)
             created = inv.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
         Label createdLabel = new Label("Created: " + created);
+        createdLabel.setStyle("-fx-font-size: 11; -fx-text-fill: #999999;");
 
-        // ================= PREDICTION =================
-        Label predictionLabel = new Label();
-        predictionLabel.getStyleClass().add("prediction-label");
-        try {
-            InvestmentPredictionResponse prediction = predictionService.predict(
-                    Long.valueOf(inv.getInvestmentId()), // conversion int → Long
-                    inv.getEstimatedValue() != null ? inv.getEstimatedValue().doubleValue() : 0,
-                    inv.getRiskLevel()
-            );
-            predictionLabel.setText("Predicted Return: " + String.format("%.2f", prediction.getPredictedReturn())
-                    + " | Risk: " + prediction.getPredictedRisk()
-                    + " | Recommendation: " + prediction.getRecommendation());
-        } catch (Exception e) {
-            predictionLabel.setText("Prediction unavailable");
-        }
-
-        // ================= BUTTONS =================
-        Button updateBtn = new Button(" Update");
-        updateBtn.getStyleClass().add("btn-update");
+        // ------------------ BUTTONS ------------------
+        Button updateBtn = new Button("✏ Update");
+        updateBtn.setStyle(
+                "-fx-background-color: #17a2b8; -fx-text-fill: white; -fx-font-weight: bold;" +
+                        "-fx-background-radius: 10; -fx-padding: 5 10;"
+        );
         updateBtn.setOnAction(e -> {
             AppState.setSelectedInvestment(inv);
             SceneNavigator.goTo("investment_form.fxml", "Edit Investment");
         });
 
-        Button deleteBtn = new Button(" Delete");
-        deleteBtn.getStyleClass().add("btn-delete");
+        Button deleteBtn = new Button("🗑 Delete");
+        deleteBtn.setStyle(
+                "-fx-background-color: #dc3545; -fx-text-fill: white; -fx-font-weight: bold;" +
+                        "-fx-background-radius: 10; -fx-padding: 5 10;"
+        );
         deleteBtn.setOnAction(e -> {
             Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
             alert.setTitle("Confirm Delete");
@@ -164,21 +175,28 @@ public class InvestmentCardsController {
             });
         });
 
-        // ================= BOUTON DETAILS =================
-        Button detailsBtn = new Button("Voir détails");
-        detailsBtn.getStyleClass().add("btn-details");
+        Button detailsBtn = new Button("👁 Details");
+        detailsBtn.setStyle(
+                "-fx-background-color: #4B0082; -fx-text-fill: white; -fx-font-weight: bold;" +
+                        "-fx-background-radius: 10; -fx-padding: 5 10;"
+        );
+        detailsBtn.setOnMouseEntered(e -> detailsBtn.setStyle(
+                "-fx-background-color: #6A0DAD; -fx-text-fill: white; -fx-font-weight: bold;" +
+                        "-fx-background-radius: 10; -fx-padding: 5 10;"
+        ));
+        detailsBtn.setOnMouseExited(e -> detailsBtn.setStyle(
+                "-fx-background-color: #4B0082; -fx-text-fill: white; -fx-font-weight: bold;" +
+                        "-fx-background-radius: 10; -fx-padding: 5 10;"
+        ));
         detailsBtn.setOnAction(e -> {
-            try {
-                AppState.setSelectedInvestment(inv); // passe l'investment sélectionné
-                SceneNavigator.openModal("investment_details.fxml", "Investment Details");
-            } catch (RuntimeException ex) {
-                showAlert("Erreur", "Impossible d'ouvrir la fenêtre de détails : " + ex.getMessage());
-            }
+            AppState.setSelectedInvestment(inv);
+            SceneNavigator.goTo("investment_details.fxml", "Investment Details");
         });
 
         HBox buttonsBox = new HBox(10, updateBtn, deleteBtn, detailsBtn);
-        card.getChildren().addAll(imgView, nameLabel, infoLabel, valueLabel, riskLabel,
-                descLabel, createdLabel, predictionLabel, buttonsBox);
+
+        // ------------------ ASSEMBLY ------------------
+        card.getChildren().addAll(imgView, nameLabel, infoLabel, valueLabel, riskLabel, descLabel, createdLabel, buttonsBox);
 
         return card;
     }
@@ -267,7 +285,9 @@ public class InvestmentCardsController {
 
     // ================= SEARCH & FILTER =================
     @FXML
-    private void onSearch() { applyFilters(); }
+    private void onSearch() {
+        applyFilters();
+    }
 
     @FXML
     private void onClearSearch() {
@@ -277,7 +297,9 @@ public class InvestmentCardsController {
     }
 
     @FXML
-    private void onFilterRisk() { applyFilters(); }
+    private void onFilterRisk() {
+        applyFilters();
+    }
 
     private void applyFilters() {
         String query = searchField.getText().trim().toLowerCase();

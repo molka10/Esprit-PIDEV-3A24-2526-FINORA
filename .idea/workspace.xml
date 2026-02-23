@@ -5,13 +5,13 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="c29a7d9c-7ce5-447a-8626-457253968d65" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/src/main/java/tn/finora/controllers/InvestmentDetailsController.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/tn/finora/entities/InvestmentPredictionResponse.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/tn/finora/services/PredictionService.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/tn/finora/finorainves/ui/investment_details.fxml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/tn/finora/services/HistoryService.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/module-info.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/module-info.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/tn/finora/controllers/InvestmentCardsController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/tn/finora/controllers/InvestmentCardsController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/tn/finora/controllers/InvestmentDetailsController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/tn/finora/controllers/InvestmentDetailsController.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/tn/finora/finorainves/SceneNavigator.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/tn/finora/finorainves/SceneNavigator.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/tn/finora/finorainves/ui/investment_details.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/tn/finora/finorainves/ui/investment_details.fxml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -75,7 +75,7 @@
       <option name="presentableId" value="Default" />
       <updated>1771756030130</updated>
       <workItem from="1771756031381" duration="18845000" />
-      <workItem from="1771807092518" duration="396000" />
+      <workItem from="1771807092518" duration="5456000" />
     </task>
     <servers />
   </component>
