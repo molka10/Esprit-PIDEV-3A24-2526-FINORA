@@ -7,16 +7,19 @@
 <BorderPane xmlns="http://javafx.com/javafx/17"
             xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="tn.finora.controllers.InvestmentCardsController"
-            stylesheets="@../styles/style.css">
+            stylesheets="@../styles/style.css"
+            styleClass="app-root">
 
     <!-- ================= HEADER ================= -->
     <top>
-        <VBox spacing="16" style="-fx-padding: 30 30 20 30;">
+        <VBox spacing="24" styleClass="header-section">
 
+            <!-- Title + Dark Mode -->
             <HBox alignment="CENTER_LEFT" spacing="20">
 
-                <VBox spacing="4">
-                    <Label text="Investment Portfolio" styleClass="title"/>
+                <VBox spacing="6">
+                    <Label text="Investment Portfolio"
+                           styleClass="title"/>
                     <Label text="Manage and monitor your investments efficiently"
                            styleClass="subtitle"/>
                 </VBox>
@@ -25,12 +28,13 @@
 
                 <ToggleButton text="🌙 Dark Mode"
                               onAction="#toggleDarkMode"
-                              styleClass="btn-ghost"/>
+                              styleClass="btn-dark-toggle"
+                              prefHeight="38"
+                              prefWidth="140"/>
             </HBox>
 
-            <!-- ===== DASHBOARD KPI ===== -->
-
-            <HBox spacing="20">
+            <!-- Dashboard KPI -->
+            <HBox spacing="24">
 
                 <VBox styleClass="kpi-card">
                     <Label text="Total Portfolio Value"
@@ -53,82 +57,89 @@
 
     <!-- ================= MAIN CONTENT ================= -->
     <center>
-        <VBox spacing="20" style="-fx-padding: 0 30 30 30;">
+        <VBox spacing="28" styleClass="content-section">
 
             <!-- ===== TOOLBAR ===== -->
-            <HBox spacing="12" alignment="CENTER_LEFT">
+            <HBox spacing="16" alignment="CENTER_LEFT">
 
-                <Button text="Add Investment"
+                <Button text="＋ Add Investment"
                         onAction="#onAdd"
-                        styleClass="btn-primary"/>
+                        styleClass="btn-primary"
+                        prefWidth="170"
+                        prefHeight="40"/>
 
-                <Button text="Refresh"
+                <Button text="⟳ Refresh"
                         onAction="#onRefresh"
-                        styleClass="btn-ghost"/>
+                        styleClass="btn-secondary"
+                        prefWidth="120"
+                        prefHeight="40"/>
 
                 <Region HBox.hgrow="ALWAYS"/>
 
                 <Button text="Management"
                         onAction="#goToManagement"
-                        styleClass="btn-ghost"/>
+                        styleClass="btn-management"
+                        prefWidth="140"
+                        prefHeight="40"/>
 
             </HBox>
 
             <!-- ===== SEARCH BAR ===== -->
-            <HBox spacing="16" alignment="CENTER_LEFT">
+            <HBox spacing="18" alignment="CENTER_LEFT">
 
                 <HBox alignment="CENTER_LEFT"
-                      spacing="8"
-                      style="-fx-background-color: white;
-                             -fx-background-radius: 16;
-                             -fx-padding: 8 16 8 16;
-                             -fx-effect: dropshadow(gaussian, rgba(109,40,217,0.08), 12, 0.2, 0, 4);"
+                      spacing="10"
+                      styleClass="search-container"
                       HBox.hgrow="ALWAYS">
 
                     <Label text="🔍"
-                           style="-fx-font-size: 16;
-                                  -fx-text-fill: #8B5CF6;"/>
+                           styleClass="search-icon"/>
 
                     <TextField fx:id="searchField"
                                promptText="Search investments by name..."
-                               style="-fx-background-color: transparent;
-                                      -fx-border-width: 0;"
+                               styleClass="search-field"
                                HBox.hgrow="ALWAYS"
-                               prefHeight="36"/>
+                               prefHeight="38"/>
 
                 </HBox>
 
                 <Button text="Search"
                         onAction="#onSearch"
-                        styleClass="btn-primary"/>
+                        styleClass="btn-primary"
+                        prefWidth="110"
+                        prefHeight="38"/>
 
                 <Button text="Clear"
                         onAction="#onClearSearch"
-                        styleClass="btn-ghost"/>
+                        styleClass="btn-clear"
+                        prefWidth="100"
+                        prefHeight="38"/>
 
                 <ComboBox fx:id="riskFilter"
-                          prefWidth="150"
-                          prefHeight="36"
-                          promptText="Filter Risk"
+                          promptText="Risk Level"
                           onAction="#onFilterRisk"
-                          style="-fx-background-radius: 14;"/>
+                          prefWidth="160"
+                          prefHeight="38"
+                          styleClass="risk-combo"/>
 
             </HBox>
 
             <!-- ===== CARDS AREA ===== -->
             <ScrollPane fitToWidth="true"
-                        style="-fx-background-color: transparent;">
+                        styleClass="transparent-scroll">
 
                 <content>
                     <FlowPane fx:id="cardsPane"
-                              hgap="20"
-                              vgap="20"
-                              prefWrapLength="1200"
-                              style="-fx-background-color: transparent;">
+                              hgap="24"
+                              vgap="24"
+                              prefWrapLength="1300"
+                              styleClass="cards-container">
 
                         <padding>
-                            <Insets top="20" right="10"
-                                    bottom="20" left="10"/>
+                            <Insets top="20"
+                                    right="10"
+                                    bottom="20"
+                                    left="10"/>
                         </padding>
 
                     </FlowPane>

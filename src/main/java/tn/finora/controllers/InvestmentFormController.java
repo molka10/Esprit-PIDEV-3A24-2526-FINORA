@@ -2,6 +2,8 @@ package tn.finora.controllers;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import tn.finora.entities.Investment;
 import tn.finora.finorainves.AppState;
 import tn.finora.finorainves.SceneNavigator;
@@ -13,6 +15,7 @@ import java.time.LocalDateTime;
 public class InvestmentFormController {
 
     @FXML private Label titleLabel;
+
     @FXML private TextField nameField;
     @FXML private TextField categoryField;
     @FXML private TextField locationField;
@@ -20,28 +23,39 @@ public class InvestmentFormController {
     @FXML private ComboBox<String> riskCombo;
     @FXML private TextField imageField;
     @FXML private TextArea descArea;
-    @FXML private Label errorLabel;
+    @FXML private ImageView previewImage;
+
+    // Error labels
+    @FXML private Label nameError;
+    @FXML private Label categoryError;
+    @FXML private Label locationError;
+    @FXML private Label valueError;
+    @FXML private Label riskError;
+    @FXML private Label imageError;
+    @FXML private Label descError;
 
     private final InvestmentService service = new InvestmentService();
     private Investment editing;
 
     @FXML
     public void initialize() {
+
         riskCombo.getItems().setAll("LOW", "MEDIUM", "HIGH");
-        errorLabel.setText("");
 
         editing = AppState.getSelectedInvestment();
 
+        // Live Image Preview
+        imageField.textProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal != null && newVal.startsWith("http")) {
+                previewImage.setImage(new Image(newVal, true));
+            } else {
+                previewImage.setImage(null);
+            }
+        });
+
         if (editing != null) {
-            titleLabel.setText("Edit Investment");
-            nameField.setText(editing.getName());
-            categoryField.setText(editing.getCategory());
-            locationField.setText(editing.getLocation());
-            BigDecimal estValue = editing.getEstimatedValue();
-            valueField.setText(estValue != null ? estValue.toPlainString() : "0");
-            riskCombo.setValue(editing.getRiskLevel());
-            imageField.setText(editing.getImageUrl());
-            descArea.setText(editing.getDescription());
+            titleLabel.setText("Update Investment");
+            loadEditingData();
         } else {
             titleLabel.setText("Add Investment");
             riskCombo.getSelectionModel().selectFirst();
@@ -49,94 +63,94 @@ public class InvestmentFormController {
         }
     }
 
-    @FXML
-    private void onCancel() {
-        AppState.setSelectedInvestment(null);
-        SceneNavigator.goTo("investment_cards.fxml", "Investment - List");
+    private void loadEditingData() {
+        nameField.setText(editing.getName());
+        categoryField.setText(editing.getCategory());
+        locationField.setText(editing.getLocation());
+        valueField.setText(editing.getEstimatedValue().toPlainString());
+        riskCombo.setValue(editing.getRiskLevel());
+        imageField.setText(editing.getImageUrl());
+        descArea.setText(editing.getDescription());
     }
 
     @FXML
     private void onSave() {
-        errorLabel.setText("");
 
-        StringBuilder errors = new StringBuilder();
+        clearErrors();
+        boolean valid = true;
 
-        // Name validation
+        // -------- NAME --------
         String name = nameField.getText().trim();
         if (name.isEmpty()) {
-            errors.append("❌ Name is required\n");
+            setError(nameField, nameError, "Name is required");
+            valid = false;
         } else if (name.length() > 50) {
-            errors.append("❌ Name too long (max 50 chars)\n");
+            setError(nameField, nameError, "Max 50 characters");
+            valid = false;
         }
 
-        // Category validation
+        // -------- CATEGORY --------
         String category = categoryField.getText().trim();
         if (category.isEmpty()) {
-            errors.append("❌ Category is required\n");
-        } else if (category.length() > 50) {
-            errors.append("❌ Category too long (max 50 chars)\n");
+            setError(categoryField, categoryError, "Category required");
+            valid = false;
         }
 
-        // Location validation
+        // -------- LOCATION --------
         String location = locationField.getText().trim();
         if (location.isEmpty()) {
-            errors.append("❌ Location is required\n");
-        } else if (location.length() > 100) {
-            errors.append("❌ Location too long (max 100 chars)\n");
+            setError(locationField, locationError, "Location required");
+            valid = false;
         }
 
-        // Estimated value validation
-        BigDecimal estimatedValue = null;
-        String valueText = valueField.getText().trim();
-        if (valueText.isEmpty()) {
-            errors.append("❌ Estimated value is required\n");
-        } else {
-            try {
-                estimatedValue = new BigDecimal(valueText);
-                if (estimatedValue.compareTo(BigDecimal.ZERO) < 0) {
-                    errors.append("❌ Estimated value cannot be negative\n");
-                }
-            } catch (NumberFormatException ex) {
-                errors.append("❌ Enter a valid number for estimated value\n");
+        // -------- VALUE --------
+        BigDecimal value = null;
+        try {
+            value = new BigDecimal(valueField.getText().trim());
+            if (value.compareTo(BigDecimal.ZERO) <= 0) {
+                setError(valueField, valueError, "Must be greater than 0");
+                valid = false;
             }
+        } catch (Exception e) {
+            setError(valueField, valueError, "Invalid number");
+            valid = false;
         }
 
-        // Risk validation
+        // -------- RISK --------
         String risk = riskCombo.getValue();
-        if (risk == null || risk.isEmpty()) {
-            errors.append("❌ Select a risk level\n");
-        } else if (!risk.equals("LOW") && !risk.equals("MEDIUM") && !risk.equals("HIGH")) {
-            errors.append("❌ Invalid risk value\n");
+        if (risk == null) {
+            riskError.setText("Select risk level");
+            valid = false;
         }
 
-        // Image URL validation (optionnel)
+        // -------- IMAGE --------
         String imageUrl = imageField.getText().trim();
-        if (!imageUrl.isEmpty()) {
-            if (imageUrl.length() > 255) {
-                errors.append("❌ Image URL too long (max 255 chars)\n");
-            } else if (!imageUrl.matches("^(https?://.*|.*\\.(png|jpg|jpeg|gif))$")) {
-                errors.append("❌ Invalid image URL or path\n");
-            }
+        if (!imageUrl.isEmpty() && !imageUrl.startsWith("http")) {
+            setError(imageField, imageError, "Invalid URL");
+            valid = false;
         }
 
-        // Description validation (optionnel)
+        // -------- DESCRIPTION --------
         String description = descArea.getText().trim();
         if (description.length() > 500) {
-            errors.append("❌ Description too long (max 500 chars)\n");
+            descError.setText("Max 500 characters");
+            valid = false;
         }
 
-        // If any error, show and stop
-        if (errors.length() > 0) {
-            errorLabel.setText(errors.toString());
-            return;
+        if (!valid) return;
+
+        // ===== BUSINESS FEATURE =====
+        // Auto-adjust Risk based on Value
+        if (value.compareTo(new BigDecimal("1000000")) > 0) {
+            risk = "HIGH";
         }
 
-        // Everything is valid → create or edit Investment
         Investment inv = (editing != null) ? editing : new Investment();
+
         inv.setName(name);
         inv.setCategory(category);
         inv.setLocation(location);
-        inv.setEstimatedValue(estimatedValue);
+        inv.setEstimatedValue(value);
         inv.setRiskLevel(risk);
         inv.setImageUrl(imageUrl);
         inv.setDescription(description);
@@ -148,11 +162,40 @@ public class InvestmentFormController {
             } else {
                 service.update(inv);
             }
+
             AppState.setSelectedInvestment(null);
-            SceneNavigator.goTo("investment_cards.fxml", "Investment - List");
+            SceneNavigator.goTo("investment_cards.fxml", "Investments");
+
         } catch (Exception ex) {
-            errorLabel.setText("❌ Error saving investment: " + ex.getMessage());
             ex.printStackTrace();
         }
+    }
+
+    private void setError(Control field, Label label, String message) {
+        field.getStyleClass().add("input-error");
+        label.setText(message);
+    }
+
+    private void clearErrors() {
+
+        nameError.setText("");
+        categoryError.setText("");
+        locationError.setText("");
+        valueError.setText("");
+        riskError.setText("");
+        imageError.setText("");
+        descError.setText("");
+
+        nameField.getStyleClass().remove("input-error");
+        categoryField.getStyleClass().remove("input-error");
+        locationField.getStyleClass().remove("input-error");
+        valueField.getStyleClass().remove("input-error");
+        imageField.getStyleClass().remove("input-error");
+    }
+
+    @FXML
+    private void onCancel() {
+        AppState.setSelectedInvestment(null);
+        SceneNavigator.goTo("investment_cards.fxml", "Investments");
     }
 }

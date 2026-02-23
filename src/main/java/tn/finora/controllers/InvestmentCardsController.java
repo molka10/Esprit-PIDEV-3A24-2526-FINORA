@@ -3,12 +3,11 @@ package tn.finora.controllers;
 import javafx.animation.ScaleTransition;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
+import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.FlowPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 import javafx.util.Duration;
 import tn.finora.entities.Investment;
 import tn.finora.finorainves.AppState;
@@ -18,20 +17,15 @@ import tn.finora.utils.DBConnection;
 import java.math.BigDecimal;
 import java.sql.*;
 import java.text.NumberFormat;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import javafx.scene.layout.Region;
-import javafx.scene.layout.Priority;
-import javafx.geometry.Pos;
+
 public class InvestmentCardsController {
 
     @FXML private FlowPane cardsPane;
     @FXML private TextField searchField;
     @FXML private ComboBox<String> riskFilter;
-
-    // Dashboard KPI
     @FXML private Label totalValueLabel;
     @FXML private Label totalCountLabel;
 
@@ -47,12 +41,10 @@ public class InvestmentCardsController {
 
     @FXML
     public void initialize() {
-
         riskFilter.setItems(
                 FXCollections.observableArrayList("All", "Low", "Medium", "High")
         );
         riskFilter.setValue("All");
-
         refreshData();
     }
 
@@ -80,10 +72,11 @@ public class InvestmentCardsController {
 
     @FXML
     private void toggleDarkMode() {
-        if (cardsPane.getScene().getRoot().getStyleClass().contains("dark-root")) {
-            cardsPane.getScene().getRoot().getStyleClass().remove("dark-root");
+        var root = cardsPane.getScene().getRoot();
+        if (root.getStyleClass().contains("dark-root")) {
+            root.getStyleClass().remove("dark-root");
         } else {
-            cardsPane.getScene().getRoot().getStyleClass().add("dark-root");
+            root.getStyleClass().add("dark-root");
         }
     }
 
@@ -94,7 +87,7 @@ public class InvestmentCardsController {
     }
 
     // =====================================================
-    // DASHBOARD KPI
+    // DASHBOARD
     // =====================================================
 
     private void updateDashboard() {
@@ -121,6 +114,7 @@ public class InvestmentCardsController {
 
         if (investments.isEmpty()) {
             Label empty = new Label("No investments found.");
+            empty.getStyleClass().add("empty-label");
             cardsPane.getChildren().add(empty);
             return;
         }
@@ -134,20 +128,20 @@ public class InvestmentCardsController {
 
         VBox card = new VBox();
         card.getStyleClass().add("investment-card");
-        card.setPrefWidth(260);
+        card.setPrefWidth(280);
 
-        // -------- IMAGE --------
-        ImageView imgView = new ImageView();
-        imgView.setFitWidth(260);
-        imgView.setFitHeight(150);
-        imgView.setPreserveRatio(false);
-        imgView.getStyleClass().add("card-image-modern");
+        // ===== IMAGE =====
+        ImageView image = new ImageView();
+        image.setFitWidth(280);
+        image.setFitHeight(160);
+        image.setPreserveRatio(false);
+        image.getStyleClass().add("card-image-modern");
 
         if (inv.getImageUrl() != null && !inv.getImageUrl().isBlank()) {
-            imgView.setImage(new Image(inv.getImageUrl(), true));
+            image.setImage(new Image(inv.getImageUrl(), true));
         }
 
-        // -------- CONTENT --------
+        // ===== TEXT CONTENT =====
         Label nameLabel = new Label(inv.getName());
         nameLabel.getStyleClass().add("card-title");
 
@@ -165,7 +159,9 @@ public class InvestmentCardsController {
         );
         valueLabel.getStyleClass().add("card-value");
 
-        Label riskLabel = new Label(safe(inv.getRiskLevel()).toUpperCase());
+        Label riskLabel = new Label(
+                safe(inv.getRiskLevel()).toUpperCase()
+        );
         riskLabel.getStyleClass().add("risk-badge");
 
         switch (safe(inv.getRiskLevel()).toLowerCase()) {
@@ -174,49 +170,61 @@ public class InvestmentCardsController {
             case "high" -> riskLabel.getStyleClass().add("badge-high-modern");
         }
 
-        Button updateBtn = new Button("Edit");
-        updateBtn.getStyleClass().add("btn-primary");
-        updateBtn.setPrefWidth(100);
-        updateBtn.setPrefHeight(36);
+        // ===== BUTTONS =====
+
+        Button updateBtn = new Button("Update");
+        updateBtn.getStyleClass().add("btn-update-modern");
+        updateBtn.setPrefWidth(130);
+        updateBtn.setPrefHeight(42);
 
         updateBtn.setOnAction(e -> {
             AppState.setSelectedInvestment(inv);
-            SceneNavigator.goTo("investment_form.fxml", "Edit Investment");
+            SceneNavigator.goTo("investment_form.fxml", "Update Investment");
         });
 
         Button deleteBtn = new Button("Delete");
-        deleteBtn.getStyleClass().add("btn-outline");
-        deleteBtn.setPrefWidth(100);
-        deleteBtn.setPrefHeight(36);
+        deleteBtn.getStyleClass().add("btn-delete-modern");
+        deleteBtn.setPrefWidth(130);
+        deleteBtn.setPrefHeight(42);
 
         deleteBtn.setOnAction(e -> confirmDelete(inv));
 
-// Spacer intelligent
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
 
-        HBox buttons = new HBox(12, updateBtn, spacer, deleteBtn);
+        HBox buttons = new HBox(18, updateBtn, spacer, deleteBtn);
         buttons.setAlignment(Pos.CENTER_LEFT);
-        buttons.setStyle("-fx-padding: 12 0 0 0;");
+        buttons.setStyle("-fx-padding: 20 0 0 0;");
 
-        VBox content = new VBox(10, nameLabel, categoryLabel, valueLabel, riskLabel, buttons);
-        content.setStyle("-fx-padding: 18;");
+        VBox content = new VBox(12,
+                nameLabel,
+                categoryLabel,
+                valueLabel,
+                riskLabel,
+                buttons
+        );
+        content.setStyle("-fx-padding: 22;");
 
-        card.getChildren().addAll(imgView, content);
+        card.getChildren().addAll(image, content);
 
         addSmoothHoverAnimation(card);
 
         return card;
     }
 
-    // Animation fluide professionnelle
+    // =====================================================
+    // ANIMATION
+    // =====================================================
+
     private void addSmoothHoverAnimation(VBox card) {
 
-        ScaleTransition scaleUp = new ScaleTransition(Duration.millis(200), card);
+        ScaleTransition scaleUp =
+                new ScaleTransition(Duration.millis(180), card);
         scaleUp.setToX(1.03);
         scaleUp.setToY(1.03);
 
-        ScaleTransition scaleDown = new ScaleTransition(Duration.millis(200), card);
+        ScaleTransition scaleDown =
+                new ScaleTransition(Duration.millis(180), card);
         scaleDown.setToX(1);
         scaleDown.setToY(1);
 
@@ -224,11 +232,17 @@ public class InvestmentCardsController {
         card.setOnMouseExited(e -> scaleDown.playFromStart());
     }
 
+    // =====================================================
+    // DELETE CONFIRMATION
+    // =====================================================
+
     private void confirmDelete(Investment inv) {
 
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-        alert.setTitle("Confirm Delete");
-        alert.setContentText("Delete this investment?");
+        alert.setTitle("Delete Investment");
+        alert.setHeaderText(null);
+        alert.setContentText("Are you sure you want to delete this investment?");
+
         alert.showAndWait().ifPresent(response -> {
             if (response == ButtonType.OK) {
                 delete(inv.getInvestmentId());
@@ -244,7 +258,6 @@ public class InvestmentCardsController {
     public List<Investment> getAll() {
 
         List<Investment> list = new ArrayList<>();
-
         String sql = "SELECT * FROM investment ORDER BY investment_id DESC";
 
         try (PreparedStatement ps = cnx.prepareStatement(sql);
@@ -335,12 +348,13 @@ public class InvestmentCardsController {
     }
 
     // =====================================================
-    // UTILS
+    // UTIL
     // =====================================================
 
     private void showError(String title, String msg) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle(title);
+        alert.setHeaderText(null);
         alert.setContentText(msg);
         alert.showAndWait();
     }
