@@ -9,6 +9,8 @@ import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import tn.finora.entities.Investment;
+import tn.finora.entities.InvestmentPredictionResponse;
+import tn.finora.services.PredictionService;
 import tn.finora.utils.DBConnection;
 import tn.finora.finorainves.AppState;
 import tn.finora.finorainves.SceneNavigator;
@@ -31,7 +33,8 @@ public class InvestmentCardsController {
     private ComboBox<String> riskFilter;
 
     private final Connection cnx;
-    private List<Investment> allInvestments; // Liste complète pour recherche et filtre
+    private final PredictionService predictionService = new PredictionService();
+    private List<Investment> allInvestments;
 
     public InvestmentCardsController() {
         cnx = DBConnection.getInstance().getCnx();
@@ -40,11 +43,9 @@ public class InvestmentCardsController {
     // ================= INITIALIZE =================
     @FXML
     public void initialize() {
-        // Charger tous les investissements
         allInvestments = getAll();
         loadCards(allInvestments);
 
-        // Initialiser le ComboBox pour le tri par risque
         riskFilter.setItems(FXCollections.observableArrayList("All", "Low", "Medium", "High"));
         riskFilter.setValue("All");
     }
@@ -96,9 +97,7 @@ public class InvestmentCardsController {
         imgView.setPreserveRatio(true);
         imgView.getStyleClass().add("card-image");
         if (inv.getImageUrl() != null && !inv.getImageUrl().isEmpty()) {
-            try {
-                imgView.setImage(new Image(inv.getImageUrl(), true));
-            } catch (Exception ignored) {}
+            try { imgView.setImage(new Image(inv.getImageUrl(), true)); } catch (Exception ignored) {}
         }
 
         // LABELS
@@ -125,7 +124,23 @@ public class InvestmentCardsController {
             created = inv.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
         Label createdLabel = new Label("Created: " + created);
 
-        // BUTTONS
+        // ================= PREDICTION =================
+        Label predictionLabel = new Label();
+        predictionLabel.getStyleClass().add("prediction-label");
+        try {
+            InvestmentPredictionResponse prediction = predictionService.predict(
+                    Long.valueOf(inv.getInvestmentId()), // conversion int → Long
+                    inv.getEstimatedValue() != null ? inv.getEstimatedValue().doubleValue() : 0,
+                    inv.getRiskLevel()
+            );
+            predictionLabel.setText("Predicted Return: " + String.format("%.2f", prediction.getPredictedReturn())
+                    + " | Risk: " + prediction.getPredictedRisk()
+                    + " | Recommendation: " + prediction.getRecommendation());
+        } catch (Exception e) {
+            predictionLabel.setText("Prediction unavailable");
+        }
+
+        // ================= BUTTONS =================
         Button updateBtn = new Button(" Update");
         updateBtn.getStyleClass().add("btn-update");
         updateBtn.setOnAction(e -> {
@@ -149,8 +164,21 @@ public class InvestmentCardsController {
             });
         });
 
-        HBox buttonsBox = new HBox(10, updateBtn, deleteBtn);
-        card.getChildren().addAll(imgView, nameLabel, infoLabel, valueLabel, riskLabel, descLabel, createdLabel, buttonsBox);
+        // ================= BOUTON DETAILS =================
+        Button detailsBtn = new Button("Voir détails");
+        detailsBtn.getStyleClass().add("btn-details");
+        detailsBtn.setOnAction(e -> {
+            try {
+                AppState.setSelectedInvestment(inv); // passe l'investment sélectionné
+                SceneNavigator.openModal("investment_details.fxml", "Investment Details");
+            } catch (RuntimeException ex) {
+                showAlert("Erreur", "Impossible d'ouvrir la fenêtre de détails : " + ex.getMessage());
+            }
+        });
+
+        HBox buttonsBox = new HBox(10, updateBtn, deleteBtn, detailsBtn);
+        card.getChildren().addAll(imgView, nameLabel, infoLabel, valueLabel, riskLabel,
+                descLabel, createdLabel, predictionLabel, buttonsBox);
 
         return card;
     }
@@ -239,9 +267,7 @@ public class InvestmentCardsController {
 
     // ================= SEARCH & FILTER =================
     @FXML
-    private void onSearch() {
-        applyFilters();
-    }
+    private void onSearch() { applyFilters(); }
 
     @FXML
     private void onClearSearch() {
@@ -251,9 +277,7 @@ public class InvestmentCardsController {
     }
 
     @FXML
-    private void onFilterRisk() {
-        applyFilters();
-    }
+    private void onFilterRisk() { applyFilters(); }
 
     private void applyFilters() {
         String query = searchField.getText().trim().toLowerCase();
@@ -261,12 +285,10 @@ public class InvestmentCardsController {
 
         List<Investment> filtered = new ArrayList<>(allInvestments);
 
-        // Filtrer par nom
         if (!query.isEmpty()) {
             filtered.removeIf(inv -> inv.getName() == null || !inv.getName().toLowerCase().contains(query));
         }
 
-        // Filtrer par risque
         if (selectedRisk != null && !"All".equals(selectedRisk)) {
             filtered.removeIf(inv -> inv.getRiskLevel() == null || !inv.getRiskLevel().equalsIgnoreCase(selectedRisk));
         }

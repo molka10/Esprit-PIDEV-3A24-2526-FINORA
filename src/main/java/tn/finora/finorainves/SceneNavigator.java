@@ -42,4 +42,19 @@ public class SceneNavigator {
             throw new RuntimeException("Navigation error: " + e.getMessage(), e);
         }
     }
+    public static void openModal(String fxml, String title) {
+        try {
+            FXMLLoader loader = new FXMLLoader(SceneNavigator.class.getResource("/tn/finora/finorainves/ui/" + fxml));
+            Parent root = loader.load();
+            Stage stage = new Stage();
+            stage.setTitle(title);
+            stage.setScene(new Scene(root));
+            stage.initModality(
+
+                    Modality.APPLICATION_MODAL); // bloque la fenêtre parente
+            stage.showAndWait(); // attend la fermeture pour reprendre le flow
+        } catch (IOException e) {
+            throw new RuntimeException("Navigation error: " + e.getMessage(), e);
+        }
+    }
 }

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.chart.*?>
+
+<?import javafx.geometry.Insets?>
+<VBox xmlns="http://javafx.com/javafx/17"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="tn.finora.controllers.InvestmentDetailsController"
+      spacing="15">
+
+    <padding>
+        <Insets right="15" bottom="15" left="15"/>
+    </padding>
+
+    <!-- Image + Infos -->
+    <HBox spacing="15">
+        <ImageView fx:id="imageView" fitWidth="200" fitHeight="120" preserveRatio="true"/>
+        <VBox spacing="5">
+            <Label fx:id="nameLabel" styleClass="title"/>
+            <Label fx:id="categoryLabel" styleClass="subtitle"/>
+            <Label fx:id="valueLabel"/>
+            <Label fx:id="riskLabel"/>
+            <Label fx:id="descriptionLabel" wrapText="true"/>
+            <Label fx:id="predictionLabel" wrapText="true"/>
+        </VBox>
+    </HBox>
+
+    <!-- Graphique historique -->
+    <LineChart fx:id="valueChart" title="Historical Values" prefHeight="250">
+        <xAxis>
+            <CategoryAxis label="Date"/>
+        </xAxis>
+        <yAxis>
+            <NumberAxis label="Value"/>
+        </yAxis>
+    </LineChart>
+
+    <!-- Commentaires -->
+    <Label text="Commentaires / Notes:"/>
+    <VBox fx:id="commentsBox" spacing="5"/>
+    <HBox spacing="10">
+        <TextArea fx:id="commentsArea" promptText="Ajouter un commentaire..." prefRowCount="2"/>
+        <Button text="Add Comment" onAction="#onAddComment"/>
+    </HBox>
+</VBox>
