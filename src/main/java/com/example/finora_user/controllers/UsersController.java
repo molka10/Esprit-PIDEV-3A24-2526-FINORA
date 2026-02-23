@@ -1,6 +1,8 @@
 package com.example.finora_user.controllers;
 
 import com.example.finora_user.entities.User;
+import com.example.finora_user.services.DuplicateDetectionService;
+import com.example.finora_user.services.DuplicateMatch;
 import com.example.finora_user.services.RiskResult;
 import com.example.finora_user.services.RiskScoringService;
 import com.example.finora_user.services.UserService;
@@ -46,11 +48,15 @@ public class UsersController {
     @FXML private ComboBox<String> roleFilterCombo;
 
     private UserService userService;
-    private RiskScoringService riskService;
 
-    private final ObservableList<User> data = FXCollections.observableArrayList();
+    // Risk scoring
+    private RiskScoringService riskService;
     private final Map<Integer, RiskResult> riskCache = new HashMap<>();
 
+    // Duplicate detection
+    private DuplicateDetectionService duplicateService;
+
+    private final ObservableList<User> data = FXCollections.observableArrayList();
     private User selectedUser;
 
     private enum SearchMode { TEXT, ROLE }
@@ -63,6 +69,7 @@ public class UsersController {
         try {
             userService = new UserService();
             riskService = new RiskScoringService();
+            duplicateService = new DuplicateDetectionService(userService);
 
             roleCombo.setItems(FXCollections.observableArrayList("ADMIN", "ENTREPRISE", "USER"));
             roleFilterCombo.setItems(FXCollections.observableArrayList("ADMIN", "ENTREPRISE", "USER"));
@@ -94,10 +101,8 @@ public class UsersController {
             List<User> users = userService.getAllUsers();
             data.setAll(users);
             recomputeRisk(users);
-
             updateCount();
             statusLabel.setText("");
-
         } catch (SQLException e) {
             statusLabel.setText("❌ Erreur chargement: " + e.getMessage());
             e.printStackTrace();
@@ -113,9 +118,22 @@ public class UsersController {
                 return;
             }
 
+            // Duplicate check BEFORE insert
+            String uname = usernameField.getText().trim();
+            String mail = emailField.getText().trim();
+
+            List<DuplicateMatch> dups = duplicateService.findDuplicates(uname, mail, -1);
+            if (!dups.isEmpty()) {
+                boolean proceed = confirmProceedWithDuplicates("Doublons possibles détectés (Ajout)", dups);
+                if (!proceed) {
+                    statusLabel.setText("⚠️ Ajout annulé (doublon possible).");
+                    return;
+                }
+            }
+
             User u = new User();
-            u.setUsername(usernameField.getText().trim());
-            u.setEmail(emailField.getText().trim());
+            u.setUsername(uname);
+            u.setEmail(mail);
             u.setRole(roleCombo.getValue());
             u.setPhone(safe(phoneField.getText()));
             u.setAddress(addressField.getText().trim());
@@ -148,8 +166,21 @@ public class UsersController {
                 return;
             }
 
-            selectedUser.setUsername(usernameField.getText().trim());
-            selectedUser.setEmail(emailField.getText().trim());
+            // Duplicate check BEFORE update (exclude current user id)
+            String uname = usernameField.getText().trim();
+            String mail = emailField.getText().trim();
+
+            List<DuplicateMatch> dups = duplicateService.findDuplicates(uname, mail, selectedUser.getId());
+            if (!dups.isEmpty()) {
+                boolean proceed = confirmProceedWithDuplicates("Doublons possibles détectés (Modification)", dups);
+                if (!proceed) {
+                    statusLabel.setText("⚠️ Modification annulée (doublon possible).");
+                    return;
+                }
+            }
+
+            selectedUser.setUsername(uname);
+            selectedUser.setEmail(mail);
             selectedUser.setRole(roleCombo.getValue());
             selectedUser.setPhone(safe(phoneField.getText()));
             selectedUser.setAddress(addressField.getText().trim());
@@ -225,7 +256,6 @@ public class UsersController {
         if (t == toggleRole) {
             mode = SearchMode.ROLE;
 
-            // disable text field, show role combo
             searchField.setDisable(true);
             searchField.clear();
 
@@ -299,21 +329,47 @@ public class UsersController {
     private void recomputeRisk(List<User> users) {
         riskCache.clear();
 
-        if (users == null || users.isEmpty()) {
-            usersList.refresh();
-            return;
-        }
-
-        for (User u : users) {
-            try {
-                riskCache.put(u.getId(), riskService.compute(u));
-            } catch (Exception ex) {
-                // don’t break UI
-                riskCache.put(u.getId(), new RiskResult(0, RiskResult.Level.LOW, List.of("Impossible de calculer le risque")));
+        if (users != null) {
+            for (User u : users) {
+                try {
+                    riskCache.put(u.getId(), riskService.compute(u));
+                } catch (Exception ex) {
+                    riskCache.put(u.getId(), new RiskResult(0, RiskResult.Level.LOW, List.of("Risque indisponible")));
+                }
             }
         }
 
         usersList.refresh();
+    }
+
+    // -------------------- DUPLICATES UI --------------------
+    private boolean confirmProceedWithDuplicates(String title, List<DuplicateMatch> matches) {
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle(title);
+        alert.setHeaderText("Des comptes similaires existent déjà.\nVoulez-vous continuer ?");
+
+        StringBuilder sb = new StringBuilder();
+        for (DuplicateMatch m : matches) {
+            sb.append("• #").append(m.userId())
+                    .append(" | ").append(m.username())
+                    .append(" | ").append(m.email())
+                    .append(" | sim=").append((int) Math.round(m.similarity() * 100)).append("%")
+                    .append("\n   raisons: ").append(String.join(", ", m.reasons()))
+                    .append("\n\n");
+        }
+
+        TextArea area = new TextArea(sb.toString().trim());
+        area.setEditable(false);
+        area.setWrapText(true);
+        area.setPrefRowCount(10);
+
+        alert.getDialogPane().setContent(area);
+
+        ButtonType proceed = new ButtonType("Continuer", ButtonBar.ButtonData.OK_DONE);
+        ButtonType cancel = new ButtonType("Annuler", ButtonBar.ButtonData.CANCEL_CLOSE);
+        alert.getButtonTypes().setAll(proceed, cancel);
+
+        return alert.showAndWait().orElse(cancel) == proceed;
     }
 
     // -------------------- VALIDATION --------------------
@@ -392,13 +448,10 @@ public class UsersController {
             right.setMinWidth(170);
             right.setMaxWidth(170);
 
-            // Role badge
             Label role = new Label(user.getRole());
             role.getStyleClass().addAll("badge", roleClass(user.getRole()));
 
-            // Risk badge
             Label risk = buildRiskBadge(user);
-
             right.getChildren().addAll(role, risk);
 
             card.getChildren().addAll(left, spacer, right);
@@ -433,14 +486,10 @@ public class UsersController {
 
             if (rr.reasons() != null && !rr.reasons().isEmpty()) {
                 StringBuilder sb = new StringBuilder("Raisons:\n");
-                for (String r : rr.reasons()) {
-                    sb.append("• ").append(r).append("\n");
-                }
-                Tooltip tip = new Tooltip(sb.toString().trim());
-                Tooltip.install(risk, tip);
+                for (String r : rr.reasons()) sb.append("• ").append(r).append("\n");
+                Tooltip.install(risk, new Tooltip(sb.toString().trim()));
             } else {
-                Tooltip tip = new Tooltip("Aucun signal de risque détecté");
-                Tooltip.install(risk, tip);
+                Tooltip.install(risk, new Tooltip("Aucun signal de risque détecté"));
             }
 
             return risk;
