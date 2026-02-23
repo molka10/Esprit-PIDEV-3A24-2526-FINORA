@@ -125,13 +125,9 @@
                                        promptText="Rechercher user..."
                                        prefWidth="250"/>
 
-                            <Button text="Search"
-                                    onAction="#rechercheUser"
-                                    styleClass="btn-small"/>
 
-                            <Button text="Reset"
-                                    onAction="#resetSearch"
-                                    styleClass="btn-small"/>
+
+
                             <HBox fx:id="statsContainer" spacing="10"/>
 
                         </HBox>

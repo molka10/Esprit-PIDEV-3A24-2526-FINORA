@@ -66,6 +66,9 @@ public class AdminController {
         loadChart();
         loadLineChart();
         loadStatsUsers();
+        userSearchField.textProperty().addListener((observable, oldValue, newValue) -> {
+            rechercheUser();
+        });
     }
 
 
@@ -418,16 +421,51 @@ public class AdminController {
         l.setStyle("-fx-text-fill:"+(m>=0?"#2ecc71":"#e74c3c")+"; -fx-font-weight:bold;");
         return l;
     }
+    private void buildWalletTable(Map<String, Double> totalMap,
+                                  Map<String, Double> incomeMap,
+                                  Map<String, Double> outcomeMap,
+                                  Map<String, Integer> countMap) {
 
+        HBox header = new HBox(30);
+        header.setPadding(new Insets(10));
+        header.setStyle("-fx-background-color:#8e44ad; -fx-background-radius:10;");
+
+        header.getChildren().addAll(
+                createHeaderLabel("Role",120),
+                createHeaderLabel("Total",120),
+                createHeaderLabel("Income",120),
+                createHeaderLabel("Outcome",120),
+                createHeaderLabel("Transactions",120)
+        );
+
+        walletContainer.getChildren().add(header);
+
+        for(String role : totalMap.keySet()){
+
+            HBox row = new HBox(30);
+            row.setPadding(new Insets(10));
+            row.setStyle("-fx-background-color:#f3f0fa; -fx-background-radius:10;");
+
+            row.getChildren().addAll(
+                    createCell(role,120),
+                    createCell(totalMap.get(role)+" DT",120),
+                    createCell(incomeMap.getOrDefault(role,0.0)+" DT",120),
+                    createCell(outcomeMap.getOrDefault(role,0.0)+" DT",120),
+                    createCell(String.valueOf(countMap.get(role)),120)
+            );
+
+            walletContainer.getChildren().add(row);
+        }
+    }
     @FXML
     private void rechercheUser(){
 
-        String userSearch = userSearchField.getText();
+        String userSearch = userSearchField.getText().trim().toLowerCase();
 
         transactionContainer.getChildren().clear();
         walletContainer.getChildren().clear();
 
-        if(userSearch == null || userSearch.isEmpty()){
+        if(userSearch.isEmpty()){
             loadTransactions();
             loadWallet();
             return;
@@ -441,7 +479,7 @@ public class AdminController {
         for(transaction t : st.afficher()){
 
             if(t.getRole() != null &&
-                    t.getRole().toLowerCase().contains(userSearch.toLowerCase())){
+                    t.getRole().toLowerCase().contains(userSearch)){
 
                 addTransactionRow(t);
 
@@ -462,48 +500,10 @@ public class AdminController {
             }
         }
 
-        HBox header = new HBox(30);
-        header.setPadding(new Insets(10));
-        header.setStyle("-fx-background-color:#8e44ad; -fx-background-radius:10;");
-
-        header.getChildren().addAll(
-                createHeaderLabel("Role",120),
-                createHeaderLabel("Total",120),
-                createHeaderLabel("Income",120),
-                createHeaderLabel("Outcome",120),
-                createHeaderLabel("Transactions",120)
-        );
-
-        walletContainer.getChildren().add(header);
-
-
-        for(String role : totalMap.keySet()){
-
-            HBox row = new HBox(30);
-            row.setPadding(new Insets(10));
-            row.setStyle("-fx-background-color:#f3f0fa; -fx-background-radius:10;");
-
-            row.getChildren().addAll(
-                    createCell(role,120),
-                    createCell(totalMap.get(role)+" DT",120),
-                    createCell(incomeMap.getOrDefault(role,0.0)+" DT",120),
-                    createCell(outcomeMap.getOrDefault(role,0.0)+" DT",120),
-                    createCell(String.valueOf(countMap.get(role)),120)
-            );
-
-            walletContainer.getChildren().add(row);
-        }
+        buildWalletTable(totalMap, incomeMap, outcomeMap, countMap);
     }
 
-    @FXML
-    private void resetSearch(){
 
-        userSearchField.clear();
-
-        loadTransactions();
-
-        loadWallet();
-    }
 
     private void loadChart(){
 
