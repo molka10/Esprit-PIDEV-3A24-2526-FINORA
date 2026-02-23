@@ -9,7 +9,6 @@
       <change beforePath="$PROJECT_DIR$/src/main/java/tn/finora/controllers/InvestmentCardsController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/tn/finora/controllers/InvestmentCardsController.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/tn/finora/controllers/InvestmentFormController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/tn/finora/controllers/InvestmentFormController.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/tn/finora/finorainves/styles/style.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/tn/finora/finorainves/styles/style.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/tn/finora/finorainves/ui/investment_cards.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/tn/finora/finorainves/ui/investment_cards.fxml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/tn/finora/finorainves/ui/investment_form.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/tn/finora/finorainves/ui/investment_form.fxml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -76,7 +75,7 @@
       <workItem from="1771756031381" duration="18845000" />
       <workItem from="1771807092518" duration="6056000" />
       <workItem from="1771832799685" duration="3195000" />
-      <workItem from="1771875108923" duration="5371000" />
+      <workItem from="1771875108923" duration="7828000" />
     </task>
     <servers />
   </component>

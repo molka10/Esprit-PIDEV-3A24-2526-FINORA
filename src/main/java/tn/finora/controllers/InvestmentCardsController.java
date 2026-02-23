@@ -15,6 +15,7 @@ import tn.finora.finorainves.SceneNavigator;
 import tn.finora.utils.DBConnection;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.*;
 import java.text.NumberFormat;
 import java.util.ArrayList;
@@ -123,7 +124,25 @@ public class InvestmentCardsController {
             cardsPane.getChildren().add(createCard(inv));
         }
     }
+// =====================================================
+// CARD HOVER ANIMATION
+// =====================================================
 
+    private void addSmoothHoverAnimation(VBox card) {
+
+        ScaleTransition scaleUp =
+                new ScaleTransition(Duration.millis(180), card);
+        scaleUp.setToX(1.03);
+        scaleUp.setToY(1.03);
+
+        ScaleTransition scaleDown =
+                new ScaleTransition(Duration.millis(180), card);
+        scaleDown.setToX(1);
+        scaleDown.setToY(1);
+
+        card.setOnMouseEntered(e -> scaleUp.playFromStart());
+        card.setOnMouseExited(e -> scaleDown.playFromStart());
+    }
     private VBox createCard(Investment inv) {
 
         VBox card = new VBox();
@@ -141,7 +160,7 @@ public class InvestmentCardsController {
             image.setImage(new Image(inv.getImageUrl(), true));
         }
 
-        // ===== TEXT CONTENT =====
+        // ===== TITLE =====
         Label nameLabel = new Label(inv.getName());
         nameLabel.getStyleClass().add("card-title");
 
@@ -150,15 +169,27 @@ public class InvestmentCardsController {
         );
         categoryLabel.getStyleClass().add("card-subtitle");
 
-        Label valueLabel = new Label(
-                currencyFormat.format(
-                        inv.getEstimatedValue() != null ?
-                                inv.getEstimatedValue() :
-                                BigDecimal.ZERO
-                )
-        );
+        // ===== VALUE + CURRENCY =====
+        Label valueLabel = new Label();
         valueLabel.getStyleClass().add("card-value");
 
+        ComboBox<String> currencyCombo = new ComboBox<>();
+        currencyCombo.getItems().addAll("USD", "EUR", "TND");
+        currencyCombo.setValue("USD");
+        currencyCombo.setPrefWidth(90);
+
+        updateCardValue(valueLabel, inv.getEstimatedValue(), "USD");
+
+        currencyCombo.setOnAction(e ->
+                updateCardValue(valueLabel,
+                        inv.getEstimatedValue(),
+                        currencyCombo.getValue())
+        );
+
+        HBox valueBox = new HBox(10, valueLabel, currencyCombo);
+        valueBox.setAlignment(Pos.CENTER_LEFT);
+
+        // ===== RISK =====
         Label riskLabel = new Label(
                 safe(inv.getRiskLevel()).toUpperCase()
         );
@@ -170,8 +201,14 @@ public class InvestmentCardsController {
             case "high" -> riskLabel.getStyleClass().add("badge-high-modern");
         }
 
-        // ===== BUTTONS =====
+        // ===== TOP INVESTMENT BADGE =====
+        Label topBadge = null;
+        if (isTopInvestment(inv)) {
+            topBadge = new Label("🏆 Top Investment");
+            topBadge.getStyleClass().add("top-badge");
+        }
 
+        // ===== BUTTONS =====
         Button updateBtn = new Button("Update");
         updateBtn.getStyleClass().add("btn-update-modern");
         updateBtn.setPrefWidth(130);
@@ -194,17 +231,18 @@ public class InvestmentCardsController {
 
         HBox buttons = new HBox(18, updateBtn, spacer, deleteBtn);
         buttons.setAlignment(Pos.CENTER_LEFT);
-        buttons.setStyle("-fx-padding: 20 0 0 0;");
+        buttons.setStyle("-fx-padding: 18 0 0 0;");
 
         VBox content = new VBox(12,
                 nameLabel,
                 categoryLabel,
-                valueLabel,
+                valueBox,
                 riskLabel,
+                topBadge != null ? topBadge : new Pane(),
                 buttons
         );
-        content.setStyle("-fx-padding: 22;");
 
+        content.setStyle("-fx-padding: 22;");
         card.getChildren().addAll(image, content);
 
         addSmoothHoverAnimation(card);
@@ -213,27 +251,46 @@ public class InvestmentCardsController {
     }
 
     // =====================================================
-    // ANIMATION
+    // VALUE CONVERSION
     // =====================================================
 
-    private void addSmoothHoverAnimation(VBox card) {
+    private void updateCardValue(Label label, BigDecimal value, String currency) {
 
-        ScaleTransition scaleUp =
-                new ScaleTransition(Duration.millis(180), card);
-        scaleUp.setToX(1.03);
-        scaleUp.setToY(1.03);
+        if (value == null) {
+            label.setText(currency + " 0.00");
+            return;
+        }
 
-        ScaleTransition scaleDown =
-                new ScaleTransition(Duration.millis(180), card);
-        scaleDown.setToX(1);
-        scaleDown.setToY(1);
+        BigDecimal converted = value;
 
-        card.setOnMouseEntered(e -> scaleUp.playFromStart());
-        card.setOnMouseExited(e -> scaleDown.playFromStart());
+        switch (currency) {
+            case "EUR":
+                converted = value.multiply(BigDecimal.valueOf(0.92));
+                break;
+            case "TND":
+                converted = value.multiply(BigDecimal.valueOf(3.10));
+                break;
+        }
+
+        label.setText(currency + " " +
+                converted.setScale(2, RoundingMode.HALF_UP));
+    }
+
+    private boolean isTopInvestment(Investment inv) {
+
+        if (inv.getEstimatedValue() == null ||
+                inv.getRiskLevel() == null)
+            return false;
+
+        BigDecimal value = inv.getEstimatedValue();
+        String risk = inv.getRiskLevel().toLowerCase();
+
+        return value.compareTo(new BigDecimal("500000")) > 0
+                && (risk.equals("low") || risk.equals("medium"));
     }
 
     // =====================================================
-    // DELETE CONFIRMATION
+    // DELETE
     // =====================================================
 
     private void confirmDelete(Investment inv) {
@@ -252,7 +309,7 @@ public class InvestmentCardsController {
     }
 
     // =====================================================
-    // CRUD
+    // DATABASE
     // =====================================================
 
     public List<Investment> getAll() {
@@ -303,7 +360,7 @@ public class InvestmentCardsController {
     }
 
     // =====================================================
-    // SEARCH & FILTER
+    // SEARCH
     // =====================================================
 
     @FXML

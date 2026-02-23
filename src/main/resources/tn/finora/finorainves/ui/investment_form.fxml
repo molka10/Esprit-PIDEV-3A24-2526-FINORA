@@ -12,182 +12,168 @@
             styleClass="screen">
 
     <center>
-        <VBox alignment="TOP_CENTER"
-              spacing="28"
-              style="-fx-padding: 40 0 50 0;">
 
-            <!-- ================= FORM CARD ================= -->
-            <VBox spacing="24"
-                  styleClass="form-box"
-                  maxWidth="780">
+        <!-- ✅ SCROLL ACTIVÉ -->
+        <ScrollPane fitToWidth="true"
+                    vbarPolicy="AS_NEEDED"
+                    hbarPolicy="NEVER"
+                    styleClass="transparent-scroll">
 
-                <padding>
-                    <Insets top="36" right="36" bottom="36" left="36"/>
-                </padding>
+            <content>
 
-                <!-- ================= TITLE ================= -->
-                <VBox spacing="6">
-                    <Label fx:id="titleLabel"
-                           text="Add Investment"
-                           styleClass="title"/>
+                <VBox alignment="TOP_CENTER"
+                      spacing="30"
+                      style="-fx-padding: 40 0 50 0;">
 
-                    <Label text="Fill in the details to create or update an investment"
-                           styleClass="subtitle"/>
-                </VBox>
+                    <VBox spacing="25"
+                          styleClass="form-box"
+                          maxWidth="780">
 
-                <!-- ================= FORM GRID ================= -->
-                <GridPane hgap="20" vgap="18">
+                        <padding>
+                            <Insets top="36" right="36" bottom="36" left="36"/>
+                        </padding>
 
-                    <columnConstraints>
-                        <ColumnConstraints percentWidth="30"/>
-                        <ColumnConstraints percentWidth="70"/>
-                    </columnConstraints>
+                        <!-- TITLE -->
+                        <VBox spacing="6">
+                            <Label fx:id="titleLabel"
+                                   text="Add Investment"
+                                   styleClass="title"/>
 
-                    <!-- ===== NAME ===== -->
-                    <Label text="Name:" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
-                    <VBox spacing="5"
-                          GridPane.rowIndex="0"
-                          GridPane.columnIndex="1">
-                        <TextField fx:id="nameField"
-                                   promptText="ex: Land Development Project"/>
-                        <Label fx:id="nameError"
-                               styleClass="field-error"/>
-                    </VBox>
+                            <Label text="Create or update your investment information"
+                                   styleClass="subtitle"/>
+                        </VBox>
 
-                    <!-- ===== CATEGORY ===== -->
-                    <Label text="Category:" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
-                    <VBox spacing="5"
-                          GridPane.rowIndex="1"
-                          GridPane.columnIndex="1">
-                        <TextField fx:id="categoryField"
-                                   promptText="ex: Real Estate"/>
-                        <Label fx:id="categoryError"
-                               styleClass="field-error"/>
-                    </VBox>
+                        <!-- FORM -->
+                        <GridPane hgap="20" vgap="18">
 
-                    <!-- ===== LOCATION ===== -->
-                    <Label text="Location:" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
-                    <VBox spacing="5"
-                          GridPane.rowIndex="2"
-                          GridPane.columnIndex="1">
-                        <TextField fx:id="locationField"
-                                   promptText="ex: Tunis, Tunisia"/>
-                        <Label fx:id="locationError"
-                               styleClass="field-error"/>
-                    </VBox>
+                            <columnConstraints>
+                                <ColumnConstraints percentWidth="30"/>
+                                <ColumnConstraints percentWidth="70"/>
+                            </columnConstraints>
 
-                    <!-- ===== ESTIMATED VALUE + CURRENCY ===== -->
-                    <Label text="Estimated Value:"
-                           GridPane.rowIndex="3"
-                           GridPane.columnIndex="0"/>
+                            <!-- NAME -->
+                            <Label text="Name:" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+                            <VBox spacing="5" GridPane.rowIndex="0" GridPane.columnIndex="1">
+                                <TextField fx:id="nameField"
+                                           promptText="Land Development Project"/>
+                                <Label fx:id="nameError" styleClass="field-error"/>
+                            </VBox>
 
-                    <VBox spacing="6"
-                          GridPane.rowIndex="3"
-                          GridPane.columnIndex="1">
+                            <!-- CATEGORY -->
+                            <Label text="Category:" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+                            <VBox spacing="5" GridPane.rowIndex="1" GridPane.columnIndex="1">
+                                <TextField fx:id="categoryField"
+                                           promptText="Real Estate"/>
+                                <Label fx:id="categoryError" styleClass="field-error"/>
+                            </VBox>
 
-                        <HBox spacing="14">
+                            <!-- LOCATION -->
+                            <Label text="Location:" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+                            <VBox spacing="5" GridPane.rowIndex="2" GridPane.columnIndex="1">
+                                <TextField fx:id="locationField"
+                                           promptText="Tunis, Tunisia"/>
+                                <Label fx:id="locationError" styleClass="field-error"/>
+                            </VBox>
 
-                            <TextField fx:id="valueField"
-                                       promptText="ex: 15000.50"
-                                       HBox.hgrow="ALWAYS"
-                                       prefHeight="40"/>
+                            <!-- VALUE + CURRENCY -->
+                            <Label text="Estimated Value:"
+                                   GridPane.rowIndex="3"
+                                   GridPane.columnIndex="0"/>
 
-                            <ComboBox fx:id="currencyCombo"
-                                      prefWidth="120"
-                                      prefHeight="40"
-                                      promptText="USD"/>
+                            <VBox spacing="6"
+                                  GridPane.rowIndex="3"
+                                  GridPane.columnIndex="1">
 
+                                <HBox spacing="15">
+
+                                    <TextField fx:id="valueField"
+                                               promptText="15000"
+                                               HBox.hgrow="ALWAYS"/>
+
+                                    <ComboBox fx:id="currencyCombo"
+                                              prefWidth="120"/>
+                                </HBox>
+
+                                <Label fx:id="valueError" styleClass="field-error"/>
+                            </VBox>
+
+                            <!-- RISK -->
+                            <Label text="Risk Level:"
+                                   GridPane.rowIndex="4"
+                                   GridPane.columnIndex="0"/>
+
+                            <VBox spacing="5"
+                                  GridPane.rowIndex="4"
+                                  GridPane.columnIndex="1">
+
+                                <ComboBox fx:id="riskCombo"/>
+
+                                <Label fx:id="riskError" styleClass="field-error"/>
+                            </VBox>
+
+                            <!-- IMAGE -->
+                            <Label text="Image URL:"
+                                   GridPane.rowIndex="5"
+                                   GridPane.columnIndex="0"/>
+
+                            <VBox spacing="8"
+                                  GridPane.rowIndex="5"
+                                  GridPane.columnIndex="1">
+
+                                <TextField fx:id="imageField"
+                                           promptText="https://example.com/image.jpg"/>
+
+                                <ImageView fx:id="previewImage"
+                                           fitHeight="150"
+                                           preserveRatio="true"
+                                           smooth="true"/>
+
+                                <Label fx:id="imageError"
+                                       styleClass="field-error"/>
+                            </VBox>
+
+                            <!-- DESCRIPTION -->
+                            <Label text="Description:"
+                                   GridPane.rowIndex="6"
+                                   GridPane.columnIndex="0"/>
+
+                            <VBox spacing="5"
+                                  GridPane.rowIndex="6"
+                                  GridPane.columnIndex="1">
+
+                                <TextArea fx:id="descArea"
+                                          prefRowCount="4"
+                                          wrapText="true"/>
+
+                                <Label fx:id="descError"
+                                       styleClass="field-error"/>
+                            </VBox>
+
+                        </GridPane>
+
+                        <!-- BUTTONS -->
+                        <HBox spacing="18"
+                              alignment="CENTER_RIGHT"
+                              style="-fx-padding: 10 0 0 0;">
+
+                            <Button text="Save Investment"
+                                    onAction="#onSave"
+                                    styleClass="btn-primary"
+                                    prefWidth="200"
+                                    prefHeight="44"/>
+
+                            <Button text="Cancel"
+                                    onAction="#onCancel"
+                                    styleClass="btn-secondary"
+                                    prefWidth="140"
+                                    prefHeight="44"/>
                         </HBox>
 
-                        <Label fx:id="valueError"
-                               styleClass="field-error"/>
-
                     </VBox>
+                </VBox>
 
-                    <!-- ===== RISK ===== -->
-                    <Label text="Risk Level:"
-                           GridPane.rowIndex="4"
-                           GridPane.columnIndex="0"/>
+            </content>
+        </ScrollPane>
 
-                    <VBox spacing="5"
-                          GridPane.rowIndex="4"
-                          GridPane.columnIndex="1">
-
-                        <ComboBox fx:id="riskCombo"
-                                  prefHeight="40"/>
-
-                        <Label fx:id="riskError"
-                               styleClass="field-error"/>
-
-                    </VBox>
-
-                    <!-- ===== IMAGE URL ===== -->
-                    <Label text="Image URL:"
-                           GridPane.rowIndex="5"
-                           GridPane.columnIndex="0"/>
-
-                    <VBox spacing="8"
-                          GridPane.rowIndex="5"
-                          GridPane.columnIndex="1">
-
-                        <TextField fx:id="imageField"
-                                   promptText="https://example.com/image.jpg"/>
-
-                        <ImageView fx:id="previewImage"
-                                   fitHeight="150"
-                                   preserveRatio="true"
-                                   smooth="true"
-                                   style="-fx-background-color: #f5f3ff;
-                                          -fx-background-radius: 16;
-                                          -fx-padding: 6;"/>
-
-                        <Label fx:id="imageError"
-                               styleClass="field-error"/>
-
-                    </VBox>
-
-                    <!-- ===== DESCRIPTION ===== -->
-                    <Label text="Description:"
-                           GridPane.rowIndex="6"
-                           GridPane.columnIndex="0"/>
-
-                    <VBox spacing="6"
-                          GridPane.rowIndex="6"
-                          GridPane.columnIndex="1">
-
-                        <TextArea fx:id="descArea"
-                                  promptText="Short description..."
-                                  prefRowCount="4"
-                                  wrapText="true"/>
-
-                        <Label fx:id="descError"
-                               styleClass="field-error"/>
-
-                    </VBox>
-
-                </GridPane>
-
-                <!-- ================= ACTION BUTTONS ================= -->
-                <HBox spacing="18"
-                      alignment="CENTER_RIGHT"
-                      style="-fx-padding: 14 0 0 0;">
-
-                    <Button text="Save Investment"
-                            onAction="#onSave"
-                            styleClass="btn-primary"
-                            prefWidth="200"
-                            prefHeight="44"/>
-
-                    <Button text="Cancel"
-                            onAction="#onCancel"
-                            styleClass="btn-secondary"
-                            prefWidth="140"
-                            prefHeight="44"/>
-
-                </HBox>
-
-            </VBox>
-
-        </VBox>
     </center>
 </BorderPane>

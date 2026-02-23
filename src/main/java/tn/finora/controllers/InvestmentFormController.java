@@ -20,7 +20,10 @@ public class InvestmentFormController {
     @FXML private TextField categoryField;
     @FXML private TextField locationField;
     @FXML private TextField valueField;
+
+    @FXML private ComboBox<String> currencyCombo;   // 💱 NEW
     @FXML private ComboBox<String> riskCombo;
+
     @FXML private TextField imageField;
     @FXML private TextArea descArea;
     @FXML private ImageView previewImage;
@@ -40,37 +43,54 @@ public class InvestmentFormController {
     @FXML
     public void initialize() {
 
+        // Devise
+        currencyCombo.getItems().addAll("USD", "EUR", "TND");
+        currencyCombo.setValue("USD");
+
+        // Risk
         riskCombo.getItems().setAll("LOW", "MEDIUM", "HIGH");
+        riskCombo.getSelectionModel().selectFirst();
 
         editing = AppState.getSelectedInvestment();
 
-        // Live Image Preview
-        imageField.textProperty().addListener((obs, oldVal, newVal) -> {
-            if (newVal != null && newVal.startsWith("http")) {
-                previewImage.setImage(new Image(newVal, true));
-            } else {
-                previewImage.setImage(null);
-            }
-        });
+        // Image Preview sécurisé
+        imageField.textProperty().addListener((obs, oldVal, newVal) -> loadImagePreview(newVal));
 
         if (editing != null) {
             titleLabel.setText("Update Investment");
             loadEditingData();
         } else {
             titleLabel.setText("Add Investment");
-            riskCombo.getSelectionModel().selectFirst();
             valueField.setText("0");
         }
     }
 
     private void loadEditingData() {
+
         nameField.setText(editing.getName());
         categoryField.setText(editing.getCategory());
         locationField.setText(editing.getLocation());
-        valueField.setText(editing.getEstimatedValue().toPlainString());
+
+        if (editing.getEstimatedValue() != null) {
+            valueField.setText(editing.getEstimatedValue().toPlainString());
+        }
+
         riskCombo.setValue(editing.getRiskLevel());
         imageField.setText(editing.getImageUrl());
         descArea.setText(editing.getDescription());
+    }
+
+    private void loadImagePreview(String url) {
+
+        try {
+            if (url != null && url.startsWith("http")) {
+                previewImage.setImage(new Image(url, true));
+            } else {
+                previewImage.setImage(null);
+            }
+        } catch (Exception e) {
+            previewImage.setImage(null);
+        }
     }
 
     @FXML
@@ -79,31 +99,31 @@ public class InvestmentFormController {
         clearErrors();
         boolean valid = true;
 
-        // -------- NAME --------
         String name = nameField.getText().trim();
+        String category = categoryField.getText().trim();
+        String location = locationField.getText().trim();
+        String imageUrl = imageField.getText().trim();
+        String description = descArea.getText().trim();
+
+        // NAME
         if (name.isEmpty()) {
             setError(nameField, nameError, "Name is required");
             valid = false;
-        } else if (name.length() > 50) {
-            setError(nameField, nameError, "Max 50 characters");
-            valid = false;
         }
 
-        // -------- CATEGORY --------
-        String category = categoryField.getText().trim();
+        // CATEGORY
         if (category.isEmpty()) {
             setError(categoryField, categoryError, "Category required");
             valid = false;
         }
 
-        // -------- LOCATION --------
-        String location = locationField.getText().trim();
+        // LOCATION
         if (location.isEmpty()) {
             setError(locationField, locationError, "Location required");
             valid = false;
         }
 
-        // -------- VALUE --------
+        // VALUE
         BigDecimal value = null;
         try {
             value = new BigDecimal(valueField.getText().trim());
@@ -116,22 +136,20 @@ public class InvestmentFormController {
             valid = false;
         }
 
-        // -------- RISK --------
+        // RISK
         String risk = riskCombo.getValue();
         if (risk == null) {
             riskError.setText("Select risk level");
             valid = false;
         }
 
-        // -------- IMAGE --------
-        String imageUrl = imageField.getText().trim();
+        // IMAGE URL
         if (!imageUrl.isEmpty() && !imageUrl.startsWith("http")) {
             setError(imageField, imageError, "Invalid URL");
             valid = false;
         }
 
-        // -------- DESCRIPTION --------
-        String description = descArea.getText().trim();
+        // DESCRIPTION
         if (description.length() > 500) {
             descError.setText("Max 500 characters");
             valid = false;
@@ -139,11 +157,24 @@ public class InvestmentFormController {
 
         if (!valid) return;
 
-        // ===== BUSINESS FEATURE =====
-        // Auto-adjust Risk based on Value
+        // ======================
+        // 💱 Currency Conversion
+        // ======================
+        value = convertCurrency(value);
+
+        // ======================
+        // 📈 Smart Business Logic
+        // ======================
+
         if (value.compareTo(new BigDecimal("1000000")) > 0) {
             risk = "HIGH";
+        } else if (value.compareTo(new BigDecimal("200000")) > 0) {
+            risk = "MEDIUM";
+        } else {
+            risk = "LOW";
         }
+
+        riskCombo.setValue(risk); // UI update
 
         Investment inv = (editing != null) ? editing : new Investment();
 
@@ -168,6 +199,20 @@ public class InvestmentFormController {
 
         } catch (Exception ex) {
             ex.printStackTrace();
+        }
+    }
+
+    private BigDecimal convertCurrency(BigDecimal value) {
+
+        String currency = currencyCombo.getValue();
+
+        switch (currency) {
+            case "EUR":
+                return value.multiply(BigDecimal.valueOf(1.08)); // example rate
+            case "TND":
+                return value.multiply(BigDecimal.valueOf(0.32)); // example rate
+            default:
+                return value;
         }
     }
 
