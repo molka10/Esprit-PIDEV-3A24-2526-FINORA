@@ -218,35 +218,76 @@ public class GeminiService {
     // --- MÉTHODES DE PARSING SÉCURISÉ ---
 
     private List<QuizQuestion> parseCleanJson(String text) throws Exception {
-        // 1. Nettoyage basique des balises Markdown
-        text = text.replaceAll("```json", "").replaceAll("```", "").trim();
 
-        // 2. Extraction intelligente du JSON (corrige le MalformedJsonException)
-        // On cherche le premier '{' et le dernier '}' pour ignorer le blabla de l'IA
+        text = text.replaceAll("```json", "")
+                .replaceAll("```", "")
+                .trim();
+
         String cleanJson = extractJson(text);
 
-        // 3. Parsing du JSON nettoyé
         JsonObject quizJson = JsonParser.parseString(cleanJson).getAsJsonObject();
         JsonArray questionsArray = quizJson.getAsJsonArray("questions");
 
         List<QuizQuestion> questions = new ArrayList<>();
+
+        if (questionsArray == null) {
+            throw new RuntimeException("Réponse IA invalide : pas de 'questions'");
+        }
+
         for (JsonElement el : questionsArray) {
+
             JsonObject q = el.getAsJsonObject();
 
-            String questionText = q.get("question").getAsString();
-            int correct = q.get("correct").getAsInt();
+            // ---- QUESTION TEXT SAFE ----
+            String questionText = q.has("question")
+                    ? q.get("question").getAsString()
+                    : "Question invalide";
 
+            // ---- OPTIONS SAFE ----
             List<String> options = new ArrayList<>();
-            for (JsonElement opt : q.getAsJsonArray("options")) {
-                options.add(opt.getAsString());
+
+            if (q.has("options") && q.get("options").isJsonArray()) {
+                for (JsonElement opt : q.getAsJsonArray("options")) {
+                    options.add(opt.getAsString());
+                }
+            }
+
+            // Ensure EXACTLY 4 options
+            while (options.size() < 4) {
+                options.add("Option manquante");
+            }
+
+            if (options.size() > 4) {
+                options = options.subList(0, 4);
+            }
+
+            // ---- CORRECT INDEX SAFE ----
+            int correct = 0;
+            if (q.has("correct")) {
+                try {
+                    correct = q.get("correct").getAsInt();
+                } catch (Exception ignored) {}
+            }
+
+            // Clamp correct index between 0 and 3
+            if (correct < 0 || correct > 3) {
+                correct = 0;
             }
 
             questions.add(new QuizQuestion(questionText, options, correct));
         }
+
+        // Ensure at least 1 question
+        if (questions.isEmpty()) {
+            questions.add(new QuizQuestion(
+                    "Aucune question générée",
+                    List.of("Option A", "Option B", "Option C", "Option D"),
+                    0
+            ));
+        }
+
         return questions;
     }
-
-    // Méthode pour extraire le JSON valide d'un texte potentiellement pollué
     private String extractJson(String text) {
         int start = text.indexOf('{');
         int end = text.lastIndexOf('}');
@@ -254,8 +295,8 @@ public class GeminiService {
         if (start != -1 && end != -1 && end > start) {
             return text.substring(start, end + 1);
         }
-        // Si on ne trouve pas d'accolades, on retourne le texte original (échouera plus tard)
-        return text;
+
+        throw new RuntimeException("JSON invalide reçu de l'IA");
     }
 
     // --- CLASSE INTERNE QUIZ QUESTION ---

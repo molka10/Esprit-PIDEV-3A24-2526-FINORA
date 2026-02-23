@@ -576,8 +576,7 @@ public class LessonViewController {
             stage.show();
 
         } catch (Exception e) {
-            showError("Erreur ouverture quiz: " + e.getMessage());
-        }
+            e.printStackTrace();        }
     }
     @FXML
     private void onYoutubeSuggestions() {
