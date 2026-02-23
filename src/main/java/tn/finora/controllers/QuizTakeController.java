@@ -3,6 +3,7 @@ package tn.finora.controllers;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import tn.finora.entities.Formation;
 import tn.finora.entities.Lesson;
@@ -39,6 +40,8 @@ public class QuizTakeController {
     private final GeminiService geminiService = new GeminiService();
     private final QuizResultService resultService = new QuizResultService();
 
+    private boolean quizReady = false;
+
     @FXML
     public void initialize() {
 
@@ -47,13 +50,13 @@ public class QuizTakeController {
         rb3.setToggleGroup(group);
         rb4.setToggleGroup(group);
 
-        // VERY IMPORTANT: assign userData
         rb1.setUserData(0);
         rb2.setUserData(1);
         rb3.setUserData(2);
         rb4.setUserData(3);
 
         btnPrevious.setDisable(true);
+        btnNext.setDisable(true);
     }
 
     public void setData(Lesson lesson, Formation formation) {
@@ -62,21 +65,38 @@ public class QuizTakeController {
         generateQuiz();
     }
 
+    // ================= QUIZ GENERATION =================
+
     private void generateQuiz() {
-        lblStatus.setText("⏳ Génération du quiz...");
+
+        quizReady = false;
         btnNext.setDisable(true);
+        btnPrevious.setDisable(true);
+        group.selectToggle(null);
+
+        lblStatus.setText("⏳ Génération du quiz...");
+        lblQuestion.setText("");
+        lblProgress.setText("");
 
         Thread thread = new Thread(() -> {
             try {
+
                 List<QuizQuestion> generated =
                         geminiService.generateQuiz(
                                 lesson.getTitre(),
                                 lesson.getContenu());
 
                 Platform.runLater(() -> {
-                    questions = generated;
+
+                    questions.clear();
+                    questions.addAll(generated);
+
                     currentIndex = 0;
+                    userAnswers.clear();
+                    quizReady = true;
+
                     showQuestion();
+
                     lblStatus.setText("📝 Répondez aux questions");
                     btnNext.setDisable(false);
                 });
@@ -91,9 +111,13 @@ public class QuizTakeController {
         thread.start();
     }
 
+    // ================= DISPLAY QUESTION =================
+
     private void showQuestion() {
 
-        if (questions.isEmpty()) return;
+        if (!quizReady || questions.isEmpty()) return;
+
+        currentIndex = Math.max(0, Math.min(currentIndex, questions.size() - 1));
 
         QuizQuestion q = questions.get(currentIndex);
 
@@ -102,44 +126,41 @@ public class QuizTakeController {
 
         List<RadioButton> buttons = List.of(rb1, rb2, rb3, rb4);
 
-        // Reset buttons cleanly
         group.selectToggle(null);
 
-        for (RadioButton rb : buttons) {
-            rb.setVisible(false);
-            rb.setManaged(false);
-        }
+        for (int i = 0; i < 4; i++) {
 
-        // Show only available options
-        for (int i = 0; i < q.options.size() && i < 4; i++) {
             RadioButton rb = buttons.get(i);
-            rb.setText(q.options.get(i));
-            rb.setVisible(true);
-            rb.setManaged(true);
+
+            if (i < q.options.size()) {
+                rb.setText(q.options.get(i));
+                rb.setDisable(false);
+            } else {
+                rb.setText("Option indisponible");
+                rb.setDisable(true);
+            }
+
+            rb.setSelected(false);
         }
 
-        // Restore answer
-        Integer saved = userAnswers.get(currentIndex);
-        if (saved != null) {
-            for (RadioButton rb : buttons) {
-                if (rb.getUserData().equals(saved)) {
-                    rb.setSelected(true);
-                    break;
-                }
+        // Restore saved answer
+        if (userAnswers.containsKey(currentIndex)) {
+            int saved = userAnswers.get(currentIndex);
+            if (saved >= 0 && saved < 4) {
+                buttons.get(saved).setSelected(true);
             }
         }
 
         btnPrevious.setDisable(currentIndex == 0);
-
-        if (currentIndex == questions.size() - 1) {
-            btnNext.setText("Finish ✅");
-        } else {
-            btnNext.setText("Next ➡");
-        }
+        btnNext.setText(currentIndex == questions.size() - 1 ? "Finish ✅" : "Next ➡");
     }
+
+    // ================= NEXT =================
 
     @FXML
     private void onNext() {
+
+        if (!quizReady) return;
 
         Toggle selected = group.getSelectedToggle();
 
@@ -160,15 +181,24 @@ public class QuizTakeController {
         showQuestion();
     }
 
+    // ================= PREVIOUS =================
+
     @FXML
     private void onPrevious() {
+
+        if (!quizReady) return;
+
         if (currentIndex > 0) {
             currentIndex--;
             showQuestion();
         }
     }
 
+    // ================= RESULT =================
+
     private void calculateResult() {
+
+        if (questions.isEmpty()) return;
 
         int correct = 0;
 
@@ -182,23 +212,49 @@ public class QuizTakeController {
 
         int percent = (correct * 100) / questions.size();
 
-        String formationTitle =
-                (formation != null) ? formation.getTitre() : "Formation";
+        Dialog<Void> dialog = new Dialog<>();
+        dialog.setTitle("Quiz Result");
 
-        resultService.save(
-                "Étudiant",
-                lesson.getId(),
-                lesson.getTitre(),
-                formationTitle,
-                percent
+        dialog.initOwner(lblQuestion.getScene().getWindow());
+
+        VBox box = new VBox(15);
+        box.setStyle("-fx-padding: 30; -fx-alignment: center;");
+
+        Label lblTitle = new Label("🎉 Quiz Completed!");
+        lblTitle.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
+
+        Label lblScore = new Label(percent + "%");
+        lblScore.setStyle("-fx-font-size: 40px; -fx-font-weight: bold; -fx-text-fill: #7C3AED;");
+
+        Label lblDetails = new Label("Correct answers: " + correct + " / " + questions.size());
+        lblDetails.setStyle("-fx-font-size: 14px;");
+
+        Label lblMessage = new Label(getPerformanceMessage(percent));
+        lblMessage.setStyle("-fx-font-size: 14px; -fx-text-fill: #555;");
+
+        Button btnCertificate = new Button("🏆 Download Certificate");
+        btnCertificate.setStyle(
+                "-fx-background-color: #7C3AED;" +
+                        "-fx-text-fill: white;" +
+                        "-fx-padding: 8 20;" +
+                        "-fx-background-radius: 8;"
         );
 
-        showAlert("Résultat",
-                "Score: " + percent + "% (" + correct + "/" + questions.size() + ")");
+        btnCertificate.setOnAction(e ->
+                System.out.println("Certificate button clicked ✅"));
+
+        box.getChildren().addAll(lblTitle, lblScore, lblDetails, lblMessage, btnCertificate);
+
+        dialog.getDialogPane().setContent(box);
+        dialog.getDialogPane().getButtonTypes().add(ButtonType.OK);
+
+        dialog.showAndWait();
 
         Stage stage = (Stage) lblQuestion.getScene().getWindow();
         stage.close();
     }
+
+    // ================= UTIL =================
 
     @FXML
     private void onClose() {
@@ -212,5 +268,12 @@ public class QuizTakeController {
         alert.setHeaderText(null);
         alert.setContentText(msg);
         alert.showAndWait();
+    }
+
+    private String getPerformanceMessage(int percent) {
+        if (percent >= 90) return "🔥 Excellent performance!";
+        if (percent >= 70) return "👏 Great job!";
+        if (percent >= 50) return "🙂 Not bad, keep improving!";
+        return "📚 Keep studying and try again!";
     }
 }

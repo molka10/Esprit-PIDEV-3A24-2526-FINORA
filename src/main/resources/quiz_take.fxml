@@ -9,56 +9,65 @@
             fx:controller="tn.finora.controllers.QuizTakeController"
             styleClass="screen">
 
-    <!-- ================= TOP ================= -->
+    <!-- ================= HEADER ================= -->
     <top>
-        <VBox spacing="12" styleClass="card">
+        <VBox spacing="10" styleClass="card">
             <padding>
-                <Insets top="16" right="18" bottom="16" left="18"/>
+                <Insets top="20" right="25" bottom="20" left="25"/>
             </padding>
 
             <HBox alignment="CENTER_LEFT">
-                <Label text="Quiz" styleClass="title"/>
+                <Label text="📝 Quiz Evaluation" styleClass="title"/>
                 <Region HBox.hgrow="ALWAYS"/>
                 <Button fx:id="btnClose"
-                        text="✖ Fermer"
+                        text="✖"
                         styleClass="btn-ghost"
                         onAction="#onClose"/>
             </HBox>
 
-            <Label fx:id="lblStatus"
-                   text="..."
-                   styleClass="subtitle"/>
+            <Label fx:id="lblStatus" styleClass="subtitle"/>
+
+            <!-- Progress Bar -->
+            <ProgressBar fx:id="progressBar"
+                         prefWidth="600"
+                         progress="0.0"/>
 
             <Label fx:id="lblProgress"
-                   text="Question 1/5"
                    style="-fx-font-weight: bold; -fx-text-fill: #7C3AED;"/>
         </VBox>
     </top>
 
-    <!-- ================= CENTER ================= -->
+    <!-- ================= BODY ================= -->
     <center>
-        <VBox spacing="20" alignment="CENTER">
+        <VBox spacing="30" alignment="TOP_CENTER">
             <padding>
-                <Insets top="30" right="40" bottom="30" left="40"/>
+                <Insets top="40" right="80" bottom="40" left="80"/>
             </padding>
 
-            <!-- Question -->
-            <Label fx:id="lblQuestion"
-                   wrapText="true"
-                   style="-fx-font-size: 16px; -fx-font-weight: 800; -fx-text-fill: #1E0A3C;"/>
+            <!-- Question Card -->
+            <VBox spacing="20" styleClass="quiz-card">
+                <padding>
+                    <Insets top="30" right="30" bottom="30" left="30"/>
+                </padding>
 
-            <!-- Options -->
-            <VBox spacing="12" alignment="CENTER_LEFT">
-                <RadioButton fx:id="rb1"/>
-                <RadioButton fx:id="rb2"/>
-                <RadioButton fx:id="rb3"/>
-                <RadioButton fx:id="rb4"/>
+                <Label fx:id="lblQuestion"
+                       wrapText="true"
+                       styleClass="quiz-question"/>
+
+                <!-- Options -->
+                <VBox spacing="15">
+                    <RadioButton fx:id="rb1" styleClass="quiz-option"/>
+                    <RadioButton fx:id="rb2" styleClass="quiz-option"/>
+                    <RadioButton fx:id="rb3" styleClass="quiz-option"/>
+                    <RadioButton fx:id="rb4" styleClass="quiz-option"/>
+                </VBox>
             </VBox>
 
             <!-- Navigation -->
-            <HBox spacing="20" alignment="CENTER">
+            <HBox spacing="40" alignment="CENTER">
                 <Button fx:id="btnPrevious"
                         text="⬅ Previous"
+                        styleClass="btn-ghost"
                         onAction="#onPrevious"/>
 
                 <Button fx:id="btnNext"
@@ -66,7 +75,6 @@
                         styleClass="btn-primary"
                         onAction="#onNext"/>
             </HBox>
-
         </VBox>
     </center>
 

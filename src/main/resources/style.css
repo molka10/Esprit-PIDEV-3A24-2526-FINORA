@@ -1189,6 +1189,39 @@
 .ud-btn-primary:hover{
     -fx-background-color: #6D28D9;
 }
+/* ================= QUIZ DESIGN ================= */
+
+.quiz-card {
+    -fx-background-color: white;
+    -fx-background-radius: 18;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 18, 0, 0, 6);
+}
+
+.quiz-question {
+    -fx-font-size: 18px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #1E0A3C;
+}
+
+.quiz-option {
+    -fx-font-size: 14px;
+    -fx-padding: 10 15;
+}
+
+.quiz-option:selected {
+    -fx-background-color: #EDE9FE;
+}
+
+.btn-primary {
+    -fx-background-color: #7C3AED;
+    -fx-text-fill: white;
+    -fx-background-radius: 8;
+    -fx-padding: 8 20;
+}
+
+.btn-primary:hover {
+    -fx-background-color: #6D28D9;
+}
 
 /* Better grid spacing */
 .cards-udemy{
