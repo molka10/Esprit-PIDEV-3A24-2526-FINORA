@@ -3,6 +3,7 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import javafx.scene.image.ImageView?>
 
 <AnchorPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="com.example.finora_user.controllers.LoginController"
@@ -21,6 +22,14 @@
                 <TextField fx:id="emailField" promptText="Email" styleClass="field"/>
                 <PasswordField fx:id="passwordField" promptText="Mot de passe" styleClass="field"/>
 
+                <HBox spacing="10" alignment="CENTER_LEFT">
+                    <ImageView fx:id="captchaImage" fitWidth="220" fitHeight="60" preserveRatio="false"/>
+                    <Button text="↻" onAction="#refreshCaptcha" styleClass="btn-ghost"/>
+                </HBox>
+
+                <TextField fx:id="captchaField" promptText="Entrez le code CAPTCHA"/>
+
+                <TextField fx:id="captchaField" promptText="Entrez le code CAPTCHA"/>
                 <Button text="Se connecter" onAction="#handleLogin" styleClass="btn-primary" maxWidth="Infinity"/>
                 <Button text="Créer un compte" onAction="#goToSignup" styleClass="btn-ghost" maxWidth="Infinity"/>
                 <Hyperlink text="Mot de passe oublié ?" onAction="#goForgotPassword" styleClass="link"/>

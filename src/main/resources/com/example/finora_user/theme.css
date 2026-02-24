@@ -333,3 +333,8 @@
     -fx-border-color: rgba(239,68,68,0.35);
     -fx-text-fill: #dc2626;
 }
+/* Captcha field */
+.text-field {
+    -fx-background-radius: 10;
+    -fx-border-radius: 10;
+}

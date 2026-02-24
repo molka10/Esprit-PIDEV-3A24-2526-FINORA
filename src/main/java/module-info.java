@@ -5,6 +5,9 @@ module com.example.finora_user {
     requires jbcrypt;
     requires twilio;
     requires jakarta.mail;
+    requires javafx.swing;
+    requires java.desktop;      // for java.awt, image, geom
+    requires java.datatransfer; // for AWT internals
 
 
     // allow FXMLLoader to create controllers via reflection
