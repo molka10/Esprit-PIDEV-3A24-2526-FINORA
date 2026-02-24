@@ -160,10 +160,10 @@ public class UserController {
         outcomeChart.getData().add(outcomeSeries);
 
         totalIncomeLabel.setText(String.format("%.2f %s",
-                totalIncome * conversionRate, currentCurrency));
+                totalIncome , currentCurrency));
         totalOutcomeLabel.setText(
                 String.format("%.2f %s",
-                        totalOutcome * conversionRate,
+                        totalOutcome ,
                         currentCurrency)
         );
 
@@ -283,7 +283,7 @@ public class UserController {
 
         balanceLabel.setText(
                 String.format("%.2f %s",
-                        balance * conversionRate,
+                        balance ,
                         currentCurrency)
         );
 
