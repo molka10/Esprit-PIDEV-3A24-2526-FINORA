@@ -1,7 +1,10 @@
 module tn.finora.finorainves {
     requires javafx.controls;
     requires javafx.fxml;
-
+    requires org.apache.poi.ooxml;
+    requires org.apache.poi.poi;
+    requires org.apache.commons.collections4;
+    requires org.apache.xmlbeans;
     requires java.sql;
     requires mysql.connector.j;
 

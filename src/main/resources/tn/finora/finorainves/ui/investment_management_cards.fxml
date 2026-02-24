@@ -8,48 +8,130 @@
 <BorderPane xmlns="http://javafx.com/javafx/17"
             xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="tn.finora.controllers.InvestmentManagementCardsController"
-            stylesheets="@../styles/style.css">
+            stylesheets="@../styles/style.css"
+            styleClass="app-root">
 
-    <!-- ================= TOP BAR ================= -->
+    <!-- ================= HEADER ================= -->
     <top>
-        <HBox spacing="10" styleClass="top-bar">
-            <padding>
-                <Insets top="12" right="12" bottom="12" left="12"/>
-            </padding>
+        <VBox spacing="20" styleClass="header-section">
 
-            <Button text=" Add Management" onAction="#onAdd" styleClass="btn-primary"/>
-            <Button text=" Refresh" onAction="#onRefresh" styleClass="btn-secondary"/>
-            <Region HBox.hgrow="ALWAYS"/>
-            <Button text="⬅ Back to Investments" onAction="#goToInvestments" styleClass="btn-secondary"/>
-        </HBox>
-    </top>
+            <!-- ===== TOOLBAR ===== -->
+            <HBox spacing="12" alignment="CENTER_LEFT">
 
-    <!-- ================= CENTER ================= -->
-    <center>
-        <VBox spacing="16" style="-fx-padding: 12;">
-            <!-- Charts -->
-            <HBox spacing="20">
-                <PieChart fx:id="statusPieChart" prefWidth="300" prefHeight="250" title="Status Distribution"/>
-                <BarChart fx:id="amountBarChart" title="Total Amount by Type" prefWidth="500" prefHeight="250">
-                    <xAxis>
-                        <CategoryAxis fx:id="typeAxis" label="Investment Type"/>
-                    </xAxis>
-                    <yAxis>
-                        <NumberAxis fx:id="amountAxis" label="Amount Invested"/>
-                    </yAxis>
-                </BarChart>
+                <Button text="＋ Add Management"
+                        onAction="#onAdd"
+                        styleClass="btn-primary"
+                        prefHeight="38"/>
+
+                <Button text="⟳ Refresh"
+                        onAction="#onRefresh"
+                        styleClass="btn-secondary"
+                        prefHeight="38"/>
+
+                <!-- Spacer -->
+                <Region HBox.hgrow="ALWAYS"/>
+
+                <ToggleButton text="🌙 Dark Mode"
+                              onAction="#toggleDarkMode"
+                              styleClass="btn-dark-toggle"
+                              prefHeight="38"
+                              prefWidth="130"/>
+
+                <Button text="⬅ Back"
+                        onAction="#goToInvestments"
+                        styleClass="btn-secondary"
+                        prefHeight="38"/>
+
             </HBox>
 
-            <!-- Cards ScrollPane -->
-            <ScrollPane fitToWidth="true" styleClass="scroll-bg" prefHeight="400">
+            <!-- ===== KPI SECTION ===== -->
+            <HBox spacing="25">
+
+                <VBox styleClass="glass-kpi-card">
+                    <Label text="Total Management"
+                           styleClass="kpi-title"/>
+                    <Label fx:id="totalManagementLabel"
+                           text="0"
+                           styleClass="kpi-value"/>
+                </VBox>
+
+                <VBox styleClass="glass-kpi-card">
+                    <Label text="Total Invested"
+                           styleClass="kpi-title"/>
+                    <Label fx:id="totalInvestedLabel"
+                           text="\$0"
+                           styleClass="kpi-value"/>
+                </VBox>
+
+                <VBox styleClass="glass-kpi-card">
+                    <Label text="Active Ratio"
+                           styleClass="kpi-title"/>
+                    <Label fx:id="activeRatioLabel"
+                           text="0%"
+                           styleClass="kpi-value"/>
+                </VBox>
+
+            </HBox>
+
+        </VBox>
+    </top>
+
+    <!-- ================= MAIN ================= -->
+    <center>
+        <VBox spacing="25"
+              styleClass="content-section">
+
+            <!-- ===== CHARTS SECTION ===== -->
+            <HBox spacing="30">
+
+                <PieChart fx:id="statusPieChart"
+                          title="Status Distribution"
+                          prefHeight="280"
+                          styleClass="glass-chart"/>
+
+                <BarChart fx:id="amountBarChart"
+                          title="Total Amount by Type"
+                          prefHeight="280"
+                          styleClass="glass-chart">
+
+                    <xAxis>
+                        <CategoryAxis fx:id="typeAxis"
+                                      label="Investment Type"/>
+                    </xAxis>
+
+                    <yAxis>
+                        <NumberAxis fx:id="amountAxis"
+                                    label="Amount Invested"/>
+                    </yAxis>
+
+                </BarChart>
+
+            </HBox>
+
+            <!-- ===== CARDS SECTION ===== -->
+            <ScrollPane fx:id="cardsScrollPane"
+                        fitToWidth="true"
+                        styleClass="transparent-scroll">
+
                 <content>
-                    <FlowPane fx:id="cardsPane" hgap="14" vgap="14" prefWrapLength="980" styleClass="cards-zone">
+                    <FlowPane fx:id="cardsPane"
+                              hgap="20"
+                              vgap="20"
+                              prefWrapLength="1200"
+                              styleClass="cards-zone">
+
                         <padding>
-                            <Insets top="14" right="14" bottom="14" left="14"/>
+                            <Insets top="20"
+                                    right="20"
+                                    bottom="20"
+                                    left="20"/>
                         </padding>
+
                     </FlowPane>
                 </content>
+
             </ScrollPane>
+
         </VBox>
     </center>
 

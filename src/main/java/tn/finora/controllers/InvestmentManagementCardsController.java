@@ -1,54 +1,62 @@
 package tn.finora.controllers;
 
+import javafx.animation.*;
+import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.SimpleDoubleProperty;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.ButtonType;
+import javafx.geometry.Pos;
+import javafx.geometry.Side;
+import javafx.scene.Parent;
 import javafx.scene.chart.*;
-import javafx.scene.layout.FlowPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
+import javafx.scene.control.*;
+import javafx.scene.layout.*;
+import javafx.stage.FileChooser;
+import javafx.util.Duration;
+
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+
 import tn.finora.entities.InvestmentManagement;
 import tn.finora.finorainves.AppState;
 import tn.finora.finorainves.SceneNavigator;
 import tn.finora.services.InvestmentManagementService;
-import javafx.scene.control.Label;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.math.BigDecimal;
+import java.text.NumberFormat;
+import java.util.*;
 
 public class InvestmentManagementCardsController {
 
-    @FXML
-    private FlowPane cardsPane;
+    @FXML private FlowPane cardsPane;
+    @FXML private PieChart statusPieChart;
+    @FXML private BarChart<String, Number> amountBarChart;
+    @FXML private Label totalManagementLabel;
+    @FXML private Label totalInvestedLabel;
+    @FXML private Label activeRatioLabel;
 
-    @FXML
-    private PieChart statusPieChart;
+    private final InvestmentManagementService service =
+            new InvestmentManagementService();
 
-    @FXML
-    private BarChart<String, Number> amountBarChart;
+    private final NumberFormat currencyFormat =
+            NumberFormat.getCurrencyInstance(Locale.US);
 
-    @FXML
-    private CategoryAxis typeAxis;
+    // ================= INIT =================
 
-    @FXML
-    private NumberAxis amountAxis;
-
-    private final InvestmentManagementService service = new InvestmentManagementService();
-
-    // ================= INITIALIZE =================
     @FXML
     public void initialize() {
         loadCards();
     }
 
     // ================= NAVIGATION =================
+
     @FXML
     private void onAdd() {
         AppState.setSelectedManagement(null);
-        SceneNavigator.goTo("investment_management_form.fxml", "Add Investment Management");
+        SceneNavigator.goTo("investment_management_form.fxml",
+                "Add Investment Management");
     }
 
     @FXML
@@ -61,107 +69,288 @@ public class InvestmentManagementCardsController {
         SceneNavigator.goTo("investment_cards.fxml", "Investments");
     }
 
-    // ================= LOAD CARDS =================
+    // ✅ DARK MODE FIXED
+    @FXML
+    private void toggleDarkMode() {
+
+        if (cardsPane == null || cardsPane.getScene() == null) return;
+
+        Parent root = cardsPane.getScene().getRoot();
+
+        if (root.getStyleClass().contains("dark-root")) {
+            root.getStyleClass().remove("dark-root");
+        } else {
+            root.getStyleClass().add("dark-root");
+        }
+    }
+
+    // ================= LOAD DATA =================
+
     private void loadCards() {
+
         cardsPane.getChildren().clear();
         List<InvestmentManagement> list = service.getAll();
+
+        if (list.isEmpty()) {
+            cardsPane.getChildren().add(new Label("No management records found."));
+        }
+
         for (InvestmentManagement m : list) {
             cardsPane.getChildren().add(buildCard(m));
         }
-        loadStatistics(list); // mettre à jour les graphiques
+
+        loadStatistics(list);
+        updateKPI(list);
+    }
+
+    // ================= KPI =================
+
+    private void updateKPI(List<InvestmentManagement> list) {
+
+        int total = list.size();
+
+        double totalInvested = list.stream()
+                .map(InvestmentManagement::getAmountInvested)
+                .filter(Objects::nonNull)
+                .mapToDouble(BigDecimal::doubleValue)
+                .sum();
+
+        long active = list.stream()
+                .filter(m -> "active".equalsIgnoreCase(m.getStatus()))
+                .count();
+
+        double ratio = total == 0 ? 0 : (active * 100.0) / total;
+
+        animateCounter(totalManagementLabel, total, false);
+        animateCounter(totalInvestedLabel, totalInvested, true);
+        animateCounter(activeRatioLabel, ratio, false);
+    }
+
+    private void animateCounter(Label label, double target, boolean currency) {
+
+        DoubleProperty value = new SimpleDoubleProperty(0);
+
+        Timeline timeline = new Timeline(
+                new KeyFrame(Duration.seconds(1.2),
+                        new KeyValue(value, target, Interpolator.EASE_OUT))
+        );
+
+        value.addListener((obs, oldVal, newVal) -> {
+
+            if (currency) {
+                label.setText(currencyFormat.format(newVal.doubleValue()));
+            } else if (label == activeRatioLabel) {
+                label.setText(String.format("%.1f %%", newVal.doubleValue()));
+            } else {
+                label.setText(String.valueOf(newVal.intValue()));
+            }
+        });
+
+        timeline.play();
     }
 
     // ================= BUILD CARD =================
+
     private VBox buildCard(InvestmentManagement m) {
-        VBox card = new VBox(8);
-        card.getStyleClass().add("management-card");
+
+        VBox card = new VBox(10);
+        card.setPrefWidth(280);
 
         Label title = new Label("Management #" + m.getManagementId());
-        title.getStyleClass().add("management-title");
+        Label name = new Label(safe(m.getInvestmentName()));
+        Label amount = new Label(
+                m.getAmountInvested() != null
+                        ? currencyFormat.format(m.getAmountInvested())
+                        : "-"
+        );
 
-        Label l1 = new Label("Investment ID: " + m.getInvestmentId());
-        Label lName = new Label("Investment Name: " + safe(m.getInvestmentName()));
-        Label l2 = new Label("Type: " + safe(m.getInvestmentType()));
-        Label l3 = new Label("Amount: " + (m.getAmountInvested() != null ? m.getAmountInvested().toPlainString() : "-"));
-        Label l4 = new Label("Ownership: " + (m.getOwnershipPercentage() != null ? m.getOwnershipPercentage().toPlainString() + " %" : "-"));
-        Label l5 = new Label("Start Date: " + (m.getStartDate() != null ? m.getStartDate().toString() : "-"));
-        Label l6 = new Label("Status: " + safe(m.getStatus()));
+        Label status = new Label(safe(m.getStatus()).toUpperCase());
 
-        // Appliquer style label
-        l1.getStyleClass().add("management-label");
-        lName.getStyleClass().add("management-label");
-        l2.getStyleClass().add("management-label");
-        l3.getStyleClass().add("management-label");
-        l4.getStyleClass().add("management-label");
-        l5.getStyleClass().add("management-label");
-        l6.getStyleClass().add("management-label");
-
-        // Buttons Edit & Delete
-        Button editBtn = new Button("✏ Edit");
-        editBtn.getStyleClass().add("btn-edit");
-        editBtn.setOnAction(e -> {
+        Button edit = new Button("Edit");
+        edit.setOnAction(e -> {
             AppState.setSelectedManagement(m);
-            SceneNavigator.goTo("investment_management_form.fxml", "Edit Management");
+            SceneNavigator.goTo("investment_management_form.fxml",
+                    "Edit Management");
         });
 
-        Button deleteBtn = new Button("🗑 Delete");
-        deleteBtn.getStyleClass().add("btn-delete");
-        deleteBtn.setOnAction(e -> onDelete(m));
+        Button delete = new Button("Delete");
+        delete.setOnAction(e -> onDelete(m));
 
-        HBox actions = new HBox(8, editBtn, deleteBtn);
+        HBox actions = new HBox(10, edit, delete);
+        actions.setAlignment(Pos.CENTER_LEFT);
 
-        card.getChildren().addAll(title, l1, lName, l2, l3, l4, l5, l6, actions);
+        card.getChildren().addAll(title, name, amount, status, actions);
+
         return card;
     }
 
-    // ================= DELETE =================
     private void onDelete(InvestmentManagement m) {
+
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-        alert.setTitle("Confirm Delete");
-        alert.setHeaderText("Delete Management ID = " + m.getManagementId() + " ?");
-        alert.setContentText("This action cannot be undone.");
+        alert.setHeaderText("Delete Management #" + m.getManagementId());
+        alert.setContentText("Confirm deletion?");
 
         alert.showAndWait().ifPresent(btn -> {
             if (btn == ButtonType.OK) {
                 service.delete(m.getManagementId());
-                loadCards(); // refresh cards and stats
+                loadCards();
             }
         });
     }
 
-    // ================= SAFE STRING =================
-    private String safe(String s) {
-        return (s == null || s.isBlank()) ? "-" : s;
-    }
+    // ================= CHARTS =================
 
-    // ================= STATISTICS =================
     private void loadStatistics(List<InvestmentManagement> list) {
-        // PieChart: répartition par status
-        long activeCount = list.stream()
-                .filter(m -> "Active".equalsIgnoreCase(m.getStatus()))
+
+        long active = list.stream()
+                .filter(m -> "active".equalsIgnoreCase(m.getStatus()))
                 .count();
 
-        long closedCount = list.stream()
-                .filter(m -> "Closed".equalsIgnoreCase(m.getStatus()))
+        long closed = list.stream()
+                .filter(m -> "closed".equalsIgnoreCase(m.getStatus()))
                 .count();
 
         statusPieChart.setData(FXCollections.observableArrayList(
-                new PieChart.Data("Active", activeCount),
-                new PieChart.Data("Closed", closedCount)
+                new PieChart.Data("Active", active),
+                new PieChart.Data("Closed", closed)
         ));
 
-        // BarChart: montant total par type
-        Map<String, Double> totalByType = new HashMap<>();
+        statusPieChart.setLegendSide(Side.BOTTOM);
+
+        Map<String, Double> totals = new HashMap<>();
+
         for (InvestmentManagement m : list) {
+
             String type = safe(m.getInvestmentType());
-            double amount = m.getAmountInvested() != null ? m.getAmountInvested().doubleValue() : 0;
-            totalByType.put(type, totalByType.getOrDefault(type, 0.0) + amount);
+
+            double amount = 0.0;
+            if (m.getAmountInvested() != null) {
+                amount = m.getAmountInvested().doubleValue();
+            }
+
+            totals.put(type, totals.getOrDefault(type, 0.0) + amount);
         }
 
         amountBarChart.getData().clear();
+
         XYChart.Series<String, Number> series = new XYChart.Series<>();
         series.setName("Total Invested");
-        totalByType.forEach((type, total) -> series.getData().add(new XYChart.Data<>(type, total)));
+
+        totals.forEach((type, total) -> {
+
+            XYChart.Data<String, Number> data =
+                    new XYChart.Data<>(type, 0.0);
+
+            series.getData().add(data);
+
+            Timeline timeline = new Timeline(
+                    new KeyFrame(Duration.seconds(1.5),
+                            new KeyValue(data.YValueProperty(),
+                                    total,
+                                    Interpolator.EASE_OUT))
+            );
+
+            timeline.play();
+        });
+
         amountBarChart.getData().add(series);
+
+        animateCharts();
+    }
+
+    private void animateCharts() {
+
+        FadeTransition fadePie =
+                new FadeTransition(Duration.seconds(1), statusPieChart);
+        fadePie.setFromValue(0);
+        fadePie.setToValue(1);
+
+        FadeTransition fadeBar =
+                new FadeTransition(Duration.seconds(1), amountBarChart);
+        fadeBar.setFromValue(0);
+        fadeBar.setToValue(1);
+
+        new ParallelTransition(fadePie, fadeBar).play();
+    }
+
+    // ================= EXPORT EXCEL =================
+
+    @FXML
+    private void onExportExcel() {
+
+        List<InvestmentManagement> list = service.getAll();
+
+        FileChooser chooser = new FileChooser();
+        chooser.setTitle("Save Excel");
+        chooser.getExtensionFilters()
+                .add(new FileChooser.ExtensionFilter("Excel Files", "*.xlsx"));
+
+        File file = chooser.showSaveDialog(cardsPane.getScene().getWindow());
+        if (file == null) return;
+
+        try (Workbook workbook = new XSSFWorkbook()) {
+
+            Sheet sheet = workbook.createSheet("Management Report");
+
+            String[] columns = {
+                    "ID", "Investment", "Type",
+                    "Amount", "Ownership %", "Start Date", "Status"
+            };
+
+            Row header = sheet.createRow(0);
+
+            for (int i = 0; i < columns.length; i++) {
+                header.createCell(i).setCellValue(columns[i]);
+            }
+
+            int rowIndex = 1;
+
+            for (InvestmentManagement m : list) {
+
+                Row row = sheet.createRow(rowIndex++);
+
+                row.createCell(0).setCellValue(m.getManagementId());
+                row.createCell(1).setCellValue(safe(m.getInvestmentName()));
+                row.createCell(2).setCellValue(safe(m.getInvestmentType()));
+
+                row.createCell(3).setCellValue(
+                        m.getAmountInvested() != null
+                                ? m.getAmountInvested().doubleValue()
+                                : 0.0
+                );
+
+                row.createCell(4).setCellValue(
+                        m.getOwnershipPercentage() != null
+                                ? m.getOwnershipPercentage().doubleValue()
+                                : 0.0
+                );
+
+                row.createCell(5).setCellValue(
+                        m.getStartDate() != null
+                                ? m.getStartDate().toString()
+                                : "-"
+                );
+
+                row.createCell(6).setCellValue(safe(m.getStatus()));
+            }
+
+            for (int i = 0; i < columns.length; i++) {
+                sheet.autoSizeColumn(i);
+            }
+
+            try (FileOutputStream fos = new FileOutputStream(file)) {
+                workbook.write(fos);
+            }
+
+            new Alert(Alert.AlertType.INFORMATION,
+                    "Excel exported successfully!").showAndWait();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private String safe(String s) {
+        return (s == null || s.isBlank()) ? "-" : s;
     }
 }
