@@ -19,7 +19,7 @@ public class AddCategoryController {
     private servicecategorie sc = new servicecategorie();
     private String categoryType;
     private int editingId = -1;
-    private String role;
+
 
 
 
@@ -31,10 +31,7 @@ public class AddCategoryController {
         priorityBox.setStyle("-fx-background-color:#f3f0fa; -fx-background-radius:10;");
     }
 
-    public void setRole(String role) {
-        this.role = role;
-        tryLoad();
-    }
+
 
     public void setCategoryType(String type) {
         this.categoryType = type;
@@ -42,7 +39,7 @@ public class AddCategoryController {
     }
 
     private void tryLoad() {
-        if (role != null && categoryType != null) {
+        if (categoryType != null) {
             loadCategories();
         }
     }
@@ -80,12 +77,12 @@ public class AddCategoryController {
 
         if (editingId == -1) {
 
-            categorie c = new categorie(name, priority, categoryType, role);
+            categorie c = new categorie(name, priority, categoryType);
             sc.ajouter(c);
 
         } else {
 
-            categorie c = new categorie(editingId, name, priority, categoryType, role);
+            categorie c = new categorie(editingId, name, priority, categoryType);
             sc.modifier(c);
             editingId = -1;
         }
@@ -122,7 +119,7 @@ public class AddCategoryController {
 
         int row = 1;
 
-        List<categorie> list = sc.getByRole(role);
+        List<categorie> list = sc.afficher();
 
         for (categorie c : list) {
 

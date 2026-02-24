@@ -20,8 +20,8 @@ public class servicetransaction implements Iservicetransaction {
     @Override
     public void ajouter(transaction t) {
 
-        String sql = "INSERT INTO transaction (nom_transaction, type, montant, date_transaction, source, user_id, category_id, role) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO transaction (nom_transaction, type, montant, date_transaction, source, user_id, category_id) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?)";
 
         try {
             PreparedStatement ps = cnx.prepareStatement(sql);
@@ -32,7 +32,6 @@ public class servicetransaction implements Iservicetransaction {
             ps.setString(5, t.getSource());
             ps.setInt(6, t.getUser_id());
             ps.setInt(7, t.getCategory_id());
-            ps.setString(8, t.getRole());
             ps.executeUpdate();
 
         } catch (SQLException e) {
@@ -107,7 +106,6 @@ public class servicetransaction implements Iservicetransaction {
                 t.setSource(rs.getString("source"));
                 t.setUser_id(rs.getInt("user_id"));
                 t.setCategory_id(rs.getInt("category_id"));
-                t.setRole(rs.getString("role"));
                 t.setCategorie(rs.getString("categorie_nom"));
 
                 list.add(t);
@@ -157,7 +155,7 @@ public class servicetransaction implements Iservicetransaction {
 
         return total;
     }
-    public List<transaction> afficherParRole(String role) {
+    public List<transaction> afficherParUser(int userId) {
 
         List<transaction> list = new ArrayList<>();
 
@@ -166,12 +164,13 @@ public class servicetransaction implements Iservicetransaction {
             String query = """
             SELECT t.*, c.nom AS categorie_nom
             FROM transaction t
-            JOIN category c ON t.category_id = c.id_category
-            WHERE c.role = ?
+            LEFT JOIN category c
+            ON t.category_id = c.id_category
+            WHERE t.user_id = ?
         """;
 
             PreparedStatement ps = cnx.prepareStatement(query);
-            ps.setString(1, role);
+            ps.setInt(1, userId);
 
             ResultSet rs = ps.executeQuery();
 
@@ -192,10 +191,11 @@ public class servicetransaction implements Iservicetransaction {
                 list.add(t);
             }
 
-        } catch (Exception e) {
+        } catch (SQLException e) {
             e.printStackTrace();
         }
 
         return list;
     }
+
 }

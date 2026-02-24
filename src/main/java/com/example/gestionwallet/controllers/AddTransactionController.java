@@ -27,13 +27,15 @@ public class AddTransactionController {
     private String currentType;
     private servicetransaction st = new servicetransaction();
     private servicecategorie sc = new servicecategorie();
-    private String role;
+    private int currentUserId;
 
-    public void setRole(String role){
-        this.role = role;
-    }
+
     public void setParentController(Object controller) {
         this.parentController = controller;
+
+    }
+    public void setUserId(int id){
+        this.currentUserId = id;
     }
     @FXML
     public void initialize() {
@@ -75,7 +77,7 @@ public class AddTransactionController {
 
         categoryBox.getItems().clear();
 
-        List<categorie> list = sc.getByRole(role);
+        List<categorie> list = sc.afficher();
 
         for (categorie c : list) {
 
@@ -140,7 +142,7 @@ public class AddTransactionController {
                 amount = -Math.abs(amount);
             }
 
-            List<categorie> list = sc.getByRole(role);
+            List<categorie> list = sc.afficher();
 
             int categoryId = -1;
 
@@ -158,9 +160,9 @@ public class AddTransactionController {
                     amount,
                     java.sql.Date.valueOf(datePicker.getValue()),
                     "MANUAL",
-                    1,
-                    categoryId,
-                    role
+                    currentUserId,
+                    categoryId
+
             );
 
             st.ajouter(t);
@@ -194,7 +196,7 @@ public class AddTransactionController {
 
             AddCategoryController controller = loader.getController();
 
-            controller.setRole(role);
+
             controller.setCategoryType(currentType);
 
             stage.showAndWait();

@@ -68,6 +68,8 @@ public class UserController {
     private servicecategorie sc = new servicecategorie();
     private double balance = 0;
 
+    private int currentUserId = 1; // temporaire
+
     @FXML
     public void initialize() {
 
@@ -111,7 +113,7 @@ public class UserController {
         XYChart.Series<String, Number> outcomeSeries = new XYChart.Series<>();
 
 
-        for (transaction t : st.afficherParRole("USER")) {
+        for (transaction t : st.afficherParUser(currentUserId)) {
 
             transaction currentTransaction = t;
 
@@ -219,7 +221,7 @@ public class UserController {
         Map<String, Double> monthlyIncome = new HashMap<>();
         Map<String, Double> monthlyOutcome = new HashMap<>();
 
-        for (transaction t : st.afficherParRole("USER")) {
+        for (transaction t : st.afficherParUser(currentUserId)) {
 
             LocalDate date = t.getDate_transaction().toLocalDate();
             String month = date.getMonth().toString();
@@ -523,7 +525,6 @@ public class UserController {
             AddTransactionController controller = loader.getController();
             controller.setType(type);
             controller.setParentController(this);
-            controller.setRole("USER");
             controller.setType(type);
 
             stage.setScene(scene);
@@ -565,7 +566,7 @@ public class UserController {
         Calendar outcomeCal = new Calendar("Outcome");
         outcomeCal.setStyle(Calendar.Style.STYLE3);
 
-        for (transaction t : st.afficherParRole("USER")) {
+        for (transaction t : st.afficherParUser(currentUserId)) {
 
             Entry<String> entry = new Entry<>(t.getNom_transaction());
 
@@ -662,7 +663,7 @@ public class UserController {
             table.addCell(h4);
 
 
-            for (transaction t : st.afficherParRole("USER")) {
+            for (transaction t : st.afficherParUser(currentUserId)) {
 
                 table.addCell(t.getNom_transaction());
                 table.addCell(t.getType());
@@ -746,7 +747,7 @@ public class UserController {
 
             int rowNum = 1;
 
-            for (transaction t : st.afficherParRole("USER")) {
+            for (transaction t : st.afficherParUser(currentUserId)) {
 
                 org.apache.poi.ss.usermodel.Row row =
                         sheet.createRow(rowNum++);
@@ -898,7 +899,7 @@ public class UserController {
         double totalIncome = 0;
         double totalOutcome = 0;
 
-        for (transaction t : st.afficherParRole("USER")) {
+        for (transaction t : st.afficherParUser(currentUserId)) {
             if (t.getMontant() >= 0) {
                 totalIncome += t.getMontant();
             } else {
@@ -1016,5 +1017,6 @@ CONSEILS
             aiResultLabel.setText("Erreur : " + e.getMessage());
         }
     }
+
 
 }

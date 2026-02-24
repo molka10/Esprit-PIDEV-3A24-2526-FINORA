@@ -3,9 +3,11 @@ package com.example.gestionwallet.services;
 import com.example.gestionwallet.models.transaction;
 import com.example.gestionwallet.models.categorie;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 import java.sql.Date;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -20,17 +22,37 @@ public class TestTransaction {
         sc = new servicecategorie();
     }
 
+    @AfterEach
+    void cleanUp() {
+
+        // delete test transactions
+        List<transaction> list = service.afficher();
+
+        for (transaction t : list) {
+            if (t.getNom_transaction().contains("Test")) {
+                service.supprimer(t.getId_transaction());
+            }
+        }
+
+        // delete test categories
+        List<categorie> cats = sc.afficher();
+
+        for (categorie c : cats) {
+            if (c.getNom().contains("Temp")) {
+                sc.supprimer(c.getId_category());
+            }
+        }
+    }
+
     @Test
     void testAjouterTransaction() {
 
-        // ADD CATEGORY
-        categorie c = new categorie("TempTest", "BASSE", "INCOME", "USER");
+        categorie c = new categorie("TempTest", "BASSE", "INCOME");
         sc.ajouter(c);
 
         int categoryId = sc.getIdByName("TempTest");
         assertTrue(categoryId > 0);
 
-        // ADD TRANSACTION
         Date date = Date.valueOf("2025-02-10");
 
         transaction t = new transaction(
@@ -39,22 +61,24 @@ public class TestTransaction {
                 150.0,
                 date,
                 "MANUAL",
-                1,
-                categoryId,
-                "USER"
+                1,          // user_id
+                categoryId
         );
 
         service.ajouter(t);
 
-        assertNotNull(t);
-        assertEquals(150.0, t.getMontant());
-        assertEquals("USER", t.getRole());
+        List<transaction> list = service.afficher();
+
+        boolean exists = list.stream()
+                .anyMatch(tr -> tr.getNom_transaction().equals("Test Transaction"));
+
+        assertTrue(exists);
     }
 
     @Test
     void testSupprimerTransaction() {
 
-        categorie c = new categorie("TempDeleteCat", "BASSE", "OUTCOME", "USER");
+        categorie c = new categorie("TempDeleteCat", "BASSE", "OUTCOME");
         sc.ajouter(c);
 
         int categoryId = sc.getIdByName("TempDeleteCat");
@@ -68,15 +92,27 @@ public class TestTransaction {
                 date,
                 "MANUAL",
                 1,
-                categoryId,
-                "USER"
+                categoryId
         );
 
         service.ajouter(t);
 
+        List<transaction> list = service.afficher();
 
+        transaction added = list.stream()
+                .filter(tr -> tr.getNom_transaction().equals("TestDelete"))
+                .findFirst()
+                .orElse(null);
 
-        assertNotNull(t);
-        assertEquals("OUTCOME", t.getType());
+        assertNotNull(added);
+
+        service.supprimer(added.getId_transaction());
+
+        List<transaction> afterDelete = service.afficher();
+
+        boolean exists = afterDelete.stream()
+                .anyMatch(tr -> tr.getNom_transaction().equals("TestDelete"));
+
+        assertFalse(exists);
     }
 }

@@ -102,7 +102,7 @@ public class AdminController {
         row.setStyle("-fx-background-color:#f3f0fa; -fx-background-radius:10;");
 
         row.getChildren().addAll(
-                createCell(t.getRole(),120),
+                createCell(String.valueOf(t.getUser_id()),120),
                 createCell(t.getType(),120),
                 createMontantCell(t.getMontant(),150),
                 createCell(t.getDate_transaction().toString(),180)
@@ -159,7 +159,7 @@ public class AdminController {
 
         for(transaction t : st.afficher()){
 
-            String role = t.getRole();
+            String role = String.valueOf(t.getUser_id());
 
             if(role == null || role.trim().isEmpty()){
                 continue;
@@ -184,7 +184,7 @@ public class AdminController {
         header.setStyle("-fx-background-color:#8e44ad; -fx-background-radius:10;");
 
         header.getChildren().addAll(
-                createHeaderLabel("Role",120),
+                createHeaderLabel("User ID",120),
                 createHeaderLabel("Total",120),
                 createHeaderLabel("Income",120),
                 createHeaderLabel("Outcome",120),
@@ -308,7 +308,7 @@ public class AdminController {
         PdfPTable table = new PdfPTable(5);
         table.setWidthPercentage(100);
 
-        String[] headers = {"Role","Total","Income","Outcome","Transactions"};
+        String[] headers = {"User ID","Total","Income","Outcome","Transactions"};
 
         for(String h:headers){
             PdfPCell cell = new PdfPCell(new Phrase(h,headerFont));
@@ -323,7 +323,7 @@ public class AdminController {
 
         for(transaction t: st.afficher()){
 
-            String role = t.getRole();
+            String role = String.valueOf(t.getUser_id());
 
             if(role == null || role.trim().isEmpty()){
                 continue;
@@ -386,7 +386,7 @@ public class AdminController {
 
         for(transaction t: st.afficher()){
 
-            table.addCell(new Phrase(t.getRole(),normalFont));
+            table.addCell(new Phrase( String.valueOf(t.getUser_id()),normalFont));
             table.addCell(new Phrase(t.getType(),normalFont));
 
             if(t.getMontant()>=0)
@@ -431,7 +431,7 @@ public class AdminController {
         header.setStyle("-fx-background-color:#8e44ad; -fx-background-radius:10;");
 
         header.getChildren().addAll(
-                createHeaderLabel("Role",120),
+                createHeaderLabel("User ID",120),
                 createHeaderLabel("Total",120),
                 createHeaderLabel("Income",120),
                 createHeaderLabel("Outcome",120),
@@ -478,12 +478,12 @@ public class AdminController {
 
         for(transaction t : st.afficher()){
 
-            if(t.getRole() != null &&
-                    t.getRole().toLowerCase().contains(userSearch)){
+            if(String.valueOf(t.getUser_id()) != null &&
+                    String.valueOf(t.getUser_id()).toLowerCase().contains(userSearch)){
 
                 addTransactionRow(t);
 
-                String role = t.getRole();
+                String role = String.valueOf(t.getUser_id());
 
                 totalMap.put(role,
                         totalMap.getOrDefault(role,0.0) + t.getMontant());
@@ -637,30 +637,19 @@ public class AdminController {
     }
     private void loadStatsUsers() {
 
-        Set<String> users = new HashSet<>();
-        Set<String> entreprises = new HashSet<>();
+        Set<Integer> users = new HashSet<>();
 
         for (transaction t : st.afficher()) {
-
-            if (t.getRole() == null) continue;
-
-            if (t.getRole().equalsIgnoreCase("USER")) {
-                users.add(t.getRole());
-            }
-            else if (t.getRole().equalsIgnoreCase("ENTREPRISE")) {
-                entreprises.add(t.getRole());
-            }
+            users.add(t.getUser_id());
         }
 
-        int nbrUser = users.size();
-        int nbrEntreprise = entreprises.size();
+        int nbrUsers = users.size();
 
         statsContainer.getChildren().clear();
 
         statsContainer.getChildren().addAll(
-                createStatCard("Users", nbrUser, "#6a0dad"),
-                createStatCard("Entreprises", nbrEntreprise, "#8e44ad"),
-                createStatCard("Total", nbrUser + nbrEntreprise, "#4b0082")
+                createStatCard("Users", nbrUsers, "#6a0dad"),
+                createStatCard("Transactions", st.afficher().size(), "#8e44ad")
         );
     }
     @FXML

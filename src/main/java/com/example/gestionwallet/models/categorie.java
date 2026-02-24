@@ -6,23 +6,23 @@ public class categorie {
     private String nom;
     private String priorite;
     private String type;
-    private String role;
+
 
     public categorie() {}
 
-    public categorie(String nom, String priorite, String type, String role) {
+    public categorie(String nom, String priorite, String type) {
         this.nom = nom;
         this.priorite = priorite;
         this.type = type;
-        this.role = role;
+
     }
 
-    public categorie(int id_category, String nom, String priorite, String type , String role) {
+    public categorie(int id_category, String nom, String priorite, String type ) {
         this.id_category = id_category;
         this.nom = nom;
         this.priorite = priorite;
         this.type = type;
-        this.role = role;
+
 
     }
 
@@ -39,16 +39,13 @@ public class categorie {
     public void setType(String type) { this.type = type; }
 
 
-    public String getRole() { return role; }
-    public void setRole(String role) { this.role = role; }
 
     @Override
     public String toString() {
         return "ID: " + id_category +
                 " | Nom : " + nom +
                 " | Priorité : " + priorite +
-                " | Type : " + type+
-                " | Role : " + role;
+                " | Type : " + type ;
 
     }
 

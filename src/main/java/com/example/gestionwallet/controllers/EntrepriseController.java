@@ -67,6 +67,8 @@ public class EntrepriseController {
     private final servicetransaction st = new servicetransaction();
     private servicecategorie sc = new servicecategorie();
     private double balance = 0;
+    private int currentEntrepriseId = 2;
+
 
     @FXML
     public void initialize() {
@@ -111,7 +113,7 @@ public class EntrepriseController {
         XYChart.Series<String, Number> outcomeSeries = new XYChart.Series<>();
 
 
-        for (transaction t : st.afficherParRole("ENTREPRISE")) {
+        for (transaction t : st.afficherParUser(currentEntrepriseId)) {
 
             transaction currentTransaction = t;
 
@@ -216,7 +218,7 @@ public class EntrepriseController {
         Map<String, Double> monthlyIncome = new HashMap<>();
         Map<String, Double> monthlyOutcome = new HashMap<>();
 
-        for (transaction t : st.afficherParRole("ENTREPRISE")) {
+        for (transaction t : st.afficherParUser(currentEntrepriseId)) {
 
             LocalDate date = t.getDate_transaction().toLocalDate();
             String month = date.getMonth().toString();
@@ -517,8 +519,8 @@ public class EntrepriseController {
             AddTransactionController controller = loader.getController();
             controller.setType(type);
             controller.setParentController(this);
-            controller.setRole("ENTREPRISE");
-            controller.setType(type);
+            controller.setUserId(currentEntrepriseId);
+
 
             stage.setScene(scene);
             stage.initModality(Modality.APPLICATION_MODAL);
@@ -558,7 +560,7 @@ public class EntrepriseController {
         Calendar outcomeCal = new Calendar("Outcome");
         outcomeCal.setStyle(Calendar.Style.STYLE3);
 
-        for (transaction t : st.afficherParRole("ENTREPRISE")) {
+        for (transaction t : st.afficherParUser(currentEntrepriseId)) {
 
             Entry<String> entry = new Entry<>(t.getNom_transaction());
 
@@ -653,7 +655,7 @@ public class EntrepriseController {
             table.addCell(h4);
 
 
-            for (transaction t : st.afficherParRole("ENTREPRISE")) {
+            for (transaction t : st.afficherParUser(currentEntrepriseId)) {
 
                 table.addCell(t.getNom_transaction());
                 table.addCell(t.getType());
@@ -736,7 +738,7 @@ public class EntrepriseController {
 
             int rowNum = 1;
 
-            for (transaction t : st.afficherParRole("ENTREPRISE")) {
+            for (transaction t : st.afficherParUser(currentEntrepriseId)) {
 
                 org.apache.poi.ss.usermodel.Row row =
                         sheet.createRow(rowNum++);
@@ -884,7 +886,7 @@ public class EntrepriseController {
         double totalIncome = 0;
         double totalOutcome = 0;
 
-        for (transaction t : st.afficherParRole("ENTREPRISE")) {
+        for (transaction t : st.afficherParUser(currentEntrepriseId)) {
             if (t.getMontant() >= 0) {
                 totalIncome += t.getMontant();
             } else {

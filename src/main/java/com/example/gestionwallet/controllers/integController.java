@@ -20,55 +20,28 @@ public class integController {
     private void initialize() {
         System.out.println("Page Wallet chargée");
     }
-
-    @FXML
-    private void goToUser() {
-
-        try {
-
-            Parent root = FXMLLoader.load(
-                    getClass().getResource("/com/example/gestionwallet/user.fxml"));
-
-            Stage stage = (Stage) userButton.getScene().getWindow();
+    private void changeScene(String fxmlPath, Button button){
+        try{
+            Parent root = FXMLLoader.load(getClass().getResource(fxmlPath));
+            Stage stage = (Stage) button.getScene().getWindow();
             stage.getScene().setRoot(root);
-
-
-        } catch (Exception e) {
+        }catch(Exception e){
             e.printStackTrace();
         }
+    }
+    @FXML
+    private void goToUser() {
+        changeScene("/com/example/gestionwallet/user.fxml", userButton);
     }
 
     @FXML
     private void goToEntreprise() {
-        try {
-
-            Parent root = FXMLLoader.load(
-                    getClass().getResource("/com/example/gestionwallet/entreprise.fxml"));
-
-            Stage stage = (Stage) userButton.getScene().getWindow();
-            stage.getScene().setRoot(root);
-
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        changeScene("/com/example/gestionwallet/entreprise.fxml", entrepriseButton);
     }
-
 
     @FXML
     private void goToAdmin() {
-
-        try {
-
-            Parent root = FXMLLoader.load(
-                    getClass().getResource("/com/example/gestionwallet/admin-dashboard.fxml"));
-
-            Stage stage = (Stage) adminButton.getScene().getWindow();
-            stage.getScene().setRoot(root);
-
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        changeScene("/com/example/gestionwallet/admin-dashboard.fxml", adminButton);
     }
+
 }

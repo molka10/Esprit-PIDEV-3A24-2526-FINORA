@@ -12,14 +12,13 @@ public class transaction {
     private String source;
     private int user_id;
     private int category_id;
-    private String role;
     private String categorie;
 
     public transaction() {}
 
     public transaction(String nom_transaction, String type, double montant,
                        Date date_transaction, String source,
-                       int user_id, int category_id, String role) {
+                       int user_id, int category_id) {
 
         this.nom_transaction = nom_transaction;
         this.type = type;
@@ -28,12 +27,12 @@ public class transaction {
         this.source = source;
         this.user_id = user_id;
         this.category_id = category_id;
-        this.role = role;
+
     }
 
     public transaction(int id_transaction, String nom_transaction, String type,
                        double montant, Date date_transaction,
-                       String source, int user_id, int category_id, String role) {
+                       String source, int user_id, int category_id) {
 
         this.id_transaction = id_transaction;
         this.nom_transaction = nom_transaction;
@@ -43,7 +42,6 @@ public class transaction {
         this.source = source;
         this.user_id = user_id;
         this.category_id = category_id;
-        this.role = role;
     }
 
 
@@ -71,8 +69,6 @@ public class transaction {
     public int getCategory_id() { return category_id; }
     public void setCategory_id(int category_id) { this.category_id = category_id; }
 
-    public String getRole() { return role; }
-    public void setRole(String role) { this.role = role; }
 
     public String getCategorie() { return categorie; }
     public void setCategorie(String categorie) { this.categorie = categorie; }
@@ -83,7 +79,6 @@ public class transaction {
                 " | Nom : " + nom_transaction +
                 " | Type : " + type +
                 " | Montant : " + montant + " DT" +
-                " | Date : " + date_transaction +
-                " | Role : " + role;
+                " | Date : " + date_transaction ;
     }
 }

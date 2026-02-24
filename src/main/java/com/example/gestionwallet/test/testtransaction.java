@@ -16,7 +16,7 @@ public class testtransaction {
         servicetransaction st = new servicetransaction();
 
         // ADD CATEGORY
-        categorie cat = new categorie("TestCategory", "HAUTE", "INCOME", "USER");
+        categorie cat = new categorie("TestCategory", "HAUTE", "INCOME");
         sc.ajouter(cat);
 
         List<categorie> categories = sc.afficher();
@@ -30,8 +30,7 @@ public class testtransaction {
                 Date.valueOf("2026-02-12"),
                 "MANUAL",
                 1,
-                lastCategoryId,
-                "USER"
+                lastCategoryId
         );
 
         st.ajouter(t1);
@@ -48,8 +47,7 @@ public class testtransaction {
                 Date.valueOf("2026-02-13"),
                 "MANUAL",
                 1,
-                lastCategoryId,
-                "USER"
+                lastCategoryId
         );
 
         st.modifier(t2);

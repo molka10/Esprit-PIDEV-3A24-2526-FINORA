@@ -36,15 +36,14 @@ public class servicecategorie implements Iservicecategorie {
         return -1;
     }
 
-    public boolean existsByName(String nom, String type, String role) {
+    public boolean existsByName(String nom, String type) {
 
-        String sql = "SELECT COUNT(*) FROM category WHERE LOWER(nom)=LOWER(?) AND type=? AND role=?";
+        String sql = "SELECT COUNT(*) FROM category WHERE LOWER(nom)=LOWER(?) AND type=?";
 
         try {
             PreparedStatement ps = cnx.prepareStatement(sql);
             ps.setString(1, nom);
             ps.setString(2, type);
-            ps.setString(3, role);
 
             ResultSet rs = ps.executeQuery();
 
@@ -62,19 +61,18 @@ public class servicecategorie implements Iservicecategorie {
     @Override
     public void ajouter(categorie c) {
 
-        if (existsByName(c.getNom(), c.getType(), c.getRole())) {
-            System.out.println(" Catégorie déjà existante ");
+        if (existsByName(c.getNom(), c.getType())) {
+            System.out.println("Catégorie déjà existante");
             return;
         }
 
-        String sql = "INSERT INTO category (nom, priorite, type, role) VALUES (?, ?, ?, ?)";
+        String sql = "INSERT INTO category (nom, priorite, type) VALUES (?, ?, ?)";
 
         try {
             PreparedStatement ps = cnx.prepareStatement(sql);
             ps.setString(1, c.getNom());
             ps.setString(2, c.getPriorite());
             ps.setString(3, c.getType());
-            ps.setString(4, c.getRole());
             ps.executeUpdate();
 
             System.out.println("Catégorie ajoutée");
@@ -87,15 +85,14 @@ public class servicecategorie implements Iservicecategorie {
     @Override
     public void modifier(categorie c) {
 
-        String sql = "UPDATE category SET nom=?, priorite=?, type=?, role=? WHERE id_category=?";
+        String sql = "UPDATE category SET nom=?, priorite=?, type=? WHERE id_category=?";
 
         try {
             PreparedStatement ps = cnx.prepareStatement(sql);
             ps.setString(1, c.getNom());
             ps.setString(2, c.getPriorite());
             ps.setString(3, c.getType());
-            ps.setString(4, c.getRole());
-            ps.setInt(5, c.getId_category());
+            ps.setInt(4, c.getId_category());
             ps.executeUpdate();
 
             System.out.println("Catégorie modifiée");
@@ -138,8 +135,7 @@ public class servicecategorie implements Iservicecategorie {
                         rs.getInt("id_category"),
                         rs.getString("nom"),
                         rs.getString("priorite"),
-                        rs.getString("type"),
-                        rs.getString("role")
+                        rs.getString("type")
                 );
 
                 list.add(c);
@@ -157,7 +153,6 @@ public class servicecategorie implements Iservicecategorie {
         categorie c = null;
 
         try {
-
             PreparedStatement pst = cnx.prepareStatement(sql);
             pst.setInt(1, id);
 
@@ -168,8 +163,7 @@ public class servicecategorie implements Iservicecategorie {
                         rs.getInt("id_category"),
                         rs.getString("nom"),
                         rs.getString("priorite"),
-                        rs.getString("type"),
-                        rs.getString("role")
+                        rs.getString("type")
                 );
             }
 
@@ -179,6 +173,7 @@ public class servicecategorie implements Iservicecategorie {
 
         return c;
     }
+
     public List<categorie> getByType(String type) {
 
         List<categorie> list = new ArrayList<>();
@@ -195,8 +190,7 @@ public class servicecategorie implements Iservicecategorie {
                         rs.getInt("id_category"),
                         rs.getString("nom"),
                         rs.getString("priorite"),
-                        rs.getString("type"),
-                        rs.getString("role")
+                        rs.getString("type")
                 ));
             }
 
@@ -223,8 +217,7 @@ public class servicecategorie implements Iservicecategorie {
                         rs.getInt("id_category"),
                         rs.getString("nom"),
                         rs.getString("priorite"),
-                        rs.getString("type"),
-                        rs.getString("role")
+                        rs.getString("type")
                 );
 
                 list.add(c);
@@ -257,8 +250,7 @@ public class servicecategorie implements Iservicecategorie {
                         rs.getInt("id_category"),
                         rs.getString("nom"),
                         rs.getString("priorite"),
-                        rs.getString("type"),
-                        rs.getString("role")
+                        rs.getString("type")
                 );
 
                 list.add(c);

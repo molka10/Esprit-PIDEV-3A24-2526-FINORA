@@ -22,7 +22,7 @@ public class database {
             cnx = DriverManager.getConnection(URL, USER, PASSWORD);
             System.out.println(" Connexion BD établie");
         } catch (SQLException e) {
-            System.out.println(" Erreur connexion DB");
+            System.out.println("Erreur connexion BD : " + e.getMessage());
             e.printStackTrace();
         }
     }
