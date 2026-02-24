@@ -45,27 +45,31 @@ public class InvestmentCardsController {
     private Button addButton;
     @FXML
     public void initialize() {
-        // 🔐 Protection si aucune session
+
         if (UserSession.getRole() == null) {
             showError("Session Error", "No role selected.");
             return;
         }
+
         riskFilter.setItems(
                 FXCollections.observableArrayList("All", "Low", "Medium", "High")
         );
         riskFilter.setValue("All");
-        refreshData();
-        // Hide Add button if INVESTISSEUR
-        if (UserSession.isInvestisseur()) {
-            addButton.setVisible(false);
-            addButton.setManaged(false); // remove empty space
-        }
+
+        // 1️⃣ D'abord appeler l'API
         RecommendationApiService apiService =
                 new RecommendationApiService();
 
         recommendedTitles = apiService.fetchRecommendations();
-    }
 
+        // 2️⃣ Ensuite charger les cartes
+        refreshData();
+
+        if (UserSession.isInvestisseur()) {
+            addButton.setVisible(false);
+            addButton.setManaged(false);
+        }
+    }
     // =====================================================
     // NAVIGATION
     // =====================================================
