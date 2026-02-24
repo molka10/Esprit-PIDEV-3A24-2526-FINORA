@@ -7,6 +7,8 @@ module tn.finora.finoraformation {
     requires com.google.gson;
 
 
+
+
     requires itextpdf;
 
     opens tn.finora.finoraformation to javafx.fxml;

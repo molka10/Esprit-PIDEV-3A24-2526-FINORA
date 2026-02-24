@@ -6,6 +6,7 @@ import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
@@ -22,6 +23,7 @@ import tn.finora.controllers.YoutubeSearchController;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.scene.media.MediaView;
+import tn.finora.services.SpeechService;
 
 import java.awt.Desktop;
 import java.net.URI;
@@ -57,8 +59,8 @@ public class LessonViewController {
     @FXML private Label lblFindInfo;
     @FXML private Button btnYoutube;
 
-    @FXML private Button btnQuiz;         // quiz button in FXML
-    private Lesson currentLesson;         // track current lesson for quiz
+    @FXML private Button btnQuiz;
+    private Lesson currentLesson;
 
     @FXML private Button btnWatchVideo;
 
@@ -74,8 +76,10 @@ public class LessonViewController {
     private String currentQuery = "";
     private int currentMatch = -1;
     private int fontSizePx = 16;
-
     private double lastDividerPos = 0.28;
+
+    // ✅ TTS
+    private final SpeechService speechService = new SpeechService();
 
     public void setOnBack(Runnable onBack) {
         this.onBack = onBack;
@@ -98,50 +102,72 @@ public class LessonViewController {
         render(false);
     }
 
-    private void buildSidebar() {
-        if (sidebarBox == null) return;
+    // ================= TTS =================
 
-        sidebarBox.getChildren().clear();
-        sidebarNodeByLessonId.clear();
-
-        for (int i = 0; i < lessons.size(); i++) {
-            Lesson l = lessons.get(i);
-
-            Button item = new Button();
-            item.getStyleClass().add("curr-item");
-            item.setMaxWidth(Double.MAX_VALUE);
-
-            Label left = new Label(String.format("%02d", i + 1));
-            left.getStyleClass().add("curr-num");
-
-            Label mid = new Label(safe(l.getTitre(), "(Sans titre)"));
-            mid.getStyleClass().add("curr-title");
-            mid.setWrapText(true);
-
-            Label right = new Label(isCompleted(l) ? "✓" : "");
-            right.getStyleClass().add("curr-check");
-
-            HBox row = new HBox(10, left, mid);
-            row.getStyleClass().add("curr-row");
-            HBox.setHgrow(mid, Priority.ALWAYS);
-            row.getChildren().add(right);
-
-            item.setGraphic(row);
-            item.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
-
-            final int targetIndex = i;
-            item.setOnAction(e -> {
-                if (targetIndex == index) return;
-                index = targetIndex;
-                render(true);
-            });
-
-            sidebarBox.getChildren().add(item);
-            sidebarNodeByLessonId.put(l.getId(), item);
+    @FXML
+    private void onReadLesson() {
+        if (currentContent == null || currentContent.isBlank()) {
+            showWarn("Aucun contenu à lire.");
+            return;
         }
-
-        updateSidebarStyles();
+        speechService.speak(currentContent);
     }
+
+    // ================= BACK (ONLY ONE) =================
+
+    @FXML
+    private void onBack() {
+        speechService.stop();
+        if (onBack != null) onBack.run();
+        Stage stage = (Stage) lblTitre.getScene().getWindow();
+        stage.close();
+    }
+
+// ================= ALL YOUR ORIGINAL METHODS BELOW =================
+private void buildSidebar() {
+    if (sidebarBox == null) return;
+
+    sidebarBox.getChildren().clear();
+    sidebarNodeByLessonId.clear();
+
+    for (int i = 0; i < lessons.size(); i++) {
+        Lesson l = lessons.get(i);
+
+        Button item = new Button();
+        item.getStyleClass().add("curr-item");
+        item.setMaxWidth(Double.MAX_VALUE);
+
+        Label left = new Label(String.format("%02d", i + 1));
+        left.getStyleClass().add("curr-num");
+
+        Label mid = new Label(safe(l.getTitre(), "(Sans titre)"));
+        mid.getStyleClass().add("curr-title");
+        mid.setWrapText(true);
+
+        Label right = new Label(isCompleted(l) ? "✓" : "");
+        right.getStyleClass().add("curr-check");
+
+        HBox row = new HBox(10, left, mid);
+        row.getStyleClass().add("curr-row");
+        HBox.setHgrow(mid, Priority.ALWAYS);
+        row.getChildren().add(right);
+
+        item.setGraphic(row);
+        item.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
+
+        final int targetIndex = i;
+        item.setOnAction(e -> {
+            if (targetIndex == index) return;
+            index = targetIndex;
+            render(true);
+        });
+
+        sidebarBox.getChildren().add(item);
+        sidebarNodeByLessonId.put(l.getId(), item);
+    }
+
+    updateSidebarStyles();
+}
 
     private void updateSidebarStyles() {
         for (int i = 0; i < lessons.size(); i++) {
@@ -502,12 +528,7 @@ public class LessonViewController {
         return fmt(p.getTotalDuration().toMillis());
     }
 
-    @FXML
-    private void onBack() {
-        if (onBack != null) onBack.run();
-        Stage stage = (Stage) lblTitre.getScene().getWindow();
-        stage.close();
-    }
+
 
     private void fadeSwap(Node node, Runnable apply) {
         FadeTransition out = new FadeTransition(Duration.millis(140), node);
@@ -576,7 +597,8 @@ public class LessonViewController {
             stage.show();
 
         } catch (Exception e) {
-            e.printStackTrace();        }
+            showError("Erreur ouverture quiz: " + e.getMessage());
+        }
     }
     @FXML
     private void onYoutubeSuggestions() {

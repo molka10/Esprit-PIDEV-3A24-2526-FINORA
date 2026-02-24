@@ -1,35 +1,47 @@
 package tn.finora.services;
 
-import com.google.gson.*;
+
 import java.io.*;
 import java.net.*;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
-
+import com.google.gson.*;
 public class YouTubeService {
 
     private static String apiKey() {
-        String k = System.getenv("YOUTUBE_API_KEY");
-        if (k == null || k.isBlank()) k = System.getProperty("YOUTUBE_API_KEY");
-        if (k == null || k.isBlank()) {
+        String key = System.getenv("YOUTUBE_API_KEY");
+
+        if (key == null || key.isBlank()) {
+            key = System.getProperty("YOUTUBE_API_KEY");
+        }
+
+        if (key == null || key.isBlank()) {
             throw new IllegalStateException(
-                    "YouTube API key missing. Set env YOUTUBE_API_KEY or JVM -DYOUTUBE_API_KEY=..."
+                    "YouTube API key missing. Set environment variable YOUTUBE_API_KEY " +
+                            "or run with -DYOUTUBE_API_KEY=your_key"
             );
         }
-        return k.trim();
+
+        return key.trim();
     }
 
     public List<YouTubeVideo> search(String query, int maxResults, String order) throws Exception {
-        String encoded = URLEncoder.encode(query, StandardCharsets.UTF_8);
 
-        String ord = (order == null || order.isBlank()) ? "relevance" : order.trim();
+        if (query == null || query.isBlank()) {
+            return Collections.emptyList();
+        }
+
+        String encodedQuery = URLEncoder.encode(query, StandardCharsets.UTF_8);
+        String safeOrder = (order == null || order.isBlank()) ? "relevance" : order.trim();
+
+        int safeMax = Math.min(Math.max(maxResults, 1), 10);
 
         String urlStr =
                 "https://www.googleapis.com/youtube/v3/search" +
                         "?part=snippet&type=video" +
-                        "&maxResults=" + Math.min(Math.max(maxResults, 1), 10) +
-                        "&order=" + URLEncoder.encode(ord, StandardCharsets.UTF_8) +
-                        "&q=" + encoded +
+                        "&maxResults=" + safeMax +
+                        "&order=" + URLEncoder.encode(safeOrder, StandardCharsets.UTF_8) +
+                        "&q=" + encodedQuery +
                         "&key=" + apiKey();
 
         HttpURLConnection conn = (HttpURLConnection) new URL(urlStr).openConnection();
@@ -38,57 +50,92 @@ public class YouTubeService {
         conn.setReadTimeout(30000);
 
         int code = conn.getResponseCode();
-        InputStream is = (code >= 200 && code < 300) ? conn.getInputStream() : conn.getErrorStream();
+        InputStream stream = (code >= 200 && code < 300)
+                ? conn.getInputStream()
+                : conn.getErrorStream();
 
-        StringBuilder sb = new StringBuilder();
-        try (BufferedReader br = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))) {
+        StringBuilder response = new StringBuilder();
+
+        try (BufferedReader br = new BufferedReader(
+                new InputStreamReader(stream, StandardCharsets.UTF_8))) {
+
             String line;
-            while ((line = br.readLine()) != null) sb.append(line);
+            while ((line = br.readLine()) != null) {
+                response.append(line);
+            }
         }
 
         if (code < 200 || code >= 300) {
-            throw new RuntimeException("YouTube error HTTP " + code + ": " + sb);
+            throw new RuntimeException("YouTube API error HTTP " + code + ": " + response);
         }
 
-        return parseSearch(sb.toString());
+        conn.disconnect();
+
+        return parseSearch(response.toString());
     }
 
     private List<YouTubeVideo> parseSearch(String json) {
-        List<YouTubeVideo> out = new ArrayList<>();
+
+        List<YouTubeVideo> results = new ArrayList<>();
+
         JsonObject root = JsonParser.parseString(json).getAsJsonObject();
-
         JsonArray items = root.getAsJsonArray("items");
-        if (items == null) return out;
 
-        for (JsonElement el : items) {
-            JsonObject item = el.getAsJsonObject();
+        if (items == null) return results;
 
-            String videoId = item.getAsJsonObject("id").get("videoId").getAsString();
+        for (JsonElement element : items) {
+
+            JsonObject item = element.getAsJsonObject();
+
+            JsonObject idObj = item.getAsJsonObject("id");
+            if (idObj == null || !idObj.has("videoId")) continue;
+
+            String videoId = idObj.get("videoId").getAsString();
+
             JsonObject snippet = item.getAsJsonObject("snippet");
+            if (snippet == null) continue;
 
-            String title = snippet.get("title").getAsString();
-            String channel = snippet.get("channelTitle").getAsString();
+            String title = snippet.has("title")
+                    ? snippet.get("title").getAsString()
+                    : "No title";
 
-            // simple thumbnail
+            String channel = snippet.has("channelTitle")
+                    ? snippet.get("channelTitle").getAsString()
+                    : "Unknown channel";
+
             String thumb = "";
-            JsonObject thumbs = snippet.getAsJsonObject("thumbnails");
-            if (thumbs != null) {
-                if (thumbs.has("medium")) thumb = thumbs.getAsJsonObject("medium").get("url").getAsString();
-                else if (thumbs.has("default")) thumb = thumbs.getAsJsonObject("default").get("url").getAsString();
+
+            if (snippet.has("thumbnails")) {
+                JsonObject thumbs = snippet.getAsJsonObject("thumbnails");
+
+                if (thumbs.has("medium")) {
+                    thumb = thumbs.getAsJsonObject("medium")
+                            .get("url").getAsString();
+                } else if (thumbs.has("default")) {
+                    thumb = thumbs.getAsJsonObject("default")
+                            .get("url").getAsString();
+                }
             }
 
-            out.add(new YouTubeVideo(videoId, title, channel, thumb));
+            results.add(new YouTubeVideo(videoId, title, channel, thumb));
         }
-        return out;
+
+        return results;
     }
 
+    // ================= INNER CLASS =================
+
     public static class YouTubeVideo {
+
         public final String videoId;
         public final String title;
         public final String channelTitle;
         public final String thumbnailUrl;
 
-        public YouTubeVideo(String videoId, String title, String channelTitle, String thumbnailUrl) {
+        public YouTubeVideo(String videoId,
+                            String title,
+                            String channelTitle,
+                            String thumbnailUrl) {
             this.videoId = videoId;
             this.title = title;
             this.channelTitle = channelTitle;

@@ -96,6 +96,12 @@
                                     text="🔎 YouTube Suggestions"
                                     styleClass="btn-ghost"
                                     onAction="#onYoutubeSuggestions"/>
+                            <Button text="🔊 Lire la leçon"
+                                    onAction="#onReadLesson"
+                                    style="-fx-background-color:#7C3AED;
+               -fx-text-fill:white;
+               -fx-background-radius:8;
+               -fx-padding:6 14;"/>
 
                             <ToggleButton fx:id="btnFocus"
                                           text="🎯 Focus"
