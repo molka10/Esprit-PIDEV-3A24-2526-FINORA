@@ -590,3 +590,10 @@
 .btn-logout:hover {
     -fx-background-color: #f3e8ff;
 }
+.recommended-badge {
+    -fx-background-color: linear-gradient(to right, #f4c430, #ffd700);
+    -fx-text-fill: black;
+    -fx-font-weight: bold;
+    -fx-padding: 6 12 6 12;
+    -fx-background-radius: 20;
+}

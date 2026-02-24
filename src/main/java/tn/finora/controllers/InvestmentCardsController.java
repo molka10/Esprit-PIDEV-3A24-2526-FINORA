@@ -31,7 +31,7 @@ public class InvestmentCardsController {
     @FXML private ComboBox<String> riskFilter;
     @FXML private Label totalValueLabel;
     @FXML private Label totalCountLabel;
-
+    private List<String> recommendedTitles = new ArrayList<>();
     private final Connection cnx;
     private List<Investment> allInvestments = new ArrayList<>();
 
@@ -60,6 +60,10 @@ public class InvestmentCardsController {
             addButton.setVisible(false);
             addButton.setManaged(false); // remove empty space
         }
+        RecommendationApiService apiService =
+                new RecommendationApiService();
+
+        recommendedTitles = apiService.fetchRecommendations();
     }
 
     // =====================================================
@@ -234,6 +238,15 @@ public class InvestmentCardsController {
             topBadge = new Label("🏆 Top Investment");
             topBadge.getStyleClass().add("top-badge");
         }
+        // ===== RECOMMENDED BADGE =====
+        Label recommendedBadge = null;
+
+        if (recommendedTitles.stream()
+                .anyMatch(r -> r.equalsIgnoreCase(inv.getName()))) {
+
+            recommendedBadge = new Label("⭐ Recommended");
+            recommendedBadge.getStyleClass().add("recommended-badge");
+        }
 
         // ===== BUTTONS =====
         Button updateBtn = new Button("Update");
@@ -284,6 +297,7 @@ public class InvestmentCardsController {
                 valueBox,
                 riskLabel,
                 topBadge != null ? topBadge : new Pane(),
+                recommendedBadge != null ? recommendedBadge : new Pane(),
                 buttons
         );
 
