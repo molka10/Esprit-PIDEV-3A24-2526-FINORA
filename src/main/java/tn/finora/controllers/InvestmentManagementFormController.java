@@ -23,13 +23,18 @@ public class InvestmentManagementFormController {
     @FXML private DatePicker startDatePicker;
     @FXML private ComboBox<String> statusCombo;
 
-    // Labels pour les messages d'erreur par champ
     @FXML private Label investmentErrorLabel;
     @FXML private Label typeErrorLabel;
     @FXML private Label amountErrorLabel;
     @FXML private Label percentErrorLabel;
     @FXML private Label startDateErrorLabel;
     @FXML private Label statusErrorLabel;
+
+    // BUSINESS UI
+    @FXML private Label exposureLabel;
+    @FXML private ProgressBar fundingProgressBar;
+    @FXML private Label fundingPercentLabel;
+    @FXML private Label fundingStatusBadge;
 
     private final InvestmentManagementService service = new InvestmentManagementService();
     private final InvestmentService investmentService = new InvestmentService();
@@ -38,31 +43,36 @@ public class InvestmentManagementFormController {
 
     @FXML
     public void initialize() {
-        // Initialisation des erreurs vides
+
         clearErrorLabels();
 
-        // Remplissage des listes combo
         statusCombo.getItems().setAll("ACTIVE", "CLOSED");
         investmentCombo.getItems().setAll(investmentService.getAll());
 
-        // Affichage personnalisé dans le ComboBox Investment
         investmentCombo.setCellFactory(cb -> new ListCell<>() {
             @Override
             protected void updateItem(Investment item, boolean empty) {
                 super.updateItem(item, empty);
-                setText(empty || item == null ? "" : (item.getInvestmentId() + " - " + item.getName()));
+                setText(empty || item == null ? "" :
+                        item.getInvestmentId() + " - " + item.getName());
             }
         });
+
         investmentCombo.setButtonCell(new ListCell<>() {
             @Override
             protected void updateItem(Investment item, boolean empty) {
                 super.updateItem(item, empty);
-                setText(empty || item == null ? "" : (item.getInvestmentId() + " - " + item.getName()));
+                setText(empty || item == null ? "" :
+                        item.getInvestmentId() + " - " + item.getName());
             }
         });
 
-        // Vérifier si on édite un management existant
+        // Listeners for business updates
+        amountField.textProperty().addListener((obs, oldVal, newVal) -> updateBusinessView());
+        percentField.textProperty().addListener((obs, oldVal, newVal) -> updateBusinessView());
+
         editing = AppState.getSelectedManagement();
+
         if (editing != null) {
             titleLabel.setText("Edit Investment Management");
             fillForm(editing);
@@ -74,6 +84,7 @@ public class InvestmentManagementFormController {
     }
 
     private void fillForm(InvestmentManagement m) {
+
         Investment selected = investmentCombo.getItems()
                 .stream()
                 .filter(x -> x.getInvestmentId() == m.getInvestmentId())
@@ -82,20 +93,25 @@ public class InvestmentManagementFormController {
 
         investmentCombo.setValue(selected);
         typeField.setText(m.getInvestmentType());
-        amountField.setText(m.getAmountInvested() != null ? m.getAmountInvested().toPlainString() : "");
-        percentField.setText(m.getOwnershipPercentage() != null ? m.getOwnershipPercentage().toPlainString() : "");
+        amountField.setText(m.getAmountInvested() != null ?
+                m.getAmountInvested().toPlainString() : "");
+        percentField.setText(m.getOwnershipPercentage() != null ?
+                m.getOwnershipPercentage().toPlainString() : "");
         startDatePicker.setValue(m.getStartDate());
-        statusCombo.setValue(m.getStatus() != null ? m.getStatus() : "ACTIVE");
+        statusCombo.setValue(m.getStatus() != null ?
+                m.getStatus() : "ACTIVE");
+
+        updateBusinessView();
     }
 
     @FXML
     private void onCancel() {
         AppState.setSelectedManagement(null);
-        SceneNavigator.goTo("investment_management_cards.fxml", "Investment Management - List");
+        SceneNavigator.goTo(
+                "investment_management_cards.fxml",
+                "Investment Management - List");
     }
 
-    // Nettoyer tous les labels d'erreur
-    @FXML
     private void clearErrorLabels() {
         investmentErrorLabel.setText("");
         typeErrorLabel.setText("");
@@ -105,90 +121,143 @@ public class InvestmentManagementFormController {
         statusErrorLabel.setText("");
     }
 
+    // ==============================
+    // BUSINESS CALCULATION
+    // ==============================
+
+    private void updateBusinessView() {
+
+        try {
+            if (amountField.getText().isBlank() || percentField.getText().isBlank()) {
+                exposureLabel.setText("$0.00");
+                fundingProgressBar.setProgress(0);
+                fundingPercentLabel.setText("0%");
+                fundingStatusBadge.setText("PARTIALLY FUNDED");
+                return;
+            }
+
+            BigDecimal amount = new BigDecimal(amountField.getText());
+            BigDecimal percent = new BigDecimal(percentField.getText());
+
+            BigDecimal exposure = amount.multiply(percent)
+                    .divide(new BigDecimal("100"));
+
+            exposureLabel.setText("$" + exposure.setScale(2, BigDecimal.ROUND_HALF_UP));
+
+            double progress = percent.doubleValue() / 100.0;
+            fundingProgressBar.setProgress(progress);
+            fundingPercentLabel.setText(percent.setScale(0) + "%");
+
+            if (percent.compareTo(new BigDecimal("100")) == 0) {
+                fundingStatusBadge.setText("FULLY FUNDED");
+                fundingStatusBadge.setStyle("-fx-background-color:#2ecc71;-fx-text-fill:white;");
+                statusCombo.setValue("CLOSED");
+            } else {
+                fundingStatusBadge.setText("PARTIALLY FUNDED");
+                fundingStatusBadge.setStyle("-fx-background-color:#f39c12;-fx-text-fill:white;");
+                statusCombo.setValue("ACTIVE");
+            }
+
+        } catch (Exception e) {
+            exposureLabel.setText("$0.00");
+            fundingProgressBar.setProgress(0);
+            fundingPercentLabel.setText("0%");
+        }
+    }
+
+    // ==============================
+    // SAVE
+    // ==============================
+
     @FXML
     private void onSave() {
+
         clearErrorLabels();
 
-        boolean hasError = false;
-
-        // ---------------------------
-        // Validation des champs
-        // ---------------------------
-        // Investment
         Investment inv = investmentCombo.getValue();
         if (inv == null) {
-            investmentErrorLabel.setText("You must choose an Investment.");
-            hasError = true;
+            investmentErrorLabel.setText("Investment required.");
+            return;
         }
 
-        // Type
-        String type = typeField.getText() == null ? "" : typeField.getText().trim();
+        String type = typeField.getText().trim();
         if (type.length() < 3) {
-            typeErrorLabel.setText("Investment type is required (min 3 chars).");
-            hasError = true;
+            typeErrorLabel.setText("Minimum 3 characters required.");
+            return;
         }
 
-        // Amount
-        BigDecimal amount = null;
+        BigDecimal amount;
+        BigDecimal percent;
+
         try {
-            amount = new BigDecimal(amountField.getText().trim());
-            if (amount.compareTo(BigDecimal.ZERO) <= 0) {
-                amountErrorLabel.setText("Amount invested must be > 0.");
-                hasError = true;
-            }
+            amount = new BigDecimal(amountField.getText());
+            percent = new BigDecimal(percentField.getText());
         } catch (Exception e) {
-            amountErrorLabel.setText("Amount must be numeric (ex: 5000.00).");
-            hasError = true;
+            amountErrorLabel.setText("Invalid numeric value.");
+            return;
         }
 
-        // Percent
-        BigDecimal percent = null;
-        String percentText = percentField.getText() == null ? "" : percentField.getText().trim();
-        if (!percentText.isEmpty()) {
-            try {
-                percent = new BigDecimal(percentText);
-                if (percent.compareTo(BigDecimal.ZERO) < 0 || percent.compareTo(new BigDecimal("100")) > 0) {
-                    percentErrorLabel.setText("Ownership % must be between 0 and 100.");
-                    hasError = true;
-                }
-            } catch (Exception e) {
-                percentErrorLabel.setText("Ownership % must be numeric (0-100).");
-                hasError = true;
-            }
+        if (amount.compareTo(BigDecimal.ZERO) <= 0) {
+            amountErrorLabel.setText("Amount must be > 0.");
+            return;
         }
 
-        // Start Date
+        if (percent.compareTo(BigDecimal.ZERO) < 0 ||
+                percent.compareTo(new BigDecimal("100")) > 0) {
+            percentErrorLabel.setText("Ownership must be between 0 and 100.");
+            return;
+        }
+
         LocalDate startDate = startDatePicker.getValue();
         if (startDate == null) {
-            startDateErrorLabel.setText("Start date is required.");
-            hasError = true;
+            startDateErrorLabel.setText("Start date required.");
+            return;
         }
 
-        // Status
-        String status = statusCombo.getValue();
-        if (status == null || status.isBlank()) {
-            statusErrorLabel.setText("Status is required (ACTIVE/CLOSED).");
-            hasError = true;
+        // BUSINESS RULE BigDecimal SAFE
+        BigDecimal existingOwnership =
+                service.getTotalOwnershipForInvestment(inv.getInvestmentId());
+
+        if (editing != null && editing.getOwnershipPercentage() != null) {
+            existingOwnership =
+                    existingOwnership.subtract(editing.getOwnershipPercentage());
         }
 
-        // Stop si erreur
-        if (hasError) return;
+        BigDecimal totalAfterSave = existingOwnership.add(percent);
 
-        // ---------------------------
-        // Save ou Update
-        // ---------------------------
-        InvestmentManagement m = (editing != null) ? editing : new InvestmentManagement();
+        if (totalAfterSave.compareTo(new BigDecimal("100")) > 0) {
+            percentErrorLabel.setText(
+                    "Total exceeds 100% (Current: "
+                            + existingOwnership.setScale(2) + "%)");
+            return;
+        }
+
+        InvestmentManagement m =
+                (editing != null) ? editing : new InvestmentManagement();
+
         m.setInvestmentId(inv.getInvestmentId());
         m.setInvestmentType(type);
         m.setAmountInvested(amount);
         m.setOwnershipPercentage(percent);
         m.setStartDate(startDate);
-        m.setStatus(status);
 
-        if (editing == null) service.add(m);
-        else service.update(m);
+        if (totalAfterSave.compareTo(new BigDecimal("100")) == 0) {
+            m.setStatus("CLOSED");
+        } else {
+            m.setStatus("ACTIVE");
+        }
+
+        if (editing == null)
+            service.add(m);
+        else
+            service.update(m);
+
+        service.closeInvestmentIfFullyOwned(inv.getInvestmentId());
 
         AppState.setSelectedManagement(null);
-        SceneNavigator.goTo("investment_management_cards.fxml", "Investment Management - List");
+
+        SceneNavigator.goTo(
+                "investment_management_cards.fxml",
+                "Investment Management - List");
     }
 }

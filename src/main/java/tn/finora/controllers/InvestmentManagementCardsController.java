@@ -69,7 +69,6 @@ public class InvestmentManagementCardsController {
         SceneNavigator.goTo("investment_cards.fxml", "Investments");
     }
 
-    // ✅ DARK MODE FIXED
     @FXML
     private void toggleDarkMode() {
 
@@ -92,15 +91,42 @@ public class InvestmentManagementCardsController {
         List<InvestmentManagement> list = service.getAll();
 
         if (list.isEmpty()) {
-            cardsPane.getChildren().add(new Label("No management records found."));
+            Label empty = new Label("No management records found.");
+            empty.getStyleClass().add("empty-label");
+            cardsPane.getChildren().add(empty);
         }
 
+        int index = 0;
+
         for (InvestmentManagement m : list) {
-            cardsPane.getChildren().add(buildCard(m));
+            VBox card = buildCard(m);
+            cardsPane.getChildren().add(card);
+            animateCard(card, index++);
         }
 
         loadStatistics(list);
         updateKPI(list);
+    }
+
+    // ================= CARD ANIMATION =================
+
+    private void animateCard(VBox card, int index) {
+
+        card.setOpacity(0);
+        card.setTranslateY(30);
+
+        FadeTransition fade = new FadeTransition(Duration.millis(500), card);
+        fade.setFromValue(0);
+        fade.setToValue(1);
+
+        TranslateTransition slide = new TranslateTransition(Duration.millis(500), card);
+        slide.setFromY(30);
+        slide.setToY(0);
+
+        PauseTransition delay = new PauseTransition(Duration.millis(index * 120));
+
+        new SequentialTransition(delay,
+                new ParallelTransition(fade, slide)).play();
     }
 
     // ================= KPI =================
@@ -137,36 +163,49 @@ public class InvestmentManagementCardsController {
 
         value.addListener((obs, oldVal, newVal) -> {
 
-            if (currency) {
+            if (currency)
                 label.setText(currencyFormat.format(newVal.doubleValue()));
-            } else if (label == activeRatioLabel) {
+            else if (label == activeRatioLabel)
                 label.setText(String.format("%.1f %%", newVal.doubleValue()));
-            } else {
+            else
                 label.setText(String.valueOf(newVal.intValue()));
-            }
         });
 
         timeline.play();
     }
 
-    // ================= BUILD CARD =================
+    // ================= BUILD GLASS CARD =================
 
     private VBox buildCard(InvestmentManagement m) {
 
-        VBox card = new VBox(10);
-        card.setPrefWidth(280);
+        VBox card = new VBox(15);
+        card.getStyleClass().add("glass-card");
+        card.setPrefWidth(300);
 
         Label title = new Label("Management #" + m.getManagementId());
+        title.getStyleClass().add("card-title");
+
         Label name = new Label(safe(m.getInvestmentName()));
+        name.getStyleClass().add("card-name");
+
         Label amount = new Label(
                 m.getAmountInvested() != null
                         ? currencyFormat.format(m.getAmountInvested())
                         : "-"
         );
+        amount.getStyleClass().add("card-amount");
 
         Label status = new Label(safe(m.getStatus()).toUpperCase());
+        status.getStyleClass().add("card-status");
+
+        if ("active".equalsIgnoreCase(m.getStatus()))
+            status.getStyleClass().add("status-active");
+        else
+            status.getStyleClass().add("status-closed");
 
         Button edit = new Button("Edit");
+        edit.getStyleClass().add("btn-edit");
+
         edit.setOnAction(e -> {
             AppState.setSelectedManagement(m);
             SceneNavigator.goTo("investment_management_form.fxml",
@@ -174,14 +213,32 @@ public class InvestmentManagementCardsController {
         });
 
         Button delete = new Button("Delete");
+        delete.getStyleClass().add("btn-delete");
+
         delete.setOnAction(e -> onDelete(m));
 
-        HBox actions = new HBox(10, edit, delete);
+        HBox actions = new HBox(12, edit, delete);
         actions.setAlignment(Pos.CENTER_LEFT);
 
         card.getChildren().addAll(title, name, amount, status, actions);
 
+        addHoverEffect(card);
+
         return card;
+    }
+
+    private void addHoverEffect(VBox card) {
+
+        ScaleTransition scaleUp = new ScaleTransition(Duration.millis(150), card);
+        scaleUp.setToX(1.05);
+        scaleUp.setToY(1.05);
+
+        ScaleTransition scaleDown = new ScaleTransition(Duration.millis(150), card);
+        scaleDown.setToX(1);
+        scaleDown.setToY(1);
+
+        card.setOnMouseEntered(e -> scaleUp.playFromStart());
+        card.setOnMouseExited(e -> scaleDown.playFromStart());
     }
 
     private void onDelete(InvestmentManagement m) {
@@ -223,10 +280,9 @@ public class InvestmentManagementCardsController {
 
             String type = safe(m.getInvestmentType());
 
-            double amount = 0.0;
-            if (m.getAmountInvested() != null) {
-                amount = m.getAmountInvested().doubleValue();
-            }
+            double amount = m.getAmountInvested() != null
+                    ? m.getAmountInvested().doubleValue()
+                    : 0.0;
 
             totals.put(type, totals.getOrDefault(type, 0.0) + amount);
         }
@@ -244,7 +300,7 @@ public class InvestmentManagementCardsController {
             series.getData().add(data);
 
             Timeline timeline = new Timeline(
-                    new KeyFrame(Duration.seconds(1.5),
+                    new KeyFrame(Duration.seconds(1.3),
                             new KeyValue(data.YValueProperty(),
                                     total,
                                     Interpolator.EASE_OUT))
@@ -254,23 +310,6 @@ public class InvestmentManagementCardsController {
         });
 
         amountBarChart.getData().add(series);
-
-        animateCharts();
-    }
-
-    private void animateCharts() {
-
-        FadeTransition fadePie =
-                new FadeTransition(Duration.seconds(1), statusPieChart);
-        fadePie.setFromValue(0);
-        fadePie.setToValue(1);
-
-        FadeTransition fadeBar =
-                new FadeTransition(Duration.seconds(1), amountBarChart);
-        fadeBar.setFromValue(0);
-        fadeBar.setToValue(1);
-
-        new ParallelTransition(fadePie, fadeBar).play();
     }
 
     // ================= EXPORT EXCEL =================
@@ -312,25 +351,18 @@ public class InvestmentManagementCardsController {
                 row.createCell(0).setCellValue(m.getManagementId());
                 row.createCell(1).setCellValue(safe(m.getInvestmentName()));
                 row.createCell(2).setCellValue(safe(m.getInvestmentType()));
-
                 row.createCell(3).setCellValue(
                         m.getAmountInvested() != null
                                 ? m.getAmountInvested().doubleValue()
-                                : 0.0
-                );
-
+                                : 0.0);
                 row.createCell(4).setCellValue(
                         m.getOwnershipPercentage() != null
                                 ? m.getOwnershipPercentage().doubleValue()
-                                : 0.0
-                );
-
+                                : 0.0);
                 row.createCell(5).setCellValue(
                         m.getStartDate() != null
                                 ? m.getStartDate().toString()
-                                : "-"
-                );
-
+                                : "-");
                 row.createCell(6).setCellValue(safe(m.getStatus()));
             }
 
