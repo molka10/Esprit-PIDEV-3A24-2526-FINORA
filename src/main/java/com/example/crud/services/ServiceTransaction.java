@@ -11,8 +11,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 📜 ServiceTransaction
+ * 📜 ServiceTransaction - VERSION CORRIGÉE
  * Gère la persistance de l'historique des transactions
+ * ✅ Portefeuille synchronisé correctement
  */
 public class ServiceTransaction {
 
@@ -79,8 +80,6 @@ public class ServiceTransaction {
     }
 
     public List<Transaction> getByType(String type) {
-        // ⚠️ ton code concaténait la string (risque SQL injection).
-        // On garde ta méthode mais on sécurise.
         String where = "WHERE t.type_transaction = ? ORDER BY t.date_transaction DESC";
         return requeteTransactionsPrepared(where, type);
     }
@@ -173,7 +172,6 @@ public class ServiceTransaction {
         return list;
     }
 
-    // ✅ Variante sécurisée pour getByType
     private List<Transaction> requeteTransactionsPrepared(String whereOrder, String type) {
         List<Transaction> list = new ArrayList<>();
 
@@ -252,30 +250,15 @@ public class ServiceTransaction {
     }
 
     /**
-     * Exécute un trade avec transaction SQL + portefeuille.
-     * ✅ ACHAT : décrémente stock + ajoute au portefeuille
-     * ✅ VENTE : vérifie portefeuille (bloque si insuffisant) + remet au stock
-     *
-     * Important: on PROPAGE l'erreur (throw) au Controller pour afficher un message propre.
+     * ✅ VERSION CORRIGÉE - Exécute un trade avec transaction SQL + portefeuille
+     * ACHAT : décrémente stock + ajoute au portefeuille
+     * VENTE : vérifie portefeuille (bloque si insuffisant) + remet au stock
      */
     private Transaction executerTrade(int idAction, String type, int quantite) throws Exception {
         if (quantite <= 0) throw new IllegalArgumentException("Quantité invalide.");
 
         String sqlPrixStock = "SELECT prix_unitaire, quantite_disponible FROM action WHERE id_action = ?";
-
         String sqlUpdateStock = "UPDATE action SET quantite_disponible = ? WHERE id_action = ?";
-
-        String sqlUpsertPortefeuille =
-                "INSERT INTO portefeuille (display_name, id_action, quantite) " +
-                        "VALUES (?, ?, ?) " +
-                        "ON DUPLICATE KEY UPDATE quantite = quantite + VALUES(quantite)";
-
-        String sqlUpdatePortefeuilleVente =
-                "UPDATE portefeuille SET quantite = quantite - ? " +
-                        "WHERE display_name = ? AND id_action = ? AND quantite >= ?";
-
-        String sqlCleanupPortefeuille =
-                "DELETE FROM portefeuille WHERE display_name = ? AND id_action = ? AND quantite <= 0";
 
         boolean oldAutoCommit = true;
 
@@ -305,38 +288,89 @@ public class ServiceTransaction {
                 if (stock < quantite) {
                     throw new IllegalStateException("Stock insuffisant. Disponible=" + stock + ", demandé=" + quantite);
                 }
+
                 newStock = stock - quantite;
 
-                // ✅ Ajouter au portefeuille
-                try (PreparedStatement pst = connection.prepareStatement(sqlUpsertPortefeuille)) {
+                // ✅ VÉRIFIER SI EXISTE DANS PORTEFEUILLE
+                String sqlCheck = "SELECT quantite FROM portefeuille WHERE display_name = ? AND id_action = ?";
+                int quantiteActuelle = 0;
+                boolean existe = false;
+
+                try (PreparedStatement pst = connection.prepareStatement(sqlCheck)) {
                     pst.setString(1, STATIC_USER);
                     pst.setInt(2, idAction);
-                    pst.setInt(3, quantite);
-                    pst.executeUpdate();
+                    try (ResultSet rs = pst.executeQuery()) {
+                        if (rs.next()) {
+                            existe = true;
+                            quantiteActuelle = rs.getInt("quantite");
+                        }
+                    }
+                }
+
+                if (existe) {
+                    // UPDATE
+                    String sqlUpdate = "UPDATE portefeuille SET quantite = ? WHERE display_name = ? AND id_action = ?";
+                    try (PreparedStatement pst = connection.prepareStatement(sqlUpdate)) {
+                        pst.setInt(1, quantiteActuelle + quantite);
+                        pst.setString(2, STATIC_USER);
+                        pst.setInt(3, idAction);
+                        pst.executeUpdate();
+                        System.out.println("✅ Portefeuille mis à jour : " + (quantiteActuelle + quantite) + " actions");
+                    }
+                } else {
+                    // INSERT
+                    String sqlInsert = "INSERT INTO portefeuille (display_name, id_action, quantite) VALUES (?, ?, ?)";
+                    try (PreparedStatement pst = connection.prepareStatement(sqlInsert)) {
+                        pst.setString(1, STATIC_USER);
+                        pst.setInt(2, idAction);
+                        pst.setInt(3, quantite);
+                        pst.executeUpdate();
+                        System.out.println("✅ Portefeuille créé : " + quantite + " actions");
+                    }
                 }
 
             } else if ("VENTE".equalsIgnoreCase(type)) {
 
-                // ✅ Bloquer la vente si pas assez dans portefeuille
-                try (PreparedStatement pst = connection.prepareStatement(sqlUpdatePortefeuilleVente)) {
-                    pst.setInt(1, quantite);
-                    pst.setString(2, STATIC_USER);
-                    pst.setInt(3, idAction);
-                    pst.setInt(4, quantite);
-                    int updated = pst.executeUpdate();
-                    if (updated != 1) {
-                        throw new IllegalStateException("Vente impossible : quantité insuffisante dans ton portefeuille.");
+                // ✅ VÉRIFIER QUANTITÉ POSSÉDÉE
+                String sqlCheck = "SELECT quantite FROM portefeuille WHERE display_name = ? AND id_action = ?";
+                int quantitePossedee = 0;
+
+                try (PreparedStatement pst = connection.prepareStatement(sqlCheck)) {
+                    pst.setString(1, STATIC_USER);
+                    pst.setInt(2, idAction);
+                    try (ResultSet rs = pst.executeQuery()) {
+                        if (rs.next()) {
+                            quantitePossedee = rs.getInt("quantite");
+                        }
                     }
                 }
 
-                newStock = stock + quantite;
+                if (quantitePossedee < quantite) {
+                    throw new IllegalStateException(
+                            "Vente impossible : vous possédez " + quantitePossedee +
+                                    " action(s), vous essayez de vendre " + quantite
+                    );
+                }
 
-                // cleanup si 0
-                try (PreparedStatement pst = connection.prepareStatement(sqlCleanupPortefeuille)) {
+                // UPDATE portefeuille
+                String sqlUpdate = "UPDATE portefeuille SET quantite = ? WHERE display_name = ? AND id_action = ?";
+                try (PreparedStatement pst = connection.prepareStatement(sqlUpdate)) {
+                    pst.setInt(1, quantitePossedee - quantite);
+                    pst.setString(2, STATIC_USER);
+                    pst.setInt(3, idAction);
+                    pst.executeUpdate();
+                    System.out.println("✅ Portefeuille réduit : " + (quantitePossedee - quantite) + " actions restantes");
+                }
+
+                // Supprimer si quantité = 0
+                String sqlCleanup = "DELETE FROM portefeuille WHERE display_name = ? AND id_action = ? AND quantite <= 0";
+                try (PreparedStatement pst = connection.prepareStatement(sqlCleanup)) {
                     pst.setString(1, STATIC_USER);
                     pst.setInt(2, idAction);
                     pst.executeUpdate();
                 }
+
+                newStock = stock + quantite;
 
             } else {
                 throw new IllegalArgumentException("Type transaction invalide: " + type);
@@ -350,6 +384,7 @@ public class ServiceTransaction {
                 if (updated != 1) {
                     throw new SQLException("Échec mise à jour stock action (id=" + idAction + ")");
                 }
+                System.out.println("✅ Stock mis à jour : " + newStock + " disponibles");
             }
 
             // 4) Enregistrer transaction
@@ -360,6 +395,7 @@ public class ServiceTransaction {
 
             // ✅ Commit DB
             connection.commit();
+            System.out.println("✅ Transaction DB commitée");
 
             // ✅ PUSH POWER BI (après commit)
             pushPowerBIAfterCommit(t, idAction);
@@ -367,9 +403,12 @@ public class ServiceTransaction {
             return t;
 
         } catch (Exception ex) {
-            try { connection.rollback(); } catch (SQLException ignore) {}
+            try {
+                connection.rollback();
+                System.err.println("⚠️ Rollback effectué");
+            } catch (SQLException ignore) {}
             System.err.println("❌ Erreur trade " + type + " : " + ex.getMessage());
-            throw ex; // ✅ IMPORTANT : propager au controller
+            throw ex;
 
         } finally {
             try {
@@ -379,7 +418,7 @@ public class ServiceTransaction {
     }
 
     // ─────────────────────────────────────────────────────────
-    //  POWER BI HELPERS (NOUVEAU)
+    //  POWER BI HELPERS
     // ─────────────────────────────────────────────────────────
 
     /**
