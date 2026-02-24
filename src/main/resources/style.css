@@ -1227,3 +1227,13 @@
 .cards-udemy{
     -fx-background-color: transparent;
 }
+.radio-button {
+    -fx-text-fill: #1E0A3C;
+    -fx-font-size: 14px;
+    -fx-padding: 8 0;
+}
+
+.radio-button:selected {
+    -fx-text-fill: #7C3AED;
+    -fx-font-weight: bold;
+}
