@@ -14,7 +14,5 @@ module com.example.crud {
     requires com.google.gson;
     opens com.example.crud.services to com.google.gson;
     requires java.desktop;
-    opens com.example.finora_user.Bourse.controllers to javafx.fxml;
-    opens com.example.finora_user.Bourse.entities to javafx.base;
-    opens com.example.finora_user.Bourse.services to com.google.gson;
+   
 }
