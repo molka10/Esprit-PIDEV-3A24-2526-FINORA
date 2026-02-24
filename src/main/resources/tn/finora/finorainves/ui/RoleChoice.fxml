@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+
+<StackPane xmlns="http://javafx.com/javafx/17"
+           xmlns:fx="http://javafx.com/fxml"
+           fx:controller="tn.finora.controllers.RoleChoiceController"
+           stylesheets="@../styles/style.css"
+           styleClass="background-root">
+
+    <VBox alignment="CENTER" spacing="30"
+          maxWidth="450"
+          styleClass="glass-card">
+
+        <padding>
+            <Insets top="40" right="40" bottom="40" left="40"/>
+        </padding>
+
+        <!-- LOGO / TITLE -->
+        <Label text="FINORA"
+               styleClass="main-title"/>
+
+        <Label text="Investment Management Platform"
+               styleClass="subtitle"/>
+
+        <!-- BUTTONS -->
+        <Button text="👑  ADMIN"
+                onAction="#chooseAdmin"
+                styleClass="btn-primary"
+                prefWidth="260"
+                prefHeight="50"/>
+
+        <Button text="💰  INVESTISSEUR"
+                onAction="#chooseInvestisseur"
+                styleClass="btn-secondary"
+                prefWidth="260"
+                prefHeight="50"/>
+
+    </VBox>
+
+</StackPane>

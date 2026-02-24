@@ -13,6 +13,7 @@ import tn.finora.entities.Investment;
 import tn.finora.finorainves.AppState;
 import tn.finora.finorainves.SceneNavigator;
 import tn.finora.utils.DBConnection;
+import tn.finora.utils.UserSession;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -39,14 +40,25 @@ public class InvestmentCardsController {
     public InvestmentCardsController() {
         cnx = DBConnection.getInstance().getCnx();
     }
-
+    @FXML
+    private Button addButton;
     @FXML
     public void initialize() {
+        // 🔐 Protection si aucune session
+        if (UserSession.getRole() == null) {
+            showError("Session Error", "No role selected.");
+            return;
+        }
         riskFilter.setItems(
                 FXCollections.observableArrayList("All", "Low", "Medium", "High")
         );
         riskFilter.setValue("All");
         refreshData();
+        // Hide Add button if INVESTISSEUR
+        if (UserSession.isInvestisseur()) {
+            addButton.setVisible(false);
+            addButton.setManaged(false); // remove empty space
+        }
     }
 
     // =====================================================
@@ -55,7 +67,16 @@ public class InvestmentCardsController {
 
     @FXML
     private void onAdd() {
+        if (!UserSession.isAdmin()) {.
+            showError("Access Denied",
+                    "Only ADMIN can create investments.");
+            return;
+        }
         SceneNavigator.goTo("investment_form.fxml", "Add Investment");
+    }
+    @FXML
+    private void onBackToRole() {
+        SceneNavigator.goToRoleChoice();
     }
 
     @FXML
@@ -67,6 +88,11 @@ public class InvestmentCardsController {
 
     @FXML
     private void goToManagement() {
+        if (!UserSession.isInvestisseur()) {
+            showError("Access Denied",
+                    "Only INVESTISSEUR can access management.");
+            return;
+        }
         SceneNavigator.goTo("investment_management_cards.fxml",
                 "Investment Management");
     }
@@ -215,6 +241,11 @@ public class InvestmentCardsController {
         updateBtn.setPrefHeight(42);
 
         updateBtn.setOnAction(e -> {
+            if (!UserSession.isAdmin()) {
+                showError("Access Denied",
+                        "Only ADMIN can update investments.");
+                return;
+            }
             AppState.setSelectedInvestment(inv);
             SceneNavigator.goTo("investment_form.fxml", "Update Investment");
         });
@@ -224,7 +255,20 @@ public class InvestmentCardsController {
         deleteBtn.setPrefWidth(130);
         deleteBtn.setPrefHeight(42);
 
-        deleteBtn.setOnAction(e -> confirmDelete(inv));
+        deleteBtn.setOnAction(e -> {
+
+            if (!UserSession.isAdmin()) {
+                showError("Access Denied",
+                        "Only ADMIN can delete investments.");
+                return;
+            }
+
+            confirmDelete(inv);
+        });
+        if (UserSession.isInvestisseur()) {
+            updateBtn.setVisible(false);
+            deleteBtn.setVisible(false);
+        }
 
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
@@ -348,6 +392,12 @@ public class InvestmentCardsController {
     }
 
     public void delete(int id) {
+        if (!UserSession.isAdmin()) {
+            showError("Access Denied",
+                    "Only ADMIN can delete investments.");
+            return;
+        }
+
 
         String sql = "DELETE FROM investment WHERE investment_id=?";
 

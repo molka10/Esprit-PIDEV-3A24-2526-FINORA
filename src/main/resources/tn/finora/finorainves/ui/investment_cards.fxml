@@ -26,6 +26,12 @@
 
                 <Region HBox.hgrow="ALWAYS"/>
 
+                <Button text="⟵ Change Role"
+                        onAction="#onBackToRole"
+                        styleClass="btn-logout"
+                        prefHeight="38"
+                        prefWidth="130"/>
+
                 <ToggleButton text="🌙 Dark Mode"
                               onAction="#toggleDarkMode"
                               styleClass="btn-dark-toggle"
@@ -62,7 +68,8 @@
             <!-- ===== TOOLBAR ===== -->
             <HBox spacing="16" alignment="CENTER_LEFT">
 
-                <Button text="＋ Add Investment"
+                <Button fx:id="addButton"
+                        text="＋ Add Investment"
                         onAction="#onAdd"
                         styleClass="btn-primary"
                         prefWidth="170"

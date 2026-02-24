@@ -9,16 +9,23 @@ public class HelloApplication extends Application {
 
     @Override
     public void start(Stage stage) throws Exception {
+
+        // 🔴 LIGNE OBLIGATOIRE
         SceneNavigator.setStage(stage);
 
         FXMLLoader loader = new FXMLLoader(
-                HelloApplication.class.getResource("/tn/finora/finorainves/ui/investment_cards.fxml")
+                getClass().getResource(
+                        "/tn/finora/finorainves/ui/RoleChoice.fxml"
+                )
         );
 
-        Scene scene = new Scene(loader.load(), 900, 500);
-        stage.setTitle("Investment - List");
+        Scene scene = new Scene(loader.load(), 1000, 600);
+
+        stage.setTitle("Finora - Choose Role");
         stage.setScene(scene);
         stage.show();
+
+        System.out.println("✅ Primary Stage initialized");
     }
 
     public static void main(String[] args) {

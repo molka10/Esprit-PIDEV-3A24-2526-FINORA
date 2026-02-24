@@ -66,4 +66,21 @@ public class SceneNavigator {
     private static void showError(String title, String message) {
         System.err.println(title + ": " + message);
     }
+    // =====================================================
+// RETOUR VERS ROLE CHOICE
+// =====================================================
+
+    public static void goToRoleChoice() {
+
+        // Reset session propre
+        try {
+            Class<?> sessionClass = Class.forName("tn.finora.utils.UserSession");
+            sessionClass.getMethod("setRole", Class.forName("tn.finora.utils.AppRole"))
+                    .invoke(null, new Object[]{null});
+        } catch (Exception e) {
+            // ignore si déjà null
+        }
+
+        goTo("RoleChoice.fxml", "Select Role");
+    }
 }

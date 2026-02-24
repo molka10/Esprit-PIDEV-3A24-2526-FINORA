@@ -505,3 +505,88 @@
     -fx-text-fill: #c0392b;
     -fx-font-size: 11px;
 }
+/* ============================= */
+/* BACKGROUND */
+/* ============================= */
+
+/* BACKGROUND GRADIENT */
+.background-root {
+    -fx-background-color: linear-gradient(to right, #0f172a, #1e293b);
+}
+
+/* GLASS CARD */
+.glass-card {
+    -fx-background-color: rgba(255,255,255,0.95);
+    -fx-background-radius: 20;
+    -fx-effect: dropshadow(gaussian, rgba(124,58,237,0.4), 40, 0.3, 0, 10);
+}
+
+/* TITLE */
+.main-title {
+    -fx-font-size: 34px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #7c3aed;
+}
+
+/* SUBTITLE */
+.subtitle {
+    -fx-font-size: 14px;
+    -fx-text-fill: #64748b;
+}
+
+/* PRIMARY BUTTON */
+.btn-primary {
+    -fx-background-color: linear-gradient(to right, #7c3aed, #a855f7);
+    -fx-text-fill: white;
+    -fx-background-radius: 15;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+}
+
+.btn-primary:hover {
+    -fx-background-color: linear-gradient(to right, #6d28d9, #9333ea);
+}
+
+/* SECONDARY BUTTON */
+.btn-secondary {
+    -fx-background-color: transparent;
+    -fx-border-color: #7c3aed;
+    -fx-border-width: 2;
+    -fx-text-fill: #7c3aed;
+    -fx-background-radius: 15;
+    -fx-border-radius: 15;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+}
+
+.btn-secondary:hover {
+    -fx-background-color: #f3e8ff;
+}
+
+/* FOOTER */
+.footer-text {
+    -fx-text-fill: #cbd5e1;
+    -fx-font-size: 11px;
+}
+
+/* HINT */
+.hint-text {
+    -fx-text-fill: #94a3b8;
+    -fx-font-size: 12px;
+}
+/* Logout / Change Role Button */
+.btn-logout {
+    -fx-background-color: transparent;
+    -fx-border-color: #7c3aed;
+    -fx-border-radius: 10;
+    -fx-background-radius: 10;
+    -fx-text-fill: #7c3aed;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+}
+
+.btn-logout:hover {
+    -fx-background-color: #f3e8ff;
+}

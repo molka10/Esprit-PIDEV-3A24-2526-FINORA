@@ -5,12 +5,16 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="c29a7d9c-7ce5-447a-8626-457253968d65" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/src/main/java/tn/finora/controllers/RoleChoiceController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/tn/finora/utils/AppRole.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/tn/finora/utils/UserSession.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/resources/tn/finora/finorainves/ui/RoleChoice.fxml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/tn/finora/controllers/InvestmentManagementCardsController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/tn/finora/controllers/InvestmentManagementCardsController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/tn/finora/controllers/InvestmentManagementFormController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/tn/finora/controllers/InvestmentManagementFormController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/tn/finora/services/InvestmentManagementService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/tn/finora/services/InvestmentManagementService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/tn/finora/controllers/InvestmentCardsController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/tn/finora/controllers/InvestmentCardsController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/tn/finora/finorainves/HelloApplication.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/tn/finora/finorainves/HelloApplication.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/tn/finora/finorainves/SceneNavigator.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/tn/finora/finorainves/SceneNavigator.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/tn/finora/finorainves/styles/style.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/tn/finora/finorainves/styles/style.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/tn/finora/finorainves/ui/investment_management_form.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/tn/finora/finorainves/ui/investment_management_form.fxml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/tn/finora/finorainves/ui/investment_cards.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/tn/finora/finorainves/ui/investment_cards.fxml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -76,7 +80,9 @@
       <workItem from="1771756031381" duration="18845000" />
       <workItem from="1771807092518" duration="6056000" />
       <workItem from="1771832799685" duration="3195000" />
-      <workItem from="1771875108923" duration="17821000" />
+      <workItem from="1771875108923" duration="18529000" />
+      <workItem from="1771946161541" duration="4019000" />
+      <workItem from="1771961716701" duration="4779000" />
     </task>
     <servers />
   </component>
