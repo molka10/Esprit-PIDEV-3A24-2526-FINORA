@@ -103,6 +103,18 @@
                -fx-background-radius:8;
                -fx-padding:6 14;"/>
 
+                            <Button fx:id="btnStopRead"
+                                    text="Stop 🔇"
+                                    onAction="#onStopReading"
+                                    styleClass="reader-toolbtn"/>
+
+                            <Button text="Slower"
+                                    onAction="#onSlower"
+                                    styleClass="reader-toolbtn"/>
+
+                            <Button text="Faster"
+                                    onAction="#onFaster"
+                                    styleClass="reader-toolbtn"/>
                             <ToggleButton fx:id="btnFocus"
                                           text="🎯 Focus"
                                           styleClass="btn-focus"

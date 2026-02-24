@@ -112,6 +112,23 @@ public class LessonViewController {
         }
         speechService.speak(currentContent);
     }
+    @FXML
+    private void onStopReading() {
+        speechService.stop();
+    }
+    private int speechRate = 0;
+
+    @FXML
+    private void onSlower() {
+        speechRate = Math.max(-10, speechRate - 1);
+        speechService.setRate(speechRate);
+    }
+
+    @FXML
+    private void onFaster() {
+        speechRate = Math.min(10, speechRate + 1);
+        speechService.setRate(speechRate);
+    }
 
     // ================= BACK (ONLY ONE) =================
 
