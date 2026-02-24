@@ -223,27 +223,63 @@ public class GeminiService {
                 .replaceAll("```", "")
                 .trim();
 
-        String cleanJson = extractJson(text);
+        String cleanJson;
 
-        JsonObject quizJson = JsonParser.parseString(cleanJson).getAsJsonObject();
+        try {
+            cleanJson = extractJson(text);
+        } catch (Exception e) {
+            System.out.println("⚠️ JSON extraction failed. Raw text:");
+            System.out.println(text);
+
+            // fallback: return safe dummy quiz
+            return List.of(
+                    new QuizQuestion(
+                            "Quiz generation failed. Please try again.",
+                            List.of("Option A", "Option B", "Option C", "Option D"),
+                            0
+                    )
+            );
+        }
+
+        JsonObject quizJson;
+
+        try {
+            quizJson = JsonParser.parseString(cleanJson).getAsJsonObject();
+        } catch (Exception e) {
+            System.out.println("⚠️ Invalid JSON from AI:");
+            System.out.println(cleanJson);
+
+            return List.of(
+                    new QuizQuestion(
+                            "AI returned invalid JSON. Try again.",
+                            List.of("Option A", "Option B", "Option C", "Option D"),
+                            0
+                    )
+            );
+        }
+
         JsonArray questionsArray = quizJson.getAsJsonArray("questions");
 
-        List<QuizQuestion> questions = new ArrayList<>();
-
         if (questionsArray == null) {
-            throw new RuntimeException("Réponse IA invalide : pas de 'questions'");
+            return List.of(
+                    new QuizQuestion(
+                            "No questions generated.",
+                            List.of("Option A", "Option B", "Option C", "Option D"),
+                            0
+                    )
+            );
         }
+
+        List<QuizQuestion> questions = new ArrayList<>();
 
         for (JsonElement el : questionsArray) {
 
             JsonObject q = el.getAsJsonObject();
 
-            // ---- QUESTION TEXT SAFE ----
             String questionText = q.has("question")
                     ? q.get("question").getAsString()
                     : "Question invalide";
 
-            // ---- OPTIONS SAFE ----
             List<String> options = new ArrayList<>();
 
             if (q.has("options") && q.get("options").isJsonArray()) {
@@ -252,7 +288,6 @@ public class GeminiService {
                 }
             }
 
-            // Ensure EXACTLY 4 options
             while (options.size() < 4) {
                 options.add("Option manquante");
             }
@@ -261,7 +296,6 @@ public class GeminiService {
                 options = options.subList(0, 4);
             }
 
-            // ---- CORRECT INDEX SAFE ----
             int correct = 0;
             if (q.has("correct")) {
                 try {
@@ -269,7 +303,6 @@ public class GeminiService {
                 } catch (Exception ignored) {}
             }
 
-            // Clamp correct index between 0 and 3
             if (correct < 0 || correct > 3) {
                 correct = 0;
             }
@@ -277,7 +310,6 @@ public class GeminiService {
             questions.add(new QuizQuestion(questionText, options, correct));
         }
 
-        // Ensure at least 1 question
         if (questions.isEmpty()) {
             questions.add(new QuizQuestion(
                     "Aucune question générée",
