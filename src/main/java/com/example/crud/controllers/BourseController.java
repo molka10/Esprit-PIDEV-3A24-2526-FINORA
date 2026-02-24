@@ -35,7 +35,7 @@ public class BourseController implements Initializable {
     @FXML private TextField searchField;
     @FXML private Label lblTotal;
     @FXML private FlowPane cardsContainer;
-
+    @FXML private Button btnTheme;
     private final ServiceBourse service = new ServiceBourse();
     private final ServiceDevise serviceDevise = new ServiceDevise();
 
@@ -58,6 +58,7 @@ public class BourseController implements Initializable {
         } else {
             System.err.println("⚠️ ServiceDevise non configuré - Conversions désactivées");
         }
+
     }
 
     // ============================================================

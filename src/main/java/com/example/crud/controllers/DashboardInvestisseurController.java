@@ -225,8 +225,7 @@ public class DashboardInvestisseurController implements Initializable {
         Label prixLabel = new Label(String.format("%.2f", action.getPrixUnitaire()));
         prixLabel.setStyle("-fx-font-size: 13px; -fx-text-fill: white; -fx-font-weight: bold; -fx-pref-width: 100; -fx-alignment: CENTER_RIGHT;");
 
-        double var = (new Random(action.getIdAction() + System.currentTimeMillis() / 4000)
-                .nextDouble() * 8) - 4;
+        double var = calculerVariationSimulee(action);
         Label varLabel = new Label(String.format("%+.2f%%", var));
         varLabel.setStyle("-fx-font-size: 13px; -fx-font-weight: bold;" +
                 "-fx-text-fill: " + (var >= 0 ? "#00d4aa" : "#ef4444") + ";" +
@@ -457,6 +456,21 @@ public class DashboardInvestisseurController implements Initializable {
         }
     }
 
+
+
+    private double calculerVariationSimulee(Action action) {
+        long seed = action.getSymbole().hashCode() +
+                (System.currentTimeMillis() / 86400000);
+
+        Random rand = new Random(seed);
+        double base = (rand.nextDouble() * 10) - 5;
+
+        long microSeed = System.currentTimeMillis() / 4000;
+        Random microRand = new Random(seed + microSeed);
+        double micro = (microRand.nextDouble() * 0.4) - 0.2;
+
+        return Math.round((base + micro) * 100.0) / 100.0;
+    }
     private void executerVente(Action action, int quantite) {
         int idAction = action.getIdAction();
         int possede = portfolio.getOrDefault(idAction, 0);
@@ -643,20 +657,45 @@ public class DashboardInvestisseurController implements Initializable {
     // ============================================================
 
     private void calculerPortfolio() {
-        double valeur = 0;
-        for (Map.Entry<Integer, Integer> entry : portfolio.entrySet()) {
-            Optional<Action> opt = toutesActions.stream()
-                    .filter(a -> a.getIdAction() == entry.getKey()).findFirst();
-            if (opt.isPresent()) valeur += opt.get().getPrixUnitaire() * entry.getValue();
-        }
+        Task<Double> task = new Task<>() {
+            @Override
+            protected Double call() {
+                List<Transaction> transactions = serviceTransaction.getAll();
 
-        final double v = valeur;
-        Platform.runLater(() -> {
-            lblPortfolio.setText(v > 0 ? String.format("%.2f TND", v) : "0.00 TND");
-            lblPortfolioChange.setText(v > 0
-                    ? "📊 " + portfolio.size() + " position(s) ouvertes"
-                    : "Aucune position ouverte");
+                double totalAchats = 0;
+                double totalVentes = 0;
+
+                for (Transaction t : transactions) {
+                    if (t.getTypeTransaction().equals("ACHAT")) {
+                        totalAchats += t.getMontantTotal();
+                    } else if (t.getTypeTransaction().equals("VENTE")) {
+                        totalVentes += t.getMontantTotal();
+                    }
+                }
+
+                return totalAchats - totalVentes;
+            }
+        };
+
+        task.setOnSucceeded(e -> {
+            Double valeurPortfolio = task.getValue();
+
+            Platform.runLater(() -> {
+                lblPortfolio.setText(String.format("%.2f TND", valeurPortfolio));
+
+                if (valeurPortfolio > 0) {
+                    lblPortfolioChange.setText("📊 Positions ouvertes");
+                } else {
+                    lblPortfolioChange.setText("Aucune position ouverte");
+                }
+            });
         });
+
+        task.setOnFailed(e -> {
+            System.err.println("Erreur calcul portfolio: " + task.getException());
+        });
+
+        new Thread(task).start();
     }
 
     // ============================================================

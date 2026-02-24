@@ -11,7 +11,8 @@ module com.example.crud {
     opens com.example.crud.utils to javafx.fxml;
 
     opens com.example.crud.controllers to javafx.fxml;
-
+    requires com.google.gson;
+    opens com.example.crud.services to com.google.gson;
     requires java.desktop;
 
 }

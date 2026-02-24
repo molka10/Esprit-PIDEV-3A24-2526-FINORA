@@ -6,6 +6,7 @@ import com.example.crud.models.Transaction;
 import com.example.crud.utils.Database;
 
 import java.sql.*;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -78,7 +79,10 @@ public class ServiceTransaction {
     }
 
     public List<Transaction> getByType(String type) {
-        return requeteTransactions("WHERE t.type_transaction = '" + type + "' ORDER BY t.date_transaction DESC");
+        // ⚠️ ton code concaténait la string (risque SQL injection).
+        // On garde ta méthode mais on sécurise.
+        String where = "WHERE t.type_transaction = ? ORDER BY t.date_transaction DESC";
+        return requeteTransactionsPrepared(where, type);
     }
 
     public List<Transaction> getByAction(int idAction) {
@@ -106,7 +110,7 @@ public class ServiceTransaction {
     }
 
     // ─────────────────────────────────────────────────────────
-    //  HELPERS PRIVÉS
+    //  HELPERS PRIVÉS (LECTURE)
     // ─────────────────────────────────────────────────────────
 
     private List<Transaction> requeteTransactions(String whereOrder) {
@@ -163,6 +167,44 @@ public class ServiceTransaction {
             }
         } catch (SQLException e) {
             System.err.println("❌ Erreur lecture transactions : " + e.getMessage());
+            e.printStackTrace();
+        }
+
+        return list;
+    }
+
+    // ✅ Variante sécurisée pour getByType
+    private List<Transaction> requeteTransactionsPrepared(String whereOrder, String type) {
+        List<Transaction> list = new ArrayList<>();
+
+        String sql = "SELECT t.*, " +
+                "a.id_action, a.symbole, a.nom_entreprise, a.secteur, " +
+                "a.prix_unitaire AS prix_action, a.quantite_disponible, a.statut AS statut_action, " +
+                "b.id_bourse, b.nom_bourse, b.pays, b.devise, b.statut AS statut_bourse " +
+                "FROM transaction t " +
+                "LEFT JOIN action a ON t.id_action = a.id_action " +
+                "LEFT JOIN bourse b ON a.id_bourse = b.id_bourse " +
+                whereOrder;
+
+        try (PreparedStatement pst = connection.prepareStatement(sql)) {
+            pst.setString(1, type);
+
+            try (ResultSet rs = pst.executeQuery()) {
+                while (rs.next()) {
+                    Transaction t = new Transaction();
+                    t.setIdTransaction(rs.getInt("id_transaction"));
+                    t.setIdAction(rs.getInt("id_action"));
+                    t.setTypeTransaction(rs.getString("type_transaction"));
+                    t.setQuantite(rs.getInt("quantite"));
+                    t.setPrixUnitaire(rs.getDouble("prix_unitaire"));
+                    t.setMontantTotal(rs.getDouble("montant_total"));
+                    t.setCommission(rs.getDouble("commission"));
+                    t.setDateTransaction(rs.getTimestamp("date_transaction"));
+                    list.add(t);
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("❌ Erreur lecture transactions (prepared) : " + e.getMessage());
             e.printStackTrace();
         }
 
@@ -310,13 +352,18 @@ public class ServiceTransaction {
                 }
             }
 
-            // 4) Enregistrer transaction (inchangé)
+            // 4) Enregistrer transaction
             Transaction t = enregistrer(idAction, type.toUpperCase(), quantite, prixUnitaire);
             if (t == null) {
                 throw new SQLException("Transaction non enregistrée (retour null).");
             }
 
+            // ✅ Commit DB
             connection.commit();
+
+            // ✅ PUSH POWER BI (après commit)
+            pushPowerBIAfterCommit(t, idAction);
+
             return t;
 
         } catch (Exception ex) {
@@ -329,5 +376,57 @@ public class ServiceTransaction {
                 connection.setAutoCommit(oldAutoCommit);
             } catch (SQLException ignore) {}
         }
+    }
+
+    // ─────────────────────────────────────────────────────────
+    //  POWER BI HELPERS (NOUVEAU)
+    // ─────────────────────────────────────────────────────────
+
+    /**
+     * Envoie la transaction vers Power BI après commit.
+     * Ne bloque PAS le flow si Power BI est down.
+     */
+    private void pushPowerBIAfterCommit(Transaction t, int idAction) {
+        try {
+            String symbole = getSymboleAction(idAction);
+
+            LocalDateTime dt = (t.getDateTransaction() != null)
+                    ? t.getDateTransaction().toLocalDateTime()
+                    : LocalDateTime.now();
+
+            ServicePowerBI.TransactionBI bi = new ServicePowerBI.TransactionBI(
+                    t.getIdTransaction(),
+                    symbole,
+                    t.getTypeTransaction(),
+                    t.getQuantite(),
+                    t.getPrixUnitaire(),
+                    t.getMontantTotal(),
+                    t.getCommission(),
+                    ServicePowerBI.toPowerBIDateTime(dt),
+                    STATIC_USER
+            );
+
+            ServicePowerBI.pushTransaction(bi);
+            System.out.println("✅ Power BI: transaction push OK (id=" + t.getIdTransaction() + ")");
+
+        } catch (Exception e) {
+            System.err.println("⚠️ Power BI push échoué (sans bloquer): " + e.getMessage());
+        }
+    }
+
+    /**
+     * Récupère le symbole de l'action (pour Power BI)
+     */
+    private String getSymboleAction(int idAction) {
+        String sql = "SELECT symbole FROM action WHERE id_action = ?";
+        try (PreparedStatement pst = connection.prepareStatement(sql)) {
+            pst.setInt(1, idAction);
+            try (ResultSet rs = pst.executeQuery()) {
+                if (rs.next()) return rs.getString("symbole");
+            }
+        } catch (SQLException e) {
+            System.err.println("⚠️ Impossible de récupérer symbole action: " + e.getMessage());
+        }
+        return "UNKNOWN";
     }
 }
