@@ -1,5 +1,6 @@
 package tn.finora.controllers;
 
+import tn.finora.services.RecommendationApiService;
 import javafx.animation.ScaleTransition;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;

@@ -5,7 +5,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="c29a7d9c-7ce5-447a-8626-457253968d65" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/src/main/java/tn/finora/controllers/InvestmentCardsController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/tn/finora/controllers/InvestmentCardsController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/tn/finora/services/RecommendationApiService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/tn/finora/finorainves/HelloApplication.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/tn/finora/finorainves/HelloApplication.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -73,7 +75,8 @@
       <workItem from="1771832799685" duration="3195000" />
       <workItem from="1771875108923" duration="18529000" />
       <workItem from="1771946161541" duration="4019000" />
-      <workItem from="1771961716701" duration="4869000" />
+      <workItem from="1771961716701" duration="5945000" />
+      <workItem from="1771969530909" duration="753000" />
     </task>
     <servers />
   </component>
