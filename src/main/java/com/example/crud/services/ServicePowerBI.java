@@ -30,7 +30,7 @@ public final class ServicePowerBI {
     // IntelliJ > Run Config > Environment variables:
     // FINORA_POWERBI_PUSH_URL=https://api.powerbi.com/beta/.../rows?key=...
     private static final String POWERBI_PUSH_URL =
-            "https://api.powerbi.com/beta/604f1a96-cbe8-43f8-abbf-f8eaf5d85730/datasets/bcc6fd3f-5887-4dc3-bcb4-52ba22a99251/rows?experience=power-bi&key=sA2YMJTsKe86eLQVwV5bI4K9CjMlpEnBI5MX%2BXnf%2BKvXp7tYaZ1hTJF1nTOz2VWznFy2ey95IWDWfmy0NKeQ8w%3D%3D";
+            "https://api.powerbi.com/beta/604f1a96-cbe8-43f8-abbf-f8eaf5d85730/datasets/a3961f27-2ffc-4aba-82b3-9b4ac51867e1/rows?experience=power-bi&key=SgxZVEycQdHYOmn3fvR0RhWiEiBXwWFkKiQfW2jpdJ1sAQDPGL10gzplD6sVvU2gcMidKoQbRTCQwTq4D4Jb8g%3D%3D";
 
     private static final int CONNECT_TIMEOUT_MS = 10_000;
     private static final int READ_TIMEOUT_MS = 15_000;
