@@ -67,7 +67,7 @@ public class InvestmentCardsController {
 
     @FXML
     private void onAdd() {
-        if (!UserSession.isAdmin()) {.
+        if (!UserSession.isAdmin()) {
             showError("Access Denied",
                     "Only ADMIN can create investments.");
             return;
