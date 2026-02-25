@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.example.finora.controllers.CandidatureController"
+
+            styleClass="root">
+
+    <top>
+        <HBox spacing="12" styleClass="topbar">
+            <padding>
+                <Insets top="14" right="18" bottom="14" left="18"/>
+            </padding>
+
+            <VBox spacing="2">
+                <Label text="Gestion des Candidatures" styleClass="title"/>
+                <Label text="Afficher, ajouter, modifier, supprimer des candidatures" styleClass="subtitle"/>
+            </VBox>
+
+            <Pane HBox.hgrow="ALWAYS"/>
+
+            <TextField fx:id="searchField" promptText="Rechercher par nom / email..." styleClass="search"/>
+            <Button text="Nouveau" styleClass="primary-btn" onAction="#onNew"/>
+        </HBox>
+    </top>
+
+    <center>
+        <VBox spacing="12" styleClass="content">
+            <padding>
+                <Insets top="16" right="18" bottom="18" left="18"/>
+            </padding>
+
+            <VBox spacing="10" styleClass="card">
+                <HBox spacing="10">
+                    <Label text="Liste des candidatures" styleClass="section-title"/>
+                    <Pane HBox.hgrow="ALWAYS"/>
+                    <Button text="Actualiser" styleClass="ghost-btn" onAction="#onRefresh"/>
+                    <Button text="Modifier" styleClass="ghost-btn" onAction="#onEdit"/>
+                    <Button text="Supprimer" styleClass="danger-btn" onAction="#onDelete"/>
+                </HBox>
+
+                <HBox spacing="10" alignment="CENTER_LEFT">
+                    <Label text="Filtrer par Appel d’Offre:" styleClass="muted"/>
+
+                    <ComboBox fx:id="appelOffreFilterCombo"
+                              promptText="Choisir un appel d’offre..."
+                              prefWidth="280"/>
+
+                    <Button text="Appliquer" styleClass="ghost-btn" onAction="#onApplyFilter"/>
+                    <Button text="Reset" styleClass="ghost-btn" onAction="#onResetFilter"/>
+                </HBox>
+
+                <ListView fx:id="listView" styleClass="list-cards" VBox.vgrow="ALWAYS"/>
+
+
+            </VBox>
+        </VBox>
+    </center>
+</BorderPane>

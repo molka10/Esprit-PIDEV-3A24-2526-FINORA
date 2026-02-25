@@ -1,4 +1,4 @@
-module com.example.project_pi {
+module com.example.finora {
     requires org.apache.pdfbox;
     // ===== Required JavaFX modules =====
     requires javafx.controls;
@@ -11,18 +11,18 @@ module com.example.project_pi {
     requires jakarta.mail;      // Email
 
     // ===== Allow FXML to access controllers =====
-    opens com.example.project_pi.controllers to javafx.fxml;
+    opens com.example.finora.controllers to javafx.fxml;
 
     // ===== Allow FXML to access main app package =====
-    opens com.example.project_pi to javafx.fxml;
+    opens com.example.finora to javafx.fxml;
 
     // ===== Allow TableView / PropertyValueFactory to access entity fields =====
-    opens com.example.project_pi.entities to javafx.base;
+    opens com.example.finora.entities to javafx.base;
 
     // ===== Export packages =====
-    exports com.example.project_pi;
-    exports com.example.project_pi.controllers;
-    exports com.example.project_pi.entities;
-    exports com.example.project_pi.services;
-    exports com.example.project_pi.utils;
+    exports com.example.finora;
+    exports com.example.finora.controllers;
+    exports com.example.finora.entities;
+    exports com.example.finora.services;
+    exports com.example.finora.utils;
 }
