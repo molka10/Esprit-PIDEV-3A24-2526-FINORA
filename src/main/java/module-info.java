@@ -1,4 +1,4 @@
-module tn.finora.finorainves {
+module com.example.finora.finorainves {
     requires javafx.controls;
     requires javafx.fxml;
     requires org.apache.poi.ooxml;
@@ -8,8 +8,8 @@ module tn.finora.finorainves {
     requires java.sql;
     requires mysql.connector.j;
     requires java.net.http;
-    opens tn.finora.finorainves to javafx.fxml;
-    opens tn.finora.controllers to javafx.fxml;  // ← AJOUTE CETTE LIGNE
+    opens com.example.finora.finorainves to javafx.fxml;
+    opens com.example.finora.controllers to javafx.fxml;  // ← AJOUTE CETTE LIGNE
 
-    exports tn.finora.finorainves;
+    exports com.example.finora.finorainves;
 }

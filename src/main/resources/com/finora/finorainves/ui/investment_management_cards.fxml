@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.chart.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.example.finora.controllers.InvestmentManagementCardsController"
+            stylesheets="@../styles/style.css"
+            styleClass="app-root">
+
+    <!-- ================= HEADER ================= -->
+    <top>
+        <VBox spacing="20" styleClass="header-section">
+
+            <!-- ===== TOOLBAR ===== -->
+            <HBox spacing="12" alignment="CENTER_LEFT">
+
+                <Button text="＋ Add Management"
+                        onAction="#onAdd"
+                        styleClass="btn-primary"
+                        prefHeight="38"/>
+
+                <Button text="⟳ Refresh"
+                        onAction="#onRefresh"
+                        styleClass="btn-secondary"
+                        prefHeight="38"/>
+
+                <!-- Spacer -->
+                <Region HBox.hgrow="ALWAYS"/>
+
+                <ToggleButton text="🌙 Dark Mode"
+                              onAction="#toggleDarkMode"
+                              styleClass="btn-dark-toggle"
+                              prefHeight="38"
+                              prefWidth="130"/>
+
+                <Button text="⬅ Back"
+                        onAction="#goToInvestments"
+                        styleClass="btn-secondary"
+                        prefHeight="38"/>
+
+            </HBox>
+
+            <!-- ===== KPI SECTION ===== -->
+            <HBox spacing="25">
+
+                <VBox styleClass="glass-kpi-card">
+                    <Label text="Total Management"
+                           styleClass="kpi-title"/>
+                    <Label fx:id="totalManagementLabel"
+                           text="0"
+                           styleClass="kpi-value"/>
+                </VBox>
+
+                <VBox styleClass="glass-kpi-card">
+                    <Label text="Total Invested"
+                           styleClass="kpi-title"/>
+                    <Label fx:id="totalInvestedLabel"
+                           text="\$0"
+                           styleClass="kpi-value"/>
+                </VBox>
+
+                <VBox styleClass="glass-kpi-card">
+                    <Label text="Active Ratio"
+                           styleClass="kpi-title"/>
+                    <Label fx:id="activeRatioLabel"
+                           text="0%"
+                           styleClass="kpi-value"/>
+                </VBox>
+
+            </HBox>
+
+        </VBox>
+    </top>
+
+    <!-- ================= MAIN ================= -->
+    <center>
+        <VBox spacing="25"
+              styleClass="content-section">
+
+            <!-- ===== CHARTS SECTION ===== -->
+            <HBox spacing="30">
+
+                <PieChart fx:id="statusPieChart"
+                          title="Status Distribution"
+                          prefHeight="280"
+                          styleClass="glass-chart"/>
+
+                <BarChart fx:id="amountBarChart"
+                          title="Total Amount by Type"
+                          prefHeight="280"
+                          styleClass="glass-chart">
+
+                    <xAxis>
+                        <CategoryAxis fx:id="typeAxis"
+                                      label="Investment Type"/>
+                    </xAxis>
+
+                    <yAxis>
+                        <NumberAxis fx:id="amountAxis"
+                                    label="Amount Invested"/>
+                    </yAxis>
+
+                </BarChart>
+
+            </HBox>
+
+            <!-- ===== CARDS SECTION ===== -->
+            <ScrollPane fx:id="cardsScrollPane"
+                        fitToWidth="true"
+                        styleClass="transparent-scroll">
+
+                <content>
+                    <FlowPane fx:id="cardsPane"
+                              hgap="20"
+                              vgap="20"
+                              prefWrapLength="1200"
+                              styleClass="cards-zone">
+
+                        <padding>
+                            <Insets top="20"
+                                    right="20"
+                                    bottom="20"
+                                    left="20"/>
+                        </padding>
+
+                    </FlowPane>
+                </content>
+
+            </ScrollPane>
+
+        </VBox>
+    </center>
+
+</BorderPane>
