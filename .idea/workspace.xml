@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="c29a7d9c-7ce5-447a-8626-457253968d65" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/module-info.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/module-info.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/tn/finora/controllers/InvestmentCardsController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/finora/controllers/InvestmentCardsController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/tn/finora/controllers/InvestmentFormController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/finora/controllers/InvestmentFormController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/tn/finora/controllers/InvestmentManagementCardsController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/finora/controllers/InvestmentManagementCardsController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/tn/finora/controllers/InvestmentManagementFormController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/finora/controllers/InvestmentManagementFormController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/tn/finora/controllers/RoleChoiceController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/finora/controllers/RoleChoiceController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/tn/finora/entities/Investment.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/finora/entities/Investment.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/tn/finora/entities/InvestmentManagement.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/finora/entities/InvestmentManagement.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/tn/finora/finorainves/AppState.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/finora/finorainves/AppState.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/tn/finora/finorainves/HelloApplication.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/finora/finorainves/HelloApplication.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/tn/finora/finorainves/HelloController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/finora/finorainves/HelloController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/tn/finora/finorainves/Launcher.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/finora/finorainves/Launcher.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/tn/finora/finorainves/SceneNavigator.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/finora/finorainves/SceneNavigator.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/tn/finora/main/TestInvestmentCRUD.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/finora/main/TestInvestmentCRUD.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/tn/finora/main/TestInvestmentManagementCRUD.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/finora/main/TestInvestmentManagementCRUD.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/tn/finora/main/testbd.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/finora/main/testbd.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/tn/finora/services/ExternalTrendService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/finora/services/ExternalTrendService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/tn/finora/services/InvestmentManagementService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/finora/services/InvestmentManagementService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/tn/finora/services/InvestmentService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/finora/services/InvestmentService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/tn/finora/services/RecommendationApiService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/finora/services/RecommendationApiService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/tn/finora/services/SmartRecommendationService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/finora/services/SmartRecommendationService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/tn/finora/utils/AppRole.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/finora/utils/AppRole.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/tn/finora/utils/DBConnection.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/finora/utils/DBConnection.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/tn/finora/utils/UserSession.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/finora/utils/UserSession.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/tn/finora/finorainves/hello-view.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/com/finora/finorainves/hello-view.fxml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/tn/finora/finorainves/styles/style.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/com/finora/finorainves/styles/style.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/tn/finora/finorainves/ui/RoleChoice.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/com/finora/finorainves/ui/RoleChoice.fxml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/tn/finora/finorainves/ui/investment_cards.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/com/finora/finorainves/ui/investment_cards.fxml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/tn/finora/finorainves/ui/investment_form.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/com/finora/finorainves/ui/investment_form.fxml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/tn/finora/finorainves/ui/investment_management_cards.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/com/finora/finorainves/ui/investment_management_cards.fxml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/tn/finora/finorainves/ui/investment_management_form.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/com/finora/finorainves/ui/investment_management_form.fxml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/java/tn/finora/tests/InvestmentManagementServiceTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/com/finora/tests/InvestmentManagementServiceTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/java/tn/finora/tests/InvestmentServiceTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/com/finora/tests/InvestmentServiceTest.java" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="FxmlFile" />
+        <option value="Class" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="MavenImportPreferences">
+    <option name="generalSettings">
+      <MavenGeneralSettings>
+        <option name="mavenHomeTypeForPersistence" value="WRAPPER" />
+      </MavenGeneralSettings>
+    </option>
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;customColor&quot;: &quot;&quot;,
+  &quot;associatedIndex&quot;: 6
+}</component>
+  <component name="ProjectId" id="3A1NHUtz18y37Iq3XNM6ajWf1I7" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Application.HelloApplication.executor&quot;: &quot;Run&quot;,
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;investissement&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/khemi/Documents/FinoraInves(crud kdim)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  }
+}</component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\khemi\Documents\FinoraInves(crud kdim)\src\main\java\com\example" />
+    </key>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-jdk-30f59d01ecdd-2fc7cc6b9a17-intellij.indexing.shared.core-IU-253.30387.90" />
+        <option value="bundled-js-predefined-d6986cc7102b-9b0f141eb926-JavaScript-IU-253.30387.90" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="c29a7d9c-7ce5-447a-8626-457253968d65" name="Changes" comment="" />
+      <created>1771756030130</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1771756030130</updated>
+      <workItem from="1771756031381" duration="18845000" />
+      <workItem from="1771807092518" duration="6056000" />
+      <workItem from="1771832799685" duration="3195000" />
+      <workItem from="1771875108923" duration="18529000" />
+      <workItem from="1771946161541" duration="4019000" />
+      <workItem from="1771961716701" duration="5945000" />
+      <workItem from="1771969530909" duration="7334000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+</project>
