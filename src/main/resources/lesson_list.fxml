@@ -6,7 +6,7 @@
 
 <BorderPane xmlns="http://javafx.com/javafx/17"
             xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="tn.finora.controllers.LessonListController">
+            fx:controller="com.example.finora.controllers.LessonListController">
 
     <top>
         <VBox spacing="0" styleClass="card">

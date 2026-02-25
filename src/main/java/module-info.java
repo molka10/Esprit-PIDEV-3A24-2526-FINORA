@@ -11,15 +11,15 @@ module tn.finora.finoraformation {
 
     requires itextpdf;
 
-    opens tn.finora.finoraformation to javafx.fxml;
-    opens tn.finora.controllers to javafx.fxml;
+    opens com.example.finora.finoraformation to javafx.fxml;
+    opens com.example.finora.controllers to javafx.fxml;
 
 
 
 
-    exports tn.finora.finoraformation;
-    exports tn.finora.controllers;
-    exports tn.finora.entities;
-    exports tn.finora.services;
-    exports tn.finora.utils;
+    exports com.example.finora.finoraformation;
+    exports com.example.finora.controllers;
+    exports com.example.finora.entities;
+    exports com.example.finora.services;
+    exports com.example.finora.utils;
 }

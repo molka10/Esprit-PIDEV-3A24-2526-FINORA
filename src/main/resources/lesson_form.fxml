@@ -5,7 +5,7 @@
 
 <VBox xmlns="http://javafx.com/javafx"
       xmlns:fx="http://javafx.com/fxml"
-      fx:controller="tn.finora.controllers.LessonFormController"
+      fx:controller="com.example.finora.controllers.LessonFormController"
       spacing="12" styleClass="card">
 
     <Label fx:id="lblTitle" text="Ajouter Lesson" styleClass="title"/>

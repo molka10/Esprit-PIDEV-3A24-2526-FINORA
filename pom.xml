@@ -96,7 +96,7 @@
                 <artifactId>javafx-maven-plugin</artifactId>
                 <version>0.0.8</version>
                 <configuration>
-                    <mainClass>tn.finora.finoraformation/tn.finora.finoraformation.HelloApplication</mainClass>
+                    <mainClass>tn.finora.finoraformation/com.example.finora.finoraformation.HelloApplication</mainClass>
                 </configuration>
             </plugin>
 

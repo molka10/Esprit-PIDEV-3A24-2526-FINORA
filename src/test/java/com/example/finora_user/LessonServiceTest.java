@@ -1,8 +1,9 @@
 package tn.finora.services;
 
+import com.example.finora.services.LessonService;
 import org.junit.jupiter.api.*;
-import tn.finora.entities.Lesson;
-import tn.finora.utils.DBConnection;
+import com.example.finora.entities.Lesson;
+import com.example.finora.utils.DBConnection;
 
 import java.sql.*;
 import java.util.List;
