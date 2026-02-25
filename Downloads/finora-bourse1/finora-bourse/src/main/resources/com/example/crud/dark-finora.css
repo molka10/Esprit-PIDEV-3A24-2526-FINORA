@@ -1,0 +1,148 @@
+.root {
+    -fx-background-color: #0b1220;
+    -fx-font-family: "Segoe UI";
+}
+
+.page {
+    -fx-background-color: transparent;
+}
+
+.header {
+    -fx-background-color: #0f172a;
+    -fx-border-color: rgba(255,255,255,0.06);
+    -fx-border-width: 0 0 1 0;
+}
+
+.header-title {
+    -fx-text-fill: white;
+    -fx-font-size: 24px;
+    -fx-font-weight: 800;
+}
+
+.btn-primary {
+    -fx-background-color: #00d4aa;
+    -fx-text-fill: #06121c;
+    -fx-font-weight: 800;
+    -fx-background-radius: 10;
+    -fx-padding: 10 16;
+    -fx-cursor: hand;
+}
+
+.btn-secondary {
+    -fx-background-color: rgba(255,255,255,0.08);
+    -fx-text-fill: white;
+    -fx-font-weight: 700;
+    -fx-background-radius: 10;
+    -fx-padding: 10 16;
+    -fx-cursor: hand;
+    -fx-border-color: rgba(255,255,255,0.10);
+    -fx-border-radius: 10;
+}
+
+.stat-card {
+    -fx-background-color: rgba(255,255,255,0.04);
+    -fx-background-radius: 14;
+    -fx-padding: 18;
+    -fx-border-color: rgba(255,255,255,0.06);
+    -fx-border-radius: 14;
+}
+
+.stat-title {
+    -fx-text-fill: rgba(255,255,255,0.55);
+    -fx-font-size: 12px;
+    -fx-font-weight: 700;
+}
+
+.stat-value-green {
+    -fx-text-fill: #00d4aa;
+    -fx-font-size: 28px;
+    -fx-font-weight: 900;
+}
+
+.stat-value-yellow {
+    -fx-text-fill: #f59e0b;
+    -fx-font-size: 28px;
+    -fx-font-weight: 900;
+}
+
+.stat-value-purple {
+    -fx-text-fill: #7c83ff;
+    -fx-font-size: 28px;
+    -fx-font-weight: 900;
+}
+
+.panel {
+    -fx-background-color: rgba(255,255,255,0.04);
+    -fx-background-radius: 16;
+    -fx-padding: 14;
+    -fx-border-color: rgba(255,255,255,0.06);
+    -fx-border-radius: 16;
+}
+
+.panel-header {
+    -fx-padding: 6 6 2 6;
+}
+
+.panel-title {
+    -fx-text-fill: white;
+    -fx-font-size: 16px;
+    -fx-font-weight: 800;
+}
+
+.field {
+    -fx-background-color: rgba(255,255,255,0.06);
+    -fx-text-fill: white;
+    -fx-prompt-text-fill: rgba(255,255,255,0.45);
+    -fx-background-radius: 10;
+    -fx-padding: 10 12;
+    -fx-border-color: rgba(255,255,255,0.08);
+    -fx-border-radius: 10;
+}
+
+.table {
+    -fx-background-color: transparent;
+    -fx-control-inner-background: rgba(255,255,255,0.02);
+    -fx-control-inner-background-alt: rgba(255,255,255,0.03);
+    -fx-table-cell-border-color: rgba(255,255,255,0.06);
+    -fx-border-color: rgba(255,255,255,0.06);
+    -fx-border-radius: 12;
+    -fx-background-radius: 12;
+}
+
+.table .column-header-background {
+    -fx-background-color: rgba(255,255,255,0.04);
+}
+
+.table .column-header, .table .filler {
+    -fx-background-color: transparent;
+}
+
+.table .label {
+    -fx-text-fill: rgba(255,255,255,0.70);
+    -fx-font-weight: 700;
+}
+
+.table .table-row-cell {
+    -fx-text-fill: rgba(255,255,255,0.85);
+}
+
+.muted {
+    -fx-text-fill: rgba(255,255,255,0.45);
+}
+.btn-blue {
+    -fx-background-color: #3b82f6;
+    -fx-text-fill: white;
+    -fx-font-weight: 800;
+    -fx-background-radius: 10;
+    -fx-padding: 8 14;
+    -fx-cursor: hand;
+}
+
+.btn-red {
+    -fx-background-color: #ef4444;
+    -fx-text-fill: white;
+    -fx-font-weight: 800;
+    -fx-background-radius: 10;
+    -fx-padding: 8 14;
+    -fx-cursor: hand;
+}
