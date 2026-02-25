@@ -1,6 +1,6 @@
 package com.example.crud.services;
 
-import com.example.crud.models.Transaction;
+import com.example.crud.entities.Transaction;
 
 import java.io.*;
 import java.text.SimpleDateFormat;

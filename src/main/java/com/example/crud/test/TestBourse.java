@@ -1,6 +1,6 @@
 package com.example.crud.test;
 
-import com.example.crud.models.Bourse;
+import com.example.crud.entities.Bourse;
 import com.example.crud.services.ServiceBourse;
 
 import java.util.List;

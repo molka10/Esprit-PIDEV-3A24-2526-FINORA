@@ -1,6 +1,6 @@
 package com.example.crud.services;
 
-import com.example.crud.models.Commission;
+import com.example.crud.entities.Commission;
 import com.example.crud.utils.Database;
 
 import java.sql.*;

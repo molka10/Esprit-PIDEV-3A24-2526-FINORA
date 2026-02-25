@@ -1,6 +1,6 @@
 package com.example.crud.controllers;
 
-import com.example.crud.models.Bourse;
+import com.example.crud.entities.Bourse;
 import com.example.crud.services.ServiceBourse;
 import com.example.crud.services.ServiceDevise;
 import javafx.collections.FXCollections;

@@ -1,6 +1,6 @@
 package com.example.crud.services;
 
-import com.example.crud.models.Action;
+import com.example.crud.entities.Action;
 import org.json.JSONArray;
 import org.json.JSONObject;
 

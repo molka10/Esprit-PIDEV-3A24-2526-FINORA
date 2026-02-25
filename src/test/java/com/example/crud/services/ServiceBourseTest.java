@@ -1,6 +1,6 @@
 package com.example.crud.services;
 
-import com.example.crud.models.Bourse;
+import com.example.crud.entities.Bourse;
 import org.junit.jupiter.api.*;
 
 import java.util.List;

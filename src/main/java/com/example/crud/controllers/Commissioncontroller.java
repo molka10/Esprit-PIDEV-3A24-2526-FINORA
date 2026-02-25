@@ -1,6 +1,6 @@
 package com.example.crud.controllers;
 
-import com.example.crud.models.Commission;
+import com.example.crud.entities.Commission;
 import com.example.crud.services.Servicecommission;
 import javafx.collections.FXCollections;
 import javafx.concurrent.Task;

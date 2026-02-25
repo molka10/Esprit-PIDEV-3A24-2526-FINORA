@@ -1,4 +1,4 @@
-package com.example.crud.models;
+package com.example.crud.entities;
 
 import java.sql.Timestamp;
 

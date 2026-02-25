@@ -1,6 +1,6 @@
 package com.example.crud.controllers;
 
-import com.example.crud.models.Action;
+import com.example.crud.entities.Action;
 import com.example.crud.services.ServiceAction;
 import com.example.crud.services.ServicePrediction;
 import com.example.crud.services.ServicePrediction.ResultatPrediction;

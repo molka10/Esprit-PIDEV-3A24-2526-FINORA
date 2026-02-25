@@ -1,7 +1,7 @@
 package com.example.crud.controllers;
 
-import com.example.crud.models.Action;
-import com.example.crud.models.Bourse;
+import com.example.crud.entities.Action;
+import com.example.crud.entities.Bourse;
 import com.example.crud.services.ServiceAction;
 import com.example.crud.services.ServiceBourse;
 import com.example.crud.services.ServiceTransaction;
@@ -19,7 +19,6 @@ import javafx.scene.Scene;
 import javafx.scene.chart.*;
 import javafx.scene.control.Label;
 import javafx.scene.layout.*;
-import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
 import java.net.URL;

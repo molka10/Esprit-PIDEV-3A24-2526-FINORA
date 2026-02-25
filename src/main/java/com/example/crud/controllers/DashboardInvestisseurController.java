@@ -1,7 +1,7 @@
 package com.example.crud.controllers;
 
-import com.example.crud.models.Action;
-import com.example.crud.models.Transaction;
+import com.example.crud.entities.Action;
+import com.example.crud.entities.Transaction;
 import com.example.crud.services.ServiceAction;
 import com.example.crud.services.ServiceBourse;
 import com.example.crud.services.ServiceTransaction;

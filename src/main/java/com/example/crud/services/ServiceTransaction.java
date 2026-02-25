@@ -1,8 +1,8 @@
 package com.example.crud.services;
 
-import com.example.crud.models.Action;
-import com.example.crud.models.Bourse;
-import com.example.crud.models.Transaction;
+import com.example.crud.entities.Action;
+import com.example.crud.entities.Bourse;
+import com.example.crud.entities.Transaction;
 import com.example.crud.utils.Database;
 
 import java.sql.*;
