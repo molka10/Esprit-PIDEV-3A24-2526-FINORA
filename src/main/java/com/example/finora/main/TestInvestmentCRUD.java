@@ -1,7 +1,7 @@
 package com.example.finora.main;
 
-import tn.finora.entities.Investment;
-import tn.finora.services.InvestmentService;
+import com.example.finora.entities.Investment;
+import com.example.finora.services.InvestmentService;
 
 import java.math.BigDecimal;
 import java.util.List;

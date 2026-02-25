@@ -4,10 +4,10 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import tn.finora.entities.Investment;
-import tn.finora.finorainves.AppState;
-import tn.finora.finorainves.SceneNavigator;
-import tn.finora.services.InvestmentService;
+import com.example.finora.entities.Investment;
+import com.example.finora.finorainves.AppState;
+import com.example.finora.finorainves.SceneNavigator;
+import com.example.finora.services.InvestmentService;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;

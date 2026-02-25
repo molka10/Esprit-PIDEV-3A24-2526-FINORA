@@ -17,10 +17,10 @@ import javafx.util.Duration;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
-import tn.finora.entities.InvestmentManagement;
-import tn.finora.finorainves.AppState;
-import tn.finora.finorainves.SceneNavigator;
-import tn.finora.services.InvestmentManagementService;
+import com.example.finora.entities.InvestmentManagement;
+import com.example.finora.finorainves.AppState;
+import com.example.finora.finorainves.SceneNavigator;
+import com.example.finora.services.InvestmentManagementService;
 
 import java.io.File;
 import java.io.FileOutputStream;

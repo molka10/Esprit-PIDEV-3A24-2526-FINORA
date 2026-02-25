@@ -1,9 +1,9 @@
 package com.finora.tests;
 
 import org.junit.jupiter.api.Test;
-import tn.finora.entities.InvestmentManagement;
-import tn.finora.services.InvestmentManagementService;
-import tn.finora.utils.DBConnection;
+import com.example.finora.entities.InvestmentManagement;
+import com.example.finora.services.InvestmentManagementService;
+import com.example.finora.utils.DBConnection;
 
 import java.math.BigDecimal;
 import java.sql.*;

@@ -1,7 +1,7 @@
 package com.example.finora.services;
 
-import tn.finora.entities.InvestmentManagement;
-import tn.finora.utils.DBConnection;
+import com.example.finora.entities.InvestmentManagement;
+import com.example.finora.utils.DBConnection;
 
 import java.math.BigDecimal;
 import java.sql.*;

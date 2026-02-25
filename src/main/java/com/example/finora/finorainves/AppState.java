@@ -1,7 +1,7 @@
 package com.example.finora.finorainves;
 
-import tn.finora.entities.Investment;
-import tn.finora.entities.InvestmentManagement;
+import com.example.finora.entities.Investment;
+import com.example.finora.entities.InvestmentManagement;
 
 public class AppState {
     private static Investment selectedInvestment;

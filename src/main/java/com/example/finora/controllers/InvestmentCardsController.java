@@ -1,6 +1,6 @@
 package com.example.finora.controllers;
 
-import tn.finora.services.RecommendationApiService;
+import com.example.finora.services.RecommendationApiService;
 import javafx.animation.ScaleTransition;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
@@ -10,11 +10,11 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.util.Duration;
-import tn.finora.entities.Investment;
-import tn.finora.finorainves.AppState;
-import tn.finora.finorainves.SceneNavigator;
-import tn.finora.utils.DBConnection;
-import tn.finora.utils.UserSession;
+import com.example.finora.entities.Investment;
+import com.example.finora.finorainves.AppState;
+import com.example.finora.finorainves.SceneNavigator;
+import com.example.finora.utils.DBConnection;
+import com.example.finora.utils.UserSession;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
