@@ -1,4 +1,4 @@
-module com.example.finora_user {
+module com.example.finora {
     requires javafx.controls;
     requires javafx.fxml;
     requires java.sql;
@@ -11,10 +11,10 @@ module com.example.finora_user {
 
 
     // allow FXMLLoader to create controllers via reflection
-    opens com.example.finora_user.controllers to javafx.fxml;
+    opens com.example.finora.controllers to javafx.fxml;
 
     // allow TableView PropertyValueFactory to read entity properties
-    opens com.example.finora_user.entities to javafx.base;
+    opens com.example.finora.entities to javafx.base;
 
-    exports com.example.finora_user;
+    exports com.example.finora;
 }

@@ -24,6 +24,11 @@
     </properties>
 
     <dependencies>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-web</artifactId>
+            <version>${javafx.version}</version>
+        </dependency>
 
         <!-- ✅ JavaFX -->
         <dependency>
@@ -109,7 +114,7 @@
                     <execution>
                         <id>default-cli</id>
                         <configuration>
-                            <mainClass>com.example.finora_user/com.example.finora_user.HelloApplication</mainClass>
+                            <mainClass>com.example.finora_user/com.example.finora.HelloApplication</mainClass>
                             <launcher>app</launcher>
                             <jlinkZipName>app</jlinkZipName>
                             <jlinkImageName>app</jlinkImageName>

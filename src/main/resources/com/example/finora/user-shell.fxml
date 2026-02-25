@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.example.finora.controllers.UserShellController"
+            stylesheets="@theme.css" styleClass="root-bg">
+
+    <top>
+        <HBox styleClass="topbar" alignment="CENTER_LEFT" spacing="10">
+            <padding><Insets top="12" right="16" bottom="12" left="16"/></padding>
+            <children>
+                <Label text="Finora • Dashboard" styleClass="topbar-title"/>
+                <Region HBox.hgrow="ALWAYS"/>
+
+                <!-- PROFILE BUTTON -->
+                <Button onAction="#goProfile" styleClass="profile-btn">
+                    <graphic>
+                        <HBox spacing="8" alignment="CENTER_LEFT">
+                            <StackPane styleClass="avatar">
+                                <Label fx:id="avatarText" text="U" styleClass="avatar-text"/>
+                            </StackPane>
+                            <Label fx:id="profileNameLabel" text="Profil" styleClass="profile-name"/>
+                        </HBox>
+                    </graphic>
+                </Button>
+
+                <Button text="Déconnexion" onAction="#logout" styleClass="btn-ghost"/>
+            </children>
+        </HBox>
+    </top>
+
+    <left>
+        <VBox spacing="10" styleClass="card" prefWidth="220">
+            <padding><Insets top="14" right="14" bottom="14" left="14"/></padding>
+
+            <children>
+                <Label text="Menu" styleClass="h2"/>
+
+                <Button text="Bourse" onAction="#goBourse" styleClass="btn-secondary" maxWidth="Infinity"/>
+                <Button text="Portefeuille" onAction="#goPortefeuille" styleClass="btn-secondary" maxWidth="Infinity"/>
+                <Button text="Appel d'offre" onAction="#goAppelOffre" styleClass="btn-secondary" maxWidth="Infinity"/>
+            </children>
+        </VBox>
+    </left>
+
+    <center>
+        <StackPane fx:id="contentArea">
+            <Label text="Bienvenue" styleClass="h2"/>
+        </StackPane>
+    </center>
+
+</BorderPane>
