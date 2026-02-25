@@ -17,6 +17,7 @@ import tn.finora.entities.Formation;
 import tn.finora.finoraformation.HelloApplication;
 import tn.finora.services.FormationService;
 import tn.finora.utils.UserSession;
+import tn.finora.services.SpeechToTextService; // ✅ ADDED
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -33,29 +34,30 @@ public class FormationListController {
     @FXML private Button btnAdd;
     @FXML private Button btnEdit;
     @FXML private Button btnDelete;
-    @FXML private Button btnQuizResults;  // ✅ matches fx:id in FXML now
+    @FXML private Button btnQuizResults;
+
+    @FXML private Button btnMic; // ✅ ADDED (must match fx:id in FXML)
 
     private final FormationService service = new FormationService();
+    private final SpeechToTextService sttService = new SpeechToTextService(); // ✅ ADDED
+
     private Formation selected;
     private List<Formation> allFormations = new ArrayList<>();
 
     @FXML
     public void initialize() {
         initSort();
-        applyRolePermissions(); // ✅ single place for all role-based visibility
+        applyRolePermissions();
         refresh();
     }
 
-    // ✅ All role-based show/hide logic in ONE place — clean
     private void applyRolePermissions() {
         boolean admin = UserSession.isAdmin();
 
-        // Toolbar buttons
         if (btnAdd    != null) { btnAdd.setVisible(admin);         btnAdd.setManaged(admin); }
         if (btnEdit   != null) { btnEdit.setVisible(admin);        btnEdit.setManaged(admin); }
         if (btnDelete != null) { btnDelete.setVisible(admin);      btnDelete.setManaged(admin); }
 
-        // ✅ FIX: quiz results only visible to admin
         if (btnQuizResults != null) {
             btnQuizResults.setVisible(admin);
             btnQuizResults.setManaged(admin);
@@ -90,6 +92,38 @@ public class FormationListController {
 
     @FXML private void onSearch() { applySearchAndSort(); }
     @FXML private void onSort()   { applySearchAndSort(); }
+
+    // ===============================
+    // ✅ STT VOICE SEARCH
+    // ===============================
+
+    @FXML
+    private void onToggleVoice() {
+
+        if (!sttService.isListening()) {
+
+            btnMic.setText("⏹");
+
+            sttService.startListening(text -> {
+
+                javafx.application.Platform.runLater(() -> {
+
+                    txtSearch.setText(text);
+                    onSearch();
+
+                });
+
+            });
+
+        } else {
+
+            sttService.stopListening();
+            btnMic.setText("🎤");
+
+        }
+    }
+
+    // ===============================
 
     @FXML
     private void onAdd() {

@@ -37,7 +37,12 @@
                     <ComboBox fx:id="cbSort"
                               prefWidth="200"
                               onAction="#onSort"/>
+                    <Button fx:id="btnMic"
+                            text="🎤"
+                            onAction="#onToggleVoice"/>
+
                 </HBox>
+
 
                 <Region HBox.hgrow="ALWAYS"/>
 

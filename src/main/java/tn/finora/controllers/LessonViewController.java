@@ -24,7 +24,7 @@ import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.scene.media.MediaView;
 import tn.finora.services.SpeechService;
-
+import tn.finora.services.SpeechToTextService;
 import java.awt.Desktop;
 import java.net.URI;
 import java.util.*;
@@ -80,6 +80,7 @@ public class LessonViewController {
 
     // ✅ TTS
     private final SpeechService speechService = new SpeechService();
+
 
     public void setOnBack(Runnable onBack) {
         this.onBack = onBack;

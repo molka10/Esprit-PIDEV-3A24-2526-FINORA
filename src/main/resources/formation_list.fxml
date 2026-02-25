@@ -21,49 +21,68 @@
                 <Insets top="16" right="16" bottom="16" left="16"/>
             </padding>
 
-            <HBox spacing="10" styleClass="toolbar" alignment="CENTER_LEFT">
-                <TextField fx:id="txtSearch"
-                           promptText="Rechercher (titre / catégorie / niveau)..."
-                           onKeyReleased="#onSearch"
-                           prefWidth="320"/>
+            <!-- ================= TOOLBAR ================= -->
+            <HBox spacing="12" styleClass="toolbar" alignment="CENTER_LEFT">
 
+                <!-- SEARCH + MIC -->
+                <HBox spacing="8" alignment="CENTER_LEFT" HBox.hgrow="ALWAYS">
+
+                    <TextField fx:id="txtSearch"
+                               promptText="Rechercher (titre / catégorie / niveau)..."
+                               onKeyReleased="#onSearch"
+                               HBox.hgrow="ALWAYS"/>
+
+                    <Button fx:id="btnMic"
+                            text="🎤"
+                            onAction="#onToggleVoice"/>
+                </HBox>
+
+                <!-- SORT -->
                 <ComboBox fx:id="cbSort"
                           prefWidth="220"
                           onAction="#onSort"/>
 
-                <!-- Admin only buttons -->
+                <!-- ADMIN BUTTONS -->
                 <Button fx:id="btnAdd"
                         text="➕ Ajouter"
                         styleClass="btn-primary"
                         onAction="#onAdd"/>
+
                 <Button fx:id="btnEdit"
                         text="✏ Modifier"
                         styleClass="btn-ghost"
                         onAction="#onEdit"/>
+
                 <Button fx:id="btnDelete"
                         text="🗑 Supprimer"
                         styleClass="btn-danger"
                         onAction="#onDelete"/>
 
-                <!-- ✅ FIX: added fx:id so controller can show/hide it -->
                 <Button fx:id="btnQuizResults"
                         text="📊 Résultats Quiz"
                         styleClass="btn-ghost"
                         onAction="#goQuizResults"/>
 
+                <!-- PUSH RIGHT SIDE -->
                 <Region HBox.hgrow="ALWAYS"/>
 
+                <!-- NAVIGATION -->
                 <Button text="📚 Lessons"
                         styleClass="btn-ghost"
                         onAction="#goLessons"/>
+
                 <Button text="🔁 Changer espace"
                         styleClass="btn-ghost"
                         onAction="#goRoleChoice"/>
+
             </HBox>
+            <!-- =========================================== -->
 
             <ScrollPane fitToWidth="true" styleClass="scroll">
                 <content>
-                    <VBox fx:id="cardsContainer" spacing="12" styleClass="cards"/>
+                    <VBox fx:id="cardsContainer"
+                          spacing="12"
+                          styleClass="cards"/>
                 </content>
             </ScrollPane>
 

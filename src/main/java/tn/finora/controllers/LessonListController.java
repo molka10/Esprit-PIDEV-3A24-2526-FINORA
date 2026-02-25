@@ -15,7 +15,7 @@ import tn.finora.finoraformation.HelloApplication;
 import tn.finora.services.FormationService;
 import tn.finora.services.LessonService;
 import tn.finora.utils.UserSession;
-
+import tn.finora.services.SpeechToTextService;
 import java.net.URI;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -35,6 +35,7 @@ public class LessonListController {
 
     private final LessonService lessonService = new LessonService();
     private final FormationService formationService = new FormationService();
+    private final SpeechToTextService sttService = new SpeechToTextService();
 
     private List<Lesson> allLessons = new ArrayList<>();
     private List<Lesson> lastDisplayed = new ArrayList<>();
@@ -342,7 +343,7 @@ public class LessonListController {
                 }
             }
 
-            controller.setLessons(displayedList, idx, formation);
+            controller  .setLessons(displayedList, idx, formation);
 
             Stage popup = new Stage();
             popup.setTitle("Leçon — " + lesson.getTitre());
@@ -382,6 +383,31 @@ public class LessonListController {
             }
         }
     }
+    @FXML
+    private Button btnMic;
+
+    @FXML
+    private void onToggleVoice() {
+
+        if (!sttService.isListening()) {
+
+            btnMic.setText("⏹"); // show stop icon
+
+            sttService.startListening(text -> {
+
+                javafx.application.Platform.runLater(() -> {
+                    txtSearch.setText(text);
+                    onSearch(); // your existing filter method
+                });
+            });
+
+        } else {
+
+            sttService.stopListening();
+            btnMic.setText("🎤");
+        }
+    }
+
 
     @FXML
     private void goFormations() {
