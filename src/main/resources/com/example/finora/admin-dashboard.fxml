@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.chart.*?>
+
+<StackPane prefWidth="1400" prefHeight="900"
+           xmlns="http://javafx.com/javafx/8"
+           xmlns:fx="http://javafx.com/fxml/1"
+           fx:controller="com.example.finora.controllers.AdminController"
+           stylesheets="@dashboard.css">
+
+    <ScrollPane fitToWidth="true"
+                hbarPolicy="NEVER"
+                vbarPolicy="AS_NEEDED"
+                styleClass="main-scroll">
+
+        <VBox spacing="30"
+              alignment="TOP_CENTER"
+              styleClass="main-container"
+              maxWidth="1500">
+
+            <!-- ================= HEADER ================= -->
+            <HBox alignment="CENTER_LEFT" spacing="25">
+
+                <Button text="Retour"
+                        fx:id="backButton"
+                        onAction="#goBack"
+                        styleClass="btn-primary"/>
+
+                <Label text="📊 ADMIN DASHBOARD"
+                       styleClass="title"/>
+
+                <Region HBox.hgrow="ALWAYS"/>
+
+
+                <Button text=" 📄 Download PDF"
+                        onAction="#downloadPDF"
+                        styleClass="btn-secondary"
+                        prefWidth="200"/>
+
+            </HBox>
+
+            <!-- ================= MAIN 2 COLUMNS ================= -->
+            <HBox spacing="40" alignment="TOP_CENTER">
+
+                <!-- ===== LEFT SIDE : CHARTS ===== -->
+                <VBox spacing="30"
+                      prefWidth="600"
+                      HBox.hgrow="ALWAYS">
+                    <VBox spacing="10">
+
+                        <Label text="Marché Devises"
+                               style="-fx-font-size:18px; -fx-font-weight:bold; -fx-text-fill:#6a0dad;" />
+
+                        <HBox spacing="20" alignment="CENTER_LEFT">
+
+                            <Button text="Charger taux de change"
+                                    onAction="#loadCurrencyRates"
+                                    style="-fx-background-color:#8e44ad; -fx-text-fill:white;" />
+
+                            <Label fx:id="currencyRatesLabel"
+                                   wrapText="true"
+                                   style="-fx-background-color:#f3f0fa;
+                      -fx-padding:15;
+                      -fx-background-radius:15;" />
+
+                        </HBox>
+
+                    </VBox>
+                    <!-- PIE -->
+                    <VBox alignment="CENTER"
+                          spacing="20"
+                          styleClass="card">
+
+                        <Label text="Répartition"
+                               styleClass="card-title"/>
+
+                        <PieChart fx:id="walletChart"
+                                  prefHeight="280"
+                                  legendVisible="false"
+                                  labelsVisible="true"/>
+                    </VBox>
+
+                    <!-- LINE -->
+                    <VBox alignment="CENTER"
+                          spacing="20"
+                          styleClass="card">
+
+                        <Label text="Transactions par date"
+                               styleClass="card-title"/>
+
+                        <LineChart fx:id="transactionLineChart"
+                                   prefHeight="280"
+                                   legendVisible="false">
+
+                            <xAxis>
+                                <CategoryAxis label="Date"/>
+                            </xAxis>
+
+                            <yAxis>
+                                <NumberAxis label="Montant"/>
+                            </yAxis>
+
+                        </LineChart>
+
+                    </VBox>
+
+                </VBox>
+
+                <!-- ===== RIGHT SIDE : DATA ===== -->
+                <VBox spacing="25"
+                      prefWidth="650"
+                      HBox.hgrow="ALWAYS">
+
+                    <!-- RECHERCHE -->
+                    <VBox spacing="10">
+
+                        <Label text="Recherche utilisateur"
+                               styleClass="section-title"/>
+
+                        <HBox spacing="15">
+
+                            <TextField fx:id="userSearchField"
+                                       promptText="Rechercher user..."
+                                       prefWidth="250"/>
+
+
+
+
+                            <HBox fx:id="statsContainer" spacing="10"/>
+
+                        </HBox>
+
+
+                    </VBox>
+
+                    <!-- WALLET -->
+                    <VBox spacing="15">
+
+
+                        <Label text="Wallet"
+                               styleClass="section-title"/>
+
+                        <VBox fx:id="walletContainer"
+                              spacing="12"/>
+
+                    </VBox>
+
+                    <!-- TRANSACTIONS -->
+                    <VBox spacing="15">
+
+                        <Label text="Transactions"
+                               styleClass="section-title"/>
+
+                        <HBox spacing="10">
+                            <ComboBox fx:id="filterBox" prefWidth="120"/>
+                            <DatePicker fx:id="datePicker"/>
+                            <Button text="Filtrer"
+                                    onAction="#applyFilter"
+                                    styleClass="btn-small"/>
+                            <Button text="Reset"
+                                    onAction="#resetFilter"
+                                    styleClass="btn-small"/>
+                        </HBox>
+
+                        <ScrollPane fitToWidth="true"
+                                    prefHeight="350"
+                                    styleClass="inner-scroll">
+
+                            <VBox fx:id="transactionContainer"
+                                  spacing="12"/>
+
+
+                        </ScrollPane>
+
+                    </VBox>
+
+                </VBox>
+
+            </HBox>
+
+        </VBox>
+
+    </ScrollPane>
+
+</StackPane>
