@@ -1,0 +1,379 @@
+/*
+ * 🎨 Gestion Appel d’Offre - Light Theme (FINORA style)
+ * White background + purple accents + soft shadows
+ */
+
+/* ═══════════════════════════════════════
+   GLOBAL
+   ═══════════════════════════════════════ */
+
+.root {
+    -fx-font-family: "Segoe UI";
+    -fx-base: #ffffff;
+    -fx-background-color: #ffffff;
+    -fx-control-inner-background: #ffffff;
+
+    /* optional accent var */
+    -fx-accent: #a855f7;
+}
+
+/* Common backgrounds (optional utility classes) */
+.background-primary { -fx-background-color: #ffffff; }
+.background-secondary { -fx-background-color: #f8f9fa; }
+.background-tertiary { -fx-background-color: #f1f3f5; }
+
+/* ═══════════════════════════════════════
+   LAYOUT: SIDEBAR / TOPBAR
+   ═══════════════════════════════════════ */
+
+.sidebar {
+    -fx-background-color: #f8f9fa;
+    -fx-border-color: transparent #e9ecef transparent transparent;
+    -fx-border-width: 0 1 0 0;
+}
+
+.topbar {
+    -fx-background-color: #ffffff;
+    -fx-border-color: transparent transparent #e9ecef transparent;
+    -fx-border-width: 0 0 1 0;
+}
+
+/* Titles */
+.title {
+    -fx-text-fill: #1f2937;
+    -fx-font-weight: 900;
+    -fx-font-size: 22px;
+}
+
+.subtitle, .muted {
+    -fx-text-fill: #6b7280;
+}
+
+/* Section title inside cards */
+.section-title {
+    -fx-text-fill: #1f2937;
+    -fx-font-weight: 900;
+    -fx-font-size: 16px;
+}
+
+/* ═══════════════════════════════════════
+   CARDS / STAT CARDS
+   ═══════════════════════════════════════ */
+
+.card, .stat-card {
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 14px;
+    -fx-border-radius: 14px;
+    -fx-border-color: #e9ecef;
+    -fx-border-width: 1px;
+    -fx-padding: 20px;
+
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 10, 0, 0, 2);
+}
+
+.card:hover, .stat-card:hover {
+    -fx-background-color: #f8f9fa;
+    -fx-border-color: #a855f7;
+    -fx-effect: dropshadow(gaussian, rgba(168,85,247,0.20), 15, 0, 0, 3);
+}
+
+.stat-value {
+    -fx-font-size: 28px;
+    -fx-font-weight: 900;
+    -fx-text-fill: #1f2937;
+}
+
+.stat-label {
+    -fx-font-size: 12px;
+    -fx-text-fill: #6b7280;
+}
+
+/* ═══════════════════════════════════════
+   INPUTS
+   ═══════════════════════════════════════ */
+
+/* your searchField has styleClass="search" */
+.search, .text-field {
+    -fx-background-color: #ffffff;
+    -fx-text-fill: #1f2937;
+    -fx-prompt-text-fill: #9ca3af;
+
+    -fx-background-radius: 8px;
+    -fx-border-radius: 8px;
+    -fx-border-color: #e5e7eb;
+    -fx-border-width: 1px;
+
+    -fx-padding: 8px 14px;
+    -fx-font-size: 13px;
+}
+
+.search:focused, .text-field:focused {
+    -fx-border-color: #a855f7;
+    -fx-effect: dropshadow(gaussian, rgba(168,85,247,0.20), 6, 0, 0, 0);
+}
+
+.text-area {
+    -fx-background-color: #ffffff;
+    -fx-text-fill: #1f2937;
+    -fx-control-inner-background: #ffffff;
+    -fx-background-radius: 8px;
+    -fx-border-radius: 8px;
+    -fx-border-color: #e5e7eb;
+    -fx-border-width: 1px;
+    -fx-font-size: 13px;
+}
+
+.text-area .content {
+    -fx-background-color: #ffffff;
+}
+
+.combo-box, .date-picker {
+    -fx-background-color: #ffffff;
+    -fx-text-fill: #1f2937;
+    -fx-background-radius: 8px;
+    -fx-border-radius: 8px;
+    -fx-border-color: #e5e7eb;
+    -fx-border-width: 1px;
+    -fx-font-size: 14px;
+}
+
+.combo-box .list-cell {
+    -fx-background-color: #ffffff;
+    -fx-text-fill: #1f2937;
+}
+
+.combo-box .list-cell:hover {
+    -fx-background-color: #f3e8ff;
+}
+
+/* ═══════════════════════════════════════
+   BUTTONS (keep your existing class names)
+   ═══════════════════════════════════════ */
+
+.primary-btn {
+    -fx-background-color: #a855f7;
+    -fx-text-fill: white;
+    -fx-font-weight: 900;
+    -fx-background-radius: 10px;
+    -fx-padding: 12px 30px;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(168,85,247,0.30), 8, 0, 0, 2);
+}
+
+.primary-btn:hover {
+    -fx-background-color: #9333ea;
+    -fx-effect: dropshadow(gaussian, rgba(168,85,247,0.50), 12, 0, 0, 3);
+}
+
+.ghost-btn {
+    -fx-background-color: #f3e8ff;
+    -fx-text-fill: #a855f7;
+    -fx-font-weight: 900;
+
+    -fx-background-radius: 10px;
+    -fx-padding: 10px 24px;
+    -fx-cursor: hand;
+
+    -fx-border-color: #e9d5ff;
+    -fx-border-width: 1px;
+    -fx-border-radius: 10px;
+}
+
+.ghost-btn:hover {
+    -fx-background-color: #e9d5ff;
+}
+
+.danger-btn {
+    -fx-background-color: #ef4444;
+    -fx-text-fill: white;
+    -fx-font-weight: 900;
+    -fx-background-radius: 10px;
+    -fx-padding: 10px 24px;
+    -fx-cursor: hand;
+}
+
+.danger-btn:hover {
+    -fx-background-color: #dc2626;
+}
+
+/* If you use nav buttons */
+.nav-btn {
+    -fx-background-color: transparent;
+    -fx-text-fill: #6b7280;
+    -fx-font-weight: 900;
+    -fx-background-radius: 10px;
+    -fx-cursor: hand;
+}
+
+.nav-btn:hover {
+    -fx-background-color: #f3e8ff;
+    -fx-text-fill: #a855f7;
+}
+
+.nav-btn-active {
+    -fx-background-color: #f3e8ff;
+    -fx-text-fill: #a855f7;
+    -fx-border-color: #e9d5ff;
+    -fx-border-width: 1px;
+    -fx-border-radius: 10px;
+}
+
+/* ═══════════════════════════════════════
+   LISTVIEW CARDS (your new Table replacement)
+   ═══════════════════════════════════════ */
+
+.list-cards {
+    -fx-background-color: transparent;
+    -fx-padding: 0;
+    -fx-background-insets: 0;
+}
+
+.list-cards .list-cell {
+    -fx-background-color: transparent;
+    -fx-padding: 0 0 12 0;
+}
+
+/* card inside list cell */
+.ao-card {
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 14px;
+    -fx-border-radius: 14px;
+    -fx-border-color: #e9ecef;
+    -fx-border-width: 1px;
+    -fx-padding: 14px;
+
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.06), 8, 0, 0, 2);
+}
+
+.list-view:focused .list-cell:filled:selected .ao-card,
+.list-view .list-cell:filled:selected .ao-card {
+    -fx-border-color: #a855f7;
+    -fx-effect: dropshadow(gaussian, rgba(168,85,247,0.20), 12, 0, 0, 2);
+}
+
+.ao-title {
+    -fx-font-size: 15px;
+    -fx-font-weight: 900;
+    -fx-text-fill: #1f2937;
+}
+
+.ao-meta {
+    -fx-font-size: 12px;
+    -fx-text-fill: #6b7280;
+}
+
+/* ═══════════════════════════════════════
+   TABLE (optional: keep, but not needed now)
+   ═══════════════════════════════════════ */
+
+.table-view {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #e9ecef;
+}
+
+.table-view .column-header-background,
+.table-view .column-header,
+.table-view .filler,
+.table-view .corner {
+    -fx-background-color: #f8f9fa;
+    -fx-border-color: #e9ecef;
+}
+
+.table-view .column-header .label {
+    -fx-text-fill: #6b7280;
+    -fx-font-weight: 900;
+}
+
+.table-view .table-cell {
+    -fx-text-fill: #1f2937;
+    -fx-border-color: #f1f3f5;
+}
+
+.table-row-cell:hover {
+    -fx-background-color: #f8f9fa;
+}
+
+/* ═══════════════════════════════════════
+   SCROLLBAR (nice modern look)
+   ═══════════════════════════════════════ */
+
+.scroll-pane {
+    -fx-background-color: transparent;
+}
+.scroll-pane .viewport {
+    -fx-background-color: transparent;
+}
+
+.scroll-bar {
+    -fx-background-color: transparent;
+}
+.scroll-bar .track {
+    -fx-background-color: #f3e8ff;
+    -fx-background-radius: 10px;
+}
+.scroll-bar .thumb {
+    -fx-background-color: #a855f7;
+    -fx-background-radius: 10px;
+}
+
+/* Errors */
+.error-text {
+    -fx-text-fill: #ef4444;
+}
+/* =========================
+   FINORA TabPane (Modern)
+   ========================= */
+
+.finora-tabs {
+    -fx-background-color: transparent;
+}
+
+.finora-tabs .tab-header-area {
+    -fx-background-color: transparent;
+    -fx-padding: 0 0 10 0;
+}
+
+.finora-tabs .tab-header-background {
+    -fx-background-color: transparent;
+}
+
+.finora-tabs .headers-region {
+    -fx-background-color: transparent;
+}
+
+/* Individual tab (pill) */
+.finora-tabs .tab {
+    -fx-background-color: #f3e8ff;
+    -fx-background-radius: 10;
+    -fx-border-radius: 10;
+    -fx-border-color: #e9d5ff;
+    -fx-border-width: 1;
+    -fx-padding: 6 14 6 14;
+}
+
+/* Tab label */
+.finora-tabs .tab .tab-label {
+    -fx-text-fill: #a855f7;
+    -fx-font-weight: bold;
+}
+
+/* Selected tab */
+.finora-tabs .tab:selected {
+    -fx-background-color: #a855f7;
+    -fx-border-color: #a855f7;
+}
+
+.finora-tabs .tab:selected .tab-label {
+    -fx-text-fill: white;
+}
+
+/* Remove the ugly focus ring */
+.finora-tabs .tab:focused {
+    -fx-focus-color: transparent;
+    -fx-faint-focus-color: transparent;
+}
+.conversion-box {
+    -fx-background-color: #f3e8ff;
+    -fx-background-radius: 8;
+    -fx-padding: 8;
+}

@@ -1,0 +1,384 @@
+/*
+ * 🌙 Gestion Appel d’Offre - Dark Theme (FINORA style)
+ * Dark background + purple accents + soft shadows
+ */
+
+/* ═══════════════════════════════════════
+   GLOBAL
+   ═══════════════════════════════════════ */
+
+.root {
+    -fx-font-family: "Segoe UI";
+    -fx-base: #0b1220;
+    -fx-background-color: #0b1220;
+    -fx-control-inner-background: #0f172a;
+
+    -fx-accent: #a855f7;
+}
+
+/* Optional utility backgrounds */
+.background-primary { -fx-background-color: #0b1220; }
+.background-secondary { -fx-background-color: #0f172a; }
+.background-tertiary { -fx-background-color: #111c33; }
+
+/* ═══════════════════════════════════════
+   LAYOUT: SIDEBAR / TOPBAR
+   ═══════════════════════════════════════ */
+
+.sidebar {
+    -fx-background-color: #0f172a;
+    -fx-border-color: transparent #1f2a44 transparent transparent;
+    -fx-border-width: 0 1 0 0;
+}
+
+.topbar {
+    -fx-background-color: #0f172a;
+    -fx-border-color: transparent transparent #1f2a44 transparent;
+    -fx-border-width: 0 0 1 0;
+}
+
+/* Titles */
+.title {
+    -fx-text-fill: #e5e7eb;
+    -fx-font-weight: 900;
+    -fx-font-size: 22px;
+}
+
+.subtitle, .muted {
+    -fx-text-fill: #94a3b8;
+}
+
+/* Section title inside cards */
+.section-title {
+    -fx-text-fill: #e5e7eb;
+    -fx-font-weight: 900;
+    -fx-font-size: 16px;
+}
+
+/* ═══════════════════════════════════════
+   CARDS / STAT CARDS
+   ═══════════════════════════════════════ */
+
+.card, .stat-card {
+    -fx-background-color: #0f172a;
+    -fx-background-radius: 14px;
+    -fx-border-radius: 14px;
+    -fx-border-color: #1f2a44;
+    -fx-border-width: 1px;
+    -fx-padding: 20px;
+
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.35), 12, 0, 0, 4);
+}
+
+.card:hover, .stat-card:hover {
+    -fx-background-color: #111c33;
+    -fx-border-color: #a855f7;
+    -fx-effect: dropshadow(gaussian, rgba(168,85,247,0.25), 16, 0, 0, 4);
+}
+
+.stat-value {
+    -fx-font-size: 28px;
+    -fx-font-weight: 900;
+    -fx-text-fill: #e5e7eb;
+}
+
+.stat-label {
+    -fx-font-size: 12px;
+    -fx-text-fill: #94a3b8;
+}
+
+/* ═══════════════════════════════════════
+   INPUTS
+   ═══════════════════════════════════════ */
+
+.search, .text-field {
+    -fx-background-color: #0b1220;
+    -fx-text-fill: #e5e7eb;
+    -fx-prompt-text-fill: #64748b;
+
+    -fx-background-radius: 8px;
+    -fx-border-radius: 8px;
+    -fx-border-color: #1f2a44;
+    -fx-border-width: 1px;
+
+    -fx-padding: 8px 14px;
+    -fx-font-size: 13px;
+}
+
+.search:focused, .text-field:focused {
+    -fx-border-color: #a855f7;
+    -fx-effect: dropshadow(gaussian, rgba(168,85,247,0.25), 8, 0, 0, 0);
+}
+
+.text-area {
+    -fx-background-color: #0b1220;
+    -fx-text-fill: #e5e7eb;
+    -fx-control-inner-background: #0b1220;
+
+    -fx-background-radius: 8px;
+    -fx-border-radius: 8px;
+    -fx-border-color: #1f2a44;
+    -fx-border-width: 1px;
+    -fx-font-size: 13px;
+}
+
+.text-area .content {
+    -fx-background-color: #0b1220;
+}
+
+.combo-box, .date-picker {
+    -fx-background-color: #0b1220;
+    -fx-text-fill: #e5e7eb;
+
+    -fx-background-radius: 8px;
+    -fx-border-radius: 8px;
+    -fx-border-color: #1f2a44;
+    -fx-border-width: 1px;
+    -fx-font-size: 14px;
+}
+
+.combo-box .list-cell {
+    -fx-background-color: #0b1220;
+    -fx-text-fill: #e5e7eb;
+}
+
+.combo-box .list-cell:hover {
+    -fx-background-color: #1a1330; /* subtle purple tint */
+}
+
+/* ═══════════════════════════════════════
+   BUTTONS (keep your existing class names)
+   ═══════════════════════════════════════ */
+
+.primary-btn {
+    -fx-background-color: #a855f7;
+    -fx-text-fill: white;
+    -fx-font-weight: 900;
+    -fx-background-radius: 10px;
+    -fx-padding: 12px 30px;
+    -fx-cursor: hand;
+
+    -fx-effect: dropshadow(gaussian, rgba(168,85,247,0.35), 10, 0, 0, 2);
+}
+
+.primary-btn:hover {
+    -fx-background-color: #9333ea;
+    -fx-effect: dropshadow(gaussian, rgba(168,85,247,0.55), 14, 0, 0, 3);
+}
+
+.ghost-btn {
+    -fx-background-color: #111c33;
+    -fx-text-fill: #e5e7eb;
+    -fx-font-weight: 900;
+
+    -fx-background-radius: 10px;
+    -fx-padding: 10px 24px;
+    -fx-cursor: hand;
+
+    -fx-border-color: #1f2a44;
+    -fx-border-width: 1px;
+    -fx-border-radius: 10px;
+}
+
+.ghost-btn:hover {
+    -fx-background-color: #1a2440;
+    -fx-border-color: #a855f7;
+}
+
+.danger-btn {
+    -fx-background-color: #ef4444;
+    -fx-text-fill: white;
+    -fx-font-weight: 900;
+
+    -fx-background-radius: 10px;
+    -fx-padding: 10px 24px;
+    -fx-cursor: hand;
+}
+
+.danger-btn:hover {
+    -fx-background-color: #dc2626;
+}
+
+/* Sidebar nav buttons (if used) */
+.nav-btn {
+    -fx-background-color: transparent;
+    -fx-text-fill: #94a3b8;
+    -fx-font-weight: 900;
+    -fx-background-radius: 10px;
+    -fx-cursor: hand;
+}
+
+.nav-btn:hover {
+    -fx-background-color: #1a1330;
+    -fx-text-fill: #a855f7;
+}
+
+.nav-btn-active {
+    -fx-background-color: #1a1330;
+    -fx-text-fill: #a855f7;
+    -fx-border-color: #3b2a63;
+    -fx-border-width: 1px;
+    -fx-border-radius: 10px;
+}
+
+/* ═══════════════════════════════════════
+   LISTVIEW CARDS (your Table replacement)
+   ═══════════════════════════════════════ */
+
+.list-cards {
+    -fx-background-color: transparent;
+    -fx-padding: 0;
+    -fx-background-insets: 0;
+}
+
+.list-cards .list-cell {
+    -fx-background-color: transparent;
+    -fx-padding: 0 0 12 0;
+}
+
+/* card inside list cell */
+.ao-card {
+    -fx-background-color: #0f172a;
+    -fx-background-radius: 14px;
+    -fx-border-radius: 14px;
+    -fx-border-color: #1f2a44;
+    -fx-border-width: 1px;
+    -fx-padding: 14px;
+
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.30), 10, 0, 0, 3);
+}
+
+.list-view:focused .list-cell:filled:selected .ao-card,
+.list-view .list-cell:filled:selected .ao-card {
+    -fx-border-color: #a855f7;
+    -fx-effect: dropshadow(gaussian, rgba(168,85,247,0.30), 14, 0, 0, 3);
+}
+
+.ao-title {
+    -fx-font-size: 15px;
+    -fx-font-weight: 900;
+    -fx-text-fill: #e5e7eb;
+}
+
+.ao-meta {
+    -fx-font-size: 12px;
+    -fx-text-fill: #94a3b8;
+}
+
+/* ═══════════════════════════════════════
+   TABLE (optional: keep if other pages still use it)
+   ═══════════════════════════════════════ */
+
+.table-view {
+    -fx-background-color: #0f172a;
+    -fx-border-color: #1f2a44;
+}
+
+.table-view .column-header-background,
+.table-view .column-header,
+.table-view .filler,
+.table-view .corner {
+    -fx-background-color: #111c33;
+    -fx-border-color: #1f2a44;
+}
+
+.table-view .column-header .label {
+    -fx-text-fill: #94a3b8;
+    -fx-font-weight: 900;
+}
+
+.table-view .table-cell {
+    -fx-text-fill: #e5e7eb;
+    -fx-border-color: #15203a;
+}
+
+.table-row-cell:hover {
+    -fx-background-color: #111c33;
+}
+
+/* ═══════════════════════════════════════
+   SCROLLBAR
+   ═══════════════════════════════════════ */
+
+.scroll-pane { -fx-background-color: transparent; }
+.scroll-pane .viewport { -fx-background-color: transparent; }
+
+.scroll-bar { -fx-background-color: transparent; }
+.scroll-bar .track {
+    -fx-background-color: #111c33;
+    -fx-background-radius: 10px;
+}
+.scroll-bar .thumb {
+    -fx-background-color: #a855f7;
+    -fx-background-radius: 10px;
+}
+
+/* Errors */
+.error-text {
+    -fx-text-fill: #f87171;
+}
+/* =========================
+   FINORA TabPane (Dark Mode)
+   ========================= */
+
+.finora-tabs {
+    -fx-background-color: transparent;
+}
+
+/* Header container */
+.finora-tabs .tab-header-area {
+    -fx-background-color: transparent;
+    -fx-padding: 0 0 12 0;
+}
+
+.finora-tabs .tab-header-background {
+    -fx-background-color: transparent;
+}
+
+.finora-tabs .headers-region {
+    -fx-background-color: transparent;
+}
+
+/* =========================
+   Individual tab (pill)
+   ========================= */
+
+.finora-tabs .tab {
+    -fx-background-color: #1e293b;       /* dark card color */
+    -fx-background-radius: 10;
+    -fx-border-radius: 10;
+    -fx-border-color: #334155;           /* subtle border */
+    -fx-border-width: 1;
+    -fx-padding: 6 16 6 16;
+}
+
+/* Hover effect */
+.finora-tabs .tab:hover {
+    -fx-background-color: #273449;
+    -fx-border-color: #a855f7;
+}
+
+/* Tab label */
+.finora-tabs .tab .tab-label {
+    -fx-text-fill: #cbd5e1;              /* light text */
+    -fx-font-weight: bold;
+}
+
+/* =========================
+   Selected tab
+   ========================= */
+
+.finora-tabs .tab:selected {
+    -fx-background-color: #a855f7;       /* purple */
+    -fx-border-color: #a855f7;
+}
+
+.finora-tabs .tab:selected .tab-label {
+    -fx-text-fill: white;
+}
+
+/* Remove default focus glow */
+.finora-tabs .tab:focused {
+    -fx-focus-color: transparent;
+    -fx-faint-focus-color: transparent;
+}

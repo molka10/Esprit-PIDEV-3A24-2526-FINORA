@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.chart.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.example.finora.controllers.AppelOffreController"
+            styleClass="root">
+
+    <!-- TOP BAR -->
+    <top>
+        <HBox spacing="12" styleClass="topbar">
+            <padding>
+                <Insets top="14" right="18" bottom="14" left="18"/>
+            </padding>
+
+            <VBox spacing="2">
+                <Label text="Gestion des Appels d’Offres" styleClass="title"/>
+                <Label text="Créer, modifier, supprimer et rechercher des appels d’offres" styleClass="subtitle"/>
+            </VBox>
+
+            <Pane HBox.hgrow="ALWAYS"/>
+
+            <!-- filters (still global) -->
+            <ComboBox fx:id="categoryFilterCombo"
+                      promptText="Catégorie..."
+                      prefWidth="220"
+                      styleClass="search"/>
+
+            <TextField fx:id="searchField"
+                       promptText="Rechercher par titre / catégorie..."
+                       styleClass="search"/>
+
+            <Button text="Nouveau" styleClass="primary-btn" onAction="#onNew"/>
+        </HBox>
+    </top>
+
+    <!-- CENTER -->
+    <center>
+        <VBox spacing="12" styleClass="content">
+            <padding>
+                <Insets top="16" right="18" bottom="18" left="18"/>
+            </padding>
+
+            <TabPane fx:id="tabPane" tabClosingPolicy="UNAVAILABLE" styleClass="finora-tabs">
+                <tabs>
+
+                    <!-- ✅ TAB 1: LISTE -->
+                    <Tab text="Liste">
+                        <VBox spacing="10" styleClass="card">
+                            <HBox spacing="10">
+                                <Label text="Liste des appels d’offres" styleClass="section-title"/>
+                                <Pane HBox.hgrow="ALWAYS"/>
+
+                                <Button text="Actualiser" styleClass="ghost-btn" onAction="#onRefresh"/>
+                                <Button text="Modifier" styleClass="ghost-btn" onAction="#onEdit"/>
+                                <Button text="Exporter PDF" styleClass="ghost-btn" onAction="#onExportPdf"/>
+                                <Button text="Supprimer" styleClass="danger-btn" onAction="#onDelete"/>
+
+                            </HBox>
+
+                            <ListView fx:id="listView" styleClass="list-cards" VBox.vgrow="ALWAYS"/>
+                        </VBox>
+                    </Tab>
+
+                    <!-- ✅ TAB 2: STATISTIQUES -->
+                    <Tab text="Statistiques">
+                        <VBox spacing="12" styleClass="card">
+                            <!-- Quick Stats -->
+                            <HBox spacing="12">
+                                <HBox spacing="10" styleClass="stat-card" HBox.hgrow="ALWAYS">
+                                    <VBox spacing="2">
+                                        <Label text="Total" styleClass="stat-label"/>
+                                        <Label fx:id="totalLabel" text="0" styleClass="stat-value"/>
+                                    </VBox>
+                                </HBox>
+
+                                <HBox spacing="10" styleClass="stat-card" HBox.hgrow="ALWAYS">
+                                    <VBox spacing="2">
+                                        <Label text="Published" styleClass="stat-label"/>
+                                        <Label fx:id="publishedLabel" text="0" styleClass="stat-value"/>
+                                    </VBox>
+                                </HBox>
+
+                                <HBox spacing="10" styleClass="stat-card" HBox.hgrow="ALWAYS">
+                                    <VBox spacing="2">
+                                        <Label text="Draft" styleClass="stat-label"/>
+                                        <Label fx:id="draftLabel" text="0" styleClass="stat-value"/>
+                                    </VBox>
+                                </HBox>
+                            </HBox>
+
+                            <!-- Charts -->
+                            <HBox spacing="14">
+                                <VBox spacing="6" HBox.hgrow="ALWAYS" styleClass="card">
+                                    <Label text="Appels d’Offres par statut" styleClass="muted"/>
+                                    <PieChart fx:id="statutPie" prefHeight="320"/>
+                                </VBox>
+
+                                <VBox spacing="6" HBox.hgrow="ALWAYS" styleClass="card">
+                                    <Label text="Candidatures par appel d’offre (Top 8)" styleClass="muted"/>
+                                    <BarChart fx:id="candidatureBar" prefHeight="320">
+                                        <xAxis>
+                                            <CategoryAxis />
+                                        </xAxis>
+                                        <yAxis>
+                                            <NumberAxis />
+                                        </yAxis>
+                                    </BarChart>
+                                </VBox>
+                            </HBox>
+                        </VBox>
+                    </Tab>
+
+                </tabs>
+            </TabPane>
+
+        </VBox>
+    </center>
+
+</BorderPane>
