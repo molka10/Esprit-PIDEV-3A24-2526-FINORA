@@ -98,7 +98,7 @@
                 <artifactId>javafx-maven-plugin</artifactId>
                 <version>0.0.8</version>
                 <configuration>
-                    <mainClass>com.example.gestionwallet.HelloApplication</mainClass>
+                    <mainClass>com.example.finora.HelloApplication</mainClass>
                 </configuration>
             </plugin>
 

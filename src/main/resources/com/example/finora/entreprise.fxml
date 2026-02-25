@@ -1,0 +1,243 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.chart.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/8"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.example.finora.controllers.EntrepriseController"
+            prefWidth="1366"
+            prefHeight="768"
+            stylesheets="@dashboard.css">
+
+    <center>
+        <ScrollPane fitToWidth="true"
+                    hbarPolicy="NEVER"
+                    vbarPolicy="AS_NEEDED"
+                    styleClass="transparent-scroll">
+
+            <content>
+
+                <VBox spacing="30"
+                      alignment="TOP_LEFT"
+                      style="-fx-padding:30; -fx-background-color:#f4f4f8;">
+
+                    <!-- HEADER -->
+                    <HBox spacing="20" alignment="CENTER_LEFT">
+
+                        <Button text=" ⬅️ Retour"
+                                fx:id="backButton"
+                                onAction="#goBack"
+                                styleClass="btn-primary"/>
+
+                        <Label text=" 🏢 ENTREPRISE DASHBOARD"
+                               styleClass="title"/>
+
+                        <Region HBox.hgrow="ALWAYS"/>
+
+                        <ComboBox fx:id="currencyBox"
+                                  prefWidth="110"
+                                  onAction="#changeCurrency"
+                                  styleClass="simple-purple"/>
+                    </HBox>
+
+                    <!-- MAIN 4 COLUMNS -->
+                    <HBox spacing="40" alignment="TOP_LEFT">
+
+                        <!-- STATS -->
+                        <VBox spacing="20" prefWidth="230">
+
+                            <VBox spacing="5" alignment="CENTER" style="-fx-background-color:white; -fx-padding:20; -fx-background-radius:15;
+                                    -fx-effect:dropshadow(gaussian, rgba(0,0,0,0.1), 10,0,0,3);">
+                                <Label text="Balance" styleClass="stat-title"/>
+                                <Label fx:id="balanceLabel" text="0 DT" styleClass="stat-value"/>
+                            </VBox>
+
+                            <VBox spacing="5" alignment="CENTER" style="-fx-background-color:white; -fx-padding:20; -fx-background-radius:15;
+                                    -fx-effect:dropshadow(gaussian, rgba(0,0,0,0.1), 10,0,0,3);">
+                                <Label text="Total Income" styleClass="stat-title"/>
+                                <Label fx:id="totalIncomeLabel" text="0 DT" styleClass="income-value"/>
+                            </VBox>
+
+                            <VBox spacing="5" alignment="CENTER" style="-fx-background-color:white; -fx-padding:20; -fx-background-radius:15;
+                                    -fx-effect:dropshadow(gaussian, rgba(0,0,0,0.1), 10,0,0,3);">
+                                <Label text="Total Outcome" styleClass="stat-title"/>
+                                <Label fx:id="totalOutcomeLabel" text="0 DT" styleClass="outcome-value"/>
+                            </VBox>
+
+                            <VBox spacing="5" alignment="CENTER"
+                                  style="-fx-background-color:white; -fx-padding:20; -fx-background-radius:15;
+                                         -fx-effect:dropshadow(gaussian, rgba(0,0,0,0.1), 10,0,0,3);">
+                                <Label text="Total Transactions" style="-fx-text-fill:gray;"/>
+                                <Label fx:id="totalTransactionsLabel"
+                                       text="0"
+                                       style="-fx-font-size:24; -fx-font-weight:bold; -fx-text-fill:#6a0dad;"/>
+                            </VBox>
+
+                        </VBox>
+
+                        <!-- OUTCOME -->
+                        <VBox spacing="10" alignment="CENTER">
+                            <Label text="Outcome" styleClass="section-title-outcome"/>
+                            <Button text="Ajouter Outcome"
+                                    onAction="#openAddOutcome"
+                                    styleClass="btn-danger"/>
+                            <LineChart fx:id="outcomeChart" prefWidth="400" prefHeight="300">
+                                <xAxis>
+                                    <CategoryAxis label="Categorie"/>
+                                </xAxis>
+                                <yAxis>
+                                    <NumberAxis label="Montant"/>
+                                </yAxis>
+                            </LineChart>
+                        </VBox>
+
+                        <!-- INCOME -->
+                        <VBox spacing="10" alignment="CENTER">
+                            <Label text="Income" styleClass="section-title-income"/>
+                            <Button text="Ajouter Income"
+                                    onAction="#openAddIncome"
+                                    styleClass="btn-success"/>
+                            <LineChart fx:id="incomeChart" prefWidth="400" prefHeight="300">
+                                <xAxis>
+                                    <CategoryAxis label="Categorie"/>
+                                </xAxis>
+                                <yAxis>
+                                    <NumberAxis label="Montant"/>
+                                </yAxis>
+                            </LineChart>
+                        </VBox>
+
+                        <!-- BUTTONS -->
+                        <VBox spacing="25"
+                              alignment="CENTER"
+                              prefWidth="180">
+
+                            <Button text="Historique"
+                                    onAction="#openHistorique"
+                                    prefWidth="150"
+                                    style="-fx-background-color:#8e44ad;
+                   -fx-text-fill:white;
+                   -fx-background-radius:20;"/>
+
+                            <Button text="Exporter PDF"
+                                    onAction="#exportPDF"
+                                    prefWidth="150"
+                                    style="-fx-background-color:#2ecc71;
+                   -fx-text-fill:white;
+                   -fx-background-radius:20;"/>
+
+                            <Button text="Export Excel"
+                                    onAction="#exportExcel"
+                                    prefWidth="150"
+                                    style="-fx-background-color:#35da7b;
+                   -fx-text-fill:white;
+                   -fx-background-radius:20;"/>
+
+                        </VBox>
+
+                    </HBox>
+
+                    <!-- DASHBOARD ANALYTICS SECTION -->
+                    <VBox spacing="40" alignment="TOP_CENTER">
+
+                        <!-- AI CARD -->
+                        <VBox spacing="15"
+                              prefWidth="260"
+                              style="-fx-background-color:white;
+                     -fx-padding:25;
+                     -fx-background-radius:20;
+                     -fx-effect:dropshadow(gaussian, rgba(0,0,0,0.08), 10,0,0,3);">
+
+                            <Label text=" 🤖 Analyse IA"
+                                   style="-fx-font-size:18;
+                          -fx-font-weight:bold;
+                          -fx-text-fill:#6a0dad;"/>
+
+                            <Button text=" 🚀 Lancer Analyse"
+                                    onAction="#analyzeWithAI"
+                                    style="-fx-background-color:#8e44ad;
+                           -fx-text-fill:white;
+                           -fx-background-radius:20;"
+                                    prefWidth="180"/>
+
+                            <Label fx:id="aiResultLabel"
+                                   wrapText="true"
+                                   text="Cliquez sur le bouton pour voir l'analyse..."
+                                   style="-fx-font-size:13px;
+                          -fx-text-fill:#555;"/>
+                        </VBox>
+
+                        <!-- ANALYSE + WISHLIST -->
+                        <HBox spacing="40" alignment="TOP_CENTER">
+
+                            <VBox spacing="25"
+                                  prefWidth="700"
+                                  style="-fx-background-color:white;
+                 -fx-padding:30;
+                 -fx-background-radius:25;
+                 -fx-effect:dropshadow(gaussian, rgba(0,0,0,0.08), 12,0,0,4);">
+
+                                <Label text=" 📊 Analyse"
+                                       style="-fx-font-size:20;
+                      -fx-font-weight:bold;
+                      -fx-text-fill:#6a0dad;"/>
+
+                                <PieChart fx:id="pieChart"
+                                          prefWidth="380"
+                                          prefHeight="300"/>
+
+                                <FlowPane fx:id="monthlyContainer"
+                                          hgap="20"
+                                          vgap="20"
+                                          prefWrapLength="400"/>
+
+                                <Label fx:id="averageLabel"
+                                       style="-fx-font-size:14; -fx-font-weight:bold; -fx-text-fill:#6a0dad;"/>
+                            </VBox>
+
+                            <VBox spacing="20"
+                                  prefWidth="600"
+                                  style="-fx-background-color:white;
+                 -fx-padding:30;
+                 -fx-background-radius:25;
+                 -fx-effect:dropshadow(gaussian, rgba(0,0,0,0.08), 12,0,0,4);">
+
+                                <Label text=" 🛍️ Wishlist"
+                                       style="-fx-font-size:20;
+                      -fx-font-weight:bold;
+                      -fx-text-fill:#6a0dad;"/>
+
+                                <HBox spacing="15">
+                                    <TextField fx:id="itemField"
+                                               promptText="Nom produit..."
+                                               prefWidth="250"/>
+
+                                    <TextField fx:id="priceField"
+                                               promptText="Montant DT"
+                                               prefWidth="180"/>
+
+                                    <Button text="Ajouter"
+                                            onAction="#addWishlistItem"
+                                            style="-fx-background-color:#6a0dad;
+                           -fx-text-fill:white;
+                           -fx-background-radius:20;"
+                                            prefWidth="120"/>
+                                </HBox>
+
+                                <ListView fx:id="wishlistView"
+                                          prefHeight="200"/>
+                            </VBox>
+
+                        </HBox>
+
+                    </VBox>
+
+                </VBox>
+
+            </content>
+        </ScrollPane>
+    </center>
+
+</BorderPane>

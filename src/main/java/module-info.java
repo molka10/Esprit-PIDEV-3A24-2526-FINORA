@@ -1,4 +1,4 @@
-module com.example.gestionwallet {
+module com.example.finora {
 
     requires javafx.controls;
     requires javafx.fxml;
@@ -11,9 +11,9 @@ module com.example.gestionwallet {
     requires java.net.http;
     requires org.json;
 
-    opens com.example.gestionwallet.controllers to javafx.fxml;
-    opens com.example.gestionwallet.models to javafx.base;
+    opens com.example.finora.controllers to javafx.fxml;
+    opens com.example.finora.entities to javafx.base;
 
-    exports com.example.gestionwallet;
-    exports com.example.gestionwallet.controllers;
+    exports com.example.finora;
+    exports com.example.finora.controllers;
 }
