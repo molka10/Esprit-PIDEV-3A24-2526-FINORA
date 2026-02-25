@@ -10,6 +10,7 @@ import tn.finora.entities.Lesson;
 import tn.finora.services.GeminiService;
 import tn.finora.services.GeminiService.QuizQuestion;
 import tn.finora.services.QuizResultService;
+import tn.finora.services.QuizFraudService;
 
 import java.util.*;
 
@@ -30,6 +31,8 @@ public class QuizTakeController {
 
     private Lesson lesson;
     private Formation formation;
+
+    private final QuizFraudService fraudService = new QuizFraudService();
 
     private final List<QuizQuestion> questions = new ArrayList<>();
     private final Map<Integer, Integer> userAnswers = new HashMap<>();
@@ -57,6 +60,16 @@ public class QuizTakeController {
 
         btnPrevious.setDisable(true);
         btnNext.setDisable(true);
+
+        // 🔹 Detect window focus loss
+        Platform.runLater(() -> {
+            Stage stage = (Stage) lblQuestion.getScene().getWindow();
+            stage.focusedProperty().addListener((obs, oldVal, newVal) -> {
+                if (!newVal) {
+                    fraudService.registerFocusLoss();
+                }
+            });
+        });
     }
 
     public void setData(Lesson lesson, Formation formation) {
@@ -92,7 +105,6 @@ public class QuizTakeController {
 
                     questions.clear();
 
-                    // SAFETY: keep only valid questions (min 2 options)
                     for (QuizQuestion q : generated) {
                         if (q.options != null && q.options.size() >= 2) {
                             questions.add(q);
@@ -107,6 +119,10 @@ public class QuizTakeController {
                     currentIndex = 0;
                     userAnswers.clear();
                     quizReady = true;
+
+                    // 🔹 Start fraud tracking AFTER quiz is ready
+                    fraudService.startQuiz();
+                    fraudService.startQuestion(currentIndex);
 
                     showQuestion();
 
@@ -157,7 +173,6 @@ public class QuizTakeController {
             rb.setSelected(false);
         }
 
-        // Restore saved answer
         if (userAnswers.containsKey(currentIndex)) {
             int saved = userAnswers.get(currentIndex);
             if (saved >= 0 && saved < q.options.size()) {
@@ -167,6 +182,8 @@ public class QuizTakeController {
 
         btnPrevious.setDisable(currentIndex == 0);
         btnNext.setText(currentIndex == questions.size() - 1 ? "Finish ✅" : "Next ➡");
+
+        fraudService.startQuestion(currentIndex);
     }
 
     // ================================
@@ -188,6 +205,9 @@ public class QuizTakeController {
         int selectedIndex = (int) selected.getUserData();
         userAnswers.put(currentIndex, selectedIndex);
 
+        // 🔹 record timing
+        fraudService.finishQuestion(currentIndex);
+
         if (currentIndex == questions.size() - 1) {
             calculateResult();
             return;
@@ -195,21 +215,6 @@ public class QuizTakeController {
 
         currentIndex++;
         showQuestion();
-    }
-
-    // ================================
-    // PREVIOUS
-    // ================================
-
-    @FXML
-    private void onPrevious() {
-
-        if (!quizReady) return;
-
-        if (currentIndex > 0) {
-            currentIndex--;
-            showQuestion();
-        }
     }
 
     // ================================
@@ -230,6 +235,8 @@ public class QuizTakeController {
 
         int percent = (correct * 100) / questions.size();
 
+        boolean suspicious = fraudService.isFraudSuspicious();
+
         Dialog<Void> dialog = new Dialog<>();
         dialog.setTitle("Quiz Result");
 
@@ -243,8 +250,21 @@ public class QuizTakeController {
 
         box.getChildren().addAll(lblScore, lblDetails);
 
-        // Certificate ONLY if >=80%
-        if (percent >= 80) {
+        // 🔹 Fraud display
+        Label fraudLabel = new Label();
+
+        if (suspicious) {
+            fraudLabel.setText("⚠ Suspicious activity detected!");
+            fraudLabel.setStyle("-fx-text-fill: red; -fx-font-weight: bold;");
+        } else {
+            fraudLabel.setText("✅ No suspicious activity detected.");
+            fraudLabel.setStyle("-fx-text-fill: green;");
+        }
+
+        box.getChildren().add(fraudLabel);
+
+        // Certificate only if >=80% AND not suspicious
+        if (percent >= 80 && !suspicious) {
             Button btnCertificate = new Button("🏆 Download Certificate");
             btnCertificate.setStyle("-fx-background-color:#7C3AED; -fx-text-fill:white;");
             box.getChildren().add(btnCertificate);
@@ -270,5 +290,15 @@ public class QuizTakeController {
         alert.setHeaderText(null);
         alert.setContentText(msg);
         alert.showAndWait();
+    }
+    @FXML
+    private void onPrevious() {
+
+        if (!quizReady) return;
+
+        if (currentIndex > 0) {
+            currentIndex--;
+            showQuestion();
+        }
     }
 }
