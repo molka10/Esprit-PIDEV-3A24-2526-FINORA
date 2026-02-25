@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.TextFlow?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="tn.finora.controllers.LessonViewController"
+            styleClass="screen">
+
+    <top>
+        <VBox styleClass="card" spacing="14">
+
+            <HBox alignment="CENTER_LEFT" spacing="0">
+                <Label fx:id="lblEyebrow" text="FORMATION" styleClass="viewer-eyebrow"/>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Button text="← Retour" styleClass="btn-ghost" onAction="#onBack"/>
+            </HBox>
+
+            <Label fx:id="lblTitre"
+                   text="Titre de la leçon"
+                   styleClass="viewer-title"
+                   wrapText="true"
+                   maxWidth="900"/>
+
+            <HBox alignment="CENTER_LEFT" spacing="14">
+                <Label fx:id="lblMeta" text="Ordre  •  Durée" styleClass="viewer-meta"/>
+                <Label fx:id="lblRating" text="★★★★★  4.60" styleClass="viewer-rating"/>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Label fx:id="lblInstructor" text="Instructeur : Finora Academy" styleClass="viewer-instructor"/>
+                <Label fx:id="lblTotalDuration" text="⏱ 0 min total" styleClass="viewer-totalbadge"/>
+            </HBox>
+
+            <HBox alignment="CENTER_LEFT" spacing="16">
+
+                <HBox alignment="CENTER_LEFT" spacing="10" HBox.hgrow="ALWAYS">
+                    <Label text="Progression" styleClass="viewer-progress-label"/>
+                    <ProgressBar fx:id="progressBar" prefWidth="260" prefHeight="6" styleClass="viewer-progress-bar"/>
+                    <Label fx:id="lblProgress" text="0%" styleClass="viewer-progress-label"/>
+                    <Label fx:id="lblProgressDetail" text="0 / 0 terminées" styleClass="viewer-progress-detail"/>
+                </HBox>
+
+                <HBox alignment="CENTER_RIGHT" spacing="10">
+                    <ToggleButton fx:id="btnComplete"
+                                  text="Marquer comme terminé"
+                                  styleClass="btn-complete"
+                                  onAction="#onToggleComplete"/>
+
+                    <Label fx:id="lblIndex" text="01 / 01" styleClass="viewer-index-pill"/>
+
+                    <Button fx:id="btnPrev" text="◀ Précédent" styleClass="btn-nav-prev" onAction="#onPrev"/>
+                    <Button fx:id="btnNext" text="Suivant ▶" styleClass="btn-nav-next" onAction="#onNext"/>
+                </HBox>
+
+            </HBox>
+
+        </VBox>
+    </top>
+
+    <center>
+        <SplitPane fx:id="splitPane" dividerPositions="0.28" styleClass="viewer-split">
+
+            <ScrollPane fx:id="sidebarScroll" fitToWidth="true" styleClass="viewer-sidebar-scroll">
+                <content>
+                    <VBox spacing="12" styleClass="viewer-sidebar">
+                        <padding><Insets top="18" right="16" bottom="18" left="18"/></padding>
+
+                        <Label text="PLAN DU COURS" styleClass="viewer-section-label"/>
+                        <VBox fx:id="sidebarBox" spacing="10"/>
+                    </VBox>
+                </content>
+            </ScrollPane>
+
+            <ScrollPane fitToWidth="true" styleClass="scroll">
+                <content>
+                    <VBox fx:id="contentWrap" spacing="14">
+                        <padding><Insets top="22" right="28" bottom="28" left="28"/></padding>
+
+                        <HBox alignment="CENTER_LEFT" spacing="10">
+                            <Label text="CONTENU DE LA LEÇON" styleClass="viewer-section-label"/>
+                            <Region HBox.hgrow="ALWAYS"/>
+
+                            <Button fx:id="btnWatchVideo"
+                                    text="🎬 Regarder"
+                                    styleClass="btn-video"
+                                    onAction="#onWatchVideo"/>
+
+                            <!-- ✅ removed visible/managed attributes -->
+                            <Button fx:id="btnQuiz"
+                                    text="🧠  Quiz"
+                                    styleClass="btn-primary"
+                                    onAction="#onQuiz"/>
+                            <Button fx:id="btnYoutube"
+                                    text="🔎 YouTube Suggestions"
+                                    styleClass="btn-ghost"
+                                    onAction="#onYoutubeSuggestions"/>
+                            <Button text="🔊 Lire la leçon"
+                                    onAction="#onReadLesson"
+                                    style="-fx-background-color:#7C3AED;
+               -fx-text-fill:white;
+               -fx-background-radius:8;
+               -fx-padding:6 14;"/>
+
+                            <Button fx:id="btnStopRead"
+                                    text="Stop 🔇"
+                                    onAction="#onStopReading"
+                                    styleClass="reader-toolbtn"/>
+
+                            <Button text="Slower"
+                                    onAction="#onSlower"
+                                    styleClass="reader-toolbtn"/>
+
+                            <Button text="Faster"
+                                    onAction="#onFaster"
+                                    styleClass="reader-toolbtn"/>
+                            <ToggleButton fx:id="btnFocus"
+                                          text="🎯 Focus"
+                                          styleClass="btn-focus"
+                                          onAction="#onToggleFocus"/>
+                        </HBox>
+
+                        <HBox alignment="CENTER_LEFT" spacing="10">
+                            <TextField fx:id="txtFind"
+                                       promptText="Rechercher dans la leçon..."
+                                       onKeyReleased="#onFindChanged"
+                                       styleClass="reader-find"
+                                       HBox.hgrow="ALWAYS"/>
+
+                            <Button text="◀" onAction="#onFindPrev" styleClass="reader-toolbtn"/>
+                            <Button text="▶" onAction="#onFindNext" styleClass="reader-toolbtn"/>
+
+                            <Label fx:id="lblFindInfo" text="" styleClass="reader-findinfo"/>
+                        </HBox>
+
+                        <HBox alignment="CENTER_LEFT" spacing="10">
+                            <Button text="⎘ Copier" onAction="#onCopy" styleClass="reader-toolbtn"/>
+                            <Button text="A-" onAction="#onFontMinus" styleClass="reader-toolbtn"/>
+                            <Button text="A+" onAction="#onFontPlus" styleClass="reader-toolbtn"/>
+                        </HBox>
+
+                        <VBox styleClass="reader-card">
+                            <padding><Insets top="18" right="20" bottom="18" left="20"/></padding>
+                            <TextFlow fx:id="contentFlow" styleClass="reader-flow"/>
+                        </VBox>
+
+                    </VBox>
+                </content>
+            </ScrollPane>
+
+        </SplitPane>
+    </center>
+
+</BorderPane>

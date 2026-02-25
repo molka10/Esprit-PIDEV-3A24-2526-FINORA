@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="tn.finora.controllers.QuizResultsController">
+
+    <top>
+        <VBox styleClass="card" spacing="16">
+
+            <HBox alignment="CENTER_LEFT" spacing="0">
+                <Label text="Résultats des Quiz" styleClass="title"/>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Button text="⬅ Retour" styleClass="btn-ghost" onAction="#onBack"/>
+            </HBox>
+
+            <Label text="Tableau de bord des performances étudiantes"
+                   styleClass="subtitle"/>
+
+            <HBox spacing="16">
+
+                <VBox styleClass="item-card" spacing="4" prefWidth="200">
+                    <padding><Insets top="14" right="18" bottom="14" left="18"/></padding>
+                    <Label text="TOTAL QUIZ" styleClass="viewer-eyebrow"/>
+                    <Label fx:id="lblTotal" text="0" styleClass="title"/>
+                </VBox>
+
+                <VBox styleClass="item-card" spacing="4" prefWidth="260">
+                    <padding><Insets top="14" right="18" bottom="14" left="18"/></padding>
+                    <Label text="RÉUSSIS" styleClass="viewer-eyebrow"/>
+                    <Label fx:id="lblPassed" text="0" styleClass="title"/>
+                </VBox>
+
+                <VBox styleClass="item-card" spacing="4" prefWidth="200">
+                    <padding><Insets top="14" right="18" bottom="14" left="18"/></padding>
+                    <Label text="SCORE MOYEN" styleClass="viewer-eyebrow"/>
+                    <Label fx:id="lblAverage" text="0%" styleClass="title"/>
+                </VBox>
+
+            </HBox>
+
+            <HBox spacing="12" alignment="CENTER_LEFT" styleClass="toolbar">
+                <TextField fx:id="txtSearch"
+                           promptText="Rechercher par étudiant, leçon, formation..."
+                           prefWidth="380"
+                           onKeyReleased="#onSearch"/>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Button text="🔄 Actualiser"
+                        styleClass="btn-ghost"
+                        onAction="#onRefresh"/>
+            </HBox>
+
+        </VBox>
+    </top>
+
+    <center>
+        <ScrollPane fitToWidth="true" styleClass="scroll">
+            <content>
+                <VBox fx:id="cardsContainer" spacing="12">
+                    <padding>
+                        <Insets top="16" right="20" bottom="20" left="20"/>
+                    </padding>
+                </VBox>
+            </content>
+        </ScrollPane>
+    </center>
+
+</BorderPane>
