@@ -39,7 +39,9 @@ import com.calendarfx.view.CalendarView;
 import com.calendarfx.model.Calendar;
 import com.calendarfx.model.CalendarSource;
 import com.calendarfx.model.Entry;
-
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.ColumnConstraints;
+import javafx.scene.layout.*;
 import com.example.finora.entities.categorie;
 import com.example.finora.services.servicecategorie;
 
@@ -60,6 +62,8 @@ public class EntrepriseController {
     @FXML private Button backButton;
     @FXML private ComboBox<String> currencyBox;
     @FXML private Label aiResultLabel;
+    @FXML private VBox incomeContainer;
+    @FXML private VBox outcomeContainer;
 
     private ObservableList<HBox> wishlist = FXCollections.observableArrayList();
     private String currentCurrency = "DT";
@@ -88,11 +92,56 @@ public class EntrepriseController {
 
         loadTransactions();
     }
+    private VBox createHeader() {
 
+        GridPane headerGrid = new GridPane();
+        headerGrid.setHgap(30);
+
+        Label h1 = new Label("Name");
+        Label h2 = new Label("Category");
+        Label h3 = new Label("Amount");
+        Label h4 = new Label("Date");
+
+        h1.setStyle("-fx-font-weight:bold;");
+        h2.setStyle("-fx-font-weight:bold;");
+        h3.setStyle("-fx-font-weight:bold;");
+        h4.setStyle("-fx-font-weight:bold;");
+
+        headerGrid.add(h1, 0, 0);
+        headerGrid.add(h2, 1, 0);
+        headerGrid.add(h3, 2, 0);
+        headerGrid.add(h4, 3, 0);
+
+        ColumnConstraints col1 = new ColumnConstraints();
+        ColumnConstraints col2 = new ColumnConstraints();
+        ColumnConstraints col3 = new ColumnConstraints();
+        ColumnConstraints col4 = new ColumnConstraints();
+
+        col1.setHgrow(Priority.ALWAYS);
+        col2.setHgrow(Priority.ALWAYS);
+        col3.setHgrow(Priority.ALWAYS);
+        col4.setHgrow(Priority.ALWAYS);
+
+        headerGrid.getColumnConstraints().addAll(col1, col2, col3, col4);
+
+        VBox headerCard = new VBox(headerGrid);
+        headerCard.setStyle("""
+        -fx-background-color:#eeeeee;
+        -fx-padding:10;
+        -fx-background-radius:10;
+    """);
+
+        return headerCard;
+    }
     public void loadTransactions() {
 
         incomeChart.getData().clear();
         outcomeChart.getData().clear();
+        incomeContainer.getChildren().clear();
+        outcomeContainer.getChildren().clear();
+
+        incomeContainer.getChildren().add(createHeader());
+        outcomeContainer.getChildren().add(createHeader());
         int totalTransactions = 0;
         double totalIncome = 0;
         double totalOutcome = 0;
@@ -145,6 +194,7 @@ public class EntrepriseController {
                 balance += montant;
             }
 
+
             data.nodeProperty().addListener((obs, oldNode, newNode) -> {
                 if (newNode != null) {
                     newNode.setOnMouseClicked(e ->
@@ -153,6 +203,63 @@ public class EntrepriseController {
             });
             totalTransactions++;
             totalTransactionsLabel.setText(String.valueOf(totalTransactions));
+            // ===== TABLE ROW =====
+
+            Label nameLabel = new Label(currentTransaction.getNom_transaction());
+            Label categoryLabel = new Label(categorie);
+            Label amountLabel = new Label(String.format("%.2f %s",
+                    Math.abs(montant) * conversionRate,
+                    currentCurrency));
+            Label dateLabel = new Label(date.toString());
+
+// Style
+            nameLabel.setStyle("-fx-font-weight:bold;");
+            categoryLabel.setStyle("-fx-text-fill:#6a0dad;");
+            amountLabel.setStyle(
+                    categoryType.equalsIgnoreCase("INCOME")
+                            ? "-fx-text-fill:#2ecc71; -fx-font-weight:bold;"
+                            : "-fx-text-fill:#e74c3c; -fx-font-weight:bold;"
+            );
+            dateLabel.setStyle("-fx-text-fill:#555;");
+
+// Grid layout
+            GridPane grid = new GridPane();
+            grid.setHgap(30);
+
+            grid.add(nameLabel, 0, 0);
+            grid.add(categoryLabel, 1, 0);
+            grid.add(amountLabel, 2, 0);
+            grid.add(dateLabel, 3, 0);
+
+            ColumnConstraints c1 = new ColumnConstraints();
+            ColumnConstraints c2 = new ColumnConstraints();
+            ColumnConstraints c3 = new ColumnConstraints();
+            ColumnConstraints c4 = new ColumnConstraints();
+
+            c1.setHgrow(Priority.ALWAYS);
+            c2.setHgrow(Priority.ALWAYS);
+            c3.setHgrow(Priority.ALWAYS);
+            c4.setHgrow(Priority.ALWAYS);
+
+            grid.getColumnConstraints().addAll(c1, c2, c3, c4);
+
+            VBox card = new VBox(grid);
+            card.setStyle("""
+    -fx-background-color:white;
+    -fx-padding:12;
+    -fx-background-radius:12;
+    -fx-effect:dropshadow(gaussian, rgba(0,0,0,0.06), 6,0,0,2);
+""");
+
+// click open popup
+            card.setOnMouseClicked(e -> showTransactionDetails(currentTransaction));
+
+// add to correct container
+            if (categoryType.equalsIgnoreCase("INCOME")) {
+                incomeContainer.getChildren().add(card);
+            } else {
+                outcomeContainer.getChildren().add(card);
+            }
 
         }
 
@@ -549,16 +656,16 @@ public class EntrepriseController {
 
         CalendarView calendarView = new CalendarView();
 
-        calendarView.showWeekPage();
+        calendarView.showMonthPage();
         calendarView.setShowAddCalendarButton(false);
         calendarView.setShowSearchField(false);
         calendarView.setShowSourceTray(false);
 
         Calendar incomeCal = new Calendar("Income");
-        incomeCal.setStyle(Calendar.Style.STYLE2);
+        incomeCal.setStyle(Calendar.Style.STYLE1);
 
         Calendar outcomeCal = new Calendar("Outcome");
-        outcomeCal.setStyle(Calendar.Style.STYLE3);
+        outcomeCal.setStyle(Calendar.Style.STYLE5);
 
         for (transaction t : st.afficherParUser(currentEntrepriseId)) {
 

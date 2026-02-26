@@ -83,6 +83,11 @@
                             <Button text="Ajouter Outcome"
                                     onAction="#openAddOutcome"
                                     styleClass="btn-danger"/>
+                            <ScrollPane fitToWidth="true" prefHeight="200">
+                                <content>
+                                    <VBox fx:id="outcomeContainer" spacing="10"/>
+                                </content>
+                            </ScrollPane>
                             <LineChart fx:id="outcomeChart" prefWidth="400" prefHeight="300">
                                 <xAxis>
                                     <CategoryAxis label="Categorie"/>
@@ -99,6 +104,11 @@
                             <Button text="Ajouter Income"
                                     onAction="#openAddIncome"
                                     styleClass="btn-success"/>
+                            <ScrollPane fitToWidth="true" prefHeight="200">
+                                <content>
+                                    <VBox fx:id="incomeContainer" spacing="10"/>
+                                </content>
+                            </ScrollPane>
                             <LineChart fx:id="incomeChart" prefWidth="400" prefHeight="300">
                                 <xAxis>
                                     <CategoryAxis label="Categorie"/>

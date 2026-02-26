@@ -39,7 +39,9 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import java.util.*;
 import javafx.scene.layout.FlowPane;
-
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.ColumnConstraints;
+import javafx.scene.layout.*;
 import com.example.finora.entities.categorie;
 import com.example.finora.services.servicecategorie;
 
@@ -60,6 +62,8 @@ public class UserController {
     @FXML private Button backButton;
     @FXML private ComboBox<String> currencyBox;
     @FXML private Label aiResultLabel;
+    @FXML private VBox incomeContainer;
+    @FXML private VBox outcomeContainer;
 
     private ObservableList<HBox> wishlist = FXCollections.observableArrayList();
     private String currentCurrency = "DT";
@@ -88,11 +92,55 @@ public class UserController {
     private void handleSearch() {
         loadTransactions();
     }
+    private VBox createHeader() {
 
+        GridPane headerGrid = new GridPane();
+        headerGrid.setHgap(30);
+
+        Label h1 = new Label("Name");
+        Label h2 = new Label("Category");
+        Label h3 = new Label("Amount");
+        Label h4 = new Label("Date");
+
+        h1.setStyle("-fx-font-weight:bold;");
+        h2.setStyle("-fx-font-weight:bold;");
+        h3.setStyle("-fx-font-weight:bold;");
+        h4.setStyle("-fx-font-weight:bold;");
+
+        headerGrid.add(h1, 0, 0);
+        headerGrid.add(h2, 1, 0);
+        headerGrid.add(h3, 2, 0);
+        headerGrid.add(h4, 3, 0);
+
+        ColumnConstraints col1 = new ColumnConstraints();
+        ColumnConstraints col2 = new ColumnConstraints();
+        ColumnConstraints col3 = new ColumnConstraints();
+        ColumnConstraints col4 = new ColumnConstraints();
+
+        col1.setHgrow(Priority.ALWAYS);
+        col2.setHgrow(Priority.ALWAYS);
+        col3.setHgrow(Priority.ALWAYS);
+        col4.setHgrow(Priority.ALWAYS);
+
+        headerGrid.getColumnConstraints().addAll(col1, col2, col3, col4);
+
+        VBox headerCard = new VBox(headerGrid);
+        headerCard.setStyle("""
+        -fx-background-color:#eeeeee;
+        -fx-padding:10;
+        -fx-background-radius:10;
+    """);
+
+        return headerCard;
+    }
     public void loadTransactions() {
 
         incomeChart.getData().clear();
         outcomeChart.getData().clear();
+        incomeContainer.getChildren().clear();
+        outcomeContainer.getChildren().clear();
+        incomeContainer.getChildren().add(createHeader());
+        outcomeContainer.getChildren().add(createHeader());
         int totalTransactions = 0;
         double totalIncome = 0;
         double totalOutcome = 0;
@@ -223,22 +271,82 @@ public class UserController {
 
         for (transaction t : st.afficherParUser(currentUserId)) {
 
-            LocalDate date = t.getDate_transaction().toLocalDate();
-            String month = date.getMonth().toString();
-
-            double amount = t.getMontant() * conversionRate;
-
             int categoryId = t.getCategory_id();
             categorie cat = sc.getById(categoryId);
-
             if (cat == null) continue;
 
-            if (cat.getType().equalsIgnoreCase("INCOME")) {
-                monthlyIncome.put(month,
-                        monthlyIncome.getOrDefault(month, 0.0) + amount);
-            } else {
-                monthlyOutcome.put(month,
-                        monthlyOutcome.getOrDefault(month, 0.0) + Math.abs(amount));
+            String categoryType = cat.getType();
+            String catName = cat.getNom();
+
+            double montant = t.getMontant() * conversionRate;
+
+
+
+            // Labels values
+            Label nameLabel = new Label(t.getNom_transaction());
+            Label categoryLabel = new Label(catName);
+            Label amountLabel = new Label(String.format("%.2f %s",
+                    Math.abs(montant), currentCurrency));
+            Label dateLabel = new Label(
+                    t.getDate_transaction().toLocalDate().toString()
+            );
+
+            // Styling
+            nameLabel.setStyle("-fx-font-weight:bold;");
+            categoryLabel.setStyle("-fx-text-fill:#6a0dad;");
+            amountLabel.setStyle(
+                    categoryType.equalsIgnoreCase("INCOME")
+                            ? "-fx-text-fill:#2ecc71; -fx-font-weight:bold;"
+                            : "-fx-text-fill:#e74c3c; -fx-font-weight:bold;"
+            );
+            dateLabel.setStyle("-fx-text-fill:#555;");
+
+            // Grid layout (table style)
+            GridPane grid = new GridPane();
+            grid.setHgap(30);
+            grid.setVgap(5);
+
+            grid.add(nameLabel, 0, 0);
+            grid.add(categoryLabel, 1, 0);
+            grid.add(amountLabel, 2, 0);
+            grid.add(dateLabel, 3, 0);
+
+            ColumnConstraints col1 = new ColumnConstraints();
+            col1.setHgrow(Priority.ALWAYS);
+
+            ColumnConstraints col2 = new ColumnConstraints();
+            col2.setHgrow(Priority.ALWAYS);
+
+            ColumnConstraints col3 = new ColumnConstraints();
+            col3.setHgrow(Priority.ALWAYS);
+
+            ColumnConstraints col4 = new ColumnConstraints();
+            col4.setHgrow(Priority.ALWAYS);
+
+            grid.getColumnConstraints().addAll(col1, col2, col3, col4);
+
+
+            VBox card = new VBox();
+            card.getChildren().add(grid);
+
+            card.setStyle("""
+    -fx-background-color:white;
+    -fx-padding:12;
+    -fx-background-radius:12;
+    -fx-effect:dropshadow(gaussian, rgba(0,0,0,0.06), 6,0,0,2);
+""");
+
+
+
+
+            // Click to open details
+            card.setOnMouseClicked(e -> showTransactionDetails(t));
+
+            // Add to correct container
+            if (categoryType.equalsIgnoreCase("INCOME")) {
+                incomeContainer.getChildren().add(card);
+            } else if (categoryType.equalsIgnoreCase("OUTCOME")) {
+                outcomeContainer.getChildren().add(card);
             }
         }
 
@@ -525,7 +633,8 @@ public class UserController {
             AddTransactionController controller = loader.getController();
             controller.setType(type);
             controller.setParentController(this);
-            controller.setType(type);
+            controller.setUserId(currentUserId);
+
 
             stage.setScene(scene);
             stage.initModality(Modality.APPLICATION_MODAL);
@@ -555,16 +664,16 @@ public class UserController {
 
         CalendarView calendarView = new CalendarView();
 
-        calendarView.showWeekPage();
+        calendarView.showMonthPage();
         calendarView.setShowAddCalendarButton(false);
         calendarView.setShowSearchField(false);
         calendarView.setShowSourceTray(false);
 
         Calendar incomeCal = new Calendar("Income");
-        incomeCal.setStyle(Calendar.Style.STYLE2);
+        incomeCal.setStyle(Calendar.Style.STYLE1);
 
         Calendar outcomeCal = new Calendar("Outcome");
-        outcomeCal.setStyle(Calendar.Style.STYLE3);
+        outcomeCal.setStyle(Calendar.Style.STYLE5);
 
         for (transaction t : st.afficherParUser(currentUserId)) {
 
@@ -690,7 +799,7 @@ public class UserController {
             document.close();
 
             Alert alert = new Alert(Alert.AlertType.INFORMATION);
-            alert.setContentText("PDF généré avec succès 💜");
+            alert.setContentText("PDF généré avec succès ");
             alert.show();
 
         } catch (Exception e) {
@@ -774,7 +883,7 @@ public class UserController {
             workbook.close();
 
             Alert alert = new Alert(Alert.AlertType.INFORMATION);
-            alert.setContentText("Excel généré avec succès 💜");
+            alert.setContentText("Excel généré avec succès ");
             alert.show();
 
         } catch (Exception e) {
