@@ -1,0 +1,101 @@
+/* ================================ */
+/* FINORA - Styles Modernes */
+/* ================================ */
+
+/* Palette de couleurs */
+.root {
+    -fx-primary-color: #6366F1;
+    -fx-secondary-color: #8B5CF6;
+    -fx-success-color: #10b981;
+    -fx-danger-color: #ef4444;
+    -fx-warning-color: #f59e0b;
+    -fx-info-color: #3b82f6;
+    -fx-light-bg: #F5F7FA;
+    -fx-dark-text: #1f2937;
+    -fx-gray-text: #6b7280;
+}
+
+/* Boutons principaux */
+.button {
+    -fx-cursor: hand;
+    -fx-font-family: "Segoe UI", Arial, sans-serif;
+}
+
+.button:hover {
+    -fx-opacity: 0.9;
+    -fx-scale-x: 1.02;
+    -fx-scale-y: 1.02;
+}
+
+.button:pressed {
+    -fx-opacity: 0.8;
+}
+
+/* Labels */
+.label {
+    -fx-font-family: "Segoe UI", Arial, sans-serif;
+}
+
+/* Cartes d'action */
+.action-card {
+    -fx-cursor: hand;
+}
+
+.action-card:hover {
+    -fx-scale-x: 1.05;
+    -fx-scale-y: 1.05;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 15, 0, 0, 3);
+}
+
+/* ScrollPane */
+.scroll-pane {
+    -fx-background-color: transparent;
+}
+
+.scroll-pane .viewport {
+    -fx-background-color: transparent;
+}
+
+/* ListView */
+.list-view {
+    -fx-font-size: 11px;
+}
+
+.list-cell {
+    -fx-background-color: transparent;
+    -fx-text-fill: #4b5563;
+}
+
+.list-cell:filled:selected {
+    -fx-background-color: #e0e7ff;
+    -fx-text-fill: #4338ca;
+}
+
+/* Charts */
+.chart {
+    -fx-background-color: white;
+}
+
+.chart-title {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #1f2937;
+}
+
+.chart-legend {
+    -fx-font-size: 11px;
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from {
+        -fx-opacity: 0;
+    }
+    to {
+        -fx-opacity: 1;
+    }
+}
+
+.fade-in {
+    -fx-animation: fadeIn 0.3s ease-in;
+}

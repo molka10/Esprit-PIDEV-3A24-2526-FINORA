@@ -1,0 +1,74 @@
+/* Fond global */
+.root{
+    -fx-font-family: "Segoe UI";
+    -fx-background-color: #0f141b;
+}
+
+/* Topbar */
+.topbar{
+    -fx-background-color: #121a24;
+    -fx-padding: 18 22 18 22;
+}
+
+.top-title{
+    -fx-font-size: 26px;
+    -fx-font-weight: 800;
+    -fx-text-fill: #ffffff;
+}
+
+.top-sub{
+    -fx-font-size: 13px;
+    -fx-text-fill: #95a3b3;
+}
+
+/* Wrapper centre */
+.content-wrap{
+    -fx-padding: 28;
+}
+
+/* Grande carte centrale */
+.content-card{
+    -fx-background-color: #141d29;
+    -fx-background-radius: 18;
+    -fx-padding: 28;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.35), 22, 0.25, 0, 8);
+}
+
+/* Cards profils */
+.profile-card{
+    -fx-background-color: #121a24;
+    -fx-background-radius: 16;
+    -fx-padding: 18;
+    -fx-cursor: hand;
+
+    -fx-border-color: rgba(255,255,255,0.06);
+    -fx-border-radius: 16;
+}
+
+.profile-card:hover{
+    -fx-background-color: #172235;
+    -fx-effect: dropshadow(gaussian, rgba(0, 208, 170, 0.16), 18, 0.25, 0, 6);
+    -fx-border-color: rgba(0, 208, 170, 0.35);
+}
+
+/* Texte cards */
+.card-icon{
+    -fx-font-size: 24px;
+}
+
+.card-title{
+    -fx-font-size: 16px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #ffffff;
+}
+
+.card-desc{
+    -fx-font-size: 12px;
+    -fx-text-fill: #95a3b3;
+}
+
+.hint{
+    -fx-font-size: 14px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #d7dde6;
+}

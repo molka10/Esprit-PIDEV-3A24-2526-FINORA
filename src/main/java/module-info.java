@@ -78,3 +78,8 @@ module com.example.finora {
     exports tn.finora.services;
     exports tn.finora.utils;
 }
+    requires com.google.gson;
+    opens com.example.crud.services to com.google.gson;
+    requires java.desktop;
+   
+}
