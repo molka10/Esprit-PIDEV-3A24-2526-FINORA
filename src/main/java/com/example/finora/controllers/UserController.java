@@ -2,6 +2,8 @@ package com.example.finora.controllers;
 
 
 import com.example.finora.services.PredictionService;
+import com.example.finora.services.serviceWishlist;
+import com.example.finora.entities.Wishlist;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -74,6 +76,9 @@ public class UserController {
     private servicecategorie sc = new servicecategorie();
     private double balance = 0;
 
+    private serviceWishlist sw = new serviceWishlist();
+
+
     private int currentUserId = 1; // temporaire
 
     @FXML
@@ -86,6 +91,7 @@ public class UserController {
         wishlistView.setItems(wishlist);
         currencyBox.getItems().addAll("DT", "EUR", "USD");
         currencyBox.setValue("DT");
+        loadWishlist();
 
     }
 
@@ -905,31 +911,36 @@ public class UserController {
 
             double price = Double.parseDouble(priceText);
 
-            Label itemLabel = new Label( name);
-            itemLabel.setStyle("-fx-font-weight:bold;");
+            sw.ajouter(new Wishlist(currentUserId, name, price));
 
-            Label priceLabel = new Label(price + " DT");
-            priceLabel.setStyle("-fx-text-fill:#6a0dad;");
-
-            Button deleteBtn = new Button("✖");
-            deleteBtn.setStyle("-fx-background-color:#e74c3c; -fx-text-fill:white; -fx-background-radius:20;");
-
-            HBox itemBox = new HBox(15, itemLabel, priceLabel, deleteBtn);
-            itemBox.setStyle("""
-            -fx-background-color:#f9f6ff;
-            -fx-padding:10;
-            -fx-background-radius:10;
-        """);
-
-            deleteBtn.setOnAction(e -> wishlistView.getItems().remove(itemBox));
-
-            wishlistView.getItems().add(itemBox);
+            loadWishlist();
 
             itemField.clear();
             priceField.clear();
 
         } catch (Exception e) {
             showError("Montant invalide !");
+        }
+    }
+    private void loadWishlist() {
+
+        wishlistView.getItems().clear();
+
+        for (Wishlist w : sw.afficher(currentUserId)) {
+
+            Label itemLabel = new Label(w.getName());
+            Label priceLabel = new Label(w.getPrice() + " DT");
+
+            Button deleteBtn = new Button("✖");
+
+            HBox box = new HBox(15, itemLabel, priceLabel, deleteBtn);
+
+            deleteBtn.setOnAction(e -> {
+                sw.supprimer(w.getId());
+                loadWishlist();
+            });
+
+            wishlistView.getItems().add(box);
         }
     }
     private double getExchangeRate(String from, String to) {
