@@ -5,10 +5,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="c29a7d9c-7ce5-447a-8626-457253968d65" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/example/finora/finorainves/ApiServer.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/finora/finorainves/HelloApplication.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/finora/finorainves/HelloApplication.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/module-info.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/module-info.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/finora/controllers/InvestmentCardsController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/finora/controllers/InvestmentCardsController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/finora/finorainves/ApiServer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/finora/finorainves/ApiServer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/com/finora/finorainves/styles/style.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/com/finora/finorainves/styles/style.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/com/finora/finorainves/ui/investment_cards.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/com/finora/finorainves/ui/investment_cards.fxml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -85,7 +86,7 @@
       <workItem from="1771961716701" duration="5945000" />
       <workItem from="1771969530909" duration="11148000" />
       <workItem from="1772181527000" duration="1235000" />
-      <workItem from="1772182827660" duration="2932000" />
+      <workItem from="1772182827660" duration="6788000" />
     </task>
     <servers />
   </component>

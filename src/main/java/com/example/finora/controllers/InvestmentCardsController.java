@@ -22,6 +22,10 @@ import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 
 public class InvestmentCardsController {
 
@@ -40,6 +44,8 @@ public class InvestmentCardsController {
     public InvestmentCardsController() {
         cnx = DBConnection.getInstance().getCnx();
     }
+    @FXML private VBox internalRecommendationBox;
+    @FXML private VBox externalRecommendationBox;
     @FXML
     private Button addButton;
     @FXML
@@ -64,11 +70,15 @@ public class InvestmentCardsController {
             addButton.setVisible(false);
             addButton.setManaged(false);
         }
+        loadRecommendations();
     }
     // =====================================================
     // NAVIGATION
     // =====================================================
-
+    @FXML
+    private void onRefreshRecommendations() {
+        loadRecommendations();
+    }
     @FXML
     private void onAdd() {
         if (!UserSession.isAdmin()) {
@@ -482,5 +492,150 @@ public class InvestmentCardsController {
 
     private String safe(String value) {
         return value == null ? "" : value;
+    }
+    private String callApi(String endpoint) {
+
+        try {
+            HttpClient client = HttpClient.newHttpClient();
+
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(endpoint))
+                    .GET()
+                    .build();
+
+            HttpResponse<String> response =
+                    client.send(request, HttpResponse.BodyHandlers.ofString());
+
+            return response.body();
+
+        } catch (Exception e) {
+            return "API not reachable";
+        }
+    }
+    private void loadRecommendations() {
+
+        String internalJson =
+                callApi("http://localhost:7777/api/recommendation/internal/top3");
+
+        String externalJson =
+                callApi("http://localhost:7777/api/recommendation/external/top3");
+
+        List<String> internal = extractInvestmentNames(internalJson);
+        List<String> external = extractInvestmentNames(externalJson);
+
+        displayRecommendations(internalRecommendationBox, internal, true);
+        displayRecommendations(externalRecommendationBox, external, false);
+
+        recommendedTitles.clear();
+        recommendedTitles.addAll(internal);
+        recommendedTitles.addAll(external);
+
+        loadCards(allInvestments);
+    }
+    private void displayRecommendations(
+            VBox box,
+            List<String> list,
+            boolean internal
+    ) {
+
+        box.getChildren().clear();
+
+        if (list.isEmpty()) {
+
+            Label empty = new Label("No recommendation");
+            empty.getStyleClass().add("kpi-value");
+            box.getChildren().add(empty);
+            return;
+        }
+
+        String[] medals = {"🥇", "🥈", "🥉"};
+
+        for (int i = 0; i < list.size(); i++) {
+
+            HBox row = new HBox(10);
+            row.setAlignment(Pos.CENTER_LEFT);
+            row.setPrefHeight(35);
+
+            Label medal = new Label(medals[i]);
+            medal.getStyleClass().add("medal-icon");
+
+            Label rank = new Label("#" + (i + 1));
+            rank.getStyleClass().add("rank-number");
+
+            Label name = new Label(list.get(i));
+            name.getStyleClass().add("rec-name");
+
+            Label counter = new Label("(" + (list.size() - i) + " pts)");
+            counter.getStyleClass().add("rec-counter");
+
+            Label tag = new Label(internal ? "⭐ Internal" : "🔥 Market");
+            tag.getStyleClass().add(
+                    internal ? "internal-badge" : "market-badge"
+            );
+
+            Region spacer = new Region();
+            HBox.setHgrow(spacer, Priority.ALWAYS);
+
+            row.getChildren().addAll(
+                    medal,
+                    rank,
+                    name,
+                    counter,
+                    spacer,
+                    tag
+            );
+
+            if (i == 0) {
+                row.getStyleClass().add("gold-row");
+                applyGoldGlowEffect(row);
+            }
+            if (i == 1) row.getStyleClass().add("silver-row");
+            if (i == 2) row.getStyleClass().add("bronze-row");
+
+            box.getChildren().add(row);
+        }
+    }
+    private List<String> extractInvestmentNames(String json) {
+
+        List<String> names = new ArrayList<>();
+
+        try {
+
+            String[] parts = json.split("\\{");
+
+            for (int i = 1; i < parts.length; i++) {
+
+                String part = parts[i];
+
+                if (part.contains("\"investment\"")) {
+
+                    String name =
+                            part.split("\"investment\":\"")[1]
+                                    .split("\"")[0];
+
+                    names.add(name);
+                }
+            }
+
+        } catch (Exception ignored) {}
+
+        return names;
+    }
+
+
+
+    private void applyGoldGlowEffect(HBox row) {
+
+        javafx.animation.PauseTransition pause =
+                new javafx.animation.PauseTransition(Duration.millis(200));
+
+        row.setStyle("-fx-effect: dropshadow(gaussian, rgba(255,215,0,0.6), 20, 0.5, 0, 0);");
+
+        pause.setOnFinished(e ->
+                row.setStyle(
+                        "-fx-effect: dropshadow(gaussian, rgba(255,215,0,0.6), 20, 0.5, 0, 0);")
+        );
+
+        pause.play();
     }
 }

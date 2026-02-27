@@ -597,3 +597,79 @@
     -fx-padding: 6 12 6 12;
     -fx-background-radius: 20;
 }
+.medal-icon {
+    -fx-font-size: 18px;
+}
+
+.rank-number {
+    -fx-font-size: 14px;
+    -fx-text-fill: #999;
+}
+
+.rec-name {
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+}
+
+.internal-badge {
+    -fx-background-color: #6C5CE7;
+    -fx-text-fill: white;
+    -fx-padding: 4 10 4 10;
+    -fx-background-radius: 12;
+    -fx-font-size: 11px;
+}
+
+.market-badge {
+    -fx-background-color: #00B894;
+    -fx-text-fill: white;
+    -fx-padding: 4 10 4 10;
+    -fx-background-radius: 12;
+    -fx-font-size: 11px;
+}
+
+.gold-row {
+    -fx-background-color: rgba(255,215,0,0.12);
+    -fx-padding: 8;
+    -fx-background-radius: 10;
+}
+
+.silver-row {
+    -fx-background-color: rgba(192,192,192,0.12);
+    -fx-padding: 8;
+    -fx-background-radius: 10;
+}
+
+.bronze-row {
+    -fx-background-color: rgba(205,127,50,0.12);
+    -fx-padding: 8;
+    -fx-background-radius: 10;
+}
+.btn-refresh-rec {
+    -fx-background-color: #0984e3;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-background-radius: 20;
+}
+
+.rec-counter {
+    -fx-font-size: 12px;
+    -fx-text-fill: #999;
+}
+
+.gold-row {
+    -fx-background-color: rgba(255,215,0,0.12);
+    -fx-padding: 8;
+    -fx-background-radius: 10;
+}
+
+.silver-row {
+    -fx-background-color: rgba(192,192,192,0.12);
+    -fx-padding: 8;
+    -fx-background-radius: 10;
+}
+
+.bronze-row {
+    -fx-background-color: rgba(205,127,50,0.12);
+    -fx-padding: 8;
+    -fx-background-radius: 10;
+}

@@ -57,6 +57,33 @@
                 </VBox>
 
             </HBox>
+            <!-- ===== RECOMMENDATION SECTION ===== -->
+            <HBox spacing="24">
+
+                <!-- INTERNAL -->
+                <VBox styleClass="kpi-card" prefWidth="350">
+                    <Label text="📊 Internal Recommendation"
+                           styleClass="kpi-title"/>
+                    <VBox fx:id="internalRecommendationBox"
+                          spacing="8"
+                          styleClass="kpi-value"/>
+                </VBox>
+
+                <!-- EXTERNAL -->
+                <VBox styleClass="kpi-card" prefWidth="350">
+                    <Label text="🌍 Market Recommendation"
+                           styleClass="kpi-title"/>
+                    <VBox fx:id="externalRecommendationBox"
+                          spacing="8"
+                          styleClass="kpi-value"/>
+                </VBox>
+
+            </HBox>
+            <Button text="🔄 Refresh Recommendations"
+                    onAction="#onRefreshRecommendations"
+                    styleClass="btn-refresh-rec"
+                    prefHeight="36"
+                    prefWidth="220"/>
 
         </VBox>
     </top>
