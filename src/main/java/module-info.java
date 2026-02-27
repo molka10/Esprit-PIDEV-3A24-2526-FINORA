@@ -8,6 +8,7 @@ module com.example.finora.finorainves {
     requires java.sql;
     requires mysql.connector.j;
     requires java.net.http;
+    requires jdk.httpserver;
     opens com.example.finora.finorainves to javafx.fxml;
     opens com.example.finora.controllers to javafx.fxml;  // ← AJOUTE CETTE LIGNE
 
