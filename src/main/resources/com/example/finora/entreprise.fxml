@@ -166,7 +166,7 @@
                           -fx-text-fill:#6a0dad;"/>
 
                             <Button text=" 🚀 Lancer Analyse"
-                                    onAction="#analyzeWithAI"
+                                    onAction="#predictEntrepriseAI"
                                     style="-fx-background-color:#8e44ad;
                            -fx-text-fill:white;
                            -fx-background-radius:20;"

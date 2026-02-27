@@ -1,5 +1,7 @@
 package com.example.finora.controllers;
 
+
+import com.example.finora.services.PredictionService;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -1003,129 +1005,56 @@ public class UserController {
 
 
     @FXML
-    private void analyzeWithAI() {
-
-        double totalIncome = 0;
-        double totalOutcome = 0;
-
-        for (transaction t : st.afficherParUser(currentUserId)) {
-            if (t.getMontant() >= 0) {
-                totalIncome += t.getMontant();
-            } else {
-                totalOutcome += Math.abs(t.getMontant());
-            }
-        }
-
-        double surplus = totalIncome - totalOutcome;
-
-        double ratio = 0;
-        if (totalIncome > 0) {
-            ratio = (totalOutcome / totalIncome) * 100;
-        }
-
-        String riskLevel;
-        if (ratio < 50) {
-            riskLevel = "Faible";
-        } else if (ratio < 75) {
-            riskLevel = "Modéré";
-        } else {
-            riskLevel = "Élevé";
-        }
-
-        String prompt = """
-Explique brièvement la situation financière.
-Ne modifie aucun chiffre.
-Ne parle pas de dette.
-Ne parle pas d’endettement.
-Ne fais aucun calcul.
-Phrases courtes.
-
-Revenus : %.2f DT
-Dépenses : %.2f DT
-Excédent : %.2f DT
-Ratio : %.2f %%
-"""
-                .formatted(totalIncome, totalOutcome, surplus, ratio);
+    private void predictFutureSpending() {
 
         try {
 
-            HttpClient client = HttpClient.newHttpClient();
+            double totalIncome = 0;
+            double totalOutcome = 0;
 
-            String cleanPrompt = prompt
-                    .replace("\\", "\\\\")
-                    .replace("\"", "\\\"")
-                    .replace("\n", "\\n")
-                    .replace("\r", "");
-
-            String requestBody = """
-{
-  "model": "phi3",
-  "prompt": "%s",
-  "stream": false
-}
-""".formatted(cleanPrompt);
-
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create("http://localhost:11434/api/generate"))
-                    .header("Content-Type", "application/json")
-                    .POST(HttpRequest.BodyPublishers.ofString(requestBody))
-                    .build();
-
-            HttpResponse<String> response =
-                    client.send(request, HttpResponse.BodyHandlers.ofString());
-
-            if (response.statusCode() != 200) {
-                aiResultLabel.setText("Erreur Ollama:\n" + response.body());
-                return;
+            for (transaction t : st.afficherParUser(currentUserId)) {
+                if (t.getMontant() >= 0) {
+                    totalIncome += t.getMontant();
+                } else {
+                    totalOutcome += Math.abs(t.getMontant());
+                }
             }
 
-            String body = response.body();
+            String prompt = """
+Tu es un analyste financier personnel spécialisé en gestion budgétaire.
 
-            org.json.JSONObject json = new org.json.JSONObject(body);
-            String aiExplanation = json.getString("response");
-            aiExplanation = aiExplanation
-                    .replace("€", "DT")
-                    .replace("euros", "DT")
-                    .replace("Euro", "DT")
-                    .replace("EUR", "DT")
-                    .replace("dollar", "DT")
-                    .replace("dollars", "DT")
-                    .replace("USD", "DT")
-                    .replace("millions de", "")
-                    .replace("million de", "");
+Analyse uniquement les données financières suivantes :
 
-
-            String finalText = """
-ANALYSE FINANCIÈRE
-
-RÉSULTAT
-
+Données utilisateur :
 - Revenus mensuels : %.2f DT
 - Dépenses mensuelles : %.2f DT
-- Excédent mensuel : %.2f DT
-- Ratio dépenses/revenus : %.2f %%
+- Solde net : %.2f DT
 
-NIVEAU DE RISQUE
+Travail demandé :
 
-- %s
+1. Analyser la situation financière globale de l’utilisateur.
+2. Évaluer l’équilibre entre revenus et dépenses.
+3. Déterminer le niveau de risque financier (Faible, Moyen, Élevé) avec justification concise.
+4. Estimer la tendance probable des dépenses le mois prochain (augmentation, stabilité ou diminution).
+5. Indiquer si la situation actuelle peut mener à un déficit futur.
+6. Donner un score de santé financière sur 100 avec justification.
+7. Fournir 4 recommandations concrètes adaptées à la situation.
 
-EXPLICATION
+Contraintes :
+- Ne modifier aucun chiffre fourni.
+- Ne pas inventer de nouvelles données.
+- Ne pas inventer de catégories ou de pourcentages.
+- Analyse basée uniquement sur les chiffres donnés.
+- Réponse structurée et 100%% en français.
+""".formatted(totalIncome, totalOutcome, (totalIncome - totalOutcome));
 
-%s
 
-CONSEILS
-
-- Maintenir le niveau actuel de dépenses.
-- Continuer à épargner une partie de l’excédent.
-"""
-                    .formatted(totalIncome, totalOutcome, surplus, ratio, riskLevel, aiExplanation);
-
-            aiResultLabel.setText(finalText);
+            PredictionService ps = new PredictionService();
+            String result = ps.callAI(prompt);
+            aiResultLabel.setText(result);
 
         } catch (Exception e) {
-            aiResultLabel.setText("Erreur : " + e.getMessage());
+            aiResultLabel.setText("Erreur IA: " + e.getMessage());
         }
     }
-
-
 }

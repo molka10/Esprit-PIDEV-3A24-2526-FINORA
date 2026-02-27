@@ -6,28 +6,26 @@ import java.sql.SQLException;
 
 public class database {
 
-    private static DBConnection instance;
+    private static database instance;
     private Connection cnx;
 
     private final String URL = "jdbc:mysql://localhost:3306/finora";
     private final String USER = "root";
     private final String PASSWORD = "";
 
-
     private database() {
         try {
             cnx = DriverManager.getConnection(URL, USER, PASSWORD);
-            System.out.println(" Connexion BD établie");
+            System.out.println("Connexion BD établie");
         } catch (SQLException e) {
-            System.out.println(" Erreur connexion DB");
+            System.out.println("Erreur connexion DB");
             e.printStackTrace();
         }
     }
 
-
-    public static DBConnection getInstance() {
+    public static database getInstance() {
         if (instance == null) {
-            instance = new DBConnection();
+            instance = new database();
         }
         return instance;
     }

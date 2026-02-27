@@ -67,9 +67,21 @@ public class AdminController {
         userSearchField.textProperty().addListener((observable, oldValue, newValue) -> {
             rechercheUser();
         });
+        loadStatsUsers();
     }
 
+    public String calculateStatus(double income, double outcome, double total) {
 
+        if (total < 0 || Math.abs(outcome) > income) {
+            return "CRITICAL";
+        }
+
+        if (Math.abs(outcome) >= income * 0.7) {
+            return "RISK";
+        }
+
+        return "STABLE";
+    }
     private void loadTransactions() {
 
         transactionContainer.getChildren().clear();
@@ -186,7 +198,9 @@ public class AdminController {
                 createHeaderLabel("Total",120),
                 createHeaderLabel("Income",120),
                 createHeaderLabel("Outcome",120),
-                createHeaderLabel("Transactions",120)
+                createHeaderLabel("Transactions",120),
+                createHeaderLabel("Status",120)
+
         );
 
         walletContainer.getChildren().add(header);
@@ -203,13 +217,28 @@ public class AdminController {
             Label outcomeLabel = createCell(outcomeMap.getOrDefault(role,0.0)+" DT",120);
             Label countLabel = createCell(String.valueOf(countMap.get(role)),120);
 
+            double income = incomeMap.getOrDefault(role,0.0);
+            double outcome = outcomeMap.getOrDefault(role,0.0);
+            double total = totalMap.get(role);
+
+            String statusValue = calculateStatus(income, outcome, total);
+
+            Label statusLabel = createCell(statusValue,120);
+
+// Couleur automatique
+            switch (statusValue) {
+                case "CRITICAL" -> statusLabel.setStyle("-fx-text-fill:red; -fx-font-weight:bold;");
+                case "RISK" -> statusLabel.setStyle("-fx-text-fill:orange; -fx-font-weight:bold;");
+                case "STABLE" -> statusLabel.setStyle("-fx-text-fill:green; -fx-font-weight:bold;");
+            }
+
             incomeLabel.setStyle("-fx-text-fill:#2ecc71; -fx-font-weight:bold;");
             outcomeLabel.setStyle("-fx-text-fill:#e74c3c; -fx-font-weight:bold;");
             totalLabel.setStyle("-fx-text-fill:#6a0dad; -fx-font-weight:bold;");
             countLabel.setStyle("-fx-text-fill:#6a0dad; -fx-font-weight:bold;");
 
             row.getChildren().addAll(
-                    roleLabel,totalLabel,incomeLabel,outcomeLabel,countLabel
+                    roleLabel,totalLabel,incomeLabel,outcomeLabel,countLabel,statusLabel
             );
 
             walletContainer.getChildren().add(row);
@@ -615,19 +644,24 @@ public class AdminController {
     }
     private VBox createStatCard(String title, int value, String color) {
 
-        VBox box = new VBox(10);
-        box.setPadding(new Insets(15));
+        VBox box = new VBox(3);
+        box.setPadding(new Insets(6));
+        box.setPrefWidth(100);
+        box.setMinWidth(100);
+
         box.setStyle(
                 "-fx-background-color:#f3f0fa;" +
-                        "-fx-background-radius:15;" +
-                        "-fx-border-radius:15;"
+                        "-fx-background-radius:12;" +
+                        "-fx-border-radius:12;"
         );
 
         Label titleLabel = new Label(title);
-        titleLabel.setStyle("-fx-text-fill:" + color + "; -fx-font-size:16px; -fx-font-weight:bold;");
+        titleLabel.setStyle("-fx-text-fill:" + color +
+                "; -fx-font-size:14px; -fx-font-weight:bold;");
 
         Label valueLabel = new Label(String.valueOf(value));
-        valueLabel.setStyle("-fx-text-fill:" + color + "; -fx-font-size:22px; -fx-font-weight:bold;");
+        valueLabel.setStyle("-fx-text-fill:" + color +
+                "; -fx-font-size:18px; -fx-font-weight:bold;");
 
         box.getChildren().addAll(titleLabel, valueLabel);
 
@@ -637,17 +671,67 @@ public class AdminController {
 
         Set<Integer> users = new HashSet<>();
 
+        int critical = 0;
+        int risk = 0;
+        int stable = 0;
+
+        Map<String, Double> totalMap = new TreeMap<>();
+        Map<String, Double> incomeMap = new TreeMap<>();
+        Map<String, Double> outcomeMap = new TreeMap<>();
+
         for (transaction t : st.afficher()) {
+
             users.add(t.getUser_id());
+
+            String role = String.valueOf(t.getUser_id());
+
+            totalMap.put(role,
+                    totalMap.getOrDefault(role,0.0) + t.getMontant());
+
+            if(t.getMontant() >= 0)
+                incomeMap.put(role,
+                        incomeMap.getOrDefault(role,0.0) + t.getMontant());
+            else
+                outcomeMap.put(role,
+                        outcomeMap.getOrDefault(role,0.0) + t.getMontant());
         }
 
-        int nbrUsers = users.size();
+        for(String role : totalMap.keySet()){
+
+            double income = incomeMap.getOrDefault(role,0.0);
+            double outcome = outcomeMap.getOrDefault(role,0.0);
+            double total = totalMap.get(role);
+
+            String status = calculateStatus(income, outcome, total);
+
+            switch (status){
+                case "CRITICAL" -> critical++;
+                case "RISK" -> risk++;
+                case "STABLE" -> stable++;
+            }
+        }
 
         statsContainer.getChildren().clear();
 
-        statsContainer.getChildren().addAll(
-                createStatCard("Users", nbrUsers, "#6a0dad"),
+        statsContainer.getChildren().add(
+                createStatCard("Users", users.size(), "#6a0dad")
+        );
+
+        statsContainer.getChildren().add(
                 createStatCard("Transactions", st.afficher().size(), "#8e44ad")
+        );
+
+
+        statsContainer.getChildren().add(
+                createStatCard("Critical", critical, "#e74c3c")
+        );
+
+        statsContainer.getChildren().add(
+                createStatCard("Risk", risk, "#f39c12")
+        );
+
+        statsContainer.getChildren().add(
+                createStatCard("Stable", stable, "#2ecc71")
         );
     }
     @FXML
@@ -683,17 +767,26 @@ public class AdminController {
             double jpy = rates.getDouble("JPY");
 
             currencyRatesLabel.setText(
-                    "Taux de change (Base: TND)\n\n" +
-                            "EUR : " + eur + "\n" +
-                            "USD : " + usd + "\n" +
-                            "GBP : " + gbp + "\n" +
-                            "CAD : " + cad + "\n" +
-                            "JPY : " + jpy
+                    "Base: TND\n\n" +
+
+                            "1 TND = " + eur + " EUR\n" +
+                            "1 TND = " + usd + " USD\n" +
+                            "1 TND = " + gbp + " GBP\n" +
+                            "1 TND = " + cad + " CAD\n" +
+                            "1 TND = " + jpy + " JPY\n\n" +
+
+                            "Inverse:\n\n" +
+                            "1 EUR = " + (1/eur) + " TND\n" +
+                            "1 USD = " + (1/usd) + " TND\n" +
+                            "1 GBP = " + (1/gbp) + " TND\n" +
+                            "1 CAD = " + (1/cad) + " TND\n" +
+                            "1 JPY = " + (1/jpy) + " TND"
             );
 
         } catch (Exception e) {
             currencyRatesLabel.setText("Erreur API devises");
         }
     }
+
 
 }

@@ -180,13 +180,11 @@
                           -fx-font-weight:bold;
                           -fx-text-fill:#6a0dad;"/>
 
-                            <Button text=" 🚀 Lancer Analyse"
-                                    onAction="#analyzeWithAI"
+
+                            <Button text="🚀 Prediction IA" onAction="#predictFutureSpending"
                                     style="-fx-background-color:#8e44ad;
                            -fx-text-fill:white;
-                           -fx-background-radius:20;"
-                                    prefWidth="180"/>
-
+                           -fx-background-radius:20;"/>
                             <Label fx:id="aiResultLabel"
                                    wrapText="true"
                                    text="Cliquez sur le bouton pour voir l'analyse..."

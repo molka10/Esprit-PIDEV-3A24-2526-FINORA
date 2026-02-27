@@ -1,5 +1,7 @@
 package com.example.finora.controllers;
 
+import com.example.finora.services.PredictionService;
+
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -988,7 +990,7 @@ public class EntrepriseController {
     }
 
     @FXML
-    private void analyzeWithAI() {
+    private void predictEntrepriseAI() {
 
         double totalIncome = 0;
         double totalOutcome = 0;
@@ -1001,118 +1003,55 @@ public class EntrepriseController {
             }
         }
 
-        double surplus = totalIncome - totalOutcome;
-
-        double ratio = 0;
-        if (totalIncome > 0) {
-            ratio = (totalOutcome / totalIncome) * 100;
-        }
-
-        String riskLevel;
-        if (ratio < 50) {
-            riskLevel = "Faible";
-        } else if (ratio < 75) {
-            riskLevel = "Modéré";
-        } else {
-            riskLevel = "Élevé";
-        }
+        double net = totalIncome - totalOutcome;
 
         String prompt = """
-Explique brièvement la situation financière.
-Ne modifie aucun chiffre.
-Ne parle pas de dette.
-Ne parle pas d’endettement.
-Ne fais aucun calcul.
-Phrases courtes.
+Tu es un expert en analyse financière et en stratégie d’entreprise.
 
-Revenus : %.2f DT
-Dépenses : %.2f DT
-Excédent : %.2f DT
-Ratio : %.2f %%
-"""
-                .formatted(totalIncome, totalOutcome, surplus, ratio);
+Analyse en profondeur les données financières suivantes :
+
+Données mensuelles de l’entreprise :
+- Revenus totaux : %.2f DT
+- Dépenses totales : %.2f DT
+- Résultat net : %.2f DT
+
+Travail demandé :
+
+1. Analyser la rentabilité de l’entreprise.
+2. Évaluer la stabilité financière (équilibre revenus/dépenses).
+3. Déterminer le niveau de risque financier (Faible, Moyen, Élevé) avec justification.
+4. Estimer les dépenses probables du mois prochain.
+5. Prédire les types d’achats ou investissements probables le mois prochain.
+6. Indiquer s’il existe un risque de baisse de performance ou de déficit futur.
+7. Donner un score de santé financière sur 100 avec justification.
+8. Fournir 4 recommandations stratégiques concrètes.
+
+Contraintes :
+- Ne modifier aucun chiffre.
+- Ne pas inventer de nouvelles données.
+- Analyse logique basée uniquement sur les informations fournies.
+- Réponse structurée avec titres clairs.
+- Réponse 100%% en français.
+""".formatted(totalIncome, totalOutcome, net);
 
         try {
 
-            HttpClient client = HttpClient.newHttpClient();
-
-            String cleanPrompt = prompt
-                    .replace("\\", "\\\\")
-                    .replace("\"", "\\\"")
-                    .replace("\n", "\\n")
-                    .replace("\r", "");
-
-            String requestBody = """
-{
-  "model": "phi3",
-  "prompt": "%s",
-  "stream": false
-}
-""".formatted(cleanPrompt);
-
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create("http://localhost:11434/api/generate"))
-                    .header("Content-Type", "application/json")
-                    .POST(HttpRequest.BodyPublishers.ofString(requestBody))
-                    .build();
-
-            HttpResponse<String> response =
-                    client.send(request, HttpResponse.BodyHandlers.ofString());
-
-            if (response.statusCode() != 200) {
-                aiResultLabel.setText("Erreur Ollama:\n" + response.body());
-                return;
-            }
-
-            String body = response.body();
-
-            org.json.JSONObject json = new org.json.JSONObject(body);
-
-            String aiExplanation = json.getString("response");
-
-            aiExplanation = aiExplanation
-                    .replace("€", "DT")
-                    .replace("euros", "DT")
-                    .replace("Euro", "DT")
-                    .replace("EUR", "DT")
-                    .replace("dollar", "DT")
-                    .replace("dollars", "DT")
-                    .replace("USD", "DT")
-                    .replace("millions de", "")
-                    .replace("million de", "");
+            PredictionService ps = new PredictionService();
+            String result = ps.callAI(prompt);
 
             String finalText = """
-ANALYSE FINANCIÈRE
-
-RÉSULTAT
-
-- Revenus mensuels : %.2f DT
-- Dépenses mensuelles : %.2f DT
-- Excédent mensuel : %.2f DT
-- Ratio dépenses/revenus : %.2f %%
-
-NIVEAU DE RISQUE
-
-- %s
-
-EXPLICATION
+ANALYSE IA – ENTREPRISE
 
 %s
-
-CONSEILS
-
-- Maintenir le niveau actuel de dépenses.
-- Continuer à épargner une partie de l’excédent.
-"""
-                    .formatted(totalIncome, totalOutcome, surplus, ratio, riskLevel, aiExplanation);
+""".formatted(result);
 
             aiResultLabel.setText(finalText);
 
         } catch (Exception e) {
-            aiResultLabel.setText("Erreur : " + e.getMessage());
+            aiResultLabel.setText("Erreur IA : " + e.getMessage());
         }
-
     }
+
 
 
 }
