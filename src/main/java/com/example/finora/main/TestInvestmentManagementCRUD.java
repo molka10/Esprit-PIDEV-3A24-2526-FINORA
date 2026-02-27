@@ -1,4 +1,4 @@
-package com.exaple.finora.main;
+package com.example.finora.main;
 
 import com.example.finora.entities.InvestmentManagement;
 import com.example.finora.services.InvestmentManagementService;

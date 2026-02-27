@@ -19,7 +19,7 @@ public class SceneNavigator {
     public static void goTo(String fxml, String title) {
         try {
             FXMLLoader loader = new FXMLLoader(
-                    SceneNavigator.class.getResource("/tn/finora/finorainves/ui/" + fxml)
+                    SceneNavigator.class.getResource("/com/finora/finorainves/ui/" + fxml)
             );
 
             Parent root = loader.load();

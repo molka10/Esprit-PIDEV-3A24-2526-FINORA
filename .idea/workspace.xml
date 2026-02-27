@@ -5,21 +5,16 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="c29a7d9c-7ce5-447a-8626-457253968d65" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/example/finora/controllers/InvestmentCardsController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/finora/controllers/InvestmentCardsController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/finora/controllers/InvestmentFormController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/finora/controllers/InvestmentFormController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/finora/controllers/InvestmentManagementCardsController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/finora/controllers/InvestmentManagementCardsController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/finora/controllers/InvestmentManagementFormController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/finora/controllers/InvestmentManagementFormController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/finora/finorainves/AppState.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/finora/finorainves/AppState.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/finora/main/TestInvestmentCRUD.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/finora/main/TestInvestmentCRUD.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/finora/finorainves/SceneNavigator.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/finora/finorainves/SceneNavigator.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/example/finora/main/TestInvestmentManagementCRUD.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/finora/main/TestInvestmentManagementCRUD.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/finora/main/testbd.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/finora/main/testbd.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/finora/services/InvestmentManagementService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/finora/services/InvestmentManagementService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/finora/services/ExternalTrendService.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/finora/services/RecommendationApiService.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/finora/services/SmartRecommendationService.java" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/module-info.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/module-info.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/com/finora/finorainves/hello-view.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/com/finora/finorainves/hello-view.fxml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/test/java/com/finora/tests/InvestmentManagementServiceTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/com/finora/tests/InvestmentManagementServiceTest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/test/java/com/finora/tests/InvestmentServiceTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/com/finora/tests/InvestmentServiceTest.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -53,20 +48,21 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;Application.HelloApplication.executor&quot;: &quot;Run&quot;,
-    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;investissement&quot;,
-    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Users/khemi/Documents/FinoraInves(crud kdim)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Application.HelloApplication.executor": "Run",
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
+    "git-widget-placeholder": "investissement",
+    "ignore.virus.scanning.warn.message": "true",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "C:/Users/khemi/Documents/FinoraInves(crud kdim)",
+    "nodejs_package_manager_path": "npm",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
       <recent name="C:\Users\khemi\Documents\FinoraInves(crud kdim)\src\main\java\com\example" />
@@ -93,7 +89,9 @@
       <workItem from="1771875108923" duration="18529000" />
       <workItem from="1771946161541" duration="4019000" />
       <workItem from="1771961716701" duration="5945000" />
-      <workItem from="1771969530909" duration="9044000" />
+      <workItem from="1771969530909" duration="11148000" />
+      <workItem from="1772181527000" duration="1235000" />
+      <workItem from="1772182827660" duration="463000" />
     </task>
     <servers />
   </component>

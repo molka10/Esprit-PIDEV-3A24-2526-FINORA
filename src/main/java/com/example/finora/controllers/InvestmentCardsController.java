@@ -1,6 +1,5 @@
 package com.example.finora.controllers;
 
-import com.example.finora.services.RecommendationApiService;
 import javafx.animation.ScaleTransition;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
@@ -56,11 +55,7 @@ public class InvestmentCardsController {
         );
         riskFilter.setValue("All");
 
-        // 1️⃣ D'abord appeler l'API
-        RecommendationApiService apiService =
-                new RecommendationApiService();
 
-        recommendedTitles = apiService.fetchRecommendations();
 
         // 2️⃣ Ensuite charger les cartes
         refreshData();
