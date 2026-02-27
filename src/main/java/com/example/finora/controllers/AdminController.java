@@ -34,9 +34,10 @@ import java.net.http.*;
 import java.util.Set;
 import java.util.HashSet;
 import java.net.URI;
-
+import javafx.scene.layout.StackPane;
 import com.example.finora.entities.transaction;
 import com.example.finora.services.servicetransaction;
+import javafx.scene.layout.AnchorPane;
 
 public class AdminController {
 
@@ -50,8 +51,11 @@ public class AdminController {
     @FXML private Button backButton;
     @FXML private HBox statsContainer;
     @FXML private Label currencyRatesLabel;
-
+    @FXML private StackPane mainRoot;
     private final servicetransaction st = new servicetransaction();
+    private boolean darkMode = false;
+    @FXML private AnchorPane root;
+    @FXML private Button themeButton;
 
     @FXML
     public void initialize() {
@@ -88,7 +92,7 @@ public class AdminController {
 
         HBox header = new HBox();
         header.setPadding(new Insets(10));
-        header.setStyle("-fx-background-color:#8e44ad; -fx-background-radius:10;");
+        header.getStyleClass().add("header-row");
 
         header.getChildren().addAll(
                 createHeaderLabel("User",120),
@@ -109,7 +113,7 @@ public class AdminController {
 
         HBox row = new HBox();
         row.setPadding(new Insets(10));
-        row.setStyle("-fx-background-color:#f3f0fa; -fx-background-radius:10;");
+        row.getStyleClass().add("wallet-row");
 
         row.getChildren().addAll(
                 createCell(String.valueOf(t.getUser_id()),120),
@@ -191,7 +195,7 @@ public class AdminController {
 
         HBox header = new HBox(30);
         header.setPadding(new Insets(10));
-        header.setStyle("-fx-background-color:#8e44ad; -fx-background-radius:10;");
+        header.getStyleClass().add("header-row");
 
         header.getChildren().addAll(
                 createHeaderLabel("User ID",120),
@@ -209,7 +213,7 @@ public class AdminController {
 
             HBox row = new HBox(30);
             row.setPadding(new Insets(10));
-            row.setStyle("-fx-background-color:#f3f0fa; -fx-background-radius:10;");
+            row.getStyleClass().add("wallet-row");
 
             Label roleLabel = createCell(role,120);
             Label totalLabel = createCell(totalMap.get(role)+" DT",120);
@@ -227,7 +231,7 @@ public class AdminController {
 
 // Couleur automatique
             switch (statusValue) {
-                case "CRITICAL" -> statusLabel.setStyle("-fx-text-fill:red; -fx-font-weight:bold;");
+                case "CRITICAL" -> statusLabel.getStyleClass().add("status-critical");
                 case "RISK" -> statusLabel.setStyle("-fx-text-fill:orange; -fx-font-weight:bold;");
                 case "STABLE" -> statusLabel.setStyle("-fx-text-fill:green; -fx-font-weight:bold;");
             }
@@ -431,21 +435,26 @@ public class AdminController {
     private Label createHeaderLabel(String t,double w){
         Label l=new Label(t);
         l.setPrefWidth(w);
-        l.setStyle("-fx-text-fill:white; -fx-font-weight:bold;");
+        l.getStyleClass().add("header-text");
         return l;
     }
 
     private Label createCell(String t,double w){
         Label l=new Label(t);
         l.setPrefWidth(w);
-        l.setStyle("-fx-text-fill:#4b0082;");
+        l.getStyleClass().add("cell-text");
         return l;
     }
 
     private Label createMontantCell(double m,double w){
         Label l=new Label(m+" DT");
         l.setPrefWidth(w);
-        l.setStyle("-fx-text-fill:"+(m>=0?"#2ecc71":"#e74c3c")+"; -fx-font-weight:bold;");
+        if(m>=0){
+            l.getStyleClass().add("income-text");
+        }else{
+            l.getStyleClass().add("outcome-text");
+        }
+
         return l;
     }
     private void buildWalletTable(Map<String, Double> totalMap,
@@ -455,8 +464,7 @@ public class AdminController {
 
         HBox header = new HBox(30);
         header.setPadding(new Insets(10));
-        header.setStyle("-fx-background-color:#8e44ad; -fx-background-radius:10;");
-
+        header.getStyleClass().add("header-row");
         header.getChildren().addAll(
                 createHeaderLabel("User ID",120),
                 createHeaderLabel("Total",120),
@@ -471,7 +479,7 @@ public class AdminController {
 
             HBox row = new HBox(30);
             row.setPadding(new Insets(10));
-            row.setStyle("-fx-background-color:#f3f0fa; -fx-background-radius:10;");
+            row.getStyleClass().add("wallet-row");
 
             row.getChildren().addAll(
                     createCell(role,120),
@@ -649,11 +657,7 @@ public class AdminController {
         box.setPrefWidth(100);
         box.setMinWidth(100);
 
-        box.setStyle(
-                "-fx-background-color:#f3f0fa;" +
-                        "-fx-background-radius:12;" +
-                        "-fx-border-radius:12;"
-        );
+        box.getStyleClass().add("stat-card");
 
         Label titleLabel = new Label(title);
         titleLabel.setStyle("-fx-text-fill:" + color +
@@ -788,5 +792,17 @@ public class AdminController {
         }
     }
 
+    @FXML
+    private void toggleTheme() {
 
+        if (darkMode) {
+            mainRoot.getStyleClass().remove("dark-mode");
+            themeButton.setText("🌙Mode");
+        } else {
+            mainRoot.getStyleClass().add("dark-mode");
+            themeButton.setText("☀️Mode");
+        }
+
+        darkMode = !darkMode;
+    }
 }

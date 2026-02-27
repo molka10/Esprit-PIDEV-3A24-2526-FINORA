@@ -562,3 +562,48 @@
 .simple-purple:hover {
     -fx-background-color: #d1c4e9;
 }
+.wallet-row {
+    -fx-background-color: #f3f0fa;
+    -fx-background-radius: 10;
+}
+.status-critical { -fx-text-fill: red; }
+.status-risk { -fx-text-fill: orange; }
+.status-stable { -fx-text-fill: green; }
+/* ===== NORMAL MODE ===== */
+
+.cell-text {
+    -fx-text-fill: #4b0082;
+}
+
+.header-text {
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+}
+
+.income-text {
+    -fx-text-fill: #2ecc71;
+    -fx-font-weight: bold;
+}
+
+.outcome-text {
+    -fx-text-fill: #e74c3c;
+    -fx-font-weight: bold;
+}
+
+/* ===== DARK MODE ===== */
+
+.dark-mode .cell-text {
+    -fx-text-fill: white;
+}
+
+.dark-mode .header-text {
+    -fx-text-fill: white;
+}
+
+.dark-mode .income-text {
+    -fx-text-fill: #22C55E;
+}
+
+.dark-mode .outcome-text {
+    -fx-text-fill: #EF4444;
+}

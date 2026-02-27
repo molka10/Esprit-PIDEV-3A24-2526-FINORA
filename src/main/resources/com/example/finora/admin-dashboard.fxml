@@ -4,11 +4,14 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.chart.*?>
 
-<StackPane prefWidth="1400" prefHeight="900"
+<StackPane fx:id="mainRoot"
+           prefWidth="1400" prefHeight="900"
            xmlns="http://javafx.com/javafx/8"
            xmlns:fx="http://javafx.com/fxml/1"
            fx:controller="com.example.finora.controllers.AdminController"
-           stylesheets="@dashboard.css">
+           stylesheets="@dashboard.css, @dark.css">
+
+    <AnchorPane fx:id="root"/>
 
     <ScrollPane fitToWidth="true"
                 hbarPolicy="NEVER"
@@ -22,11 +25,16 @@
 
             <!-- ================= HEADER ================= -->
             <HBox alignment="CENTER_LEFT" spacing="25">
+                <Button fx:id="themeButton"
+                        text="🌙 Mode"
+                        onAction="#toggleTheme"
+                        styleClass="btn-primary"/>
 
                 <Button text="Retour"
                         fx:id="backButton"
                         onAction="#goBack"
                         styleClass="btn-primary"/>
+
 
                 <Label text="📊 ADMIN DASHBOARD"
                        styleClass="title"/>
@@ -61,9 +69,7 @@
 
                             <Label fx:id="currencyRatesLabel"
                                    wrapText="true"
-                                   style="-fx-background-color:#f3f0fa;
-                      -fx-padding:15;
-                      -fx-background-radius:15;" />
+                                   styleClass="currency-box"/>
 
                         </HBox>
 
