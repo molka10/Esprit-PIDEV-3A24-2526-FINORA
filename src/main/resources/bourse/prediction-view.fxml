@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.chart.*?>
+
+<BorderPane prefHeight="750.0" prefWidth="1100.0"
+            xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.example.finora.controllers.bourse.PredictionController"
+            style="-fx-background-color: #f8f9fa;">
+
+    <!-- HEADER -->
+    <top>
+        <HBox alignment="CENTER_LEFT" spacing="20"
+              style="-fx-background-color: #ffffff; -fx-padding: 20 24; -fx-border-color: transparent transparent #e9ecef transparent; -fx-border-width: 0 0 1 0;">
+            <Label text="🎯 Prédiction de Prix IA"
+                   style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #f59e0b;"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Button text="⬅ Retour" onAction="#retourDashboard"
+                    style="-fx-background-color: #a855f7; -fx-text-fill: white; -fx-font-size: 13px; -fx-font-weight: bold; -fx-background-radius: 8; -fx-padding: 10 20; -fx-cursor: hand;"/>
+        </HBox>
+    </top>
+
+    <center>
+        <ScrollPane fitToWidth="true" style="-fx-background-color: transparent;">
+            <VBox spacing="20" style="-fx-padding: 24; -fx-background-color: #f8f9fa;">
+
+                <!-- SÉLECTION ACTION -->
+                <VBox spacing="12"
+                      style="-fx-background-color: #ffffff; -fx-background-radius: 14; -fx-padding: 20; -fx-border-color: #e9ecef; -fx-border-radius: 14; -fx-border-width: 1; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 8, 0, 0, 2);">
+
+                    <Label text="Sélectionner une Action"
+                           style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #1f2937;"/>
+
+                    <HBox spacing="12" alignment="CENTER_LEFT">
+                        <ComboBox fx:id="cbAction" promptText="Choisir une action..."
+                                  HBox.hgrow="ALWAYS"
+                                  style="-fx-background-color: #f8f9fa; -fx-text-fill: #1f2937; -fx-background-radius: 8; -fx-font-size: 14px; -fx-pref-width: 400;"/>
+
+                        <Button fx:id="btnAnalyser" text="🎯 Analyser" onAction="#analyserAction"
+                                style="-fx-background-color: #f59e0b; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold; -fx-background-radius: 10; -fx-padding: 12 30; -fx-cursor: hand;"/>
+                    </HBox>
+                </VBox>
+
+                <!-- RÉSULTATS -->
+                <VBox fx:id="resultsContainer" spacing="16" visible="false" managed="false">
+
+                    <!-- INFO ACTION + GRAPHIQUE -->
+                    <HBox spacing="16">
+
+                        <!-- Info Action -->
+                        <VBox spacing="12"
+                              style="-fx-background-color: #ffffff; -fx-background-radius: 14; -fx-padding: 20; -fx-pref-width: 350; -fx-border-color: #e9ecef; -fx-border-radius: 14; -fx-border-width: 1; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 8, 0, 0, 2);">
+
+                            <Label text="📊 Information" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #1f2937;"/>
+
+                            <VBox spacing="8">
+                                <HBox spacing="8">
+                                    <Label text="Action :" style="-fx-font-size: 12px; -fx-text-fill: #6b7280; -fx-pref-width: 100;"/>
+                                    <Label fx:id="lblActionNom" text="-" style="-fx-font-size: 12px; -fx-text-fill: #1f2937; -fx-font-weight: bold;"/>
+                                </HBox>
+                                <HBox spacing="8">
+                                    <Label text="Secteur :" style="-fx-font-size: 12px; -fx-text-fill: #6b7280; -fx-pref-width: 100;"/>
+                                    <Label fx:id="lblSecteur" text="-" style="-fx-font-size: 12px; -fx-text-fill: #1f2937;"/>
+                                </HBox>
+                                <HBox spacing="8">
+                                    <Label text="Prix actuel :" style="-fx-font-size: 12px; -fx-text-fill: #6b7280; -fx-pref-width: 100;"/>
+                                    <Label fx:id="lblPrixActuel" text="-" style="-fx-font-size: 14px; -fx-text-fill: #10b981; -fx-font-weight: bold;"/>
+                                </HBox>
+                            </VBox>
+
+                            <Separator/>
+
+                            <Label text="🎯 Prédictions IA" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #1f2937;"/>
+
+                            <VBox spacing="8">
+                                <HBox spacing="8">
+                                    <Label text="Tendance :" style="-fx-font-size: 12px; -fx-text-fill: #6b7280; -fx-pref-width: 100;"/>
+                                    <Label fx:id="lblTendance" text="-" style="-fx-font-size: 12px; -fx-font-weight: bold;"/>
+                                </HBox>
+                                <HBox spacing="8">
+                                    <Label text="7 jours :" style="-fx-font-size: 12px; -fx-text-fill: #6b7280; -fx-pref-width: 100;"/>
+                                    <Label fx:id="lblPred7j" text="-" style="-fx-font-size: 12px; -fx-text-fill: #1f2937; -fx-font-weight: bold;"/>
+                                </HBox>
+                                <HBox spacing="8">
+                                    <Label text="30 jours :" style="-fx-font-size: 12px; -fx-text-fill: #6b7280; -fx-pref-width: 100;"/>
+                                    <Label fx:id="lblPred30j" text="-" style="-fx-font-size: 12px; -fx-text-fill: #1f2937; -fx-font-weight: bold;"/>
+                                </HBox>
+                                <HBox spacing="8">
+                                    <Label text="Confiance :" style="-fx-font-size: 12px; -fx-text-fill: #6b7280; -fx-pref-width: 100;"/>
+                                    <ProgressBar fx:id="progressConfiance" prefWidth="150" prefHeight="20"/>
+                                    <Label fx:id="lblConfiance" text="0%" style="-fx-font-size: 11px; -fx-text-fill: #6b7280;"/>
+                                </HBox>
+                            </VBox>
+                        </VBox>
+
+                        <!-- Graphique Historique + Prédictions -->
+                        <VBox spacing="12" HBox.hgrow="ALWAYS"
+                              style="-fx-background-color: #ffffff; -fx-background-radius: 14; -fx-padding: 20; -fx-border-color: #e9ecef; -fx-border-radius: 14; -fx-border-width: 1; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 8, 0, 0, 2);">
+
+                            <Label text="📈 Historique 30j + Prédictions" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #1f2937;"/>
+
+                            <LineChart fx:id="lineChart" prefHeight="280" animated="false"
+                                       style="-fx-background-color: transparent;">
+                                <xAxis><CategoryAxis label="" tickLabelFill="#6b7280"/></xAxis>
+                                <yAxis><NumberAxis label="" tickLabelFill="#6b7280"/></yAxis>
+                            </LineChart>
+                        </VBox>
+
+                    </HBox>
+
+                    <!-- SCÉNARIOS -->
+                    <HBox spacing="16">
+
+                        <VBox spacing="8" HBox.hgrow="ALWAYS"
+                              style="-fx-background-color: #d1fae5; -fx-background-radius: 12; -fx-padding: 16; -fx-border-color: #6ee7b7; -fx-border-radius: 12; -fx-border-width: 1;">
+                            <Label text="📈 Scénario Optimiste" style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #065f46;"/>
+                            <Label fx:id="lblScenarioOpt" text="-" style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #065f46;"/>
+                        </VBox>
+
+                        <VBox spacing="8" HBox.hgrow="ALWAYS"
+                              style="-fx-background-color: #fef3c7; -fx-background-radius: 12; -fx-padding: 16; -fx-border-color: #fde68a; -fx-border-radius: 12; -fx-border-width: 1;">
+                            <Label text="⚖️ Scénario Réaliste" style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #92400e;"/>
+                            <Label fx:id="lblScenarioReal" text="-" style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #92400e;"/>
+                        </VBox>
+
+                        <VBox spacing="8" HBox.hgrow="ALWAYS"
+                              style="-fx-background-color: #fee2e2; -fx-background-radius: 12; -fx-padding: 16; -fx-border-color: #fecaca; -fx-border-radius: 12; -fx-border-width: 1;">
+                            <Label text="📉 Scénario Pessimiste" style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #991b1b;"/>
+                            <Label fx:id="lblScenarioPess" text="-" style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #991b1b;"/>
+                        </VBox>
+
+                    </HBox>
+
+                    <!-- ANALYSE DÉTAILLÉE -->
+                    <VBox spacing="12"
+                          style="-fx-background-color: #ffffff; -fx-background-radius: 14; -fx-padding: 20; -fx-border-color: #e9ecef; -fx-border-radius: 14; -fx-border-width: 1; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 8, 0, 0, 2);">
+
+                        <Label text="🧠 Analyse de Claude" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #1f2937;"/>
+
+                        <TextArea fx:id="txtAnalyse" editable="false" wrapText="true" prefHeight="200"
+                                  style="-fx-background-color: #f8f9fa; -fx-text-fill: #1f2937; -fx-background-radius: 8; -fx-font-size: 13px; -fx-control-inner-background: #f8f9fa;"/>
+                    </VBox>
+
+                    <!-- AVERTISSEMENT -->
+                    <HBox spacing="12" alignment="CENTER_LEFT"
+                          style="-fx-background-color: #fef3c7; -fx-background-radius: 10; -fx-padding: 16; -fx-border-color: #fde68a; -fx-border-radius: 10; -fx-border-width: 1;">
+                        <Label text="⚠️" style="-fx-font-size: 20px;"/>
+                        <Label text="Cette prédiction est générée par IA et ne constitue pas un conseil financier. Les marchés sont imprévisibles. Investissez prudemment."
+                               wrapText="true"
+                               style="-fx-font-size: 12px; -fx-text-fill: #92400e;"/>
+                    </HBox>
+
+                </VBox>
+
+                <!-- LOADING INDICATOR -->
+                <VBox fx:id="loadingContainer" spacing="16" alignment="CENTER" visible="false" managed="false"
+                      style="-fx-background-color: #ffffff; -fx-background-radius: 14; -fx-padding: 60; -fx-border-color: #e9ecef; -fx-border-radius: 14; -fx-border-width: 1; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 8, 0, 0, 2);">
+                    <ProgressIndicator prefWidth="60" prefHeight="60"/>
+                    <Label text="Claude analyse l'action..." style="-fx-font-size: 16px; -fx-text-fill: #1f2937;"/>
+                    <Label text="Cela peut prendre 5-10 secondes" style="-fx-font-size: 12px; -fx-text-fill: #6b7280;"/>
+                </VBox>
+
+            </VBox>
+        </ScrollPane>
+    </center>
+
+</BorderPane>

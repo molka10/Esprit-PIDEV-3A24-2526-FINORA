@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.example.finora.controllers.RoleSelectController"
+            styleClass="root">
+
+    <top>
+        <HBox spacing="12" styleClass="topbar">
+            <padding><Insets top="14" right="18" bottom="14" left="18"/></padding>
+            <VBox spacing="2">
+                <Label text="FINORA" styleClass="title"/>
+                <Label text="Choisis ton rôle pour démarrer" styleClass="subtitle"/>
+            </VBox>
+        </HBox>
+    </top>
+
+    <center>
+        <VBox spacing="14" styleClass="content" alignment="CENTER">
+            <padding><Insets top="24" right="24" bottom="24" left="24"/></padding>
+
+            <HBox spacing="14" alignment="CENTER">
+                <VBox spacing="10" styleClass="card" prefWidth="280">
+                    <Label text="👑 Admin" styleClass="section-title"/>
+                    <Label text="Gérer tout : appels d’offres, candidatures, stats, exports." wrapText="true" styleClass="muted"/>
+                    <Pane VBox.vgrow="ALWAYS"/>
+                    <Button text="Entrer" styleClass="primary-btn" onAction="#onAdmin"/>
+                </VBox>
+
+                <VBox spacing="10" styleClass="card" prefWidth="280">
+                    <Label text="🏢 Entreprise" styleClass="section-title"/>
+                    <Label text="Publier des appels d’offres et suivre les candidatures reçues." wrapText="true" styleClass="muted"/>
+                    <Pane VBox.vgrow="ALWAYS"/>
+                    <Button text="Entrer" styleClass="primary-btn" onAction="#onEntreprise"/>
+                </VBox>
+
+                <VBox spacing="10" styleClass="card" prefWidth="280">
+                    <Label text="👤 Utilisateur" styleClass="section-title"/>
+                    <Label text="Consulter les appels d’offres publiés et postuler." wrapText="true" styleClass="muted"/>
+                    <Pane VBox.vgrow="ALWAYS"/>
+                    <Button text="Entrer" styleClass="primary-btn" onAction="#onUser"/>
+                </VBox>
+            </HBox>
+
+            <Label text="Astuce: En intégration équipe, vous brancherez l’authentification plus tard." styleClass="muted"/>
+        </VBox>
+    </center>
+</BorderPane>

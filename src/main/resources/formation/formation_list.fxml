@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.geometry.Pos?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import java.net.URL?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.example.finora.controllers.FormationListController">
+    <stylesheets>
+        <URL value="@style.css" />
+    </stylesheets>
+
+    <top>
+        <VBox spacing="8" styleClass="card">
+            <Label text="Gestion Formations" styleClass="title"/>
+            <Label fx:id="lblInfo" text="" styleClass="subtitle"/>
+        </VBox>
+    </top>
+
+    <center>
+        <VBox spacing="14" styleClass="screen">
+            <padding>
+                <Insets top="16" right="16" bottom="16" left="16"/>
+            </padding>
+
+            <HBox spacing="12" styleClass="toolbar" alignment="CENTER_LEFT">
+
+                <!-- SEARCH (with overlay "Parlez...") + MIC -->
+                <HBox spacing="8" alignment="CENTER_LEFT" HBox.hgrow="ALWAYS">
+
+                    <!-- ✅ TextField with overlay label -->
+                    <StackPane HBox.hgrow="ALWAYS">
+                        <TextField fx:id="txtSearch"
+                                   promptText="Rechercher (titre / catégorie / niveau)..."
+                                   onKeyReleased="#onSearch"
+                                   HBox.hgrow="ALWAYS"/>
+
+                        <!-- overlay -->
+                        <Label fx:id="lblVoiceHint"
+                               text="Parlez..."
+                               visible="false"
+                               managed="false"
+                               mouseTransparent="true"
+                               styleClass="voice-hint-infield"
+                               StackPane.alignment="CENTER_LEFT"/>
+                    </StackPane>
+
+                    <Button fx:id="btnMic"
+                            text="🎤"
+                            onAction="#onToggleVoice"/>
+                </HBox>
+
+                <ComboBox fx:id="cbSort"
+                          prefWidth="220"
+                          onAction="#onSort"/>
+
+                <Button fx:id="btnAdd"
+                        text="➕ Ajouter"
+                        styleClass="btn-primary"
+                        onAction="#onAdd"/>
+
+                <Button fx:id="btnEdit"
+                        text="✏ Modifier"
+                        styleClass="btn-ghost"
+                        onAction="#onEdit"/>
+
+                <Button fx:id="btnDelete"
+                        text="🗑 Supprimer"
+                        styleClass="btn-danger"
+                        onAction="#onDelete"/>
+
+                <Button fx:id="btnQuizResults"
+                        text="📊 Résultats Quiz"
+                        styleClass="btn-ghost"
+                        onAction="#goQuizResults"/>
+
+                <Region HBox.hgrow="ALWAYS"/>
+
+                <Button text="📚 Lessons"
+                        styleClass="btn-ghost"
+                        onAction="#goLessons"/>
+
+                <Button fx:id="btnCenterMap"
+                        text="🗺 Find a Center"
+                        onAction="#onOpenCenterMap"/>
+
+            </HBox>
+
+            <ScrollPane fitToWidth="true" styleClass="scroll">
+                <content>
+                    <VBox fx:id="cardsContainer"
+                          spacing="12"
+                          styleClass="cards"/>
+                </content>
+            </ScrollPane>
+
+        </VBox>
+    </center>
+
+</BorderPane>

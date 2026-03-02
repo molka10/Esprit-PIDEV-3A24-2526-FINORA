@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<ScrollPane xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.example.finora.controllers.ProfileController"
+            fitToWidth="true"
+            styleClass="content-scroll"
+            stylesheets="@theme.css">
+
+    <content>
+        <VBox spacing="14" styleClass="root-bg">
+            <padding>
+                <Insets top="20" right="20" bottom="20" left="20"/>
+            </padding>
+
+            <children>
+                <!-- PROFILE INFO -->
+                <VBox styleClass="card" spacing="12">
+                    <padding>
+                        <Insets top="18" right="18" bottom="18" left="18"/>
+                    </padding>
+
+                    <children>
+                        <HBox alignment="CENTER_LEFT" spacing="12">
+                            <StackPane styleClass="avatar avatar-lg">
+                                <Label fx:id="avatarText" text="AA" styleClass="avatar-text avatar-text-lg"/>
+                            </StackPane>
+
+                            <VBox spacing="3">
+                                <Label fx:id="fullNameLabel" text="Profil" styleClass="h2"/>
+                                <Label fx:id="emailLabel" text="email@finora.com" styleClass="muted"/>
+                            </VBox>
+                        </HBox>
+
+                        <Separator/>
+
+                        <GridPane hgap="12" vgap="12">
+                            <columnConstraints>
+                                <ColumnConstraints percentWidth="30"/>
+                                <ColumnConstraints percentWidth="70"/>
+                            </columnConstraints>
+
+                            <Label text="Username" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+                            <TextField fx:id="usernameField" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+
+                            <Label text="Téléphone" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+                            <TextField fx:id="phoneField" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+
+                            <Label text="Adresse" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+                            <TextField fx:id="addressField" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+
+                            <Label text="Date de naissance" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
+                            <DatePicker fx:id="dobPicker" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+                        </GridPane>
+
+                        <HBox spacing="10" alignment="CENTER_LEFT">
+                            <Button text="Enregistrer" onAction="#handleSave" styleClass="btn-primary"/>
+                            <Label fx:id="statusLabel" text="" styleClass="muted"/>
+                        </HBox>
+                    </children>
+                </VBox>
+
+                <!-- CHANGE PASSWORD -->
+                <VBox styleClass="card" spacing="12">
+                    <padding>
+                        <Insets top="18" right="18" bottom="18" left="18"/>
+                    </padding>
+
+                    <children>
+                        <Label text="Changer le mot de passe" styleClass="h2"/>
+
+                        <GridPane hgap="12" vgap="12">
+                            <columnConstraints>
+                                <ColumnConstraints percentWidth="30"/>
+                                <ColumnConstraints percentWidth="70"/>
+                            </columnConstraints>
+
+                            <Label text="Ancien" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+                            <PasswordField fx:id="oldPasswordField" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+
+                            <Label text="Nouveau" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+                            <PasswordField fx:id="newPasswordField" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+
+                            <Label text="Confirmer" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+                            <PasswordField fx:id="confirmPasswordField" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+                        </GridPane>
+
+                        <HBox spacing="10" alignment="CENTER_LEFT">
+                            <Button text="Mettre à jour" onAction="#handleChangePassword" styleClass="btn-secondary"/>
+                            <Label fx:id="pwdStatusLabel" text="" styleClass="muted"/>
+                        </HBox>
+                    </children>
+                </VBox>
+
+                <!-- FACE ID ENROLLMENT -->
+                <VBox styleClass="card" spacing="12">
+                    <padding>
+                        <Insets top="18" right="18" bottom="18" left="18"/>
+                    </padding>
+
+                    <children>
+                        <VBox spacing="4">
+                            <Label text="Sécurité Biométrique (Face ID)" styleClass="h2"/>
+                            <Label text="Utilisez la reconnaissance faciale pour vous connecter rapidement." styleClass="muted"/>
+                        </VBox>
+
+                        <Separator/>
+
+                        <HBox spacing="15" alignment="CENTER_LEFT">
+                            <StackPane style="-fx-background-color: rgba(99, 102, 241, 0.1); -fx-padding: 15; -fx-background-radius: 10;">
+                                <Label text="👤" style="-fx-font-size: 24;"/>
+                            </StackPane>
+                            
+                            <VBox spacing="5" HBox.hgrow="ALWAYS">
+                                <Label fx:id="faceIdStatusLabel" text="Non configuré" style="-fx-text-fill: #94a3b8; -fx-font-weight: bold;"/>
+                                <Label text="Scanner votre visage pour activer cette fonctionnalité." style="-fx-font-size: 11; -fx-text-fill: #64748b;"/>
+                            </VBox>
+
+                            <Button fx:id="enrollFaceBtn" text="Configurer" onAction="#handleEnrollFace" styleClass="btn-secondary"/>
+                        </HBox>
+                    </children>
+                </VBox>
+            </children>
+        </VBox>
+    </content>
+</ScrollPane>

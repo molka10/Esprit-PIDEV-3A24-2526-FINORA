@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx/17"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.example.finora.controllers.appeldoffre.EntrepriseHomeController"
+      spacing="12" styleClass="content" style="-fx-padding: 30 20 20 20;">
+
+    <Label text="Espace Entreprise" styleClass="title"/>
+    <Label fx:id="subtitle" text="Publier des appels d’offres et suivre les candidatures reçues." styleClass="subtitle"/>
+
+    <HBox spacing="12">
+        <VBox styleClass="stat-card" prefWidth="260" spacing="6">
+            <Label text="Mes appels" styleClass="muted"/>
+            <Label fx:id="aoCount" text="-" styleClass="section-title"/>
+        </VBox>
+        <VBox styleClass="stat-card" prefWidth="260" spacing="6">
+            <Label text="Candidatures reçues" styleClass="muted"/>
+            <Label fx:id="candCount" text="-" styleClass="section-title"/>
+        </VBox>
+    </HBox>
+
+    <VBox styleClass="card" spacing="10">
+        <Label text="Actions rapides" styleClass="section-title"/>
+        <HBox spacing="10">
+            <Button text="➕ Nouveau Appel d’Offre" styleClass="primary-btn" onAction="#newAppel"/>
+            <Button text="📣 Mes Appels" styleClass="ghost-btn" onAction="#openAppels"/>
+            <Button text="🧾 Candidatures" styleClass="ghost-btn" onAction="#openCands"/>
+        </HBox>
+        <Label text="Astuce: Publie (statut = published) pour rendre l’appel visible aux utilisateurs." styleClass="muted"/>
+    </VBox>
+</VBox>

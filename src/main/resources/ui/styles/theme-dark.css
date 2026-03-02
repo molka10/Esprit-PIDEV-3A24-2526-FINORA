@@ -1,0 +1,53 @@
+/*
+ * Minimal Dark Theme - Only Navigation Colors
+ * Changes ONLY sidebar and topbar colors, preserves all other styling
+ */
+
+/* ═══════════════════════════════════════
+   NAVIGATION ONLY - SIDEBAR / TOPBAR
+   ═══════════════════════════════════════ */
+
+.sidebar {
+    background-color: #0f172a;
+    -fx-background-color: #0f172a !important;
+    -fx-background-radius: 15 0 0 15;
+    -fx-border-radius: 15 0 0 15;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.3), 8, 0, 2, 0);
+}
+
+.topbar {
+    background-color: #0f172a;
+    -fx-background-color: #0f172a !important;
+}
+
+/* Keep text readable in dark mode */
+.topbar-title {
+    -fx-text-fill: #ffffff !important;
+}
+
+.sidebar .label {
+    -fx-text-fill: #ffffff !important;
+}
+
+.nav-btn {
+    -fx-text-fill: #ffffff !important;
+}
+
+.nav-btn-active {
+    -fx-text-fill: #ffffff !important;
+}
+
+.ghost-btn {
+    -fx-text-fill: #ffffff !important;
+}
+
+/* Profile info in sidebar */
+.profile-name {
+    -fx-text-fill: #ffffff !important;
+}
+
+.avatar-text {
+    -fx-text-fill: #ffffff !important;
+}
+
+/* THAT'S IT! No other changes - forms, cards, containers keep their original styling */

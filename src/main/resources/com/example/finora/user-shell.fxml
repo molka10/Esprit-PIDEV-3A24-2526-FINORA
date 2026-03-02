@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<StackPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+           fx:controller="com.example.finora.controllers.UserShellController"
+           stylesheets="@theme.css">
+
+    <BorderPane>
+        <top>
+            <HBox styleClass="topbar" alignment="CENTER_LEFT" spacing="10">
+                <padding><Insets top="12" right="16" bottom="12" left="16"/></padding>
+                <children>
+                    <Label text="Finora • Dashboard" styleClass="topbar-title"/>
+                    <Region HBox.hgrow="ALWAYS"/>
+
+                    <!-- PROFILE BUTTON -->
+                    <Button onAction="#goProfile" styleClass="profile-btn">
+                        <graphic>
+                            <HBox spacing="8" alignment="CENTER_LEFT">
+                                <StackPane styleClass="avatar">
+                                    <Label fx:id="avatarText" text="U" styleClass="avatar-text"/>
+                                </StackPane>
+                                <Label fx:id="profileNameLabel" text="Profil" styleClass="profile-name"/>
+                            </HBox>
+                        </graphic>
+                    </Button>
+
+                    <Button fx:id="btnTheme" text="☀️ Light" onAction="#toggleTheme" styleClass="ghost-btn"/>
+                    <Button text="Déconnexion" onAction="#logout" styleClass="ghost-btn"/>
+                </children>
+            </HBox>
+        </top>
+
+        <left>
+            <VBox spacing="10" styleClass="sidebar" prefWidth="220">
+                <padding><Insets top="14" right="14" bottom="14" left="14"/></padding>
+
+                <children>
+                    <Button text="🏠 Tableau de Bord" onAction="#goDashboard" styleClass="nav-btn-active" maxWidth="Infinity"/>
+                    <Button text="📈 Bourse" onAction="#goBourse" styleClass="nav-btn" maxWidth="Infinity"/>
+                    <Button text="📦 Ordres" onAction="#goOrdres" styleClass="nav-btn" maxWidth="Infinity"/>
+                    <Button text="📜 Historique" onAction="#goHistorique" styleClass="nav-btn" maxWidth="Infinity"/>
+                    <Button text="🌍 Actualités" onAction="#goNews" styleClass="nav-btn" maxWidth="Infinity"/>
+
+                    <Separator/>
+
+                    <Button text="💰 Wallet" onAction="#goPortefeuille" styleClass="nav-btn" maxWidth="Infinity"/>
+                    <Button text="🏘️ Investissements" onAction="#goInvestment" styleClass="nav-btn" maxWidth="Infinity"/>
+                    <Button text="📋 Appel d'offre" onAction="#goAppelOffre" styleClass="nav-btn" maxWidth="Infinity"/>
+                    <Button text="🎓 Formation" onAction="#goFormation" styleClass="nav-btn" maxWidth="Infinity"/>
+
+                    <Region VBox.vgrow="ALWAYS"/>
+
+                    <!-- USER INFO SIDEBAR -->
+                    <VBox alignment="CENTER" spacing="5" style="-fx-padding: 10 0 0 0;">
+                        <StackPane styleClass="avatar" prefWidth="40" prefHeight="40">
+                            <Label fx:id="sidebarAvatarText" text="U" styleClass="avatar-text"/>
+                        </StackPane>
+                        <Label fx:id="sidebarNameLabel" text="User" styleClass="profile-name" style="-fx-font-size: 12px;"/>
+                        <Label fx:id="sidebarIdLabel" text="ID: 0" style="-fx-text-fill: #6b7280; -fx-font-size: 11px; -fx-background-color: #f3f4f6; -fx-background-radius: 4; -fx-padding: 2 6;"/>
+                    </VBox>
+                </children>
+            </VBox>
+        </left>
+
+        <center>
+            <StackPane fx:id="contentArea">
+            </StackPane>
+        </center>
+    </BorderPane>
+
+    <!-- NOTIFICATION LAYER -->
+    <VBox fx:id="toastContainer" mouseTransparent="true" pickOnBounds="false" spacing="10" alignment="TOP_RIGHT" styleClass="toast-container" maxWidth="400" StackPane.alignment="TOP_RIGHT"/>
+
+</StackPane>

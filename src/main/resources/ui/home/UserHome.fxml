@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx/17"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.example.finora.controllers.appeldoffre.UserHomeController"
+      spacing="12" styleClass="content" style="-fx-padding: 30 20 20 20;">
+
+    <Label text="Espace Utilisateur" styleClass="title"/>
+    <Label fx:id="subtitle" text="Consulter les appels d’offres publiés et postuler." styleClass="subtitle"/>
+
+    <HBox spacing="12">
+        <VBox styleClass="stat-card" prefWidth="260" spacing="6">
+            <Label text="Appels publiés" styleClass="muted"/>
+            <Label fx:id="publishedCount" text="-" styleClass="section-title"/>
+        </VBox>
+        <VBox styleClass="stat-card" prefWidth="260" spacing="6">
+            <Label text="Mes candidatures" styleClass="muted"/>
+            <Label fx:id="myCandCount" text="-" styleClass="section-title"/>
+        </VBox>
+    </HBox>
+
+    <VBox styleClass="card" spacing="10">
+        <Label text="Actions rapides" styleClass="section-title"/>
+        <HBox spacing="10">
+            <Button text="🔎 Voir Appels d’Offres" styleClass="primary-btn" onAction="#openAppels"/>
+            <Button text="🧾 Mes candidatures" styleClass="ghost-btn" onAction="#openCands"/>
+        </HBox>
+        <Label text="Astuce: Renseigne ton email correctement pour recevoir les mises à jour." styleClass="muted"/>
+    </VBox>
+</VBox>

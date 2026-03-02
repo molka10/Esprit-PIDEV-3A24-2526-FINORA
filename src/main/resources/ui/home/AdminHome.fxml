@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx/17"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.example.finora.controllers.appeldoffre.AdminHomeController"
+      spacing="12" styleClass="content" style="-fx-padding: 30 20 20 20;">
+
+    <Label text="Tableau de bord Admin" styleClass="title"/>
+    <Label fx:id="subtitle" text="Vue globale : gestion, contrôle, export, statistiques." styleClass="subtitle"/>
+
+    <HBox spacing="12">
+        <VBox styleClass="stat-card" prefWidth="260" spacing="6">
+            <Label text="Appels d’Offres" styleClass="muted"/>
+            <Label fx:id="aoCount" text="-" styleClass="section-title"/>
+        </VBox>
+        <VBox styleClass="stat-card" prefWidth="260" spacing="6">
+            <Label text="Candidatures" styleClass="muted"/>
+            <Label fx:id="candCount" text="-" styleClass="section-title"/>
+        </VBox>
+        <VBox styleClass="stat-card" prefWidth="260" spacing="6">
+            <Label text="Publiés" styleClass="muted"/>
+            <Label fx:id="publishedCount" text="-" styleClass="section-title"/>
+        </VBox>
+    </HBox>
+
+    <VBox styleClass="card" spacing="10">
+        <Label text="Actions rapides" styleClass="section-title"/>
+        <HBox spacing="10">
+            <Button text="📣 Gérer Appels d’Offres" styleClass="primary-btn" onAction="#openAppels"/>
+            <Button text="🧾 Gérer Candidatures" styleClass="ghost-btn" onAction="#openCands"/>
+            <Button text="📊 Voir Statistiques" styleClass="ghost-btn" onAction="#openStats"/>
+        </HBox>
+        <Label text="Conseil: Utilise les exports PDF pour présenter tes rapports au professeur." styleClass="muted"/>
+    </VBox>
+</VBox>

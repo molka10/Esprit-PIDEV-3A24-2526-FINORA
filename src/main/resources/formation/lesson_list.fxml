@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.geometry.Pos?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import java.net.URL?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.example.finora.controllers.LessonListController">
+    <stylesheets>
+        <URL value="@style.css" />
+    </stylesheets>
+
+    <top>
+        <VBox spacing="0" styleClass="card">
+            <Label text="Gestion Lessons" styleClass="title"/>
+            <Label text="Gestion des leçons associées aux formations" styleClass="subtitle"/>
+        </VBox>
+    </top>
+
+    <center>
+        <VBox spacing="14" styleClass="screen">
+            <padding>
+                <Insets top="18" right="26" bottom="22" left="26"/>
+            </padding>
+
+            <HBox spacing="12" alignment="CENTER_LEFT" styleClass="toolbar">
+                <HBox spacing="10" alignment="CENTER_LEFT">
+
+                    <Label text="Formation:" styleClass="subtitle"/>
+
+                    <ComboBox fx:id="cbFormation"
+                              prefWidth="220"
+                              promptText="Toutes les formations"
+                              onAction="#onFilter"/>
+
+                    <!-- ✅ TextField with overlay label -->
+                    <StackPane>
+                        <TextField fx:id="txtSearch"
+                                   prefWidth="260"
+                                   promptText="Rechercher..."
+                                   onKeyReleased="#onSearch"/>
+
+                        <Label fx:id="lblVoiceHint"
+                               text="Parlez..."
+                               visible="false"
+                               managed="false"
+                               mouseTransparent="true"
+                               styleClass="voice-hint-infield"
+                               StackPane.alignment="CENTER_LEFT"/>
+                    </StackPane>
+
+                    <ComboBox fx:id="cbSort"
+                              prefWidth="200"
+                              onAction="#onSort"/>
+
+                    <Button fx:id="btnMic"
+                            text="🎤"
+                            onAction="#onToggleVoice"/>
+
+                </HBox>
+
+                <Region HBox.hgrow="ALWAYS"/>
+
+                <HBox spacing="10" alignment="CENTER_RIGHT">
+                    <Button fx:id="btnAdd" text="➕ Ajouter" styleClass="btn-primary" onAction="#onAdd"/>
+                    <Button fx:id="btnEdit" text="✏ Modifier" styleClass="btn-ghost" onAction="#onEdit"/>
+                    <Button fx:id="btnDelete" text="🗑 Supprimer" styleClass="btn-danger" onAction="#onDelete"/>
+                    <Button text="⬅ Formations" styleClass="btn-ghost" onAction="#goFormations"/>
+                </HBox>
+            </HBox>
+
+            <ScrollPane fitToWidth="true" styleClass="scroll" VBox.vgrow="ALWAYS">
+                <content>
+                    <VBox alignment="TOP_CENTER">
+                        <FlowPane fx:id="cardsBox"
+                                  hgap="22"
+                                  vgap="22"
+                                  alignment="TOP_CENTER"
+                                  prefWrapLength="1100"
+                                  styleClass="cards cards-udemy">
+                            <padding>
+                                <Insets top="14" right="14" bottom="24" left="14"/>
+                            </padding>
+                        </FlowPane>
+                    </VBox>
+                </content>
+            </ScrollPane>
+
+            <Label fx:id="lblInfo" text="" styleClass="subtitle"/>
+        </VBox>
+    </center>
+
+</BorderPane>

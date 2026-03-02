@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import java.net.URL?>
+<?import javafx.scene.shape.Rectangle?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.example.finora.controllers.QuizTakeController"
+            styleClass="screen quiz-screen">
+    <stylesheets>
+        <URL value="@style.css" />
+    </stylesheets>
+
+    <!-- ============ TOP / HERO ============ -->
+    <top>
+        <VBox styleClass="quiz-hero" spacing="10">
+            <padding>
+                <Insets top="18" right="22" bottom="18" left="22"/>
+            </padding>
+
+            <HBox alignment="CENTER_LEFT" spacing="12">
+                <Label text="🧠 Quiz" styleClass="quiz-hero-title"/>
+
+                <Region HBox.hgrow="ALWAYS"/>
+
+                <Button fx:id="btnClose"
+                        text="✖"
+                        onAction="#onClose"
+                        styleClass="quiz-close"/>
+            </HBox>
+
+            <HBox alignment="CENTER_LEFT" spacing="14">
+                <Label fx:id="lblStatus" text="⏳ Preparing..." styleClass="quiz-hero-sub"/>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Label fx:id="lblProgress" text="" styleClass="quiz-hero-pill"/>
+            </HBox>
+
+            <!-- Fancy progress line (optional: controller can update progressBar if you add Java later) -->
+            <ProgressBar fx:id="progressBar"
+                         prefHeight="8"
+                         progress="0"
+                         styleClass="quiz-progress"/>
+        </VBox>
+    </top>
+
+    <!-- ============ CENTER ============ -->
+    <center>
+        <StackPane styleClass="quiz-center">
+            <VBox maxWidth="820" spacing="18" styleClass="quiz-card">
+                <padding>
+                    <Insets top="26" right="26" bottom="26" left="26"/>
+                </padding>
+
+                <!-- subtle top row -->
+                <HBox alignment="CENTER_LEFT" spacing="10">
+                    <Label text="Question" styleClass="quiz-section"/>
+                    <Region HBox.hgrow="ALWAYS"/>
+                    <!-- This label can be used to show warnings (optional in controller) -->
+                    <Label fx:id="lblCheatHint" text="" styleClass="quiz-warning"/>
+                </HBox>
+
+                <!-- Question box -->
+                <StackPane styleClass="quiz-questionBox">
+                    <padding><Insets top="16" right="16" bottom="16" left="16"/></padding>
+                    <Label fx:id="lblQuestion"
+                           wrapText="true"
+                           maxWidth="760"
+                           styleClass="quiz-questionText"/>
+                </StackPane>
+
+                <!-- Options -->
+                <VBox spacing="12" styleClass="quiz-options">
+                    <RadioButton fx:id="rb1" styleClass="quiz-option"/>
+                    <RadioButton fx:id="rb2" styleClass="quiz-option"/>
+                    <RadioButton fx:id="rb3" styleClass="quiz-option"/>
+                    <RadioButton fx:id="rb4" styleClass="quiz-option"/>
+                </VBox>
+
+                <!-- Navigation -->
+                <HBox alignment="CENTER_LEFT" spacing="12">
+                    <Button fx:id="btnPrevious"
+                            text="⬅ Previous"
+                            onAction="#onPrevious"
+                            styleClass="quiz-btn ghost"/>
+
+                    <Region HBox.hgrow="ALWAYS"/>
+
+                    <Button fx:id="btnNext"
+                            text="Next ➡"
+                            onAction="#onNext"
+                            styleClass="quiz-btn primary"/>
+                </HBox>
+
+                <!-- Footer note -->
+                <Label text="Tip: stay in fullscreen and keep the quiz window focused."
+                       styleClass="quiz-footnote"/>
+            </VBox>
+        </StackPane>
+    </center>
+
+</BorderPane>
