@@ -89,9 +89,16 @@ class AppelOffre
     #[ORM\OneToMany(targetEntity: Candidature::class, mappedBy: 'appelOffre')]
     private Collection $candidatures;
 
+    /**
+     * @var Collection<int, Rating>
+     */
+    #[ORM\OneToMany(targetEntity: Rating::class, mappedBy: 'appelOffre')]
+    private Collection $ratings;
+
     public function __construct()
     {
         $this->candidatures = new ArrayCollection();
+        $this->ratings = new ArrayCollection();
     }
 
     #[ORM\PrePersist]
@@ -141,6 +148,36 @@ class AppelOffre
                 $candidature->setAppelOffre(null);
             }
         }
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Rating>
+     */
+    public function getRatings(): Collection
+    {
+        return $this->ratings;
+    }
+
+    public function addRating(Rating $rating): static
+    {
+        if (!$this->ratings->contains($rating)) {
+            $this->ratings->add($rating);
+            $rating->setAppelOffre($this);
+        }
+
+        return $this;
+    }
+
+    public function removeRating(Rating $rating): static
+    {
+        if ($this->ratings->removeElement($rating)) {
+            // set the owning side to null (unless already changed)
+            if ($rating->getAppelOffre() === $this) {
+                $rating->setAppelOffre(null);
+            }
+        }
+
         return $this;
     }
 }

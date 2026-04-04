@@ -34,8 +34,15 @@ public function index(Request $request, AppelOffreRepository $appelOffreReposito
     $statut = $request->query->get('statut');
     $categorieId = $request->query->get('categorie');
     $search = $request->query->get('search');
+    $role = $request->getSession()->get('role');
 
-    $appel_offres = $appelOffreRepository->findByFilters($type, $statut, $categorieId ? (int)$categorieId : null, $search);
+    $appel_offres = $appelOffreRepository->findByFilters(
+        $type,
+        $statut,
+        $categorieId ? (int)$categorieId : null,
+        $search,
+        $role
+    );
     $categories = $categorieRepository->findAll();
 
     return $this->render('appel_offre/index.html.twig', [

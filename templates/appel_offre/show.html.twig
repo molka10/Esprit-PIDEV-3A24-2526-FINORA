@@ -155,9 +155,9 @@
         </div>
         {% endif %}
 
-        {# ENTREPRISE - Ses candidatures sur cet appel #}
+        {# ENTREPRISE - Soumettre candidature #}
         {% if app.session.get('role') == 'entreprise' %}
-        <div class="card shadow-sm">
+        <div class="card shadow-sm mt-4">
             <div class="card-header" style="background:#1a1a2e; color:white;">
                 <h5 class="mb-0"><i class="fas fa-paper-plane"></i> Votre Candidature</h5>
             </div>
@@ -173,12 +173,13 @@
 
     {# COLONNE DROITE - Actions #}
     <div class="col-md-4">
+
+        {# ACTIONS #}
         <div class="card shadow-sm mb-3">
             <div class="card-header" style="background:#1a1a2e; color:white;">
                 <h5 class="mb-0"><i class="fas fa-cogs"></i> Actions</h5>
             </div>
             <div class="card-body">
-
                 {# ADMIN #}
                 {% if app.session.get('role') == 'admin' %}
                     <a href="{{ path('app_appel_offre_edit', {'id': appel_offre.id}) }}"
@@ -206,7 +207,7 @@
 
         {# STATS - ADMIN seulement #}
         {% if app.session.get('role') == 'admin' %}
-        <div class="card shadow-sm">
+        <div class="card shadow-sm mb-3">
             <div class="card-header" style="background:#1a1a2e; color:white;">
                 <h5 class="mb-0"><i class="fas fa-chart-bar"></i> Statistiques</h5>
             </div>
@@ -227,8 +228,135 @@
         </div>
         {% endif %}
 
+        {# RATING - ENTREPRISE seulement #}
+        {% if app.session.get('role') == 'entreprise' %}
+        <div class="card shadow-sm mb-3">
+            <div class="card-header" style="background:#1a1a2e; color:white;">
+                <h5 class="mb-0"><i class="fas fa-star"></i> Évaluation</h5>
+            </div>
+            <div class="card-body text-center">
+                <p class="text-muted mb-2">Notez cet appel d'offre</p>
+                <div id="star-rating" class="mb-3">
+                    {% for i in 1..5 %}
+                        <i class="fas fa-star fa-2x star-btn"
+                           data-note="{{ i }}"
+                           style="cursor:pointer; color:#ddd;"
+                           onclick="noterAppel({{ i }})">
+                        </i>
+                    {% endfor %}
+                </div>
+                <div id="rating-message"></div>
+            </div>
+        </div>
+        {% endif %}
+
+        {# MOYENNE RATING - TOUS #}
+        <div class="card shadow-sm mb-3">
+            <div class="card-header" style="background:#1a1a2e; color:white;">
+                <h5 class="mb-0"><i class="fas fa-star text-warning"></i> Note Moyenne</h5>
+            </div>
+            <div class="card-body text-center">
+                <h2 class="text-warning" id="moyenne-value">--</h2>
+                <div id="stars-display" class="mb-1"></div>
+                <small class="text-muted"><span id="total-votes">0</span> vote(s)</small>
+            </div>
+        </div>
+
     </div>
 
 </div>
 
+{% endblock %}
+
+{% block javascripts %}
+<script>
+    const appelOffreId = {{ appel_offre.id }};
+
+    // Charger les stats au démarrage
+    fetch(`/rating/stats/${appelOffreId}`)
+        .then(r => r.json())
+        .then(data => {
+            updateStarsDisplay(data.moyenne, data.total_votes);
+            // Si déjà noté → désactiver les étoiles
+            if (data.deja_note) {
+                document.querySelectorAll('.star-btn').forEach(star => {
+                    star.style.pointerEvents = 'none';
+                    star.style.color = '#ddd';
+                });
+                const ratingMessage = document.getElementById('rating-message');
+                if (ratingMessage) {
+                    ratingMessage.innerHTML =
+                        '<div class="alert alert-info mt-2"><i class="fas fa-info-circle"></i> Vous avez déjà noté cet appel d\'offre.</div>';
+                }
+            }
+        });
+
+    // Hover sur les étoiles
+    document.querySelectorAll('.star-btn').forEach(star => {
+        star.addEventListener('mouseover', function() {
+            highlightStars(parseInt(this.dataset.note));
+        });
+        star.addEventListener('mouseout', function() {
+            resetStars();
+        });
+    });
+
+    function highlightStars(note) {
+        document.querySelectorAll('.star-btn').forEach(star => {
+            star.style.color = parseInt(star.dataset.note) <= note ? '#ffc107' : '#ddd';
+        });
+    }
+
+    function resetStars() {
+        document.querySelectorAll('.star-btn').forEach(star => {
+            star.style.color = '#ddd';
+        });
+    }
+
+    function noterAppel(note) {
+        const formData = new FormData();
+        formData.append('note', note);
+
+        fetch(`/rating/noter/${appelOffreId}`, {
+            method: 'POST',
+            body: formData,
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                highlightStars(note);
+                updateStarsDisplay(data.moyenne, data.total_votes);
+                document.getElementById('rating-message').innerHTML =
+                    '<div class="alert alert-success mt-2"><i class="fas fa-check"></i> Merci pour votre note !</div>';
+                // Désactiver les étoiles après vote
+                document.querySelectorAll('.star-btn').forEach(star => {
+                    star.style.pointerEvents = 'none';
+                });
+            } else if (data.already_rated) {
+                document.getElementById('rating-message').innerHTML =
+                    '<div class="alert alert-warning mt-2"><i class="fas fa-exclamation-triangle"></i> Vous avez déjà noté cet appel d\'offre !</div>';
+            } else {
+                document.getElementById('rating-message').innerHTML =
+                    '<div class="alert alert-danger mt-2"><i class="fas fa-times"></i> ' + data.error + '</div>';
+            }
+        });
+    }
+
+    function updateStarsDisplay(moyenne, totalVotes) {
+        document.getElementById('moyenne-value').textContent = moyenne > 0 ? moyenne : '--';
+        document.getElementById('total-votes').textContent = totalVotes;
+
+        let starsHtml = '';
+        for (let i = 1; i <= 5; i++) {
+            if (i <= Math.floor(moyenne)) {
+                starsHtml += '<i class="fas fa-star text-warning"></i>';
+            } else if (i - 0.5 <= moyenne) {
+                starsHtml += '<i class="fas fa-star-half-alt text-warning"></i>';
+            } else {
+                starsHtml += '<i class="far fa-star text-warning"></i>';
+            }
+        }
+        document.getElementById('stars-display').innerHTML = starsHtml;
+    }
+</script>
 {% endblock %}

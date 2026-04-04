@@ -32,7 +32,7 @@ final class CandidatureController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $entityManager->persist($candidature);
             $entityManager->flush();
-
+            $this->addFlash('success', 'Candidature soumise avec succès !');
             return $this->redirectToRoute('app_candidature_index', [], Response::HTTP_SEE_OTHER);
         }
 
@@ -58,7 +58,7 @@ final class CandidatureController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $entityManager->flush();
-
+            $this->addFlash('success', 'Candidature modifiée avec succès !');
             return $this->redirectToRoute('app_candidature_index', [], Response::HTTP_SEE_OTHER);
         }
 
@@ -68,12 +68,37 @@ final class CandidatureController extends AbstractController
         ]);
     }
 
+    #[Route('/{id}/accepter', name: 'app_candidature_accepter', methods: ['POST'])]
+    public function accepter(Request $request, Candidature $candidature, EntityManagerInterface $entityManager): Response
+    {
+        if ($this->isCsrfTokenValid('accepter'.$candidature->getId(), $request->getPayload()->getString('_token'))) {
+            $candidature->setStatut('accepted');
+            $entityManager->flush();
+            $this->addFlash('success', 'Candidature acceptée avec succès !');
+        }
+
+        return $this->redirectToRoute('app_candidature_show', ['id' => $candidature->getId()]);
+    }
+
+    #[Route('/{id}/rejeter', name: 'app_candidature_rejeter', methods: ['POST'])]
+    public function rejeter(Request $request, Candidature $candidature, EntityManagerInterface $entityManager): Response
+    {
+        if ($this->isCsrfTokenValid('rejeter'.$candidature->getId(), $request->getPayload()->getString('_token'))) {
+            $candidature->setStatut('rejected');
+            $entityManager->flush();
+            $this->addFlash('success', 'Candidature rejetée avec succès !');
+        }
+
+        return $this->redirectToRoute('app_candidature_show', ['id' => $candidature->getId()]);
+    }
+
     #[Route('/{id}', name: 'app_candidature_delete', methods: ['POST'])]
     public function delete(Request $request, Candidature $candidature, EntityManagerInterface $entityManager): Response
     {
         if ($this->isCsrfTokenValid('delete'.$candidature->getId(), $request->getPayload()->getString('_token'))) {
             $entityManager->remove($candidature);
             $entityManager->flush();
+            $this->addFlash('success', 'Candidature supprimée avec succès !');
         }
 
         return $this->redirectToRoute('app_candidature_index', [], Response::HTTP_SEE_OTHER);

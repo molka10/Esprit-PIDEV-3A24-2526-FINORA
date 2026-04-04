@@ -92,46 +92,71 @@
 
     {# COLONNE DROITE #}
     <div class="col-md-4">
+
+        {# ACTIONS #}
         <div class="card shadow-sm mb-3">
             <div class="card-header" style="background:#1a1a2e; color:white;">
                 <h5 class="mb-0"><i class="fas fa-cogs"></i> Actions</h5>
             </div>
             <div class="card-body">
-                <a href="{{ path('app_candidature_edit', {'id': candidature.id}) }}"
-                   class="btn btn-warning btn-block mb-2">
-                    <i class="fas fa-edit"></i> Modifier
-                </a>
+                {% if app.session.get('role') == 'admin' %}
+                    <a href="{{ path('app_candidature_edit', {'id': candidature.id}) }}"
+                       class="btn btn-warning btn-block mb-2">
+                        <i class="fas fa-edit"></i> Modifier
+                    </a>
+                {% endif %}
+
                 <a href="{{ path('app_candidature_index') }}"
                    class="btn btn-secondary btn-block mb-2">
                     <i class="fas fa-arrow-left"></i> Retour à la liste
                 </a>
+
                 {% if candidature.appelOffre %}
-                <a href="{{ path('app_appel_offre_show', {'id': candidature.appelOffre.id}) }}"
-                   class="btn btn-outline-primary btn-block mb-2">
-                    <i class="fas fa-file-contract"></i> Voir l'Appel d'Offre
-                </a>
+                    <a href="{{ path('app_appel_offre_show', {'id': candidature.appelOffre.id}) }}"
+                       class="btn btn-outline-primary btn-block mb-2">
+                        <i class="fas fa-file-contract"></i> Voir l'Appel d'Offre
+                    </a>
                 {% endif %}
-                <hr>
-                {{ include('candidature/_delete_form.html.twig') }}
+
+                {% if app.session.get('role') == 'admin' %}
+                    <hr>
+                    {{ include('candidature/_delete_form.html.twig') }}
+                {% endif %}
             </div>
         </div>
 
-        {# Changer le statut rapidement #}
-        <div class="card shadow-sm">
+        {# CHANGER LE STATUT - ADMIN seulement #}
+        {% if app.session.get('role') == 'admin' %}
+        <div class="card shadow-sm mb-3">
             <div class="card-header" style="background:#1a1a2e; color:white;">
                 <h5 class="mb-0"><i class="fas fa-toggle-on"></i> Changer le Statut</h5>
             </div>
             <div class="card-body">
-                <a href="{{ path('app_candidature_edit', {'id': candidature.id}) }}"
-                   class="btn btn-success btn-block mb-2">
-                    <i class="fas fa-check"></i> Accepter
-                </a>
-                <a href="{{ path('app_candidature_edit', {'id': candidature.id}) }}"
-                   class="btn btn-danger btn-block">
-                    <i class="fas fa-times"></i> Rejeter
-                </a>
+
+                {# Bouton Accepter #}
+                <form method="post" action="{{ path('app_candidature_accepter', {'id': candidature.id}) }}">
+                    <input type="hidden" name="_token" value="{{ csrf_token('accepter' ~ candidature.id) }}">
+                    <button type="submit" class="btn btn-success btn-block mb-2"
+                        {% if candidature.statut == 'accepted' %}disabled{% endif %}
+                        onclick="return confirm('Accepter cette candidature ?')">
+                        <i class="fas fa-check"></i> Accepter
+                    </button>
+                </form>
+
+                {# Bouton Rejeter #}
+                <form method="post" action="{{ path('app_candidature_rejeter', {'id': candidature.id}) }}">
+                    <input type="hidden" name="_token" value="{{ csrf_token('rejeter' ~ candidature.id) }}">
+                    <button type="submit" class="btn btn-danger btn-block"
+                        {% if candidature.statut == 'rejected' %}disabled{% endif %}
+                        onclick="return confirm('Rejeter cette candidature ?')">
+                        <i class="fas fa-times"></i> Rejeter
+                    </button>
+                </form>
+
             </div>
         </div>
+        {% endif %}
+
     </div>
 
 </div>

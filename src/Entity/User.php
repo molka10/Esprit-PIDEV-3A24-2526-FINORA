@@ -60,10 +60,17 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(targetEntity: AppelOffre::class, mappedBy: 'createdBy')]
     private Collection $appelOffres;
 
+    /**
+     * @var Collection<int, Rating>
+     */
+    #[ORM\OneToMany(targetEntity: Rating::class, mappedBy: 'user')]
+    private Collection $ratings;
+
     public function __construct()
     {
         $this->candidatures = new ArrayCollection();
         $this->appelOffres = new ArrayCollection();
+        $this->ratings = new ArrayCollection();
     }
 
     public function getId(): ?int { return $this->id; }
@@ -118,6 +125,36 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
                 $appelOffre->setCreatedBy(null);
             }
         }
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Rating>
+     */
+    public function getRatings(): Collection
+    {
+        return $this->ratings;
+    }
+
+    public function addRating(Rating $rating): static
+    {
+        if (!$this->ratings->contains($rating)) {
+            $this->ratings->add($rating);
+            $rating->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeRating(Rating $rating): static
+    {
+        if ($this->ratings->removeElement($rating)) {
+            // set the owning side to null (unless already changed)
+            if ($rating->getUser() === $this) {
+                $rating->setUser(null);
+            }
+        }
+
         return $this;
     }
 }
