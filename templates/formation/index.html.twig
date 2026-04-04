@@ -15,7 +15,14 @@
 
                 <div>
                     <label for="categorie">Catégorie</label><br>
-                    <input type="text" id="categorie" name="categorie" value="{{ categorie }}" placeholder="Rechercher par catégorie">
+                    <select id="categorie" name="categorie">
+                        <option value="">Toutes</option>
+                        {% for cat in categories %}
+                            <option value="{{ cat }}" {{ categorie == cat ? 'selected' : '' }}>
+                                {{ cat }}
+                            </option>
+                        {% endfor %}
+                    </select>
                 </div>
 
                 <div>
@@ -35,7 +42,6 @@
                         <option value="titre" {{ tri == 'titre' ? 'selected' : '' }}>Titre</option>
                         <option value="categorie" {{ tri == 'categorie' ? 'selected' : '' }}>Catégorie</option>
                         <option value="niveau" {{ tri == 'niveau' ? 'selected' : '' }}>Niveau</option>
-                        <option value="created_at" {{ tri == 'created_at' ? 'selected' : '' }}>Date de création</option>
                     </select>
                 </div>
 
@@ -76,7 +82,11 @@
                         Catégorie : {{ formation.categorie }}<br>
                         Niveau : {{ formation.niveau }}<br>
                         Description : {{ formation.description ?? 'Pas de description' }}<br>
-                        Date de création : {{ formation.createdAt }}<br><br>
+                        Publiée : {{ formation.ispublished ? 'Oui' : 'Non' }}<br>
+                        {% if formation.imageUrl %}
+                            Image URL : {{ formation.imageUrl }}<br>
+                        {% endif %}
+                        <br>
 
                         <a href="{{ path('formation_edit', {'id': formation.id}) }}"
                            style="margin-right:10px; padding:8px 12px; background:#2563eb; color:white; text-decoration:none; border-radius:6px;">

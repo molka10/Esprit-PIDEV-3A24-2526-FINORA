@@ -29,8 +29,8 @@ final class FormationController extends AbstractController
         }
 
         if (!empty($categorie)) {
-            $qb->andWhere('f.categorie LIKE :categorie')
-                ->setParameter('categorie', '%' . $categorie . '%');
+            $qb->andWhere('f.categorie = :categorie')
+                ->setParameter('categorie', $categorie);
         }
 
         if (!empty($niveau)) {
@@ -38,7 +38,7 @@ final class FormationController extends AbstractController
                 ->setParameter('niveau', $niveau);
         }
 
-        $allowedSortFields = ['id', 'titre', 'categorie', 'niveau', 'created_at'];
+        $allowedSortFields = ['id', 'titre', 'categorie', 'niveau'];
         if (!in_array($tri, $allowedSortFields, true)) {
             $tri = 'id';
         }
@@ -49,6 +49,28 @@ final class FormationController extends AbstractController
 
         $formations = $qb->getQuery()->getResult();
 
+        $categories = [
+            'Bourse',
+            'Investissement',
+            'Trading',
+            'Actions',
+            'ETF',
+            'Obligations',
+            'Crypto',
+            'Forex',
+            'Analyse technique',
+            'Analyse fondamentale',
+            'Gestion des risques',
+            'Portefeuille',
+            'Dividendes',
+            'Marchés financiers',
+            'Psychologie du trader',
+            'Économie',
+            'Inflation',
+            'Taux d’intérêt',
+            'Fiscalité',
+        ];
+
         return $this->render('formation/index.html.twig', [
             'formations' => $formations,
             'titre' => $titre,
@@ -56,6 +78,7 @@ final class FormationController extends AbstractController
             'niveau' => $niveau,
             'tri' => $tri,
             'ordre' => strtolower($ordre),
+            'categories' => $categories,
         ]);
     }
 
