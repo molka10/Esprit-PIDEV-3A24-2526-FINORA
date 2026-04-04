@@ -1,0 +1,70 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+
+<div class="row justify-content-center mt-5">
+    <div class="col-md-7">
+
+        <div class="card p-4 shadow rounded-4">
+
+            <h2 class="text-center mb-4">Create Account</h2>
+
+            {{ form_start(form) }}
+
+            <!-- EMAIL -->
+            <div class="mb-3">
+                {{ form_label(form.email) }}
+                {{ form_widget(form.email, {'attr': {'class': 'form-control'}}) }}
+                {{ form_errors(form.email) }}
+            </div>
+
+            <!-- USERNAME -->
+            <div class="mb-3">
+                {{ form_label(form.firstname, 'Username') }}
+                {{ form_widget(form.firstname, {'attr': {'class': 'form-control'}}) }}
+                {{ form_errors(form.firstname) }}
+            </div>
+
+            <!-- PHONE -->
+            <div class="mb-3">
+                {{ form_label(form.phone) }}
+                {{ form_widget(form.phone, {'attr': {'class': 'form-control'}}) }}
+            </div>
+
+            <!-- ADDRESS -->
+            <div class="mb-3">
+                {{ form_label(form.address) }}
+                {{ form_widget(form.address, {'attr': {'class': 'form-control'}}) }}
+            </div>
+
+            <!-- DATE OF BIRTH -->
+            <div class="mb-3">
+                {{ form_label(form.dateOfBirth) }}
+                {{ form_widget(form.dateOfBirth, {'attr': {'class': 'form-control'}}) }}
+            </div>
+
+            <!-- ROLE TYPE -->
+            <div class="mb-3">
+                {{ form_label(form.roleType) }}
+                {{ form_widget(form.roleType, {'attr': {'class': 'form-select'}}) }}
+            </div>
+
+            <!-- PASSWORD -->
+            <div class="mb-4">
+                {{ form_label(form.password) }}
+                {{ form_widget(form.password, {'attr': {'class': 'form-control'}}) }}
+                {{ form_errors(form.password) }}
+            </div>
+
+            <button class="btn btn-success w-100">
+                Register
+            </button>
+
+            {{ form_end(form) }}
+
+        </div>
+
+    </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,24 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+
+<div class="text-center mb-5">
+
+    <h1 class="mb-4">Welcome to Finora 🚀</h1>
+
+    <p class="mb-4">
+        Manage users, investments, and analytics in one platform.
+    </p>
+
+    {% if not app.user %}
+        <a href="{{ path('app_register') }}" class="btn btn-primary m-2">Register</a>
+        <a href="{{ path('app_login') }}" class="btn btn-outline-dark m-2">Login</a>
+    {% else %}
+        <a href="{{ path('app_profile') }}" class="btn btn-success">My Profile</a>
+    {% endif %}
+
+</div>
+
+
+
+{% endblock %}
