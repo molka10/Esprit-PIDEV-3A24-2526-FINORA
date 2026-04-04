@@ -1,0 +1,234 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ appel_offre.titre }}{% endblock %}
+
+{% block body %}
+
+{# HERO #}
+<div class="py-3 mb-4" style="background: linear-gradient(135deg, #1a1a2e, #16213e); border-radius: 10px;">
+    <div class="container text-white text-center py-2">
+        <h2 class="font-weight-bold"><i class="fas fa-file-contract"></i> {{ appel_offre.titre }}</h2>
+        <p class="mb-0">
+            {% if appel_offre.statut == 'published' %}
+                <span class="badge badge-success">Publié</span>
+            {% elseif appel_offre.statut == 'draft' %}
+                <span class="badge badge-secondary">Brouillon</span>
+            {% else %}
+                <span class="badge badge-danger">Clôturé</span>
+            {% endif %}
+            <span class="badge badge-info ml-2">{{ appel_offre.type }}</span>
+        </p>
+    </div>
+</div>
+
+<div class="row">
+
+    {# COLONNE GAUCHE - Détails #}
+    <div class="col-md-8">
+        <div class="card shadow-sm mb-4">
+            <div class="card-header" style="background:#1a1a2e; color:white;">
+                <h5 class="mb-0"><i class="fas fa-info-circle"></i> Détails de l'Appel d'Offre</h5>
+            </div>
+            <div class="card-body">
+                <table class="table table-borderless">
+                    <tr>
+                        <th width="35%"><i class="fas fa-heading text-muted"></i> Titre</th>
+                        <td>{{ appel_offre.titre }}</td>
+                    </tr>
+                    <tr>
+                        <th><i class="fas fa-align-left text-muted"></i> Description</th>
+                        <td>{{ appel_offre.description ?? 'Aucune description' }}</td>
+                    </tr>
+                    <tr>
+                        <th><i class="fas fa-tag text-muted"></i> Type</th>
+                        <td><span class="badge badge-info">{{ appel_offre.type }}</span></td>
+                    </tr>
+                    <tr>
+                        <th><i class="fas fa-folder text-muted"></i> Catégorie</th>
+                        <td>{{ appel_offre.categorie ? appel_offre.categorie.nom : 'Non définie' }}</td>
+                    </tr>
+                    <tr>
+                        <th><i class="fas fa-money-bill text-muted"></i> Budget</th>
+                        <td>
+                            {% if appel_offre.budgetMin and appel_offre.budgetMax %}
+                                <strong>{{ appel_offre.budgetMin }} - {{ appel_offre.budgetMax }}</strong>
+                                {{ appel_offre.devise ?? 'TND' }}
+                            {% else %}
+                                <span class="text-muted">Non défini</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <th><i class="fas fa-calendar text-muted"></i> Date Limite</th>
+                        <td>
+                            {% if appel_offre.dateLimite %}
+                                {% if appel_offre.dateLimite < date() %}
+                                    <span class="text-danger">
+                                        <i class="fas fa-exclamation-circle"></i>
+                                        {{ appel_offre.dateLimite|date('d/m/Y') }} (Expiré)
+                                    </span>
+                                {% else %}
+                                    <span class="text-success">
+                                        <i class="fas fa-clock"></i>
+                                        {{ appel_offre.dateLimite|date('d/m/Y') }}
+                                    </span>
+                                {% endif %}
+                            {% else %}
+                                <span class="text-muted">Non définie</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <th><i class="fas fa-clock text-muted"></i> Créé le</th>
+                        <td>{{ appel_offre.createdAt|date('d/m/Y à H:i') }}</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        {# CANDIDATURES - ADMIN seulement #}
+        {% if app.session.get('role') == 'admin' %}
+        <div class="card shadow-sm">
+            <div class="card-header d-flex justify-content-between align-items-center" style="background:#1a1a2e; color:white;">
+                <h5 class="mb-0">
+                    <i class="fas fa-users"></i> Candidatures
+                    <span class="badge badge-warning ml-2">{{ appel_offre.candidatures|length }}</span>
+                </h5>
+            </div>
+            <div class="card-body p-0">
+                {% if appel_offre.candidatures|length > 0 %}
+                    <table class="table table-hover mb-0">
+                        <thead class="thead-dark">
+                            <tr>
+                                <th>Candidat</th>
+                                <th>Montant Proposé</th>
+                                <th>Statut</th>
+                                <th>Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        {% for candidature in appel_offre.candidatures %}
+                            <tr>
+                                <td>
+                                    <i class="fas fa-user text-muted"></i>
+                                    {{ candidature.user ? candidature.user.nom : 'Anonyme' }}
+                                </td>
+                                <td>
+                                    {% if candidature.montantPropose %}
+                                        <strong>{{ candidature.montantPropose }}</strong> TND
+                                    {% else %}
+                                        <span class="text-muted">N/A</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if candidature.statut == 'accepted' %}
+                                        <span class="badge badge-success">Acceptée</span>
+                                    {% elseif candidature.statut == 'rejected' %}
+                                        <span class="badge badge-danger">Rejetée</span>
+                                    {% else %}
+                                        <span class="badge badge-warning">En attente</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ candidature.createdAt|date('d/m/Y') }}</td>
+                                <td>
+                                    <a href="{{ path('app_candidature_show', {'id': candidature.id}) }}"
+                                       class="btn btn-sm btn-outline-primary">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a href="{{ path('app_candidature_edit', {'id': candidature.id}) }}"
+                                       class="btn btn-sm btn-outline-warning">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    <div class="text-center text-muted py-4">
+                        <i class="fas fa-inbox fa-2x mb-2 d-block"></i>
+                        Aucune candidature pour le moment
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+
+        {# ENTREPRISE - Ses candidatures sur cet appel #}
+        {% if app.session.get('role') == 'entreprise' %}
+        <div class="card shadow-sm">
+            <div class="card-header" style="background:#1a1a2e; color:white;">
+                <h5 class="mb-0"><i class="fas fa-paper-plane"></i> Votre Candidature</h5>
+            </div>
+            <div class="card-body text-center">
+                <a href="{{ path('app_candidature_new') }}" class="btn btn-success">
+                    <i class="fas fa-paper-plane"></i> Soumettre une Candidature
+                </a>
+            </div>
+        </div>
+        {% endif %}
+
+    </div>
+
+    {# COLONNE DROITE - Actions #}
+    <div class="col-md-4">
+        <div class="card shadow-sm mb-3">
+            <div class="card-header" style="background:#1a1a2e; color:white;">
+                <h5 class="mb-0"><i class="fas fa-cogs"></i> Actions</h5>
+            </div>
+            <div class="card-body">
+
+                {# ADMIN #}
+                {% if app.session.get('role') == 'admin' %}
+                    <a href="{{ path('app_appel_offre_edit', {'id': appel_offre.id}) }}"
+                       class="btn btn-warning btn-block mb-2">
+                        <i class="fas fa-edit"></i> Modifier
+                    </a>
+                    <hr>
+                    {{ include('appel_offre/_delete_form.html.twig') }}
+                {% endif %}
+
+                {# VISITEUR #}
+                {% if app.session.get('role') == 'visiteur' or app.session.get('role') == null %}
+                    <div class="alert alert-warning text-center">
+                        <i class="fas fa-lock fa-2x mb-2 d-block"></i>
+                        <small>Sélectionnez le rôle <strong>Entreprise</strong> pour soumettre une candidature</small>
+                    </div>
+                {% endif %}
+
+                <a href="{{ path('app_appel_offre_index') }}"
+                   class="btn btn-secondary btn-block mt-2">
+                    <i class="fas fa-arrow-left"></i> Retour à la liste
+                </a>
+            </div>
+        </div>
+
+        {# STATS - ADMIN seulement #}
+        {% if app.session.get('role') == 'admin' %}
+        <div class="card shadow-sm">
+            <div class="card-header" style="background:#1a1a2e; color:white;">
+                <h5 class="mb-0"><i class="fas fa-chart-bar"></i> Statistiques</h5>
+            </div>
+            <div class="card-body text-center">
+                <div class="row">
+                    <div class="col-6 border-right">
+                        <h3 class="text-warning">{{ appel_offre.candidatures|length }}</h3>
+                        <small class="text-muted">Candidatures</small>
+                    </div>
+                    <div class="col-6">
+                        <h3 class="text-success">
+                            {{ appel_offre.candidatures|filter(c => c.statut == 'accepted')|length }}
+                        </h3>
+                        <small class="text-muted">Acceptées</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+    </div>
+
+</div>
+
+{% endblock %}

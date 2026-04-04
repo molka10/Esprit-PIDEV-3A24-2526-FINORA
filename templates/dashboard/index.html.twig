@@ -1,0 +1,314 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block body %}
+
+{# HERO #}
+<div class="py-4 mb-4" style="background: linear-gradient(135deg, #1a1a2e, #16213e); border-radius: 10px;">
+    <div class="container text-white text-center py-3">
+        {% if app.session.get('role') == 'admin' %}
+            <h1 class="display-5 font-weight-bold">👑 Dashboard Admin</h1>
+            <p class="lead">Vue d'ensemble de la plateforme</p>
+        {% elseif app.session.get('role') == 'entreprise' %}
+            <h1 class="display-5 font-weight-bold">🏢 Dashboard Entreprise</h1>
+            <p class="lead">Bienvenue sur la plateforme des appels d'offre</p>
+        {% else %}
+            <h1 class="display-5 font-weight-bold">📋 Plateforme des Appels d'Offre</h1>
+            <p class="lead">Consultez les appels d'offre disponibles</p>
+            <a href="{{ path('app_appel_offre_index') }}" class="btn btn-warning btn-lg mt-2">
+                <i class="fas fa-search"></i> Voir les Appels d'Offre
+            </a>
+        {% endif %}
+    </div>
+</div>
+
+{# STATS ADMIN #}
+{% if app.session.get('role') == 'admin' %}
+
+    {# ROW 1 - Appels d'offre #}
+    <h5 class="mb-3"><i class="fas fa-file-contract text-warning"></i> Appels d'Offre</h5>
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card text-white mb-3" style="background:#1a1a2e;">
+                <div class="card-body text-center">
+                    <i class="fas fa-file-contract fa-2x mb-2"></i>
+                    <h3>{{ totalAppels }}</h3>
+                    <p class="mb-0">Total</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white mb-3" style="background:#28a745;">
+                <div class="card-body text-center">
+                    <i class="fas fa-check-circle fa-2x mb-2"></i>
+                    <h3>{{ appelPublies }}</h3>
+                    <p class="mb-0">Publiés</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white mb-3" style="background:#dc3545;">
+                <div class="card-body text-center">
+                    <i class="fas fa-lock fa-2x mb-2"></i>
+                    <h3>{{ appelClotures }}</h3>
+                    <p class="mb-0">Clôturés</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white mb-3" style="background:#6c757d;">
+                <div class="card-body text-center">
+                    <i class="fas fa-edit fa-2x mb-2"></i>
+                    <h3>{{ appelBrouillons }}</h3>
+                    <p class="mb-0">Brouillons</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# ROW 2 - Candidatures #}
+    <h5 class="mb-3"><i class="fas fa-users text-warning"></i> Candidatures</h5>
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card text-white mb-3" style="background:#1a1a2e;">
+                <div class="card-body text-center">
+                    <i class="fas fa-users fa-2x mb-2"></i>
+                    <h3>{{ totalCandidatures }}</h3>
+                    <p class="mb-0">Total</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white mb-3" style="background:#28a745;">
+                <div class="card-body text-center">
+                    <i class="fas fa-thumbs-up fa-2x mb-2"></i>
+                    <h3>{{ candidaturesAcceptees }}</h3>
+                    <p class="mb-0">Acceptées</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white mb-3" style="background:#dc3545;">
+                <div class="card-body text-center">
+                    <i class="fas fa-thumbs-down fa-2x mb-2"></i>
+                    <h3>{{ candidaturesRejetes }}</h3>
+                    <p class="mb-0">Rejetées</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white mb-3" style="background:#ffc107;">
+                <div class="card-body text-center">
+                    <i class="fas fa-hourglass-half fa-2x mb-2"></i>
+                    <h3>{{ candidaturesEnAttente }}</h3>
+                    <p class="mb-0">En Attente</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# ROW 3 - Autres #}
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card text-white mb-3" style="background:#17a2b8;">
+                <div class="card-body text-center">
+                    <i class="fas fa-tags fa-2x mb-2"></i>
+                    <h3>{{ totalCategories }}</h3>
+                    <p class="mb-0">Catégories</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card text-white mb-3" style="background:#6f42c1;">
+                <div class="card-body text-center">
+                    <i class="fas fa-user-cog fa-2x mb-2"></i>
+                    <h3>{{ totalUsers }}</h3>
+                    <p class="mb-0">Utilisateurs</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# GRAPHIQUES #}
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-header" style="background:#1a1a2e; color:white;">
+                    <h5 class="mb-0"><i class="fas fa-chart-pie"></i> Statut des Appels d'Offre</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="appelOffreChart"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-header" style="background:#1a1a2e; color:white;">
+                    <h5 class="mb-0"><i class="fas fa-chart-pie"></i> Statut des Candidatures</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="candidatureChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# DERNIÈRES ACTIVITÉS #}
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header" style="background:#1a1a2e; color:white;">
+                    <h5 class="mb-0"><i class="fas fa-clock"></i> Derniers Appels d'Offre</h5>
+                </div>
+                <div class="card-body p-0">
+                    <table class="table table-hover mb-0">
+                        <thead class="thead-dark">
+                            <tr>
+                                <th>Titre</th>
+                                <th>Statut</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        {% for appel in derniersAppels %}
+                            <tr>
+                                <td>
+                                    <a href="{{ path('app_appel_offre_show', {'id': appel.id}) }}">
+                                        {{ appel.titre }}
+                                    </a>
+                                </td>
+                                <td>
+                                    {% if appel.statut == 'published' %}
+                                        <span class="badge badge-success">Publié</span>
+                                    {% elseif appel.statut == 'draft' %}
+                                        <span class="badge badge-secondary">Brouillon</span>
+                                    {% else %}
+                                        <span class="badge badge-danger">Clôturé</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ appel.createdAt|date('d/m/Y') }}</td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header" style="background:#1a1a2e; color:white;">
+                    <h5 class="mb-0"><i class="fas fa-clock"></i> Dernières Candidatures</h5>
+                </div>
+                <div class="card-body p-0">
+                    <table class="table table-hover mb-0">
+                        <thead class="thead-dark">
+                            <tr>
+                                <th>Candidat</th>
+                                <th>Statut</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        {% for candidature in dernieresCandidatures %}
+                            <tr>
+                                <td>{{ candidature.user ? candidature.user.nom : 'Anonyme' }}</td>
+                                <td>
+                                    {% if candidature.statut == 'accepted' %}
+                                        <span class="badge badge-success">Acceptée</span>
+                                    {% elseif candidature.statut == 'rejected' %}
+                                        <span class="badge badge-danger">Rejetée</span>
+                                    {% else %}
+                                        <span class="badge badge-warning">En attente</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ candidature.createdAt|date('d/m/Y') }}</td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endif %}
+
+{# STATS ENTREPRISE #}
+{% if app.session.get('role') == 'entreprise' %}
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card text-white mb-3" style="background:#1a1a2e;">
+                <div class="card-body text-center">
+                    <i class="fas fa-file-contract fa-2x mb-2"></i>
+                    <h3>{{ appelPublies }}</h3>
+                    <p class="mb-0">Appels d'Offre Ouverts</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-white mb-3" style="background:#28a745;">
+                <div class="card-body text-center">
+                    <i class="fas fa-paper-plane fa-2x mb-2"></i>
+                    <h3>{{ totalCandidatures }}</h3>
+                    <p class="mb-0">Total Candidatures</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-white mb-3" style="background:#ffc107;">
+                <div class="card-body text-center">
+                    <i class="fas fa-hourglass-half fa-2x mb-2"></i>
+                    <h3>{{ candidaturesEnAttente }}</h3>
+                    <p class="mb-0">En Attente</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="text-center mt-3">
+        <a href="{{ path('app_appel_offre_index') }}" class="btn btn-warning btn-lg">
+            <i class="fas fa-search"></i> Voir les Appels d'Offre
+        </a>
+        <a href="{{ path('app_candidature_index') }}" class="btn btn-outline-primary btn-lg ml-2">
+            <i class="fas fa-users"></i> Mes Candidatures
+        </a>
+    </div>
+{% endif %}
+
+{% endblock %}
+
+{% block javascripts %}
+{% if app.session.get('role') == 'admin' %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Graphique Appels d'Offre
+    const ctx1 = document.getElementById('appelOffreChart').getContext('2d');
+    new Chart(ctx1, {
+        type: 'doughnut',
+        data: {
+            labels: ['Publiés', 'Clôturés', 'Brouillons'],
+            datasets: [{
+                data: [{{ appelPublies }}, {{ appelClotures }}, {{ appelBrouillons }}],
+                backgroundColor: ['#28a745', '#dc3545', '#6c757d'],
+            }]
+        },
+        options: { responsive: true }
+    });
+
+    // Graphique Candidatures
+    const ctx2 = document.getElementById('candidatureChart').getContext('2d');
+    new Chart(ctx2, {
+        type: 'doughnut',
+        data: {
+            labels: ['Acceptées', 'Rejetées', 'En attente'],
+            datasets: [{
+                data: [{{ candidaturesAcceptees }}, {{ candidaturesRejetes }}, {{ candidaturesEnAttente }}],
+                backgroundColor: ['#28a745', '#dc3545', '#ffc107'],
+            }]
+        },
+        options: { responsive: true }
+    });
+</script>
+{% endif %}
+{% endblock %}

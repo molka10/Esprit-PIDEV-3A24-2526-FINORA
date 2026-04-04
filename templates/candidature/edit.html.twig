@@ -1,0 +1,106 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Modifier la Candidature{% endblock %}
+
+{% block body %}
+
+<div class="py-3 mb-4" style="background: linear-gradient(135deg, #1a1a2e, #16213e); border-radius: 10px;">
+    <div class="container text-white text-center py-2">
+        <h2 class="font-weight-bold"><i class="fas fa-edit"></i> Modifier la Candidature</h2>
+    </div>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow">
+            <div class="card-header" style="background:#1a1a2e; color:white;">
+                <h5 class="mb-0"><i class="fas fa-file-alt"></i> Modifier les informations</h5>
+            </div>
+            <div class="card-body">
+
+                {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+
+                <div class="row">
+                    <div class="col-md-12 mb-3">
+                        {{ form_label(form.appelOffre) }}
+                        {{ form_widget(form.appelOffre) }}
+                        {% if form_errors(form.appelOffre) %}
+                            <div class="text-danger small mt-1">
+                                <i class="fas fa-exclamation-circle"></i>
+                                {{ form_errors(form.appelOffre) }}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-12 mb-3">
+                        {{ form_label(form.user) }}
+                        {{ form_widget(form.user) }}
+                        {% if form_errors(form.user) %}
+                            <div class="text-danger small mt-1">
+                                <i class="fas fa-exclamation-circle"></i>
+                                {{ form_errors(form.user) }}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        {{ form_label(form.montantPropose) }}
+                        {{ form_widget(form.montantPropose) }}
+                        {% if form_errors(form.montantPropose) %}
+                            <div class="text-danger small mt-1">
+                                <i class="fas fa-exclamation-circle"></i>
+                                {{ form_errors(form.montantPropose) }}
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        {{ form_label(form.statut) }}
+                        {{ form_widget(form.statut) }}
+                        {% if form_errors(form.statut) %}
+                            <div class="text-danger small mt-1">
+                                <i class="fas fa-exclamation-circle"></i>
+                                {{ form_errors(form.statut) }}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-12 mb-3">
+                        {{ form_label(form.message) }}
+                        {{ form_widget(form.message) }}
+                        {% if form_errors(form.message) %}
+                            <div class="text-danger small mt-1">
+                                <i class="fas fa-exclamation-circle"></i>
+                                {{ form_errors(form.message) }}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-between mt-3">
+                    <a href="{{ path('app_candidature_index') }}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Retour
+                    </a>
+                    <button type="submit" class="btn btn-warning">
+                        <i class="fas fa-save"></i> Enregistrer
+                    </button>
+                </div>
+
+                {{ form_end(form) }}
+
+                {# DELETE - EN DEHORS DU FORM #}
+                <div class="mt-2">
+                    {{ include('candidature/_delete_form.html.twig') }}
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

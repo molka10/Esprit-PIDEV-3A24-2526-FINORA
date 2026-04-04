@@ -1,0 +1,78 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ user.nom }}{% endblock %}
+
+{% block body %}
+
+<div class="py-3 mb-4" style="background: linear-gradient(135deg, #1a1a2e, #16213e); border-radius: 10px;">
+    <div class="container text-white text-center py-2">
+        <h2 class="font-weight-bold"><i class="fas fa-user"></i> {{ user.nom }}</h2>
+        <p class="mb-0">{{ user.email }}</p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card shadow-sm">
+            <div class="card-header" style="background:#1a1a2e; color:white;">
+                <h5 class="mb-0"><i class="fas fa-info-circle"></i> Informations</h5>
+            </div>
+            <div class="card-body">
+                <table class="table table-borderless">
+                    <tr>
+                        <th width="35%"><i class="fas fa-user text-muted"></i> Nom</th>
+                        <td>{{ user.nom }}</td>
+                    </tr>
+                    <tr>
+                        <th><i class="fas fa-envelope text-muted"></i> Email</th>
+                        <td>{{ user.email }}</td>
+                    </tr>
+                    <tr>
+                        <th><i class="fas fa-phone text-muted"></i> Téléphone</th>
+                        <td>{{ user.telephone ?? 'N/A' }}</td>
+                    </tr>
+                    <tr>
+                        <th><i class="fas fa-shield-alt text-muted"></i> Rôles</th>
+                        <td>
+                            {% for role in user.roles %}
+                                {% if role == 'ROLE_ADMIN' %}
+                                    <span class="badge badge-danger">Admin</span>
+                                {% elseif role == 'ROLE_FOURNISSEUR' %}
+                                    <span class="badge badge-info">Entreprise</span>
+                                {% else %}
+                                    <span class="badge badge-secondary">Utilisateur</span>
+                                {% endif %}
+                            {% endfor %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <th><i class="fas fa-file-contract text-muted"></i> Candidatures</th>
+                        <td>{{ user.candidatures|length }}</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card shadow-sm">
+            <div class="card-header" style="background:#1a1a2e; color:white;">
+                <h5 class="mb-0"><i class="fas fa-cogs"></i> Actions</h5>
+            </div>
+            <div class="card-body">
+                <a href="{{ path('app_user_edit', {'id': user.id}) }}"
+                   class="btn btn-warning btn-block mb-2">
+                    <i class="fas fa-edit"></i> Modifier
+                </a>
+                <a href="{{ path('app_user_index') }}"
+                   class="btn btn-secondary btn-block mb-2">
+                    <i class="fas fa-arrow-left"></i> Retour
+                </a>
+                <hr>
+                {{ include('user/_delete_form.html.twig') }}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
