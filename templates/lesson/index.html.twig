@@ -1,21 +1,30 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Lessons{% endblock %}
+{% block title %}FINORA - Lessons{% endblock %}
 
 {% block body %}
-<div style="padding: 30px; font-family: Arial;">
-    <h1>Lessons</h1>
+<div style="padding: 30px; font-family: Arial, sans-serif; background:#f8fafc; min-height:100vh;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+        <h1 style="margin:0; color:#1f2937;">Liste des lessons</h1>
 
-    <form method="get" action="{{ path('app_lesson_index') }}" style="margin-bottom: 25px; padding: 15px; border: 1px solid #ddd; border-radius: 10px;">
-        <div style="display: flex; flex-wrap: wrap; gap: 15px; align-items: end;">
+        <a href="{{ path('app_lesson_new') }}"
+           style="padding:10px 16px; background:#7C3AED; color:white; text-decoration:none; border-radius:10px; font-weight:bold;">
+            + Ajouter une lesson
+        </a>
+    </div>
+
+    <form method="get" action="{{ path('app_lesson_index') }}"
+          style="margin-bottom: 25px; padding: 18px; background:white; border: 1px solid #e5e7eb; border-radius: 14px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+        <div style="display:flex; flex-wrap:wrap; gap:15px; align-items:end;">
             <div>
-                <label for="titre">Titre</label><br>
-                <input type="text" id="titre" name="titre" value="{{ titre }}" placeholder="Rechercher par titre">
+                <label for="titre">Titre / contenu</label><br>
+                <input type="text" id="titre" name="titre" value="{{ titre }}" placeholder="Rechercher..."
+                       style="padding:8px 10px; border:1px solid #d1d5db; border-radius:8px;">
             </div>
 
             <div>
                 <label for="formation">Formation</label><br>
-                <select id="formation" name="formation">
+                <select id="formation" name="formation" style="padding:8px 10px; border:1px solid #d1d5db; border-radius:8px;">
                     <option value="">Toutes</option>
                     {% for formation in formations %}
                         <option value="{{ formation.id }}" {{ formationSelected == formation.id ? 'selected' : '' }}>
@@ -27,78 +36,111 @@
 
             <div>
                 <label for="tri">Trier par</label><br>
-                <select id="tri" name="tri">
-                    <option value="id" {{ tri == 'id' ? 'selected' : '' }}>ID</option>
-                    <option value="titre" {{ tri == 'titre' ? 'selected' : '' }}>Titre</option>
+                <select id="tri" name="tri" style="padding:8px 10px; border:1px solid #d1d5db; border-radius:8px;">
                     <option value="ordre" {{ tri == 'ordre' ? 'selected' : '' }}>Ordre</option>
-                    <option value="duree_minutes" {{ tri == 'duree_minutes' ? 'selected' : '' }}>Durée</option>
+                    <option value="id" {{ tri == 'id' ? 'selected' : '' }}>Dernier ajouté</option>
+                    <option value="titre" {{ tri == 'titre' ? 'selected' : '' }}>Titre</option>
+                    <option value="dureeMinutes" {{ tri == 'dureeMinutes' ? 'selected' : '' }}>Durée</option>
                 </select>
             </div>
 
             <div>
                 <label for="ordre">Ordre</label><br>
-                <select id="ordre" name="ordre">
+                <select id="ordre" name="ordre" style="padding:8px 10px; border:1px solid #d1d5db; border-radius:8px;">
                     <option value="asc" {{ ordre == 'asc' ? 'selected' : '' }}>Ascendant</option>
                     <option value="desc" {{ ordre == 'desc' ? 'selected' : '' }}>Descendant</option>
                 </select>
             </div>
 
             <div>
-                <button type="submit" style="padding: 8px 14px; background: #7C3AED; color: white; border: none; border-radius: 6px;">
+                <button type="submit"
+                        style="padding:9px 14px; background:#7C3AED; color:white; border:none; border-radius:8px; cursor:pointer;">
                     Rechercher
                 </button>
             </div>
 
             <div>
-                <a href="{{ path('app_lesson_index') }}" style="padding: 8px 14px; background: #6b7280; color: white; text-decoration: none; border-radius: 6px;">
+                <a href="{{ path('app_lesson_index') }}"
+                   style="padding:9px 14px; background:#6b7280; color:white; text-decoration:none; border-radius:8px;">
                     Réinitialiser
                 </a>
             </div>
         </div>
     </form>
 
-    <a href="{{ path('app_lesson_new') }}"
-       style="display:inline-block; margin-bottom:20px; padding:10px 15px; background:#7C3AED; color:white; border-radius:8px; text-decoration:none;">
-        Add Lesson
-    </a>
+    {% if lessons is empty %}
+        <div style="padding:20px; background:white; border-radius:12px; border:1px solid #e5e7eb;">
+            Aucune lesson trouvée.
+        </div>
+    {% else %}
+        <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(340px, 1fr)); gap:20px;">
+            {% for lesson in lessons %}
+                <div style="background:white; border-radius:16px; overflow:hidden; box-shadow:0 4px 14px rgba(0,0,0,0.08); border:1px solid #e5e7eb;">
 
-    <div style="display:flex; flex-wrap:wrap; gap:20px;">
-        {% for lesson in lessons %}
-            <div style="width:300px; padding:15px; border-radius:10px; box-shadow:0 2px 8px rgba(0,0,0,0.1);">
-                <h3>{{ lesson.titre }}</h3>
+                    <div style="height:100px; background:#ede9fe; display:flex; align-items:center; justify-content:space-between; padding:16px;">
+                        <span style="background:white; color:#7C3AED; padding:6px 10px; border-radius:999px; font-size:12px; font-weight:700;">
+                            LEÇON {{ '%02d'|format(lesson.ordre) }}
+                        </span>
 
-                <p style="font-size:14px;">
-                    {{ lesson.contenu ? lesson.contenu|slice(0, 100) ~ '...' : 'Pas de contenu' }}
-                </p>
+                        {% if lesson.videoUrl %}
+                            <span style="background:#fef3c7; color:#92400e; padding:6px 10px; border-radius:999px; font-size:12px; font-weight:600;">
+                                🎬 Vidéo
+                            </span>
+                        {% endif %}
+                    </div>
 
-                <p><strong>Formation:</strong> {{ lesson.formation ? lesson.formation.titre : 'Non liée' }}</p>
-                <p><strong>Ordre:</strong> {{ lesson.ordre }}</p>
-                <p><strong>Duration:</strong> {{ lesson.dureeMinutes ?? 'Non définie' }} min</p>
+                    <div style="padding:18px;">
+                        <h3 style="margin-top:0; margin-bottom:10px; color:#111827;">
+                            {{ lesson.titre }}
+                        </h3>
 
-                <div style="margin-top:10px;">
-                    <a href="{{ path('app_lesson_show', {'id': lesson.id}) }}"
-                       style="padding:6px 10px; background:#16a34a; color:white; border-radius:5px; text-decoration:none;">
-                        Show
-                    </a>
+                        <div style="margin-bottom:10px; display:flex; gap:8px; flex-wrap:wrap;">
+                            <span style="background:#dbeafe; color:#1d4ed8; padding:6px 10px; border-radius:999px; font-size:12px;">
+                                📌 {{ lesson.formation ? lesson.formation.titre : 'Formation inconnue' }}
+                            </span>
 
-                    <a href="{{ path('app_lesson_edit', {'id': lesson.id}) }}"
-                       style="padding:6px 10px; background:#2563eb; color:white; border-radius:5px; text-decoration:none;">
-                        Edit
-                    </a>
+                            <span style="background:#dcfce7; color:#166534; padding:6px 10px; border-radius:999px; font-size:12px;">
+                                ⏱ {{ lesson.dureeMinutes }} min
+                            </span>
+                        </div>
 
-                    <form method="post"
-                          action="{{ path('app_lesson_delete', {'id': lesson.id}) }}"
-                          style="display:inline;">
-                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ lesson.id) }}">
-                        <button style="padding:6px 10px; background:#dc2626; color:white; border:none; border-radius:5px;">
-                            Delete
-                        </button>
-                    </form>
+                        <p style="color:#4b5563; min-height:48px;">
+                            {{ lesson.contenu ? lesson.contenu|slice(0, 120) ~ '...' : 'Pas de contenu' }}
+                        </p>
+
+                        <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:15px;">
+                            <a href="{{ path('app_lesson_show', {'id': lesson.id}) }}"
+                               style="padding:8px 12px; background:#16a34a; color:white; text-decoration:none; border-radius:8px;">
+                                Voir
+                            </a>
+
+                            <a href="{{ path('app_lesson_edit', {'id': lesson.id}) }}"
+                               style="padding:8px 12px; background:#2563eb; color:white; text-decoration:none; border-radius:8px;">
+                                Modifier
+                            </a>
+
+                            <form method="post"
+                                  action="{{ path('app_lesson_delete', {'id': lesson.id}) }}"
+                                  style="display:inline-block;"
+                                  onsubmit="return confirm('Supprimer cette lesson ?');">
+                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ lesson.id) }}">
+                                <button type="submit"
+                                        style="padding:8px 12px; background:#dc2626; color:white; border:none; border-radius:8px; cursor:pointer;">
+                                    Supprimer
+                                </button>
+                            </form>
+
+                            {% if lesson.videoUrl %}
+                                <a href="{{ lesson.videoUrl }}" target="_blank"
+                                   style="padding:8px 12px; background:#f59e0b; color:white; text-decoration:none; border-radius:8px;">
+                                    Ouvrir vidéo
+                                </a>
+                            {% endif %}
+                        </div>
+                    </div>
                 </div>
-            </div>
-        {% else %}
-            <p>Aucune lesson trouvée.</p>
-        {% endfor %}
-    </div>
+            {% endfor %}
+        </div>
+    {% endif %}
 </div>
 {% endblock %}

@@ -1,54 +1,96 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Lesson{% endblock %}
+{% block title %}{{ lesson.titre }} - FINORA{% endblock %}
 
 {% block body %}
-    <h1>Lesson</h1>
+<div style="padding: 30px; font-family: Arial, sans-serif; background:#f8fafc; min-height:100vh;">
+    <div style="max-width: 1000px; margin: 0 auto; background:white; border:1px solid #e5e7eb; border-radius:16px; box-shadow:0 4px 14px rgba(0,0,0,0.08); overflow:hidden;">
 
-    <table class="table">
-        <tbody>
-            <tr>
-                <th>Id</th>
-                <td>{{ lesson.id }}</td>
-            </tr>
-            <tr>
-                <th>Formation_id</th>
-                <td>{{ lesson.formationId }}</td>
-            </tr>
-            <tr>
-                <th>Titre</th>
-                <td>{{ lesson.titre }}</td>
-            </tr>
-            <tr>
-                <th>Contenu</th>
-                <td>{{ lesson.contenu }}</td>
-            </tr>
-            <tr>
-                <th>Ordre</th>
-                <td>{{ lesson.ordre }}</td>
-            </tr>
-            <tr>
-                <th>Duree_minutes</th>
-                <td>{{ lesson.dureeMinutes }}</td>
-            </tr>
-            <tr>
-                <th>Video_url</th>
-                <td>{{ lesson.videoUrl }}</td>
-            </tr>
-            <tr>
-                <th>Latitude</th>
-                <td>{{ lesson.latitude }}</td>
-            </tr>
-            <tr>
-                <th>Longitude</th>
-                <td>{{ lesson.longitude }}</td>
-            </tr>
-        </tbody>
-    </table>
+        <div style="background:#ede9fe; padding:20px 24px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+            <div>
+                <div style="font-size:12px; color:#6b7280; font-weight:700; margin-bottom:6px;">
+                    LEÇON {{ '%02d'|format(lesson.ordre) }}
+                </div>
+                <h1 style="margin:0; color:#111827; font-size:28px;">
+                    {{ lesson.titre }}
+                </h1>
+            </div>
 
-    <a href="{{ path('app_lesson_index') }}">back to list</a>
+            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                <span style="background:#dbeafe; color:#1d4ed8; padding:6px 10px; border-radius:999px; font-size:12px;">
+                    📌 {{ lesson.formation ? lesson.formation.titre : 'Formation inconnue' }}
+                </span>
+                <span style="background:#dcfce7; color:#166534; padding:6px 10px; border-radius:999px; font-size:12px;">
+                    ⏱ {{ lesson.dureeMinutes }} min
+                </span>
+                {% if lesson.videoUrl %}
+                    <span style="background:#fef3c7; color:#92400e; padding:6px 10px; border-radius:999px; font-size:12px;">
+                        🎬 Vidéo disponible
+                    </span>
+                {% endif %}
+            </div>
+        </div>
 
-    <a href="{{ path('app_lesson_edit', {'id': lesson.id}) }}">edit</a>
+        <div style="padding:24px;">
+            <h3 style="margin-top:0; color:#111827;">Contenu</h3>
+            <div style="line-height:1.7; color:#374151; white-space:pre-line; margin-bottom:30px;">
+                {{ lesson.contenu ?: 'Aucun contenu disponible.' }}
+            </div>
 
-    {{ include('lesson/_delete_form.html.twig') }}
+            {% if lesson.videoUrl %}
+                <h3 style="color:#111827;">Vidéo</h3>
+
+                {% set isYoutube = lesson.youTubeVideoId is not null %}
+                {% set isMp4 = lesson.videoUrl ends with '.mp4' %}
+
+                {% if isYoutube %}
+                    <div style="margin-bottom:20px;">
+                        <iframe
+                            width="100%"
+                            height="420"
+                            src="https://www.youtube.com/embed/{{ lesson.youTubeVideoId }}"
+                            title="YouTube video player"
+                            frameborder="0"
+                            allowfullscreen
+                            style="border-radius:12px;">
+                        </iframe>
+                    </div>
+                {% elseif isMp4 %}
+                    <div style="margin-bottom:20px;">
+                        <video controls style="width:100%; border-radius:12px;">
+                            <source src="{{ lesson.videoUrl }}" type="video/mp4">
+                            Votre navigateur ne supporte pas la lecture vidéo.
+                        </video>
+                    </div>
+                {% else %}
+                    <div style="margin-bottom:20px;">
+                        <a href="{{ lesson.videoUrl }}" target="_blank"
+                           style="display:inline-block; padding:10px 16px; background:#f59e0b; color:white; text-decoration:none; border-radius:8px;">
+                            Ouvrir la vidéo
+                        </a>
+                    </div>
+                {% endif %}
+            {% endif %}
+
+            <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:25px;">
+                <a href="{{ path('app_lesson_index') }}"
+                   style="padding:10px 14px; background:#6b7280; color:white; text-decoration:none; border-radius:8px;">
+                    Retour à la liste
+                </a>
+
+                <a href="{{ path('app_lesson_edit', {'id': lesson.id}) }}"
+                   style="padding:10px 14px; background:#2563eb; color:white; text-decoration:none; border-radius:8px;">
+                    Modifier
+                </a>
+
+                {% if lesson.videoUrl %}
+                    <a href="{{ lesson.videoUrl }}" target="_blank"
+                       style="padding:10px 14px; background:#7C3AED; color:white; text-decoration:none; border-radius:8px;">
+                        Ouvrir dans un nouvel onglet
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}

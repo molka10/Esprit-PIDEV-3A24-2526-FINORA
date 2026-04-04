@@ -15,25 +15,25 @@ final class FormationController extends AbstractController
     #[Route('/formation', name: 'formation_index')]
     public function index(Request $request, EntityManagerInterface $entityManager): Response
     {
-        $titre = $request->query->get('titre');
-        $categorie = $request->query->get('categorie');
-        $niveau = $request->query->get('niveau');
-        $tri = $request->query->get('tri', 'id');
-        $ordre = $request->query->get('ordre', 'asc');
+        $titre = trim((string) $request->query->get('titre', ''));
+        $categorie = trim((string) $request->query->get('categorie', ''));
+        $niveau = trim((string) $request->query->get('niveau', ''));
+        $tri = (string) $request->query->get('tri', 'id');
+        $ordre = strtolower((string) $request->query->get('ordre', 'desc'));
 
         $qb = $entityManager->getRepository(Formation::class)->createQueryBuilder('f');
 
-        if (!empty($titre)) {
-            $qb->andWhere('f.titre LIKE :titre')
+        if ($titre !== '') {
+            $qb->andWhere('LOWER(f.titre) LIKE LOWER(:titre)')
                 ->setParameter('titre', '%' . $titre . '%');
         }
 
-        if (!empty($categorie)) {
-            $qb->andWhere('f.categorie = :categorie')
-                ->setParameter('categorie', $categorie);
+        if ($categorie !== '') {
+            $qb->andWhere('LOWER(f.categorie) LIKE LOWER(:categorie)')
+                ->setParameter('categorie', '%' . $categorie . '%');
         }
 
-        if (!empty($niveau)) {
+        if ($niveau !== '') {
             $qb->andWhere('f.niveau = :niveau')
                 ->setParameter('niveau', $niveau);
         }
@@ -43,8 +43,7 @@ final class FormationController extends AbstractController
             $tri = 'id';
         }
 
-        $ordre = strtolower($ordre) === 'desc' ? 'DESC' : 'ASC';
-
+        $ordre = $ordre === 'asc' ? 'ASC' : 'DESC';
         $qb->orderBy('f.' . $tri, $ordre);
 
         $formations = $qb->getQuery()->getResult();

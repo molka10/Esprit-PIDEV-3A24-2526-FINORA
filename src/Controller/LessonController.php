@@ -17,21 +17,22 @@ final class LessonController extends AbstractController
     #[Route(name: 'app_lesson_index', methods: ['GET'])]
     public function index(Request $request, EntityManagerInterface $entityManager): Response
     {
-        $titre = $request->query->get('titre');
-        $formationId = $request->query->get('formation');
-        $tri = $request->query->get('tri', 'id');
-        $ordreTri = $request->query->get('ordre', 'asc');
+        $titre = trim((string) $request->query->get('titre', ''));
+        $formationId = trim((string) $request->query->get('formation', ''));
+        $tri = (string) $request->query->get('tri', 'ordre');
+        $ordreTri = strtolower((string) $request->query->get('ordre', 'asc'));
 
-        $qb = $entityManager->getRepository(Lesson::class)->createQueryBuilder('l')
+        $qb = $entityManager->getRepository(Lesson::class)
+            ->createQueryBuilder('l')
             ->leftJoin('l.formation', 'f')
             ->addSelect('f');
 
-        if (!empty($titre)) {
-            $qb->andWhere('l.titre LIKE :titre')
+        if ($titre !== '') {
+            $qb->andWhere('LOWER(l.titre) LIKE LOWER(:titre) OR LOWER(l.contenu) LIKE LOWER(:titre)')
                 ->setParameter('titre', '%' . $titre . '%');
         }
 
-        if (!empty($formationId)) {
+        if ($formationId !== '') {
             $qb->andWhere('f.id = :formationId')
                 ->setParameter('formationId', $formationId);
         }
@@ -40,15 +41,14 @@ final class LessonController extends AbstractController
             'id' => 'l.id',
             'titre' => 'l.titre',
             'ordre' => 'l.ordre',
-            'duree_minutes' => 'l.duree_minutes',
+            'dureeMinutes' => 'l.dureeMinutes',
         ];
 
         if (!array_key_exists($tri, $allowedSortFields)) {
-            $tri = 'id';
+            $tri = 'ordre';
         }
 
-        $ordreTri = strtolower($ordreTri) === 'desc' ? 'DESC' : 'ASC';
-
+        $ordreTri = $ordreTri === 'desc' ? 'DESC' : 'ASC';
         $qb->orderBy($allowedSortFields[$tri], $ordreTri);
 
         $lessons = $qb->getQuery()->getResult();
@@ -75,7 +75,7 @@ final class LessonController extends AbstractController
             $entityManager->persist($lesson);
             $entityManager->flush();
 
-            return $this->redirectToRoute('app_lesson_index', [], Response::HTTP_SEE_OTHER);
+            return $this->redirectToRoute('app_lesson_index');
         }
 
         return $this->render('lesson/new.html.twig', [
@@ -101,7 +101,7 @@ final class LessonController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $entityManager->flush();
 
-            return $this->redirectToRoute('app_lesson_index', [], Response::HTTP_SEE_OTHER);
+            return $this->redirectToRoute('app_lesson_index');
         }
 
         return $this->render('lesson/edit.html.twig', [
@@ -118,6 +118,6 @@ final class LessonController extends AbstractController
             $entityManager->flush();
         }
 
-        return $this->redirectToRoute('app_lesson_index', [], Response::HTTP_SEE_OTHER);
+        return $this->redirectToRoute('app_lesson_index');
     }
 }

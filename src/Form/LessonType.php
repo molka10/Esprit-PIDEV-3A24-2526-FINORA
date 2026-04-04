@@ -21,34 +21,34 @@ class LessonType extends AbstractType
                 'class' => Formation::class,
                 'choice_label' => 'titre',
                 'label' => 'Formation',
+                'placeholder' => 'Choisir une formation',
             ])
             ->add('titre', TextType::class, [
                 'label' => 'Titre',
+                'attr' => [
+                    'placeholder' => 'Entrez le titre de la lesson'
+                ]
             ])
             ->add('contenu', TextareaType::class, [
                 'label' => 'Contenu',
                 'required' => false,
+                'attr' => [
+                    'placeholder' => 'Entrez le contenu'
+                ]
+            ])
+            ->add('videoUrl', TextType::class, [
+                'label' => 'URL vidéo',
+                'required' => false,
+                'attr' => [
+                    'placeholder' => 'https://youtube.com/... ou https://...mp4'
+                ]
             ])
             ->add('ordre', IntegerType::class, [
                 'label' => 'Ordre',
             ])
-            ->add('duree_minutes', IntegerType::class, [
+            ->add('dureeMinutes', IntegerType::class, [
                 'label' => 'Durée (minutes)',
-                'required' => false,
-            ])
-            ->add('video_url', TextType::class, [
-                'label' => 'Video URL',
-                'required' => false,
-            ])
-            ->add('latitude', TextType::class, [
-                'label' => 'Latitude',
-                'required' => false,
-            ])
-            ->add('longitude', TextType::class, [
-                'label' => 'Longitude',
-                'required' => false,
-            ])
-        ;
+            ]);
     }
 
     public function configureOptions(OptionsResolver $resolver): void

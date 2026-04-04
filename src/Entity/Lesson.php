@@ -36,36 +36,23 @@ class Lesson
     )]
     private ?string $contenu = null;
 
-    #[ORM\Column(type: 'integer')]
-    #[Assert\NotNull(message: 'L’ordre est obligatoire.')]
-    #[Assert\Positive(message: 'L’ordre doit être un nombre positif.')]
-    private ?int $ordre = null;
-
-    #[ORM\Column(type: 'integer', nullable: true)]
-    #[Assert\Positive(message: 'La durée doit être un nombre positif.')]
-    private ?int $duree_minutes = null;
-
-    #[ORM\Column(type: 'string', length: 500, nullable: true)]
+    #[ORM\Column(name: 'video_url', type: 'string', length: 500, nullable: true)]
     #[Assert\Length(
         max: 500,
         maxMessage: 'L’URL de la vidéo ne doit pas dépasser {{ limit }} caractères.'
     )]
     #[Assert\Url(message: 'Veuillez entrer une URL vidéo valide.')]
-    private ?string $video_url = null;
+    private ?string $videoUrl = null;
 
-    #[ORM\Column(type: 'string', length: 255, nullable: true)]
-    #[Assert\Regex(
-        pattern: '/^-?\d+(\.\d+)?$/',
-        message: 'La latitude est invalide.'
-    )]
-    private ?string $latitude = null;
+    #[ORM\Column(type: 'integer')]
+    #[Assert\NotNull(message: 'L’ordre est obligatoire.')]
+    #[Assert\Positive(message: 'L’ordre doit être un entier positif.')]
+    private ?int $ordre = null;
 
-    #[ORM\Column(type: 'string', length: 255, nullable: true)]
-    #[Assert\Regex(
-        pattern: '/^-?\d+(\.\d+)?$/',
-        message: 'La longitude est invalide.'
-    )]
-    private ?string $longitude = null;
+    #[ORM\Column(name: 'duree_minutes', type: 'integer')]
+    #[Assert\NotNull(message: 'La durée est obligatoire.')]
+    #[Assert\Positive(message: 'La durée doit être un entier positif.')]
+    private ?int $dureeMinutes = null;
 
     public function getId(): ?int
     {
@@ -105,6 +92,17 @@ class Lesson
         return $this;
     }
 
+    public function getVideoUrl(): ?string
+    {
+        return $this->videoUrl;
+    }
+
+    public function setVideoUrl(?string $videoUrl): self
+    {
+        $this->videoUrl = $videoUrl;
+        return $this;
+    }
+
     public function getOrdre(): ?int
     {
         return $this->ordre;
@@ -118,45 +116,53 @@ class Lesson
 
     public function getDureeMinutes(): ?int
     {
-        return $this->duree_minutes;
+        return $this->dureeMinutes;
     }
 
-    public function setDureeMinutes(?int $duree_minutes): self
+    public function setDureeMinutes(int $dureeMinutes): self
     {
-        $this->duree_minutes = $duree_minutes;
+        $this->dureeMinutes = $dureeMinutes;
         return $this;
     }
 
-    public function getVideoUrl(): ?string
+    public function getYouTubeVideoId(): ?string
     {
-        return $this->video_url;
+        if ($this->videoUrl === null) {
+            return null;
+        }
+
+        $url = trim($this->videoUrl);
+
+        $vPos = strpos($url, 'v=');
+        if ($vPos !== false) {
+            $id = substr($url, $vPos + 2);
+            $ampPos = strpos($id, '&');
+            if ($ampPos !== false) {
+                $id = substr($id, 0, $ampPos);
+            }
+            return trim($id) !== '' ? $id : null;
+        }
+
+        $shortPos = strpos($url, 'youtu.be/');
+        if ($shortPos !== false) {
+            $id = substr($url, $shortPos + strlen('youtu.be/'));
+            $qPos = strpos($id, '?');
+            if ($qPos !== false) {
+                $id = substr($id, 0, $qPos);
+            }
+            return trim($id) !== '' ? $id : null;
+        }
+
+        return null;
     }
 
-    public function setVideoUrl(?string $video_url): self
+    public function getYouTubeThumbnailUrl(): ?string
     {
-        $this->video_url = $video_url;
-        return $this;
-    }
+        $id = $this->getYouTubeVideoId();
+        if ($id === null) {
+            return null;
+        }
 
-    public function getLatitude(): ?string
-    {
-        return $this->latitude;
-    }
-
-    public function setLatitude(?string $latitude): self
-    {
-        $this->latitude = $latitude;
-        return $this;
-    }
-
-    public function getLongitude(): ?string
-    {
-        return $this->longitude;
-    }
-
-    public function setLongitude(?string $longitude): self
-    {
-        $this->longitude = $longitude;
-        return $this;
+        return 'https://img.youtube.com/vi/' . $id . '/hqdefault.jpg';
     }
 }
