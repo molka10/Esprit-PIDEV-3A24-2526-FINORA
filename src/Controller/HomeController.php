@@ -102,4 +102,64 @@ final class HomeController extends AbstractController
             'categories' => $categories,
         ]);
     }
+
+    #[Route('/lessons', name: 'app_lessons')]
+    public function lessons(
+        Request $request,
+        EntityManagerInterface $entityManager,
+        PaginatorInterface $paginator
+    ): Response {
+        $titre = trim((string) $request->query->get('titre', ''));
+        $formationId = trim((string) $request->query->get('formation', ''));
+        $tri = (string) $request->query->get('tri', 'ordre');
+        $ordre = strtolower((string) $request->query->get('ordre', 'asc'));
+
+        $qb = $entityManager->getRepository(Lesson::class)
+            ->createQueryBuilder('l')
+            ->leftJoin('l.formation', 'f')
+            ->addSelect('f');
+
+        if ($titre !== '') {
+            $qb->andWhere('LOWER(l.titre) LIKE LOWER(:titre) OR LOWER(l.contenu) LIKE LOWER(:titre)')
+                ->setParameter('titre', '%' . $titre . '%');
+        }
+
+        if ($formationId !== '') {
+            $qb->andWhere('f.id = :formationId')
+                ->setParameter('formationId', $formationId);
+        }
+
+        $allowedSortFields = [
+            'id' => 'l.id',
+            'titre' => 'l.titre',
+            'ordre' => 'l.ordre',
+            'dureeMinutes' => 'l.dureeMinutes',
+        ];
+
+        if (!array_key_exists($tri, $allowedSortFields)) {
+            $tri = 'ordre';
+        }
+
+        $ordre = $ordre === 'desc' ? 'DESC' : 'ASC';
+        $qb->orderBy($allowedSortFields[$tri], $ordre);
+
+        $query = $qb->getQuery();
+
+        $lessons = $paginator->paginate(
+            $query,
+            $request->query->getInt('page', 1),
+            6
+        );
+
+        $formations = $entityManager->getRepository(Formation::class)->findAll();
+
+        return $this->render('home/lessons.html.twig', [
+            'lessons' => $lessons,
+            'formations' => $formations,
+            'titre' => $titre,
+            'formationSelected' => $formationId,
+            'tri' => $tri,
+            'ordre' => strtolower($ordre),
+        ]);
+    }
 }

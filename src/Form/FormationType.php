@@ -22,30 +22,12 @@ class FormationType extends AbstractType
                 'label' => 'Description',
                 'required' => false
             ])
-            ->add('categorie', ChoiceType::class, [
-                'label' => 'Catégorie',
-                'placeholder' => 'Choisir une catégorie',
-                'choices' => [
-                    'Bourse' => 'Bourse',
-                    'Investissement' => 'Investissement',
-                    'Trading' => 'Trading',
-                    'Actions' => 'Actions',
-                    'ETF' => 'ETF',
-                    'Obligations' => 'Obligations',
-                    'Crypto' => 'Crypto',
-                    'Forex' => 'Forex',
-                    'Analyse technique' => 'Analyse technique',
-                    'Analyse fondamentale' => 'Analyse fondamentale',
-                    'Gestion des risques' => 'Gestion des risques',
-                    'Portefeuille' => 'Portefeuille',
-                    'Dividendes' => 'Dividendes',
-                    'Marchés financiers' => 'Marchés financiers',
-                    'Psychologie du trader' => 'Psychologie du trader',
-                    'Économie' => 'Économie',
-                    'Inflation' => 'Inflation',
-                    'Taux d’intérêt' => 'Taux d’intérêt',
-                    'Fiscalité' => 'Fiscalité',
-                ]
+            ->add('categorie', TextType::class, [
+                'label' => 'Catégories',
+                'attr' => [
+                    'placeholder' => 'Ex: Bourse, ETF, Crypto'
+                ],
+                'help' => 'Séparez les catégories par des virgules.'
             ])
             ->add('niveau', ChoiceType::class, [
                 'label' => 'Niveau',
