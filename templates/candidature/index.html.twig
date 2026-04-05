@@ -1,0 +1,140 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Candidatures{% endblock %}
+
+{% block body %}
+
+{# HERO #}
+<div class="py-4 mb-4" style="background: linear-gradient(135deg, #1a1a2e, #16213e); border-radius: 10px;">
+    <div class="container text-white text-center py-3">
+        <h1 class="display-5 font-weight-bold">👥 Candidatures</h1>
+        {% if app.session.get('role') == 'admin' %}
+            <p class="lead">Gérez toutes les candidatures soumises</p>
+        {% else %}
+            <p class="lead">Vos candidatures soumises</p>
+        {% endif %}
+        {% if app.session.get('role') == 'entreprise' %}
+            <a href="{{ path('app_candidature_new') }}" class="btn btn-warning btn-lg mt-2">
+                <i class="fas fa-plus"></i> Nouvelle Candidature
+            </a>
+        {% endif %}
+    </div>
+</div>
+
+{# STATS #}
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card text-white mb-3" style="background:#1a1a2e;">
+            <div class="card-body text-center">
+                <i class="fas fa-users fa-2x mb-2"></i>
+                <h4>{{ candidatures|length }}</h4>
+                <p class="mb-0">Total Candidatures</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-white mb-3" style="background:#28a745;">
+            <div class="card-body text-center">
+                <i class="fas fa-check-circle fa-2x mb-2"></i>
+                <h4>{{ candidatures|filter(c => c.statut == 'accepted')|length }}</h4>
+                <p class="mb-0">Acceptées</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-white mb-3" style="background:#ffc107;">
+            <div class="card-body text-center">
+                <i class="fas fa-hourglass-half fa-2x mb-2"></i>
+                <h4>{{ candidatures|filter(c => c.statut == 'submitted')|length }}</h4>
+                <p class="mb-0">En Attente</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+{# TABLE #}
+<div class="card shadow-sm">
+    <div class="card-header d-flex justify-content-between align-items-center" style="background:#1a1a2e; color:white;">
+        <h5 class="mb-0"><i class="fas fa-list"></i> Liste des Candidatures</h5>
+        <a href="{{ path('app_candidature_new') }}" class="btn btn-warning btn-sm">
+            <i class="fas fa-plus"></i> Nouvelle
+        </a>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="thead-dark">
+                    <tr>
+                        <th>Appel d'Offre</th>
+                        <th>Candidat</th>
+                        <th>Montant Proposé</th>
+                        <th>Statut</th>
+                        <th>Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for candidature in candidatures %}
+                    <tr>
+                        <td>
+                            <strong>
+                                {{ candidature.appelOffre ? candidature.appelOffre.titre : 'N/A' }}
+                            </strong>
+                        </td>
+                        <td>
+                            <i class="fas fa-user text-muted"></i>
+                            {{ candidature.user ? candidature.user.nom : 'Anonyme' }}
+                        </td>
+                        <td>
+                            {% if candidature.montantPropose %}
+                                <strong>{{ candidature.montantPropose }}</strong> TND
+                            {% else %}
+                                <span class="text-muted">N/A</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if candidature.statut == 'accepted' %}
+                                <span class="badge badge-success">Acceptée</span>
+                            {% elseif candidature.statut == 'rejected' %}
+                                <span class="badge badge-danger">Rejetée</span>
+                            {% else %}
+                                <span class="badge badge-warning">En attente</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ candidature.createdAt|date('d/m/Y') }}</td>
+                        <td>
+    <a href="{{ path('app_candidature_show', {'id': candidature.id}) }}"
+       class="btn btn-sm btn-outline-primary">
+        <i class="fas fa-eye"></i>
+    </a>
+    {# ADMIN seulement #}
+    {% if app.session.get('role') == 'admin' %}
+        <a href="{{ path('app_candidature_edit', {'id': candidature.id}) }}"
+           class="btn btn-sm btn-outline-warning">
+            <i class="fas fa-edit"></i>
+        </a>
+    {% endif %}
+    {# ENTREPRISE - modifier SA candidature #}
+    {% if app.session.get('role') == 'entreprise' %}
+        <a href="{{ path('app_candidature_edit', {'id': candidature.id}) }}"
+           class="btn btn-sm btn-outline-warning">
+            <i class="fas fa-edit"></i>
+        </a>
+    {% endif %}
+</td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="6" class="text-center text-muted py-4">
+                            <i class="fas fa-inbox fa-2x mb-2 d-block"></i>
+                            Aucune candidature pour le moment
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

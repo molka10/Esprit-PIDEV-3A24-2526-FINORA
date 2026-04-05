@@ -1,0 +1,250 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Appels d'Offre{% endblock %}
+
+{% block body %}
+
+{# HERO SECTION #}
+<div class="py-4 mb-4" style="background: linear-gradient(135deg, #1a1a2e, #16213e); border-radius: 10px;">
+    <div class="container text-white text-center py-3">
+        <h1 class="display-5 font-weight-bold">📋 Appels d'Offre</h1>
+        <p class="lead">Consultez et gérez tous les appels d'offre disponibles</p>
+        {% if app.session.get('role') == 'admin' %}
+            <a href="{{ path('app_appel_offre_new') }}" class="btn btn-warning btn-lg mt-2">
+                <i class="fas fa-plus"></i> Nouvel Appel d'Offre
+            </a>
+        {% endif %}
+    </div>
+</div>
+
+{# STATS CARDS #}
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card text-white mb-3" style="background:#1a1a2e;">
+            <div class="card-body text-center">
+                <i class="fas fa-file-contract fa-2x mb-2"></i>
+                <h4>{{ appel_offres|length }}</h4>
+                <p class="mb-0">Total Appels d'Offre</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-white mb-3" style="background:#28a745;">
+            <div class="card-body text-center">
+                <i class="fas fa-check-circle fa-2x mb-2"></i>
+                <h4>{{ appel_offres|filter(a => a.statut == 'published')|length }}</h4>
+                <p class="mb-0">Publiés</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-white mb-3" style="background:#dc3545;">
+            <div class="card-body text-center">
+                <i class="fas fa-lock fa-2x mb-2"></i>
+                <h4>{{ appel_offres|filter(a => a.statut == 'closed')|length }}</h4>
+                <p class="mb-0">Clôturés</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+{# FILTRES #}
+<div class="card shadow-sm mb-4">
+    <div class="card-header" style="background:#1a1a2e; color:white;">
+        <h5 class="mb-0"><i class="fas fa-filter"></i> Filtres de Recherche</h5>
+    </div>
+    <div class="card-body">
+        <form method="GET" action="{{ path('app_appel_offre_index') }}" id="filterForm">
+            <div class="row">
+                <div class="col-md-3 mb-2">
+                    <input type="text" name="search" id="searchInput" class="form-control"
+                           placeholder="🔍 Rechercher par titre..."
+                           value="{{ filters.search ?? '' }}">
+                </div>
+                <div class="col-md-3 mb-2">
+                    <select name="type" id="typeFilter" class="form-control">
+                        <option value="">-- Tous les types --</option>
+                        <option value="achat" {{ filters.type == 'achat' ? 'selected' : '' }}>Achat</option>
+                        <option value="partenariat" {{ filters.type == 'partenariat' ? 'selected' : '' }}>Partenariat</option>
+                        <option value="don" {{ filters.type == 'don' ? 'selected' : '' }}>Don</option>
+                    </select>
+                </div>
+                <div class="col-md-2 mb-2">
+                    <select name="statut" id="statutFilter" class="form-control">
+                        <option value="">-- Tous les statuts --</option>
+                        <option value="published" {{ filters.statut == 'published' ? 'selected' : '' }}>Publié</option>
+                        <option value="draft" {{ filters.statut == 'draft' ? 'selected' : '' }}>Brouillon</option>
+                        <option value="closed" {{ filters.statut == 'closed' ? 'selected' : '' }}>Clôturé</option>
+                    </select>
+                </div>
+                <div class="col-md-2 mb-2">
+                    <select name="categorie" id="categorieFilter" class="form-control">
+                        <option value="">-- Toutes catégories --</option>
+                        {% for categorie in categories %}
+                            <option value="{{ categorie.id }}"
+                                {% if filters.categorie is not null and filters.categorie == categorie.id %}selected{% endif %}>
+                                {{ categorie.nom }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2 mb-2 d-flex">
+                    <button type="submit" class="btn btn-warning mr-2 flex-fill">
+                        <i class="fas fa-search"></i> Filtrer
+                    </button>
+                    <a href="{{ path('app_appel_offre_index') }}" class="btn btn-secondary flex-fill">
+                        <i class="fas fa-times"></i>
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+{# TABLE #}
+<div class="card shadow-sm">
+    <div class="card-header d-flex justify-content-between align-items-center" style="background:#1a1a2e; color:white;">
+        <h5 class="mb-0">
+            <i class="fas fa-list"></i> Liste des Appels d'Offre
+            <span class="badge badge-warning ml-2">{{ appel_offres|length }} résultat(s)</span>
+        </h5>
+        {% if app.session.get('role') == 'admin' %}
+            <a href="{{ path('app_appel_offre_new') }}" class="btn btn-warning btn-sm">
+                <i class="fas fa-plus"></i> Nouveau
+            </a>
+        {% endif %}
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0" id="appelOffreTable">
+                <thead class="thead-dark">
+                    <tr>
+                        <th>Titre</th>
+                        <th>Type</th>
+                        <th>Catégorie</th>
+                        <th>Budget</th>
+                        <th>Date Limite</th>
+                        <th>Statut</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for appel in appel_offres %}
+                    <tr>
+                        <td><strong>{{ appel.titre }}</strong></td>
+                        <td>
+                            <span class="badge badge-info">{{ appel.type }}</span>
+                        </td>
+                        <td>
+                            {% if appel.categorie %}
+                                {{ appel.categorie.nom }}
+                            {% else %}
+                                <span class="text-muted">N/A</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if appel.budgetMin and appel.budgetMax %}
+                                {{ appel.budgetMin }} - {{ appel.budgetMax }}
+                            {% else %}
+                                <span class="text-muted">N/A</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if appel.dateLimite %}
+                                {% if appel.dateLimite < date() %}
+                                    <span class="text-danger">
+                                        <i class="fas fa-exclamation-circle"></i>
+                                        {{ appel.dateLimite|date('d/m/Y') }}
+                                    </span>
+                                {% else %}
+                                    <span class="text-success">
+                                        {{ appel.dateLimite|date('d/m/Y') }}
+                                    </span>
+                                {% endif %}
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if appel.statut == 'published' %}
+                                <span class="badge badge-success">Publié</span>
+                            {% elseif appel.statut == 'draft' %}
+                                <span class="badge badge-secondary">Brouillon</span>
+                            {% elseif appel.statut == 'closed' %}
+                                <span class="badge badge-danger">Clôturé</span>
+                            {% else %}
+                                <span class="badge badge-warning">{{ appel.statut }}</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {# TOUS - Voir #}
+                            <a href="{{ path('app_appel_offre_show', {'id': appel.id}) }}"
+                               class="btn btn-sm btn-outline-primary">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                            {# ADMIN - Modifier #}
+                            {% if app.session.get('role') == 'admin' %}
+                                <a href="{{ path('app_appel_offre_edit', {'id': appel.id}) }}"
+                                   class="btn btn-sm btn-outline-warning">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                            {% endif %}
+                            {# ENTREPRISE - Soumettre #}
+                            {% if app.session.get('role') == 'entreprise' %}
+                                <a href="{{ path('app_candidature_new') }}"
+                                   class="btn btn-sm btn-outline-success"
+                                   title="Soumettre une candidature">
+                                    <i class="fas fa-paper-plane"></i>
+                                </a>
+                            {% endif %}
+                            {# VISITEUR #}
+                            {% if app.session.get('role') == 'visiteur' or app.session.get('role') == null %}
+                                <span class="badge badge-secondary" title="Connectez-vous pour soumettre">
+                                    <i class="fas fa-lock"></i>
+                                </span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="7" class="text-center text-muted py-4">
+                            <i class="fas fa-inbox fa-2x mb-2 d-block"></i>
+                            Aucun appel d'offre trouvé
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block javascripts %}
+<script>
+    // Recherche dynamique en temps réel
+    document.getElementById('searchInput').addEventListener('keyup', function() {
+        const search = this.value.toLowerCase();
+        const rows = document.querySelectorAll('#appelOffreTable tbody tr');
+
+        rows.forEach(row => {
+            const titre = row.querySelector('td:first-child')?.textContent.toLowerCase();
+            if (titre) {
+                row.style.display = titre.includes(search) ? '' : 'none';
+            }
+        });
+    });
+
+    // Soumission automatique quand on change type/statut/catégorie
+    document.getElementById('typeFilter').addEventListener('change', function() {
+        document.getElementById('filterForm').submit();
+    });
+
+    document.getElementById('statutFilter').addEventListener('change', function() {
+        document.getElementById('filterForm').submit();
+    });
+
+    document.getElementById('categorieFilter').addEventListener('change', function() {
+        document.getElementById('filterForm').submit();
+    });
+</script>
+{% endblock %}

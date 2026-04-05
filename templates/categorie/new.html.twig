@@ -1,0 +1,48 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Nouvelle Catégorie{% endblock %}
+
+{% block body %}
+
+<div class="py-3 mb-4" style="background: linear-gradient(135deg, #1a1a2e, #16213e); border-radius: 10px;">
+    <div class="container text-white text-center py-2">
+        <h2 class="font-weight-bold"><i class="fas fa-plus-circle"></i> Nouvelle Catégorie</h2>
+    </div>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card shadow">
+            <div class="card-header" style="background:#1a1a2e; color:white;">
+                <h5 class="mb-0"><i class="fas fa-tag"></i> Informations</h5>
+            </div>
+            <div class="card-body">
+                {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+
+                <div class="mb-3">
+                    {{ form_label(form.nom) }}
+                    {{ form_widget(form.nom, {'attr': {'class': 'form-control', 'placeholder': 'Nom de la catégorie'}}) }}
+                    {% if form_errors(form.nom) %}
+                        <div class="text-danger small mt-1">
+                            <i class="fas fa-exclamation-circle"></i>
+                            {{ form_errors(form.nom) }}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="d-flex justify-content-between mt-3">
+                    <a href="{{ path('app_categorie_index') }}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Retour
+                    </a>
+                    <button type="submit" class="btn btn-warning">
+                        <i class="fas fa-save"></i> Enregistrer
+                    </button>
+                </div>
+
+                {{ form_end(form) }}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

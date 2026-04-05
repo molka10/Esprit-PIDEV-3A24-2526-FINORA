@@ -1,0 +1,164 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Détail Candidature{% endblock %}
+
+{% block body %}
+
+{# HERO #}
+<div class="py-3 mb-4" style="background: linear-gradient(135deg, #1a1a2e, #16213e); border-radius: 10px;">
+    <div class="container text-white text-center py-2">
+        <h2 class="font-weight-bold"><i class="fas fa-file-alt"></i> Détail de la Candidature</h2>
+        <p class="mb-0">
+            {% if candidature.statut == 'accepted' %}
+                <span class="badge badge-success">Acceptée</span>
+            {% elseif candidature.statut == 'rejected' %}
+                <span class="badge badge-danger">Rejetée</span>
+            {% else %}
+                <span class="badge badge-warning">En attente</span>
+            {% endif %}
+        </p>
+    </div>
+</div>
+
+<div class="row">
+
+    {# COLONNE GAUCHE #}
+    <div class="col-md-8">
+        <div class="card shadow-sm mb-4">
+            <div class="card-header" style="background:#1a1a2e; color:white;">
+                <h5 class="mb-0"><i class="fas fa-info-circle"></i> Informations</h5>
+            </div>
+            <div class="card-body">
+                <table class="table table-borderless">
+                    <tr>
+                        <th width="35%"><i class="fas fa-file-contract text-muted"></i> Appel d'Offre</th>
+                        <td>
+                            {% if candidature.appelOffre %}
+                                <a href="{{ path('app_appel_offre_show', {'id': candidature.appelOffre.id}) }}">
+                                    {{ candidature.appelOffre.titre }}
+                                </a>
+                            {% else %}
+                                <span class="text-muted">N/A</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <th><i class="fas fa-user text-muted"></i> Candidat</th>
+                        <td>{{ candidature.user ? candidature.user.nom : 'Anonyme' }}</td>
+                    </tr>
+                    <tr>
+                        <th><i class="fas fa-envelope text-muted"></i> Email</th>
+                        <td>{{ candidature.user ? candidature.user.email : 'N/A' }}</td>
+                    </tr>
+                    <tr>
+                        <th><i class="fas fa-money-bill text-muted"></i> Montant Proposé</th>
+                        <td>
+                            {% if candidature.montantPropose %}
+                                <strong class="text-success">{{ candidature.montantPropose }} TND</strong>
+                            {% else %}
+                                <span class="text-muted">Non défini</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <th><i class="fas fa-info-circle text-muted"></i> Statut</th>
+                        <td>
+                            {% if candidature.statut == 'accepted' %}
+                                <span class="badge badge-success">Acceptée</span>
+                            {% elseif candidature.statut == 'rejected' %}
+                                <span class="badge badge-danger">Rejetée</span>
+                            {% else %}
+                                <span class="badge badge-warning">En attente</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <th><i class="fas fa-clock text-muted"></i> Soumise le</th>
+                        <td>{{ candidature.createdAt|date('d/m/Y à H:i') }}</td>
+                    </tr>
+                </table>
+
+                {% if candidature.message %}
+                <div class="mt-3">
+                    <h6><i class="fas fa-comment text-muted"></i> Message / Motivation</h6>
+                    <div class="p-3 rounded" style="background:#f8f9fa; border-left: 4px solid #1a1a2e;">
+                        {{ candidature.message }}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    {# COLONNE DROITE #}
+    <div class="col-md-4">
+
+        {# ACTIONS #}
+        <div class="card shadow-sm mb-3">
+            <div class="card-header" style="background:#1a1a2e; color:white;">
+                <h5 class="mb-0"><i class="fas fa-cogs"></i> Actions</h5>
+            </div>
+            <div class="card-body">
+                {% if app.session.get('role') == 'admin' %}
+                    <a href="{{ path('app_candidature_edit', {'id': candidature.id}) }}"
+                       class="btn btn-warning btn-block mb-2">
+                        <i class="fas fa-edit"></i> Modifier
+                    </a>
+                {% endif %}
+
+                <a href="{{ path('app_candidature_index') }}"
+                   class="btn btn-secondary btn-block mb-2">
+                    <i class="fas fa-arrow-left"></i> Retour à la liste
+                </a>
+
+                {% if candidature.appelOffre %}
+                    <a href="{{ path('app_appel_offre_show', {'id': candidature.appelOffre.id}) }}"
+                       class="btn btn-outline-primary btn-block mb-2">
+                        <i class="fas fa-file-contract"></i> Voir l'Appel d'Offre
+                    </a>
+                {% endif %}
+
+                {% if app.session.get('role') == 'admin' %}
+                    <hr>
+                    {{ include('candidature/_delete_form.html.twig') }}
+                {% endif %}
+            </div>
+        </div>
+
+        {# CHANGER LE STATUT - ADMIN seulement #}
+        {% if app.session.get('role') == 'admin' %}
+        <div class="card shadow-sm mb-3">
+            <div class="card-header" style="background:#1a1a2e; color:white;">
+                <h5 class="mb-0"><i class="fas fa-toggle-on"></i> Changer le Statut</h5>
+            </div>
+            <div class="card-body">
+
+                {# Bouton Accepter #}
+                <form method="post" action="{{ path('app_candidature_accepter', {'id': candidature.id}) }}">
+                    <input type="hidden" name="_token" value="{{ csrf_token('accepter' ~ candidature.id) }}">
+                    <button type="submit" class="btn btn-success btn-block mb-2"
+                        {% if candidature.statut == 'accepted' %}disabled{% endif %}
+                        onclick="return confirm('Accepter cette candidature ?')">
+                        <i class="fas fa-check"></i> Accepter
+                    </button>
+                </form>
+
+                {# Bouton Rejeter #}
+                <form method="post" action="{{ path('app_candidature_rejeter', {'id': candidature.id}) }}">
+                    <input type="hidden" name="_token" value="{{ csrf_token('rejeter' ~ candidature.id) }}">
+                    <button type="submit" class="btn btn-danger btn-block"
+                        {% if candidature.statut == 'rejected' %}disabled{% endif %}
+                        onclick="return confirm('Rejeter cette candidature ?')">
+                        <i class="fas fa-times"></i> Rejeter
+                    </button>
+                </form>
+
+            </div>
+        </div>
+        {% endif %}
+
+    </div>
+
+</div>
+
+{% endblock %}
