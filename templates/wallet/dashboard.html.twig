@@ -14,23 +14,60 @@
 
 </div>
 
-<div class="card-container">
+<div class="dashboard-cards">
 
-    <div class="card balance">
-        <h3>💼 Balance</h3>
-        <h2>{{ balance|number_format(2, '.', ' ') }} DT</h2>
+    <div class="dash-card">
+        <span>Balance</span>
+        <h2 class="purple">{{ balance|number_format(2, '.', ' ') }} DT</h2>
     </div>
 
-    <div class="card income-card">
-        <h3>🟢 Income</h3>
-        <h2>{{ income|number_format(2, '.', ' ') }} DT</h2>
+    <div class="dash-card">
+        <span>Total Income</span>
+        <h2 class="green">{{ income|number_format(2, '.', ' ') }} DT</h2>
     </div>
 
-    <div class="card outcome-card">
-        <h3>🔴 Outcome</h3>
-        <h2>{{ outcome|number_format(2, '.', ' ') }} DT</h2>
+    <div class="dash-card">
+        <span>Total Outcome</span>
+        <h2 class="red">{{ outcome|number_format(2, '.', ' ') }} DT</h2>
+    </div>
+
+    <div class="dash-card">
+        <span>Total Transactions</span>
+        <h2 class="purple">{{ transactions|length }}</h2>
     </div>
 
 </div>
+<div style="margin-top:40px; display:flex; justify-content:center;">
+    <div style="width:400px; height:400px;">
+        <canvas id="pieChart"></canvas>
+    </div>
+</div>
+{% block javascripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+const ctx = document.getElementById('pieChart');
+
+new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+        labels: ['Income', 'Outcome'],
+        datasets: [{
+            data: [{{ income }}, {{ outcome }}],
+            backgroundColor: ['#00b894', '#d63031'],
+            borderWidth: 0
+        }]
+    },
+    options: {
+        cutout: '70%',
+        plugins: {
+            legend: {
+                position: 'bottom'
+            }
+        }
+    }
+});
+</script>
+{% endblock %}
 
 {% endblock %}

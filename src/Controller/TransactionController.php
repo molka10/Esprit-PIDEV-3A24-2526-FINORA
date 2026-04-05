@@ -130,6 +130,7 @@ public function dashboard(EntityManagerInterface $em): Response
         'income' => $income,
         'outcome' => $outcome,
         'balance' => $balance,
+         'transactions' => $transactions
     ]);
 }
 

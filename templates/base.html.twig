@@ -264,7 +264,45 @@ button:hover, .btn:hover {
         grid-template-columns: 1fr;
     }
 }
+.dashboard-cards {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 25px;
+    margin-top: 40px;
+}
 
+.dash-card {
+    width: 300px;
+    padding: 25px;
+    background: #f1f2f6;
+    border-radius: 20px;
+    text-align: center;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+    transition: 0.3s;
+}
+
+.dash-card:hover {
+    transform: translateY(-5px);
+}
+
+.dash-card span {
+    display: block;
+    font-size: 16px;
+    color: #636e72;
+    margin-bottom: 10px;
+}
+
+.dash-card h2 {
+    margin: 0;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+/* COLORS */
+.purple { color: #6c5ce7; }
+.green { color: #2ecc71; }
+.red { color: #e74c3c; }
 </style>
 </head>
 
