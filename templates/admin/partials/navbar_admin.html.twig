@@ -1,0 +1,46 @@
+<nav class="navbar top-bar navbar-light border-bottom py-0 py-xl-3">
+    <div class="container-fluid p-0">
+        <div class="d-flex align-items-center w-100">
+            <div class="d-flex align-items-center d-xl-none">
+                <a class="navbar-brand" href="{{ path('app_home') }}">
+                    <img class="light-mode-item navbar-brand-item h-30px" src="{{ asset('assets/images/logo-mobile.svg') }}" alt="">
+                    <img class="dark-mode-item navbar-brand-item h-30px" src="{{ asset('assets/images/logo-mobile-light.svg') }}" alt="">
+                </a>
+            </div>
+
+            <div class="navbar-expand-xl sidebar-offcanvas-menu">
+                <button class="navbar-toggler me-auto" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasSidebar" aria-controls="offcanvasSidebar" aria-expanded="false" aria-label="Toggle navigation" data-bs-auto-close="outside">
+                    <i class="bi bi-text-right fa-fw h2 lh-0 mb-0 rtl-flip"></i>
+                </button>
+            </div>
+
+            <div class="navbar-expand-lg ms-auto ms-xl-0">
+                <div class="collapse navbar-collapse w-100" id="navbarTopContent">
+                    <div class="nav my-3 my-xl-0 flex-nowrap align-items-center">
+                        <div class="nav-item w-100">
+                            <form class="position-relative">
+                                <input class="form-control pe-5 bg-secondary bg-opacity-10 border-0" type="search" placeholder="Search" aria-label="Search">
+                                <button class="bg-transparent px-2 py-0 border-0 position-absolute top-50 end-0 translate-middle-y" type="submit">
+                                    <i class="fas fa-search fs-6 text-primary"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="ms-xl-auto">
+                <ul class="navbar-nav flex-row align-items-center">
+                    <li class="nav-item ms-2 ms-md-3">
+                        <a class="btn btn-light btn-round mb-0" href="#"><i class="bi bi-bell fa-fw"></i></a>
+                    </li>
+                    <li class="nav-item ms-2 ms-md-3">
+                        <a class="avatar avatar-sm p-0" href="#">
+                            <img class="avatar-img rounded-circle" src="{{ asset('assets/images/avatar/01.jpg') }}" alt="avatar">
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</nav>

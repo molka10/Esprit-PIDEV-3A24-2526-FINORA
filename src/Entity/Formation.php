@@ -65,14 +65,6 @@ class Formation
     #[Assert\Url(message: 'Veuillez entrer une URL valide pour l’image.')]
     private ?string $image_url = null;
 
-    #[ORM\Column(type: 'string', length: 255)]
-    #[Assert\NotBlank(message: 'La date de création est obligatoire.')]
-    #[Assert\Regex(
-        pattern: '/^\d{4}-\d{2}-\d{2}$/',
-        message: 'La date doit être au format YYYY-MM-DD.'
-    )]
-    private ?string $created_at = null;
-
     public function getId(): ?int
     {
         return $this->id;
@@ -141,17 +133,6 @@ class Formation
     public function setImageUrl(?string $image_url): self
     {
         $this->image_url = $image_url;
-        return $this;
-    }
-
-    public function getCreatedAt(): ?string
-    {
-        return $this->created_at;
-    }
-
-    public function setCreatedAt(string $created_at): self
-    {
-        $this->created_at = $created_at;
         return $this;
     }
 

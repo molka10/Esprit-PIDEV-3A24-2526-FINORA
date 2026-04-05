@@ -1,45 +1,183 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}FINORA - Formations{% endblock %}
+{% block title %}FINORA - Accueil{% endblock %}
 
 {% block body %}
-    <div style="padding: 30px; font-family: Arial, sans-serif;">
-        <h1>Liste des formations</h1>
+<header class="navbar-light navbar-sticky">
+    <nav class="navbar navbar-expand-xl z-index-9">
+        <div class="container">
+            <a class="navbar-brand" href="{{ path('app_home') }}">
+                <img class="light-mode-item navbar-brand-item" src="{{ asset('assets/images/logo.svg') }}" alt="logo">
+                <img class="dark-mode-item navbar-brand-item" src="{{ asset('assets/images/logo-light.svg') }}" alt="logo">
+            </a>
 
-        <a href="{{ path('formation_new') }}"
-           style="display:inline-block; margin-bottom:20px; padding:10px 15px; background:#7C3AED; color:white; text-decoration:none; border-radius:8px;">
-            Ajouter une formation
-        </a>
+            <button class="navbar-toggler ms-auto" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-animation">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </span>
+            </button>
 
-        {% if formations is empty %}
-            <p>Aucune formation trouvée.</p>
-        {% else %}
-            <ul>
-                {% for formation in formations %}
-                    <li style="margin-bottom: 20px; padding:15px; border:1px solid #ddd; border-radius:10px;">
-                        <strong>{{ formation.titre }}</strong><br>
-                        Catégorie : {{ formation.categorie }}<br>
-                        Niveau : {{ formation.niveau }}<br>
-                        Description : {{ formation.description ?? 'Pas de description' }}<br><br>
+            <div class="navbar-collapse collapse" id="navbarCollapse">
+                <div class="col-xxl-6">
+                    <div class="nav my-3 my-xl-0 px-4 flex-nowrap align-items-center">
+                        <div class="nav-item w-100">
+                            <form class="rounded position-relative">
+                                <input class="form-control pe-5 bg-secondary bg-opacity-10 border-0" type="search" placeholder="Rechercher une formation" aria-label="Search">
+                                <button class="btn btn-link bg-transparent px-2 py-0 position-absolute top-50 end-0 translate-middle-y" type="submit">
+                                    <i class="fas fa-search fs-6 text-primary"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
 
-                        <a href="{{ path('formation_edit', {'id': formation.id}) }}"
-                           style="margin-right:10px; padding:8px 12px; background:#2563eb; color:white; text-decoration:none; border-radius:6px;">
-                            Modifier
-                        </a>
+                <ul class="navbar-nav navbar-nav-scroll ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="{{ path('app_home') }}">Accueil</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ path('formation_index') }}">Formations</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ path('app_lesson_index') }}">Lessons</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ path('admin_dashboard') }}">Dashboard</a></li>
+                </ul>
+            </div>
 
-                        <form method="post"
-                              action="{{ path('formation_delete', {'id': formation.id}) }}"
-                              style="display:inline-block;"
-                              onsubmit="return confirm('Supprimer cette formation ?');">
-                            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ formation.id) }}">
-                            <button type="submit"
-                                    style="padding:8px 12px; background:#dc2626; color:white; border:none; border-radius:6px; cursor:pointer;">
-                                Supprimer
-                            </button>
-                        </form>
-                    </li>
-                {% endfor %}
+            <ul class="nav flex-row align-items-center list-unstyled ms-xl-auto">
+                <li class="nav-item ms-0 ms-sm-2 d-none d-sm-block">
+                    <a class="btn btn-light btn-round mb-0" href="#"><i class="bi bi-heart fa-fw"></i></a>
+                </li>
+                <li class="nav-item ms-2 ms-sm-3 dropdown">
+                    <a class="btn btn-light btn-round mb-0" href="#"><i class="bi bi-bell fa-fw"></i></a>
+                </li>
             </ul>
-        {% endif %}
-    </div>
+        </div>
+    </nav>
+
+    <hr class="my-0">
+
+    <nav class="navbar navbar-expand-xl nav-category">
+        <div class="container px-0">
+            <button class="navbar-toggler m-auto w-100" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse2" aria-controls="navbarCollapse2" aria-expanded="false" aria-label="Toggle navigation">
+                <i class="bi bi-grid-fill"></i> Catégories
+            </button>
+
+            <div class="navbar-collapse w-100 collapse" id="navbarCollapse2">
+                <ul class="navbar-nav navbar-nav-scroll mx-auto">
+                    <li class="nav-item"><a class="nav-link active" href="#">Bourse</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#">Trading</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#">Investissement</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#">Crypto</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#">Analyse technique</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+</header>
+
+<main>
+    <section class="position-relative overflow-hidden pb-0 pb-sm-5">
+        <div class="container">
+            <div class="row align-items-center justify-content-xl-between g-4 g-md-5">
+                <div class="col-lg-7 col-xl-5 position-relative z-index-1 text-center text-lg-start mb-2 mb-md-9 mb-xl-0">
+                    <h6 class="mb-3 font-base bg-primary bg-opacity-10 text-primary py-2 px-4 rounded-2 d-inline-block">
+                        Bienvenue sur FINORA
+                    </h6>
+                    <h1 class="mb-4 display-5">
+                        Développez vos compétences en
+                        <span class="text-primary">finance</span>
+                    </h1>
+                    <p class="mb-3">
+                        FINORA est votre plateforme d’apprentissage pour découvrir les formations, suivre les lessons et progresser dans l’univers de la finance, de l’investissement et du trading.
+                    </p>
+
+                    <form class="border rounded p-2 mb-4">
+                        <div class="input-group">
+                            <input class="form-control border-0 me-1" type="search" placeholder="Trouver une formation">
+                            <button type="button" class="btn btn-primary mb-0 rounded"><i class="fas fa-search"></i></button>
+                        </div>
+                    </form>
+
+                    <div class="row g-3 mb-3 mb-lg-0">
+                        <div class="col-sm-6">
+                            <div class="d-flex align-items-center">
+                                <div class="icon-lg fs-4 text-orange bg-orange bg-opacity-10 rounded">
+                                    <i class="bi bi-book-half"></i>
+                                </div>
+                                <div class="ms-3">
+                                    <div class="d-flex">
+                                        <h4 class="fw-bold mb-0">{{ formations|length|default(0) }}</h4>
+                                        <span class="h4 mb-0">+</span>
+                                    </div>
+                                    <div>Formations</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-sm-6">
+                            <div class="d-flex align-items-center">
+                                <div class="icon-lg fs-4 text-info bg-info bg-opacity-10 rounded">
+                                    <i class="fas fa-graduation-cap"></i>
+                                </div>
+                                <div class="ms-3">
+                                    <div class="d-flex">
+                                        <h4 class="fw-bold mb-0">{{ lessons|length|default(0) }}</h4>
+                                        <span class="h4 mb-0">+</span>
+                                    </div>
+                                    <div>Lessons</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-5 col-xl-6 text-center position-relative">
+                    <div class="position-relative">
+                        <div class="bg-warning rounded-4 border border-white border-5 h-200px h-sm-300px shadow"></div>
+                        <img src="{{ asset('assets/images/element/06.png') }}" class="position-absolute bottom-0 start-50 translate-middle-x" alt="">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="pt-0 pt-lg-5">
+        <div class="container">
+            <div class="row mb-4">
+                <div class="col-12">
+                    <h2 class="mb-0">Nos formations</h2>
+                </div>
+            </div>
+
+            <div class="row g-4">
+                {% for formation in formations|slice(0, 3) %}
+                    <div class="col-md-6 col-xl-4">
+                        <div class="card shadow-hover overflow-hidden bg-transparent h-100">
+                            <div class="position-relative">
+                                {% if formation.imageUrl %}
+                                    <img class="card-img-top" src="{{ formation.imageUrl }}" alt="{{ formation.titre }}">
+                                {% else %}
+                                    <img class="card-img-top" src="{{ asset('assets/images/courses/4by3/16.jpg') }}" alt="{{ formation.titre }}">
+                                {% endif %}
+                            </div>
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between mb-3">
+                                    <div class="hstack gap-2">
+                                        <span class="badge bg-orange bg-opacity-10 text-orange">{{ formation.niveau }}</span>
+                                        <span class="badge text-bg-dark">{{ formation.categorie }}</span>
+                                    </div>
+                                </div>
+                                <h5 class="card-title">{{ formation.titre }}</h5>
+                                <p class="mb-3">{{ formation.description ?: 'Pas de description' }}</p>
+                                <a href="{{ path('formation_index') }}" class="btn btn-primary-soft">Voir plus</a>
+                            </div>
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="col-12">
+                        <p>Aucune formation disponible.</p>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+</main>
 {% endblock %}

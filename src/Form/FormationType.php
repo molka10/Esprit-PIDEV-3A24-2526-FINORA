@@ -16,22 +16,35 @@ class FormationType extends AbstractType
     {
         $builder
             ->add('titre', TextType::class, [
-                'label' => 'Titre',
-                'attr' => [
-                    'placeholder' => 'Entrez le titre de la formation'
-                ]
+                'label' => 'Titre'
             ])
             ->add('description', TextareaType::class, [
                 'label' => 'Description',
-                'required' => false,
-                'attr' => [
-                    'placeholder' => 'Entrez une description'
-                ]
+                'required' => false
             ])
-            ->add('categorie', TextType::class, [
+            ->add('categorie', ChoiceType::class, [
                 'label' => 'Catégorie',
-                'attr' => [
-                    'placeholder' => 'Entrez la catégorie'
+                'placeholder' => 'Choisir une catégorie',
+                'choices' => [
+                    'Bourse' => 'Bourse',
+                    'Investissement' => 'Investissement',
+                    'Trading' => 'Trading',
+                    'Actions' => 'Actions',
+                    'ETF' => 'ETF',
+                    'Obligations' => 'Obligations',
+                    'Crypto' => 'Crypto',
+                    'Forex' => 'Forex',
+                    'Analyse technique' => 'Analyse technique',
+                    'Analyse fondamentale' => 'Analyse fondamentale',
+                    'Gestion des risques' => 'Gestion des risques',
+                    'Portefeuille' => 'Portefeuille',
+                    'Dividendes' => 'Dividendes',
+                    'Marchés financiers' => 'Marchés financiers',
+                    'Psychologie du trader' => 'Psychologie du trader',
+                    'Économie' => 'Économie',
+                    'Inflation' => 'Inflation',
+                    'Taux d’intérêt' => 'Taux d’intérêt',
+                    'Fiscalité' => 'Fiscalité',
                 ]
             ])
             ->add('niveau', ChoiceType::class, [
@@ -53,16 +66,7 @@ class FormationType extends AbstractType
             ])
             ->add('image_url', TextType::class, [
                 'label' => 'Image URL',
-                'required' => false,
-                'attr' => [
-                    'placeholder' => 'https://example.com/image.jpg'
-                ]
-            ])
-            ->add('created_at', TextType::class, [
-                'label' => 'Date de création',
-                'attr' => [
-                    'placeholder' => 'YYYY-MM-DD'
-                ]
+                'required' => false
             ]);
     }
 

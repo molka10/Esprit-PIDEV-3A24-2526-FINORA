@@ -1,0 +1,69 @@
+{% extends 'admin/base_admin.html.twig' %}
+
+{% block title %}FINORA - Dashboard{% endblock %}
+
+{% block admin_content %}
+<div class="row">
+    <div class="col-12 mb-3">
+        <h1 class="h3 mb-2 mb-sm-0">Dashboard</h1>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-md-6 col-xxl-3">
+        <div class="card card-body bg-warning bg-opacity-15 p-4 h-100">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="mb-0 fw-bold">FINORA</h2>
+                    <span class="mb-0 h6 fw-light">Back Office</span>
+                </div>
+                <div class="icon-lg rounded-circle bg-warning text-white mb-0">
+                    <i class="fas fa-tv fa-fw"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6 col-xxl-3">
+        <div class="card card-body bg-purple bg-opacity-10 p-4 h-100">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="mb-0 fw-bold">CRUD</h2>
+                    <span class="mb-0 h6 fw-light">Formations</span>
+                </div>
+                <div class="icon-lg rounded-circle bg-purple text-white mb-0">
+                    <i class="fas fa-user-tie fa-fw"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6 col-xxl-3">
+        <div class="card card-body bg-primary bg-opacity-10 p-4 h-100">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="mb-0 fw-bold">CRUD</h2>
+                    <span class="mb-0 h6 fw-light">Lessons</span>
+                </div>
+                <div class="icon-lg rounded-circle bg-primary text-white mb-0">
+                    <i class="fas fa-user-graduate fa-fw"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6 col-xxl-3">
+        <div class="card card-body bg-success bg-opacity-10 p-4 h-100">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="mb-0 fw-bold">Séance 9</h2>
+                    <span class="mb-0 h6 fw-light">Template intégré</span>
+                </div>
+                <div class="icon-lg rounded-circle bg-success text-white mb-0">
+                    <i class="bi bi-stopwatch-fill fa-fw"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

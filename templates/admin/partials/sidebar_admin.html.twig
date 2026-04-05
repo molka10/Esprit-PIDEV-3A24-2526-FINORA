@@ -1,0 +1,52 @@
+<nav class="navbar sidebar navbar-expand-xl navbar-dark bg-dark">
+    <div class="d-flex align-items-center">
+        <a class="navbar-brand" href="{{ path('admin_dashboard') }}">
+            <img class="navbar-brand-item" src="{{ asset('assets/images/logo-light.svg') }}" alt="">
+        </a>
+    </div>
+
+    <div class="offcanvas offcanvas-start flex-row custom-scrollbar h-100" data-bs-backdrop="true" tabindex="-1" id="offcanvasSidebar">
+        <div class="offcanvas-body sidebar-content d-flex flex-column bg-dark">
+            <ul class="navbar-nav flex-column" id="navbar-sidebar">
+                <li class="nav-item">
+                    <a href="{{ path('admin_dashboard') }}" class="nav-link">
+                        <i class="bi bi-house fa-fw me-2"></i>Dashboard
+                    </a>
+                </li>
+
+                <li class="nav-item ms-2 my-2">Gestion</li>
+
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ path('formation_index') }}">
+                        <i class="bi bi-basket fa-fw me-2"></i>Formations
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ path('app_lesson_index') }}">
+                        <i class="fas fa-book fa-fw me-2"></i>Lessons
+                    </a>
+                </li>
+
+                <li class="nav-item ms-2 my-2">Navigation</li>
+
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ path('app_home') }}">
+                        <i class="bi bi-globe fa-fw me-2"></i>Accueil
+                    </a>
+                </li>
+            </ul>
+
+            <div class="px-3 mt-auto pt-3">
+                <div class="d-flex align-items-center justify-content-between text-primary-hover">
+                    <a class="h5 mb-0 text-body" href="{{ path('admin_dashboard') }}">
+                        <i class="bi bi-gear-fill"></i>
+                    </a>
+                    <a class="h5 mb-0 text-body" href="{{ path('app_home') }}">
+                        <i class="bi bi-globe"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>

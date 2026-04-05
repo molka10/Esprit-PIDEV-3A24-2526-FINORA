@@ -1,149 +1,120 @@
-{% extends 'base.html.twig' %}
+{% extends 'admin/base_admin.html.twig' %}
 
 {% block title %}FINORA - Formations{% endblock %}
 
-{% block body %}
-    <div style="padding: 30px; font-family: Arial, sans-serif; background: #f8fafc; min-height: 100vh;">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-            <h1 style="margin:0; color:#1f2937;">Liste des formations</h1>
+{% block admin_content %}
+<div class="row mb-3">
+    <div class="col-12 d-sm-flex justify-content-between align-items-center">
+        <h1 class="h3 mb-2 mb-sm-0">Formations</h1>
+        <a href="{{ path('formation_new') }}" class="btn btn-sm btn-primary mb-0">Ajouter une formation</a>
+    </div>
+</div>
 
-            <a href="{{ path('formation_new') }}"
-               style="padding:10px 16px; background:#7C3AED; color:white; text-decoration:none; border-radius:10px; font-weight:bold;">
-                + Ajouter une formation
-            </a>
-        </div>
-
-        <form method="get" action="{{ path('formation_index') }}"
-              style="margin-bottom: 25px; padding: 18px; background:white; border: 1px solid #e5e7eb; border-radius: 14px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
-            <div style="display:flex; flex-wrap:wrap; gap:15px; align-items:end;">
-                <div>
-                    <label for="titre">Titre</label><br>
-                    <input type="text" id="titre" name="titre" value="{{ titre }}" placeholder="Rechercher par titre"
-                           style="padding:8px 10px; border:1px solid #d1d5db; border-radius:8px;">
+<div class="card bg-transparent border">
+    <div class="card-header bg-light border-bottom">
+        <form method="get" action="{{ path('formation_index') }}">
+            <div class="row g-3 align-items-center justify-content-between">
+                <div class="col-md-3">
+                    <input class="form-control bg-body" type="text" name="titre" value="{{ titre }}" placeholder="Rechercher par titre">
                 </div>
 
-                <div>
-                    <label for="categorie">Catégorie</label><br>
-                    <select id="categorie" name="categorie" style="padding:8px 10px; border:1px solid #d1d5db; border-radius:8px;">
-                        <option value="">Toutes</option>
+                <div class="col-md-2">
+                    <select class="form-select border-0 z-index-9" name="categorie">
+                        <option value="">Toutes catégories</option>
                         {% for cat in categories %}
-                            <option value="{{ cat }}" {{ categorie == cat ? 'selected' : '' }}>
-                                {{ cat }}
-                            </option>
+                            <option value="{{ cat }}" {{ categorie == cat ? 'selected' : '' }}>{{ cat }}</option>
                         {% endfor %}
                     </select>
                 </div>
 
-                <div>
-                    <label for="niveau">Niveau</label><br>
-                    <select id="niveau" name="niveau" style="padding:8px 10px; border:1px solid #d1d5db; border-radius:8px;">
-                        <option value="">Tous</option>
+                <div class="col-md-2">
+                    <select class="form-select border-0 z-index-9" name="niveau">
+                        <option value="">Tous niveaux</option>
                         <option value="Débutant" {{ niveau == 'Débutant' ? 'selected' : '' }}>Débutant</option>
                         <option value="Intermédiaire" {{ niveau == 'Intermédiaire' ? 'selected' : '' }}>Intermédiaire</option>
                         <option value="Avancé" {{ niveau == 'Avancé' ? 'selected' : '' }}>Avancé</option>
                     </select>
                 </div>
 
-                <div>
-                    <label for="tri">Trier par</label><br>
-                    <select id="tri" name="tri" style="padding:8px 10px; border:1px solid #d1d5db; border-radius:8px;">
-                        <option value="id" {{ tri == 'id' ? 'selected' : '' }}>Dernier ajouté</option>
+                <div class="col-md-2">
+                    <select class="form-select border-0 z-index-9" name="tri">
+                        <option value="id" {{ tri == 'id' ? 'selected' : '' }}>Trier par ID</option>
                         <option value="titre" {{ tri == 'titre' ? 'selected' : '' }}>Titre</option>
                         <option value="categorie" {{ tri == 'categorie' ? 'selected' : '' }}>Catégorie</option>
                         <option value="niveau" {{ tri == 'niveau' ? 'selected' : '' }}>Niveau</option>
                     </select>
                 </div>
 
-                <div>
-                    <label for="ordre">Ordre</label><br>
-                    <select id="ordre" name="ordre" style="padding:8px 10px; border:1px solid #d1d5db; border-radius:8px;">
-                        <option value="desc" {{ ordre == 'desc' ? 'selected' : '' }}>Descendant</option>
-                        <option value="asc" {{ ordre == 'asc' ? 'selected' : '' }}>Ascendant</option>
+                <div class="col-md-1">
+                    <select class="form-select border-0 z-index-9" name="ordre">
+                        <option value="asc" {{ ordre == 'asc' ? 'selected' : '' }}>ASC</option>
+                        <option value="desc" {{ ordre == 'desc' ? 'selected' : '' }}>DESC</option>
                     </select>
                 </div>
 
-                <div>
-                    <button type="submit"
-                            style="padding:9px 14px; background:#7C3AED; color:white; border:none; border-radius:8px; cursor:pointer;">
-                        Rechercher
-                    </button>
-                </div>
-
-                <div>
-                    <a href="{{ path('formation_index') }}"
-                       style="padding:9px 14px; background:#6b7280; color:white; text-decoration:none; border-radius:8px;">
-                        Réinitialiser
-                    </a>
+                <div class="col-md-2 d-flex gap-2">
+                    <button class="btn btn-primary w-100" type="submit">Filtrer</button>
+                    <a href="{{ path('formation_index') }}" class="btn btn-secondary w-100">Reset</a>
                 </div>
             </div>
         </form>
-
-        {% if formations is empty %}
-            <div style="padding:20px; background:white; border-radius:12px; border:1px solid #e5e7eb;">
-                Aucune formation trouvée.
-            </div>
-        {% else %}
-            <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(340px, 1fr)); gap:20px;">
-                {% for formation in formations %}
-                    <div style="background:white; border-radius:16px; overflow:hidden; box-shadow:0 4px 14px rgba(0,0,0,0.08); border:1px solid #e5e7eb;">
-
-                        <div style="height:180px; background:#ede9fe; display:flex; align-items:center; justify-content:center;">
-                            {% if formation.imageUrl %}
-                                <img src="{{ formation.imageUrl }}" alt="{{ formation.titre }}"
-                                     style="width:100%; height:100%; object-fit:cover;">
-                            {% else %}
-                                <span style="color:#6b7280;">Pas d’image</span>
-                            {% endif %}
-                        </div>
-
-                        <div style="padding:18px;">
-                            <h3 style="margin-top:0; margin-bottom:10px; color:#111827;">
-                                {{ formation.titre }}
-                            </h3>
-
-                            <div style="margin-bottom:10px; display:flex; flex-wrap:wrap; gap:8px;">
-                                {% for tag in formation.categorie ? formation.categorie|split(',') : [] %}
-                                    <span style="background:#f3e8ff; color:#7C3AED; padding:6px 10px; border-radius:999px; font-size:12px; font-weight:600;">
-                                        {{ tag|trim }}
-                                    </span>
-                                {% endfor %}
-                            </div>
-
-                            <div style="margin-bottom:10px; display:flex; gap:8px; flex-wrap:wrap;">
-                                <span style="background:#dbeafe; color:#1d4ed8; padding:6px 10px; border-radius:999px; font-size:12px;">
-                                    {{ formation.niveau }}
-                                </span>
-
-                                <span style="background:{{ formation.isPublished ? '#dcfce7' : '#f3f4f6' }}; color:{{ formation.isPublished ? '#166534' : '#4b5563' }}; padding:6px 10px; border-radius:999px; font-size:12px;">
-                                    {{ formation.isPublished ? 'Publié' : 'Non publié' }}
-                                </span>
-                            </div>
-
-                            <p style="color:#4b5563; min-height:48px;">
-                                {{ formation.description ?: 'Pas de description' }}
-                            </p>
-
-                            <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:15px;">
-                                <a href="{{ path('formation_edit', {'id': formation.id}) }}"
-                                   style="padding:8px 12px; background:#2563eb; color:white; text-decoration:none; border-radius:8px;">
-                                    Modifier
-                                </a>
-
-                                <form method="post"
-                                      action="{{ path('formation_delete', {'id': formation.id}) }}"
-                                      style="display:inline-block;"
-                                      onsubmit="return confirm('Supprimer cette formation ?');">
-                                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ formation.id) }}">
-                                    <button type="submit"
-                                            style="padding:8px 12px; background:#dc2626; color:white; border:none; border-radius:8px; cursor:pointer;">
-                                        Supprimer
-                                    </button>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-                {% endfor %}
-            </div>
-        {% endif %}
     </div>
+
+    <div class="card-body">
+        <div class="table-responsive border-0 rounded-3">
+            <table class="table table-dark-gray align-middle p-4 mb-0 table-hover">
+                <thead>
+                    <tr>
+                        <th class="border-0 rounded-start">Titre</th>
+                        <th class="border-0">Catégorie</th>
+                        <th class="border-0">Niveau</th>
+                        <th class="border-0">Publié</th>
+                        <th class="border-0">Image</th>
+                        <th class="border-0 rounded-end">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for formation in formations %}
+                        <tr>
+                            <td>
+                                <strong>{{ formation.titre }}</strong><br>
+                                <small>{{ formation.description ?: 'Pas de description' }}</small>
+                            </td>
+                            <td>{{ formation.categorie }}</td>
+                            <td>
+                                <span class="badge text-bg-primary">{{ formation.niveau }}</span>
+                            </td>
+                            <td>
+                                {% if formation.isPublished %}
+                                    <span class="badge bg-success bg-opacity-15 text-success">Oui</span>
+                                {% else %}
+                                    <span class="badge bg-warning bg-opacity-15 text-warning">Non</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if formation.imageUrl %}
+                                    <a href="{{ formation.imageUrl }}" target="_blank" class="btn btn-sm btn-light">Voir</a>
+                                {% else %}
+                                    <span class="text-muted">Aucune</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <a href="{{ path('formation_edit', {'id': formation.id}) }}" class="btn btn-sm btn-dark me-1 mb-1 mb-md-0">Modifier</a>
+
+                                <form method="post" action="{{ path('formation_delete', {'id': formation.id}) }}" style="display:inline-block;" onsubmit="return confirm('Supprimer cette formation ?');">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ formation.id) }}">
+                                    <button type="submit" class="btn btn-sm btn-danger">Supprimer</button>
+                                </form>
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="6" class="text-center">Aucune formation trouvée.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
 {% endblock %}
