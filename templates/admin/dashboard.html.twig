@@ -1,0 +1,105 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+
+<h2 class="mb-4">📊 Admin Dashboard</h2>
+
+<div class="row g-4">
+
+    <!-- TOTAL USERS -->
+    <div class="col-md-4">
+        <div class="card text-white bg-primary p-4 shadow border-0">
+            <h6>Total Users</h6>
+            <h2>{{ totalUsers }}</h2>
+        </div>
+    </div>
+
+    <!-- ACTIVE USERS -->
+    <div class="col-md-4">
+        <div class="card text-white bg-success p-4 shadow border-0">
+            <h6>Active Users</h6>
+            <h2>{{ activeUsers }}</h2>
+        </div>
+    </div>
+
+    <!-- BLOCKED USERS -->
+    <div class="col-md-4">
+        <div class="card text-white bg-danger p-4 shadow border-0">
+            <h6>Blocked Users</h6>
+            <h2>{{ blockedUsers }}</h2>
+        </div>
+    </div>
+
+</div>
+
+<hr class="my-5">
+
+<!-- CHART -->
+<div class="card p-4 shadow border-0 text-center">
+
+    <h5 class="mb-4">📈 User Statistics</h5>
+
+    <!-- 👇 CONTROL SIZE HERE -->
+    <div style="width: 350px; height: 350px; margin: auto;">
+        <canvas id="userChart"></canvas>
+    </div>
+
+</div>
+
+<!-- BUTTON -->
+<div class="mt-4 text-center">
+    <a href="{{ path('app_user_index') }}" class="btn btn-dark px-4">
+        👨‍💼 Manage Users
+    </a>
+</div>
+
+{% endblock %}
+
+
+{% block javascripts %}
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    const ctx = document.getElementById('userChart');
+
+    new Chart(ctx, {
+        type: 'doughnut',
+
+        data: {
+            labels: ['Active Users', 'Blocked Users'],
+            datasets: [{
+                data: [{{ activeUsers }}, {{ blockedUsers }}],
+
+                backgroundColor: [
+                    '#28a745', // green
+                    '#dc3545'  // red
+                ],
+
+                borderWidth: 2,
+                borderColor: '#ffffff',
+                hoverOffset: 10
+            }]
+        },
+
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+
+            plugins: {
+                legend: {
+                    position: 'top',
+                    labels: {
+                        font: {
+                            size: 14
+                        }
+                    }
+                }
+            },
+
+            cutout: '65%' // makes it look modern (donut hole)
+        }
+    });
+</script>
+
+{% endblock %}

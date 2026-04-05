@@ -1,0 +1,59 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+
+<div class="row justify-content-center mt-5">
+    <div class="col-md-6">
+
+        <div class="card shadow p-4 rounded-4">
+
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h2>👤 My Profile</h2>
+
+                <!-- ✅ EDIT BUTTON -->
+                <a href="{{ path('app_profile_edit') }}" class="btn btn-primary">
+                    ✏️ Edit Profile
+                </a>
+            </div>
+
+            <ul class="list-group list-group-flush">
+
+                <li class="list-group-item">
+                    <strong>Email:</strong> {{ app.user.email }}
+                </li>
+
+                <li class="list-group-item">
+                    <strong>Username:</strong> {{ app.user.firstname }}
+                </li>
+
+                <li class="list-group-item">
+                    <strong>Type:</strong> {{ app.user.roleType }}
+                </li>
+
+                <li class="list-group-item">
+                    <strong>Phone:</strong> 
+                    {{ app.user.phone ?: 'Not provided' }}
+                </li>
+
+                <li class="list-group-item">
+                    <strong>Address:</strong> 
+                    {{ app.user.address ?: 'Not provided' }}
+                </li>
+
+                <li class="list-group-item">
+                    <strong>Date of Birth:</strong> 
+                    {% if app.user.dateOfBirth %}
+                        {{ app.user.dateOfBirth|date('Y-m-d') }}
+                    {% else %}
+                        Not provided
+                    {% endif %}
+                </li>
+
+            </ul>
+
+        </div>
+
+    </div>
+</div>
+
+{% endblock %}

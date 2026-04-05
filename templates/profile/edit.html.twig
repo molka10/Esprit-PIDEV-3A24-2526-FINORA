@@ -1,0 +1,100 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+
+<div class="container mt-5">
+    <div class="card p-4 shadow">
+
+        <h2 class="mb-4 text-center">👤 Edit Profile</h2>
+
+        {{ form_start(form) }}
+
+        {# 🔥 GLOBAL ERRORS (VERY IMPORTANT) #}
+        
+
+        <!-- EMAIL -->
+        <div class="mb-3">
+            {{ form_label(form.email) }}
+            {{ form_widget(form.email, {'attr': {'class': 'form-control'}}) }}
+            <div class="text-danger small">
+                {{ form_errors(form.email) }}
+            </div>
+        </div>
+
+        <!-- FIRSTNAME -->
+        <div class="mb-3">
+            {{ form_label(form.firstname) }}
+            {{ form_widget(form.firstname, {'attr': {'class': 'form-control'}}) }}
+            <div class="text-danger small">
+                {{ form_errors(form.firstname) }}
+            </div>
+        </div>
+
+        <!-- PHONE -->
+        <div class="mb-3">
+            {{ form_label(form.phone) }}
+            {{ form_widget(form.phone, {'attr': {'class': 'form-control'}}) }}
+        </div>
+
+        <!-- ADDRESS -->
+        <div class="mb-3">
+            {{ form_label(form.address) }}
+            {{ form_widget(form.address, {'attr': {'class': 'form-control'}}) }}
+        </div>
+
+        <!-- DATE OF BIRTH -->
+        <div class="mb-3">
+            {{ form_label(form.dateOfBirth) }}
+            {{ form_widget(form.dateOfBirth, {'attr': {'class': 'form-control'}}) }}
+        </div>
+
+        <hr class="my-4">
+
+        <!-- 🔐 PASSWORD SECTION -->
+        <div class="p-3 bg-light rounded">
+            <h5 class="mb-3">🔐 Change Password</h5>
+
+            <!-- CURRENT PASSWORD -->
+            <div class="mb-3">
+                {{ form_label(form.currentPassword) }}
+                {{ form_widget(form.currentPassword, {'attr': {'class': 'form-control'}}) }}
+            </div>
+
+            <!-- NEW PASSWORD -->
+            <div class="mb-3">
+                {{ form_label(form.newPassword.first) }}
+                {{ form_widget(form.newPassword.first, {'attr': {'class': 'form-control'}}) }}
+            </div>
+
+            <!-- CONFIRM PASSWORD -->
+            <div class="mb-3">
+                {{ form_label(form.newPassword.second) }}
+                {{ form_widget(form.newPassword.second, {'attr': {'class': 'form-control'}}) }}
+
+                <!-- 🔥 FIELD ERROR -->
+                <div class="text-danger mt-1 small">
+                    {{ form_errors(form.newPassword) }}
+                </div>
+            </div>
+        </div>
+
+        <!-- 🔥 BUTTON -->
+        <div class="d-grid mt-4">
+            <button class="btn btn-primary btn-lg">
+                💾 Save Changes
+            </button>
+        </div>
+
+        {{ form_end(form) }}
+
+        <!-- BACK BUTTON -->
+        <div class="mt-3 text-center">
+            <a href="{{ path('app_profile') }}" class="btn btn-outline-secondary">
+                ⬅ Back to Profile
+            </a>
+        </div>
+
+    </div>
+</div>
+
+{% endblock %}
