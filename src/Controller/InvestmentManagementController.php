@@ -14,14 +14,63 @@ use Symfony\Component\Routing\Annotation\Route;
 #[Route('/management')]
 class InvestmentManagementController extends AbstractController
 {
+    // ================= INDEX + SEARCH =================
     #[Route('/', name: 'app_management_index', methods: ['GET'])]
-    public function index(InvestmentManagementRepository $repo): Response
+    public function index(Request $request, InvestmentManagementRepository $repo): Response
     {
+        $search = $request->query->get('search');
+        $status = $request->query->get('status');
+
+        $qb = $repo->createQueryBuilder('i')
+            ->join('i.investment', 'inv');
+
+        if ($search) {
+            $qb->andWhere('inv.name LIKE :search OR i.investmentType LIKE :search')
+               ->setParameter('search', '%'.$search.'%');
+        }
+
+        if ($status && $status !== 'ALL') {
+            $qb->andWhere('i.status = :status')
+               ->setParameter('status', $status);
+        }
+
+        $items = $qb->getQuery()->getResult();
+
         return $this->render('investment_management/index.html.twig', [
-            'items' => $repo->findAll(),
+            'items' => $items,
         ]);
     }
 
+    // ================= DASHBOARD =================
+    #[Route('/dashboard', name: 'app_management_dashboard')]
+    public function dashboard(InvestmentManagementRepository $repo): Response
+    {
+        $items = $repo->findAll();
+
+        $total = count($items);
+        $totalAmount = 0;
+        $active = 0;
+        $closed = 0;
+
+        foreach ($items as $item) {
+            $totalAmount += (float)$item->getAmountInvested();
+
+            if ($item->getStatus() === 'ACTIVE') {
+                $active++;
+            } else {
+                $closed++;
+            }
+        }
+
+        return $this->render('investment_management/dashboard.html.twig', [
+            'total' => $total,
+            'totalAmount' => $totalAmount,
+            'active' => $active,
+            'closed' => $closed,
+        ]);
+    }
+
+    // ================= CREATE =================
     #[Route('/new', name: 'app_management_new', methods: ['GET', 'POST'])]
     public function new(Request $request, EntityManagerInterface $em): Response
     {
@@ -32,7 +81,7 @@ class InvestmentManagementController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
 
-            // 🔥 BUSINESS LOGIC
+            // 🔥 AUTO STATUS
             $percent = (float)$item->getOwnershipPercentage();
             $item->setStatus($percent == 100 ? 'CLOSED' : 'ACTIVE');
 
@@ -49,6 +98,7 @@ class InvestmentManagementController extends AbstractController
         ]);
     }
 
+    // ================= SHOW =================
     #[Route('/{managementId}', name: 'app_management_show', methods: ['GET'])]
     public function show(InvestmentManagement $item): Response
     {
@@ -57,6 +107,7 @@ class InvestmentManagementController extends AbstractController
         ]);
     }
 
+    // ================= EDIT =================
     #[Route('/{managementId}/edit', name: 'app_management_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, InvestmentManagement $item, EntityManagerInterface $em): Response
     {
@@ -81,6 +132,7 @@ class InvestmentManagementController extends AbstractController
         ]);
     }
 
+    // ================= DELETE =================
     #[Route('/{managementId}', name: 'app_management_delete', methods: ['POST'])]
     public function delete(Request $request, InvestmentManagement $item, EntityManagerInterface $em): Response
     {
