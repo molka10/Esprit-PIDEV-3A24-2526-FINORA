@@ -4,67 +4,96 @@
 
 {% block body %}
 
-<h1>Investment Management</h1>
+<div class="container mt-4">
 
-<table class="table table-bordered table-striped">
-    <thead>
-        <tr>
-                <th>ManagementId</th>
-                <th>InvestmentType</th>
-                <th>AmountInvested</th>
-                <th>OwnershipPercentage</th>
-                <th>StartDate</th>
-                <th>Status</th>
-                <th>actions</th>
-        </tr>
-    </thead>
+    <h1 class="mb-4">📊 Investment Management</h1>
 
-    <tbody>
-    {% for item in items %}
-        <tr>
-            <td>{{ item.managementId }}</td>
+    <div class="d-flex justify-content-between mb-3">
+        <a class="btn btn-success" href="{{ path('app_management_new') }}">
+            ➕ New Investment
+        </a>
+    </div>
 
-            <!-- 🔥 RELATION -->
-            <td>{{ item.investment.name }}</td>
+    <div class="card shadow p-3">
 
-            <td>{{ item.investmentType }}</td>
-            <td>{{ item.amountInvested }}</td>
-            <td>{{ item.ownershipPercentage }}%</td>
+        <table class="table table-hover align-middle">
 
-            <td>
-                {{ item.startDate ? item.startDate|date('Y-m-d') : '' }}
-            </td>
+            <thead class="table-dark">
+                <tr>
+                    <th>#</th>
+                    <th>Investment</th>
+                    <th>Type</th>
+                    <th>Amount</th>
+                    <th>%</th>
+                    <th>Date</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
 
-            <td>
-                {% if item.status == 'ACTIVE' %}
-                    <span class="badge bg-success">Active</span>
-                {% else %}
-                    <span class="badge bg-danger">Closed</span>
-                {% endif %}
-            </td>
+            <tbody>
+            {% for item in items %}
+                <tr>
 
-            <td>
-                <a class="btn btn-sm btn-info"
-                   href="{{ path('app_management_show', {'managementId': item.managementId}) }}">
-                   Show
-                </a>
+                    <td>{{ item.managementId }}</td>
 
-                <a class="btn btn-sm btn-warning"
-                   href="{{ path('app_management_edit', {'managementId': item.managementId}) }}">
-                   Edit
-                </a>
-            </td>
-        </tr>
-    {% else %}
-        <tr>
-            <td colspan="8">No records found</td>
-        </tr>
-    {% endfor %}
-    </tbody>
-</table>
+                    <!-- 🔥 RELATION -->
+                    <td>
+                        <strong>{{ item.investment.name }}</strong>
+                    </td>
 
-<a class="btn btn-primary" href="{{ path('app_management_new') }}">
-    ➕ Create new
-</a>
+                    <td>{{ item.investmentType }}</td>
+
+                    <td>
+                        💰 {{ item.amountInvested }} TND
+                    </td>
+
+                    <td>
+                        {{ item.ownershipPercentage }}%
+                    </td>
+
+                    <td>
+                        {{ item.startDate ? item.startDate|date('d M Y') : '' }}
+                    </td>
+
+                    <td>
+                        {% if item.status == 'ACTIVE' %}
+                            <span class="badge bg-success">Active</span>
+                        {% else %}
+                            <span class="badge bg-danger">Closed</span>
+                        {% endif %}
+                    </td>
+
+                    <td class="d-flex gap-2">
+
+                        <a class="btn btn-sm btn-info"
+                           href="{{ path('app_management_show', {'managementId': item.managementId}) }}">
+                           👁 Show
+                        </a>
+
+                        <a class="btn btn-sm btn-warning"
+                           href="{{ path('app_management_edit', {'managementId': item.managementId}) }}">
+                           ✏️ Edit
+                        </a>
+
+                        {{ include('investment_management/_delete_form.html.twig', {'item': item}) }}
+
+                    </td>
+
+                </tr>
+            {% else %}
+                <tr>
+                    <td colspan="8" class="text-center text-muted">
+                        🚫 No records found
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
 
 {% endblock %}

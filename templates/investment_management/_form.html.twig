@@ -1,4 +1,37 @@
 {{ form_start(form) }}
-    {{ form_widget(form) }}
-    <button class="btn">{{ button_label|default('Save') }}</button>
+
+<div class="mb-3">
+    {{ form_label(form.investment) }}
+    {{ form_widget(form.investment, {'attr': {'class': 'form-control'}}) }}
+    <div class="text-danger">{{ form_errors(form.investment) }}</div>
+</div>
+
+<div class="mb-3">
+    {{ form_label(form.investmentType) }}
+    {{ form_widget(form.investmentType, {'attr': {'class': 'form-control'}}) }}
+    <div class="text-danger">{{ form_errors(form.investmentType) }}</div>
+</div>
+
+<div class="mb-3">
+    {{ form_label(form.amountInvested) }}
+    {{ form_widget(form.amountInvested, {'attr': {'class': 'form-control'}}) }}
+    <div class="text-danger">{{ form_errors(form.amountInvested) }}</div>
+</div>
+
+<div class="mb-3">
+    {{ form_label(form.ownershipPercentage) }}
+    {{ form_widget(form.ownershipPercentage, {'attr': {'class': 'form-control'}}) }}
+    <div class="text-danger">{{ form_errors(form.ownershipPercentage) }}</div>
+</div>
+
+<div class="mb-3">
+    {{ form_label(form.startDate) }}
+    {{ form_widget(form.startDate, {'attr': {'class': 'form-control'}}) }}
+    <div class="text-danger">{{ form_errors(form.startDate) }}</div>
+</div>
+
+<button class="btn btn-success">
+    {{ button_label|default('💾 Save') }}
+</button>
+
 {{ form_end(form) }}
