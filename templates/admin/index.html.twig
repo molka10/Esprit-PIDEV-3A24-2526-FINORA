@@ -1,0 +1,206 @@
+{% extends 'base.html.twig' %}
+
+{% block content %}
+
+<div class="admin">
+
+    <div class="admin-header">
+        <h1>📊 ADMIN DASHBOARD</h1>
+       <a href="{{ path('download_pdf', { search: app.request.get('search') }) }}" class="btn-purple"> ⬇ PDF</a>
+    </div>
+
+    <!-- SEARCH -->
+    <form method="GET">
+    <input type="text" id="searchUser"
+       placeholder="🔍 Search..."
+       class="admin-search">
+</form>
+
+    <!-- TOP GRID -->
+    <div class="admin-grid">
+
+        <!-- USERS -->
+        <div class="box">
+            <h3>👥 Users</h3>
+
+            <table id="userTable">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Balance</th>
+                        <th>Income</th>
+                        <th>Outcome</th>
+                        <th>Transactions</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for u in users %}
+                        <tr>
+                            <td>{{ u.name }}</td>
+                            <td>{{ u.balance }} DT</td>
+                            <td class="green">{{ u.income }}</td>
+                            <td class="red">{{ u.outcome }}</td>
+                            <td>{{ u.count }}</td>
+                            <td>
+                                {% if u.balance > 0 %}
+                                    <span class="badge income">Good</span>
+                                {% else %}
+                                    <span class="badge outcome">Risk</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- PIE -->
+        <div class="box small-chart">
+            <h3>📊 Overview</h3>
+            <canvas id="chart"></canvas>
+        </div>
+
+    </div>
+
+    <!-- 🔥 ROW CHART + TRANSACTIONS -->
+    <div class="admin-row">
+
+        <!-- LINE CHART -->
+        <div class="box big-chart">
+            <h3 style="color:#6c5ce7;">Transactions par date</h3>
+            <canvas id="lineChart"></canvas>
+        </div>
+
+        <!-- TRANSACTIONS -->
+        <div class="box transactions-box">
+
+            <h2 style="color:#6c5ce7;">Transactions</h2>
+
+           
+
+            <table id="transactionTable">
+                <thead>
+                    <tr>
+                        <th>User</th>
+                        <th>Type</th>
+                        <th>Montant</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for u in users %}
+                        {% for t in u.transactions ?? [] %}
+                            <tr>
+                                <td>{{ u.name }}</td>
+                                <td>{{ t.type }}</td>
+                                <td class="{{ t.type == 'INCOME' ? 'green' : 'red' }}">
+                                    {{ t.montant }} DT
+                                </td>
+                                <td>{{ t.dateTransaction|date('Y-m-d') }}</td>
+                            </tr>
+                        {% endfor %}
+                    {% endfor %}
+                </tbody>
+            </table>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}
+
+{% block javascripts %}
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+
+
+
+// 📊 PIE
+const ctx = document.getElementById('chart');
+
+new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+        labels: ['Income', 'Outcome'],
+        datasets: [{
+            data: [
+                {% set totalIncome = 0 %}
+                {% set totalOutcome = 0 %}
+                {% for u in users %}
+                    {% set totalIncome = totalIncome + u.income %}
+                    {% set totalOutcome = totalOutcome + u.outcome %}
+                {% endfor %}
+                {{ totalIncome }}, {{ totalOutcome }}
+            ],
+            backgroundColor: ['#00b894', '#d63031']
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        cutout: '65%'
+    }
+});
+
+// 📈 LINE CHART
+const ctxLine = document.getElementById('lineChart');
+
+new Chart(ctxLine, {
+    type: 'line',
+    data: {
+        labels: {{ chartLabels|json_encode|raw }},
+        datasets: [{
+            label: 'Montant',
+            data: {{ chartData|json_encode|raw }},
+            borderColor: '#6c5ce7',
+            borderWidth: 3,
+            tension: 0,
+            fill: false,
+            pointBackgroundColor: '#fff',
+            pointBorderColor: '#fd7e14',
+            pointBorderWidth: 3,
+            pointRadius: 6
+        }]
+    },
+    options: {
+    responsive: true,
+    maintainAspectRatio: false, // 🔥 مهم
+    plugins: {
+        legend: {
+            position: 'top'
+        }
+    }
+}
+});
+const input = document.getElementById('searchUser');
+
+input.addEventListener('keyup', function () {
+    let value = input.value.toLowerCase();
+
+    // USERS TABLE
+    let userRows = document.querySelectorAll("#userTable tbody tr");
+
+    userRows.forEach(row => {
+        let text = row.innerText.toLowerCase();
+        row.style.display = text.includes(value) ? "" : "none";
+    });
+
+    // TRANSACTIONS TABLE
+    let transactionRows = document.querySelectorAll("#transactionTable tbody tr");
+
+    transactionRows.forEach(row => {
+        let text = row.innerText.toLowerCase();
+        row.style.display = text.includes(value) ? "" : "none";
+    });
+});
+
+</script>
+
+{% endblock %}

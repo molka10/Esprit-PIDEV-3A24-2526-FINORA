@@ -1,0 +1,124 @@
+{% extends 'base.html.twig' %}
+
+{% block content %}
+
+<div style="display:flex; justify-content:space-between; align-items:center;">
+    
+    <h1>➕ Add Transaction</h1>
+
+    <a href="{{ path('dashboard') }}" class="btn" style="background:#636e72;">
+        ⬅ Dashboard
+    </a>
+
+</div>
+
+<div class="form-container">
+    {{ form_start(form) }}
+
+{{ form_row(form.nomTransaction) }}
+
+{{ form_row(form.type) }}
+
+{{ form_row(form.montant) }}
+{{ form_row(form.dateTransaction) }}
+
+<label>Category</label>
+<select id="transaction_wallet_category" name="transaction_wallet[category]">
+    <option value="">Select category</option>
+</select>
+
+<div style="display:flex; gap:10px; align-items:center;">
+    {{ form_row(form.save) }}
+
+    <a href="{{ path('category_list') }}" class="btn" style="background:#00cec9;">
+        ➕ Category
+    </a>
+</div>
+
+{{ form_end(form, {'render_rest': false}) }}
+
+</div>
+
+<hr>
+
+<h1>💰 Transactions</h1>
+
+<table>
+    <tr>
+        <th>Nom</th>
+        <th>Type</th>
+        <th>Montant</th>
+        <th>Category</th>
+        <th>Date</th>
+        <th>Actions</th>
+    </tr>
+
+    {% for t in transactions %}
+        <tr>
+            <td>{{ t.nomTransaction }}</td>
+
+            <td>
+                <span class="badge {{ t.type == 'INCOME' ? 'income' : 'outcome' }}">
+                    {{ t.type }}
+                </span>
+            </td>
+
+            <td>
+                <span class="badge {{ t.montant > 0 ? 'income' : 'outcome' }}">
+                    {{ t.montant }} DT
+                </span>
+            </td>
+
+            <td>{{ t.category ? t.category.nom : 'No category' }}</td>
+
+            <td>{{ t.dateTransaction|date('Y-m-d') }}</td>
+
+            <td>
+                <a href="/edit/{{ t.id }}" class="btn">✏️</a>
+                <a href="/delete/{{ t.id }}" class="btn delete">🗑</a>
+            </td>
+        </tr>
+    {% endfor %}
+</table>
+{% block javascripts %}
+<script>
+console.log("JS WORKING");
+document.addEventListener("DOMContentLoaded", function () {
+
+    const radios = document.querySelectorAll('input[type="radio"]');
+    const categorySelect = document.getElementById('transaction_wallet_category');
+
+    function loadCategories(type) {
+
+        fetch('/api/categories/' + type)
+            .then(res => res.json())
+            .then(data => {
+
+                categorySelect.innerHTML = '<option value="">Select category</option>';
+
+                data.forEach(cat => {
+                    let option = document.createElement('option');
+                    option.value = cat.id;
+                    option.textContent = cat.nom;
+                    categorySelect.appendChild(option);
+                });
+
+            });
+    }
+
+    radios.forEach(radio => {
+        radio.addEventListener("change", function () {
+            loadCategories(this.value);
+        });
+    });
+
+    // 🔥 auto load first time
+    const checked = document.querySelector('input[name="transaction_wallet[type]"]:checked');
+    if (checked) {
+        loadCategories(checked.value);
+    }
+
+});
+</script>
+{% endblock %}
+{% endblock %}

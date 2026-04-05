@@ -1,0 +1,36 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+
+<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+    
+    <h1>📊 Dashboard</h1>
+
+    <a href="{{ path('transactions') }}" class="btn" style="background:#00b894;">
+        ➕ Ajouter Transaction
+    </a>
+
+</div>
+
+<div class="card-container">
+
+    <div class="card balance">
+        <h3>💼 Balance</h3>
+        <h2>{{ balance|number_format(2, '.', ' ') }} DT</h2>
+    </div>
+
+    <div class="card income-card">
+        <h3>🟢 Income</h3>
+        <h2>{{ income|number_format(2, '.', ' ') }} DT</h2>
+    </div>
+
+    <div class="card outcome-card">
+        <h3>🔴 Outcome</h3>
+        <h2>{{ outcome|number_format(2, '.', ' ') }} DT</h2>
+    </div>
+
+</div>
+
+{% endblock %}

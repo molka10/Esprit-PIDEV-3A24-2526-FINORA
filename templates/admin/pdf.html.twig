@@ -1,0 +1,47 @@
+<h1>ADMIN REPORT</h1>
+
+<h2>Users</h2>
+
+<table border="1" width="100%" cellspacing="0" cellpadding="5">
+    <tr>
+        <th>Name</th>
+        <th>Balance</th>
+        <th>Income</th>
+        <th>Outcome</th>
+        <th>Transactions</th>
+    </tr>
+
+    {% for u in users %}
+        <tr>
+            <td>{{ u.name }}</td>
+            <td>{{ u.balance }} DT</td>
+            <td>{{ u.income }}</td>
+            <td>{{ u.outcome }}</td>
+            <td>{{ u.count }}</td>
+        </tr>
+    {% endfor %}
+</table>
+
+<br><br>
+
+<h2>Transactions</h2>
+
+<table border="1" width="100%" cellspacing="0" cellpadding="5">
+    <tr>
+        <th>User</th>
+        <th>Type</th>
+        <th>Montant</th>
+        <th>Date</th>
+    </tr>
+
+    {% for u in users %}
+        {% for t in u.transactions %}
+            <tr>
+                <td>{{ u.name }}</td>
+                <td>{{ t.type }}</td>
+                <td>{{ t.montant }} DT</td>
+                <td>{{ t.dateTransaction|date('Y-m-d') }}</td>
+            </tr>
+        {% endfor %}
+    {% endfor %}
+</table>

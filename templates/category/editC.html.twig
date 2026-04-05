@@ -1,0 +1,16 @@
+{% extends 'base.html.twig' %}
+
+{% block content %}
+
+<h1> Edit Category</h1>
+
+{{ form_start(form) }}
+
+{{ form_row(form.nom) }}
+{{ form_row(form.type) }}
+{{ form_row(form.priorite) }}
+
+
+{{ form_end(form) }}
+
+{% endblock %}
