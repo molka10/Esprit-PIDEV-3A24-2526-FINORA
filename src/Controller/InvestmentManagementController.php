@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\InvestmentManagement;
 use App\Form\InvestmentManagementType;
 use App\Repository\InvestmentManagementRepository;
+use App\Repository\InvestmentRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -43,8 +44,12 @@ class InvestmentManagementController extends AbstractController
 
     // ================= DASHBOARD =================
     #[Route('/dashboard', name: 'app_management_dashboard')]
-    public function dashboard(InvestmentManagementRepository $repo): Response
+    public function dashboard(
+        InvestmentManagementRepository $repo,
+        InvestmentRepository $investmentRepo
+    ): Response
     {
+        // 🔹 Management
         $items = $repo->findAll();
 
         $total = count($items);
@@ -62,11 +67,34 @@ class InvestmentManagementController extends AbstractController
             }
         }
 
+        $average = $total > 0 ? $totalAmount / $total : 0;
+
+        // 🔹 Investments (pour calcul performance seulement)
+        $investments = $investmentRepo->findAll();
+
+        $totalValue = 0;
+        foreach ($investments as $inv) {
+            $totalValue += (float)$inv->getEstimatedValue();
+        }
+
+        // 🔥 MÉTIER PERFORMANCE
+        $totalInvested = $totalAmount;
+        $profit = $totalValue - $totalInvested;
+        $roi = $totalInvested > 0 ? ($profit / $totalInvested) * 100 : 0;
+
         return $this->render('investment_management/dashboard.html.twig', [
             'total' => $total,
             'totalAmount' => $totalAmount,
             'active' => $active,
             'closed' => $closed,
+            'average' => $average,
+            'items' => $items,
+
+            // 🔥 données métier
+            'totalValue' => $totalValue,
+            'totalInvested' => $totalInvested,
+            'profit' => $profit,
+            'roi' => $roi,
         ]);
     }
 
@@ -81,7 +109,6 @@ class InvestmentManagementController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
 
-            // 🔥 AUTO STATUS
             $percent = (float)$item->getOwnershipPercentage();
             $item->setStatus($percent == 100 ? 'CLOSED' : 'ACTIVE');
 
@@ -90,7 +117,7 @@ class InvestmentManagementController extends AbstractController
 
             $this->addFlash('success', 'Created successfully ✅');
 
-            return $this->redirectToRoute('app_management_index');
+            return $this->redirectToRoute('app_management_dashboard');
         }
 
         return $this->render('investment_management/new.html.twig', [
@@ -123,7 +150,7 @@ class InvestmentManagementController extends AbstractController
 
             $this->addFlash('success', 'Updated successfully ✏️');
 
-            return $this->redirectToRoute('app_management_index');
+            return $this->redirectToRoute('app_management_dashboard');
         }
 
         return $this->render('investment_management/edit.html.twig', [
@@ -144,6 +171,6 @@ class InvestmentManagementController extends AbstractController
             $this->addFlash('danger', 'Deleted successfully ❌');
         }
 
-        return $this->redirectToRoute('app_management_index');
+        return $this->redirectToRoute('app_management_dashboard');
     }
 }

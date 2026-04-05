@@ -14,6 +14,7 @@ use Symfony\Component\Routing\Annotation\Route;
 #[Route('/investment')]
 class InvestmentController extends AbstractController
 {
+    // ================= INDEX =================
     #[Route('/', name: 'app_investment_index')]
     public function index(InvestmentRepository $repo): Response
     {
@@ -22,6 +23,46 @@ class InvestmentController extends AbstractController
         ]);
     }
 
+    // ================= DASHBOARD 🔥 =================
+    #[Route('/dashboard', name: 'app_investment_dashboard')]
+    public function dashboard(InvestmentRepository $repo): Response
+    {
+        $investments = $repo->findAll();
+
+        $total = count($investments);
+        $totalValue = 0;
+        $high = 0;
+        $medium = 0;
+        $low = 0;
+
+        foreach ($investments as $inv) {
+            $value = (float)$inv->getEstimatedValue();
+            $totalValue += $value;
+
+            // 🔥 stats risk
+            if ($inv->getRiskLevel() === 'HIGH') {
+                $high++;
+            } elseif ($inv->getRiskLevel() === 'MEDIUM') {
+                $medium++;
+            } else {
+                $low++;
+            }
+        }
+
+        $average = $total > 0 ? $totalValue / $total : 0;
+
+        return $this->render('investment/dashboard.html.twig', [
+            'investments' => $investments,
+            'total' => $total,
+            'totalValue' => $totalValue,
+            'average' => $average,
+            'high' => $high,
+            'medium' => $medium,
+            'low' => $low,
+        ]);
+    }
+
+    // ================= CARDS =================
     #[Route('/cards', name: 'app_investment_cards')]
     public function cards(InvestmentRepository $repo): Response
     {
@@ -39,6 +80,7 @@ class InvestmentController extends AbstractController
         ]);
     }
 
+    // ================= CREATE =================
     #[Route('/new', name: 'app_investment_new')]
     public function new(Request $request, EntityManagerInterface $em): Response
     {
@@ -62,7 +104,7 @@ class InvestmentController extends AbstractController
             $em->persist($investment);
             $em->flush();
 
-            return $this->redirectToRoute('app_investment_cards');
+            return $this->redirectToRoute('app_investment_dashboard'); // 🔥 redirect dashboard
         }
 
         return $this->render('investment/new.html.twig', [
@@ -70,6 +112,7 @@ class InvestmentController extends AbstractController
         ]);
     }
 
+    // ================= EDIT =================
     #[Route('/{investmentId}/edit', name: 'app_investment_edit')]
     public function edit(Request $request, Investment $investment, EntityManagerInterface $em): Response
     {
@@ -90,7 +133,7 @@ class InvestmentController extends AbstractController
 
             $em->flush();
 
-            return $this->redirectToRoute('app_investment_cards');
+            return $this->redirectToRoute('app_investment_dashboard');
         }
 
         return $this->render('investment/edit.html.twig', [
@@ -99,6 +142,7 @@ class InvestmentController extends AbstractController
         ]);
     }
 
+    // ================= SHOW =================
     #[Route('/{investmentId}', name: 'app_investment_show')]
     public function show(Investment $investment): Response
     {
@@ -107,6 +151,7 @@ class InvestmentController extends AbstractController
         ]);
     }
 
+    // ================= DELETE =================
     #[Route('/{investmentId}', name: 'app_investment_delete', methods: ['POST'])]
     public function delete(Request $request, Investment $investment, EntityManagerInterface $em): Response
     {
@@ -115,6 +160,6 @@ class InvestmentController extends AbstractController
             $em->flush();
         }
 
-        return $this->redirectToRoute('app_investment_cards');
+        return $this->redirectToRoute('app_investment_dashboard');
     }
 }

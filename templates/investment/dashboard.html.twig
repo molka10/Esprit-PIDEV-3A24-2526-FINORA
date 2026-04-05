@@ -1,0 +1,56 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Investment Dashboard{% endblock %}
+
+{% block body %}
+
+<div class="container mt-5">
+
+    <h1>📁 Investment Dashboard</h1>
+
+    <div class="row mt-4">
+        <div class="col-md-4">
+            <div class="card p-3 text-center shadow">
+                <h5>Total Investments</h5>
+                <h2>{{ total }}</h2>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card p-3 text-center shadow">
+                <h5>Total Value</h5>
+                <h2>{{ totalValue }} DT</h2>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card p-3 text-center shadow">
+                <h5>Average</h5>
+                <h2>{{ average|number_format(2) }} DT</h2>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mt-5 shadow p-3">
+        <h4>📋 Investments List</h4>
+
+        <table class="table">
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Value</th>
+            </tr>
+
+            {% for inv in investments %}
+                <tr>
+                    <td>{{ inv.investmentId }}</td>
+                    <td>{{ inv.name }}</td>
+                    <td>{{ inv.estimatedValue }} DT</td>
+                </tr>
+            {% endfor %}
+        </table>
+    </div>
+
+</div>
+
+{% endblock %}

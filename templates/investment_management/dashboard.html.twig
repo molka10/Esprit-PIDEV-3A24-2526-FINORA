@@ -1,0 +1,172 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Management Dashboard{% endblock %}
+
+{% block body %}
+
+<div class="container mt-5">
+
+    <h1 class="mb-4">⚙️ Investment Management Dashboard</h1>
+
+    <!-- 🔥 STATS -->
+    <div class="row">
+
+        <div class="col-md-3">
+            <div class="card text-center shadow p-3 bg-light">
+                <h6>Total Management</h6>
+                <h2>{{ total }}</h2>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card text-center shadow p-3 bg-light">
+                <h6>Total Amount</h6>
+                <h2>{{ totalAmount }} DT</h2>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card text-center shadow p-3 bg-light">
+                <h6>Active</h6>
+                <h2>{{ active }}</h2>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card text-center shadow p-3 bg-light">
+                <h6>Closed</h6>
+                <h2>{{ closed }}</h2>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- 🔥 AVERAGE -->
+    <div class="card mt-4 text-center shadow p-3">
+        <h6>Average Investment</h6>
+        <h2>{{ average|number_format(2) }} DT</h2>
+    </div>
+
+    <!-- 🔥 PERFORMANCE -->
+    <div class="row mt-4">
+
+        <div class="col-md-3">
+            <div class="card text-center shadow p-3">
+                <h6>Total Value</h6>
+                <h2>{{ totalValue }} DT</h2>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card text-center shadow p-3">
+                <h6>Total Invested</h6>
+                <h2>{{ totalInvested }} DT</h2>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card text-center shadow p-3">
+                <h6>Profit</h6>
+                <h2>
+                    {% if profit >= 0 %}
+                        <span class="text-success">+{{ profit }}</span>
+                    {% else %}
+                        <span class="text-danger">{{ profit }}</span>
+                    {% endif %}
+                    DT
+                </h2>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card text-center shadow p-3">
+                <h6>ROI</h6>
+                <h2>
+                    {% if roi >= 0 %}
+                        <span class="text-success">+{{ roi|number_format(2) }}%</span>
+                    {% else %}
+                        <span class="text-danger">{{ roi|number_format(2) }}%</span>
+                    {% endif %}
+                </h2>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- 📊 GRAPH STATUS -->
+    <div class="card mt-5 shadow p-4">
+        <h4 class="text-center mb-3">📊 Investment Status</h4>
+        <canvas id="statusChart"></canvas>
+    </div>
+
+    <!-- 📈 GRAPH PERFORMANCE -->
+    <div class="card mt-5 shadow p-4">
+        <h4 class="text-center mb-3">📈 Performance</h4>
+        <canvas id="performanceChart"></canvas>
+    </div>
+
+    <!-- 🔥 MANAGEMENT TABLE -->
+    <div class="card mt-5 shadow p-3">
+        <h4 class="mb-3">📋 Investment Management</h4>
+
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Amount Invested</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in items %}
+                    <tr>
+                        <td>{{ item.managementId }}</td>
+                        <td>{{ item.amountInvested }} DT</td>
+                        <td>
+                            {% if item.status == 'ACTIVE' %}
+                                <span class="badge bg-success">Active</span>
+                            {% else %}
+                                <span class="badge bg-danger">Closed</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="3">No management data</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+<!-- 🔥 CHART SCRIPT -->
+<script>
+    // STATUS CHART
+    new Chart(document.getElementById('statusChart'), {
+        type: 'doughnut',
+        data: {
+            labels: ['Active', 'Closed'],
+            datasets: [{
+                data: [{{ active }}, {{ closed }}],
+                backgroundColor: ['#28a745', '#dc3545']
+            }]
+        }
+    });
+
+    // PERFORMANCE CHART
+    new Chart(document.getElementById('performanceChart'), {
+        type: 'bar',
+        data: {
+            labels: ['Invested', 'Value', 'Profit'],
+            datasets: [{
+                label: 'DT',
+                data: [{{ totalInvested }}, {{ totalValue }}, {{ profit }}],
+                backgroundColor: ['#007bff', '#17a2b8', '#ffc107']
+            }]
+        }
+    });
+</script>
+
+{% endblock %}
