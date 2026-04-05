@@ -1,0 +1,21 @@
+<h2>Transactions</h2>
+
+<table border="1" width="100%" cellspacing="0" cellpadding="5">
+    <tr>
+        <th>Nom</th>
+        <th>Type</th>
+        <th>Montant</th>
+        <th>Category</th>
+        <th>Date</th>
+    </tr>
+
+    {% for t in transactions %}
+        <tr>
+            <td>{{ t.nomTransaction }}</td>
+            <td>{{ t.type }}</td>
+            <td>{{ t.montant }} DT</td>
+            <td>{{ t.category ? t.category.nom : '' }}</td>
+            <td>{{ t.dateTransaction|date('Y-m-d') }}</td>
+        </tr>
+    {% endfor %}
+</table>

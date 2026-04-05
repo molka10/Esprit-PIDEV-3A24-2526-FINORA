@@ -12,6 +12,10 @@ use Symfony\Component\Routing\Annotation\Route;
 use App\Entity\Category; 
 use App\Repository\CategoryRepository;
 use Symfony\Component\HttpFoundation\JsonResponse;
+
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 class TransactionController extends AbstractController
 {
 
@@ -201,5 +205,67 @@ public function getCategoriesByType($type, EntityManagerInterface $em): JsonResp
     }
 
     return new JsonResponse($data);
+}
+
+
+#[Route('/transactions/pdf', name: 'transactions_pdf')]
+public function exportPdf(EntityManagerInterface $em): Response
+{
+    $transactions = $em->getRepository(TransactionWallet::class)->findAll();
+
+    $html = $this->renderView('wallet/pdf.html.twig', [
+        'transactions' => $transactions
+    ]);
+
+    $dompdf = new \Dompdf\Dompdf();
+    $dompdf->loadHtml($html);
+    $dompdf->render();
+
+    return new Response(
+        $dompdf->output(),
+        200,
+        [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'attachment; filename="transactions.pdf"',
+        ]
+    );
+}
+
+
+#[Route('/transactions/excel', name: 'transactions_excel')]
+public function exportExcel(EntityManagerInterface $em): Response
+{
+    $transactions = $em->getRepository(TransactionWallet::class)->findAll();
+
+    $spreadsheet = new Spreadsheet();
+    $sheet = $spreadsheet->getActiveSheet();
+
+    // HEADER
+    $sheet->setCellValue('A1', 'Nom');
+    $sheet->setCellValue('B1', 'Type');
+    $sheet->setCellValue('C1', 'Montant');
+    $sheet->setCellValue('D1', 'Category');
+    $sheet->setCellValue('E1', 'Date');
+
+    $row = 2;
+
+    foreach ($transactions as $t) {
+        $sheet->setCellValue('A'.$row, $t->getNomTransaction());
+        $sheet->setCellValue('B'.$row, $t->getType());
+        $sheet->setCellValue('C'.$row, $t->getMontant());
+        $sheet->setCellValue('D'.$row, $t->getCategory() ? $t->getCategory()->getNom() : '');
+        $sheet->setCellValue('E'.$row, $t->getDateTransaction()->format('Y-m-d'));
+        $row++;
+    }
+
+    $response = new StreamedResponse(function () use ($spreadsheet) {
+        $writer = new Xlsx($spreadsheet);
+        $writer->save('php://output');
+    });
+
+    $response->headers->set('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    $response->headers->set('Content-Disposition', 'attachment;filename="transactions.xlsx"');
+
+    return $response;
 }
 }
