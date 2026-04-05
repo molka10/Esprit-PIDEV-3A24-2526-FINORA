@@ -1,0 +1,135 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+<div class="container mt-4">
+
+    <!-- ================= HEADER ================= -->
+    <div class="mb-4">
+        <h2 class="fw-bold">Investment Portfolio</h2>
+        <p class="text-muted">Manage and monitor your investments efficiently</p>
+    </div>
+
+    <!-- ================= DASHBOARD ================= -->
+    <div class="row mb-4 text-center">
+
+        <div class="col-md-6">
+            <div class="card shadow p-3">
+                <h6>Total Portfolio Value</h6>
+                <h3>{{ totalValue }}</h3>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card shadow p-3">
+                <h6>Total Investments</h6>
+                <h3>{{ totalCount }}</h3>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ================= TOOLBAR ================= -->
+    <div class="d-flex mb-4">
+
+        <a href="{{ path('app_investment_new') }}" class="btn btn-primary me-2">
+            ➕ Add Investment
+        </a>
+
+        <a href="{{ path('app_investment_cards') }}" class="btn btn-secondary me-2">
+            🔄 Refresh
+        </a>
+
+        <div class="ms-auto">
+            <a href="#" class="btn btn-dark">Management</a>
+        </div>
+
+    </div>
+
+    <!-- ================= SEARCH + FILTER ================= -->
+    <div class="row mb-4">
+
+        <div class="col-md-6">
+            <input type="text" id="search" class="form-control" placeholder="Search investments...">
+        </div>
+
+        <div class="col-md-6">
+            <select id="filterRisk" class="form-control">
+                <option value="ALL">All</option>
+                <option value="LOW">Low</option>
+                <option value="MEDIUM">Medium</option>
+                <option value="HIGH">High</option>
+            </select>
+        </div>
+
+    </div>
+
+    <!-- ================= CARDS ================= -->
+    <div class="row">
+
+        {% for inv in investments %}
+        <div class="col-md-4 mb-4 card-item"
+             data-risk="{{ inv.riskLevel|upper }}">
+
+            <div class="card shadow h-100">
+
+                {% if inv.imageUrl %}
+                    <img src="{{ inv.imageUrl }}"
+                         class="card-img-top"
+                         style="height:180px; object-fit:cover;">
+                {% endif %}
+
+                <div class="card-body">
+
+                    <h5 class="fw-bold">{{ inv.name }}</h5>
+
+                    <p class="text-muted">
+                        {{ inv.category }} • {{ inv.location }}
+                    </p>
+
+                    <h6>{{ inv.estimatedValue }}</h6>
+
+                    <!-- RISK -->
+                    <span class="badge
+                        {% if inv.riskLevel == 'HIGH' %}bg-danger
+                        {% elseif inv.riskLevel == 'MEDIUM' %}bg-warning
+                        {% else %}bg-success
+                        {% endif %}">
+                        {{ inv.riskLevel }}
+                    </span>
+
+                </div>
+            </div>
+
+        </div>
+        {% endfor %}
+
+    </div>
+
+</div>
+
+<!-- ================= JS ================= -->
+<script>
+const searchInput = document.getElementById('search');
+const filterRisk = document.getElementById('filterRisk');
+
+function filterCards() {
+    let search = searchInput.value.toLowerCase();
+    let risk = filterRisk.value;
+
+    document.querySelectorAll('.card-item').forEach(card => {
+
+        let text = card.innerText.toLowerCase();
+        let cardRisk = card.getAttribute('data-risk');
+
+        let matchSearch = text.includes(search);
+        let matchRisk = (risk === 'ALL' || cardRisk === risk);
+
+        card.style.display = (matchSearch && matchRisk) ? '' : 'none';
+    });
+}
+
+searchInput.addEventListener('input', filterCards);
+filterRisk.addEventListener('change', filterCards);
+</script>
+
+{% endblock %}

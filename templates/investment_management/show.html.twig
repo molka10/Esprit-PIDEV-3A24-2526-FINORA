@@ -1,0 +1,68 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Investment Management Details{% endblock %}
+
+{% block body %}
+
+<h1>Investment Management Details</h1>
+
+<table class="table table-bordered">
+    <tbody>
+        <tr>
+            <th>ID</th>
+            <td>{{ item.managementId }}</td>
+        </tr>
+
+        <tr>
+            <th>Investment</th>
+            <td>{{ item.investment.name }}</td>
+        </tr>
+
+        <tr>
+            <th>Type</th>
+            <td>{{ item.investmentType }}</td>
+        </tr>
+
+        <tr>
+            <th>Amount</th>
+            <td>{{ item.amountInvested }}</td>
+        </tr>
+
+        <tr>
+            <th>Ownership</th>
+            <td>{{ item.ownershipPercentage }}%</td>
+        </tr>
+
+        <tr>
+            <th>Start Date</th>
+            <td>{{ item.startDate ? item.startDate|date('Y-m-d') : '' }}</td>
+        </tr>
+
+        <tr>
+            <th>Status</th>
+            <td>
+                {% if item.status == 'ACTIVE' %}
+                    <span class="badge bg-success">Active</span>
+                {% else %}
+                    <span class="badge bg-danger">Closed</span>
+                {% endif %}
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+<div class="mt-3">
+
+    <a class="btn btn-secondary" href="{{ path('app_management_index') }}">
+        ⬅ Back
+    </a>
+
+    <a class="btn btn-warning" href="{{ path('app_management_edit', {'managementId': item.managementId}) }}">
+        ✏️ Edit
+    </a>
+
+    {{ include('investment_management/_delete_form.html.twig') }}
+
+</div>
+
+{% endblock %}

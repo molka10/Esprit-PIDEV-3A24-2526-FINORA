@@ -1,0 +1,25 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}New Investment Management{% endblock %}
+
+{% block body %}
+
+<div class="container mt-4">
+
+    <h1 class="mb-4">➕ Create Investment Management</h1>
+
+    <div class="card shadow p-4">
+
+        {{ include('investment_management/_form.html.twig') }}
+
+        <div class="mt-3">
+            <a class="btn btn-secondary" href="{{ path('app_management_index') }}">
+                ⬅ Back to list
+            </a>
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}
