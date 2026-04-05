@@ -1,96 +1,125 @@
-{% extends 'admin/base_admin.html.twig' %}
+{% extends 'base.html.twig' %}
 
 {% block title %}{{ lesson.titre }} - FINORA{% endblock %}
 
-{% block admin_content %}
-<div style="padding: 30px; font-family: Arial, sans-serif; background:#f8fafc; min-height:100vh;">
-    <div style="max-width: 1000px; margin: 0 auto; background:white; border:1px solid #e5e7eb; border-radius:16px; box-shadow:0 4px 14px rgba(0,0,0,0.08); overflow:hidden;">
+{% block body %}
+<header class="navbar-light navbar-sticky">
+    <nav class="navbar navbar-expand-xl z-index-9">
+        <div class="container">
+            <a class="navbar-brand" href="{{ path('app_home') }}">
+                <img class="light-mode-item navbar-brand-item" src="{{ asset('assets/images/logo.svg') }}" alt="logo">
+                <img class="dark-mode-item navbar-brand-item" src="{{ asset('assets/images/logo-light.svg') }}" alt="logo">
+            </a>
 
-        <div style="background:#ede9fe; padding:20px 24px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
-            <div>
-                <div style="font-size:12px; color:#6b7280; font-weight:700; margin-bottom:6px;">
-                    LEÇON {{ '%02d'|format(lesson.ordre) }}
+            <button class="navbar-toggler ms-auto" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse">
+                <span class="navbar-toggler-animation">
+                    <span></span><span></span><span></span>
+                </span>
+            </button>
+
+            <div class="navbar-collapse collapse" id="navbarCollapse">
+                <ul class="navbar-nav navbar-nav-scroll ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="{{ path('app_home') }}">Accueil</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ path('app_formations') }}">Formations</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="{{ path('app_lessons') }}">Lessons</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ path('admin_dashboard') }}">Dashboard</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+</header>
+
+<main>
+    <section class="py-5">
+        <div class="container">
+            <div class="mx-auto" style="max-width: 1000px;">
+                <div class="card border-0 shadow-sm overflow-hidden">
+                    <div class="p-4" style="background:#ede9fe;">
+                        <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+                            <div>
+                                <div class="small text-muted fw-bold mb-2">
+                                    LEÇON {{ '%02d'|format(lesson.ordre) }}
+                                </div>
+                                <h1 class="h2 mb-0">{{ lesson.titre }}</h1>
+                            </div>
+
+                            <div class="d-flex gap-2 flex-wrap">
+                                <span class="badge bg-primary bg-opacity-10 text-primary">
+                                    {{ lesson.formation ? lesson.formation.titre : 'Formation inconnue' }}
+                                </span>
+                                <span class="badge bg-success bg-opacity-10 text-success">
+                                    {{ lesson.dureeMinutes }} min
+                                </span>
+                                {% if lesson.videoUrl %}
+                                    <span class="badge bg-warning bg-opacity-10 text-warning">
+                                        Vidéo disponible
+                                    </span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card-body p-4">
+                        <h3 class="h5 mb-3">Contenu</h3>
+                        <div class="mb-4" style="white-space: pre-line; line-height: 1.8;">
+                            {{ lesson.contenu ?: 'Aucun contenu disponible.' }}
+                        </div>
+
+                        {% if lesson.videoUrl %}
+                            <h3 class="h5 mb-3">Vidéo</h3>
+
+                            {% set isYoutube = lesson.youTubeVideoId is not null %}
+                            {% set isMp4 = lesson.videoUrl ends with '.mp4' %}
+
+                            {% if isYoutube %}
+                                <div class="mb-4">
+                                    <iframe
+                                        width="100%"
+                                        height="420"
+                                        src="https://www.youtube.com/embed/{{ lesson.youTubeVideoId }}"
+                                        title="YouTube video player"
+                                        frameborder="0"
+                                        allowfullscreen
+                                        style="border-radius:12px;">
+                                    </iframe>
+                                </div>
+                            {% elseif isMp4 %}
+                                <div class="mb-4">
+                                    <video controls style="width:100%; border-radius:12px;">
+                                        <source src="{{ lesson.videoUrl }}" type="video/mp4">
+                                        Votre navigateur ne supporte pas la lecture vidéo.
+                                    </video>
+                                </div>
+                            {% else %}
+                                <div class="mb-4">
+                                    <a href="{{ lesson.videoUrl }}" target="_blank" class="btn btn-warning">
+                                        Ouvrir la vidéo
+                                    </a>
+                                </div>
+                            {% endif %}
+                        {% endif %}
+
+                        <div class="d-flex gap-2 flex-wrap mt-4">
+                            <a href="{{ path('app_lessons') }}" class="btn btn-secondary">
+                                Retour aux lessons
+                            </a>
+
+                            {% if lesson.formation %}
+                                <a href="{{ path('app_lessons', {'formation': lesson.formation.id}) }}" class="btn btn-primary">
+                                    Voir les lessons de cette formation
+                                </a>
+                            {% endif %}
+
+                            {% if lesson.videoUrl %}
+                                <a href="{{ lesson.videoUrl }}" target="_blank" class="btn btn-outline-primary">
+                                    Ouvrir dans un nouvel onglet
+                                </a>
+                            {% endif %}
+                        </div>
+                    </div>
                 </div>
-                <h1 style="margin:0; color:#111827; font-size:28px;">
-                    {{ lesson.titre }}
-                </h1>
-            </div>
-
-            <div style="display:flex; gap:8px; flex-wrap:wrap;">
-                <span style="background:#dbeafe; color:#1d4ed8; padding:6px 10px; border-radius:999px; font-size:12px;">
-                    📌 {{ lesson.formation ? lesson.formation.titre : 'Formation inconnue' }}
-                </span>
-                <span style="background:#dcfce7; color:#166534; padding:6px 10px; border-radius:999px; font-size:12px;">
-                    ⏱ {{ lesson.dureeMinutes }} min
-                </span>
-                {% if lesson.videoUrl %}
-                    <span style="background:#fef3c7; color:#92400e; padding:6px 10px; border-radius:999px; font-size:12px;">
-                        🎬 Vidéo disponible
-                    </span>
-                {% endif %}
             </div>
         </div>
-
-        <div style="padding:24px;">
-            <h3 style="margin-top:0; color:#111827;">Contenu</h3>
-            <div style="line-height:1.7; color:#374151; white-space:pre-line; margin-bottom:30px;">
-                {{ lesson.contenu ?: 'Aucun contenu disponible.' }}
-            </div>
-
-            {% if lesson.videoUrl %}
-                <h3 style="color:#111827;">Vidéo</h3>
-
-                {% set isYoutube = lesson.youTubeVideoId is not null %}
-                {% set isMp4 = lesson.videoUrl ends with '.mp4' %}
-
-                {% if isYoutube %}
-                    <div style="margin-bottom:20px;">
-                        <iframe
-                            width="100%"
-                            height="420"
-                            src="https://www.youtube.com/embed/{{ lesson.youTubeVideoId }}"
-                            title="YouTube video player"
-                            frameborder="0"
-                            allowfullscreen
-                            style="border-radius:12px;">
-                        </iframe>
-                    </div>
-                {% elseif isMp4 %}
-                    <div style="margin-bottom:20px;">
-                        <video controls style="width:100%; border-radius:12px;">
-                            <source src="{{ lesson.videoUrl }}" type="video/mp4">
-                            Votre navigateur ne supporte pas la lecture vidéo.
-                        </video>
-                    </div>
-                {% else %}
-                    <div style="margin-bottom:20px;">
-                        <a href="{{ lesson.videoUrl }}" target="_blank"
-                           style="display:inline-block; padding:10px 16px; background:#f59e0b; color:white; text-decoration:none; border-radius:8px;">
-                            Ouvrir la vidéo
-                        </a>
-                    </div>
-                {% endif %}
-            {% endif %}
-
-            <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:25px;">
-                <a href="{{ path('app_lesson_index') }}"
-                   style="padding:10px 14px; background:#6b7280; color:white; text-decoration:none; border-radius:8px;">
-                    Retour à la liste
-                </a>
-
-                <a href="{{ path('app_lesson_edit', {'id': lesson.id}) }}"
-                   style="padding:10px 14px; background:#2563eb; color:white; text-decoration:none; border-radius:8px;">
-                    Modifier
-                </a>
-
-                {% if lesson.videoUrl %}
-                    <a href="{{ lesson.videoUrl }}" target="_blank"
-                       style="padding:10px 14px; background:#7C3AED; color:white; text-decoration:none; border-radius:8px;">
-                        Ouvrir dans un nouvel onglet
-                    </a>
-                {% endif %}
-            </div>
-        </div>
-    </div>
-</div>
+    </section>
+</main>
 {% endblock %}

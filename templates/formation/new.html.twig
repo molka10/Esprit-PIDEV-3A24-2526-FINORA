@@ -30,7 +30,8 @@
 
                 <div class="mb-3">
                     {{ form_label(form.categorie, null, {'label_attr': {'class': 'form-label'}}) }}
-                    {{ form_widget(form.categorie, {'attr': {'class': 'form-select'}}) }}
+                    {{ form_widget(form.categorie, {'attr': {'class': 'form-select', 'multiple': 'multiple', 'size': '8'}}) }}
+                    <div class="form-text">Maintenez Ctrl pour sélectionner plusieurs catégories.</div>
                     <div class="text-danger small mt-1">{{ form_errors(form.categorie) }}</div>
                 </div>
 
