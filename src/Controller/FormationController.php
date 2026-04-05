@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Formation;
 use App\Form\FormationType;
 use Doctrine\ORM\EntityManagerInterface;
+use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -13,7 +14,7 @@ use Symfony\Component\Routing\Attribute\Route;
 final class FormationController extends AbstractController
 {
     #[Route('/formation', name: 'formation_index')]
-    public function index(Request $request, EntityManagerInterface $entityManager): Response
+    public function index(Request $request, EntityManagerInterface $entityManager, PaginatorInterface $paginator): Response
     {
         $titre = trim((string) $request->query->get('titre', ''));
         $categorie = trim((string) $request->query->get('categorie', ''));
@@ -46,7 +47,15 @@ final class FormationController extends AbstractController
         $ordre = $ordre === 'asc' ? 'ASC' : 'DESC';
         $qb->orderBy('f.' . $tri, $ordre);
 
-        $formations = $qb->getQuery()->getResult();
+        $query = $qb->getQuery();
+
+        $page = $request->query->getInt('page', 1);
+
+        $formations = $paginator->paginate(
+            $query,
+            $page,
+            5
+        );
 
         $categories = [
             'Bourse',

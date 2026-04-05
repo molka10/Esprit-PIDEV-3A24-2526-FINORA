@@ -6,7 +6,7 @@
 <header class="navbar-light navbar-sticky">
     <nav class="navbar navbar-expand-xl z-index-9">
         <div class="container">
-            <a class="navbar-brand" href="{{ path('app_home') }}">
+            <a class="nav-link" href="{{ path('app_formations') }}">Formations</a>
                 <img class="light-mode-item navbar-brand-item" src="{{ asset('assets/images/logo.svg') }}" alt="logo">
                 <img class="dark-mode-item navbar-brand-item" src="{{ asset('assets/images/logo-light.svg') }}" alt="logo">
             </a>
@@ -167,7 +167,7 @@
                                 </div>
                                 <h5 class="card-title">{{ formation.titre }}</h5>
                                 <p class="mb-3">{{ formation.description ?: 'Pas de description' }}</p>
-                                <a href="{{ path('formation_index') }}" class="btn btn-primary-soft">Voir plus</a>
+                                <a href="{{ path('app_formations') }}" class="btn btn-primary-soft">Voir plus</a>
                             </div>
                         </div>
                     </div>

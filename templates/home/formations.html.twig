@@ -1,0 +1,174 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}FINORA - Formations{% endblock %}
+
+{% block body %}
+<header class="navbar-light navbar-sticky">
+    <nav class="navbar navbar-expand-xl z-index-9">
+        <div class="container">
+            <a class="navbar-brand" href="{{ path('app_home') }}">
+                <img class="light-mode-item navbar-brand-item" src="{{ asset('assets/images/logo.svg') }}" alt="logo">
+                <img class="dark-mode-item navbar-brand-item" src="{{ asset('assets/images/logo-light.svg') }}" alt="logo">
+            </a>
+
+            <button class="navbar-toggler ms-auto" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-animation">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </span>
+            </button>
+
+            <div class="navbar-collapse collapse" id="navbarCollapse">
+                <ul class="navbar-nav navbar-nav-scroll ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="{{ path('app_home') }}">Accueil</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="{{ path('app_formations') }}">Formations</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ path('app_lesson_index') }}">Lessons</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ path('admin_dashboard') }}">Dashboard</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+</header>
+
+<main>
+    <section class="py-5">
+        <div class="container">
+            <div class="row mb-4">
+                <div class="col-12">
+                    <h1 class="mb-3">Explorer les formations</h1>
+                    <p class="mb-0">Recherchez, filtrez et triez les formations FINORA.</p>
+                </div>
+            </div>
+
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body">
+                    <form method="get" action="{{ path('app_formations') }}" id="fo-formation-filter-form">
+                        <div class="row g-3">
+                            <div class="col-md-3">
+                                <input
+                                    type="text"
+                                    name="titre"
+                                    id="fo-titre-search"
+                                    class="form-control"
+                                    placeholder="Rechercher par titre"
+                                    value="{{ titre }}"
+                                >
+                            </div>
+
+                            <div class="col-md-2">
+                                <select name="categorie" class="form-select">
+                                    <option value="">Toutes catégories</option>
+                                    {% for cat in categories %}
+                                        <option value="{{ cat }}" {{ categorie == cat ? 'selected' : '' }}>
+                                            {{ cat }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+
+                            <div class="col-md-2">
+                                <select name="niveau" class="form-select">
+                                    <option value="">Tous niveaux</option>
+                                    <option value="Débutant" {{ niveau == 'Débutant' ? 'selected' : '' }}>Débutant</option>
+                                    <option value="Intermédiaire" {{ niveau == 'Intermédiaire' ? 'selected' : '' }}>Intermédiaire</option>
+                                    <option value="Avancé" {{ niveau == 'Avancé' ? 'selected' : '' }}>Avancé</option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-2">
+                                <select name="tri" class="form-select">
+                                    <option value="id" {{ tri == 'id' ? 'selected' : '' }}>Trier par ID</option>
+                                    <option value="titre" {{ tri == 'titre' ? 'selected' : '' }}>Titre</option>
+                                    <option value="categorie" {{ tri == 'categorie' ? 'selected' : '' }}>Catégorie</option>
+                                    <option value="niveau" {{ tri == 'niveau' ? 'selected' : '' }}>Niveau</option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-1">
+                                <select name="ordre" class="form-select">
+                                    <option value="asc" {{ ordre == 'asc' ? 'selected' : '' }}>ASC</option>
+                                    <option value="desc" {{ ordre == 'desc' ? 'selected' : '' }}>DESC</option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-2 d-flex gap-2">
+                                <button type="submit" class="btn btn-primary w-100">Filtrer</button>
+                                <a href="{{ path('app_formations') }}" class="btn btn-outline-secondary w-100">Reset</a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            {% if formations|length > 0 %}
+                <div class="row g-4">
+                    {% for formation in formations %}
+                        <div class="col-md-6 col-xl-4">
+                            <div class="card border-0 shadow-sm h-100 overflow-hidden">
+                                <div class="position-relative">
+                                    {% if formation.imageUrl %}
+                                        <img src="{{ formation.imageUrl }}" class="card-img-top" alt="{{ formation.titre }}" style="height: 220px; object-fit: cover;">
+                                    {% else %}
+                                        <img src="{{ asset('assets/images/courses/4by3/16.jpg') }}" class="card-img-top" alt="{{ formation.titre }}" style="height: 220px; object-fit: cover;">
+                                    {% endif %}
+                                </div>
+
+                                <div class="card-body">
+                                    <div class="d-flex flex-wrap gap-2 mb-3">
+                                        <span class="badge bg-primary bg-opacity-10 text-primary">{{ formation.niveau }}</span>
+                                        <span class="badge bg-dark">{{ formation.categorie }}</span>
+
+                                        {% if formation.isPublished %}
+                                            <span class="badge bg-success bg-opacity-10 text-success">Publié</span>
+                                        {% else %}
+                                            <span class="badge bg-warning bg-opacity-10 text-warning">Non publié</span>
+                                        {% endif %}
+                                    </div>
+
+                                    <h5 class="card-title">{{ formation.titre }}</h5>
+                                    <p class="card-text">
+                                        {{ formation.description ? formation.description|slice(0, 120) ~ '...' : 'Pas de description' }}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+
+                <div class="d-flex justify-content-center mt-5">
+                    {{ knp_pagination_render(formations) }}
+                </div>
+            {% else %}
+                <div class="alert alert-info">
+                    Aucune formation trouvée.
+                </div>
+            {% endif %}
+        </div>
+    </section>
+</main>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const form = document.getElementById('fo-formation-filter-form');
+    const titreInput = document.getElementById('fo-titre-search');
+
+    let timeout = null;
+
+    if (titreInput) {
+        titreInput.addEventListener('keyup', function () {
+            clearTimeout(timeout);
+            timeout = setTimeout(() => {
+                form.submit();
+            }, 500);
+        });
+    }
+
+    document.querySelectorAll('#fo-formation-filter-form select').forEach(select => {
+        select.addEventListener('change', function () {
+            form.submit();
+        });
+    });
+});
+</script>
+{% endblock %}
