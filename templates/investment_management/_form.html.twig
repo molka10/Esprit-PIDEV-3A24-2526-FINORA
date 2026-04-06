@@ -1,37 +1,75 @@
-{{ form_start(form) }}
+{{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
 
+<!-- INVESTMENT -->
 <div class="mb-3">
     {{ form_label(form.investment) }}
-    {{ form_widget(form.investment, {'attr': {'class': 'form-control'}}) }}
-    <div class="text-danger">{{ form_errors(form.investment) }}</div>
+    {{ form_widget(form.investment, {
+        'attr': {
+            'class': 'form-control ' ~ (form_errors(form.investment) ? 'is-invalid' : '')
+        }
+    }) }}
+    <div class="invalid-feedback d-block">
+        {{ form_errors(form.investment) }}
+    </div>
 </div>
 
+<!-- TYPE -->
 <div class="mb-3">
     {{ form_label(form.investmentType) }}
-    {{ form_widget(form.investmentType, {'attr': {'class': 'form-control'}}) }}
-    <div class="text-danger">{{ form_errors(form.investmentType) }}</div>
+    {{ form_widget(form.investmentType, {
+        'attr': {
+            'class': 'form-control ' ~ (form_errors(form.investmentType) ? 'is-invalid' : '')
+        }
+    }) }}
+    <div class="invalid-feedback d-block">
+        {{ form_errors(form.investmentType) }}
+    </div>
 </div>
 
+<!-- AMOUNT -->
 <div class="mb-3">
     {{ form_label(form.amountInvested) }}
-    {{ form_widget(form.amountInvested, {'attr': {'class': 'form-control'}}) }}
-    <div class="text-danger">{{ form_errors(form.amountInvested) }}</div>
+    {{ form_widget(form.amountInvested, {
+        'attr': {
+            'class': 'form-control ' ~ (form_errors(form.amountInvested) ? 'is-invalid' : '')
+        }
+    }) }}
+    <div class="invalid-feedback d-block">
+        {{ form_errors(form.amountInvested) }}
+    </div>
 </div>
 
+<!-- PERCENTAGE -->
 <div class="mb-3">
     {{ form_label(form.ownershipPercentage) }}
-    {{ form_widget(form.ownershipPercentage, {'attr': {'class': 'form-control'}}) }}
-    <div class="text-danger">{{ form_errors(form.ownershipPercentage) }}</div>
+    {{ form_widget(form.ownershipPercentage, {
+        'attr': {
+            'class': 'form-control ' ~ (form_errors(form.ownershipPercentage) ? 'is-invalid' : '')
+        }
+    }) }}
+    <div class="invalid-feedback d-block">
+        {{ form_errors(form.ownershipPercentage) }}
+    </div>
 </div>
 
+<!-- DATE -->
 <div class="mb-3">
     {{ form_label(form.startDate) }}
-    {{ form_widget(form.startDate, {'attr': {'class': 'form-control'}}) }}
-    <div class="text-danger">{{ form_errors(form.startDate) }}</div>
+    {{ form_widget(form.startDate, {
+        'attr': {
+            'class': 'form-control ' ~ (form_errors(form.startDate) ? 'is-invalid' : '')
+        }
+    }) }}
+    <div class="invalid-feedback d-block">
+        {{ form_errors(form.startDate) }}
+    </div>
 </div>
 
-<button class="btn btn-success">
-    {{ button_label|default('💾 Save') }}
-</button>
+<!-- BUTTON -->
+<div class="mt-4">
+    <button class="btn btn-success">
+        {{ button_label|default('Save') }}
+    </button>
+</div>
 
 {{ form_end(form) }}

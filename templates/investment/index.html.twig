@@ -1,51 +1,85 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Investment index{% endblock %}
+{% block title %}Investment Marketplace{% endblock %}
 
 {% block body %}
-    <h1>Investment index</h1>
 
-    <table class="table">
-        <thead>
-            <tr>
-                <th>InvestmentId</th>
-                <th>Name</th>
-                <th>Category</th>
-                <th>Location</th>
-                <th>EstimatedValue</th>
-                <th>RiskLevel</th>
-                <th>ImageUrl</th>
-                <th>Description</th>
-                <th>Status</th>
-                <th>CreatedAt</th>
-                <th>actions</th>
-            </tr>
-        </thead>
-        <tbody>
-        {% for investment in investments %}
-            <tr>
-                <td>{{ investment.investmentId }}</td>
-                <td>{{ investment.name }}</td>
-                <td>{{ investment.category }}</td>
-                <td>{{ investment.location }}</td>
-                <td>{{ investment.estimatedValue }}</td>
-                <td>{{ investment.riskLevel }}</td>
-                <td>{{ investment.imageUrl }}</td>
-                <td>{{ investment.description }}</td>
-                <td>{{ investment.status }}</td>
-                <td>{{ investment.createdAt ? investment.createdAt|date('Y-m-d H:i:s') : '' }}</td>
-                <td>
-                    <a href="{{ path('app_investment_show', {'investmentId': investment.investmentId}) }}">show</a>
-                    <a href="{{ path('app_investment_edit', {'investmentId': investment.investmentId}) }}">edit</a>
-                </td>
-            </tr>
-        {% else %}
-            <tr>
-                <td colspan="11">no records found</td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
+<div class="container mt-5">
 
-    <a href="{{ path('app_investment_new') }}">Create new</a>
+    <h1 class="mb-4 fw-bold">💼 Investment Marketplace</h1>
+
+    <!-- 🔍 FILTER -->
+    <form id="filterForm" class="row g-2 mb-4">
+
+        <div class="col-md-4">
+            <input type="text" name="search" class="form-control"
+                   placeholder="Search investment...">
+        </div>
+
+        <div class="col-md-2">
+            <select name="category" class="form-select">
+                <option value="">All Category</option>
+                <option value="Immobilier">Immobilier</option>
+                <option value="Startup">Startup</option>
+                <option value="Agriculture">Agriculture</option>
+            </select>
+        </div>
+
+        <div class="col-md-2">
+            <select name="risk" class="form-select">
+                <option value="">All Risk</option>
+                <option value="LOW">Low</option>
+                <option value="MEDIUM">Medium</option>
+                <option value="HIGH">High</option>
+            </select>
+        </div>
+
+        <div class="col-md-2">
+            <select name="sort" class="form-select">
+                <option value="">Sort</option>
+                <option value="asc">Price ↑</option>
+                <option value="desc">Price ↓</option>
+            </select>
+        </div>
+
+    </form>
+
+    <!-- ADD -->
+    <div class="text-end mb-4">
+        <a href="{{ path('app_investment_new') }}" class="btn btn-success">
+            Add Investment
+        </a>
+    </div>
+
+    <!-- 🔥 RESULTS -->
+    <div id="results">
+        {% include 'investment/_cards.html.twig' %}
+    </div>
+
+</div>
+
+{% endblock %}
+
+{% block javascripts %}
+<script>
+
+const form = document.getElementById("filterForm");
+const results = document.getElementById("results");
+
+form.addEventListener("input", function () {
+
+    const data = new FormData(form);
+    const params = new URLSearchParams(data);
+
+    fetch("?" + params.toString(), {
+        headers: { "X-Requested-With": "XMLHttpRequest" }
+    })
+    .then(res => res.text())
+    .then(html => {
+        results.innerHTML = html;
+    });
+
+});
+
+</script>
 {% endblock %}

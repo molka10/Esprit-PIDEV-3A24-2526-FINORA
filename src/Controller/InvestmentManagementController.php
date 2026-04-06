@@ -5,7 +5,6 @@ namespace App\Controller;
 use App\Entity\InvestmentManagement;
 use App\Form\InvestmentManagementType;
 use App\Repository\InvestmentManagementRepository;
-use App\Repository\InvestmentRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -22,11 +21,10 @@ class InvestmentManagementController extends AbstractController
         $search = $request->query->get('search');
         $status = $request->query->get('status');
 
-        $qb = $repo->createQueryBuilder('i')
-            ->join('i.investment', 'inv');
+        $qb = $repo->createQueryBuilder('i');
 
         if ($search) {
-            $qb->andWhere('inv.name LIKE :search OR i.investmentType LIKE :search')
+            $qb->andWhere('i.investmentType LIKE :search')
                ->setParameter('search', '%'.$search.'%');
         }
 
@@ -44,12 +42,8 @@ class InvestmentManagementController extends AbstractController
 
     // ================= DASHBOARD =================
     #[Route('/dashboard', name: 'app_management_dashboard')]
-    public function dashboard(
-        InvestmentManagementRepository $repo,
-        InvestmentRepository $investmentRepo
-    ): Response
+    public function dashboard(InvestmentManagementRepository $repo): Response
     {
-        // 🔹 Management
         $items = $repo->findAll();
 
         $total = count($items);
@@ -69,32 +63,13 @@ class InvestmentManagementController extends AbstractController
 
         $average = $total > 0 ? $totalAmount / $total : 0;
 
-        // 🔹 Investments (pour calcul performance seulement)
-        $investments = $investmentRepo->findAll();
-
-        $totalValue = 0;
-        foreach ($investments as $inv) {
-            $totalValue += (float)$inv->getEstimatedValue();
-        }
-
-        // 🔥 MÉTIER PERFORMANCE
-        $totalInvested = $totalAmount;
-        $profit = $totalValue - $totalInvested;
-        $roi = $totalInvested > 0 ? ($profit / $totalInvested) * 100 : 0;
-
-        return $this->render('investment_management/dashboard.html.twig', [
+        return $this->render('investment_management/dashboardInvM.html.twig', [
             'total' => $total,
             'totalAmount' => $totalAmount,
             'active' => $active,
             'closed' => $closed,
             'average' => $average,
             'items' => $items,
-
-            // 🔥 données métier
-            'totalValue' => $totalValue,
-            'totalInvested' => $totalInvested,
-            'profit' => $profit,
-            'roi' => $roi,
         ]);
     }
 
@@ -114,8 +89,6 @@ class InvestmentManagementController extends AbstractController
 
             $em->persist($item);
             $em->flush();
-
-            $this->addFlash('success', 'Created successfully ✅');
 
             return $this->redirectToRoute('app_management_dashboard');
         }
@@ -148,8 +121,6 @@ class InvestmentManagementController extends AbstractController
 
             $em->flush();
 
-            $this->addFlash('success', 'Updated successfully ✏️');
-
             return $this->redirectToRoute('app_management_dashboard');
         }
 
@@ -167,8 +138,6 @@ class InvestmentManagementController extends AbstractController
 
             $em->remove($item);
             $em->flush();
-
-            $this->addFlash('danger', 'Deleted successfully ❌');
         }
 
         return $this->redirectToRoute('app_management_dashboard');

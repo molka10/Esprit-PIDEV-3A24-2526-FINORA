@@ -15,14 +15,50 @@ use Symfony\Component\Routing\Annotation\Route;
 class InvestmentController extends AbstractController
 {
     // ================= INDEX =================
-    #[Route('/', name: 'app_investment_index')]
-    public function index(InvestmentRepository $repo): Response
-    {
-        return $this->render('investment/index.html.twig', [
-            'investments' => $repo->findAll(),
+   #[Route('/', name: 'app_investment_index')]
+public function index(Request $request, InvestmentRepository $repo): Response
+{
+    $search = $request->query->get('search');
+    $category = $request->query->get('category');
+    $risk = $request->query->get('risk');
+    $sort = $request->query->get('sort');
+
+    $qb = $repo->createQueryBuilder('i');
+
+    if ($search) {
+        $qb->andWhere('i.name LIKE :search OR i.location LIKE :search')
+           ->setParameter('search', '%' . $search . '%');
+    }
+
+    if ($category) {
+        $qb->andWhere('i.category = :category')
+           ->setParameter('category', $category);
+    }
+
+    if ($risk) {
+        $qb->andWhere('i.riskLevel = :risk')
+           ->setParameter('risk', $risk);
+    }
+
+    if ($sort === 'asc') {
+        $qb->orderBy('i.estimatedValue', 'ASC');
+    } elseif ($sort === 'desc') {
+        $qb->orderBy('i.estimatedValue', 'DESC');
+    }
+
+    $investments = $qb->getQuery()->getResult();
+
+    // 🔥 AJAX RESPONSE
+    if ($request->isXmlHttpRequest()) {
+        return $this->render('investment/_cards.html.twig', [
+            'investments' => $investments
         ]);
     }
 
+    return $this->render('investment/index.html.twig', [
+        'investments' => $investments
+    ]);
+}
     // ================= DASHBOARD 🔥 =================
     #[Route('/dashboard', name: 'app_investment_dashboard')]
     public function dashboard(InvestmentRepository $repo): Response
@@ -73,7 +109,7 @@ class InvestmentController extends AbstractController
             $totalValue += (float)$inv->getEstimatedValue();
         }
 
-        return $this->render('investment/cards.html.twig', [
+        return $this->render('investment/_cards.html.twig', [
             'investments' => $investments,
             'totalValue' => $totalValue,
             'totalCount' => count($investments),

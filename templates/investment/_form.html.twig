@@ -1,9 +1,8 @@
-{{ form_start(form) }}
+{{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
 
 <div class="container mt-5">
 <div class="card shadow p-5" style="max-width:800px; margin:auto; border-radius:15px;">
 
-    <!-- TITLE -->
     <div class="mb-4">
         <h3 class="fw-bold">Add Investment</h3>
         <p class="text-muted">Create or update your investment information</p>
@@ -13,8 +12,10 @@
     <div class="row mb-3">
         <div class="col-md-4"><label>Name:</label></div>
         <div class="col-md-8">
-            {{ form_widget(form.name, {'attr': {'class': 'form-control', 'placeholder':'Land Development Project'}}) }}
-            <div class="text-danger small">{{ form_errors(form.name) }}</div>
+            {{ form_widget(form.name, {
+                'attr': {'class': 'form-control ' ~ (form_errors(form.name) ? 'is-invalid' : '')}
+            }) }}
+            <div class="invalid-feedback d-block">{{ form_errors(form.name) }}</div>
         </div>
     </div>
 
@@ -22,8 +23,10 @@
     <div class="row mb-3">
         <div class="col-md-4"><label>Category:</label></div>
         <div class="col-md-8">
-            {{ form_widget(form.category, {'attr': {'class': 'form-control', 'placeholder':'Real Estate'}}) }}
-            <div class="text-danger small">{{ form_errors(form.category) }}</div>
+            {{ form_widget(form.category, {
+                'attr': {'class': 'form-control ' ~ (form_errors(form.category) ? 'is-invalid' : '')}
+            }) }}
+            <div class="invalid-feedback d-block">{{ form_errors(form.category) }}</div>
         </div>
     </div>
 
@@ -31,8 +34,10 @@
     <div class="row mb-3">
         <div class="col-md-4"><label>Location:</label></div>
         <div class="col-md-8">
-            {{ form_widget(form.location, {'attr': {'class': 'form-control', 'placeholder':'Tunis, Tunisia'}}) }}
-            <div class="text-danger small">{{ form_errors(form.location) }}</div>
+            {{ form_widget(form.location, {
+                'attr': {'class': 'form-control ' ~ (form_errors(form.location) ? 'is-invalid' : '')}
+            }) }}
+            <div class="invalid-feedback d-block">{{ form_errors(form.location) }}</div>
         </div>
     </div>
 
@@ -40,8 +45,10 @@
     <div class="row mb-3">
         <div class="col-md-4"><label>Estimated Value:</label></div>
         <div class="col-md-8">
-            {{ form_widget(form.estimatedValue, {'attr': {'class': 'form-control'}}) }}
-            <div class="text-danger small">{{ form_errors(form.estimatedValue) }}</div>
+            {{ form_widget(form.estimatedValue, {
+                'attr': {'class': 'form-control ' ~ (form_errors(form.estimatedValue) ? 'is-invalid' : '')}
+            }) }}
+            <div class="invalid-feedback d-block">{{ form_errors(form.estimatedValue) }}</div>
         </div>
     </div>
 
@@ -49,8 +56,10 @@
     <div class="row mb-3">
         <div class="col-md-4"><label>Risk Level:</label></div>
         <div class="col-md-8">
-            {{ form_widget(form.riskLevel, {'attr': {'class': 'form-control'}}) }}
-            <div class="text-danger small">{{ form_errors(form.riskLevel) }}</div>
+            {{ form_widget(form.riskLevel, {
+                'attr': {'class': 'form-control ' ~ (form_errors(form.riskLevel) ? 'is-invalid' : '')}
+            }) }}
+            <div class="invalid-feedback d-block">{{ form_errors(form.riskLevel) }}</div>
         </div>
     </div>
 
@@ -58,8 +67,10 @@
     <div class="row mb-3">
         <div class="col-md-4"><label>Image URL:</label></div>
         <div class="col-md-8">
-            {{ form_widget(form.imageUrl, {'attr': {'class': 'form-control', 'id':'imageInput'}}) }}
-            <div class="text-danger small">{{ form_errors(form.imageUrl) }}</div>
+            {{ form_widget(form.imageUrl, {
+                'attr': {'class': 'form-control ' ~ (form_errors(form.imageUrl) ? 'is-invalid' : ''), 'id':'imageInput'}
+            }) }}
+            <div class="invalid-feedback d-block">{{ form_errors(form.imageUrl) }}</div>
 
             <img id="preview"
                  style="margin-top:10px; max-width:100%; height:150px; object-fit:cover; border-radius:10px; display:none;">
@@ -70,8 +81,10 @@
     <div class="row mb-3">
         <div class="col-md-4"><label>Description:</label></div>
         <div class="col-md-8">
-            {{ form_widget(form.description, {'attr': {'class': 'form-control', 'rows':4}}) }}
-            <div class="text-danger small">{{ form_errors(form.description) }}</div>
+            {{ form_widget(form.description, {
+                'attr': {'class': 'form-control ' ~ (form_errors(form.description) ? 'is-invalid' : '')}
+            }) }}
+            <div class="invalid-feedback d-block">{{ form_errors(form.description) }}</div>
         </div>
     </div>
 
@@ -79,12 +92,13 @@
     <div class="row mb-3">
         <div class="col-md-4"><label>Status:</label></div>
         <div class="col-md-8">
-            {{ form_widget(form.status, {'attr': {'class': 'form-control'}}) }}
-            <div class="text-danger small">{{ form_errors(form.status) }}</div>
+            {{ form_widget(form.status, {
+                'attr': {'class': 'form-control ' ~ (form_errors(form.status) ? 'is-invalid' : '')}
+            }) }}
+            <div class="invalid-feedback d-block">{{ form_errors(form.status) }}</div>
         </div>
     </div>
 
-    <!-- BUTTONS -->
     <div class="text-end mt-4">
         <button class="btn btn-primary px-4">💾 Save</button>
         <a href="{{ path('app_investment_cards') }}" class="btn btn-secondary px-4">Cancel</a>
@@ -94,18 +108,3 @@
 </div>
 
 {{ form_end(form) }}
-
-<!-- IMAGE PREVIEW -->
-<script>
-document.getElementById('imageInput').addEventListener('input', function () {
-    let url = this.value;
-    let preview = document.getElementById('preview');
-
-    if (url) {
-        preview.src = url;
-        preview.style.display = 'block';
-    } else {
-        preview.style.display = 'none';
-    }
-});
-</script>

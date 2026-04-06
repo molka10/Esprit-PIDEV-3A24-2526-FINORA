@@ -22,47 +22,58 @@ class InvestmentType extends AbstractType
 
             // NAME
             ->add('name', TextType::class, [
+                'required' => false,
                 'attr' => [
+                    'class' => 'form-control',
                     'placeholder' => 'Land Development Project'
                 ]
             ])
 
             // CATEGORY
             ->add('category', TextType::class, [
+                'required' => false,
                 'attr' => [
+                    'class' => 'form-control',
                     'placeholder' => 'Real Estate'
                 ]
             ])
 
             // LOCATION
             ->add('location', TextType::class, [
+                'required' => false,
                 'attr' => [
+                    'class' => 'form-control',
                     'placeholder' => 'Tunis, Tunisia'
                 ]
             ])
 
             // VALUE
             ->add('estimatedValue', NumberType::class, [
+                'required' => false,
                 'scale' => 2,
                 'attr' => [
+                    'class' => 'form-control',
                     'placeholder' => '150000'
                 ]
             ])
 
             // RISK
             ->add('riskLevel', ChoiceType::class, [
+                'required' => false,
                 'choices' => [
                     'Low' => 'LOW',
                     'Medium' => 'MEDIUM',
                     'High' => 'HIGH',
                 ],
-                'placeholder' => 'Select risk level'
+                'placeholder' => 'Select risk level',
+                'attr' => ['class' => 'form-control']
             ])
 
             // IMAGE
             ->add('imageUrl', UrlType::class, [
                 'required' => false,
                 'attr' => [
+                    'class' => 'form-control',
                     'placeholder' => 'https://example.com/image.jpg'
                 ]
             ])
@@ -71,6 +82,7 @@ class InvestmentType extends AbstractType
             ->add('description', TextareaType::class, [
                 'required' => false,
                 'attr' => [
+                    'class' => 'form-control',
                     'rows' => 4,
                     'placeholder' => 'Write a short description...'
                 ]
@@ -78,11 +90,13 @@ class InvestmentType extends AbstractType
 
             // STATUS
             ->add('status', ChoiceType::class, [
+                'required' => false,
                 'choices' => [
                     'Active' => 'ACTIVE',
                     'Inactive' => 'INACTIVE',
                 ],
-                'placeholder' => 'Select status'
+                'placeholder' => 'Select status',
+                'attr' => ['class' => 'form-control']
             ]);
     }
 

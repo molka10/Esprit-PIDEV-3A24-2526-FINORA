@@ -15,25 +15,26 @@ class Investment
     #[ORM\Column(name: "investment_id", type: "integer")]
     private ?int $investmentId = null;
 
-    #[ORM\Column(type: "string", length: 255)]
+    #[ORM\Column(length: 255)]
     #[Assert\NotBlank(message: "Le nom est obligatoire")]
-    #[Assert\Length(min: 3, max: 255, minMessage: "Minimum 3 caractères")]
+    #[Assert\Length(min: 3, minMessage: "Minimum 3 caractères")]
     private ?string $name = null;
 
-    #[ORM\Column(type: "string", length: 255)]
+    #[ORM\Column(length: 255)]
     #[Assert\NotBlank(message: "La catégorie est obligatoire")]
     private ?string $category = null;
 
-    #[ORM\Column(type: "string", length: 255)]
+    #[ORM\Column(length: 255)]
     #[Assert\NotBlank(message: "La localisation est obligatoire")]
     private ?string $location = null;
 
-    #[ORM\Column(name: "estimated_value", type: "decimal", precision: 10, scale: 2)]
+    // 🔥 FIX TYPE FLOAT
+    #[ORM\Column(name: "estimated_value", type: "float")]
     #[Assert\NotBlank(message: "La valeur est obligatoire")]
     #[Assert\Positive(message: "La valeur doit être positive")]
-    private ?string $estimatedValue = null;
+    private ?float $estimatedValue = null;
 
-    #[ORM\Column(name: "risk_level", type: "string", length: 50)]
+    #[ORM\Column(name: "risk_level", length: 50)]
     #[Assert\NotBlank(message: "Le niveau de risque est obligatoire")]
     #[Assert\Choice(
         choices: ["LOW", "MEDIUM", "HIGH"],
@@ -41,7 +42,7 @@ class Investment
     )]
     private ?string $riskLevel = null;
 
-    #[ORM\Column(name: "image_url", type: "string", length: 255, nullable: true)]
+    #[ORM\Column(name: "image_url", length: 255, nullable: true)]
     #[Assert\Url(message: "URL invalide")]
     private ?string $imageUrl = null;
 
@@ -49,7 +50,7 @@ class Investment
     #[Assert\Length(max: 2000, maxMessage: "Max 2000 caractères")]
     private ?string $description = null;
 
-    #[ORM\Column(name: "status", type: "string", length: 50)]
+    #[ORM\Column(length: 50)]
     #[Assert\NotBlank(message: "Le statut est obligatoire")]
     #[Assert\Choice(
         choices: ["ACTIVE", "INACTIVE"],
@@ -57,7 +58,7 @@ class Investment
     )]
     private ?string $status = null;
 
-    #[ORM\Column(name: "created_at", type: "datetime")]
+    #[ORM\Column(type: "datetime")]
     private ?\DateTimeInterface $createdAt = null;
 
     // 🔥 AUTO DATE
@@ -69,7 +70,7 @@ class Investment
         }
     }
 
-    // 🔥 POUR AFFICHAGE (dropdown)
+    // 🔥 POUR SELECT
     public function __toString(): string
     {
         return $this->name ?? '';
@@ -88,8 +89,9 @@ class Investment
     public function getLocation(): ?string { return $this->location; }
     public function setLocation(string $location): self { $this->location = $location; return $this; }
 
-    public function getEstimatedValue(): ?string { return $this->estimatedValue; }
-    public function setEstimatedValue(string $value): self { $this->estimatedValue = $value; return $this; }
+    // 🔥 FIX FLOAT
+    public function getEstimatedValue(): ?float { return $this->estimatedValue; }
+    public function setEstimatedValue(float $value): self { $this->estimatedValue = $value; return $this; }
 
     public function getRiskLevel(): ?string { return $this->riskLevel; }
     public function setRiskLevel(string $risk): self { $this->riskLevel = $risk; return $this; }
