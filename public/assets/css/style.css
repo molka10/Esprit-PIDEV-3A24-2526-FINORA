@@ -22595,3 +22595,18 @@ html[dir=rtl] .choices__input {
 
 /*User CSS*/
 /*# sourceMappingURL=style.css.map */
+.pagination .page-link {
+    color: #7c3aed;
+    border-radius: 8px;
+}
+
+.pagination .page-item.active .page-link {
+    background-color: #7c3aed;
+    border-color: #7c3aed;
+    color: white;
+}
+
+.pagination .page-link:hover {
+    background-color: #f3e8ff;
+    color: #6d28d9;
+}

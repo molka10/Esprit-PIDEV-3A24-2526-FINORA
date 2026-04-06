@@ -1,4 +1,4 @@
-v<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
@@ -78,6 +78,136 @@ v<!DOCTYPE html>
         <link rel="stylesheet" type="text/css" href="{{ asset('assets/vendor/glightbox/css/glightbox.css') }}">
         <link rel="stylesheet" type="text/css" href="{{ asset('assets/vendor/aos/aos.css') }}">
         <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/style.css') }}">
+
+        <style>
+            :root{
+                --finora-purple:#7c3aed;
+                --finora-purple-dark:#5b21b6;
+                --finora-purple-soft:#f3e8ff;
+                --finora-lavender:#faf5ff;
+                --finora-border:#eadcff;
+                --finora-text:#24103d;
+            }
+
+            body{
+                background: linear-gradient(180deg, #fcfaff 0%, #f8f4ff 100%);
+                color: var(--finora-text);
+            }
+
+            .navbar-light{
+                background: rgba(255,255,255,0.92);
+                backdrop-filter: blur(10px);
+            }
+
+            .navbar .nav-link{
+                font-weight: 600;
+                color: #5b4b73 !important;
+                transition: 0.2s ease;
+            }
+
+            .navbar .nav-link:hover,
+            .navbar .nav-link.active{
+                color: var(--finora-purple) !important;
+            }
+
+            .btn-primary{
+                background: linear-gradient(135deg, var(--finora-purple) 0%, #9333ea 100%);
+                border: none;
+                box-shadow: 0 8px 20px rgba(124, 58, 237, 0.22);
+            }
+
+            .btn-primary:hover{
+                background: linear-gradient(135deg, var(--finora-purple-dark) 0%, #7e22ce 100%);
+            }
+
+            .btn-outline-primary{
+                border-color: var(--finora-purple);
+                color: var(--finora-purple);
+            }
+
+            .btn-outline-primary:hover{
+                background: var(--finora-purple);
+                border-color: var(--finora-purple);
+            }
+
+            .badge.bg-primary,
+            .bg-primary{
+                background-color: var(--finora-purple) !important;
+            }
+
+            .text-primary{
+                color: var(--finora-purple) !important;
+            }
+
+            .bg-primary.bg-opacity-10,
+            .badge.bg-primary.bg-opacity-10{
+                background-color: var(--finora-purple-soft) !important;
+                color: var(--finora-purple) !important;
+            }
+
+            .card{
+                border-radius: 18px !important;
+                border: 1px solid var(--finora-border) !important;
+                box-shadow: 0 10px 30px rgba(89, 30, 130, 0.08) !important;
+            }
+
+            .card-img-top{
+                border-top-left-radius: 18px;
+                border-top-right-radius: 18px;
+            }
+
+            .nav-category{
+                background: transparent;
+            }
+
+            .nav-category .nav-link{
+                background: white;
+                border: 1px solid var(--finora-border);
+                border-radius: 999px;
+                margin: 0 4px;
+                padding: 8px 14px !important;
+            }
+
+            .nav-category .nav-link:hover{
+                background: var(--finora-purple-soft);
+            }
+
+            .form-control,
+            .form-select{
+                border-radius: 12px !important;
+                border: 1px solid #e9d5ff !important;
+                box-shadow: none !important;
+            }
+
+            .form-control:focus,
+            .form-select:focus{
+                border-color: var(--finora-purple) !important;
+                box-shadow: 0 0 0 0.2rem rgba(124,58,237,.15) !important;
+            }
+
+            .shadow-sm{
+                box-shadow: 0 10px 28px rgba(76, 29, 149, 0.08) !important;
+            }
+
+            .purple-chip{
+                background: var(--finora-purple-soft);
+                color: var(--finora-purple);
+                border-radius: 999px;
+                padding: 6px 12px;
+                font-size: 12px;
+                font-weight: 700;
+            }
+
+            .purple-section{
+                background: linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%);
+                border: 1px solid var(--finora-border);
+                border-radius: 24px;
+            }
+
+            .finora-title{
+                color: var(--finora-text);
+            }
+        </style>
     {% endblock %}
 </head>
 <body>

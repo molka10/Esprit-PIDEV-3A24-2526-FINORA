@@ -8,7 +8,7 @@
         <div class="card-body p-4">
             <h1 class="h3 mb-4">Modifier une formation</h1>
 
-            {{ form_start(form) }}
+            {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
 
                 {% if not form.vars.valid %}
                     <div class="alert alert-danger">
@@ -30,7 +30,7 @@
 
                 <div class="mb-3">
                     {{ form_label(form.categorie) }}
-                    {{ form_widget(form.categorie, {'attr': {'class': 'form-select', 'multiple': 'multiple', 'size': '8'}}) }}
+                    {{ form_widget(form.categorie, {'attr': {'class': 'form-select', 'size': '8'}}) }}
                     <div class="form-text">Maintenez Ctrl pour sélectionner plusieurs catégories.</div>
                     <div class="text-danger small mt-1">{{ form_errors(form.categorie) }}</div>
                 </div>

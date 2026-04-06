@@ -34,15 +34,15 @@
 <main>
     <section class="pt-5 pb-0">
         <div class="container">
-            <div class="row align-items-center g-4">
+            <div class="row align-items-center g-4 purple-section p-4 p-lg-5">
                 <div class="col-lg-6">
                     <span class="badge bg-primary bg-opacity-10 text-primary mb-3">Catalogue Lessons</span>
-                    <h1 class="display-5 mb-3">Explorez les lessons FINORA</h1>
+                    <h1 class="display-5 mb-3 finora-title">Explorez les lessons FINORA</h1>
                     <p class="mb-4">
                         Parcourez les lessons disponibles, filtrez par formation et trouvez rapidement le contenu qui vous intéresse.
                     </p>
 
-                    <form method="get" action="{{ path('app_lessons') }}" class="border rounded p-2 mb-4" id="hero-lesson-search-form">
+                    <form method="get" action="{{ path('app_lessons') }}" class="border rounded p-2 mb-4 bg-white" id="hero-lesson-search-form">
                         <div class="input-group">
                             <input
                                 type="text"
@@ -59,30 +59,34 @@
 
                     <div class="row g-3">
                         <div class="col-sm-6">
-                            <div class="d-flex align-items-center">
-                                <div class="icon-lg fs-4 text-orange bg-orange bg-opacity-10 rounded">
-                                    <i class="bi bi-play-btn"></i>
-                                </div>
-                                <div class="ms-3">
-                                    <div class="d-flex">
-                                        <h4 class="fw-bold mb-0">{{ lessons.getTotalItemCount }}</h4>
-                                        <span class="h4 mb-0">+</span>
+                            <div class="card h-100">
+                                <div class="card-body d-flex align-items-center">
+                                    <div class="icon-lg fs-4 text-primary bg-primary bg-opacity-10 rounded">
+                                        <i class="bi bi-play-btn"></i>
                                     </div>
-                                    <div>Lessons disponibles</div>
+                                    <div class="ms-3">
+                                        <div class="d-flex">
+                                            <h4 class="fw-bold mb-0">{{ lessons.getTotalItemCount }}</h4>
+                                            <span class="h4 mb-0">+</span>
+                                        </div>
+                                        <div>Lessons disponibles</div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
                         <div class="col-sm-6">
-                            <div class="d-flex align-items-center">
-                                <div class="icon-lg fs-4 text-info bg-info bg-opacity-10 rounded">
-                                    <i class="fas fa-book-open"></i>
-                                </div>
-                                <div class="ms-3">
-                                    <div class="d-flex">
-                                        <h4 class="fw-bold mb-0">{{ formations|length }}</h4>
+                            <div class="card h-100">
+                                <div class="card-body d-flex align-items-center">
+                                    <div class="icon-lg fs-4 text-primary bg-primary bg-opacity-10 rounded">
+                                        <i class="fas fa-book-open"></i>
                                     </div>
-                                    <div>Formations liées</div>
+                                    <div class="ms-3">
+                                        <div class="d-flex">
+                                            <h4 class="fw-bold mb-0">{{ formations|length }}</h4>
+                                        </div>
+                                        <div>Formations liées</div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -100,7 +104,7 @@
         <div class="container">
 
             <div class="mb-4">
-                <h4 class="mb-3">Filtrer par formation</h4>
+                <h4 class="mb-3 finora-title">Filtrer par formation</h4>
                 <div class="d-flex flex-wrap gap-2">
                     <a href="{{ path('app_lessons') }}"
                        class="btn btn-sm {{ formationSelected == '' ? 'btn-primary' : 'btn-outline-primary' }}">
@@ -178,7 +182,7 @@
                                             Ordre {{ lesson.ordre }}
                                         </span>
 
-                                        <span class="badge bg-dark">
+                                        <span class="purple-chip">
                                             {{ lesson.formation ? lesson.formation.titre : 'Formation inconnue' }}
                                         </span>
 
@@ -203,7 +207,7 @@
                                         </a>
 
                                         {% if lesson.videoUrl %}
-                                            <a href="{{ lesson.videoUrl }}" target="_blank" class="btn btn-sm btn-outline-warning">
+                                            <a href="{{ lesson.videoUrl }}" target="_blank" class="btn btn-sm btn-outline-primary">
                                                 Ouvrir vidéo
                                             </a>
                                         {% endif %}

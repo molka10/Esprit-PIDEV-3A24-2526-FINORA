@@ -8,7 +8,7 @@
         <div class="card-body p-4">
             <h1 class="h3 mb-4">Modifier une lesson</h1>
 
-            {{ form_start(form) }}
+            {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
 
                 {% if not form.vars.valid %}
                     <div class="alert alert-danger">

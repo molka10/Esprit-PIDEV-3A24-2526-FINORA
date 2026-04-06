@@ -3,67 +3,219 @@
 {% block title %}FINORA - Dashboard{% endblock %}
 
 {% block admin_content %}
-<div class="row">
-    <div class="col-12 mb-3">
-        <h1 class="h3 mb-2 mb-sm-0">Dashboard</h1>
-    </div>
-</div>
+<div class="container-fluid p-4">
 
-<div class="row g-4 mb-4">
-    <div class="col-md-6 col-xxl-3">
-        <div class="card card-body bg-warning bg-opacity-15 p-4 h-100">
-            <div class="d-flex justify-content-between align-items-center">
-                <div>
-                    <h2 class="mb-0 fw-bold">FINORA</h2>
-                    <span class="mb-0 h6 fw-light">Back Office</span>
-                </div>
-                <div class="icon-lg rounded-circle bg-warning text-white mb-0">
-                    <i class="fas fa-tv fa-fw"></i>
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm overflow-hidden">
+                <div class="card-body p-4 p-lg-5" style="background: linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%);">
+                    <div class="row align-items-center g-4">
+                        <div class="col-lg-8">
+                            <span class="badge bg-primary bg-opacity-10 text-primary mb-3">Back Office FINORA</span>
+                            <h1 class="h2 mb-3">Dashboard administrateur</h1>
+                            <p class="mb-0 text-muted">
+                                Gérez les formations et les lessons, surveillez l’organisation du contenu
+                                et accédez rapidement aux principales actions de votre plateforme.
+                            </p>
+                        </div>
+                        <div class="col-lg-4 text-lg-end">
+                            <a href="{{ path('formation_new') }}" class="btn btn-primary me-2 mb-2 mb-lg-0">
+                                + Ajouter formation
+                            </a>
+                            <a href="{{ path('app_lesson_new') }}" class="btn btn-outline-primary">
+                                + Ajouter lesson
+                            </a>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="col-md-6 col-xxl-3">
-        <div class="card card-body bg-purple bg-opacity-10 p-4 h-100">
-            <div class="d-flex justify-content-between align-items-center">
-                <div>
-                    <h2 class="mb-0 fw-bold">CRUD</h2>
-                    <span class="mb-0 h6 fw-light">Formations</span>
+    <div class="row g-4 mb-4">
+        <div class="col-md-6 col-xxl-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <span class="text-muted d-block mb-2">Plateforme</span>
+                            <h3 class="mb-1">FINORA</h3>
+                            <small class="text-primary fw-semibold">Back Office</small>
+                        </div>
+                        <div class="icon-lg rounded-circle bg-primary bg-opacity-10 text-primary mb-0 d-flex align-items-center justify-content-center">
+                            <i class="fas fa-tv fa-fw"></i>
+                        </div>
+                    </div>
                 </div>
-                <div class="icon-lg rounded-circle bg-purple text-white mb-0">
-                    <i class="fas fa-user-tie fa-fw"></i>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-xxl-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <span class="text-muted d-block mb-2">Gestion</span>
+                            <h3 class="mb-1">Formations</h3>
+                            <small class="text-primary fw-semibold">CRUD disponible</small>
+                        </div>
+                        <div class="icon-lg rounded-circle bg-primary bg-opacity-10 text-primary mb-0 d-flex align-items-center justify-content-center">
+                            <i class="fas fa-book-open fa-fw"></i>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <a href="{{ path('formation_index') }}" class="btn btn-sm btn-outline-primary">
+                            Ouvrir la liste
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-xxl-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <span class="text-muted d-block mb-2">Gestion</span>
+                            <h3 class="mb-1">Lessons</h3>
+                            <small class="text-primary fw-semibold">CRUD disponible</small>
+                        </div>
+                        <div class="icon-lg rounded-circle bg-primary bg-opacity-10 text-primary mb-0 d-flex align-items-center justify-content-center">
+                            <i class="fas fa-user-graduate fa-fw"></i>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <a href="{{ path('app_lesson_index') }}" class="btn btn-sm btn-outline-primary">
+                            Ouvrir la liste
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-xxl-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <span class="text-muted d-block mb-2">Projet</span>
+                            <h3 class="mb-1">Séance 9</h3>
+                            <small class="text-primary fw-semibold">Template intégré</small>
+                        </div>
+                        <div class="icon-lg rounded-circle bg-primary bg-opacity-10 text-primary mb-0 d-flex align-items-center justify-content-center">
+                            <i class="bi bi-stopwatch-fill fa-fw"></i>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <span class="badge bg-success bg-opacity-10 text-success">En progression</span>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="col-md-6 col-xxl-3">
-        <div class="card card-body bg-primary bg-opacity-10 p-4 h-100">
-            <div class="d-flex justify-content-between align-items-center">
-                <div>
-                    <h2 class="mb-0 fw-bold">CRUD</h2>
-                    <span class="mb-0 h6 fw-light">Lessons</span>
+    <div class="row g-4">
+        <div class="col-xl-8">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white border-0 pb-0 pt-4 px-4">
+                    <h4 class="mb-1">Actions rapides</h4>
+                    <p class="text-muted mb-0">Accès direct aux pages les plus importantes</p>
                 </div>
-                <div class="icon-lg rounded-circle bg-primary text-white mb-0">
-                    <i class="fas fa-user-graduate fa-fw"></i>
+                <div class="card-body p-4">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <a href="{{ path('formation_new') }}" class="text-decoration-none">
+                                <div class="p-4 rounded-4 border h-100" style="background:#faf5ff; border-color:#eadcff !important;">
+                                    <div class="d-flex align-items-center mb-3">
+                                        <div class="icon-md rounded-circle bg-primary bg-opacity-10 text-primary d-flex align-items-center justify-content-center me-3">
+                                            <i class="fas fa-plus"></i>
+                                        </div>
+                                        <h5 class="mb-0 text-dark">Ajouter une formation</h5>
+                                    </div>
+                                    <p class="text-muted mb-0">Créer rapidement une nouvelle formation avec niveau, catégories et image.</p>
+                                </div>
+                            </a>
+                        </div>
+
+                        <div class="col-md-6">
+                            <a href="{{ path('app_lesson_new') }}" class="text-decoration-none">
+                                <div class="p-4 rounded-4 border h-100" style="background:#faf5ff; border-color:#eadcff !important;">
+                                    <div class="d-flex align-items-center mb-3">
+                                        <div class="icon-md rounded-circle bg-primary bg-opacity-10 text-primary d-flex align-items-center justify-content-center me-3">
+                                            <i class="fas fa-play"></i>
+                                        </div>
+                                        <h5 class="mb-0 text-dark">Ajouter une lesson</h5>
+                                    </div>
+                                    <p class="text-muted mb-0">Associer une lesson à une formation, ajouter durée, ordre et vidéo.</p>
+                                </div>
+                            </a>
+                        </div>
+
+                        <div class="col-md-6">
+                            <a href="{{ path('app_formations') }}" class="text-decoration-none">
+                                <div class="p-4 rounded-4 border h-100" style="background:#faf5ff; border-color:#eadcff !important;">
+                                    <div class="d-flex align-items-center mb-3">
+                                        <div class="icon-md rounded-circle bg-primary bg-opacity-10 text-primary d-flex align-items-center justify-content-center me-3">
+                                            <i class="fas fa-globe"></i>
+                                        </div>
+                                        <h5 class="mb-0 text-dark">Voir le Front Office</h5>
+                                    </div>
+                                    <p class="text-muted mb-0">Vérifier l’affichage public des formations, filtres, tags et pagination.</p>
+                                </div>
+                            </a>
+                        </div>
+
+                        <div class="col-md-6">
+                            <a href="{{ path('app_lessons') }}" class="text-decoration-none">
+                                <div class="p-4 rounded-4 border h-100" style="background:#faf5ff; border-color:#eadcff !important;">
+                                    <div class="d-flex align-items-center mb-3">
+                                        <div class="icon-md rounded-circle bg-primary bg-opacity-10 text-primary d-flex align-items-center justify-content-center me-3">
+                                            <i class="fas fa-list"></i>
+                                        </div>
+                                        <h5 class="mb-0 text-dark">Explorer les lessons</h5>
+                                    </div>
+                                    <p class="text-muted mb-0">Tester la navigation entre formations et lessons du côté utilisateur.</p>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white border-0 pb-0 pt-4 px-4">
+                    <h4 class="mb-1">Idées de valeur ajoutée</h4>
+                    <p class="text-muted mb-0">Pour renforcer la démonstration</p>
+                </div>
+                <div class="card-body p-4">
+                    <div class="d-flex flex-column gap-3">
+                        <div class="p-3 rounded-4" style="background:#faf5ff;">
+                            <strong class="d-block mb-1">Tracker de progression</strong>
+                            <small class="text-muted">Afficher l’avancement d’une formation selon les lessons terminées.</small>
+                        </div>
+
+                        <div class="p-3 rounded-4" style="background:#faf5ff;">
+                            <strong class="d-block mb-1">Statistiques réelles</strong>
+                            <small class="text-muted">Total formations, total lessons, formations publiées, durée moyenne.</small>
+                        </div>
+
+                        <div class="p-3 rounded-4" style="background:#faf5ff;">
+                            <strong class="d-block mb-1">Aperçu vidéo</strong>
+                            <small class="text-muted">Miniature YouTube ou badge vidéo plus visible dans les cards lessons.</small>
+                        </div>
+
+                        <div class="p-3 rounded-4" style="background:#faf5ff;">
+                            <strong class="d-block mb-1">Barre de progression FO</strong>
+                            <small class="text-muted">Montrer au user son avancement dans une formation.</small>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="col-md-6 col-xxl-3">
-        <div class="card card-body bg-success bg-opacity-10 p-4 h-100">
-            <div class="d-flex justify-content-between align-items-center">
-                <div>
-                    <h2 class="mb-0 fw-bold">Séance 9</h2>
-                    <span class="mb-0 h6 fw-light">Template intégré</span>
-                </div>
-                <div class="icon-lg rounded-circle bg-success text-white mb-0">
-                    <i class="bi bi-stopwatch-fill fa-fw"></i>
-                </div>
-            </div>
-        </div>
-    </div>
 </div>
 {% endblock %}
