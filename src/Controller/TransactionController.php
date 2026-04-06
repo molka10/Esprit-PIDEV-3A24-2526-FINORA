@@ -112,7 +112,7 @@ return $this->render('wallet/list.html.twig', [
 ]);
 }
 
-   #[Route('/dashboard', name: 'dashboard')]
+   #[Route('/walletuser', name: 'dashboard')]
 public function dashboard(EntityManagerInterface $em): Response
 {
     $transactions = $em->getRepository(TransactionWallet::class)->findAll();
@@ -130,7 +130,7 @@ public function dashboard(EntityManagerInterface $em): Response
 
     $balance = $income - $outcome;
 
-    return $this->render('wallet/dashboard.html.twig', [
+    return $this->render('wallet/walletuser.html.twig', [
         'income' => $income,
         'outcome' => $outcome,
         'balance' => $balance,
