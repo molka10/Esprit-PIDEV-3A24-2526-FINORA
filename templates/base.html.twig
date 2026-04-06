@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>{% block title %}Finora{% endblock %}</title>
-
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
 
 /* GLOBAL */
@@ -748,6 +748,108 @@ button:hover, .btn:hover {
 
 .red {
     color: #e74c3c;
+}
+body {
+    font-family: 'Poppins', 'Segoe UI', sans-serif;
+    color: #2d3436;
+}
+
+/* TITLES */
+h1 {
+    font-size: 26px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: #2d3436;
+}
+
+h2 {
+    font-size: 20px;
+    font-weight: 600;
+}
+
+h3 {
+    font-size: 16px;
+    font-weight: 600;
+    color: #6c5ce7;
+}
+
+/* TABLE TEXT */
+table {
+    font-size: 14px;
+}
+
+th {
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 12px;
+    color: #636e72;
+    letter-spacing: 1px;
+}
+
+td {
+    font-weight: 500;
+    color: #2d3436;
+}
+
+/* COLORS (income/outcome) */
+.green {
+    color: #00b894;
+    font-weight: 600;
+}
+
+.red {
+    color: #d63031;
+    font-weight: 600;
+}
+
+/* BADGE */
+.badge {
+    padding: 5px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.badge.income {
+    background: #dff9fb;
+    color: #00b894;
+}
+
+.badge.outcome {
+    background: #ffeaa7;
+    color: #d63031;
+}
+
+/* SEARCH INPUT */
+.admin-search {
+    width: 250px;
+    padding: 10px 15px;
+    border-radius: 25px;
+    border: none;
+    outline: none;
+    background: #ecf0f1;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.admin-search::placeholder {
+    color: #b2bec3;
+}
+
+/* BUTTON */
+.btn-purple {
+    background: #6c5ce7;
+    color: white;
+    padding: 10px 18px;
+    border-radius: 25px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 14px;
+    transition: 0.3s;
+}
+
+.btn-purple:hover {
+    background: #5a4bd1;
 }
 </style>
 </head>
