@@ -1,80 +1,80 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Dashboard{% endblock %}
-
 {% block content %}
+<div class="clean-dashboard">
 
-<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-    
-    <h1>📊 Dashboard</h1>
+    <!-- HEADER -->
+    <div class="clean-header">
+        <h1>Dashboard</h1>
 
-    <a href="{{ path('transactions') }}" class="btn" style="background:#00b894;">
-        ➕ Ajouter Transaction
-    </a>
+        <a href="{{ path('transactions') }}" class="btn">
+            + Transaction
+        </a>
+    </div>
+
+    <!-- MAIN ROW -->
+    <div class="dash-row">
+
+        <!-- LEFT -->
+        <div class="left-side">
+
+            <div class="clean-stats">
+
+                <div>
+                    <span>Balance</span>
+                    <h2>{{ balance|number_format(2, '.', ' ') }} DT</h2>
+                </div>
+
+                <div>
+                    <span>Income</span>
+                    <h2 class="green">{{ income|number_format(2, '.', ' ') }} DT</h2>
+                </div>
+
+                <div>
+                    <span>Outcome</span>
+                    <h2 class="red">{{ outcome|number_format(2, '.', ' ') }} DT</h2>
+                </div>
+
+                <div>
+                    <span>Transactions</span>
+                    <h2>{{ transactions|length }}</h2>
+                </div>
+
+            </div>
+
+            <div class="clean-export">
+                <a href="{{ path('transactions_pdf') }}" class="btn-outline">PDF</a>
+                <a href="{{ path('transactions_excel') }}" class="btn-outline">Excel</a>
+            </div>
+
+        </div>
+
+        <!-- RIGHT (CHART) -->
+        <div class="right-side">
+            <canvas id="pieChart"></canvas>
+        </div>
+
+    </div>
 
 </div>
-<div class="export-buttons">
 
-    <a href="{{ path('transactions_pdf') }}" class="export-btn">
-        📄 Exporter PDF
-    </a>
-
-    <a href="{{ path('transactions_excel') }}" class="export-btn excel">
-        📊 Export Excel
-    </a>
-
-</div>
-
-<div class="dashboard-cards">
-
-    <div class="dash-card">
-        <span>Balance</span>
-        <h2 class="purple">{{ balance|number_format(2, '.', ' ') }} DT</h2>
-    </div>
-
-    <div class="dash-card">
-        <span>Total Income</span>
-        <h2 class="green">{{ income|number_format(2, '.', ' ') }} DT</h2>
-    </div>
-
-    <div class="dash-card">
-        <span>Total Outcome</span>
-        <h2 class="red">{{ outcome|number_format(2, '.', ' ') }} DT</h2>
-    </div>
-
-    <div class="dash-card">
-        <span>Total Transactions</span>
-        <h2 class="purple">{{ transactions|length }}</h2>
-    </div>
-
-</div>
-<div style="margin-top:40px; display:flex; justify-content:center;">
-    <div style="width:400px; height:400px;">
-        <canvas id="pieChart"></canvas>
-    </div>
-</div>
 {% block javascripts %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
-const ctx = document.getElementById('pieChart');
-
-new Chart(ctx, {
+new Chart(document.getElementById('pieChart'), {
     type: 'doughnut',
     data: {
         labels: ['Income', 'Outcome'],
         datasets: [{
             data: [{{ income }}, {{ outcome }}],
-            backgroundColor: ['#00b894', '#d63031'],
-            borderWidth: 0
+            backgroundColor: ['#2ecc71', '#e74c3c']
         }]
     },
     options: {
         cutout: '70%',
         plugins: {
-            legend: {
-                position: 'bottom'
-            }
+            legend: { position: 'bottom' }
         }
     }
 });

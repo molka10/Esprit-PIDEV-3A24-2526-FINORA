@@ -1,47 +1,84 @@
-<h1>ADMIN REPORT</h1>
+<h1 style="text-align:center; margin-bottom:20px;">
+     ADMIN REPORT
+</h1>
 
-<h2>Users</h2>
+<!-- ===== USERS ===== -->
+<h2 style="margin-bottom:10px;"> Users</h2>
 
-<table border="1" width="100%" cellspacing="0" cellpadding="5">
-    <tr>
-        <th>Name</th>
-        <th>Balance</th>
-        <th>Income</th>
-        <th>Outcome</th>
-        <th>Transactions</th>
-    </tr>
+<table style="width:100%; border-collapse:collapse; font-family:Arial; margin-bottom:30px;">
+    <thead>
+        <tr style="background:#6c5ce7; color:white;">
+            <th style="padding:10px; border:1px solid #ddd;">Name</th>
+            <th style="padding:10px; border:1px solid #ddd;">Balance</th>
+            <th style="padding:10px; border:1px solid #ddd;">Income</th>
+            <th style="padding:10px; border:1px solid #ddd;">Outcome</th>
+            <th style="padding:10px; border:1px solid #ddd;">Transactions</th>
+        </tr>
+    </thead>
 
+    <tbody>
     {% for u in users %}
         <tr>
-            <td>{{ u.name }}</td>
-            <td>{{ u.balance }} DT</td>
-            <td>{{ u.income }}</td>
-            <td>{{ u.outcome }}</td>
-            <td>{{ u.count }}</td>
+            <td style="padding:8px; border:1px solid #ddd;">{{ u.name }}</td>
+
+            <td style="padding:8px; border:1px solid #ddd; text-align:center;">
+                <strong>{{ u.balance }} DT</strong>
+            </td>
+
+            <td style="padding:8px; border:1px solid #ddd; text-align:center; color:green;">
+                {{ u.income }}
+            </td>
+
+            <td style="padding:8px; border:1px solid #ddd; text-align:center; color:red;">
+                {{ u.outcome }}
+            </td>
+
+            <td style="padding:8px; border:1px solid #ddd; text-align:center;">
+                {{ u.count }}
+            </td>
         </tr>
     {% endfor %}
+    </tbody>
 </table>
 
-<br><br>
+<!-- ===== TRANSACTIONS ===== -->
+<h2 style="margin-bottom:10px;"> Transactions</h2>
 
-<h2>Transactions</h2>
+<table style="width:100%; border-collapse:collapse; font-family:Arial;">
+    <thead>
+        <tr style="background:#00b894; color:white;">
+            <th style="padding:10px; border:1px solid #ddd;">User</th>
+            <th style="padding:10px; border:1px solid #ddd;">Type</th>
+            <th style="padding:10px; border:1px solid #ddd;">Montant</th>
+            <th style="padding:10px; border:1px solid #ddd;">Date</th>
+        </tr>
+    </thead>
 
-<table border="1" width="100%" cellspacing="0" cellpadding="5">
-    <tr>
-        <th>User</th>
-        <th>Type</th>
-        <th>Montant</th>
-        <th>Date</th>
-    </tr>
-
+    <tbody>
     {% for u in users %}
         {% for t in u.transactions %}
             <tr>
-                <td>{{ u.name }}</td>
-                <td>{{ t.type }}</td>
-                <td>{{ t.montant }} DT</td>
-                <td>{{ t.dateTransaction|date('Y-m-d') }}</td>
+                <td style="padding:8px; border:1px solid #ddd;">
+                    {{ u.name }}
+                </td>
+
+                <td style="padding:8px; border:1px solid #ddd; text-align:center;">
+                    {% if t.type == 'INCOME' %}
+                        <span style="color:green; font-weight:bold;">INCOME</span>
+                    {% else %}
+                        <span style="color:red; font-weight:bold;">OUTCOME</span>
+                    {% endif %}
+                </td>
+
+                <td style="padding:8px; border:1px solid #ddd; text-align:center;">
+                    {{ t.montant }} DT
+                </td>
+
+                <td style="padding:8px; border:1px solid #ddd;">
+                    {{ t.dateTransaction|date('Y-m-d') }}
+                </td>
             </tr>
         {% endfor %}
     {% endfor %}
+    </tbody>
 </table>

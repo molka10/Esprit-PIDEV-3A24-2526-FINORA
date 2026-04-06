@@ -1,21 +1,45 @@
-<h2>Transactions</h2>
+<h2 style="text-align:center; margin-bottom:20px;">
+     Transactions Report
+</h2>
 
-<table border="1" width="100%" cellspacing="0" cellpadding="5">
-    <tr>
-        <th>Nom</th>
-        <th>Type</th>
-        <th>Montant</th>
-        <th>Category</th>
-        <th>Date</th>
-    </tr>
+<table style="width:100%; border-collapse:collapse; font-family:Arial;">
 
+    <thead>
+        <tr style="background:#6c5ce7; color:white;">
+            <th style="padding:10px; border:1px solid #ddd;">Nom</th>
+            <th style="padding:10px; border:1px solid #ddd;">Type</th>
+            <th style="padding:10px; border:1px solid #ddd;">Montant</th>
+            <th style="padding:10px; border:1px solid #ddd;">Category</th>
+            <th style="padding:10px; border:1px solid #ddd;">Date</th>
+        </tr>
+    </thead>
+
+    <tbody>
     {% for t in transactions %}
         <tr>
-            <td>{{ t.nomTransaction }}</td>
-            <td>{{ t.type }}</td>
-            <td>{{ t.montant }} DT</td>
-            <td>{{ t.category ? t.category.nom : '' }}</td>
-            <td>{{ t.dateTransaction|date('Y-m-d') }}</td>
+            <td style="padding:8px; border:1px solid #ddd;">{{ t.nomTransaction }}</td>
+
+            <td style="padding:8px; border:1px solid #ddd; text-align:center;">
+                {% if t.type == 'INCOME' %}
+                    <span style="color:green; font-weight:bold;">INCOME</span>
+                {% else %}
+                    <span style="color:red; font-weight:bold;">OUTCOME</span>
+                {% endif %}
+            </td>
+
+            <td style="padding:8px; border:1px solid #ddd; text-align:center;">
+                {{ t.montant }} DT
+            </td>
+
+            <td style="padding:8px; border:1px solid #ddd;">
+                {{ t.category ? t.category.nom : '' }}
+            </td>
+
+            <td style="padding:8px; border:1px solid #ddd;">
+                {{ t.dateTransaction|date('Y-m-d') }}
+            </td>
         </tr>
     {% endfor %}
+    </tbody>
+
 </table>

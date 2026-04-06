@@ -4,12 +4,40 @@
 
 {% block content %}
 
-<h2>Modifier Transaction</h2>
+<div class="center-page">
 
-{{ form_start(form) }}
-{{ form_widget(form) }}
+    <div class="card form-card">
 
-{{ form_end(form) }}
+        <div class="header-form">
+            <h1>✏️ Edit Transaction</h1>
 
+            <a href="{{ path('transactions') }}" class="btn" style="background:#636e72;">
+                ⬅ Retour
+            </a>
+        </div>
+
+        {{ form_start(form) }}
+
+        <div class="form-group">
+            {{ form_label(form.nomTransaction) }}
+            {{ form_widget(form.nomTransaction) }}
+        </div>
+
+        <div class="form-group">
+            {{ form_label(form.montant) }}
+            {{ form_widget(form.montant) }}
+        </div>
+
+        <div class="form-group">
+            {{ form_label(form.dateTransaction) }}
+            {{ form_widget(form.dateTransaction) }}
+        </div>
+
+        
+        {{ form_end(form) }}
+
+    </div>
+
+</div>
 
 {% endblock %}
