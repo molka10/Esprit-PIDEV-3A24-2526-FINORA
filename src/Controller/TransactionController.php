@@ -118,11 +118,29 @@ public function dashboard(EntityManagerInterface $em): Response
     $income = 0;
     $outcome = 0;
 
+    $incomeData = [];
+    $outcomeData = [];
+
     foreach ($transactions as $t) {
-        if ($t->getMontant() > 0) {
-            $income += $t->getMontant();
+
+        $amount = $t->getMontant();
+        $cat = $t->getCategory() ? $t->getCategory()->getNom() : 'Autre';
+
+        if ($amount > 0) {
+            $income += $amount;
+
+            if (!isset($incomeData[$cat])) {
+                $incomeData[$cat] = 0;
+            }
+            $incomeData[$cat] += $amount;
+
         } else {
-            $outcome += abs($t->getMontant());
+            $outcome += abs($amount);
+
+            if (!isset($outcomeData[$cat])) {
+                $outcomeData[$cat] = 0;
+            }
+            $outcomeData[$cat] += abs($amount);
         }
     }
 
@@ -132,7 +150,14 @@ public function dashboard(EntityManagerInterface $em): Response
         'income' => $income,
         'outcome' => $outcome,
         'balance' => $balance,
-         'transactions' => $transactions
+        'transactions' => $transactions,
+
+        // 🔥 charts
+        'incomeChartLabels' => array_keys($incomeData),
+        'incomeChartData' => array_values($incomeData),
+
+        'outcomeChartLabels' => array_keys($outcomeData),
+        'outcomeChartData' => array_values($outcomeData),
     ]);
 }
 

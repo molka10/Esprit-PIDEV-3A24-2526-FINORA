@@ -49,6 +49,17 @@
         <div class="right-side">
             <canvas id="pieChart"></canvas>
         </div>
+        <div class="charts-container">
+    <div class="chart-box">
+        <h3 class="chart-title">Income</h3>
+        <canvas id="incomeChart"></canvas>
+    </div>
+
+    <div class="chart-box">
+        <h3 class="chart-title">Outcome</h3>
+        <canvas id="outcomeChart"></canvas>
+    </div>
+</div>
 
     </div>
 
@@ -72,6 +83,42 @@ new Chart(document.getElementById('pieChart'), {
         plugins: {
             legend: { position: 'bottom' }
         }
+    }
+});
+// INCOME
+new Chart(document.getElementById('incomeChart'), {
+    type: 'line',
+    data: {
+        labels: {{ incomeChartLabels|json_encode|raw }},
+        datasets: [{
+            data: {{ incomeChartData|json_encode|raw }},
+            borderColor: '#ff6b00',
+            backgroundColor: 'transparent',
+            borderWidth: 3,
+            pointRadius: 5
+        }]
+    },
+    options: {
+        plugins: { legend: { display: false } }
+    }
+});
+
+
+// OUTCOME
+new Chart(document.getElementById('outcomeChart'), {
+    type: 'line',
+    data: {
+        labels: {{ outcomeChartLabels|json_encode|raw }},
+        datasets: [{
+            data: {{ outcomeChartData|json_encode|raw }},
+            borderColor: '#ff6b00',
+            backgroundColor: 'transparent',
+            borderWidth: 3,
+            pointRadius: 5
+        }]
+    },
+    options: {
+        plugins: { legend: { display: false } }
     }
 });
 </script>
