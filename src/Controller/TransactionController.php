@@ -27,7 +27,6 @@ public function add(Request $req, EntityManagerInterface $em): Response
 $transaction->setUserId(rand(1, 5));
     $transaction->setSource("manual");
 
-    // 🟢 نجيبو categories قبل
     $categories = $em->getRepository(Category::class)->findAll();
 
     $form = $this->createForm(TransactionType::class, $transaction);
@@ -49,7 +48,6 @@ if (!$transaction->getDateTransaction()) {
         return $this->redirectToRoute('transactions');
     }
 
-    // ✅ return واحد فقط
     return $this->render('wallet/add.html.twig', [
         'form' => $form->createView(),
         'categories' => $categories
@@ -108,7 +106,7 @@ if ($categoryId) {
 return $this->render('wallet/list.html.twig', [
     'form' => $form->createView(),
     'transactions' => $transactions,
-    'categories' => $categories // ✅ هذا اللي ناقصك
+    'categories' => $categories 
 ]);
 }
 
@@ -240,7 +238,6 @@ public function exportExcel(EntityManagerInterface $em): Response
     $spreadsheet = new Spreadsheet();
     $sheet = $spreadsheet->getActiveSheet();
 
-    // HEADER
     $sheet->setCellValue('A1', 'Nom');
     $sheet->setCellValue('B1', 'Type');
     $sheet->setCellValue('C1', 'Montant');

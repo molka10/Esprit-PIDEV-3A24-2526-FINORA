@@ -18,7 +18,6 @@ class TransactionType extends AbstractType
     $builder
         ->add('nomTransaction');
 
-    // 🔥 يظهر type كان في add
     if ($options['show_type']) {
         $builder->add('type', ChoiceType::class, [
             'choices' => [
@@ -41,7 +40,7 @@ class TransactionType extends AbstractType
         $resolver->setDefaults([
             'data_class' => TransactionWallet::class,
             'type' => 'INCOME',
-            'show_type' => true, // 👈 default
+            'show_type' => true, 
         ]);
     }
 }

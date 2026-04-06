@@ -16,7 +16,6 @@ class AdminController extends AbstractController
     {
         $search = $request->query->get('search');
 
-        // 🔍 SEARCH IMPROVED
         if ($search) {
             $transactions = $repo->createQueryBuilder('t')
                 ->where('t.nomTransaction LIKE :search')
@@ -64,7 +63,6 @@ class AdminController extends AbstractController
             $users[$userId]['transactions'][] = $t;
         }
 
-        // 📊 CHART
         $chartDates = [];
 
         foreach ($transactions as $t) {
@@ -93,7 +91,6 @@ class AdminController extends AbstractController
         ]);
     }
 
-    // 📄 PDF
     #[Route('/admin/pdf', name: 'download_pdf')]
     public function downloadPdf(Request $request, TransactionWalletRepository $repo): Response
     {
@@ -112,7 +109,6 @@ class AdminController extends AbstractController
             $transactions = $repo->findAll();
         }
 
-        // 🔥 USERS (same logique)
         $users = [];
 
         foreach ($transactions as $t) {
