@@ -145,24 +145,33 @@ public function dashboard(EntityManagerInterface $em): Response
     }
 
     $balance = $income - $outcome;
-$chartDates = [];
+    $chartDates = [];
 
 foreach ($transactions as $t) {
-    $date = $t->getDateTransaction()->format('Y-m-d');
 
-    if (!isset($chartDates[$date])) {
-        $chartDates[$date] = [
+    // 🔥 month format
+    $month = $t->getDateTransaction()->format('Y-m'); 
+
+    if (!isset($chartDates[$month])) {
+        $chartDates[$month] = [
             'income' => 0,
             'outcome' => 0
         ];
     }
 
     if ($t->getType() === 'INCOME') {
-        $chartDates[$date]['income'] += $t->getMontant();
+        $chartDates[$month]['income'] += $t->getMontant();
     } else {
-        $chartDates[$date]['outcome'] += abs($t->getMontant());
+        $chartDates[$month]['outcome'] += abs($t->getMontant());
     }
 }
+
+
+
+// final arrays
+$chartLabels = array_keys($chartDates);
+$chartIncome = array_column($chartDates, 'income');
+$chartOutcome = array_column($chartDates, 'outcome');
 
 ksort($chartDates);
 

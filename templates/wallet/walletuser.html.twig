@@ -215,27 +215,19 @@ new Chart(document.getElementById('outcomeChart'), {
 });
 
 new Chart(document.getElementById('dateChart'), {
-    type: 'line',
+    type: 'bar',
     data: {
         labels: {{ chartLabels|json_encode|raw }},
         datasets: [
             {
                 label: 'Income',
                 data: {{ incomeData|json_encode|raw }},
-                borderColor: '#00b894',
-                backgroundColor: 'rgba(0,184,148,0.1)',
-                borderWidth: 3,
-                tension: 0.4,
-                fill: true
+                backgroundColor: '#00b894'
             },
             {
                 label: 'Outcome',
                 data: {{ outcomeData|json_encode|raw }},
-                borderColor: '#d63031',
-                backgroundColor: 'rgba(214,48,49,0.1)',
-                borderWidth: 3,
-                tension: 0.4,
-                fill: true
+                backgroundColor: '#d63031'
             }
         ]
     },
@@ -250,8 +242,14 @@ new Chart(document.getElementById('dateChart'), {
         },
 
         scales: {
-            x: { grid: { display: false } },
-            y: { grid: { color: '#eee' } }
+            x: {
+                stacked: true,
+                grid: { display: false }
+            },
+            y: {
+                stacked: true,
+                grid: { color: '#eee' }
+            }
         }
     }
 });
