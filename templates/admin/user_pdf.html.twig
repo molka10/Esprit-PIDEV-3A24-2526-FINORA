@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body { font-family: Arial; }
+        h2 { color: #6c5ce7; }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            border: 1px solid #ccc;
+            padding: 10px;
+            text-align: center;
+        }
+
+        th {
+            background: #6c5ce7;
+            color: white;
+        }
+
+        .green { color: green; }
+        .red { color: red; }
+    </style>
+</head>
+<body>
+
+<h2>User {{ userId }} Transactions</h2>
+
+<table>
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Type</th>
+            <th>Montant</th>
+            <th>Date</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        {% for t in transactions %}
+            <tr>
+                <td>{{ t.nomTransaction }}</td>
+                <td>{{ t.type }}</td>
+                <td class="{{ t.type == 'INCOME' ? 'green' : 'red' }}">
+                    {{ t.montant }} DT
+                </td>
+                <td>{{ t.dateTransaction|date('Y-m-d') }}</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+</body>
+</html>

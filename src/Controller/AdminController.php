@@ -39,6 +39,7 @@ class AdminController extends AbstractController
 
             if (!isset($users[$userId])) {
                 $users[$userId] = [
+                    'id' => $userId,
                     'name' => 'User ' . $userId,
                     'income' => 0,
                     'outcome' => 0,
@@ -155,4 +156,79 @@ class AdminController extends AbstractController
             ]
         );
     }
+
+
+    #[Route('/admin/user/{id}', name: 'user_transactions')]
+public function userTransactions($id, TransactionWalletRepository $repo): Response
+{
+    $transactions = $repo->createQueryBuilder('t')
+        ->where('t.userId = :id')
+        ->setParameter('id', $id)
+        ->orderBy('t.dateTransaction', 'DESC')
+        ->getQuery()
+        ->getResult();
+
+    // ✅ chart data (par date)
+    $chartDates = [];
+    $income = 0;
+    $outcome = 0;
+
+    foreach ($transactions as $t) {
+        $date = $t->getDateTransaction()->format('Y-m-d');
+
+        if (!isset($chartDates[$date])) {
+            $chartDates[$date] = 0;
+        }
+
+        $chartDates[$date] += $t->getMontant();
+
+        // donut
+        if ($t->getType() === 'INCOME') {
+            $income += $t->getMontant();
+        } else {
+            $outcome += abs($t->getMontant());
+        }
+    }
+
+    ksort($chartDates);
+
+    return $this->render('admin/user_transactions.html.twig', [
+        'transactions' => $transactions,
+        'userId' => $id,
+        'chartLabels' => array_keys($chartDates),
+        'chartData' => array_values($chartDates),
+        'income' => $income,
+        'outcome' => $outcome
+    ]);
+}
+#[Route('/admin/user/{id}/pdf', name: 'user_transactions_pdf')]
+public function userTransactionsPdf($id, TransactionWalletRepository $repo): Response
+{
+    $transactions = $repo->createQueryBuilder('t')
+        ->where('t.userId = :id')
+        ->setParameter('id', $id)
+        ->orderBy('t.dateTransaction', 'DESC')
+        ->getQuery()
+        ->getResult();
+
+    // render html
+    $html = $this->renderView('admin/user_pdf.html.twig', [
+        'transactions' => $transactions,
+        'userId' => $id
+    ]);
+
+    $dompdf = new Dompdf();
+    $dompdf->loadHtml($html);
+    $dompdf->render();
+
+    return new Response(
+        $dompdf->output(),
+        200,
+        [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'attachment; filename="user_'.$id.'.pdf"',
+        ]
+    );
+}
+
 }

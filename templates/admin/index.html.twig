@@ -30,6 +30,7 @@
                         <th>Outcome</th>
                         <th>Transactions</th>
                         <th>Status</th>
+                        <th>Actions</th>
                     </tr>
                 </thead>
 
@@ -48,129 +49,78 @@
                                     <span class="badge outcome">Risk</span>
                                 {% endif %}
                             </td>
+                            <td>
+                               <a href="{{ path('user_transactions', { id: u.id }) }}" class="btn-view"> 👁 View</a>
+                                
+                               
+                            </td>
                         </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
 
-        <div class="box small-chart">
-            <h3>📊 Overview</h3>
-            <canvas id="chart"></canvas>
-        </div>
+      
 
     </div>
 
-    <div class="admin-row">
+   
 
-        <div class="box big-chart">
-            <h3 style="color:#6c5ce7;">Transactions par date</h3>
-            <canvas id="lineChart"></canvas>
-        </div>
+        
 
-        <div class="box transactions-box">
-
-            <h2 style="color:#6c5ce7;">Transactions</h2>
-
-           
-
-            <table id="transactionTable">
-                <thead>
-                    <tr>
-                        <th>User</th>
-                        <th>Type</th>
-                        <th>Montant</th>
-                        <th>Date</th>
-                    </tr>
-                </thead>
-
-                <tbody>
-                    {% for u in users %}
-                        {% for t in u.transactions ?? [] %}
-                            <tr>
-                                <td>{{ u.name }}</td>
-                                <td>{{ t.type }}</td>
-                                <td class="{{ t.type == 'INCOME' ? 'green' : 'red' }}">
-                                    {{ t.montant }} DT
-                                </td>
-                                <td>{{ t.dateTransaction|date('Y-m-d') }}</td>
-                            </tr>
-                        {% endfor %}
-                    {% endfor %}
-                </tbody>
-            </table>
-
-        </div>
-
-    </div>
 
 </div>
 
 {% endblock %}
 
 {% block javascripts %}
+<script>
+    const usersData = {{ users|json_encode|raw }};
+</script>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
 
+function showUserTransactions(userName) {
 
+    let tbody = document.getElementById("transactionBody");
+    tbody.innerHTML = "";
 
-const ctx = document.getElementById('chart');
+    for (let userId in usersData) {
 
-new Chart(ctx, {
-    type: 'doughnut',
-    data: {
-        labels: ['Income', 'Outcome'],
-        datasets: [{
-            data: [
-                {% set totalIncome = 0 %}
-                {% set totalOutcome = 0 %}
-                {% for u in users %}
-                    {% set totalIncome = totalIncome + u.income %}
-                    {% set totalOutcome = totalOutcome + u.outcome %}
-                {% endfor %}
-                {{ totalIncome }}, {{ totalOutcome }}
-            ],
-            backgroundColor: ['#00b894', '#d63031']
-        }]
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        cutout: '65%'
-    }
-});
+        let user = usersData[userId];
 
-const ctxLine = document.getElementById('lineChart');
+        if (user.name === userName) {
 
-new Chart(ctxLine, {
-    type: 'line',
-    data: {
-        labels: {{ chartLabels|json_encode|raw }},
-        datasets: [{
-            label: 'Montant',
-            data: {{ chartData|json_encode|raw }},
-            borderColor: '#6c5ce7',
-            borderWidth: 3,
-            tension: 0,
-            fill: false,
-            pointBackgroundColor: '#fff',
-            pointBorderColor: '#fd7e14',
-            pointBorderWidth: 3,
-            pointRadius: 6
-        }]
-    },
-    options: {
-    responsive: true,
-    maintainAspectRatio: false, 
-    plugins: {
-        legend: {
-            position: 'top'
+            if (user.transactions.length === 0) {
+                tbody.innerHTML = "<tr><td colspan='4'>No transactions</td></tr>";
+                return;
+            }
+
+            user.transactions.forEach(t => {
+
+                let color = t.type === "INCOME" ? "green" : "red";
+
+                let row = `
+                    <tr>
+                        <td>${user.name}</td>
+                        <td>${t.type}</td>
+                        <td class="${color}">${t.montant} DT</td>
+                        <td>${t.dateTransaction.date.split(' ')[0]}</td>
+                    </tr>
+                `;
+
+                tbody.innerHTML += row;
+            });
+
         }
     }
 }
-});
+
+
+
+
 const input = document.getElementById('searchUser');
 
 input.addEventListener('keyup', function () {

@@ -252,10 +252,10 @@ button:hover, .btn:hover {
 /* LINE CHART */
 .big-chart {
     width: 100%;
-    height: 350px;
+    height: 500px;        
     border: 2px solid #a29bfe;
     border-radius: 20px;
-    padding: 20px;
+    padding: 30px;        
 }
 
 /* RESPONSIVE */
@@ -953,6 +953,75 @@ td {
     gap: 10px;
 }
 
+.btn-view {
+    background: #6c5ce7;
+    color: white;
+    border: none;
+    padding: 6px 14px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 13px;
+}
+
+.btn-view:hover {
+    background: #5a4bcf;
+}
+.charts-right {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.chart-box {
+    height: 250px;   /* متوازن */
+}
+
+
+.small-chart,
+.big-chart {
+    height: 300px;
+}
+
+.admin-row .box {
+    height: 320px;
+}
+.box {
+    padding: 20px;
+    border-radius: 20px;
+}
+
+.chart-container {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+/* DONUT */
+.chart-donut {
+    flex: 1;
+    background: white;
+    padding: 20px;
+    border-radius: 18px;
+    height: 280px;
+}
+
+/* LINE */
+.chart-line {
+    flex: 2;
+    background: white;
+    padding: 20px;
+    border-radius: 18px;
+    height: 280px;
+}
+
+/* IMPORTANT */
+.chart-container canvas {
+    width: 100% !important;
+    height: 220px !important; /* 👈 ثابت */
+}
+.admin-grid {
+    grid-template-columns: 1fr; /* بدل 2fr 1fr */
+}
 </style>
 </head>
 

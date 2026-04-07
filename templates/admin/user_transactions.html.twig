@@ -1,0 +1,106 @@
+{% extends 'base.html.twig' %}
+
+{% block content %}
+
+<div class="admin">
+
+    <h1 style="color:#6c5ce7;">👤 User {{ userId }} Transactions</h1>
+<div style="display:flex; gap:10px; margin-bottom:20px;">
+    <a href="{{ path('app_admin') }}" class="btn-view">⬅ Back</a>
+
+    <a href="{{ path('user_transactions_pdf', { id: userId }) }}" class="btn-purple">
+        ⬇ PDF
+    </a>
+
+   
+</div>
+    <div class="box">
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Type</th>
+                    <th>Montant</th>
+                    <th>Date</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for t in transactions %}
+                    <tr>
+                        <td>{{ t.nomTransaction }}</td>
+                        <td>{{ t.type }}</td>
+
+                        <td class="{{ t.type == 'INCOME' ? 'green' : 'red' }}">
+                            {{ t.montant }} DT
+                        </td>
+
+                        <td>{{ t.dateTransaction|date('Y-m-d') }}</td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="3">No transactions</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+
+        </table>
+
+    </div>
+ <div class="chart-container">
+
+    <div class="chart-donut">
+        <h3>📊 Overview</h3>
+        <canvas id="chartUser"></canvas>
+    </div>
+
+    <div class="chart-line">
+        <h3>Transactions</h3>
+        <canvas id="lineChartUser"></canvas>
+    </div>
+
+</div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+// ✅ donut (income vs outcome)
+new Chart(document.getElementById('chartUser'), {
+    type: 'doughnut',
+    data: {
+        labels: ['Income', 'Outcome'],
+        datasets: [{
+            data: [{{ income }}, {{ outcome }}],
+            backgroundColor: ['#00b894', '#d63031']
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        cutout: '65%'
+    }
+});
+
+// ✅ line chart
+new Chart(document.getElementById('lineChartUser'), {
+    type: 'line',
+    data: {
+        labels: {{ chartLabels|json_encode|raw }},
+        datasets: [{
+            label: 'Montant',
+            data: {{ chartData|json_encode|raw }},
+            borderColor: '#6c5ce7',
+            borderWidth: 4,
+            tension: 0.4,
+            fill: true,
+            backgroundColor: 'rgba(108,92,231,0.1)'
+        }]
+    },
+   options: {
+    responsive: true,
+    maintainAspectRatio: false
+}
+});
+</script>
+{% endblock %}

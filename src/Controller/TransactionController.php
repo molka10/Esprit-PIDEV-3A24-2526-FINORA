@@ -145,6 +145,30 @@ public function dashboard(EntityManagerInterface $em): Response
     }
 
     $balance = $income - $outcome;
+$chartDates = [];
+
+foreach ($transactions as $t) {
+    $date = $t->getDateTransaction()->format('Y-m-d');
+
+    if (!isset($chartDates[$date])) {
+        $chartDates[$date] = [
+            'income' => 0,
+            'outcome' => 0
+        ];
+    }
+
+    if ($t->getType() === 'INCOME') {
+        $chartDates[$date]['income'] += $t->getMontant();
+    } else {
+        $chartDates[$date]['outcome'] += abs($t->getMontant());
+    }
+}
+
+ksort($chartDates);
+
+$chartLabels = array_keys($chartDates);
+$chartIncome = array_column($chartDates, 'income');
+$chartOutcome = array_column($chartDates, 'outcome');
 
     return $this->render('wallet/walletuser.html.twig', [
         'income' => $income,
@@ -158,6 +182,10 @@ public function dashboard(EntityManagerInterface $em): Response
 
         'outcomeChartLabels' => array_keys($outcomeData),
         'outcomeChartData' => array_values($outcomeData),
+
+        'chartLabels' => $chartLabels,
+    'incomeData' => $chartIncome,
+    'outcomeData' => $chartOutcome,
     ]);
 }
 
