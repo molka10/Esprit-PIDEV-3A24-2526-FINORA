@@ -5,7 +5,7 @@
 <div class="admin">
 
     <div class="admin-header">
-        <h1>📊 ADMIN DASHBOARD</h1>
+        <h1 style="font-weight:700;">Admin Dashboard</h1>
        <a href="{{ path('download_pdf', { search: app.request.get('search') }) }}" class="btn-purple"> ⬇ PDF</a>
     </div>
 
@@ -19,7 +19,7 @@
 
         <!-- USERS -->
         <div class="box">
-            <h3>👥 Users</h3>
+            <h3> Users</h3>
 
             <table id="userTable">
                 <thead>
@@ -64,7 +64,7 @@
 
     </div>
 
-   <div style="width:500px; height:300px; margin:auto;">
+   <div class="chart-box" style="max-width:600px; margin:auto;">
     <canvas id="stackedChart"></canvas>
 </div>
 
@@ -79,24 +79,34 @@
 
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+const usersData = {{ users|json_encode|raw }};
+</script>
 
 <script>
+
+
+// تحويل data
+const labels = Object.values(usersData).map(u => u.name);
+const incomeData = Object.values(usersData).map(u => u.income);
+const outcomeData = Object.values(usersData).map(u => u.outcome);
+
 const ctx = document.getElementById('stackedChart');
 
 new Chart(ctx, {
     type: 'bar',
     data: {
-        labels: ['User 1', 'User 6'],
+        labels: labels,
         datasets: [
             {
                 label: 'Income',
-                data: [4000, 3000],
-                backgroundColor: '#00b894'
+                data: incomeData,
+                backgroundColor: '#1e3a8a'
             },
             {
                 label: 'Outcome',
-                data: [3145, 2000],
-                backgroundColor: '#d63031'
+                data: outcomeData,
+                backgroundColor: '#374151'
             }
         ]
     },
@@ -108,21 +118,12 @@ new Chart(ctx, {
             }
         },
         scales: {
-            x: {
-                stacked: true
-            },
-            y: {
-                stacked: true
-            }
+            x: { stacked: true },
+            y: { stacked: true }
         }
     }
 });
 </script>
-<script>
-    const usersData = {{ users|json_encode|raw }};
-</script>
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
 

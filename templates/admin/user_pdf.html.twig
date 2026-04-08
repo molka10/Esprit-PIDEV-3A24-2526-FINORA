@@ -3,8 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <style>
-        body { font-family: Arial; }
-        h2 { color: #6c5ce7; }
+        body {
+            font-family: Arial;
+            color: #0f172a;
+        }
+
+        h2 {
+            color: #1e3a8a;
+            text-align: center;
+            margin-bottom: 20px;
+        }
 
         table {
             width: 100%;
@@ -13,18 +21,35 @@
         }
 
         th, td {
-            border: 1px solid #ccc;
+            border: 1px solid #e5e7eb;
             padding: 10px;
             text-align: center;
         }
 
         th {
-            background: #6c5ce7;
+            background: #1e3a8a;
             color: white;
+            font-weight: bold;
         }
 
-        .green { color: green; }
-        .red { color: red; }
+        tbody tr:nth-child(even) {
+            background: #f1f5f9; /* 🔥 zebra clean */
+        }
+
+        .income {
+            color: #1e3a8a;
+            font-weight: 600;
+        }
+
+        .outcome {
+            color: #374151;
+            font-weight: 600;
+        }
+
+        .amount {
+            font-weight: 500;
+        }
+
     </style>
 </head>
 <body>
@@ -45,11 +70,18 @@
         {% for t in transactions %}
             <tr>
                 <td>{{ t.nomTransaction }}</td>
-                <td>{{ t.type }}</td>
-                <td class="{{ t.type == 'INCOME' ? 'green' : 'red' }}">
+
+                <td class="{{ t.type == 'INCOME' ? 'income' : 'outcome' }}">
+                    {{ t.type }}
+                </td>
+
+                <td class="amount">
                     {{ t.montant }} DT
                 </td>
-                <td>{{ t.dateTransaction|date('Y-m-d') }}</td>
+
+                <td style="color:#64748b;">
+                    {{ t.dateTransaction|date('Y-m-d') }}
+                </td>
             </tr>
         {% endfor %}
     </tbody>

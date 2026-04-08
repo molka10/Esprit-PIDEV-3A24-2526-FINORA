@@ -1,43 +1,47 @@
-<h2 style="text-align:center; margin-bottom:20px;">
-     Transactions Report
+<h2 style="text-align:center; margin-bottom:20px; color:#1e3a8a;">
+    Transactions Report
 </h2>
 
 <table style="width:100%; border-collapse:collapse; font-family:Arial;">
 
     <thead>
-        <tr style="background:#6c5ce7; color:white;">
-            <th style="padding:10px; border:1px solid #ddd;">Nom</th>
-            <th style="padding:10px; border:1px solid #ddd;">Type</th>
-            <th style="padding:10px; border:1px solid #ddd;">Montant</th>
-            <th style="padding:10px; border:1px solid #ddd;">Category</th>
-            <th style="padding:10px; border:1px solid #ddd;">Date</th>
+        <tr style="background:#1e3a8a; color:white;">
+            <th style="padding:10px; border:1px solid #e5e7eb;">Nom</th>
+            <th style="padding:10px; border:1px solid #e5e7eb;">Type</th>
+            <th style="padding:10px; border:1px solid #e5e7eb;">Montant</th>
+            <th style="padding:10px; border:1px solid #e5e7eb;">Category</th>
+            <th style="padding:10px; border:1px solid #e5e7eb;">Date</th>
         </tr>
     </thead>
 
     <tbody>
     {% for t in transactions %}
-        <tr>
-            <td style="padding:8px; border:1px solid #ddd;">{{ t.nomTransaction }}</td>
+        <tr style="background:#f9fafb;">
+            
+            <td style="padding:8px; border:1px solid #e5e7eb;">
+                {{ t.nomTransaction }}
+            </td>
 
-            <td style="padding:8px; border:1px solid #ddd; text-align:center;">
+            <td style="padding:8px; border:1px solid #e5e7eb; text-align:center;">
                 {% if t.type == 'INCOME' %}
-                    <span style="color:green; font-weight:bold;">INCOME</span>
+                    <span style="color:#1e3a8a; font-weight:bold;">INCOME</span>
                 {% else %}
-                    <span style="color:red; font-weight:bold;">OUTCOME</span>
+                    <span style="color:#374151; font-weight:bold;">OUTCOME</span>
                 {% endif %}
             </td>
 
-            <td style="padding:8px; border:1px solid #ddd; text-align:center;">
+            <td style="padding:8px; border:1px solid #e5e7eb; text-align:center; color:#0f172a; font-weight:500;">
                 {{ t.montant }} DT
             </td>
 
-            <td style="padding:8px; border:1px solid #ddd;">
+            <td style="padding:8px; border:1px solid #e5e7eb; color:#475569;">
                 {{ t.category ? t.category.nom : '' }}
             </td>
 
-            <td style="padding:8px; border:1px solid #ddd;">
+            <td style="padding:8px; border:1px solid #e5e7eb; color:#64748b;">
                 {{ t.dateTransaction|date('Y-m-d') }}
             </td>
+
         </tr>
     {% endfor %}
     </tbody>

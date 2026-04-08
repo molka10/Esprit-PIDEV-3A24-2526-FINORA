@@ -1,41 +1,49 @@
-<h1 style="text-align:center; margin-bottom:20px;">
-     ADMIN REPORT
+<h1 style="text-align:center; margin-bottom:20px; color:#1e3a8a;">
+    ADMIN REPORT
 </h1>
 
-<h2 style="margin-bottom:10px;"> Users</h2>
+<h2 style="margin-bottom:10px; color:#0f172a;">
+    Users
+</h2>
 
 <table style="width:100%; border-collapse:collapse; font-family:Arial; margin-bottom:30px;">
+
     <thead>
-        <tr style="background:#6c5ce7; color:white;">
-            <th style="padding:10px; border:1px solid #ddd;">Name</th>
-            <th style="padding:10px; border:1px solid #ddd;">Balance</th>
-            <th style="padding:10px; border:1px solid #ddd;">Income</th>
-            <th style="padding:10px; border:1px solid #ddd;">Outcome</th>
-            <th style="padding:10px; border:1px solid #ddd;">Transactions</th>
+        <tr style="background:#1e3a8a; color:white;">
+            <th style="padding:10px; border:1px solid #e5e7eb;">Name</th>
+            <th style="padding:10px; border:1px solid #e5e7eb;">Balance</th>
+            <th style="padding:10px; border:1px solid #e5e7eb;">Income</th>
+            <th style="padding:10px; border:1px solid #e5e7eb;">Outcome</th>
+            <th style="padding:10px; border:1px solid #e5e7eb;">Transactions</th>
         </tr>
     </thead>
 
     <tbody>
     {% for u in users %}
-        <tr>
-            <td style="padding:8px; border:1px solid #ddd;">{{ u.name }}</td>
-
-            <td style="padding:8px; border:1px solid #ddd; text-align:center;">
-                <strong>{{ u.balance }} DT</strong>
+        <tr style="background:{{ loop.index is even ? '#f1f5f9' : '#ffffff' }};">
+            
+            <td style="padding:8px; border:1px solid #e5e7eb; color:#0f172a;">
+                {{ u.name }}
             </td>
 
-            <td style="padding:8px; border:1px solid #ddd; text-align:center; color:green;">
+            <td style="padding:8px; border:1px solid #e5e7eb; text-align:center;">
+                <strong style="color:#0f172a;">{{ u.balance }} DT</strong>
+            </td>
+
+            <td style="padding:8px; border:1px solid #e5e7eb; text-align:center; color:#1e3a8a; font-weight:600;">
                 {{ u.income }}
             </td>
 
-            <td style="padding:8px; border:1px solid #ddd; text-align:center; color:red;">
+            <td style="padding:8px; border:1px solid #e5e7eb; text-align:center; color:#374151; font-weight:600;">
                 {{ u.outcome }}
             </td>
 
-            <td style="padding:8px; border:1px solid #ddd; text-align:center;">
+            <td style="padding:8px; border:1px solid #e5e7eb; text-align:center; color:#475569;">
                 {{ u.count }}
             </td>
+
         </tr>
     {% endfor %}
     </tbody>
+
 </table>

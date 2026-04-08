@@ -24,38 +24,28 @@
 
             <div class="clean-stats">
 
-                <div>
-                    <span>Balance</span>
-                    <h2>{{ balance|number_format(2, '.', ' ') }} DT</h2>
-                </div>
+    <div>
+        <span>Balance</span>
+        <h2>{{ balance }} DT</h2>
+    </div>
 
-                <div>
-                    <span>Income</span>
-                    <h2 class="green">{{ income|number_format(2, '.', ' ') }} DT</h2>
-                </div>
+    <div>
+        <span>Income</span>
+        <h2 class="green">{{ income }} DT</h2>
+    </div>
 
-                <div>
-                    <span>Outcome</span>
-                    <h2 class="red">{{ outcome|number_format(2, '.', ' ') }} DT</h2>
-                </div>
+    <div>
+        <span>Outcome</span>
+        <h2 class="red">{{ outcome }} DT</h2>
+    </div>
 
-                <div>
-                    <span>Transactions</span>
-                    <h2>{{ transactions|length }}</h2>
-                </div>
+    <div>
+        <span>Transactions</span>
+        <h2>{{ transactions|length }}</h2>
+    </div>
 
-            </div>
-
-            
-
-        </div>
-
-        
-        <div class="center">
-            <canvas id="pieChart"></canvas>
-        </div>
-
-      <div class="right-side">
+</div>
+<div class="charts-row">
 
     <div class="chart-box">
         <h3 class="chart-title">Income</h3>
@@ -66,13 +56,30 @@
         <h3 class="chart-title">Outcome</h3>
         <canvas id="outcomeChart"></canvas>
     </div>
-    <div class="chart-box">
-    <h3 class="chart-title">Transactions par date</h3>
-    <canvas id="dateChart"></canvas>
+
 </div>
 
-    
+            
+
+        </div>
+
+       
+
+   <div class="charts-right">
+        <div class="chart-box small-chart">
+            <h3 class="center-title">RÉPARTITION</h3>
+            <canvas id="pieChart"></canvas>        
+        </div>
+
+        <div class="chart-box small-chart">
+            <h3 class="center-title">TRANSACTIONS PAR DATE</h3>
+            <canvas id="dateChart"></canvas>
+        </div>
+    </div>
+
 </div>
+
+     
 
     </div>
 
@@ -91,13 +98,27 @@ new Chart(document.getElementById('pieChart'), {
         labels: ['Income', 'Outcome'],
         datasets: [{
             data: [{{ income }}, {{ outcome }}],
-            backgroundColor: ['#2ecc71', '#e74c3c']
+            backgroundColor: ['#1e3a8a', '#374151']
         }]
     },
     options: {
-        cutout: '70%',
+        cutout: '70%',  
+        radius: '90%',
         plugins: {
-            legend: { position: 'bottom' }
+            legend: { 
+            position: 'bottom' ,
+        labels: {
+                boxWidth: 15,   // 🔥 أصغر rectangle
+                boxHeight: 8,
+                padding: 8,
+
+                font: {
+                    size: 10   // 🔥 تصغير الكتابة
+                },
+
+                color: '#475569' // لون نص خفيف
+            }
+        }
         }
     }
 });
@@ -144,7 +165,7 @@ new Chart(document.getElementById('incomeChart'), {
         labels: {{ incomeChartLabels|json_encode|raw }},
         datasets: [{
             data: {{ incomeChartData|json_encode|raw }},
-            borderColor: '#ff6b00',
+            borderColor: '#1e3a8a',
             backgroundColor: 'transparent',
             borderWidth: 3,
             pointRadius: 5
@@ -172,7 +193,7 @@ new Chart(document.getElementById('outcomeChart'), {
         labels: {{ outcomeChartLabels|json_encode|raw }},
         datasets: [{
             data: {{ outcomeChartData|json_encode|raw }},
-            borderColor: '#ff6b00',
+            borderColor: '#1e3a8a',
             backgroundColor: 'transparent',
             borderWidth: 3,
             pointRadius: 5
@@ -222,12 +243,12 @@ new Chart(document.getElementById('dateChart'), {
             {
                 label: 'Income',
                 data: {{ incomeData|json_encode|raw }},
-                backgroundColor: '#00b894'
+                backgroundColor: '#1e3a8a'
             },
             {
                 label: 'Outcome',
                 data: {{ outcomeData|json_encode|raw }},
-                backgroundColor: '#d63031'
+                backgroundColor: '#374151'
             }
         ]
     },

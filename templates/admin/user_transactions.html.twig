@@ -4,7 +4,7 @@
 
 <div class="admin">
 
-    <h1 style="color:#6c5ce7;">👤 User {{ userId }} Transactions</h1>
+    <h1 style="color:#374151;"> User {{ userId }} Transactions</h1>
 <div style="display:flex; gap:10px; margin-bottom:20px;">
     <a href="{{ path('app_admin') }}" class="btn-view">⬅ Back</a>
 
@@ -51,7 +51,7 @@
  <div class="chart-container">
 
     <div class="chart-donut">
-        <h3>📊 Overview</h3>
+        <h3> Overview</h3>
         <canvas id="chartUser"></canvas>
     </div>
 
@@ -72,7 +72,7 @@ new Chart(document.getElementById('chartUser'), {
         labels: ['Income', 'Outcome'],
         datasets: [{
             data: [{{ income }}, {{ outcome }}],
-            backgroundColor: ['#00b894', '#d63031']
+             backgroundColor: ['#1e3a8a', '#374151']
         }]
     },
     options: {
@@ -90,7 +90,7 @@ new Chart(document.getElementById('lineChartUser'), {
         datasets: [{
             label: 'Montant',
             data: {{ chartData|json_encode|raw }},
-            borderColor: '#6c5ce7',
+            borderColor: '#374151',
             borderWidth: 4,
             tension: 0.4,
             fill: true,
