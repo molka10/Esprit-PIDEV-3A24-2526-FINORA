@@ -1,0 +1,127 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ formation.titre }} - FINORA{% endblock %}
+
+{% block body %}
+<header class="navbar-light navbar-sticky">
+    <nav class="navbar navbar-expand-xl z-index-9">
+        <div class="container">
+            <a class="navbar-brand" href="{{ path('app_home') }}">
+                <img class="light-mode-item navbar-brand-item" src="{{ asset('assets/images/logo.svg') }}" alt="logo">
+                <img class="dark-mode-item navbar-brand-item" src="{{ asset('assets/images/logo-light.svg') }}" alt="logo">
+            </a>
+
+            <button class="navbar-toggler ms-auto" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse">
+                <span class="navbar-toggler-animation">
+                    <span></span><span></span><span></span>
+                </span>
+            </button>
+
+            <div class="navbar-collapse collapse" id="navbarCollapse">
+                <ul class="navbar-nav navbar-nav-scroll ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="{{ path('app_home') }}">Accueil</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="{{ path('app_formations') }}">Formations</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ path('app_lessons') }}">Lessons</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ path('admin_dashboard') }}">Dashboard</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+</header>
+
+<main>
+    <section class="py-5">
+        <div class="container">
+
+            {% for message in app.flashes('success') %}
+                <div class="alert alert-success">{{ message }}</div>
+            {% endfor %}
+
+            <div class="card border-0 shadow-sm overflow-hidden mb-5">
+                <div class="row g-0 align-items-stretch">
+                    <div class="col-lg-5">
+                        {% if formation.imageUrl %}
+                            <img src="{{ formation.imageUrl }}" alt="{{ formation.titre }}" class="w-100 h-100" style="object-fit: cover; min-height: 320px;">
+                        {% else %}
+                            <img src="{{ asset('assets/images/courses/4by3/16.jpg') }}" alt="{{ formation.titre }}" class="w-100 h-100" style="object-fit: cover; min-height: 320px;">
+                        {% endif %}
+                    </div>
+
+                    <div class="col-lg-7">
+                        <div class="card-body p-4 p-lg-5">
+                            <div class="d-flex flex-wrap gap-2 mb-3">
+                                <span class="badge bg-primary bg-opacity-10 text-primary">{{ formation.niveau }}</span>
+
+                                {% for tag in formation.categorie ? formation.categorie|split(',') : [] %}
+                                    {% if tag|trim != '' %}
+                                        <span class="purple-chip">{{ tag|trim }}</span>
+                                    {% endif %}
+                                {% endfor %}
+
+                                {% if formation.isPublished %}
+                                    <span class="badge bg-success bg-opacity-10 text-success">Publié</span>
+                                {% else %}
+                                    <span class="badge bg-warning bg-opacity-10 text-warning">Non publié</span>
+                                {% endif %}
+                            </div>
+
+                            <h1 class="h2 mb-3">{{ formation.titre }}</h1>
+
+                            <p class="text-muted mb-4">
+                                {{ formation.description ?: 'Pas de description disponible.' }}
+                            </p>
+
+                            <div class="d-flex gap-2 flex-wrap">
+                                <a href="{{ path('app_formation_inscription', {'id': formation.id}) }}" class="btn btn-primary">
+                                    S'inscrire
+                                </a>
+                                <a href="{{ path('app_lessons', {'formation': formation.id}) }}" class="btn btn-outline-primary">
+                                    Voir uniquement ces lessons
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="h3 mb-0">Lessons de cette formation</h2>
+                <span class="badge bg-primary bg-opacity-10 text-primary">{{ lessons|length }} lesson(s)</span>
+            </div>
+
+            {% if lessons|length > 0 %}
+                <div class="row g-4">
+                    {% for lesson in lessons %}
+                        <div class="col-md-6 col-xl-4">
+                            <div class="card border-0 shadow-sm h-100">
+                                <div class="card-body">
+                                    <div class="d-flex flex-wrap gap-2 mb-3">
+                                        <span class="badge bg-primary bg-opacity-10 text-primary">Ordre {{ lesson.ordre }}</span>
+                                        <span class="badge bg-success bg-opacity-10 text-success">{{ lesson.dureeMinutes }} min</span>
+                                        {% if lesson.videoUrl %}
+                                            <span class="badge bg-warning bg-opacity-10 text-warning">Vidéo</span>
+                                        {% endif %}
+                                    </div>
+
+                                    <h5 class="card-title">{{ lesson.titre }}</h5>
+                                    <p class="card-text">
+                                        {{ lesson.contenu ? lesson.contenu|slice(0, 120) ~ '...' : 'Pas de contenu' }}
+                                    </p>
+
+                                    <a href="{{ path('app_lesson_show', {'id': lesson.id}) }}" class="btn btn-sm btn-primary">
+                                        Voir lesson
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="alert alert-info">
+                    Cette formation ne contient encore aucune lesson.
+                </div>
+            {% endif %}
+        </div>
+    </section>
+</main>
+{% endblock %}

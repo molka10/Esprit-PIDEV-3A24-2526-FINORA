@@ -104,6 +104,10 @@
     <section class="py-5">
         <div class="container">
 
+            {% for message in app.flashes('success') %}
+                <div class="alert alert-success">{{ message }}</div>
+            {% endfor %}
+
             <div class="mb-4">
                 <h4 class="mb-3 finora-title">Catégories populaires</h4>
                 <div class="d-flex flex-wrap gap-2">
@@ -217,8 +221,11 @@
                                     </p>
 
                                     <div class="d-flex gap-2 flex-wrap mt-3">
-                                        <a href="{{ path('app_lessons', {'formation': formation.id}) }}" class="btn btn-sm btn-primary">
-                                            Voir lessons
+                                        <a href="{{ path('app_formation_inscription', {'id': formation.id}) }}" class="btn btn-sm btn-outline-primary">
+                                            S'inscrire
+                                        </a>
+                                        <a href="{{ path('app_formation_show', {'id': formation.id}) }}" class="btn btn-sm btn-primary">
+                                            Voir formation
                                         </a>
                                     </div>
                                 </div>

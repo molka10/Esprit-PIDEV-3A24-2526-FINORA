@@ -103,6 +103,45 @@ final class HomeController extends AbstractController
         ]);
     }
 
+    #[Route('/formations/{id}', name: 'app_formation_show')]
+    public function formationShow(int $id, EntityManagerInterface $entityManager): Response
+    {
+        $formation = $entityManager->getRepository(Formation::class)->find($id);
+
+        if (!$formation) {
+            throw $this->createNotFoundException('Formation introuvable');
+        }
+
+        $lessons = $entityManager->getRepository(Lesson::class)
+            ->createQueryBuilder('l')
+            ->leftJoin('l.formation', 'f')
+            ->addSelect('f')
+            ->andWhere('f.id = :formationId')
+            ->setParameter('formationId', $id)
+            ->orderBy('l.ordre', 'ASC')
+            ->getQuery()
+            ->getResult();
+
+        return $this->render('home/formation_show.html.twig', [
+            'formation' => $formation,
+            'lessons' => $lessons,
+        ]);
+    }
+
+    #[Route('/formations/{id}/inscription', name: 'app_formation_inscription')]
+    public function formationInscription(int $id, EntityManagerInterface $entityManager): Response
+    {
+        $formation = $entityManager->getRepository(Formation::class)->find($id);
+
+        if (!$formation) {
+            throw $this->createNotFoundException('Formation introuvable');
+        }
+
+        $this->addFlash('success', 'Inscription simulée à la formation "' . $formation->getTitre() . '".');
+
+        return $this->redirectToRoute('app_formation_show', ['id' => $id]);
+    }
+
     #[Route('/lessons', name: 'app_lessons')]
     public function lessons(
         Request $request,

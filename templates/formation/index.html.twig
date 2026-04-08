@@ -99,12 +99,24 @@
                                 {% endif %}
                             </td>
                             <td>
-                                <a href="{{ path('formation_edit', {'id': formation.id}) }}" class="btn btn-sm btn-dark me-1 mb-1 mb-md-0">Modifier</a>
+                                <div class="d-flex flex-wrap gap-1">
+                                    <a href="{{ path('formation_edit', {'id': formation.id}) }}" class="btn btn-sm btn-dark">Modifier</a>
 
-                                <form method="post" action="{{ path('formation_delete', {'id': formation.id}) }}" style="display:inline-block;" onsubmit="return confirm('Supprimer cette formation ?');">
-                                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ formation.id) }}">
-                                    <button type="submit" class="btn btn-sm btn-danger">Supprimer</button>
-                                </form>
+                                    {% if lessonCounts[formation.id] is defined and lessonCounts[formation.id] > 0 %}
+                                        <a href="{{ path('app_lesson_index', {'formation': formation.id}) }}" class="btn btn-sm btn-primary">
+                                            Voir lessons
+                                        </a>
+                                    {% else %}
+                                        <a href="{{ path('app_lesson_new') }}" class="btn btn-sm btn-success">
+                                            Ajouter lesson
+                                        </a>
+                                    {% endif %}
+
+                                    <form method="post" action="{{ path('formation_delete', {'id': formation.id}) }}" style="display:inline-block;" onsubmit="return confirm('Supprimer cette formation ?');">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ formation.id) }}">
+                                        <button type="submit" class="btn btn-sm btn-danger">Supprimer</button>
+                                    </form>
+                                </div>
                             </td>
                         </tr>
                     {% else %}
@@ -145,4 +157,4 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 </script>
-{% endblock %}
+{% endblock %}.0

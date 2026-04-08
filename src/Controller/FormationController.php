@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Formation;
+use App\Entity\Lesson;
 use App\Form\FormationType;
 use Doctrine\ORM\EntityManagerInterface;
 use Knp\Component\Pager\PaginatorInterface;
@@ -79,6 +80,18 @@ final class FormationController extends AbstractController
             'Fiscalité',
         ];
 
+        $lessonCounts = [];
+        foreach ($formations as $formation) {
+            $lessonCounts[$formation->getId()] = $entityManager->getRepository(Lesson::class)
+                ->createQueryBuilder('l')
+                ->select('COUNT(l.id)')
+                ->leftJoin('l.formation', 'f')
+                ->andWhere('f.id = :formationId')
+                ->setParameter('formationId', $formation->getId())
+                ->getQuery()
+                ->getSingleScalarResult();
+        }
+
         return $this->render('formation/index.html.twig', [
             'formations' => $formations,
             'titre' => $titre,
@@ -87,6 +100,7 @@ final class FormationController extends AbstractController
             'tri' => $tri,
             'ordre' => strtolower($ordre),
             'categories' => $categories,
+            'lessonCounts' => $lessonCounts,
         ]);
     }
 
