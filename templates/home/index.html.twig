@@ -127,7 +127,7 @@
                         <div class="card shadow-sm h-100">
 
                             {% if formation.imageUrl %}
-                                <img src="{{ formation.imageUrl }}" class="card-img-top" alt="{{ formation.titre }}">
+                                <img src="{{ asset('uploads/formations/' ~ formation.imageUrl) }}" class="card-img-top" alt="{{ formation.titre }}">
                             {% else %}
                                 <img src="{{ asset('assets/images/courses/4by3/16.jpg') }}" class="card-img-top" alt="{{ formation.titre }}">
                             {% endif %}
@@ -150,8 +150,8 @@
                                     <a href="{{ path('app_formations') }}" class="btn btn-outline-primary">
                                         Explorer
                                     </a>
-                                    <a href="{{ path('app_lessons', {'formation': formation.id}) }}" class="btn btn-primary">
-                                        Voir lessons
+                                    <a href="{{ path('app_formation_show', {'id': formation.id}) }}" class="btn btn-primary">
+                                        Voir formation
                                     </a>
                                 </div>
                             </div>

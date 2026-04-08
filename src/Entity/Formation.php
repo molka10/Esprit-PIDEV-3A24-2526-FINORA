@@ -3,10 +3,13 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\Validator\Constraints as Assert;
+use Vich\UploaderBundle\Mapping\Annotation as Vich;
 
 #[ORM\Entity]
 #[ORM\Table(name: 'formation')]
+#[Vich\Uploadable]
 class Formation
 {
     #[ORM\Id]
@@ -58,12 +61,18 @@ class Formation
     private ?int $is_published = null;
 
     #[ORM\Column(type: 'string', length: 255, nullable: true)]
-    #[Assert\Length(
-        max: 255,
-        maxMessage: 'L’URL de l’image ne doit pas dépasser {{ limit }} caractères.'
-    )]
-    #[Assert\Url(message: 'Veuillez entrer une URL valide pour l’image.')]
     private ?string $image_url = null;
+
+    #[Vich\UploadableField(mapping: 'formation_images', fileNameProperty: 'image_url')]
+    #[Assert\Image(
+        maxSize: '4M',
+        mimeTypes: ['image/jpeg', 'image/png', 'image/webp', 'image/jpg'],
+        mimeTypesMessage: 'Veuillez uploader une image valide (JPG, PNG ou WEBP).'
+    )]
+    private ?File $imageFile = null;
+
+    #[ORM\Column(type: 'datetime_immutable', nullable: true)]
+    private ?\DateTimeImmutable $updatedAt = null;
 
     public function getId(): ?int
     {
@@ -133,6 +142,31 @@ class Formation
     public function setImageUrl(?string $image_url): self
     {
         $this->image_url = $image_url;
+        return $this;
+    }
+
+    public function getImageFile(): ?File
+    {
+        return $this->imageFile;
+    }
+
+    public function setImageFile(?File $imageFile = null): void
+    {
+        $this->imageFile = $imageFile;
+
+        if ($imageFile !== null) {
+            $this->updatedAt = new \DateTimeImmutable();
+        }
+    }
+
+    public function getUpdatedAt(): ?\DateTimeImmutable
+    {
+        return $this->updatedAt;
+    }
+
+    public function setUpdatedAt(?\DateTimeImmutable $updatedAt): self
+    {
+        $this->updatedAt = $updatedAt;
         return $this;
     }
 

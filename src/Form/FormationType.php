@@ -6,6 +6,7 @@ use App\Entity\Formation;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\CallbackTransformer;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -69,9 +70,11 @@ class FormationType extends AbstractType
                     'Non' => 0,
                 ]
             ])
-            ->add('image_url', TextType::class, [
-                'label' => 'Image URL',
-                'required' => false
+            ->add('imageFile', FileType::class, [
+                'label' => 'Image',
+                'required' => false,
+                'mapped' => true,
+                'help' => 'Formats acceptés : JPG, PNG, WEBP. Taille max : 4MB.'
             ]);
 
         $builder->get('categorie')->addModelTransformer(new CallbackTransformer(

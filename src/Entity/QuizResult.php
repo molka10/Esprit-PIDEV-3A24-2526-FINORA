@@ -10,7 +10,7 @@ class QuizResult
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column(type: 'int')]
+    #[ORM\Column(type: 'integer')]
     private ?int $id = null;
 
     public function getId(): ?int
@@ -38,7 +38,7 @@ class QuizResult
         return $this;
     }
 
-    #[ORM\Column(type: 'int', nullable: false)]
+    #[ORM\Column(type: 'integer', nullable: false)]
     private ?int $lesson_id = null;
 
     public function getLesson_id(): ?int
@@ -80,7 +80,7 @@ class QuizResult
         return $this;
     }
 
-    #[ORM\Column(type: 'int', nullable: false)]
+    #[ORM\Column(type: 'integer', nullable: false)]
     private ?int $score = null;
 
     public function getScore(): ?int
@@ -94,7 +94,7 @@ class QuizResult
         return $this;
     }
 
-    #[ORM\Column(type: 'int', nullable: false)]
+    #[ORM\Column(type: 'integer', nullable: false)]
     private ?int $passed = null;
 
     public function getPassed(): ?int
@@ -108,7 +108,7 @@ class QuizResult
         return $this;
     }
 
-    #[ORM\Column(type: '\DateTimeInterface', nullable: true)]
+    #[ORM\Column(type: 'datetime', nullable: true)]
     private ?\DateTimeInterface $taken_at = null;
 
     public function getTaken_at(): ?\DateTimeInterface
@@ -134,12 +134,12 @@ class QuizResult
         return $this;
     }
 
-    public function getLessonId()
+    public function getLessonId(): ?int
     {
         return $this->lesson_id;
     }
 
-    public function setLessonId($lesson_id): static
+    public function setLessonId(int $lesson_id): static
     {
         $this->lesson_id = $lesson_id;
 
@@ -170,16 +170,15 @@ class QuizResult
         return $this;
     }
 
-    public function getTakenAt()
+    public function getTakenAt(): ?\DateTimeInterface
     {
         return $this->taken_at;
     }
 
-    public function setTakenAt($taken_at): static
+    public function setTakenAt(?\DateTimeInterface $taken_at): static
     {
         $this->taken_at = $taken_at;
 
         return $this;
     }
-
 }

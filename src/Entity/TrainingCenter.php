@@ -10,7 +10,7 @@ class TrainingCenter
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column(type: 'int')]
+    #[ORM\Column(type: 'integer')]
     private ?int $id = null;
 
     public function getId(): ?int
@@ -46,7 +46,7 @@ class TrainingCenter
         return $this->address;
     }
 
-    public function setAddress(string $address): self
+    public function setAddress(?string $address): self
     {
         $this->address = $address;
         return $this;
@@ -79,5 +79,4 @@ class TrainingCenter
         $this->lng = $lng;
         return $this;
     }
-
 }

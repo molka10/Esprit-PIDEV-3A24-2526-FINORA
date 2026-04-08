@@ -192,7 +192,7 @@
                             <div class="card border-0 shadow-sm h-100 overflow-hidden">
                                 <div class="position-relative">
                                     {% if formation.imageUrl %}
-                                        <img src="{{ formation.imageUrl }}" class="card-img-top" alt="{{ formation.titre }}" style="height: 220px; object-fit: cover;">
+                                        <img src="{{ asset('uploads/formations/' ~ formation.imageUrl) }}" class="card-img-top" alt="{{ formation.titre }}" style="height: 220px; object-fit: cover;">
                                     {% else %}
                                         <img src="{{ asset('assets/images/courses/4by3/16.jpg') }}" class="card-img-top" alt="{{ formation.titre }}" style="height: 220px; object-fit: cover;">
                                     {% endif %}

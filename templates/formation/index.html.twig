@@ -93,7 +93,7 @@
                             </td>
                             <td>
                                 {% if formation.imageUrl %}
-                                    <a href="{{ formation.imageUrl }}" target="_blank" class="btn btn-sm btn-light">Voir</a>
+                                    <img src="{{ asset('uploads/formations/' ~ formation.imageUrl) }}" alt="{{ formation.titre }}" style="width: 60px; height: 60px; object-fit: cover; border-radius: 8px;">
                                 {% else %}
                                     <span class="text-muted">Aucune</span>
                                 {% endif %}
@@ -157,4 +157,4 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 </script>
-{% endblock %}.0
+{% endblock %}

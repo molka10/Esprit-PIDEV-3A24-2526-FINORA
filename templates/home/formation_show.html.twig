@@ -40,11 +40,11 @@
             <div class="card border-0 shadow-sm overflow-hidden mb-5">
                 <div class="row g-0 align-items-stretch">
                     <div class="col-lg-5">
-                        {% if formation.imageUrl %}
-                            <img src="{{ formation.imageUrl }}" alt="{{ formation.titre }}" class="w-100 h-100" style="object-fit: cover; min-height: 320px;">
-                        {% else %}
-                            <img src="{{ asset('assets/images/courses/4by3/16.jpg') }}" alt="{{ formation.titre }}" class="w-100 h-100" style="object-fit: cover; min-height: 320px;">
-                        {% endif %}
+                         {% if formation.imageUrl %}
+                    <img src="{{ asset('uploads/formations/' ~ formation.imageUrl) }}" alt="{{ formation.titre }}" class="w-100 h-100" style="object-fit: cover; min-height: 320px;">
+                    {% else %}
+                    <img src="{{ asset('assets/images/courses/4by3/16.jpg') }}" alt="{{ formation.titre }}" class="w-100 h-100" style="object-fit: cover; min-height: 320px;">
+                    {% endif %}
                     </div>
 
                     <div class="col-lg-7">
