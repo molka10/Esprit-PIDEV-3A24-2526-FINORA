@@ -1,0 +1,159 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Dashboard{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+
+{% block body %}
+
+<div class="row g-4 mb-4">
+
+```
+<!-- Actions -->
+<div class="col-md-6 col-xxl-3">
+    <div class="card card-body bg-warning bg-opacity-15 p-4 h-100">
+        <div class="d-flex justify-content-between">
+            <div>
+                <h2 class="fw-bold">{{ totalActions }}</h2>
+                <span>Actions</span>
+            </div>
+            <div class="icon-lg bg-warning text-white rounded-circle">
+                <i class="fas fa-chart-line"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bourses -->
+<div class="col-md-6 col-xxl-3">
+    <div class="card card-body bg-purple bg-opacity-10 p-4 h-100">
+        <div class="d-flex justify-content-between">
+            <div>
+                <h2 class="fw-bold">{{ totalBourses }}</h2>
+                <span>Bourses</span>
+            </div>
+            <div class="icon-lg bg-purple text-white rounded-circle">
+                <i class="fas fa-coins"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Transactions -->
+<div class="col-md-6 col-xxl-3">
+    <div class="card card-body bg-primary bg-opacity-10 p-4 h-100">
+        <div class="d-flex justify-content-between">
+            <div>
+                <h2 class="fw-bold">{{ totalTransactions }}</h2>
+                <span>Transactions</span>
+            </div>
+            <div class="icon-lg bg-primary text-white rounded-circle">
+                <i class="fas fa-exchange-alt"></i>
+            </div>
+        </div>
+    </div>
+</div>
+```
+
+</div>
+
+<!-- CHART + LIST -->
+
+<div class="row g-4 mb-4">
+
+```
+<!-- CHART -->
+<div class="col-xxl-8">
+    <div class="card shadow h-100">
+        <div class="card-header p-4 border-bottom">
+            <h5>Earnings</h5>
+        </div>
+
+        <div class="card-body">
+            <canvas id="evolutionChart"></canvas>
+        </div>
+    </div>
+</div>
+
+<!-- ACTIONS -->
+<div class="col-xxl-4">
+    <div class="card shadow h-100">
+        <div class="card-header p-4 border-bottom">
+            <h5>Latest Actions</h5>
+        </div>
+
+        <div class="card-body">
+            {% for action in actions %}
+                <div class="d-flex mb-3">
+                    <div class="me-3">
+                        <div class="avatar bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width:40px;height:40px;">
+                            {{ action.symbole|slice(0,2) }}
+                        </div>
+                    </div>
+
+                    <div>
+                        <h6 class="mb-0">{{ action.symbole }}</h6>
+                        <small>{{ action.nomEntreprise }}</small><br>
+                        <span class="text-success">{{ action.prixUnitaire }} €</span>
+                    </div>
+                </div>
+                <hr>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+```
+
+</div>
+
+<!-- PIE CHART -->
+
+<div class="row g-4">
+    <div class="col-lg-4">
+        <div class="card shadow h-100">
+            <div class="card-header p-4 border-bottom">
+                <h5>Répartition</h5>
+            </div>
+
+```
+        <div class="card-body">
+            <canvas id="repartitionChart"></canvas>
+        </div>
+    </div>
+</div>
+```
+
+</div>
+
+{% endblock %}
+
+{% block javascripts %}
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+// Evolution
+new Chart(document.getElementById('evolutionChart'), {
+    type: 'line',
+    data: {
+        labels: {{ chart_evolution_labels|json_encode|raw }},
+        datasets: [{
+            label: 'Evolution',
+            data: {{ chart_evolution_data|json_encode|raw }},
+            tension: 0.4
+        }]
+    }
+});
+
+// Repartition
+new Chart(document.getElementById('repartitionChart'), {
+    type: 'doughnut',
+    data: {
+        labels: {{ chart_repartition_labels|json_encode|raw }},
+        datasets: [{
+            data: {{ chart_repartition_data|json_encode|raw }}
+        }]
+    }
+});
+</script>
+
+{% endblock %}

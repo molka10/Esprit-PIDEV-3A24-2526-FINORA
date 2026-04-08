@@ -1,0 +1,171 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Dashboard Bourses{% endblock %}
+{% block page_title %}🏦 Gestion des Bourses{% endblock %}
+
+{% block body %}
+
+<div class="container-fluid">
+
+    <!-- 🔥 TABLE -->
+    <div class="card shadow-sm p-3 mb-4">
+
+        <div class="d-flex justify-content-between mb-3">
+
+            <h5>🏦 Liste des Bourses</h5>
+
+            <div style="display:flex; gap:10px;">
+                <input type="text" id="searchInput" class="form-control"
+                       placeholder="🔍 Rechercher..." style="width:250px;">
+
+                <a href="{{ path('app_bourse_new') }}" class="btn btn-primary">
+                    ➕ Ajouter
+                </a>
+            </div>
+
+        </div>
+
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>Nom</th>
+                    <th>Pays</th>
+                    <th>Devise</th>
+                    <th>Statut</th>
+                    <th>Date</th>
+                    <th class="text-center">Actions</th>
+                </tr>
+            </thead>
+
+            <tbody id="bourseTable">
+                {% for bourse in bourses %}
+                    <tr>
+
+                        <td><strong>{{ bourse.nomBourse }}</strong></td>
+                        <td>{{ bourse.pays }}</td>
+
+                        <td>
+                            <span class="badge bg-info">{{ bourse.devise }}</span>
+                        </td>
+
+                        <td>
+                            {% if bourse.statut == 'ACTIVE' %}
+                                <span class="badge bg-success">Actif</span>
+                            {% else %}
+                                <span class="badge bg-danger">Inactif</span>
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            {{ bourse.dateCreation ? bourse.dateCreation|date('d/m/Y') : '---' }}
+                        </td>
+
+                        <td class="text-center">
+
+                            <a href="{{ path('app_bourse_show', {id: bourse.id}) }}"
+                               class="btn btn-sm btn-info">👁</a>
+
+                            <a href="{{ path('app_bourse_edit', {id: bourse.id}) }}"
+                               class="btn btn-sm btn-warning">✏</a>
+
+                            <form method="post"
+                                  action="{{ path('app_bourse_delete', {id: bourse.id}) }}"
+                                  style="display:inline;">
+                                <input type="hidden" name="_token"
+                                       value="{{ csrf_token('delete' ~ bourse.id) }}">
+
+                                <button class="btn btn-sm btn-danger">🗑</button>
+                            </form>
+
+                        </td>
+
+                    </tr>
+                {% endfor %}
+            </tbody>
+
+        </table>
+
+    </div>
+
+    <!-- 🔥 CARDS -->
+    <div class="row mb-4">
+
+        <div class="col-md-4">
+            <div class="card shadow-sm p-3">
+                <h6>Total Bourses</h6>
+                <h3>{{ bourses|length }}</h3>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shadow-sm p-3">
+                <h6>Actives</h6>
+                <h3>{{ bourses|filter(b => b.statut == 'ACTIVE')|length }}</h3>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shadow-sm p-3">
+                <h6>Inactives</h6>
+                <h3>{{ bourses|filter(b => b.statut != 'ACTIVE')|length }}</h3>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- 🔥 GRAPH (CORRIGÉ PETIT) -->
+    <div class="card shadow-sm p-3 text-center">
+
+        <h5>📈 Répartition</h5>
+
+        <div class="d-flex justify-content-center">
+            <div style="width:250px; height:250px;">
+                <canvas id="chart"></canvas>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}
+
+{% block javascripts %}
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+
+// 🔥 GRAPH (TAILLE FIXÉE)
+new Chart(document.getElementById('chart'), {
+    type: 'pie',
+    data: {
+        labels: ['Actives', 'Inactives'],
+        datasets: [{
+            data: [
+                {{ bourses|filter(b => b.statut == 'ACTIVE')|length }},
+                {{ bourses|filter(b => b.statut != 'ACTIVE')|length }}
+            ]
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false
+    }
+});
+
+// 🔥 SEARCH
+document.getElementById('searchInput').addEventListener('keyup', function() {
+
+    let value = this.value.toLowerCase();
+    let rows = document.querySelectorAll('#bourseTable tr');
+
+    rows.forEach(row => {
+        row.style.display = row.innerText.toLowerCase().includes(value) ? '' : 'none';
+    });
+
+});
+
+</script>
+
+{% endblock %}

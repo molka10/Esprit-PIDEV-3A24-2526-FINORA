@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>{% block title %}FINORA{% endblock %}</title>
+
+    <!-- Dark mode script -->
+    <script>
+        const storedTheme = localStorage.getItem('theme')
+        const getPreferredTheme = () => {
+            if (storedTheme) { return storedTheme }
+            return window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'light'
+        }
+        const setTheme = function (theme) {
+            if (theme === 'auto' && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                document.documentElement.setAttribute('data-bs-theme', 'dark')
+            } else {
+                document.documentElement.setAttribute('data-bs-theme', theme)
+            }
+        }
+        setTheme(getPreferredTheme())
+        window.addEventListener('DOMContentLoaded', () => {
+            var el = document.querySelector('.theme-icon-active');
+            if (el != 'undefined' && el != null) {
+                const showActiveTheme = theme => {
+                    const activeThemeIcon = document.querySelector('.theme-icon-active use')
+                    const btnToActive = document.querySelector(`[data-bs-theme-value="${theme}"]`)
+                    const svgOfActiveBtn = btnToActive.querySelector('.mode-switch use').getAttribute('href')
+                    document.querySelectorAll('[data-bs-theme-value]').forEach(element => { element.classList.remove('active') })
+                    btnToActive.classList.add('active')
+                    activeThemeIcon.setAttribute('href', svgOfActiveBtn)
+                }
+                window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+                    if (storedTheme !== 'light' || storedTheme !== 'dark') { setTheme(getPreferredTheme()) }
+                })
+                showActiveTheme(getPreferredTheme())
+                document.querySelectorAll('[data-bs-theme-value]').forEach(toggle => {
+                    toggle.addEventListener('click', () => {
+                        const theme = toggle.getAttribute('data-bs-theme-value')
+                        localStorage.setItem('theme', theme)
+                        setTheme(theme)
+                        showActiveTheme(theme)
+                    })
+                })
+            }
+        })
+    </script>
+
+    <!-- Favicon -->
+    <link rel="shortcut icon" href="/assets/images/favicon.ico">
+
+    <!-- Google Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com/">
+    <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700&family=Roboto:wght@400;500;700&display=swap">
+
+    <!-- Plugins CSS -->
+    <link rel="stylesheet" href="/assets/vendor/font-awesome/css/all.min.css">
+    <link rel="stylesheet" href="/assets/vendor/bootstrap-icons/bootstrap-icons.css">
+    <link rel="stylesheet" href="/assets/vendor/tiny-slider/tiny-slider.css">
+    <link rel="stylesheet" href="/assets/vendor/glightbox/css/glightbox.css">
+    <link rel="stylesheet" href="/assets/vendor/aos/aos.css">
+
+    <!-- Theme CSS -->
+    <link rel="stylesheet" href="/assets/css/style.css">
+
+    {% block stylesheets %}{% endblock %}
+</head>
+<body>
+
+<!-- HEADER START -->
+<header class="navbar-light navbar-sticky">
+    <nav class="navbar navbar-expand-xl z-index-9">
+        <div class="container">
+
+            <!-- Logo -->
+            <a class="navbar-brand" href="{{ path('app_market') }}">
+               <a class="navbar-brand" href="{{ path('app_market') }}">
+    <img class="navbar-brand-item" src="/assets/images/logo-finora.webp" alt="FINORA" style="height:45px;">
+</a>
+                <img class="dark-mode-item navbar-brand-item" src="/assets/images/logo-light.svg" alt="FINORA">
+            </a>
+
+            <!-- Mobile toggler -->
+            <button class="navbar-toggler ms-auto" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false">
+                <span class="navbar-toggler-animation"><span></span><span></span><span></span></span>
+            </button>
+
+            <!-- Navbar collapse -->
+            <div class="navbar-collapse collapse" id="navbarCollapse">
+                <!-- Search -->
+                <div class="col-xxl-6">
+                    <div class="nav my-3 my-xl-0 px-4 flex-nowrap align-items-center">
+                        <div class="nav-item w-100">
+                            <form class="rounded position-relative">
+                                <input class="form-control pe-5 bg-secondary bg-opacity-10 border-0" type="search" placeholder="Rechercher..." aria-label="Search">
+                                <button class="btn btn-link bg-transparent px-2 py-0 position-absolute top-50 end-0 translate-middle-y" type="submit">
+                                    <i class="fas fa-search fs-6 text-primary"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Nav links -->
+                <ul class="navbar-nav navbar-nav-scroll ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link {{ app.request.get('_route') starts with 'app_market' ? 'active' : '' }}"
+                           href="{{ path('app_market') }}">
+                            📊 Marché
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ app.request.get('_route') starts with 'app_history' ? 'active' : '' }}"
+                           href="{{ path('app_history') }}">
+                            📜 Historique
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Profile & notifications -->
+            <ul class="nav flex-row align-items-center list-unstyled ms-xl-auto">
+
+                <!-- Notifications -->
+                <li class="nav-item ms-2 ms-sm-3 dropdown">
+                    <a class="btn btn-light btn-round mb-0" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" data-bs-auto-close="outside">
+                        <i class="bi bi-bell fa-fw"></i>
+                    </a>
+                    <span class="notif-badge animation-blink"></span>
+                    <div class="dropdown-menu dropdown-animation dropdown-menu-end dropdown-menu-size-md p-0 shadow-lg border-0">
+                        <div class="card bg-transparent">
+                            <div class="card-header bg-transparent border-bottom py-4 d-flex justify-content-between align-items-center">
+                                <h6 class="m-0">Notifications</h6>
+                                <a class="small" href="#">Tout effacer</a>
+                            </div>
+                            <div class="card-body p-0">
+                                <ul class="list-group list-unstyled list-group-flush">
+                                    <li>
+                                        <a href="#" class="list-group-item-action border-0 border-bottom d-flex p-3">
+                                            <div class="me-3">
+                                                <div class="avatar avatar-md">
+                                                    <img class="avatar-img rounded-circle" src="/assets/images/avatar/03.jpg" alt="avatar">
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <h6 class="mb-1">Bienvenue sur FINORA</h6>
+                                                <p class="small text-body m-0">Votre compte est actif</p>
+                                                <small class="text-body">À l'instant</small>
+                                            </div>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="card-footer bg-transparent border-0 py-3 text-center position-relative">
+                                <a href="#" class="stretched-link">Voir toutes les activités</a>
+                            </div>
+                        </div>
+                    </div>
+                </li>
+
+                <!-- Profile dropdown -->
+                <li class="nav-item ms-3 dropdown">
+                    <a class="avatar avatar-sm p-0" href="#" id="profileDropdown" role="button" data-bs-auto-close="outside" data-bs-display="static" data-bs-toggle="dropdown" aria-expanded="false">
+                        <img class="avatar-img rounded-circle" src="/assets/images/avatar/01.jpg" alt="avatar">
+                    </a>
+                    <ul class="dropdown-menu dropdown-animation dropdown-menu-end shadow pt-3" aria-labelledby="profileDropdown">
+                        <li class="px-3 mb-3">
+                            <div class="d-flex align-items-center">
+                                <div class="avatar me-3">
+                                    <img class="avatar-img rounded-circle shadow" src="/assets/images/avatar/01.jpg" alt="avatar">
+                                </div>
+                                <div>
+                                    <a class="h6" href="#">{{ app.user ? app.user.email : 'Invité' }}</a>
+                                    <p class="small m-0">Investisseur</p>
+                                </div>
+                            </div>
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                           <a class="dropdown-item bg-danger-soft-hover" href="#">
+                                <i class="bi bi-power fa-fw me-2"></i>Déconnexion
+                            </a>
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
+                        <!-- Dark mode toggle -->
+                        <li>
+                            <div class="bg-light dark-mode-switch theme-icon-active d-flex align-items-center p-1 rounded mt-2">
+                                <button type="button" class="btn btn-sm mb-0" data-bs-theme-value="light">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-sun fa-fw mode-switch" viewBox="0 0 16 16">
+                                        <path d="M8 11a3 3 0 1 1 0-6 3 3 0 0 1 0 6zm0 1a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM8 0a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 0zm0 13a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 13zm8-5a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2a.5.5 0 0 1 .5.5zM3 8a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2A.5.5 0 0 1 3 8zm10.657-5.657a.5.5 0 0 1 0 .707l-1.414 1.415a.5.5 0 1 1-.707-.708l1.414-1.414a.5.5 0 0 1 .707 0zm-9.193 9.193a.5.5 0 0 1 0 .707L3.05 13.657a.5.5 0 0 1-.707-.707l1.414-1.414a.5.5 0 0 1 .707 0zm9.193 2.121a.5.5 0 0 1-.707 0l-1.414-1.414a.5.5 0 0 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .707zM4.464 4.465a.5.5 0 0 1-.707 0L2.343 3.05a.5.5 0 1 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .708z"/>
+                                        <use href="#"></use>
+                                    </svg> Light
+                                </button>
+                                <button type="button" class="btn btn-sm mb-0" data-bs-theme-value="dark">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-moon-stars fa-fw mode-switch" viewBox="0 0 16 16">
+                                        <path d="M6 .278a.768.768 0 0 1 .08.858 7.208 7.208 0 0 0-.878 3.46c0 4.021 3.278 7.277 7.318 7.277.527 0 1.04-.055 1.533-.16a.787.787 0 0 1 .81.316.733.733 0 0 1-.031.893A8.349 8.349 0 0 1 8.344 16C3.734 16 0 12.286 0 7.71 0 4.266 2.114 1.312 5.124.06A.752.752 0 0 1 6 .278z"/>
+                                        <use href="#"></use>
+                                    </svg> Dark
+                                </button>
+                                <button type="button" class="btn btn-sm mb-0 active" data-bs-theme-value="auto">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-circle-half fa-fw mode-switch" viewBox="0 0 16 16">
+                                        <path d="M8 15A7 7 0 1 0 8 1v14zm0 1A8 8 0 1 1 8 0a8 8 0 0 1 0 16z"/>
+                                        <use href="#"></use>
+                                    </svg> Auto
+                                </button>
+                            </div>
+                        </li>
+                    </ul>
+                </li>
+
+            </ul>
+        </div>
+    </nav>
+
+    <hr class="my-0">
+
+    <!-- Category nav -->
+    <nav class="navbar navbar-expand-xl nav-category">
+        <div class="container px-0">
+            <button class="navbar-toggler m-auto w-100" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse2" aria-controls="navbarCollapse2" aria-expanded="false">
+                <i class="bi bi-grid-fill"></i> Catégories
+            </button>
+            <div class="navbar-collapse w-100 collapse" id="navbarCollapse2">
+                <ul class="navbar-nav navbar-nav-scroll mx-auto">
+                    <li class="nav-item">
+                        <a class="nav-link {{ app.request.get('_route') starts with 'app_market' ? 'active' : '' }}"
+                           href="{{ path('app_market') }}">
+                            📊 Marché
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ app.request.get('_route') starts with 'app_history' ? 'active' : '' }}"
+                           href="{{ path('app_history') }}">
+                            📜 Historique
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+</header>
+<!-- HEADER END -->
+
+<!-- FLASH MESSAGES -->
+{% for label, messages in app.flashes %}
+    {% for message in messages %}
+        <div class="alert alert-{{ label }} alert-dismissible fade show m-3" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    {% endfor %}
+{% endfor %}
+
+<!-- MAIN CONTENT -->
+<main>
+    {% block body %}{% endblock %}
+</main>
+
+<!-- FOOTER START -->
+<footer class="bg-dark pt-5">
+    <div class="container">
+        <div class="row g-4">
+            <div class="col-lg-3">
+                <a class="me-0 text-decoration-none" href="{{ path('app_market') }}">
+    <img src="/assets/images/logo-finora.webp" alt="FINORA" style="height:45px; filter:brightness(0) invert(1);">
+</a>
+                <p class="my-3 text-body-secondary">FINORA — Plateforme de trading et d'investissement en ligne dédiée aux marchés financiers tunisiens.</p>
+                <ul class="list-inline mb-0 mt-3">
+                    <li class="list-inline-item"><a class="btn btn-white btn-sm shadow px-2 text-facebook" href="#"><i class="fab fa-fw fa-facebook-f"></i></a></li>
+                    <li class="list-inline-item"><a class="btn btn-white btn-sm shadow px-2 text-instagram" href="#"><i class="fab fa-fw fa-instagram"></i></a></li>
+                    <li class="list-inline-item"><a class="btn btn-white btn-sm shadow px-2 text-twitter" href="#"><i class="fab fa-fw fa-twitter"></i></a></li>
+                    <li class="list-inline-item"><a class="btn btn-white btn-sm shadow px-2 text-linkedin" href="#"><i class="fab fa-fw fa-linkedin-in"></i></a></li>
+                </ul>
+            </div>
+            <div class="col-lg-6">
+                <div class="row g-4">
+                    <div class="col-6 col-md-4">
+                        <h5 class="mb-2 mb-md-4 text-white">FINORA</h5>
+                        <ul class="nav flex-column text-primary-hover">
+                            <li class="nav-item"><a class="nav-link" href="{{ path('app_market') }}">Marché</a></li>
+                            <li class="nav-item"><a class="nav-link" href="{{ path('app_history') }}">Historique</a></li>
+                        </ul>
+                    </div>
+                    <div class="col-6 col-md-4">
+                        <h5 class="mb-2 mb-md-4 text-white">Support</h5>
+                        <ul class="nav flex-column text-primary-hover">
+                            <li class="nav-item"><a class="nav-link" href="#">FAQ</a></li>
+                            <li class="nav-item"><a class="nav-link" href="#">Contact</a></li>
+                            <li class="nav-item"><a class="nav-link" href="#">Conditions d'utilisation</a></li>
+                        </ul>
+                    </div>
+                    <div class="col-6 col-md-4">
+                        <h5 class="mb-2 mb-md-4 text-white">Compte</h5>
+                        <ul class="nav flex-column text-primary-hover">
+                        <li class="nav-item"><a class="nav-link" href="#">Déconnexion</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3">
+                <h5 class="mb-2 mb-md-4 text-white">Contact</h5>
+                <p class="mb-2 text-body-secondary">Email:<span class="h6 fw-light text-white ms-2">contact@finora.tn</span></p>
+                <p class="mb-0 text-body-secondary">Tél:<span class="h6 fw-light text-white ms-2">+216 XX XXX XXX</span></p>
+            </div>
+        </div>
+
+        <hr class="mt-4 mb-0">
+
+        <div class="py-3">
+            <div class="d-lg-flex justify-content-between align-items-center py-3 text-center">
+                <div class="text-body-secondary">© {{ "now"|date("Y") }} FINORA. Tous droits réservés.</div>
+                <div class="nav justify-content-center mt-3 mt-lg-0">
+                    <ul class="list-inline mb-0">
+                        <li class="list-inline-item text-primary-hover"><a class="nav-link" href="#">Politique de confidentialité</a></li>
+                        <li class="list-inline-item text-primary-hover"><a class="nav-link pe-0" href="#">Conditions d'utilisation</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</footer>
+<!-- FOOTER END -->
+
+<!-- Back to top -->
+<div class="back-top"><i class="bi bi-arrow-up-short position-absolute top-50 start-50 translate-middle"></i></div>
+
+<!-- Vendor JS -->
+<script src="/assets/vendor/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+<script src="/assets/vendor/tiny-slider/tiny-slider.js"></script>
+<script src="/assets/vendor/glightbox/js/glightbox.js"></script>
+<script src="/assets/vendor/purecounterjs/dist/purecounter_vanilla.js"></script>
+<script src="/assets/vendor/aos/aos.js"></script>
+
+<!-- Theme JS -->
+<script src="/assets/js/functions.js"></script>
+
+{% block javascripts %}{% endblock %}
+</body>
+</html>

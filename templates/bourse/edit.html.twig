@@ -1,0 +1,48 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ bourse.id ? 'Éditer ' ~ bourse.nomBourse : 'Nouvelle Bourse' }} - FINORA{% endblock %}
+
+{% block body %}
+<div class="form-container">
+    <h1 class="form-title">
+        {{ bourse.id ? 'Éditer ' ~ bourse.nomBourse : 'Nouvelle Bourse' }}
+    </h1>
+
+    {{ form_start(form) }}
+    
+    <div class="form-group">
+        {{ form_label(form.nomBourse) }}
+        {{ form_widget(form.nomBourse, {'attr': {'class': 'form-control'}}) }}
+        {{ form_errors(form.nomBourse) }}
+    </div>
+
+    <div class="form-group">
+        {{ form_label(form.pays) }}
+        {{ form_widget(form.pays, {'attr': {'class': 'form-control'}}) }}
+        {{ form_errors(form.pays) }}
+    </div>
+
+    <div class="form-group">
+        {{ form_label(form.devise) }}
+        {{ form_widget(form.devise, {'attr': {'class': 'form-control'}}) }}
+        {{ form_errors(form.devise) }}
+    </div>
+
+    <div class="form-group">
+        {{ form_label(form.statut) }}
+        {{ form_widget(form.statut, {'attr': {'class': 'form-control'}}) }}
+        {{ form_errors(form.statut) }}
+    </div>
+
+    <div class="form-actions">
+        <button type="submit" class="btn-sauvegarder">
+            💾 Sauvegarder
+        </button>
+        <a href="{{ path('app_bourse_index') }}" class="btn-annuler">
+            Annuler
+        </a>
+    </div>
+
+    {{ form_end(form) }}
+</div>
+{% endblock %}

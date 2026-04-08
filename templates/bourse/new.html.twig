@@ -1,0 +1,44 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Nouvelle Bourse{% endblock %}
+
+{% block body %}
+<div class="container mt-5">
+    <div class="card shadow p-4" style="max-width:600px; margin:auto; border-radius:15px;">
+
+        <h3 class="mb-4 text-center">➕ Nouvelle Bourse</h3>
+
+        {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+
+        <div class="mb-3">
+            {{ form_label(form.nomBourse) }}
+            {{ form_widget(form.nomBourse) }}
+            <div class="text-danger small mt-1">{{ form_errors(form.nomBourse) }}</div>
+        </div>
+
+        <div class="mb-3">
+            {{ form_label(form.pays) }}
+            {{ form_widget(form.pays) }}
+            <div class="text-danger small mt-1">{{ form_errors(form.pays) }}</div>
+        </div>
+
+        <div class="mb-3">
+            {{ form_label(form.devise) }}
+            {{ form_widget(form.devise) }}
+            <div class="text-danger small mt-1">{{ form_errors(form.devise) }}</div>
+        </div>
+
+        <div class="mb-3">
+            {{ form_label(form.statut) }}
+            {{ form_widget(form.statut) }}
+        </div>
+
+        <div class="d-flex gap-2 mt-3">
+            <button type="submit" class="btn btn-success w-100">💾 Créer</button>
+            <a href="{{ path('app_bourse_index') }}" class="btn btn-secondary w-100">⬅ Retour</a>
+        </div>
+
+        {{ form_end(form) }}
+    </div>
+</div>
+{% endblock %}

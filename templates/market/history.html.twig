@@ -1,0 +1,132 @@
+{% extends 'base_user.html.twig' %}
+
+{% block title %}Historique — FINORA{% endblock %}
+
+{% block body %}
+<section class="pt-4 pb-5">
+    <div class="container">
+
+        <!-- Page title -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <h2 class="fs-1 fw-bold">📜 Historique <span class="text-primary">des Transactions</span></h2>
+                <p class="mb-0">Consultez toutes vos opérations d'achat et de vente</p>
+            </div>
+        </div>
+
+        <!-- Stat cards -->
+        <div class="row g-4 mb-4">
+            <div class="col-sm-6 col-xl-3">
+                <div class="card card-body border-0 shadow-sm p-4">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="icon-lg bg-success bg-opacity-10 text-success rounded-3 fs-5">
+                            <i class="bi bi-arrow-down-circle"></i>
+                        </div>
+                        <div>
+                            <div class="text-muted small">Total Investi</div>
+                            <div class="fw-bold fs-5 text-success">{{ totalInvesti }} TND</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6 col-xl-3">
+                <div class="card card-body border-0 shadow-sm p-4">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="icon-lg bg-danger bg-opacity-10 text-danger rounded-3 fs-5">
+                            <i class="bi bi-arrow-up-circle"></i>
+                        </div>
+                        <div>
+                            <div class="text-muted small">Total Vendu</div>
+                            <div class="fw-bold fs-5 text-danger">{{ totalVendu }} TND</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6 col-xl-3">
+                <div class="card card-body border-0 shadow-sm p-4">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="icon-lg bg-warning bg-opacity-10 text-warning rounded-3 fs-5">
+                            <i class="bi bi-percent"></i>
+                        </div>
+                        <div>
+                            <div class="text-muted small">Commissions</div>
+                            <div class="fw-bold fs-5 text-warning">0 TND</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6 col-xl-3">
+                <div class="card card-body border-0 shadow-sm p-4">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="icon-lg bg-info bg-opacity-10 text-info rounded-3 fs-5">
+                            <i class="bi bi-list-ul"></i>
+                        </div>
+                        <div>
+                            <div class="text-muted small">Transactions</div>
+                            <div class="fw-bold fs-5">{{ nbTransactions }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Transactions table -->
+        <div class="card border-0 shadow-sm rounded-3 overflow-hidden">
+            <table class="table mb-0">
+                <thead style="background:#0f172a; color:white;">
+                    <tr>
+                        <th class="py-3 px-4">Type</th>
+                        <th class="py-3 px-4">Symbole</th>
+                        <th class="py-3 px-4">Entreprise</th>
+                        <th class="py-3 px-4">Quantité</th>
+                        <th class="py-3 px-4">Prix unitaire</th>
+                        <th class="py-3 px-4">Montant total</th>
+                        <th class="py-3 px-4">Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for t in transactions %}
+                    <tr>
+                        <td class="px-4 py-3">
+                            {% if t.typeTransaction == 'ACHAT' %}
+                                <span class="badge text-bg-success">
+                                    <i class="bi bi-arrow-down me-1"></i> ACHAT
+                                </span>
+                            {% else %}
+                                <span class="badge text-bg-danger">
+                                    <i class="bi bi-arrow-up me-1"></i> VENTE
+                                </span>
+                            {% endif %}
+                        </td>
+                        <td class="px-4 py-3">
+                            <span class="badge text-bg-primary">{{ t.action.symbole }}</span>
+                        </td>
+                        <td class="px-4 py-3">{{ t.action.nomEntreprise }}</td>
+                        <td class="px-4 py-3">{{ t.quantite }}</td>
+                        <td class="px-4 py-3">{{ t.prixUnitaire }} TND</td>
+                        <td class="px-4 py-3 fw-semibold">
+                            {% if t.typeTransaction == 'ACHAT' %}
+                                <span class="text-success">+{{ t.montantTotal }} TND</span>
+                            {% else %}
+                                <span class="text-danger">-{{ t.montantTotal }} TND</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-4 py-3 text-muted small">
+                            {{ t.dateTransaction|date('d/m/Y H:i') }}
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="7" class="text-center py-5 text-muted">
+                            <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                            Aucune transaction trouvée
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+</section>
+{% endblock %}

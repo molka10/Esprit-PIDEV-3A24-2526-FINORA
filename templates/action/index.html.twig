@@ -1,0 +1,157 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Dashboard Actions{% endblock %}
+{% block page_title %}📊 Gestion des Actions{% endblock %}
+
+{% block body %}
+
+<div class="container-fluid">
+
+    <!-- 🔥 TABLE EN HAUT -->
+    <div class="card shadow-sm p-3 mb-4">
+
+        <div class="d-flex justify-content-between mb-3">
+            <h5>📊 Liste des Actions</h5>
+
+            <div style="display:flex; gap:10px;">
+                <input type="text" id="searchInput" class="form-control"
+                       placeholder="🔍 Rechercher..." style="width:250px;">
+
+                <a href="{{ path('app_action_new') }}" class="btn btn-primary">
+                    ➕ Ajouter
+                </a>
+            </div>
+        </div>
+
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>Symbole</th>
+                    <th>Entreprise</th>
+                    <th>Prix</th>
+                    <th>Quantité</th>
+                    <th>Statut</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+
+            <tbody id="actionsTable">
+                {% for action in actions %}
+                    <tr>
+
+                        <td>{{ action.symbole }}</td>
+                        <td>{{ action.nomEntreprise }}</td>
+                        <td>{{ action.prixUnitaire }} €</td>
+                        <td>{{ action.quantiteDisponible }}</td>
+
+                        <td>
+                            {% if action.statut == 'DISPONIBLE' %}
+                                <span class="badge bg-success">Disponible</span>
+                            {% else %}
+                                <span class="badge bg-danger">Indisponible</span>
+                            {% endif %}
+                        </td>
+
+                        <td>
+
+                            <a href="{{ path('app_action_show', {id: action.id}) }}"
+                               class="btn btn-sm btn-info">👁</a>
+
+                            <a href="{{ path('app_action_edit', {id: action.id}) }}"
+                               class="btn btn-sm btn-warning">✏</a>
+
+                            <form method="POST"
+                                  action="{{ path('app_action_delete', {id: action.id}) }}"
+                                  style="display:inline;">
+                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ action.id) }}">
+                                <button class="btn btn-sm btn-danger">🗑</button>
+                            </form>
+
+                        </td>
+
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+    </div>
+
+    <!-- 🔥 CARDS -->
+    <div class="row mb-4">
+
+        <div class="col-md-3">
+            <div class="card shadow-sm p-3">
+                <h6>Total Actions</h6>
+                <h3>{{ actions|length }}</h3>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card shadow-sm p-3">
+                <h6>Disponible</h6>
+                <h3>{{ actions|filter(a => a.statut == 'DISPONIBLE')|length }}</h3>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card shadow-sm p-3">
+                <h6>Indisponible</h6>
+                <h3>{{ actions|filter(a => a.statut != 'DISPONIBLE')|length }}</h3>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card shadow-sm p-3">
+                <h6>Valeur Totale</h6>
+                <h3>
+                    {{ actions|reduce((c,a)=>c+(a.prixUnitaire*a.quantiteDisponible),0)|number_format(2) }} €
+                </h3>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- 🔥 GRAPH -->
+    <div class="card shadow-sm p-3">
+
+        <h5>📈 Évolution</h5>
+        <canvas id="chart"></canvas>
+
+    </div>
+
+</div>
+
+{% endblock %}
+
+{% block javascripts %}
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+// 🔥 GRAPH
+new Chart(document.getElementById('chart'), {
+    type: 'line',
+    data: {
+        labels: ['Jan','Fev','Mar','Avr','Mai','Jun'],
+        datasets: [{
+            label: 'Actions',
+            data: [10, 20, 15, 30, 25, 40],
+            borderColor: 'blue'
+        }]
+    }
+});
+
+// 🔥 SEARCH
+document.getElementById('searchInput').addEventListener('keyup', function() {
+
+    let value = this.value.toLowerCase();
+    let rows = document.querySelectorAll('#actionsTable tr');
+
+    rows.forEach(row => {
+        row.style.display = row.innerText.toLowerCase().includes(value) ? '' : 'none';
+    });
+
+});
+</script>
+
+{% endblock %}
