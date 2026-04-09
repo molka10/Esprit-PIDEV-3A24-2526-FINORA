@@ -1,159 +1,144 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Dashboard{% endblock %}
+{% block title %}Dashboard — FINORA{% endblock %}
 {% block page_title %}Dashboard{% endblock %}
 
 {% block body %}
+<div class="p-4">
 
-<div class="row g-4 mb-4">
-
-```
-<!-- Actions -->
-<div class="col-md-6 col-xxl-3">
-    <div class="card card-body bg-warning bg-opacity-15 p-4 h-100">
-        <div class="d-flex justify-content-between">
-            <div>
-                <h2 class="fw-bold">{{ totalActions }}</h2>
-                <span>Actions</span>
-            </div>
-            <div class="icon-lg bg-warning text-white rounded-circle">
-                <i class="fas fa-chart-line"></i>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Bourses -->
-<div class="col-md-6 col-xxl-3">
-    <div class="card card-body bg-purple bg-opacity-10 p-4 h-100">
-        <div class="d-flex justify-content-between">
-            <div>
-                <h2 class="fw-bold">{{ totalBourses }}</h2>
-                <span>Bourses</span>
-            </div>
-            <div class="icon-lg bg-purple text-white rounded-circle">
-                <i class="fas fa-coins"></i>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Transactions -->
-<div class="col-md-6 col-xxl-3">
-    <div class="card card-body bg-primary bg-opacity-10 p-4 h-100">
-        <div class="d-flex justify-content-between">
-            <div>
-                <h2 class="fw-bold">{{ totalTransactions }}</h2>
-                <span>Transactions</span>
-            </div>
-            <div class="icon-lg bg-primary text-white rounded-circle">
-                <i class="fas fa-exchange-alt"></i>
-            </div>
-        </div>
-    </div>
-</div>
-```
-
-</div>
-
-<!-- CHART + LIST -->
-
-<div class="row g-4 mb-4">
-
-```
-<!-- CHART -->
-<div class="col-xxl-8">
-    <div class="card shadow h-100">
-        <div class="card-header p-4 border-bottom">
-            <h5>Earnings</h5>
-        </div>
-
-        <div class="card-body">
-            <canvas id="evolutionChart"></canvas>
-        </div>
-    </div>
-</div>
-
-<!-- ACTIONS -->
-<div class="col-xxl-4">
-    <div class="card shadow h-100">
-        <div class="card-header p-4 border-bottom">
-            <h5>Latest Actions</h5>
-        </div>
-
-        <div class="card-body">
-            {% for action in actions %}
-                <div class="d-flex mb-3">
-                    <div class="me-3">
-                        <div class="avatar bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width:40px;height:40px;">
-                            {{ action.symbole|slice(0,2) }}
-                        </div>
-                    </div>
-
+    <!-- Stat cards -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-6 col-xxl-3">
+            <div class="card card-body bg-warning bg-opacity-15 p-4 h-100 border-0 shadow-sm">
+                <div class="d-flex justify-content-between align-items-center">
                     <div>
-                        <h6 class="mb-0">{{ action.symbole }}</h6>
-                        <small>{{ action.nomEntreprise }}</small><br>
-                        <span class="text-success">{{ action.prixUnitaire }} €</span>
+                        <h2 class="fw-bold mb-0">{{ totalBourses ?? 0 }}</h2>
+                        <span class="h6 fw-light">Bourses actives</span>
+                    </div>
+                    <div class="icon-lg rounded-circle bg-warning text-white">
+                        <i class="fas fa-chart-bar fa-fw"></i>
                     </div>
                 </div>
-                <hr>
-            {% endfor %}
-        </div>
-    </div>
-</div>
-```
-
-</div>
-
-<!-- PIE CHART -->
-
-<div class="row g-4">
-    <div class="col-lg-4">
-        <div class="card shadow h-100">
-            <div class="card-header p-4 border-bottom">
-                <h5>Répartition</h5>
             </div>
-
-```
-        <div class="card-body">
-            <canvas id="repartitionChart"></canvas>
+        </div>
+        <div class="col-md-6 col-xxl-3">
+            <div class="card card-body p-4 h-100 border-0 shadow-sm" style="background:rgba(99,102,241,0.1);">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h2 class="fw-bold mb-0">{{ totalActions ?? 0 }}</h2>
+                        <span class="h6 fw-light">Actions en cours</span>
+                    </div>
+                    <div class="icon-lg rounded-circle text-white" style="background:#6366f1;">
+                        <i class="fas fa-chart-line fa-fw"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 col-xxl-3">
+            <div class="card card-body bg-success bg-opacity-10 p-4 h-100 border-0 shadow-sm">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h2 class="fw-bold mb-0">{{ totalTransactions ?? 0 }}</h2>
+                        <span class="h6 fw-light">Transactions totales</span>
+                    </div>
+                    <div class="icon-lg rounded-circle bg-success text-white">
+                        <i class="bi bi-arrow-left-right fa-fw"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 col-xxl-3">
+            <div class="card card-body bg-info bg-opacity-10 p-4 h-100 border-0 shadow-sm">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h2 class="fw-bold mb-0">{{ totalRevenu ?? '0.00' }} TND</h2>
+                        <span class="h6 fw-light">Revenu total</span>
+                    </div>
+                    <div class="icon-lg rounded-circle bg-info text-white">
+                        <i class="bi bi-cash-stack fa-fw"></i>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
-</div>
-```
+
+    <!-- Chart + Recent activity -->
+    <div class="row g-4">
+        <div class="col-xxl-8">
+            <div class="card shadow border-0 h-100">
+                <div class="card-header border-bottom p-4 d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">📈 Volume des Transactions</h5>
+                    <span class="badge bg-success">En direct</span>
+                </div>
+                <div class="card-body p-4">
+                    <div id="chartTransactions"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xxl-4">
+            <div class="card shadow border-0 h-100">
+                <div class="card-header border-bottom p-4 d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">🕐 Activité Récente</h5>
+                    <a href="{{ path('app_history') }}" class="btn btn-link p-0 mb-0 small">Voir tout</a>
+                </div>
+                <div class="card-body p-4">
+                    {% if recentTransactions is defined and recentTransactions|length > 0 %}
+                        {% for t in recentTransactions %}
+                        <div class="d-flex align-items-center gap-3 mb-3">
+                            <div style="width:40px; height:40px; border-radius:10px; display:flex; align-items:center; justify-content:center;
+                                background:{{ t.typeTransaction == 'ACHAT' ? '#dcfce7' : '#fee2e2' }}">
+                                <i class="bi bi-arrow-{{ t.typeTransaction == 'ACHAT' ? 'down' : 'up' }}-circle
+                                   {{ t.typeTransaction == 'ACHAT' ? 'text-success' : 'text-danger' }} fs-5"></i>
+                            </div>
+                            <div class="flex-grow-1">
+                                <div class="fw-semibold" style="font-size:14px;">
+                                    {{ t.typeTransaction }} — {{ t.action.symbole }}
+                                </div>
+                                <div style="font-size:12px; color:#94a3b8;">
+                                    {{ t.dateTransaction|date('d/m/Y H:i') }}
+                                </div>
+                            </div>
+                            <div class="fw-bold {{ t.typeTransaction == 'ACHAT' ? 'text-success' : 'text-danger' }}">
+                                {{ t.montantTotal }} TND
+                            </div>
+                        </div>
+                        {% if not loop.last %}<hr class="my-2">{% endif %}
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-center text-muted py-4">
+                            <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                            Aucune activité récente
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
 
 </div>
-
 {% endblock %}
 
 {% block javascripts %}
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
 <script>
-// Evolution
-new Chart(document.getElementById('evolutionChart'), {
-    type: 'line',
-    data: {
-        labels: {{ chart_evolution_labels|json_encode|raw }},
-        datasets: [{
-            label: 'Evolution',
-            data: {{ chart_evolution_data|json_encode|raw }},
-            tension: 0.4
-        }]
-    }
-});
-
-// Repartition
-new Chart(document.getElementById('repartitionChart'), {
-    type: 'doughnut',
-    data: {
-        labels: {{ chart_repartition_labels|json_encode|raw }},
-        datasets: [{
-            data: {{ chart_repartition_data|json_encode|raw }}
-        }]
-    }
-});
+var options = {
+    series: [{
+        name: 'Achats',
+        data: [30, 40, 35, 50, 49, 60, 70]
+    }, {
+        name: 'Ventes',
+        data: [20, 30, 25, 40, 39, 50, 60]
+    }],
+    chart: { type: 'area', height: 300, toolbar: { show: false } },
+    colors: ['#22c55e', '#ef4444'],
+    stroke: { curve: 'smooth', width: 2 },
+    fill: { type: 'gradient', gradient: { shadeIntensity: 1, opacityFrom: 0.4, opacityTo: 0.1 } },
+    xaxis: { categories: ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'] },
+    tooltip: { theme: 'light' },
+    legend: { position: 'top' },
+    grid: { borderColor: '#f1f5f9' }
+};
+var chart = new ApexCharts(document.querySelector("#chartTransactions"), options);
+chart.render();
 </script>
-
 {% endblock %}
