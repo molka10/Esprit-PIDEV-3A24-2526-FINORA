@@ -6,6 +6,7 @@ use App\Entity\Formation;
 use App\Entity\Lesson;
 use App\Form\LessonType;
 use Doctrine\ORM\EntityManagerInterface;
+use Nucleos\DompdfBundle\Wrapper\DompdfWrapperInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -90,6 +91,16 @@ final class LessonController extends AbstractController
         return $this->render('lesson/show.html.twig', [
             'lesson' => $lesson,
         ]);
+    }
+
+    #[Route('/{id}/pdf', name: 'app_lesson_pdf', methods: ['GET'])]
+    public function exportPdf(Lesson $lesson, DompdfWrapperInterface $dompdfWrapper): Response
+    {
+        $html = $this->renderView('lesson/pdf.html.twig', [
+            'lesson' => $lesson,
+        ]);
+
+        return $dompdfWrapper->getStreamResponse($html, 'lesson-' . $lesson->getId() . '.pdf');
     }
 
     #[Route('/{id}/edit', name: 'app_lesson_edit', methods: ['GET', 'POST'])]

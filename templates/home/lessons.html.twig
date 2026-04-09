@@ -207,9 +207,15 @@
                                         </a>
 
                                         {% if lesson.videoUrl %}
-                                            <a href="{{ lesson.videoUrl }}" target="_blank" class="btn btn-sm btn-outline-primary">
-                                                Ouvrir vidéo
-                                            </a>
+                                            {% if lesson.isUploadedVideo %}
+                                                <a href="{{ asset('uploads/lessons/videos/' ~ lesson.videoUrl) }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                                    Ouvrir vidéo
+                                                </a>
+                                            {% else %}
+                                                <a href="{{ lesson.videoUrl }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                                    Ouvrir vidéo
+                                                </a>
+                                            {% endif %}
                                         {% endif %}
                                     </div>
                                 </div>

@@ -69,7 +69,6 @@
                             <h3 class="h5 mb-3">Vidéo</h3>
 
                             {% set isYoutube = lesson.youTubeVideoId is not null %}
-                            {% set isMp4 = lesson.videoUrl ends with '.mp4' %}
 
                             {% if isYoutube %}
                                 <div class="mb-4">
@@ -83,10 +82,10 @@
                                         style="border-radius:12px;">
                                     </iframe>
                                 </div>
-                            {% elseif isMp4 %}
+                            {% elseif lesson.isUploadedVideo %}
                                 <div class="mb-4">
                                     <video controls style="width:100%; border-radius:12px;">
-                                        <source src="{{ lesson.videoUrl }}" type="video/mp4">
+                                        <source src="{{ asset('uploads/lessons/videos/' ~ lesson.videoUrl) }}">
                                         Votre navigateur ne supporte pas la lecture vidéo.
                                     </video>
                                 </div>
@@ -110,11 +109,9 @@
                                 </a>
                             {% endif %}
 
-                            {% if lesson.videoUrl %}
-                                <a href="{{ lesson.videoUrl }}" target="_blank" class="btn btn-outline-primary">
-                                    Ouvrir dans un nouvel onglet
-                                </a>
-                            {% endif %}
+                            <a href="{{ path('app_lesson_pdf', {'id': lesson.id}) }}" class="btn btn-outline-primary">
+                                Exporter en PDF
+                            </a>
                         </div>
                     </div>
                 </div>

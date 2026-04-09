@@ -6,6 +6,7 @@ use App\Entity\Formation;
 use App\Entity\Lesson;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
@@ -36,12 +37,11 @@ class LessonType extends AbstractType
                     'placeholder' => 'Entrez le contenu'
                 ]
             ])
-            ->add('videoUrl', TextType::class, [
-                'label' => 'URL vidéo',
+            ->add('videoFile', FileType::class, [
+                'label' => 'Vidéo',
                 'required' => false,
-                'attr' => [
-                    'placeholder' => 'https://youtube.com/... ou https://...mp4'
-                ]
+                'mapped' => true,
+                'help' => 'Formats acceptés : MP4, WEBM, MOV.'
             ])
             ->add('ordre', IntegerType::class, [
                 'label' => 'Ordre',

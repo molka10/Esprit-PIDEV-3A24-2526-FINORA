@@ -3,10 +3,13 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\Validator\Constraints as Assert;
+use Vich\UploaderBundle\Mapping\Annotation as Vich;
 
 #[ORM\Entity]
 #[ORM\Table(name: 'lesson')]
+#[Vich\Uploadable]
 class Lesson
 {
     #[ORM\Id]
@@ -37,12 +40,15 @@ class Lesson
     private ?string $contenu = null;
 
     #[ORM\Column(name: 'video_url', type: 'string', length: 500, nullable: true)]
-    #[Assert\Length(
-        max: 500,
-        maxMessage: 'L’URL de la vidéo ne doit pas dépasser {{ limit }} caractères.'
-    )]
-    #[Assert\Url(message: 'Veuillez entrer une URL vidéo valide.')]
     private ?string $videoUrl = null;
+
+    #[Vich\UploadableField(mapping: 'lesson_videos', fileNameProperty: 'videoUrl')]
+    #[Assert\File(
+        maxSize: '100M',
+        mimeTypes: ['video/mp4', 'video/webm', 'video/quicktime'],
+        mimeTypesMessage: 'Veuillez uploader une vidéo valide (MP4, WEBM ou MOV).'
+    )]
+    private ?File $videoFile = null;
 
     #[ORM\Column(type: 'integer')]
     #[Assert\NotNull(message: 'L’ordre est obligatoire.')]
@@ -53,6 +59,9 @@ class Lesson
     #[Assert\NotNull(message: 'La durée est obligatoire.')]
     #[Assert\Positive(message: 'La durée doit être un entier positif.')]
     private ?int $dureeMinutes = null;
+
+    #[ORM\Column(type: 'datetime_immutable', nullable: true)]
+    private ?\DateTimeImmutable $updatedAt = null;
 
     public function getId(): ?int
     {
@@ -103,6 +112,20 @@ class Lesson
         return $this;
     }
 
+    public function getVideoFile(): ?File
+    {
+        return $this->videoFile;
+    }
+
+    public function setVideoFile(?File $videoFile = null): void
+    {
+        $this->videoFile = $videoFile;
+
+        if ($videoFile !== null) {
+            $this->updatedAt = new \DateTimeImmutable();
+        }
+    }
+
     public function getOrdre(): ?int
     {
         return $this->ordre;
@@ -125,9 +148,43 @@ class Lesson
         return $this;
     }
 
-    public function getYouTubeVideoId(): ?string
+    public function getUpdatedAt(): ?\DateTimeImmutable
+    {
+        return $this->updatedAt;
+    }
+
+    public function setUpdatedAt(?\DateTimeImmutable $updatedAt): self
+    {
+        $this->updatedAt = $updatedAt;
+        return $this;
+    }
+
+    public function isExternalVideo(): bool
+    {
+        return $this->videoUrl !== null && preg_match('#^https?://#i', $this->videoUrl) === 1;
+    }
+
+    public function isUploadedVideo(): bool
+    {
+        return $this->videoUrl !== null && !$this->isExternalVideo();
+    }
+
+    public function getVideoPath(): ?string
     {
         if ($this->videoUrl === null) {
+            return null;
+        }
+
+        if ($this->isExternalVideo()) {
+            return $this->videoUrl;
+        }
+
+        return '/uploads/lessons/videos/' . $this->videoUrl;
+    }
+
+    public function getYouTubeVideoId(): ?string
+    {
+        if ($this->videoUrl === null || !$this->isExternalVideo()) {
             return null;
         }
 

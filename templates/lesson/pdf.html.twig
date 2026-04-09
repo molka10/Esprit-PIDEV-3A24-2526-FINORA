@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ lesson.titre }}</title>
+    <style>
+        body {
+            font-family: DejaVu Sans, sans-serif;
+            font-size: 14px;
+            color: #222;
+            line-height: 1.6;
+        }
+        .header {
+            background: #f3e8ff;
+            padding: 16px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        .badge {
+            display: inline-block;
+            padding: 6px 10px;
+            border-radius: 999px;
+            background: #ede9fe;
+            color: #6d28d9;
+            font-size: 12px;
+            margin-right: 6px;
+        }
+        h1 {
+            margin: 0 0 10px 0;
+            color: #1f2937;
+        }
+        h2 {
+            color: #374151;
+            margin-top: 24px;
+        }
+        .content {
+            white-space: pre-line;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>{{ lesson.titre }}</h1>
+        <span class="badge">Formation: {{ lesson.formation ? lesson.formation.titre : 'Inconnue' }}</span>
+        <span class="badge">Ordre: {{ lesson.ordre }}</span>
+        <span class="badge">Durée: {{ lesson.dureeMinutes }} min</span>
+    </div>
+
+    <h2>Contenu</h2>
+    <div class="content">
+        {{ lesson.contenu ?: 'Aucun contenu disponible.' }}
+    </div>
+
+    {% if lesson.videoUrl %}
+        <h2>Vidéo</h2>
+        <div>
+            {% if lesson.isUploadedVideo %}
+                Fichier vidéo: {{ lesson.videoUrl }}
+            {% else %}
+                Lien vidéo: {{ lesson.videoUrl }}
+            {% endif %}
+        </div>
+    {% endif %}
+</body>
+</html>

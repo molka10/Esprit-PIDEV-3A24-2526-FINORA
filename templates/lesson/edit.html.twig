@@ -34,10 +34,25 @@
                     <div class="text-danger small mt-1">{{ form_errors(form.contenu) }}</div>
                 </div>
 
+                {% if lesson.videoUrl %}
+                    <div class="mb-3">
+                        <label class="form-label">Vidéo actuelle</label><br>
+                        {% if lesson.isUploadedVideo %}
+                            <video controls style="max-width: 320px; border-radius: 12px;">
+                                <source src="{{ asset('uploads/lessons/videos/' ~ lesson.videoUrl) }}">
+                            </video>
+                        {% else %}
+                            <a href="{{ lesson.videoUrl }}" target="_blank" class="btn btn-outline-primary btn-sm">
+                                Ouvrir la vidéo actuelle
+                            </a>
+                        {% endif %}
+                    </div>
+                {% endif %}
+
                 <div class="mb-3">
-                    {{ form_label(form.videoUrl) }}
-                    {{ form_widget(form.videoUrl, {'attr': {'class': 'form-control'}}) }}
-                    <div class="text-danger small mt-1">{{ form_errors(form.videoUrl) }}</div>
+                    {{ form_label(form.videoFile) }}
+                    {{ form_widget(form.videoFile, {'attr': {'class': 'form-control'}}) }}
+                    <div class="text-danger small mt-1">{{ form_errors(form.videoFile) }}</div>
                 </div>
 
                 <div class="mb-3">

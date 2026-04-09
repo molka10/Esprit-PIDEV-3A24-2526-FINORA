@@ -9,4 +9,5 @@ return [
     Twig\Extra\TwigExtraBundle\TwigExtraBundle::class => ['all' => true],
     Knp\Bundle\PaginatorBundle\KnpPaginatorBundle::class => ['all' => true],
     Vich\UploaderBundle\VichUploaderBundle::class => ['all' => true],
+    Nucleos\DompdfBundle\NucleosDompdfBundle::class => ['all' => true],
 ];
