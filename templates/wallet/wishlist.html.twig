@@ -1,0 +1,230 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Wishlist{% endblock %}
+
+{% block content %}
+
+{% set pct = (goal > 0 and total > 0) ? min((total / goal) * 100, 100) : 0 %}
+{% set remain = (goal > 0) ? max(goal - total, 0) : null %}
+{% set sorted = wishlist %}
+{% set maxPrice = sorted is not empty ? sorted[0].getPrice() : 1 %}
+{% set need = (goal > total) ? goal - total : total %}
+
+<div class="wl-page">
+
+    <!-- LEFT -->
+    <div class="wl-left">
+
+        <div class="wl-card">
+            <h2>🛒 Wishlist</h2>
+            <a href="{{ path('dashboard') }}" class="btn" style="background:#636e72;">
+                    ⬅ Dashboard
+                </a>
+
+            <form method="post" action="{{ path('wishlist') }}" class="wl-add-form">
+                <input type="text" name="name" placeholder="Nom produit..." required>
+                <input type="number" name="price" placeholder="Montant DT" required>
+                <button type="submit">Ajouter</button>
+            </form>
+
+            {% for item in wishlist %}
+                <div class="wl-row">
+                    <span>• {{ item.getName() }}</span>
+                    <span>{{ item.getPrice() }} DT</span>
+                    <a href="{{ path('wishlist_delete', {id: item.getId()}) }}">✕</a>
+                </div>
+            {% endfor %}
+
+            <div class="wl-total">
+                Total {{ total }} DT
+            </div>
+        </div>
+
+    </div>
+
+    <!-- RIGHT -->
+    <div class="wl-right">
+
+        <!-- GOAL -->
+        <div class="wl-card">
+            <h3>🎯 Objectif d'épargne</h3>
+
+            <p>Total: {{ total }} DT</p>
+            <p>Objectif: {{ goal > 0 ? goal ~ ' DT' : '—' }}</p>
+            <p>Reste: {{ remain is not null ? remain ~ ' DT' : '—' }}</p>
+
+            <form method="post" action="{{ path('wishlist') }}">
+                <input type="hidden" name="_action" value="set_goal">
+                <input type="number" name="goal" placeholder="Ex: 1000">
+                <button>Définir</button>
+            </form>
+        </div>
+
+        <!-- PLAN -->
+        <div class="wl-card">
+            <h3>📅 Plan d'épargne mensuel</h3>
+
+            <div class="months-grid">
+                {% for m in [3,6,12,18,24,36] %}
+                    <button onclick="calc({{ m }}, {{ need }})">{{ m }} mois</button>
+                {% endfor %}
+            </div>
+
+            <p id="monthly">{{ (need / 3)|round }} DT / mois</p>
+        </div>
+
+        <!-- CHART -->
+        <div class="wl-card">
+            <h3>📊 Statistiques</h3>
+            <canvas id="chart"></canvas>
+        </div>
+
+        <!-- PRIORITY -->
+        <div class="wl-card">
+            <h3>⭐ Priorité des articles</h3>
+
+            {% for item in sorted %}
+                {% set w = (item.getPrice() / maxPrice) * 100 %}
+                <div class="p-item">
+                    <span>#{{ loop.index }} {{ item.getName() }}</span>
+                    <div class="bar">
+                        <div class="fill" style="width:{{ w }}%"></div>
+                    </div>
+                    <span>{{ item.getPrice() }} DT</span>
+                </div>
+            {% endfor %}
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}
+{% block stylesheets %}
+<style>
+
+body {
+    background: #f5f7fb;
+    font-family: Arial;
+}
+
+/* Layout */
+.wl-page {
+    display: flex;
+    gap: 40px;
+    padding: 40px;
+    max-width: 1200px;
+    margin: auto;
+}
+
+.wl-left {
+    width: 350px;
+}
+
+.wl-right {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+}
+
+/* Card */
+.wl-card {
+    background: white;
+    padding: 20px;
+    border-radius: 16px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+}
+
+/* Form */
+.wl-add-form {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.wl-add-form input {
+    flex: 1;
+    padding: 8px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+}
+
+.wl-add-form button {
+    background: #1a2440;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 10px;
+}
+
+/* Items */
+.wl-row {
+    display: flex;
+    justify-content: space-between;
+    margin: 6px 0;
+}
+
+/* Months */
+.months-grid {
+    display: grid;
+    grid-template-columns: repeat(3,1fr);
+    gap: 10px;
+}
+
+.months-grid button {
+    padding: 10px;
+    border: none;
+    background: #eee;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+/* Priority */
+.p-item {
+    margin-top: 15px;
+}
+
+.bar {
+    height: 6px;
+    background: #eee;
+    border-radius: 5px;
+}
+
+.fill {
+    height: 6px;
+    background: #185FA5;
+    border-radius: 5px;
+}
+
+</style>
+{% endblock %}
+{% block javascripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+function calc(months, need){
+    let val = Math.round(need / months);
+    document.getElementById('monthly').innerText = val + " DT / mois";
+}
+
+// Chart
+const ctx = document.getElementById('chart');
+
+new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+        labels: ['Saved', 'Remaining'],
+        datasets: [{
+            data: [{{ total }}, {{ goal > total ? goal - total : 0 }}],
+            backgroundColor: ['#185FA5', '#e5e7eb']
+        }]
+    },
+    options: {
+        plugins: {
+            legend: { display: true }
+        }
+    }
+});
+</script>
+{% endblock %}

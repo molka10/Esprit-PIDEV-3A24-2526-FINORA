@@ -44,6 +44,7 @@ class TransactionWallet
     #[ORM\JoinColumn(name: "category_id", referencedColumnName: "id_category", nullable: false)]
     private ?Category $category = null;
 
+    
     // getters & setters
 
     public function getId(): ?int
@@ -124,6 +125,7 @@ public function setCategory(?Category $category): self
     $this->category = $category;
     return $this;
 }
+
 
 
 }

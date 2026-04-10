@@ -1000,3 +1000,12 @@ body {
 body {
   background: #f1f5f9;
 }
+
+
+.btn-purple {
+    background: #6c5ce7;
+    color: white;
+    padding: 8px 18px;
+    border-radius: 20px;
+    text-decoration: none;
+}
