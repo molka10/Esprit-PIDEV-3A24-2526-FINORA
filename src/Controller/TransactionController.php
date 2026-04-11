@@ -210,6 +210,7 @@ $chartOutcome = array_column($chartDates, 'outcome');
             return new Response("Transaction non trouvée");
         }
 
+$data = $req->request->all();
 
 $type = $data['type'] ?? 'INCOME';
 $transaction->setType($type);

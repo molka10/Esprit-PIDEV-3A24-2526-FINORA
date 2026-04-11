@@ -1064,3 +1064,33 @@ body {
     align-items: center; /* 🔥 center */
     justify-content: center; /* 🔥 center عمودي */
 }
+
+.ai-box {
+    margin-top: 20px;
+    padding: 20px;
+    border-radius: 15px;
+    background: #f8fafc;
+}
+
+/* container */
+.ai-container {
+    display: flex;
+    align-items: flex-start;
+    gap: 30px;
+}
+
+/* LEFT */
+.ai-left {
+    min-width: 200px;
+}
+
+/* RIGHT */
+.ai-right {
+    flex: 1;
+}
+
+/* result styling */
+#aiResult {
+    line-height: 1.8;
+    font-size: 14px;
+}

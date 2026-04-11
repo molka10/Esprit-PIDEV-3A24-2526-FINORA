@@ -86,6 +86,27 @@
 
     </div>
 
+   <div class="chart-box ai-box">
+
+    <div class="ai-container">
+
+        <!-- LEFT -->
+        <div class="ai-left">
+            <h3> Analyse IA</h3>
+
+            <button id="aiBtn" class="btn-purple">
+                Prediction IA
+            </button>
+        </div>
+
+        <!-- RIGHT -->
+        <div class="ai-right">
+            <div id="aiResult"></div>
+        </div>
+
+    </div>
+
+</div>
 </div>
 
 {% block javascripts %}
@@ -278,6 +299,33 @@ new Chart(document.getElementById('dateChart'), {
             }
         }
     }
+});
+document.getElementById("aiBtn").addEventListener("click", function () {
+
+    fetch(`/ai/analyse-data?income={{ income }}&expenses={{ outcome }}`)
+        .then(res => res.json())
+        .then(data => {
+
+            let html = `
+    <div class="ai-content">
+        <p><strong> Situation:</strong></p>
+        <p>Balance: ${data.balance} DT</p>
+        <p>Ratio: ${data.ratio.toFixed(2)}%</p>
+
+        <p><strong> Risk:</strong> ${data.risk ?? "Unknown"}</p>
+
+        <p><strong> Prediction:</strong></p>
+        <p>Next expenses: ${data.predictedExpenses.toFixed(2)} DT</p>
+
+        <p><strong> Recommendations:</strong></p>
+        <ul>
+            ${data.recommendation.map(r => `<li>${r}</li>`).join("")}
+        </ul>
+    </div>
+`;
+
+            document.getElementById("aiResult").innerHTML = html;
+        });
 });
 </script>
 {% endblock %}
