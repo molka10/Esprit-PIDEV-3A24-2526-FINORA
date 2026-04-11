@@ -19,15 +19,16 @@ class TransactionType extends AbstractType
         ->add('nomTransaction');
 
     if ($options['show_type']) {
-        $builder->add('type', ChoiceType::class, [
-            'choices' => [
-                'Income' => 'INCOME',
-                'Outcome' => 'OUTCOME',
-            ],
-            'expanded' => true,
-            'multiple' => false,
-        ]);
-    }
+    $builder->add('type', ChoiceType::class, [
+        'choices' => [
+            'Income' => 'INCOME',
+            'Outcome' => 'OUTCOME',
+        ],
+        'expanded' => true,
+        'multiple' => false,
+        'data' => $options['type'], // 🔥 الحل
+    ]);
+}
 
     $builder
         ->add('montant')

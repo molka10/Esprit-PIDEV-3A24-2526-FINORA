@@ -23,7 +23,20 @@
             </div>
 
             <div class="form-group">
-                {{ form_row(form.type) }}
+                <div class="form-group">
+    <label>Type</label>
+
+    <div class="type-toggle">
+
+        {% for choice in form.type %}
+            <label class="type-btn">
+                {{ form_widget(choice) }}
+                <span>{{ choice.vars.label }}</span>
+            </label>
+        {% endfor %}
+
+    </div>
+</div>
             </div>
 
             <div class="form-group">
@@ -113,13 +126,15 @@
 <script>
 document.addEventListener("DOMContentLoaded", function () {
 
-    const radios = document.querySelectorAll('input[type="radio"]');
+    const radios = document.querySelectorAll('input[name="transaction_wallet[type]"]');
     const categorySelect = document.getElementById('transaction_wallet_category');
 
     function loadCategories(type) {
-        fetch('/api/categories/' + type)
+
+        fetch('/api/categories/' + type.toUpperCase())
             .then(res => res.json())
             .then(data => {
+
                 categorySelect.innerHTML = '<option value="">Select category</option>';
 
                 data.forEach(cat => {
@@ -137,10 +152,53 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     });
 
+    // default load
     const checked = document.querySelector('input[name="transaction_wallet[type]"]:checked');
     if (checked) {
         loadCategories(checked.value);
+    } else {
+        loadCategories('INCOME');
     }
+
+});
+document.addEventListener("DOMContentLoaded", function () {
+
+    const radios = document.querySelectorAll('input[name="transaction_wallet[type]"]');
+    const labels = document.querySelectorAll('.type-btn');
+    const categorySelect = document.getElementById('transaction_wallet_category');
+
+    function loadCategories(type) {
+        console.log("TYPE:", type);
+
+        fetch('/api/categories/' + type)
+            .then(res => res.json())
+            .then(data => {
+
+                categorySelect.innerHTML = '<option value="">Select category</option>';
+
+                data.forEach(cat => {
+                    let option = document.createElement('option');
+                    option.value = cat.id;
+                    option.textContent = cat.nom;
+                    categorySelect.appendChild(option);
+                });
+            });
+    }
+
+    // 🔥 الحل هنا: click على label
+    labels.forEach(label => {
+        label.addEventListener("click", function () {
+
+            const radio = this.querySelector('input');
+            radio.checked = true;
+
+            loadCategories(radio.value.toUpperCase());
+        });
+    });
+
+    // default
+    const checked = document.querySelector('input[name="transaction_wallet[type]"]:checked');
+    loadCategories(checked ? checked.value.toUpperCase() : 'INCOME');
 
 });
 </script>

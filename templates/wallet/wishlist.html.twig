@@ -14,38 +14,41 @@
 
     <!-- LEFT -->
     <div class="wl-left">
-
         <div class="wl-card">
             <h2>🛒 Wishlist</h2>
-            <a href="{{ path('dashboard') }}" class="btn" style="background:#636e72;">
-                    ⬅ Dashboard
-                </a>
 
+            <a href="{{ path('dashboard') }}" class="btn back-btn">
+                ⬅ Dashboard
+            </a>
+
+            <!-- FORM -->
             <form method="post" action="{{ path('wishlist') }}" class="wl-add-form">
                 <input type="text" name="name" placeholder="Nom produit..." required>
                 <input type="number" name="price" placeholder="Montant DT" required>
                 <button type="submit">Ajouter</button>
             </form>
 
-            {% for item in wishlist %}
-                <div class="wl-row">
-                    <span>• {{ item.getName() }}</span>
-                    <span>{{ item.getPrice() }} DT</span>
-                    <a href="{{ path('wishlist_delete', {id: item.getId()}) }}">✕</a>
-                </div>
-            {% endfor %}
+            <!-- LIST -->
+            <div class="wl-items">
+                {% for item in wishlist %}
+                    <div class="wl-row">
+                        <span>{{ item.getName() }}</span>
+                        <span>{{ item.getPrice() }} DT</span>
+                        <a href="{{ path('wishlist_delete', {id: item.getId()}) }}">✕</a>
+                    </div>
+                {% endfor %}
+            </div>
 
             <div class="wl-total">
                 Total {{ total }} DT
             </div>
         </div>
-
     </div>
 
     <!-- RIGHT -->
     <div class="wl-right">
 
-        <!-- GOAL -->
+        <!-- OBJECTIF -->
         <div class="wl-card">
             <h3>🎯 Objectif d'épargne</h3>
 
@@ -73,7 +76,7 @@
             <p id="monthly">{{ (need / 3)|round }} DT / mois</p>
         </div>
 
-        <!-- CHART -->
+        <!-- STATS -->
         <div class="wl-card">
             <h3>📊 Statistiques</h3>
             <canvas id="chart"></canvas>
@@ -100,35 +103,50 @@
 </div>
 
 {% endblock %}
+
+
 {% block stylesheets %}
 <style>
-
 body {
     background: #f5f7fb;
     font-family: Arial;
 }
 
-/* Layout */
+/* MAIN GRID */
 .wl-page {
-    display: flex;
+    display: grid;
+    grid-template-columns: 350px 1fr;
     gap: 40px;
     padding: 40px;
-    max-width: 1200px;
-    margin: auto;
+    align-items: start; /* 🔥 */
 }
 
 .wl-left {
-    width: 350px;
-}
-
-.wl-right {
-    flex: 1;
+    align-self: start; /* 🔥 */
     display: flex;
     flex-direction: column;
-    gap: 25px;
+}
+.wl-left .wl-card {
+    flex: 1;
+    min-height: 550px;
+    justify-content: center;
+}
+.wl-items {
+    justify-content: center;
 }
 
-/* Card */
+.wl-total {
+    text-align: center;
+}
+
+/* RIGHT GRID */
+.wl-right {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+/* CARD */
 .wl-card {
     background: white;
     padding: 20px;
@@ -136,7 +154,18 @@ body {
     box-shadow: 0 10px 25px rgba(0,0,0,0.05);
 }
 
-/* Form */
+/* BACK BUTTON */
+.back-btn {
+    display: inline-block;
+    margin-bottom: 15px;
+    padding: 6px 12px;
+    border-radius: 8px;
+    background: #636e72;
+    color: white;
+    text-decoration: none;
+}
+
+/* FORM */
 .wl-add-form {
     display: flex;
     gap: 10px;
@@ -158,14 +187,45 @@ body {
     border-radius: 10px;
 }
 
-/* Items */
-.wl-row {
+/* ITEMS */
+.wl-items {
     display: flex;
-    justify-content: space-between;
-    margin: 6px 0;
+    flex-wrap: wrap;
+    gap: 10px;
 }
 
-/* Months */
+.wl-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #f1f3f6;
+    padding: 10px 15px;
+    border-radius: 12px;
+    min-width: 150px;
+}
+
+.wl-row span:first-child {
+    font-weight: 500;
+}
+
+.wl-row span:nth-child(2) {
+    font-weight: bold;
+    color: #185FA5;
+}
+
+.wl-row a {
+    margin-left: auto;
+    color: red;
+    text-decoration: none;
+}
+
+/* TOTAL */
+.wl-total {
+    margin-top: 10px;
+    font-weight: bold;
+}
+
+/* MONTHS */
 .months-grid {
     display: grid;
     grid-template-columns: repeat(3,1fr);
@@ -180,7 +240,7 @@ body {
     cursor: pointer;
 }
 
-/* Priority */
+/* PRIORITY */
 .p-item {
     margin-top: 15px;
 }
@@ -197,9 +257,23 @@ body {
     border-radius: 5px;
 }
 
+/* RESPONSIVE */
+@media (max-width: 900px) {
+    .wl-page {
+        grid-template-columns: 1fr;
+    }
+
+    .wl-right {
+        grid-template-columns: 1fr;
+    }
+}
+
 </style>
 {% endblock %}
+
 {% block javascripts %}
+
+
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
@@ -208,7 +282,6 @@ function calc(months, need){
     document.getElementById('monthly').innerText = val + " DT / mois";
 }
 
-// Chart
 const ctx = document.getElementById('chart');
 
 new Chart(ctx, {
@@ -219,11 +292,6 @@ new Chart(ctx, {
             data: [{{ total }}, {{ goal > total ? goal - total : 0 }}],
             backgroundColor: ['#185FA5', '#e5e7eb']
         }]
-    },
-    options: {
-        plugins: {
-            legend: { display: true }
-        }
     }
 });
 </script>

@@ -71,7 +71,7 @@
    <div class="charts-right">
         <div class="chart-box small-chart">
             <h3 class="center-title">RÉPARTITION</h3>
-            <canvas id="pieChart"></canvas>        
+          <canvas id="pieChart" style="max-height:150px;"></canvas> 
         </div>
 
         <div class="chart-box small-chart">
@@ -170,8 +170,9 @@ new Chart(document.getElementById('incomeChart'), {
             data: {{ incomeChartData|json_encode|raw }},
             borderColor: '#1e3a8a',
             backgroundColor: 'transparent',
-            borderWidth: 3,
-            pointRadius: 5
+            borderWidth: 2,
+            pointRadius: 2,
+            tension: 0.4 
         }]
     },
     
@@ -198,8 +199,9 @@ new Chart(document.getElementById('outcomeChart'), {
             data: {{ outcomeChartData|json_encode|raw }},
             borderColor: '#1e3a8a',
             backgroundColor: 'transparent',
-            borderWidth: 3,
-            pointRadius: 5
+            borderWidth: 2,
+            pointRadius: 2,
+            tension: 0.4
         }]
     },
     options: {

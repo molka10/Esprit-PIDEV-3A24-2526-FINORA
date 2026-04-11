@@ -64,6 +64,7 @@ public function index(Request $req, EntityManagerInterface $em): Response
 
     $data = $req->request->all('transaction_wallet');
 $type = $data['type'] ?? 'INCOME';
+$transaction->setType($type);
 
 $form = $this->createForm(TransactionType::class, $transaction, [
     'type' => $type,
@@ -208,6 +209,10 @@ $chartOutcome = array_column($chartDates, 'outcome');
         if (!$transaction) {
             return new Response("Transaction non trouvée");
         }
+
+
+$type = $data['type'] ?? 'INCOME';
+$transaction->setType($type);
 
         $form = $this->createForm(TransactionType::class, $transaction, [
     'show_type' => false,

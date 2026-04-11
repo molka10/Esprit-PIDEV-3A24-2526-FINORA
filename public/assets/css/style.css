@@ -1009,3 +1009,58 @@ body {
     border-radius: 20px;
     text-decoration: none;
 }
+.type-toggle {
+    display: flex;
+    gap: 10px;
+}
+
+.type-btn {
+    flex: 1;
+    padding: 12px;
+    border-radius: 12px;
+    background: #f1f3f6;
+    text-align: center;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: 0.3s;
+}
+
+/* نخبي radio */
+.type-btn input {
+    display: none;
+}
+
+/* active */
+.type-btn:has(input:checked) {
+    background: #1a2440;
+    color: white;
+}
+
+.charts-row {
+    display: flex;
+    gap: 20px;
+}
+
+.chart-box {
+    flex: 1;
+    height: 230px;
+    padding: 15px;
+    border-radius: 16px;
+}
+
+.chart-box canvas {
+    height: 140px !important;
+}
+
+.chart-title {
+    text-align: center;
+    font-size: 13px;
+    color: #94a3b8; /* 🔥 لون خفيف */
+    letter-spacing: 1px;
+}
+.chart-box.small-chart {
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* 🔥 center */
+    justify-content: center; /* 🔥 center عمودي */
+}
