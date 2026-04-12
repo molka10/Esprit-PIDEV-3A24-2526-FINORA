@@ -34,7 +34,7 @@
 <main>
     <section class="pt-5 pb-0">
         <div class="container">
-            <div class="row align-items-center g-4 purple-section p-4 p-lg-5">
+            <div class="row align-items-center g-4 purple-section p-4 p-lg-5 rounded-4 overflow-hidden hero-finora">
                 <div class="col-lg-6">
                     <span class="badge bg-primary bg-opacity-10 text-primary mb-3">Catalogue Lessons</span>
                     <h1 class="display-5 mb-3 finora-title">Explorez les lessons FINORA</h1>
@@ -42,7 +42,7 @@
                         Parcourez les lessons disponibles, filtrez par formation et trouvez rapidement le contenu qui vous intéresse.
                     </p>
 
-                    <form method="get" action="{{ path('app_lessons') }}" class="border rounded p-2 mb-4 bg-white" id="hero-lesson-search-form">
+                    <form method="get" action="{{ path('app_lessons') }}" class="border rounded p-2 mb-4 bg-white hero-search-form" id="hero-lesson-search-form">
                         <div class="input-group">
                             <input
                                 type="text"
@@ -59,7 +59,7 @@
 
                     <div class="row g-3">
                         <div class="col-sm-6">
-                            <div class="card h-100">
+                            <div class="card h-100 border-0 shadow-sm hero-stat-card">
                                 <div class="card-body d-flex align-items-center">
                                     <div class="icon-lg fs-4 text-primary bg-primary bg-opacity-10 rounded">
                                         <i class="bi bi-play-btn"></i>
@@ -76,7 +76,7 @@
                         </div>
 
                         <div class="col-sm-6">
-                            <div class="card h-100">
+                            <div class="card h-100 border-0 shadow-sm hero-stat-card">
                                 <div class="card-body d-flex align-items-center">
                                     <div class="icon-lg fs-4 text-primary bg-primary bg-opacity-10 rounded">
                                         <i class="fas fa-book-open"></i>
@@ -102,160 +102,408 @@
 
     <section class="py-5">
         <div class="container">
+            <div class="row g-4">
 
-            <div class="mb-4">
-                <h4 class="mb-3 finora-title">Filtrer par formation</h4>
-                <div class="d-flex flex-wrap gap-2">
-                    <a href="{{ path('app_lessons') }}"
-                       class="btn btn-sm {{ formationSelected == '' ? 'btn-primary' : 'btn-outline-primary' }}">
-                        Toutes
-                    </a>
+                <div class="col-lg-4 col-xl-3">
+                    <div class="card border-0 shadow-sm filter-sidebar">
+                        <div class="card-body p-4">
+                            <h4 class="mb-4 fw-bold text-purple">Filtres</h4>
 
-                    {% for formation in formations %}
-                        <a href="{{ path('app_lessons', {'formation': formation.id}) }}"
-                           class="btn btn-sm {{ formationSelected == formation.id ? 'btn-primary' : 'btn-outline-primary' }}">
-                            {{ formation.titre }}
-                        </a>
-                    {% endfor %}
-                </div>
-            </div>
+                            <form method="get" action="{{ path('app_lessons') }}" id="filter-form">
+                                <div class="mb-4">
+                                    <label class="form-label fw-semibold">Recherche</label>
+                                    <input type="text"
+                                           name="titre"
+                                           id="search-input"
+                                           class="form-control"
+                                           placeholder="Titre ou contenu"
+                                           value="{{ titre }}">
+                                </div>
 
-            <div class="card border-0 shadow-sm mb-4">
-                <div class="card-body">
-                    <form method="get" action="{{ path('app_lessons') }}" id="fo-lesson-filter-form">
-                        <div class="row g-3">
-                            <div class="col-md-4">
-                                <input
-                                    type="text"
-                                    name="titre"
-                                    id="fo-lesson-search"
-                                    class="form-control"
-                                    placeholder="Rechercher par titre ou contenu"
-                                    value="{{ titre }}"
-                                >
-                            </div>
+                                <div class="mb-4">
+                                    <label class="form-label fw-semibold">Formation</label>
 
-                            <div class="col-md-3">
-                                <select name="formation" class="form-select">
-                                    <option value="">Toutes les formations</option>
-                                    {% for formation in formations %}
-                                        <option value="{{ formation.id }}" {{ formationSelected == formation.id ? 'selected' : '' }}>
-                                            {{ formation.titre }}
-                                        </option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-
-                            <div class="col-md-2">
-                                <select name="tri" class="form-select">
-                                    <option value="ordre" {{ tri == 'ordre' ? 'selected' : '' }}>Ordre</option>
-                                    <option value="id" {{ tri == 'id' ? 'selected' : '' }}>ID</option>
-                                    <option value="titre" {{ tri == 'titre' ? 'selected' : '' }}>Titre</option>
-                                    <option value="dureeMinutes" {{ tri == 'dureeMinutes' ? 'selected' : '' }}>Durée</option>
-                                </select>
-                            </div>
-
-                            <div class="col-md-1">
-                                <select name="ordre" class="form-select">
-                                    <option value="asc" {{ ordre == 'asc' ? 'selected' : '' }}>ASC</option>
-                                    <option value="desc" {{ ordre == 'desc' ? 'selected' : '' }}>DESC</option>
-                                </select>
-                            </div>
-
-                            <div class="col-md-2 d-flex gap-2">
-                                <button type="submit" class="btn btn-primary w-100">Filtrer</button>
-                                <a href="{{ path('app_lessons') }}" class="btn btn-outline-secondary w-100">Reset</a>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-            </div>
-
-            {% if lessons|length > 0 %}
-                <div class="row g-4">
-                    {% for lesson in lessons %}
-                        <div class="col-md-6 col-xl-4">
-                            <div class="card border-0 shadow-sm h-100 overflow-hidden">
-                                <div class="card-body">
-                                    <div class="d-flex flex-wrap gap-2 mb-3">
-                                        <span class="badge bg-primary bg-opacity-10 text-primary">
-                                            Ordre {{ lesson.ordre }}
-                                        </span>
-
-                                        <span class="purple-chip">
-                                            {{ lesson.formation ? lesson.formation.titre : 'Formation inconnue' }}
-                                        </span>
-
-                                        <span class="badge bg-success bg-opacity-10 text-success">
-                                            {{ lesson.dureeMinutes }} min
-                                        </span>
-
-                                        {% if lesson.videoUrl %}
-                                            <span class="badge bg-warning bg-opacity-10 text-warning">Vidéo</span>
-                                        {% endif %}
-                                    </div>
-
-                                    <h5 class="card-title">{{ lesson.titre }}</h5>
-
-                                    <p class="card-text">
-                                        {{ lesson.contenu ? lesson.contenu|slice(0, 120) ~ '...' : 'Pas de contenu' }}
-                                    </p>
-
-                                    <div class="d-flex gap-2 flex-wrap mt-3">
-                                        <a href="{{ path('app_lesson_show', {'id': lesson.id}) }}" class="btn btn-sm btn-primary">
-                                            Voir
+                                    <div class="formation-list">
+                                        <a href="{{ path('app_lessons', {
+                                            'titre': titre,
+                                            'tri': tri,
+                                            'ordre': ordre
+                                        }) }}"
+                                           class="formation-item {{ formationSelected == '' ? 'active' : '' }}">
+                                            Toutes les formations
                                         </a>
 
-                                        {% if lesson.videoUrl %}
-                                            {% if lesson.isUploadedVideo %}
-                                                <a href="{{ asset('uploads/lessons/videos/' ~ lesson.videoUrl) }}" target="_blank" class="btn btn-sm btn-outline-primary">
-                                                    Ouvrir vidéo
-                                                </a>
-                                            {% else %}
-                                                <a href="{{ lesson.videoUrl }}" target="_blank" class="btn btn-sm btn-outline-primary">
-                                                    Ouvrir vidéo
-                                                </a>
-                                            {% endif %}
-                                        {% endif %}
+                                        {% for formation in formations %}
+                                            <a href="{{ path('app_lessons', {
+                                                'titre': titre,
+                                                'formation': formation.id,
+                                                'tri': tri,
+                                                'ordre': ordre
+                                            }) }}"
+                                               class="formation-item {{ formationSelected == formation.id ? 'active' : '' }}">
+                                                {{ formation.titre }}
+                                            </a>
+                                        {% endfor %}
                                     </div>
                                 </div>
-                            </div>
+
+                                <div class="mb-4">
+                                    <label class="form-label fw-semibold">Trier</label>
+                                    <select name="tri" class="form-select auto-submit">
+                                        <option value="ordre" {{ tri == 'ordre' ? 'selected' : '' }}>Ordre</option>
+                                        <option value="id" {{ tri == 'id' ? 'selected' : '' }}>ID</option>
+                                        <option value="titre" {{ tri == 'titre' ? 'selected' : '' }}>Titre</option>
+                                        <option value="dureeMinutes" {{ tri == 'dureeMinutes' ? 'selected' : '' }}>Durée</option>
+                                    </select>
+                                </div>
+
+                                <div class="mb-4">
+                                    <label class="form-label fw-semibold">Ordre</label>
+                                    <select name="ordre" class="form-select auto-submit">
+                                        <option value="asc" {{ ordre == 'asc' ? 'selected' : '' }}>Ascendant</option>
+                                        <option value="desc" {{ ordre == 'desc' ? 'selected' : '' }}>Descendant</option>
+                                    </select>
+                                </div>
+
+                                <div class="d-grid gap-2">
+                                    <button class="btn btn-primary">Appliquer</button>
+                                    <a href="{{ path('app_lessons') }}" class="btn btn-outline-secondary">Reset</a>
+                                </div>
+                            </form>
                         </div>
-                    {% endfor %}
+                    </div>
                 </div>
 
-                <div class="d-flex justify-content-center mt-5">
-                    {{ knp_pagination_render(lessons) }}
+                <div class="col-lg-8 col-xl-9">
+                    <div class="card border-0 shadow-sm mb-4 results-toolbar">
+                        <div class="card-body d-flex justify-content-between align-items-center flex-wrap gap-2">
+                            <div>
+                                <h5 class="mb-1 fw-bold">Résultats</h5>
+                                <div class="text-muted small">
+                                    {{ lessons.getTotalItemCount }} lesson(s)
+                                    {% if titre %} • "{{ titre }}"{% endif %}
+                                    {% if formationSelected %} • Formation filtrée{% endif %}
+                                </div>
+                            </div>
+
+                            <div class="d-flex gap-2 flex-wrap">
+                                <span class="badge bg-light text-dark">Tri: {{ tri }}</span>
+                                <span class="badge bg-light text-dark">{{ ordre|upper }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    {% if lessons|length > 0 %}
+                        <div class="row g-4">
+                            {% for lesson in lessons %}
+                                <div class="col-md-6 col-xl-4">
+                                    <div class="card lesson-card h-100 border-0">
+
+                                        <div class="thumb">
+                                            {% if lesson.videoUrl and lesson.youTubeVideoId %}
+                                                <img src="https://img.youtube.com/vi/{{ lesson.youTubeVideoId }}/hqdefault.jpg" alt="{{ lesson.titre }}">
+                                                <div class="thumb-overlay"></div>
+                                                <div class="play-badge">▶</div>
+                                            {% elseif lesson.videoUrl and lesson.isUploadedVideo %}
+                                                <div class="fallback with-video">▶ Vidéo</div>
+                                                <div class="thumb-overlay"></div>
+                                                <div class="play-badge">▶</div>
+                                            {% else %}
+                                                <div class="fallback">FINORA</div>
+                                                <div class="thumb-overlay soft"></div>
+                                            {% endif %}
+
+                                            <div class="badge-order">
+                                                Leçon {{ '%02d'|format(lesson.ordre) }}
+                                            </div>
+
+                                            {% if lesson.videoUrl %}
+                                                <div class="badge-video">Vidéo</div>
+                                            {% endif %}
+                                        </div>
+
+                                        <div class="card-body d-flex flex-column">
+                                            <div class="mb-2 d-flex flex-wrap gap-2">
+                                                <span class="chip">
+                                                    {{ lesson.formation ? lesson.formation.titre : 'Formation inconnue' }}
+                                                </span>
+
+                                                {% if lesson.videoUrl %}
+                                                    <span class="mini-chip video-chip">Avec vidéo</span>
+                                                {% else %}
+                                                    <span class="mini-chip neutral-chip">Contenu texte</span>
+                                                {% endif %}
+                                            </div>
+
+                                            <h5 class="fw-bold lesson-title">{{ lesson.titre }}</h5>
+
+                                            <p class="text-muted small flex-grow-1 lesson-text">
+                                                {{ lesson.contenu ? lesson.contenu|slice(0, 100) ~ '...' : 'Pas de contenu' }}
+                                            </p>
+
+                                            <div class="d-flex justify-content-between align-items-center mt-3">
+                                                <span class="duration">⏱ {{ lesson.dureeMinutes }} min</span>
+
+                                                <a href="{{ path('app_lesson_show', {'id': lesson.id}) }}"
+                                                   class="btn btn-sm btn-primary lesson-btn">
+                                                    Voir
+                                                </a>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+
+                        <div class="d-flex justify-content-center mt-5">
+                            {{ knp_pagination_render(lessons) }}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5">
+                            <h5>Aucune lesson trouvée</h5>
+                            <a href="{{ path('app_lessons') }}" class="btn btn-primary mt-3">Réinitialiser</a>
+                        </div>
+                    {% endif %}
                 </div>
-            {% else %}
-                <div class="alert alert-info">
-                    Aucune lesson trouvée.
-                </div>
-            {% endif %}
+
+            </div>
         </div>
     </section>
 </main>
 
+<style>
+.text-purple {
+    color: #6d28d9;
+}
+
+.hero-finora {
+    background: linear-gradient(135deg, rgba(124, 58, 237, 0.08), rgba(167, 139, 250, 0.12));
+    border: 1px solid rgba(124, 58, 237, 0.08);
+}
+
+.hero-search-form {
+    box-shadow: 0 8px 20px rgba(124, 58, 237, 0.08);
+}
+
+.hero-stat-card {
+    border-radius: 16px;
+}
+
+.filter-sidebar {
+    border-radius: 20px;
+    overflow: hidden;
+}
+
+.formation-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.formation-item {
+    padding: 9px 12px;
+    border-radius: 12px;
+    text-decoration: none;
+    color: #444;
+    background: #f9f9ff;
+    transition: 0.22s ease;
+    font-weight: 500;
+}
+
+.formation-item:hover {
+    background: #ede9fe;
+    color: #6d28d9;
+}
+
+.formation-item.active {
+    background: linear-gradient(135deg, #7c3aed, #8b5cf6);
+    color: white;
+    box-shadow: 0 8px 18px rgba(124, 58, 237, 0.2);
+}
+
+.results-toolbar {
+    border-radius: 18px;
+}
+
+.lesson-card {
+    border-radius: 20px;
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.06);
+    border: 1px solid rgba(124, 58, 237, 0.08);
+}
+
+.lesson-card:hover {
+    transform: translateY(-7px);
+    box-shadow: 0 18px 40px rgba(124, 58, 237, 0.18);
+}
+
+.thumb {
+    height: 190px;
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(135deg, #7c3aed, #a78bfa);
+}
+
+.thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.45s ease;
+}
+
+.lesson-card:hover .thumb img {
+    transform: scale(1.06);
+}
+
+.fallback {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    font-size: 18px;
+    background: linear-gradient(135deg, #7c3aed, #a78bfa);
+}
+
+.fallback.with-video {
+    font-size: 20px;
+}
+
+.thumb-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(46, 16, 101, 0.55), rgba(46, 16, 101, 0.08));
+    pointer-events: none;
+}
+
+.thumb-overlay.soft {
+    background: linear-gradient(to top, rgba(46, 16, 101, 0.35), rgba(46, 16, 101, 0.05));
+}
+
+.play-badge {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(1);
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.92);
+    color: #6d28d9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 900;
+    font-size: 20px;
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.18);
+    transition: transform 0.28s ease, background 0.28s ease;
+}
+
+.lesson-card:hover .play-badge {
+    transform: translate(-50%, -50%) scale(1.08);
+    background: #ffffff;
+}
+
+.badge-order {
+    position: absolute;
+    bottom: 12px;
+    left: 12px;
+    background: white;
+    color: #6d28d9;
+    padding: 5px 11px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+    z-index: 2;
+}
+
+.badge-video {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: #fde68a;
+    color: #92400e;
+    padding: 5px 11px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+    z-index: 2;
+}
+
+.chip {
+    background: #ede9fe;
+    color: #6d28d9;
+    padding: 5px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.mini-chip {
+    padding: 5px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.video-chip {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.neutral-chip {
+    background: #f3f4f6;
+    color: #4b5563;
+}
+
+.lesson-title {
+    color: #1f1147;
+    line-height: 1.35;
+}
+
+.lesson-text {
+    line-height: 1.7;
+}
+
+.duration {
+    font-size: 13px;
+    color: #666;
+    font-weight: 600;
+}
+
+.lesson-btn {
+    border-radius: 10px;
+    padding-inline: 14px;
+    font-weight: 700;
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: #a78bfa;
+    box-shadow: 0 0 0 0.2rem rgba(124, 58, 237, 0.12);
+}
+</style>
+
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-    const form = document.getElementById('fo-lesson-filter-form');
-    const titreInput = document.getElementById('fo-lesson-search');
+    const form = document.getElementById('filter-form');
+    const search = document.getElementById('search-input');
 
-    let timeout = null;
+    let timeout;
 
-    if (titreInput) {
-        titreInput.addEventListener('keyup', function () {
+    if (search) {
+        search.addEventListener('keyup', function () {
             clearTimeout(timeout);
-            timeout = setTimeout(() => {
-                form.submit();
-            }, 500);
+            timeout = setTimeout(() => form.submit(), 500);
         });
     }
 
-    document.querySelectorAll('#fo-lesson-filter-form select').forEach(select => {
-        select.addEventListener('change', function () {
-            form.submit();
-        });
+    document.querySelectorAll('.auto-submit').forEach(el => {
+        el.addEventListener('change', () => form.submit());
     });
 });
 </script>

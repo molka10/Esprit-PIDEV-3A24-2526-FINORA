@@ -3,153 +3,404 @@
 {% block title %}FINORA - Lessons{% endblock %}
 
 {% block admin_content %}
-<div style="padding: 30px; font-family: Arial, sans-serif; background:#f8fafc; min-height:100vh;">
+<div class="container-fluid px-4 py-4">
+
     {% for label, messages in app.flashes %}
         {% for message in messages %}
-            <div style="margin-bottom:15px; padding:12px 16px; border-radius:10px; background:
-                {% if label == 'success' %}#dcfce7{% elseif label == 'danger' %}#fee2e2{% else %}#dbeafe{% endif %};
-                color:
-                {% if label == 'success' %}#166534{% elseif label == 'danger' %}#991b1b{% else %}#1d4ed8{% endif %};">
+            <div class="alert admin-alert {{ label }}">
                 {{ message }}
             </div>
         {% endfor %}
     {% endfor %}
 
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-        <h1 style="margin:0; color:#1f2937;">Liste des lessons</h1>
+    <div class="admin-page-header d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-1 admin-purple-title">Lessons</h1>
+            <p class="text-muted mb-0">Gérez les lessons et leurs contenus</p>
+        </div>
 
-        <a href="{{ path('app_lesson_new') }}"
-           style="padding:10px 16px; background:#7C3AED; color:white; text-decoration:none; border-radius:10px; font-weight:bold;">
+        <a href="{{ path('app_lesson_new') }}" class="btn admin-main-btn">
             + Ajouter une lesson
         </a>
     </div>
 
-    <form method="get" action="{{ path('app_lesson_index') }}"
-          style="margin-bottom: 25px; padding: 18px; background:white; border: 1px solid #e5e7eb; border-radius: 14px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
-        <div style="display:flex; flex-wrap:wrap; gap:15px; align-items:end;">
-            <div>
-                <label for="titre">Titre / contenu</label><br>
-                <input type="text" id="titre" name="titre" value="{{ titre }}" placeholder="Rechercher..."
-                       style="padding:8px 10px; border:1px solid #d1d5db; border-radius:8px;">
-            </div>
+    <div class="card admin-filter-card mb-4">
+        <div class="card-body">
+            <form method="get" action="{{ path('app_lesson_index') }}" id="filter-form">
+                <div class="row g-3 align-items-end">
 
-            <div>
-                <label for="formation">Formation</label><br>
-                <select id="formation" name="formation" style="padding:8px 10px; border:1px solid #d1d5db; border-radius:8px;">
-                    <option value="">Toutes</option>
-                    {% for formation in formations %}
-                        <option value="{{ formation.id }}" {{ formationSelected == formation.id ? 'selected' : '' }}>
-                            {{ formation.titre }}
-                        </option>
-                    {% endfor %}
-                </select>
-            </div>
+                    <div class="col-md-3">
+                        <label class="small text-muted">Recherche</label>
+                        <input
+                            type="text"
+                            name="titre"
+                            value="{{ titre }}"
+                            class="form-control"
+                            placeholder="Titre ou contenu"
+                            id="titre-search"
+                        >
+                    </div>
 
-            <div>
-                <label for="tri">Trier par</label><br>
-                <select id="tri" name="tri" style="padding:8px 10px; border:1px solid #d1d5db; border-radius:8px;">
-                    <option value="ordre" {{ tri == 'ordre' ? 'selected' : '' }}>Ordre</option>
-                    <option value="id" {{ tri == 'id' ? 'selected' : '' }}>Dernier ajouté</option>
-                    <option value="titre" {{ tri == 'titre' ? 'selected' : '' }}>Titre</option>
-                    <option value="dureeMinutes" {{ tri == 'dureeMinutes' ? 'selected' : '' }}>Durée</option>
-                </select>
-            </div>
+                    <div class="col-md-3">
+                        <label class="small text-muted">Formation</label>
+                        <select name="formation" class="form-select">
+                            <option value="">Toutes</option>
+                            {% for formation in formations %}
+                                <option value="{{ formation.id }}" {{ formationSelected == formation.id ? 'selected' : '' }}>
+                                    {{ formation.titre }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
 
-            <div>
-                <label for="ordre">Ordre</label><br>
-                <select id="ordre" name="ordre" style="padding:8px 10px; border:1px solid #d1d5db; border-radius:8px;">
-                    <option value="asc" {{ ordre == 'asc' ? 'selected' : '' }}>Ascendant</option>
-                    <option value="desc" {{ ordre == 'desc' ? 'selected' : '' }}>Descendant</option>
-                </select>
-            </div>
+                    <div class="col-md-2">
+                        <label class="small text-muted">Trier</label>
+                        <select name="tri" class="form-select">
+                            <option value="ordre" {{ tri == 'ordre' ? 'selected' : '' }}>Ordre</option>
+                            <option value="id" {{ tri == 'id' ? 'selected' : '' }}>ID</option>
+                            <option value="titre" {{ tri == 'titre' ? 'selected' : '' }}>Titre</option>
+                            <option value="dureeMinutes" {{ tri == 'dureeMinutes' ? 'selected' : '' }}>Durée</option>
+                        </select>
+                    </div>
 
-            <div>
-                <button type="submit"
-                        style="padding:9px 14px; background:#7C3AED; color:white; border:none; border-radius:8px; cursor:pointer;">
-                    Rechercher
-                </button>
-            </div>
+                    <div class="col-md-2">
+                        <label class="small text-muted">Ordre</label>
+                        <select name="ordre" class="form-select">
+                            <option value="asc" {{ ordre == 'asc' ? 'selected' : '' }}>ASC</option>
+                            <option value="desc" {{ ordre == 'desc' ? 'selected' : '' }}>DESC</option>
+                        </select>
+                    </div>
 
-            <div>
-                <a href="{{ path('app_lesson_index') }}"
-                   style="padding:9px 14px; background:#6b7280; color:white; text-decoration:none; border-radius:8px;">
-                    Réinitialiser
-                </a>
-            </div>
+                    <div class="col-md-2 d-flex gap-2">
+                        <button class="btn admin-main-btn w-100" type="submit">Filtrer</button>
+                        <a href="{{ path('app_lesson_index') }}" class="btn admin-outline-btn w-100">Reset</a>
+                    </div>
+
+                </div>
+            </form>
         </div>
-    </form>
+    </div>
 
     {% if lessons is empty %}
-        <div style="padding:20px; background:white; border-radius:12px; border:1px solid #e5e7eb;">
-            Aucune lesson trouvée.
+        <div class="empty-state text-center py-5">
+            <div class="empty-icon">📚</div>
+            <h5>Aucune lesson trouvée</h5>
+            <p class="text-muted mb-0">Essayez de modifier les filtres ou ajoutez une nouvelle lesson.</p>
         </div>
     {% else %}
-        <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(340px, 1fr)); gap:20px;">
+
+        <div class="row g-4">
             {% for lesson in lessons %}
-                <div style="background:white; border-radius:16px; overflow:hidden; box-shadow:0 4px 14px rgba(0,0,0,0.08); border:1px solid #e5e7eb;">
+                <div class="col-md-6 col-xl-4">
 
-                    <div style="height:100px; background:#ede9fe; display:flex; align-items:center; justify-content:space-between; padding:16px;">
-                        <span style="background:white; color:#7C3AED; padding:6px 10px; border-radius:999px; font-size:12px; font-weight:700;">
-                            LEÇON {{ '%02d'|format(lesson.ordre) }}
-                        </span>
+                    <div class="lesson-card">
 
-                        {% if lesson.videoUrl %}
-                            <span style="background:#fef3c7; color:#92400e; padding:6px 10px; border-radius:999px; font-size:12px; font-weight:600;">
-                                🎬 Vidéo liée
-                            </span>
-                        {% endif %}
-                    </div>
-
-                    <div style="padding:18px;">
-                        <h3 style="margin-top:0; margin-bottom:10px; color:#111827;">
-                            {{ lesson.titre }}
-                        </h3>
-
-                        <div style="margin-bottom:10px; display:flex; gap:8px; flex-wrap:wrap;">
-                            <span style="background:#dbeafe; color:#1d4ed8; padding:6px 10px; border-radius:999px; font-size:12px;">
-                                📌 {{ lesson.formation ? lesson.formation.titre : 'Formation inconnue' }}
+                        <div class="lesson-card-header">
+                            <span class="lesson-order">
+                                LEÇON {{ '%02d'|format(lesson.ordre) }}
                             </span>
 
-                            <span style="background:#dcfce7; color:#166534; padding:6px 10px; border-radius:999px; font-size:12px;">
-                                ⏱ {{ lesson.dureeMinutes }} min
-                            </span>
+                            {% if lesson.videoUrl %}
+                                <span class="lesson-video-badge">🎬 Vidéo liée</span>
+                            {% endif %}
                         </div>
 
-                        <p style="color:#4b5563; min-height:48px;">
-                            {{ lesson.contenu ? lesson.contenu|slice(0, 120) ~ '...' : 'Pas de contenu' }}
-                        </p>
+                        <div class="lesson-card-body">
+                            <h5 class="lesson-title">{{ lesson.titre }}</h5>
 
-                        <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:15px;">
-                            <a href="{{ path('app_lesson_show', {'id': lesson.id}) }}"
-                               style="padding:8px 12px; background:#16a34a; color:white; text-decoration:none; border-radius:8px;">
-                                Voir
-                            </a>
+                            <div class="lesson-tags">
+                                <span class="tag formation">
+                                    📌 {{ lesson.formation ? lesson.formation.titre : 'Formation inconnue' }}
+                                </span>
 
-                            <a href="{{ path('app_lesson_edit', {'id': lesson.id}) }}"
-                               style="padding:8px 12px; background:#2563eb; color:white; text-decoration:none; border-radius:8px;">
-                                Modifier
-                            </a>
+                                <span class="tag duration">
+                                    ⏱ {{ lesson.dureeMinutes }} min
+                                </span>
+                            </div>
 
-                            <a href="{{ path('app_lesson_youtube_manage', {'id': lesson.id}) }}"
-                               style="padding:8px 12px; background:#f59e0b; color:white; text-decoration:none; border-radius:8px;">
-                                Gérer YouTube
-                            </a>
+                            <p class="lesson-text">
+                                {{ lesson.contenu ? lesson.contenu|slice(0, 100) ~ '...' : 'Pas de contenu' }}
+                            </p>
 
-                            <form method="post"
-                                  action="{{ path('app_lesson_delete', {'id': lesson.id}) }}"
-                                  style="display:inline-block;"
-                                  onsubmit="return confirm('Supprimer cette lesson ?');">
-                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ lesson.id) }}">
-                                <button type="submit"
-                                        style="padding:8px 12px; background:#dc2626; color:white; border:none; border-radius:8px; cursor:pointer;">
-                                    Supprimer
-                                </button>
-                            </form>
+                            <div class="lesson-actions">
+                                <a href="{{ path('app_lesson_show', {'id': lesson.id}) }}"
+                                   class="btn btn-sm admin-success-btn">
+                                    Voir
+                                </a>
+
+                                <a href="{{ path('app_lesson_edit', {'id': lesson.id}) }}"
+                                   class="btn btn-sm admin-outline-btn">
+                                    Modifier
+                                </a>
+
+                                <a href="{{ path('app_lesson_youtube_manage', {'id': lesson.id}) }}"
+                                   class="btn btn-sm admin-warning-btn">
+                                    YouTube
+                                </a>
+
+                                <form method="post"
+                                      action="{{ path('app_lesson_delete', {'id': lesson.id}) }}"
+                                      onsubmit="return confirm('Supprimer cette lesson ?');"
+                                      style="display:inline-block;">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ lesson.id) }}">
+                                    <button type="submit" class="btn btn-sm admin-danger-btn">
+                                        Supprimer
+                                    </button>
+                                </form>
+                            </div>
                         </div>
+
                     </div>
+
                 </div>
             {% endfor %}
         </div>
+
     {% endif %}
 </div>
+
+<style>
+.admin-alert {
+    padding: 12px 16px;
+    border-radius: 12px;
+    margin-bottom: 12px;
+    border: none;
+}
+
+.admin-alert.success {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.admin-alert.danger {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.admin-alert.info {
+    background: #dbeafe;
+    color: #1d4ed8;
+}
+
+.admin-page-header {
+    background: linear-gradient(135deg, rgba(124, 58, 237, 0.08), rgba(167, 139, 250, 0.12));
+    border: 1px solid rgba(124, 58, 237, 0.08);
+    border-radius: 22px;
+    padding: 22px 24px;
+}
+
+.admin-filter-card {
+    background: rgba(255, 255, 255, 0.94);
+    border: 1px solid rgba(124, 58, 237, 0.08);
+    border-radius: 22px;
+    box-shadow: 0 10px 30px rgba(124, 58, 237, 0.05);
+}
+
+.lesson-card {
+    background: white;
+    border-radius: 18px;
+    border: 1px solid rgba(124, 58, 237, 0.08);
+    box-shadow: 0 10px 30px rgba(124, 58, 237, 0.06);
+    overflow: hidden;
+    transition: 0.3s;
+    height: 100%;
+}
+
+.lesson-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 18px 40px rgba(124, 58, 237, 0.18);
+}
+
+.lesson-card-header {
+    background: linear-gradient(135deg, #ede9fe, #ddd6fe);
+    padding: 14px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    min-height: 72px;
+}
+
+.lesson-order {
+    background: white;
+    color: #6d28d9;
+    padding: 6px 11px;
+    border-radius: 999px;
+    font-weight: 800;
+    font-size: 12px;
+    box-shadow: 0 6px 16px rgba(124, 58, 237, 0.08);
+}
+
+.lesson-video-badge {
+    background: #fde68a;
+    color: #92400e;
+    padding: 6px 11px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.lesson-card-body {
+    padding: 18px;
+}
+
+.lesson-title {
+    font-weight: 800;
+    color: #1f1147;
+    margin-bottom: 12px;
+    line-height: 1.35;
+}
+
+.lesson-text {
+    color: #6b7280;
+    line-height: 1.7;
+    min-height: 72px;
+    margin-bottom: 0;
+}
+
+.lesson-tags {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+}
+
+.tag {
+    padding: 6px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.tag.formation {
+    background: #dbeafe;
+    color: #1d4ed8;
+}
+
+.tag.duration {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.lesson-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 16px;
+}
+
+.lesson-actions .btn {
+    padding: 6px 12px;
+    font-size: 13px;
+    font-weight: 700;
+    border-radius: 10px;
+}
+
+/* MAIN PURPLE */
+.admin-main-btn {
+    background: linear-gradient(135deg, #7c3aed 0%, #8b5cf6 100%);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-weight: 700;
+    transition: 0.25s;
+    box-shadow: 0 10px 22px rgba(124, 58, 237, 0.2);
+}
+
+.admin-main-btn:hover {
+    color: white;
+    background: linear-gradient(135deg, #6d28d9 0%, #7c3aed 100%);
+    transform: translateY(-1px);
+}
+
+/* VIEW */
+.admin-success-btn {
+    background: linear-gradient(135deg, #16a34a, #22c55e);
+    color: white;
+    border: none;
+    transition: 0.25s;
+}
+
+.admin-success-btn:hover {
+    color: white;
+    background: linear-gradient(135deg, #15803d, #16a34a);
+    transform: translateY(-1px);
+}
+
+/* EDIT */
+.admin-outline-btn {
+    background: #faf5ff;
+    color: #6d28d9;
+    border: 1px solid rgba(124, 58, 237, 0.3);
+    transition: 0.25s;
+}
+
+.admin-outline-btn:hover {
+    background: #f3e8ff;
+    color: #5b21b6;
+    border-color: rgba(124, 58, 237, 0.35);
+}
+
+/* YOUTUBE */
+.admin-warning-btn {
+    background: linear-gradient(135deg, #f59e0b, #fbbf24);
+    color: white;
+    border: none;
+    transition: 0.25s;
+}
+
+.admin-warning-btn:hover {
+    color: white;
+    background: linear-gradient(135deg, #d97706, #f59e0b);
+    transform: translateY(-1px);
+}
+
+/* DELETE */
+.admin-danger-btn {
+    background: linear-gradient(135deg, #dc2626, #ef4444);
+    color: white;
+    border: none;
+    transition: 0.25s;
+}
+
+.admin-danger-btn:hover {
+    color: white;
+    background: linear-gradient(135deg, #b91c1c, #dc2626);
+    transform: translateY(-1px);
+}
+
+.empty-state {
+    background: rgba(255, 255, 255, 0.94);
+    border: 1px solid rgba(124, 58, 237, 0.08);
+    border-radius: 22px;
+    box-shadow: 0 10px 30px rgba(124, 58, 237, 0.05);
+}
+
+.empty-icon {
+    font-size: 34px;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const form = document.getElementById('filter-form');
+    const titreInput = document.getElementById('titre-search');
+
+    let timeout = null;
+
+    if (titreInput) {
+        titreInput.addEventListener('keyup', function () {
+            clearTimeout(timeout);
+            timeout = setTimeout(() => {
+                form.submit();
+            }, 500);
+        });
+    }
+
+    document.querySelectorAll('#filter-form select').forEach(select => {
+        select.addEventListener('change', function () {
+            form.submit();
+        });
+    });
+});
+</script>
 {% endblock %}

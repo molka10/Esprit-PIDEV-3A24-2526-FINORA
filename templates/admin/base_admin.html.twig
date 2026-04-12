@@ -7,9 +7,129 @@
     <link rel="stylesheet" type="text/css" href="{{ asset('assets/vendor/choices/css/choices.min.css') }}">
 
     <style>
-        .page-content-wrapper{
-            background: linear-gradient(180deg, #fcfaff 0%, #f7f2ff 100%);
+        body {
+            background: linear-gradient(180deg, #fcfaff 0%, #f7f2ff 45%, #f5efff 100%);
+        }
+
+        .page-content {
+            position: relative;
             min-height: 100vh;
+            background:
+                radial-gradient(circle at top right, rgba(167, 139, 250, 0.12), transparent 22%),
+                radial-gradient(circle at bottom left, rgba(124, 58, 237, 0.08), transparent 20%);
+        }
+
+        .page-content-wrapper {
+            background: linear-gradient(180deg, #fcfaff 0%, #f8f4ff 100%);
+            min-height: calc(100vh - 70px);
+            border: none !important;
+            border-radius: 26px 26px 0 0;
+            box-shadow:
+                0 -8px 30px rgba(124, 58, 237, 0.04),
+                inset 0 1px 0 rgba(255, 255, 255, 0.8);
+            padding-bottom: 24px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .page-content-wrapper::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background:
+                radial-gradient(circle at 10% 10%, rgba(124, 58, 237, 0.05), transparent 18%),
+                radial-gradient(circle at 90% 20%, rgba(196, 181, 253, 0.18), transparent 20%),
+                radial-gradient(circle at 80% 80%, rgba(139, 92, 246, 0.05), transparent 16%);
+            pointer-events: none;
+        }
+
+        .page-content-wrapper > * {
+            position: relative;
+            z-index: 1;
+        }
+
+        .admin-section-card {
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(124, 58, 237, 0.08);
+            border-radius: 20px;
+            box-shadow: 0 10px 28px rgba(124, 58, 237, 0.06);
+            backdrop-filter: blur(4px);
+        }
+
+        .admin-purple-title {
+            color: #5b21b6;
+            font-weight: 800;
+            letter-spacing: 0.2px;
+        }
+
+        .admin-soft-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 7px 12px;
+            border-radius: 999px;
+            background: linear-gradient(135deg, #ede9fe 0%, #f5f3ff 100%);
+            color: #6d28d9;
+            font-size: 12px;
+            font-weight: 700;
+            border: 1px solid rgba(124, 58, 237, 0.08);
+        }
+
+        .admin-main-btn {
+            background: linear-gradient(135deg, #7c3aed 0%, #8b5cf6 100%);
+            color: #fff;
+            border: none;
+            border-radius: 12px;
+            font-weight: 700;
+            box-shadow: 0 10px 22px rgba(124, 58, 237, 0.2);
+            transition: all 0.25s ease;
+        }
+
+        .admin-main-btn:hover {
+            color: #fff;
+            transform: translateY(-1px);
+            background: linear-gradient(135deg, #6d28d9 0%, #7c3aed 100%);
+            box-shadow: 0 14px 28px rgba(124, 58, 237, 0.26);
+        }
+
+        .admin-outline-btn {
+            border-radius: 12px;
+            font-weight: 700;
+            border: 1px solid rgba(124, 58, 237, 0.2);
+            color: #6d28d9;
+            background: #faf5ff;
+            transition: all 0.25s ease;
+        }
+
+        .admin-outline-btn:hover {
+            background: #f3e8ff;
+            color: #5b21b6;
+            border-color: rgba(124, 58, 237, 0.28);
+        }
+
+        .admin-filter-card {
+            background: rgba(255, 255, 255, 0.94);
+            border: 1px solid rgba(124, 58, 237, 0.08);
+            border-radius: 18px;
+            box-shadow: 0 8px 24px rgba(124, 58, 237, 0.05);
+        }
+
+        .admin-filter-card .form-control,
+        .admin-filter-card .form-select {
+            border-radius: 12px;
+            border-color: #ddd6fe;
+        }
+
+        .admin-filter-card .form-control:focus,
+        .admin-filter-card .form-select:focus {
+            border-color: #a78bfa;
+            box-shadow: 0 0 0 0.2rem rgba(124, 58, 237, 0.12);
+        }
+
+        @media (max-width: 991.98px) {
+            .page-content-wrapper {
+                border-radius: 18px 18px 0 0;
+            }
         }
     </style>
 {% endblock %}
@@ -21,7 +141,7 @@
     <div class="page-content">
         {% include 'admin/partials/navbar_admin.html.twig' %}
 
-        <div class="page-content-wrapper border">
+        <div class="page-content-wrapper">
             {% block admin_content %}{% endblock %}
         </div>
     </div>

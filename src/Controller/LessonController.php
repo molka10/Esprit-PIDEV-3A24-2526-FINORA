@@ -89,10 +89,41 @@ final class LessonController extends AbstractController
     }
 
     #[Route('/{id}', name: 'app_lesson_show', methods: ['GET'])]
-    public function show(Lesson $lesson): Response
+    public function show(Lesson $lesson, EntityManagerInterface $entityManager): Response
     {
+        $previousLesson = null;
+        $nextLesson = null;
+
+        if ($lesson->getFormation() !== null && $lesson->getOrdre() !== null) {
+            $previousLesson = $entityManager->getRepository(Lesson::class)
+                ->createQueryBuilder('l')
+                ->where('l.formation = :formation')
+                ->andWhere('l.ordre < :ordre')
+                ->setParameter('formation', $lesson->getFormation())
+                ->setParameter('ordre', $lesson->getOrdre())
+                ->orderBy('l.ordre', 'DESC')
+                ->addOrderBy('l.id', 'DESC')
+                ->setMaxResults(1)
+                ->getQuery()
+                ->getOneOrNullResult();
+
+            $nextLesson = $entityManager->getRepository(Lesson::class)
+                ->createQueryBuilder('l')
+                ->where('l.formation = :formation')
+                ->andWhere('l.ordre > :ordre')
+                ->setParameter('formation', $lesson->getFormation())
+                ->setParameter('ordre', $lesson->getOrdre())
+                ->orderBy('l.ordre', 'ASC')
+                ->addOrderBy('l.id', 'ASC')
+                ->setMaxResults(1)
+                ->getQuery()
+                ->getOneOrNullResult();
+        }
+
         return $this->render('lesson/show.html.twig', [
             'lesson' => $lesson,
+            'previousLesson' => $previousLesson,
+            'nextLesson' => $nextLesson,
         ]);
     }
 
@@ -210,24 +241,25 @@ final class LessonController extends AbstractController
 
         return $this->redirectToRoute('app_lesson_index');
     }
+
     #[Route('/{id}/videos', name: 'app_lesson_related_videos', methods: ['GET'])]
-public function relatedVideos(
-    Lesson $lesson,
-    YouTubeSearchService $youTubeSearchService
-): Response {
-    $results = [];
-    $error = null;
+    public function relatedVideos(
+        Lesson $lesson,
+        YouTubeSearchService $youTubeSearchService
+    ): Response {
+        $results = [];
+        $error = null;
 
-    try {
-        $results = $youTubeSearchService->search($lesson->getTitre(), 6);
-    } catch (\Throwable $e) {
-        $error = $e->getMessage();
+        try {
+            $results = $youTubeSearchService->search((string) $lesson->getTitre(), 6);
+        } catch (\Throwable $e) {
+            $error = $e->getMessage();
+        }
+
+        return $this->render('lesson/related_videos.html.twig', [
+            'lesson' => $lesson,
+            'results' => $results,
+            'error' => $error,
+        ]);
     }
-
-    return $this->render('lesson/related_videos.html.twig', [
-        'lesson' => $lesson,
-        'results' => $results,
-        'error' => $error,
-    ]);
-}
 }
