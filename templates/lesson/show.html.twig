@@ -132,8 +132,24 @@
 
                         <div class="card border-0 shadow-sm mb-4">
                             <div class="card-header border-0 bg-white pt-4 px-4 px-md-5">
-                                <h2 class="h4 fw-bold mb-1">Contenu de la leçon</h2>
-                                <p class="text-muted mb-0">Prenez le temps de lire et comprendre les points clés.</p>
+                                <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                                    <div>
+                                        <h2 class="h4 fw-bold mb-1">Contenu de la leçon</h2>
+                                        <p class="text-muted mb-0">Prenez le temps de lire et comprendre les points clés.</p>
+                                    </div>
+
+                                    <div class="d-flex gap-2 flex-wrap">
+                                        <button id="play-btn" class="btn btn-primary" type="button">
+                                            ▶ Lire
+                                        </button>
+                                        <button id="pause-btn" class="btn btn-outline-secondary" type="button">
+                                            ⏸ Pause
+                                        </button>
+                                        <button id="stop-btn" class="btn btn-outline-danger" type="button">
+                                            ⏹ Stop
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
 
                             <div class="card-body p-4 p-md-5 pt-3">
@@ -146,6 +162,11 @@
                                     "
                                 >
                                     {{ lesson.contenu ?: 'Aucun contenu disponible.' }}
+                                </div>
+
+                                <div class="mt-4">
+                                    <audio id="audio-player" controls style="width: 100%;"></audio>
+                                    <div id="tts-status" class="small text-muted mt-2"></div>
                                 </div>
                             </div>
                         </div>
@@ -269,4 +290,61 @@
         </div>
     </section>
 </main>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const audio = document.getElementById('audio-player');
+    const playBtn = document.getElementById('play-btn');
+    const pauseBtn = document.getElementById('pause-btn');
+    const stopBtn = document.getElementById('stop-btn');
+    const status = document.getElementById('tts-status');
+    const baseTtsUrl = "{{ path('app_tts', {'id': lesson.id}) }}";
+
+    if (!audio || !playBtn || !pauseBtn || !stopBtn) {
+        return;
+    }
+
+    playBtn.addEventListener('click', async function () {
+        try {
+            const freshUrl = baseTtsUrl + '?v=' + Date.now();
+            audio.src = freshUrl;
+            status.textContent = 'Chargement audio...';
+
+            audio.load();
+
+            audio.oncanplaythrough = async function () {
+                try {
+                    await audio.play();
+                    status.textContent = 'Lecture en cours.';
+                } catch (e) {
+                    console.error('Erreur lecture:', e);
+                    status.textContent = 'Impossible de lancer la lecture.';
+                }
+            };
+        } catch (error) {
+            console.error('Erreur TTS:', error);
+            status.textContent = 'Impossible de charger l’audio.';
+        }
+    });
+
+    pauseBtn.addEventListener('click', function () {
+        audio.pause();
+        status.textContent = 'Lecture en pause.';
+    });
+
+    stopBtn.addEventListener('click', function () {
+        audio.pause();
+        audio.currentTime = 0;
+        status.textContent = 'Lecture arrêtée.';
+    });
+
+    audio.addEventListener('ended', function () {
+        status.textContent = 'Lecture terminée.';
+    });
+
+    audio.addEventListener('error', function () {
+        status.textContent = 'Erreur de chargement audio.';
+    });
+});
+</script>
 {% endblock %}

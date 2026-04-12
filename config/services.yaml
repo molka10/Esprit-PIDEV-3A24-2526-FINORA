@@ -1,5 +1,6 @@
 parameters:
     youtube_api_key: '%env(YOUTUBE_API_KEY)%'
+    deepgram_api_key: '%env(DEEPGRAM_API_KEY)%'
 
 services:
     _defaults:
@@ -16,3 +17,7 @@ services:
     App\Service\YouTubeSearchService:
         arguments:
             $apiKey: '%youtube_api_key%'
+
+    App\Service\TextToSpeechService:
+        arguments:
+            $apiKey: '%deepgram_api_key%'

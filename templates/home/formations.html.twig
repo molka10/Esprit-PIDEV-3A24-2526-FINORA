@@ -48,10 +48,14 @@
                             <input
                                 type="text"
                                 name="titre"
+                                id="voice-search-input"
                                 class="form-control border-0 me-1"
                                 placeholder="Trouver une formation"
                                 value="{{ titre }}"
                             >
+                            <button type="button" id="voice-btn" class="btn btn-warning">
+                                🎤
+                            </button>
                             <button class="btn btn-primary rounded" type="submit">
                                 <i class="fas fa-search"></i>
                             </button>
@@ -407,8 +411,12 @@
 document.addEventListener('DOMContentLoaded', function () {
     const form = document.getElementById('fo-formation-filter-form');
     const titreInput = document.getElementById('fo-titre-search');
+    const voiceBtn = document.getElementById('voice-btn');
+    const voiceSearchInput = document.getElementById('voice-search-input');
 
     let timeout = null;
+    let mediaRecorder = null;
+    let audioChunks = [];
 
     if (titreInput) {
         titreInput.addEventListener('keyup', function () {
@@ -424,6 +432,61 @@ document.addEventListener('DOMContentLoaded', function () {
             form.submit();
         });
     });
+
+    if (voiceBtn && voiceSearchInput) {
+        voiceBtn.addEventListener('click', async () => {
+            try {
+                if (mediaRecorder && mediaRecorder.state === 'recording') {
+                    mediaRecorder.stop();
+                    voiceBtn.innerText = '🎤';
+                    return;
+                }
+
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+
+                mediaRecorder = new MediaRecorder(stream);
+                audioChunks = [];
+
+                mediaRecorder.ondataavailable = event => {
+                    audioChunks.push(event.data);
+                };
+
+                mediaRecorder.onstop = async () => {
+                    try {
+                        const blob = new Blob(audioChunks, { type: 'audio/webm' });
+
+                        const response = await fetch('{{ path('api_stt') }}', {
+                            method: 'POST',
+                            body: blob
+                        });
+
+                        const data = await response.json();
+
+                        if (data.text) {
+                            voiceSearchInput.value = data.text;
+                            form.querySelector('input[name="titre"]').value = data.text;
+                            document.getElementById('hero-search-form').submit();
+                        }
+                    } catch (error) {
+                        console.error('Erreur STT:', error);
+                    }
+                };
+
+                mediaRecorder.start();
+                voiceBtn.innerText = '⏹';
+
+                setTimeout(() => {
+                    if (mediaRecorder && mediaRecorder.state === 'recording') {
+                        mediaRecorder.stop();
+                        voiceBtn.innerText = '🎤';
+                    }
+                }, 6000);
+
+            } catch (error) {
+                console.error('Erreur micro:', error);
+            }
+        });
+    }
 });
 </script>
 {% endblock %}
