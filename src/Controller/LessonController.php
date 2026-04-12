@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Formation;
 use App\Entity\Lesson;
 use App\Form\LessonType;
+use App\Service\YouTubeSearchService;
 use Doctrine\ORM\EntityManagerInterface;
 use Nucleos\DompdfBundle\Wrapper\DompdfWrapperInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -76,6 +77,8 @@ final class LessonController extends AbstractController
             $entityManager->persist($lesson);
             $entityManager->flush();
 
+            $this->addFlash('success', 'La lesson a été ajoutée avec succès.');
+
             return $this->redirectToRoute('app_lesson_index');
         }
 
@@ -91,6 +94,78 @@ final class LessonController extends AbstractController
         return $this->render('lesson/show.html.twig', [
             'lesson' => $lesson,
         ]);
+    }
+
+    #[Route('/{id}/youtube/manage', name: 'app_lesson_youtube_manage', methods: ['GET'])]
+    public function youtubeManage(
+        Lesson $lesson,
+        Request $request,
+        YouTubeSearchService $youTubeSearchService
+    ): Response {
+        $query = trim((string) $request->query->get('q', (string) $lesson->getTitre()));
+        $sort = (string) $request->query->get('sort', 'relevance');
+
+        $results = [];
+        $error = null;
+
+        if ($query !== '') {
+            try {
+                $results = $youTubeSearchService->search($query, 8, $sort);
+            } catch (\Throwable $e) {
+                $error = $e->getMessage();
+            }
+        }
+
+        return $this->render('lesson/youtube_manage.html.twig', [
+            'lesson' => $lesson,
+            'query' => $query,
+            'sort' => $sort,
+            'results' => $results,
+            'error' => $error,
+        ]);
+    }
+
+    #[Route('/{id}/youtube/link', name: 'app_lesson_youtube_link', methods: ['POST'])]
+    public function linkYoutubeVideo(
+        Lesson $lesson,
+        Request $request,
+        EntityManagerInterface $entityManager
+    ): Response {
+        if (!$this->isCsrfTokenValid('link_youtube_' . $lesson->getId(), (string) $request->request->get('_token'))) {
+            throw $this->createAccessDeniedException('Jeton CSRF invalide.');
+        }
+
+        $videoUrl = trim((string) $request->request->get('video_url', ''));
+
+        if ($videoUrl === '') {
+            $this->addFlash('danger', 'Aucune vidéo YouTube sélectionnée.');
+            return $this->redirectToRoute('app_lesson_youtube_manage', ['id' => $lesson->getId()]);
+        }
+
+        $lesson->setVideoUrl($videoUrl);
+        $entityManager->flush();
+
+        $this->addFlash('success', 'La vidéo YouTube a été associée à la lesson.');
+
+        return $this->redirectToRoute('app_lesson_edit', ['id' => $lesson->getId()]);
+    }
+
+    #[Route('/{id}/youtube/remove', name: 'app_lesson_youtube_remove', methods: ['POST'])]
+    public function removeYoutubeVideo(
+        Lesson $lesson,
+        Request $request,
+        EntityManagerInterface $entityManager
+    ): Response {
+        if (!$this->isCsrfTokenValid('remove_youtube_' . $lesson->getId(), (string) $request->request->get('_token'))) {
+            throw $this->createAccessDeniedException('Jeton CSRF invalide.');
+        }
+
+        $lesson->setVideoUrl(null);
+        $entityManager->flush();
+
+        $this->addFlash('success', 'La vidéo associée a été supprimée.');
+
+        return $this->redirectToRoute('app_lesson_edit', ['id' => $lesson->getId()]);
     }
 
     #[Route('/{id}/pdf', name: 'app_lesson_pdf', methods: ['GET'])]
@@ -112,6 +187,8 @@ final class LessonController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $entityManager->flush();
 
+            $this->addFlash('success', 'La lesson a été mise à jour avec succès.');
+
             return $this->redirectToRoute('app_lesson_index');
         }
 
@@ -124,11 +201,33 @@ final class LessonController extends AbstractController
     #[Route('/{id}', name: 'app_lesson_delete', methods: ['POST'])]
     public function delete(Request $request, Lesson $lesson, EntityManagerInterface $entityManager): Response
     {
-        if ($this->isCsrfTokenValid('delete' . $lesson->getId(), $request->request->get('_token'))) {
+        if ($this->isCsrfTokenValid('delete' . $lesson->getId(), (string) $request->request->get('_token'))) {
             $entityManager->remove($lesson);
             $entityManager->flush();
+
+            $this->addFlash('success', 'La lesson a été supprimée.');
         }
 
         return $this->redirectToRoute('app_lesson_index');
     }
+    #[Route('/{id}/videos', name: 'app_lesson_related_videos', methods: ['GET'])]
+public function relatedVideos(
+    Lesson $lesson,
+    YouTubeSearchService $youTubeSearchService
+): Response {
+    $results = [];
+    $error = null;
+
+    try {
+        $results = $youTubeSearchService->search($lesson->getTitre(), 6);
+    } catch (\Throwable $e) {
+        $error = $e->getMessage();
+    }
+
+    return $this->render('lesson/related_videos.html.twig', [
+        'lesson' => $lesson,
+        'results' => $results,
+        'error' => $error,
+    ]);
+}
 }

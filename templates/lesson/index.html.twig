@@ -4,6 +4,17 @@
 
 {% block admin_content %}
 <div style="padding: 30px; font-family: Arial, sans-serif; background:#f8fafc; min-height:100vh;">
+    {% for label, messages in app.flashes %}
+        {% for message in messages %}
+            <div style="margin-bottom:15px; padding:12px 16px; border-radius:10px; background:
+                {% if label == 'success' %}#dcfce7{% elseif label == 'danger' %}#fee2e2{% else %}#dbeafe{% endif %};
+                color:
+                {% if label == 'success' %}#166534{% elseif label == 'danger' %}#991b1b{% else %}#1d4ed8{% endif %};">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endfor %}
+
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
         <h1 style="margin:0; color:#1f2937;">Liste des lessons</h1>
 
@@ -84,7 +95,7 @@
 
                         {% if lesson.videoUrl %}
                             <span style="background:#fef3c7; color:#92400e; padding:6px 10px; border-radius:999px; font-size:12px; font-weight:600;">
-                                🎬 Vidéo
+                                🎬 Vidéo liée
                             </span>
                         {% endif %}
                     </div>
@@ -119,6 +130,11 @@
                                 Modifier
                             </a>
 
+                            <a href="{{ path('app_lesson_youtube_manage', {'id': lesson.id}) }}"
+                               style="padding:8px 12px; background:#f59e0b; color:white; text-decoration:none; border-radius:8px;">
+                                Gérer YouTube
+                            </a>
+
                             <form method="post"
                                   action="{{ path('app_lesson_delete', {'id': lesson.id}) }}"
                                   style="display:inline-block;"
@@ -129,13 +145,6 @@
                                     Supprimer
                                 </button>
                             </form>
-
-                            {% if lesson.videoUrl %}
-                                <a href="{{ lesson.videoUrl }}" target="_blank"
-                                   style="padding:8px 12px; background:#f59e0b; color:white; text-decoration:none; border-radius:8px;">
-                                    Ouvrir vidéo
-                                </a>
-                            {% endif %}
                         </div>
                     </div>
                 </div>
