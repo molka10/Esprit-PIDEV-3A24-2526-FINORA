@@ -3,47 +3,121 @@
 {% block title %}Historique — FINORA{% endblock %}
 
 {% block body %}
+
 <style>
     .history-hero {
-        background: linear-gradient(135deg, #1e0a3c, #2d1155);
+        background: linear-gradient(135deg, #0f172a, #1e293b);
         padding: 28px 0;
-        border-bottom: 1px solid #3b1278;
+        border-bottom: 1px solid #1e3a5f;
     }
-    .stat-card { border: none; border-radius: 16px; box-shadow: 0 2px 12px rgba(0,0,0,0.07); transition: transform 0.2s; }
+    .stat-card {
+        border: none;
+        border-radius: 16px;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+        transition: transform 0.2s;
+    }
     .stat-card:hover { transform: translateY(-3px); }
-    .stat-icon { width: 52px; height: 52px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
-
-    .history-table-wrapper { background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 24px rgba(0,0,0,0.07); }
-    .history-table-header { background: #1e0a3c; padding: 18px 24px; display: flex; justify-content: space-between; align-items: center; }
-
-    .history-table thead th {
-        background: #f8fafc; color: #64748b;
-        font-size: 11px; font-weight: 700; text-transform: uppercase;
-        letter-spacing: 0.8px; padding: 13px 18px;
-        border: none; border-bottom: 2px solid #f1f5f9;
+    .stat-icon {
+        width: 52px; height: 52px;
+        border-radius: 14px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 20px; flex-shrink: 0;
     }
-    .history-table tbody td { padding: 16px 18px; vertical-align: middle; border-color: #f8fafc; font-size: 14px; }
-    .history-table tbody tr:hover { background: #faf5ff; cursor: pointer; }
-
-    .type-achat { background: #dcfce7; color: #16a34a; padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; display: inline-flex; align-items: center; gap: 5px; }
-    .type-vente { background: #fee2e2; color: #dc2626; padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; display: inline-flex; align-items: center; gap: 5px; }
-
-    .symbol-tag { background: #2d1155; color: white; padding: 4px 10px; border-radius: 6px; font-weight: 700; font-size: 12px; font-family: monospace; letter-spacing: 1px; }
-
-    .btn-detail { background: #f5f3ff; color: #7c3aed; border: none; padding: 6px 14px; border-radius: 8px; font-size: 12px; font-weight: 600; transition: 0.2s; display: inline-flex; align-items: center; gap: 5px; }
-    .btn-detail:hover { background: #ede9fe; }
-    .btn-pdf { background: linear-gradient(135deg, #ef4444, #dc2626); color: white; border: none; padding: 6px 14px; border-radius: 8px; font-size: 12px; font-weight: 600; transition: 0.2s; display: inline-flex; align-items: center; gap: 5px; }
+    .history-table-wrapper {
+        background: white;
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 4px 24px rgba(0,0,0,0.07);
+    }
+    .history-table-header {
+        background: #0f172a;
+        padding: 18px 24px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .history-table thead th {
+        background: #f8fafc;
+        color: #64748b;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        padding: 13px 18px;
+        border: none;
+        border-bottom: 2px solid #f1f5f9;
+    }
+    .history-table tbody td {
+        padding: 16px 18px;
+        vertical-align: middle;
+        border-color: #f8fafc;
+        font-size: 14px;
+    }
+    .history-table tbody tr:hover { background: #f8faff; cursor: pointer; }
+    .type-achat {
+        background: #dcfce7; color: #16a34a;
+        padding: 5px 12px; border-radius: 20px;
+        font-size: 12px; font-weight: 700;
+        display: inline-flex; align-items: center; gap: 5px;
+    }
+    .type-vente {
+        background: #fee2e2; color: #dc2626;
+        padding: 5px 12px; border-radius: 20px;
+        font-size: 12px; font-weight: 700;
+        display: inline-flex; align-items: center; gap: 5px;
+    }
+    .symbol-tag {
+        background: #0f172a; color: white;
+        padding: 4px 10px; border-radius: 6px;
+        font-weight: 700; font-size: 12px;
+        font-family: monospace; letter-spacing: 1px;
+    }
+    .btn-detail {
+        background: #f1f5f9; color: #475569;
+        border: none; padding: 6px 14px;
+        border-radius: 8px; font-size: 12px;
+        font-weight: 600; transition: 0.2s;
+        display: inline-flex; align-items: center; gap: 5px;
+    }
+    .btn-detail:hover { background: #e2e8f0; }
+    .btn-pdf {
+        background: linear-gradient(135deg, #ef4444, #dc2626);
+        color: white; border: none; padding: 6px 14px;
+        border-radius: 8px; font-size: 12px;
+        font-weight: 600; transition: 0.2s;
+        display: inline-flex; align-items: center; gap: 5px;
+    }
     .btn-pdf:hover { opacity: 0.9; color: white; }
 
-    .detail-header { background: linear-gradient(135deg, #1e0a3c, #3b1278); color: white; padding: 22px 24px; }
-    .detail-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #f1f5f9; font-size: 14px; }
+    /* MODAL DETAIL */
+    .detail-header {
+        background: linear-gradient(135deg, #0f172a, #1e3a5f);
+        color: white; padding: 22px 24px;
+    }
+    .detail-row {
+        display: flex; justify-content: space-between;
+        padding: 10px 0; border-bottom: 1px solid #f1f5f9;
+        font-size: 14px;
+    }
     .detail-row:last-child { border-bottom: none; }
     .detail-row .key { color: #64748b; }
     .detail-row .val { font-weight: 600; color: #1e293b; }
-
-    .commission-box { background: #f5f3ff; border: 1px solid #ddd6fe; border-radius: 12px; padding: 14px 16px; margin-top: 12px; }
-    .total-box { background: #f5f3ff; border: 1px solid #ddd6fe; border-radius: 12px; padding: 14px 16px; margin-top: 8px; text-align: center; }
-    .total-box .amount { font-size: 26px; font-weight: 800; color: #7c3aed; }
+    .commission-box {
+        background: #fffbeb;
+        border: 1px solid #fde68a;
+        border-radius: 12px;
+        padding: 14px 16px;
+        margin-top: 12px;
+    }
+    .total-box {
+        background: #f0fdf4;
+        border: 1px solid #bbf7d0;
+        border-radius: 12px;
+        padding: 14px 16px;
+        margin-top: 8px;
+        text-align: center;
+    }
+    .total-box .amount { font-size: 26px; font-weight: 800; color: #16a34a; }
 </style>
 
 {# HERO #}
@@ -51,8 +125,12 @@
     <div class="container">
         <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
             <div>
-                <h1 class="text-white fw-bold mb-1" style="font-size:26px;">📜 Historique des Transactions</h1>
-                <p class="mb-0" style="color:#c4b5fd; font-size:14px;">Toutes vos opérations d'achat et de vente</p>
+                <h1 class="text-white fw-bold mb-1" style="font-size:26px;">
+                    📜 Historique des Transactions
+                </h1>
+                <p class="mb-0" style="color:#94a3b8; font-size:14px;">
+                    Toutes vos opérations d'achat et de vente
+                </p>
             </div>
             <button onclick="exportAllPDF()" class="btn btn-danger fw-bold px-4">
                 <i class="bi bi-file-earmark-pdf me-2"></i> Exporter PDF
@@ -61,18 +139,19 @@
     </div>
 </div>
 
-<div style="background:#f5f3ff; padding: 28px 0;">
+{# STATS #}
+<div style="background:#f1f5f9; padding: 28px 0;">
 <div class="container">
-
-    {# STAT CARDS #}
     <div class="row g-3 mb-4">
         <div class="col-sm-6 col-xl-3">
             <div class="card stat-card p-4">
                 <div class="d-flex align-items-center gap-3">
-                    <div class="stat-icon" style="background:#dcfce7;"><i class="bi bi-arrow-down-circle text-success"></i></div>
+                    <div class="stat-icon" style="background:#dcfce7;">
+                        <i class="bi bi-arrow-down-circle text-success"></i>
+                    </div>
                     <div>
                         <div class="text-muted" style="font-size:12px;">Total Investi</div>
-                        <div class="fw-bold fs-5 text-success">{{ totalInvesti }} TND</div>
+                        <div class="fw-bold fs-5 text-success">{{ stats.commissions|number_format(2, '.', ',') }} TND</div>
                     </div>
                 </div>
             </div>
@@ -80,10 +159,12 @@
         <div class="col-sm-6 col-xl-3">
             <div class="card stat-card p-4">
                 <div class="d-flex align-items-center gap-3">
-                    <div class="stat-icon" style="background:#fee2e2;"><i class="bi bi-arrow-up-circle text-danger"></i></div>
+                    <div class="stat-icon" style="background:#fee2e2;">
+                        <i class="bi bi-arrow-up-circle text-danger"></i>
+                    </div>
                     <div>
                         <div class="text-muted" style="font-size:12px;">Total Vendu</div>
-                        <div class="fw-bold fs-5 text-danger">{{ totalVendu }} TND</div>
+                        <div class="fw-bold fs-5 text-danger">{{ stats.total_vendu|number_format(2, '.', ',') }} TND</div>
                     </div>
                 </div>
             </div>
@@ -91,10 +172,14 @@
         <div class="col-sm-6 col-xl-3">
             <div class="card stat-card p-4">
                 <div class="d-flex align-items-center gap-3">
-                    <div class="stat-icon" style="background:#f5f3ff;"><i class="bi bi-percent" style="color:#7c3aed;"></i></div>
+                    <div class="stat-icon" style="background:#fffbeb;">
+                        <i class="bi bi-percent text-warning"></i>
+                    </div>
                     <div>
                         <div class="text-muted" style="font-size:12px;">Commissions (1%)</div>
-                        <div class="fw-bold fs-5" style="color:#7c3aed;">{{ (totalInvesti * 0.01)|number_format(2) }} TND</div>
+                        <div class="fw-bold fs-5 text-warning">
+                           {{ stats.commissions|number_format(2, '.', ',') }} TND
+                        </div>
                     </div>
                 </div>
             </div>
@@ -102,10 +187,12 @@
         <div class="col-sm-6 col-xl-3">
             <div class="card stat-card p-4">
                 <div class="d-flex align-items-center gap-3">
-                    <div class="stat-icon" style="background:#e0f2fe;"><i class="bi bi-list-ul text-info"></i></div>
+                    <div class="stat-icon" style="background:#e0f2fe;">
+                        <i class="bi bi-list-ul text-info"></i>
+                    </div>
                     <div>
                         <div class="text-muted" style="font-size:12px;">Transactions</div>
-                        <div class="fw-bold fs-5">{{ nbTransactions }}</div>
+                        <div class="fw-bold fs-5">{{ stats.nb_transactions }}</div>
                     </div>
                 </div>
             </div>
@@ -116,9 +203,11 @@
     <div class="history-table-wrapper">
         <div class="history-table-header">
             <h5 class="text-white mb-0 fw-semibold">
-                <i class="bi bi-clock-history me-2" style="color:#a855f7;"></i> Transactions
+                <i class="bi bi-clock-history me-2 text-primary"></i> Transactions
             </h5>
-            <span style="color:#c4b5fd; font-size:13px;">{{ nbTransactions }} opération(s)</span>
+            <span style="color:#94a3b8; font-size:13px;">
+                {{ stats.nb_transactions }} opération(s) au total
+            </span>
         </div>
 
         <table class="table history-table mb-0">
@@ -147,8 +236,8 @@
                             <span class="type-vente"><i class="bi bi-arrow-up"></i> VENTE</span>
                         {% endif %}
                     </td>
-                    <td><span class="symbol-tag">{{ t.action.symbole }}</span></td>
-                    <td class="fw-semibold">{{ t.action.nomEntreprise }}</td>
+                    <td><span class="symbol-tag">{{ t.action ? t.action.symbole : 'N/A' }}</span></td>
+                    <td class="fw-semibold">{{ t.action ? t.action.nomEntreprise : 'N/A' }}</td>
                     <td>{{ t.quantite }}</td>
                     <td>{{ t.prixUnitaire }} TND</td>
                     <td>
@@ -158,13 +247,22 @@
                             <span class="fw-bold text-danger">-{{ t.montantTotal }} TND</span>
                         {% endif %}
                     </td>
-                    <td><span class="fw-semibold" style="color:#7c3aed;">{{ (t.montantTotal * 0.01)|number_format(2) }} TND</span></td>
-                    <td style="color:#64748b; font-size:13px;">{{ t.dateTransaction|date('d/m/Y H:i') }}</td>
+                    <td>
+                        <span class="text-warning fw-semibold">
+                            {{ (t.montantTotal * 0.01)|number_format(2) }} TND
+                        </span>
+                    </td>
+                    <td style="color:#64748b; font-size:13px;">
+                        {{ t.dateTransaction|date('d/m/Y H:i') }}
+                    </td>
                     <td class="text-center">
-                        <button class="btn-detail me-1" data-bs-toggle="modal" data-bs-target="#detailModal{{ t.id }}">
+                        <button class="btn-detail me-1"
+                                data-bs-toggle="modal"
+                                data-bs-target="#detailModal{{ t.id }}">
                             <i class="bi bi-eye"></i> Détail
                         </button>
-                        <button class="btn-pdf" onclick="exportPDF({{ t.id }})">
+                        <button class="btn-pdf"
+                                onclick="exportPDF({{ t.id }})">
                             <i class="bi bi-file-pdf"></i> PDF
                         </button>
                     </td>
@@ -178,6 +276,30 @@
                 </tr>
                 {% endfor %}
             </tbody>
+            <div class="d-flex justify-content-center mt-4">
+
+    {% if currentPage > 1 %}
+        <a href="{{ path('app_history', {page: currentPage - 1}) }}"
+           class="btn btn-outline-primary me-2">
+            ⬅ Précédent
+        </a>
+    {% endif %}
+
+    {% for i in 1..totalPages %}
+        <a href="{{ path('app_history', {page: i}) }}"
+           class="btn {{ i == currentPage ? 'btn-primary' : 'btn-outline-primary' }} me-1">
+            {{ i }}
+        </a>
+    {% endfor %}
+
+    {% if currentPage < totalPages %}
+        <a href="{{ path('app_history', {page: currentPage + 1}) }}"
+           class="btn btn-outline-primary ms-2">
+            Suivant ➡
+        </a>
+    {% endif %}
+
+</div>
         </table>
     </div>
 
@@ -189,26 +311,31 @@
 <div class="modal fade" id="detailModal{{ t.id }}" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 shadow-lg" style="border-radius:16px; overflow:hidden;">
+
             <div class="detail-header">
                 <div class="d-flex align-items-center gap-3">
-                    <div style="background:rgba(168,85,247,0.2); width:46px; height:46px; border-radius:12px; display:flex; align-items:center; justify-content:center;">
-                        <i class="bi bi-receipt" style="color:#a855f7;" class="fs-5"></i>
+                    <div style="background:rgba(99,102,241,0.2); width:46px; height:46px; border-radius:12px; display:flex; align-items:center; justify-content:center;">
+                        <i class="bi bi-receipt text-primary fs-5"></i>
                     </div>
                     <div>
                         <h5 class="mb-0">Détail de la Transaction</h5>
-                        <span style="color:#c4b5fd; font-size:13px;">#TXN-{{ t.id }}</span>
+                        <span style="color:#94a3b8; font-size:13px;">#TXN-{{ t.id }}</span>
                     </div>
                     <button type="button" class="btn-close btn-close-white ms-auto" data-bs-dismiss="modal"></button>
                 </div>
             </div>
 
             <div class="modal-body p-4" id="pdfContent{{ t.id }}">
+
                 <div class="text-center mb-3">
-                    <span class="fw-bold fs-5" style="color:#1e0a3c;">💰 <span style="color:#7c3aed;">FINORA</span></span>
+                    <span class="fw-bold fs-5" style="color:#0f172a;">💰 <span style="color:#f59e0b;">FINORA</span></span>
                     <div style="font-size:12px; color:#94a3b8;">Reçu de Transaction</div>
                 </div>
 
-                <div class="detail-row"><span class="key">Référence</span><span class="val">#TXN-{{ t.id }}</span></div>
+                <div class="detail-row">
+                    <span class="key">Référence</span>
+                    <span class="val">#TXN-{{ t.id }}</span>
+                </div>
                 <div class="detail-row">
                     <span class="key">Type</span>
                     <span class="val">
@@ -219,29 +346,51 @@
                         {% endif %}
                     </span>
                 </div>
-                <div class="detail-row"><span class="key">Action</span><span class="val">{{ t.action.nomEntreprise }} ({{ t.action.symbole }})</span></div>
-                <div class="detail-row"><span class="key">Quantité</span><span class="val">{{ t.quantite }} unités</span></div>
-                <div class="detail-row"><span class="key">Prix unitaire</span><span class="val">{{ t.prixUnitaire }} TND</span></div>
-                <div class="detail-row"><span class="key">Sous-total</span><span class="val">{{ t.montantTotal }} TND</span></div>
-                <div class="detail-row"><span class="key">Date</span><span class="val">{{ t.dateTransaction|date('d/m/Y à H:i') }}</span></div>
+                <div class="detail-row">
+                    <span class="key">Action</span>
+                    <span class="val">{{ t.action.nomEntreprise }} ({{ t.action.symbole }})</span>
+                </div>
+                <div class="detail-row">
+                    <span class="key">Quantité</span>
+                    <span class="val">{{ t.quantite }} unités</span>
+                </div>
+                <div class="detail-row">
+                    <span class="key">Prix unitaire</span>
+                    <span class="val">{{ t.prixUnitaire }} TND</span>
+                </div>
+                <div class="detail-row">
+                    <span class="key">Sous-total</span>
+                    <span class="val">{{ t.montantTotal }} TND</span>
+                </div>
+                <div class="detail-row">
+                    <span class="key">Date</span>
+                    <span class="val">{{ t.dateTransaction|date('d/m/Y à H:i') }}</span>
+                </div>
 
-                <div class="commission-box mt-3">
+                <div class="commission-box">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <div class="fw-semibold" style="font-size:14px; color:#7c3aed;">
-                                <i class="bi bi-percent me-1"></i> Commission FINORA (1%)
+                            <div class="fw-semibold" style="font-size:14px;">
+                                <i class="bi bi-percent me-1 text-warning"></i> Commission FINORA (1%)
                             </div>
-                            <div style="font-size:12px; color:#6d28d9;">Frais de courtage appliqués</div>
+                            <div style="font-size:12px; color:#92400e;">
+                                Frais de courtage appliqués sur le montant brut
+                            </div>
                         </div>
-                        <div class="fw-bold fs-5" style="color:#7c3aed;">{{ (t.montantTotal * 0.01)|number_format(2) }} TND</div>
+                        <div class="fw-bold text-warning fs-5">
+                            {{ (t.montantTotal * 0.01)|number_format(2) }} TND
+                        </div>
                     </div>
                 </div>
 
                 <div class="total-box">
                     <div style="font-size:12px; color:#64748b; margin-bottom:4px;">Montant total net</div>
-                    <div class="amount">{{ (t.montantTotal + t.montantTotal * 0.01)|number_format(2) }} TND</div>
+                    <div class="amount">
+                        {{ (t.montantTotal + t.montantTotal * 0.01)|number_format(2) }} TND
+                    </div>
                     <div style="font-size:11px; color:#94a3b8;">Sous-total + Commission</div>
                 </div>
+
             </div>
 
             <div class="modal-footer border-0 pt-0 pb-4 px-4">
@@ -250,6 +399,7 @@
                     <i class="bi bi-file-earmark-pdf me-1"></i> Télécharger PDF
                 </button>
             </div>
+
         </div>
     </div>
 </div>
@@ -273,26 +423,27 @@ function exportAllPDF() {
     const rows = document.querySelectorAll('.history-table tbody tr');
     let html = `
         <div style="font-family:Arial; padding:20px;">
-            <div style="text-align:center; margin-bottom:20px; border-bottom:3px solid #7c3aed; padding-bottom:16px;">
-                <h2 style="color:#1e0a3c; margin:0;">💰 <span style="color:#7c3aed;">FINORA</span></h2>
-                <p style="color:#64748b; margin:4px 0;">Relevé complet de vos transactions</p>
-                <p style="color:#94a3b8; font-size:12px; margin:0;">Généré le {{ "now"|date("d/m/Y à H:i") }}</p>
+            <div style="text-align:center; margin-bottom:20px;">
+                <h2 style="color:#0f172a;">💰 FINORA</h2>
+                <p style="color:#64748b;">Relevé de toutes vos transactions</p>
+                <p style="color:#94a3b8; font-size:12px;">Généré le {{ "now"|date("d/m/Y à H:i") }}</p>
             </div>
             <table style="width:100%; border-collapse:collapse; font-size:12px;">
                 <thead>
-                    <tr style="background:#1e0a3c; color:white;">
-                        <th style="padding:8px; text-align:left;">#</th>
-                        <th style="padding:8px; text-align:left;">Type</th>
-                        <th style="padding:8px; text-align:left;">Symbole</th>
-                        <th style="padding:8px; text-align:left;">Entreprise</th>
-                        <th style="padding:8px; text-align:left;">Qté</th>
-                        <th style="padding:8px; text-align:left;">Prix</th>
-                        <th style="padding:8px; text-align:left;">Montant</th>
-                        <th style="padding:8px; text-align:left;">Commission</th>
-                        <th style="padding:8px; text-align:left;">Date</th>
+                    <tr style="background:#0f172a; color:white;">
+                        <th style="padding:8px;">#</th>
+                        <th style="padding:8px;">Type</th>
+                        <th style="padding:8px;">Symbole</th>
+                        <th style="padding:8px;">Entreprise</th>
+                        <th style="padding:8px;">Qté</th>
+                        <th style="padding:8px;">Prix</th>
+                        <th style="padding:8px;">Montant</th>
+                        <th style="padding:8px;">Commission</th>
+                        <th style="padding:8px;">Date</th>
                     </tr>
                 </thead>
-                <tbody>`;
+                <tbody>
+    `;
     rows.forEach(row => {
         const cells = row.querySelectorAll('td');
         if (cells.length > 1) {
@@ -304,21 +455,21 @@ function exportAllPDF() {
         }
     });
     html += `</tbody></table>
-        <div style="margin-top:30px; padding:16px; background:#f5f3ff; border-radius:8px; border:1px solid #ddd6fe;">
+        <div style="margin-top:30px; padding:16px; background:#f8fafc; border-radius:8px;">
             <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
                 <span style="color:#64748b;">Total Investi</span>
-                <strong style="color:#16a34a;">{{ totalInvesti }} TND</strong>
+                <strong style="color:#16a34a;">{{ stats.total_investi|number_format(2, '.', ',') }} TND TND</strong>
             </div>
             <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
                 <span style="color:#64748b;">Total Vendu</span>
-                <strong style="color:#dc2626;">{{ totalVendu }} TND</strong>
+                <strong style="color:#dc2626;">{{ stats.total_vendu|number_format(2, '.', ',') }} TND</strong>
             </div>
             <div style="display:flex; justify-content:space-between;">
                 <span style="color:#64748b;">Commissions totales (1%)</span>
-                <strong style="color:#7c3aed;">{{ (totalInvesti * 0.01)|number_format(2) }} TND</strong>
+                <strong style="color:#d97706;">{{ stats.commissions|number_format(2, '.', ',') }} TND</strong>
             </div>
         </div>
-        </div>`;
+    </div>`;
 
     html2pdf().set({
         margin: 10,

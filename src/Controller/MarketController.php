@@ -144,40 +144,56 @@ class MarketController extends AbstractController
     // =========================
     // 🔥 HISTORIQUE (PRO)
     // =========================
-    #[Route('/history', name: 'app_history')]
-    public function history(Request $request, TransactionBourseRepository $repo): Response
-    {
-        $type = $request->query->get('type');
+#[Route('/history', name: 'app_history')]
+public function history(Request $request, TransactionBourseRepository $repo): Response
+{
+    $page = max(1, $request->query->getInt('page', 1));
+    $limit = 10;
 
-        $qb = $repo->createQueryBuilder('t')
-            ->orderBy('t.dateTransaction', 'DESC');
+    $qb = $repo->createQueryBuilder('t')
+        ->leftJoin('t.action', 'a')
+        ->addSelect('a')
+        ->orderBy('t.dateTransaction', 'DESC');
 
-        if ($type) {
-            $qb->andWhere('t.typeTransaction = :type')
-               ->setParameter('type', $type);
+    // 🔥 PAGINATION
+    $qb->setFirstResult(($page - 1) * $limit)
+       ->setMaxResults($limit);
+
+    $transactions = $qb->getQuery()->getResult();
+
+    // 🔥 TOTAL (sans pagination)
+    $totalItems = $repo->count([]);
+    $totalPages = ceil($totalItems / $limit);
+
+    // 🔥 STATS (optionnel global)
+    $all = $repo->findAll();
+
+    $totalInvesti = 0;
+    $totalVendu = 0;
+    $totalCommission = 0;
+
+    foreach ($all as $t) {
+        if ($t->getTypeTransaction() === 'ACHAT') {
+            $totalInvesti += $t->getMontantTotal();
+        } else {
+            $totalVendu += $t->getMontantTotal();
         }
 
-        $transactions = $qb->getQuery()->getResult();
-
-        $totalInvesti = 0;
-        $totalVendu = 0;
-
-        foreach ($transactions as $t) {
-            if ($t->getTypeTransaction() === 'ACHAT') {
-                $totalInvesti += $t->getMontantTotal();
-            } else {
-                $totalVendu += $t->getMontantTotal();
-            }
-        }
-
-        return $this->render('market/history.html.twig', [
-            'transactions' => $transactions,
-            'totalInvesti' => $totalInvesti,
-            'totalVendu' => $totalVendu,
-            'nbTransactions' => count($transactions),
-            'type' => $type
-        ]);
+        $totalCommission += $t->getCommission() ?? 0;
     }
+
+    return $this->render('market/history.html.twig', [
+        'transactions' => $transactions,
+        'currentPage' => $page,
+        'totalPages' => $totalPages,
+        'stats' => [
+            'total_investi' => $totalInvesti,
+            'total_vendu' => $totalVendu,
+            'commissions' => $totalCommission,
+            'nb_transactions' => $totalItems
+        ]
+    ]);
+}
 
     // =========================
     // 📄 PDF
