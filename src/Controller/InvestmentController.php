@@ -4,182 +4,119 @@ namespace App\Controller;
 
 use App\Entity\Investment;
 use App\Form\InvestmentType;
+use App\Repository\InvestmentManagementRepository;
 use App\Repository\InvestmentRepository;
+use App\Service\InvestmentImageUploader;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bridge\Doctrine\Attribute\MapEntity;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 
 #[Route('/investment')]
-class InvestmentController extends AbstractController
+final class InvestmentController extends AbstractController
 {
-    // ================= INDEX =================
-   #[Route('/', name: 'app_investment_index')]
-public function index(Request $request, InvestmentRepository $repo): Response
-{
-    $search = $request->query->get('search');
-    $category = $request->query->get('category');
-    $risk = $request->query->get('risk');
-    $sort = $request->query->get('sort');
+    public function __construct(
+        private readonly InvestmentImageUploader $imageUploader,
+    ) {}
 
-    $qb = $repo->createQueryBuilder('i');
-
-    if ($search) {
-        $qb->andWhere('i.name LIKE :search OR i.location LIKE :search')
-           ->setParameter('search', '%' . $search . '%');
-    }
-
-    if ($category) {
-        $qb->andWhere('i.category = :category')
-           ->setParameter('category', $category);
-    }
-
-    if ($risk) {
-        $qb->andWhere('i.riskLevel = :risk')
-           ->setParameter('risk', $risk);
-    }
-
-    if ($sort === 'asc') {
-        $qb->orderBy('i.estimatedValue', 'ASC');
-    } elseif ($sort === 'desc') {
-        $qb->orderBy('i.estimatedValue', 'DESC');
-    }
-
-    $investments = $qb->getQuery()->getResult();
-
-    // 🔥 AJAX RESPONSE
-    if ($request->isXmlHttpRequest()) {
-        return $this->render('investment/_cards.html.twig', [
-            'investments' => $investments
-        ]);
-    }
-
-    return $this->render('investment/index.html.twig', [
-        'investments' => $investments
-    ]);
-}
-    // ================= DASHBOARD 🔥 =================
-    #[Route('/dashboard', name: 'app_investment_dashboard')]
-    public function dashboard(InvestmentRepository $repo): Response
+    /**
+     * ================= INDEX =================
+     */
+    #[Route(name: 'app_investment_index', methods: ['GET'])]
+    public function index(Request $request, InvestmentRepository $investmentRepository): Response
     {
-        $investments = $repo->findAll();
-
-        $total = count($investments);
-        $totalValue = 0;
-        $high = 0;
-        $medium = 0;
-        $low = 0;
-
-        foreach ($investments as $inv) {
-            $value = (float)$inv->getEstimatedValue();
-            $totalValue += $value;
-
-            // 🔥 stats risk
-            if ($inv->getRiskLevel() === 'HIGH') {
-                $high++;
-            } elseif ($inv->getRiskLevel() === 'MEDIUM') {
-                $medium++;
-            } else {
-                $low++;
-            }
-        }
-
-        $average = $total > 0 ? $totalValue / $total : 0;
-
-        return $this->render('investment/dashboard.html.twig', [
-            'investments' => $investments,
-            'total' => $total,
-            'totalValue' => $totalValue,
-            'average' => $average,
-            'high' => $high,
-            'medium' => $medium,
-            'low' => $low,
+        return $this->render('investment/index.html.twig', [
+            'investments' => $investmentRepository->findAll(),
         ]);
     }
 
-    // ================= CARDS =================
-    #[Route('/cards', name: 'app_investment_cards')]
-    public function cards(InvestmentRepository $repo): Response
-    {
-        $investments = $repo->findAll();
-
-        $totalValue = 0;
-        foreach ($investments as $inv) {
-            $totalValue += (float)$inv->getEstimatedValue();
-        }
-
-        return $this->render('investment/_cards.html.twig', [
-            'investments' => $investments,
-            'totalValue' => $totalValue,
-            'totalCount' => count($investments),
-        ]);
-    }
-
-    // ================= CREATE =================
-    #[Route('/new', name: 'app_investment_new')]
-    public function new(Request $request, EntityManagerInterface $em): Response
+    /**
+     * ================= CREATE =================
+     */
+    #[Route('/new', name: 'app_investment_new', methods: ['GET', 'POST'])]
+    public function new(Request $request, EntityManagerInterface $entityManager): Response
     {
         $investment = new Investment();
-
         $form = $this->createForm(InvestmentType::class, $investment);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
 
-            $value = (float)$investment->getEstimatedValue();
+            $this->applyUploadedImage(
+                $form->get('imageFile')->getData(),
+                $investment,
+                null
+            );
 
-            if ($value > 1000000) {
-                $investment->setRiskLevel('HIGH');
-            } elseif ($value > 200000) {
-                $investment->setRiskLevel('MEDIUM');
-            } else {
-                $investment->setRiskLevel('LOW');
-            }
+            $entityManager->persist($investment);
+            $entityManager->flush();
 
-            $em->persist($investment);
-            $em->flush();
+            $this->addFlash('success', 'Investment créé avec succès.');
 
-            return $this->redirectToRoute('app_investment_dashboard'); // 🔥 redirect dashboard
+            return $this->redirectToRoute('app_investment_index');
         }
 
         return $this->render('investment/new.html.twig', [
-            'form' => $form->createView(),
+            'form' => $form,
         ]);
     }
 
-    // ================= EDIT =================
-    #[Route('/{investmentId}/edit', name: 'app_investment_edit')]
-    public function edit(Request $request, Investment $investment, EntityManagerInterface $em): Response
-    {
+    /**
+     * ================= MANAGEMENT =================
+     */
+    #[Route('/{id}/management', name: 'app_investment_management', methods: ['GET'])]
+    public function management(
+        Investment $investment,
+        InvestmentManagementRepository $managementRepository
+    ): Response {
+        return $this->render('investment/management.html.twig', [
+            'investment' => $investment,
+            'managements' => $managementRepository->findBy(['investment' => $investment]),
+        ]);
+    }
+
+    /**
+     * ================= EDIT =================
+     */
+    #[Route('/{id}/edit', name: 'app_investment_edit', methods: ['GET', 'POST'])]
+    public function edit(
+        Request $request,
+        Investment $investment,
+        EntityManagerInterface $entityManager
+    ): Response {
+        $previousImage = $investment->getImageFilename();
+
         $form = $this->createForm(InvestmentType::class, $investment);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
 
-            $value = (float)$investment->getEstimatedValue();
+            $this->applyUploadedImage(
+                $form->get('imageFile')->getData(),
+                $investment,
+                $previousImage
+            );
 
-            if ($value > 1000000) {
-                $investment->setRiskLevel('HIGH');
-            } elseif ($value > 200000) {
-                $investment->setRiskLevel('MEDIUM');
-            } else {
-                $investment->setRiskLevel('LOW');
-            }
+            $entityManager->flush();
 
-            $em->flush();
+            $this->addFlash('success', 'Investment mis à jour.');
 
-            return $this->redirectToRoute('app_investment_dashboard');
+            return $this->redirectToRoute('app_investment_index');
         }
 
         return $this->render('investment/edit.html.twig', [
-            'form' => $form->createView(),
+            'form' => $form,
             'investment' => $investment,
         ]);
     }
 
-    // ================= SHOW =================
-    #[Route('/{investmentId}', name: 'app_investment_show')]
+    /**
+     * ================= SHOW =================
+     */
+    #[Route('/{id}', name: 'app_investment_show', methods: ['GET'])]
     public function show(Investment $investment): Response
     {
         return $this->render('investment/show.html.twig', [
@@ -187,15 +124,46 @@ public function index(Request $request, InvestmentRepository $repo): Response
         ]);
     }
 
-    // ================= DELETE =================
-    #[Route('/{investmentId}', name: 'app_investment_delete', methods: ['POST'])]
-    public function delete(Request $request, Investment $investment, EntityManagerInterface $em): Response
-    {
-        if ($this->isCsrfTokenValid('delete'.$investment->getInvestmentId(), $request->request->get('_token'))) {
-            $em->remove($investment);
-            $em->flush();
+    /**
+     * ================= DELETE =================
+     */
+    #[Route('/{id}', name: 'app_investment_delete', methods: ['POST'])]
+    public function delete(
+        Request $request,
+        Investment $investment,
+        EntityManagerInterface $entityManager
+    ): Response {
+        if ($this->isCsrfTokenValid('delete'.$investment->getId(), $request->request->get('_token'))) {
+
+            // 🔥 supprimer image aussi
+            $this->imageUploader->remove($investment->getImageFilename());
+
+            $entityManager->remove($investment);
+            $entityManager->flush();
+
+            $this->addFlash('success', 'Investment supprimé.');
         }
 
-        return $this->redirectToRoute('app_investment_dashboard');
+        return $this->redirectToRoute('app_investment_index');
+    }
+
+    /**
+     * ================= IMAGE HANDLER =================
+     */
+    private function applyUploadedImage(
+        mixed $file,
+        Investment $investment,
+        ?string $previousFilename
+    ): void {
+        if (!$file instanceof UploadedFile) {
+            return;
+        }
+
+        $newFilename = $this->imageUploader->upload($file);
+        $investment->setImageFilename($newFilename);
+
+        if ($previousFilename && $previousFilename !== $newFilename) {
+            $this->imageUploader->remove($previousFilename);
+        }
     }
 }

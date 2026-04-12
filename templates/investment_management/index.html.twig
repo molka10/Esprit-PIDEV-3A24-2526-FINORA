@@ -6,20 +6,22 @@
 
 <div class="container mt-4">
 
-    <h1 class="mb-4 fw-bold">Investment Management</h1>
+    <h1 class="mb-4 fw-bold text-primary">📊 Investment Management</h1>
 
-    <!-- 🔍 SEARCH + FILTER -->
+    {% set role = app.session.get('role') %}
+
+    <!-- FILTER -->
     <form method="get" class="row g-2 mb-4">
 
         <div class="col-md-6">
             <input type="text" name="search" class="form-control"
-                   placeholder="Search investment..."
+                   placeholder="Search..."
                    value="{{ app.request.get('search') }}">
         </div>
 
         <div class="col-md-3">
             <select name="status" class="form-select">
-                <option value="ALL">All</option>
+                <option value="">All</option>
                 <option value="ACTIVE" {{ app.request.get('status') == 'ACTIVE' ? 'selected' }}>Active</option>
                 <option value="CLOSED" {{ app.request.get('status') == 'CLOSED' ? 'selected' }}>Closed</option>
             </select>
@@ -35,21 +37,32 @@
     <!-- ACTIONS -->
     <div class="d-flex justify-content-between mb-3">
 
-        <a href="{{ path('app_management_new') }}" class="btn btn-success">
-            New Investment
-        </a>
+        <div class="d-flex gap-2">
 
-        <a href="{{ path('app_management_dashboard') }}" class="btn btn-dark">
-            Dashboard
+            <a href="{{ path('app_investment_index') }}" class="btn btn-outline-primary">
+                💼 Investments
+            </a>
+
+            {% if role == 'investisseur' %}
+                <a href="{{ path('app_management_new') }}" class="btn btn-success">
+                    ➕ New
+                </a>
+            {% endif %}
+
+        </div>
+
+        <a href="{{ path('admin_dashboard') }}" class="btn btn-dark">
+            📊 Dashboard
         </a>
 
     </div>
 
-    <div class="card shadow-sm border-0 p-3">
+    <!-- TABLE -->
+    <div class="card shadow-sm p-3">
 
-        <table class="table table-hover align-middle">
+        <table class="table table-hover text-center align-middle">
 
-            <thead class="table-dark text-center">
+            <thead class="table-dark">
                 <tr>
                     <th>Investment</th>
                     <th>Type</th>
@@ -61,75 +74,70 @@
                 </tr>
             </thead>
 
-            <tbody class="text-center">
-            {% for item in items %}
+            <tbody>
+
+            {% for item in investment_managements %}
                 <tr>
 
-                    <!-- ✅ ID + NAME -->
-                    <td class="text-start">
-                        <span class="badge bg-dark mb-1">
-                            #{{ item.managementId }}
-                        </span><br>
-
-                        {% if item.investment %}
-                            <strong class="text-primary">
-                                {{ item.investment.name }}
-                            </strong>
-                        {% else %}
-                            <span class="text-muted">N/A</span>
-                        {% endif %}
-                    </td>
-
-                    <!-- TYPE -->
-                    <td>{{ item.investmentType }}</td>
-
-                    <!-- AMOUNT -->
-                    <td class="fw-semibold text-primary">
-                        {{ item.amountInvested }} TND
-                    </td>
-
-                    <!-- PERCENT -->
-                    <td>{{ item.ownershipPercentage }}%</td>
-
-                    <!-- DATE -->
                     <td>
-                        {{ item.startDate ? item.startDate|date('d M Y') : '' }}
+                        <strong>{{ item.investment ? item.investment.name : 'N/A' }}</strong>
                     </td>
 
-                    <!-- STATUS -->
+                    <td>{{ item.investmentType ?? '-' }}</td>
+
+                    <td class="text-success fw-bold">
+                        {{ item.amountInvested ?? 0 }} TND
+                    </td>
+
+                    <td>{{ item.ownershipPercentage ?? 0 }}%</td>
+
+                    <td>
+                        {{ item.startDate ? item.startDate|date('Y-m-d') : '-' }}
+                    </td>
+
                     <td>
                         {% if item.status == 'ACTIVE' %}
-                            <span class="badge bg-success px-3 py-2">Active</span>
+                            <span class="badge bg-success">Active</span>
                         {% else %}
-                            <span class="badge bg-danger px-3 py-2">Closed</span>
+                            <span class="badge bg-danger">Closed</span>
                         {% endif %}
                     </td>
 
-                    <!-- ACTIONS -->
                     <td class="d-flex justify-content-center gap-2">
 
-                        <a class="btn btn-sm btn-info text-white"
-                           href="{{ path('app_management_show', {'managementId': item.managementId}) }}">
-                           View
-                        </a>
+                        <!-- VIEW -->
+                        <a href="{{ path('app_management_show', {'id': item.id}) }}"
+                           class="btn btn-sm btn-primary">👁️</a>
 
-                        <a class="btn btn-sm btn-warning text-white"
-                           href="{{ path('app_management_edit', {'managementId': item.managementId}) }}">
-                           Edit
-                        </a>
+                        {% if role == 'investisseur' %}
 
-                        {{ include('investment_management/_delete_form.html.twig', {'item': item}) }}
+                            <!-- EDIT -->
+                            <a href="{{ path('app_management_edit', {'id': item.id}) }}"
+                               class="btn btn-sm btn-warning">✏️</a>
+
+                            <!-- DELETE -->
+                            <form method="post"
+                                  action="{{ path('app_management_delete', {'id': item.id}) }}"
+                                  onsubmit="return confirm('Delete?');">
+
+                                <input type="hidden"
+                                       name="_token"
+                                       value="{{ csrf_token('delete' ~ item.id) }}">
+
+                                <button class="btn btn-sm btn-danger">🗑</button>
+                            </form>
+
+                        {% endif %}
 
                     </td>
 
                 </tr>
             {% else %}
                 <tr>
-                    <td colspan="7" class="text-center text-muted">
-                        No records found
-                    </td>
+                    <td colspan="7" class="text-muted text-center">No data</td>
                 </tr>
             {% endfor %}
+
             </tbody>
 
         </table>

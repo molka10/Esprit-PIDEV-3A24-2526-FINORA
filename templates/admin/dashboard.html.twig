@@ -1,0 +1,123 @@
+{% extends 'admin/base_admin.html.twig' %}
+
+{% block title %}FINORA - Dashboard{% endblock %}
+
+{% block admin_content %}
+
+<div class="container-fluid p-4">
+
+    <!-- 🔥 HEADER -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body p-4">
+            <h2 class="fw-bold text-primary">📊 Dashboard FINORA</h2>
+            <p class="text-muted mb-0">
+                Gestion des formations, lessons et investissements
+            </p>
+        </div>
+    </div>
+
+    <!-- 📊 STATS GLOBAL -->
+    <div class="row g-4 mb-4">
+
+        <div class="col-md-3">
+            <div class="card p-3 bg-primary text-white text-center">
+                <h6>Investments</h6>
+                <h2>{{ totalInvestments }}</h2>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card p-3 bg-success text-white text-center">
+                <h6>Active Management</h6>
+                <h2>{{ activeManagement }}</h2>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card p-3 bg-warning text-dark text-center">
+                <h6>Closed</h6>
+                <h2>{{ closedManagement }}</h2>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card p-3 bg-dark text-white text-center">
+                <h6>Total Value</h6>
+                <h2>{{ totalValue }} TND</h2>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- 🚀 MODULES -->
+    <div class="row g-4 mb-4">
+
+        <!-- FORMATIONS -->
+        <div class="col-md-3">
+            <div class="card p-4 shadow-sm h-100">
+                <h5 class="text-primary">📚 Formations</h5>
+                <p class="text-muted">Gestion des formations</p>
+                <a href="{{ path('formation_index') }}" class="btn btn-outline-primary btn-sm">
+                    Ouvrir
+                </a>
+            </div>
+        </div>
+
+        <!-- LESSONS -->
+        <div class="col-md-3">
+            <div class="card p-4 shadow-sm h-100">
+                <h5 class="text-primary">📖 Lessons</h5>
+                <p class="text-muted">Gestion des lessons</p>
+                <a href="{{ path('app_lesson_index') }}" class="btn btn-outline-primary btn-sm">
+                    Ouvrir
+                </a>
+            </div>
+        </div>
+
+        <!-- INVESTMENTS -->
+        <div class="col-md-3">
+            <div class="card p-4 shadow-sm h-100">
+                <h5 class="text-success">💰 Investments</h5>
+                <p class="text-muted">Gérer les investissements</p>
+                <a href="{{ path('app_investment_index') }}" class="btn btn-outline-success btn-sm">
+                    Ouvrir
+                </a>
+            </div>
+        </div>
+
+        <!-- MANAGEMENT -->
+        <div class="col-md-3">
+            <div class="card p-4 shadow-sm h-100">
+                <h5 class="text-warning">📊 Management</h5>
+                <p class="text-muted">Suivi des investissements</p>
+                <a href="{{ path('app_management_index') }}" class="btn btn-outline-warning btn-sm">
+                    Ouvrir
+                </a>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- 📊 CHART -->
+    <div class="card p-4">
+        <h5 class="mb-3">📈 Investment Distribution</h5>
+        <canvas id="chart"></canvas>
+    </div>
+
+</div>
+
+<script>
+const ctx = document.getElementById('chart');
+
+new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+        labels: ['Active', 'Closed'],
+        datasets: [{
+            data: [{{ activeManagement }}, {{ closedManagement }}]
+        }]
+    }
+});
+</script>
+
+{% endblock %}

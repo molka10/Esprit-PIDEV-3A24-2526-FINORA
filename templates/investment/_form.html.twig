@@ -68,7 +68,10 @@
         <div class="col-md-4"><label>Image URL:</label></div>
         <div class="col-md-8">
             {{ form_widget(form.imageUrl, {
-                'attr': {'class': 'form-control ' ~ (form_errors(form.imageUrl) ? 'is-invalid' : ''), 'id':'imageInput'}
+                'attr': {
+                    'class': 'form-control ' ~ (form_errors(form.imageUrl) ? 'is-invalid' : ''),
+                    'id': 'imageInput'
+                }
             }) }}
             <div class="invalid-feedback d-block">{{ form_errors(form.imageUrl) }}</div>
 
@@ -99,12 +102,34 @@
         </div>
     </div>
 
+    <!-- BUTTONS -->
     <div class="text-end mt-4">
-        <button class="btn btn-primary px-4">💾 Save</button>
-        <a href="{{ path('app_investment_cards') }}" class="btn btn-secondary px-4">Cancel</a>
+        <button class="btn btn-primary px-4">
+            💾 Save
+        </button>
+
+        <a href="{{ path('app_investment_index') }}" class="btn btn-outline-secondary px-4">
+            ← Cancel
+        </a>
     </div>
 
 </div>
 </div>
 
 {{ form_end(form) }}
+
+<!-- 🔥 IMAGE PREVIEW SCRIPT -->
+<script>
+    const input = document.getElementById('imageInput');
+    const preview = document.getElementById('preview');
+
+    input.addEventListener('input', function () {
+        const url = input.value;
+        if (url) {
+            preview.src = url;
+            preview.style.display = 'block';
+        } else {
+            preview.style.display = 'none';
+        }
+    });
+</script>

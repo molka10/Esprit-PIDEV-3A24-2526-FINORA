@@ -1,7 +1,7 @@
 {% extends 'base.html.twig' %}
 
 {% block body %}
-<div class="container mt-5">
+<div class="container mt-4">
 
     <!-- ================= HEADER ================= -->
     <div class="mb-4">
@@ -13,40 +13,34 @@
     <div class="row mb-4 text-center">
 
         <div class="col-md-6">
-            <div class="card shadow-sm p-4 border-0">
-                <h6 class="text-muted">Total Portfolio Value</h6>
-                <h3 class="fw-bold text-primary">
-                    {{ totalValue|default(0) }} TND
-                </h3>
+            <div class="card shadow p-3">
+                <h6>Total Portfolio Value</h6>
+                <h3>{{ totalValue }}</h3>
             </div>
         </div>
 
         <div class="col-md-6">
-            <div class="card shadow-sm p-4 border-0">
-                <h6 class="text-muted">Total Investments</h6>
-                <h3 class="fw-bold">
-                    {{ totalCount|default(0) }}
-                </h3>
+            <div class="card shadow p-3">
+                <h6>Total Investments</h6>
+                <h3>{{ totalCount }}</h3>
             </div>
         </div>
 
     </div>
 
     <!-- ================= TOOLBAR ================= -->
-    <div class="d-flex mb-4 flex-wrap gap-2">
+    <div class="d-flex mb-4">
 
-        <a href="{{ path('app_investment_new') }}" class="btn btn-primary">
-            Add Investment
+        <a href="{{ path('app_investment_new') }}" class="btn btn-primary me-2">
+             Add Investment
         </a>
 
-        <a href="{{ path('app_investment_cards') }}" class="btn btn-secondary">
-            Refresh
+        <a href="{{ path('app_investment_cards') }}" class="btn btn-secondary me-2">
+             Refresh
         </a>
 
         <div class="ms-auto">
-            <a href="{{ path('app_management_index') }}" class="btn btn-dark">
-                Management
-            </a>
+            <a href="#" class="btn btn-dark">Management</a>
         </div>
 
     </div>
@@ -54,14 +48,13 @@
     <!-- ================= SEARCH + FILTER ================= -->
     <div class="row mb-4">
 
-        <div class="col-md-6 mb-2">
-            <input type="text" id="search" class="form-control"
-                   placeholder="Search investments...">
+        <div class="col-md-6">
+            <input type="text" id="search" class="form-control" placeholder="Search investments...">
         </div>
 
         <div class="col-md-6">
             <select id="filterRisk" class="form-control">
-                <option value="ALL">All Risks</option>
+                <option value="ALL">All</option>
                 <option value="LOW">Low</option>
                 <option value="MEDIUM">Medium</option>
                 <option value="HIGH">High</option>
@@ -71,79 +64,43 @@
     </div>
 
     <!-- ================= CARDS ================= -->
-    <div class="row g-4">
+    <div class="row">
 
         {% for inv in investments %}
-        <div class="col-md-4 card-item"
+        <div class="col-md-4 mb-4 card-item"
              data-risk="{{ inv.riskLevel|upper }}">
 
-            <div class="card shadow-sm border-0 h-100">
+            <div class="card shadow h-100">
 
-                <!-- IMAGE -->
-                <img src="{{ inv.imageUrl ?: 'https://via.placeholder.com/400x200' }}"
-                     class="card-img-top"
-                     style="height:180px; object-fit:cover;">
+                {% if inv.imageUrl %}
+                    <img src="{{ inv.imageUrl }}"
+                         class="card-img-top"
+                         style="height:180px; object-fit:cover;">
+                {% endif %}
 
                 <div class="card-body">
 
-                    <h5 class="fw-bold text-primary">
-                        {{ inv.name }}
-                    </h5>
+                    <h5 class="fw-bold">{{ inv.name }}</h5>
 
-                    <p class="text-muted mb-1">
+                    <p class="text-muted">
                         {{ inv.category }} • {{ inv.location }}
                     </p>
 
-                    <h6 class="fw-bold text-success">
-                        {{ inv.estimatedValue }} TND
-                    </h6>
+                    <h6>{{ inv.estimatedValue }}</h6>
 
                     <!-- RISK -->
                     <span class="badge
                         {% if inv.riskLevel == 'HIGH' %}bg-danger
-                        {% elseif inv.riskLevel == 'MEDIUM' %}bg-warning text-dark
+                        {% elseif inv.riskLevel == 'MEDIUM' %}bg-warning
                         {% else %}bg-success
                         {% endif %}">
                         {{ inv.riskLevel }}
                     </span>
 
                 </div>
-
-                <!-- ACTIONS -->
-                <div class="card-footer bg-white border-0 d-flex justify-content-between">
-
-                    <a href="{{ path('app_investment_show', {'investmentId': inv.investmentId}) }}"
-                       class="btn btn-sm btn-outline-primary">
-                        View
-                    </a>
-
-                    <a href="{{ path('app_investment_edit', {'investmentId': inv.investmentId}) }}"
-                       class="btn btn-sm btn-outline-warning">
-                        Edit
-                    </a>
-
-                    <form method="post"
-                          action="{{ path('app_investment_delete', {'investmentId': inv.investmentId}) }}"
-                          onsubmit="return confirm('Delete this investment?');">
-
-                        <input type="hidden" name="_token"
-                               value="{{ csrf_token('delete' ~ inv.investmentId) }}">
-
-                        <button class="btn btn-sm btn-outline-danger">
-                            Delete
-                        </button>
-
-                    </form>
-
-                </div>
-
             </div>
 
         </div>
-        {% else %}
-            <div class="col-12 text-center text-muted">
-                No investments found
-            </div>
         {% endfor %}
 
     </div>

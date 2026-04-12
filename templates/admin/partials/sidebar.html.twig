@@ -1,0 +1,58 @@
+
+
+
+<ul class="navbar-nav flex-column" id="navbar-sidebar">
+
+    <!-- 🔥 DASHBOARD -->
+    <li class="nav-item">
+        <a href="{{ path('admin_dashboard') }}" class="nav-link">
+            <i class="bi bi-house fa-fw me-2"></i>Dashboard
+        </a>
+    </li>
+
+    <!-- 🔥 SECTION GESTION -->
+    <li class="nav-item ms-2 my-2 text-uppercase small text-muted">
+        Gestion
+    </li>
+
+    <!-- FORMATIONS -->
+    <li class="nav-item">
+        <a class="nav-link" href="{{ path('formation_index') }}">
+            <i class="bi bi-mortarboard fa-fw me-2"></i>Formations
+        </a>
+    </li>
+
+    <!-- LESSONS -->
+    <li class="nav-item">
+        <a class="nav-link" href="{{ path('app_lesson_index') }}">
+            <i class="fas fa-book fa-fw me-2"></i>Lessons
+        </a>
+    </li>
+
+    <!-- 💰 INVESTMENTS -->
+    <li class="nav-item">
+        <a href="{{ path('app_investment_index') }}" class="nav-link">
+            <i class="bi bi-cash-stack fa-fw me-2"></i>Investments
+        </a>
+    </li>
+
+    <!-- 📊 MANAGEMENT -->
+    <li class="nav-item">
+        <a href="{{ path('app_management_index') }}" class="nav-link">
+            <i class="bi bi-graph-up-arrow fa-fw me-2"></i>Investment Management
+        </a>
+    </li>
+
+    <!-- 🔥 NAVIGATION -->
+    <li class="nav-item ms-2 my-2 text-uppercase small text-muted">
+        Navigation
+    </li>
+
+    <!-- HOME -->
+    <li class="nav-item">
+        <a class="nav-link" href="{{ path('app_home') }}">
+            <i class="bi bi-globe fa-fw me-2"></i>Accueil
+        </a>
+    </li>
+
+</ul>

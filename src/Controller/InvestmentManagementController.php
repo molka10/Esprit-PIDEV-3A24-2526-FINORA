@@ -6,6 +6,7 @@ use App\Entity\InvestmentManagement;
 use App\Form\InvestmentManagementType;
 use App\Repository\InvestmentManagementRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -14,71 +15,86 @@ use Symfony\Component\Routing\Annotation\Route;
 #[Route('/management')]
 class InvestmentManagementController extends AbstractController
 {
-    // ================= INDEX + SEARCH =================
-    #[Route('/', name: 'app_management_index', methods: ['GET'])]
-    public function index(Request $request, InvestmentManagementRepository $repo): Response
+    // 🔐 ROLE
+    private function getRole(Request $request)
     {
-        $search = $request->query->get('search');
-        $status = $request->query->get('status');
+        return $request->getSession()->get('role');
+    }
 
-        $qb = $repo->createQueryBuilder('i');
+    private function checkAccess(Request $request)
+    {
+        if (!in_array($this->getRole($request), ['admin', 'investisseur'])) {
+            return $this->redirectToRoute('choose_role');
+        }
+        return null;
+    }
 
-        if ($search) {
-            $qb->andWhere('i.investmentType LIKE :search')
-               ->setParameter('search', '%'.$search.'%');
+    private function checkInvestisseur(Request $request)
+    {
+        if ($this->getRole($request) !== 'investisseur') {
+            return $this->redirectToRoute('app_management_index');
+        }
+        return null;
+    }
+
+    // ================= INDEX (COMME FORMATION) =================
+    #[Route('/', name: 'app_management_index')]
+    public function index(Request $request, InvestmentManagementRepository $repo, PaginatorInterface $paginator): Response
+    {
+        if ($redirect = $this->checkAccess($request)) return $redirect;
+
+        $search = trim((string)$request->query->get('search', ''));
+        $status = trim((string)$request->query->get('status', ''));
+        $tri = (string)$request->query->get('tri', 'id');
+        $ordre = strtolower((string)$request->query->get('ordre', 'desc'));
+
+        $qb = $repo->createQueryBuilder('m')
+                   ->leftJoin('m.investment', 'i')
+                   ->addSelect('i');
+
+        if ($search !== '') {
+            $qb->andWhere('LOWER(m.investmentType) LIKE LOWER(:search)')
+               ->setParameter('search', '%' . $search . '%');
         }
 
-        if ($status && $status !== 'ALL') {
-            $qb->andWhere('i.status = :status')
+        if ($status !== '') {
+            $qb->andWhere('m.status = :status')
                ->setParameter('status', $status);
         }
 
-        $items = $qb->getQuery()->getResult();
-
-        return $this->render('investment_management/index.html.twig', [
-            'items' => $items,
-        ]);
-    }
-
-    // ================= DASHBOARD =================
-    #[Route('/dashboard', name: 'app_management_dashboard')]
-    public function dashboard(InvestmentManagementRepository $repo): Response
-    {
-        $items = $repo->findAll();
-
-        $total = count($items);
-        $totalAmount = 0;
-        $active = 0;
-        $closed = 0;
-
-        foreach ($items as $item) {
-            $totalAmount += (float)$item->getAmountInvested();
-
-            if ($item->getStatus() === 'ACTIVE') {
-                $active++;
-            } else {
-                $closed++;
-            }
+        $allowedSortFields = ['id', 'amountInvested', 'ownershipPercentage', 'status'];
+        if (!in_array($tri, $allowedSortFields, true)) {
+            $tri = 'id';
         }
 
-        $average = $total > 0 ? $totalAmount / $total : 0;
+        $ordre = $ordre === 'asc' ? 'ASC' : 'DESC';
+        $qb->orderBy('m.' . $tri, $ordre);
 
-        return $this->render('investment_management/dashboardInvM.html.twig', [
-            'total' => $total,
-            'totalAmount' => $totalAmount,
-            'active' => $active,
-            'closed' => $closed,
-            'average' => $average,
-            'items' => $items,
+        $query = $qb->getQuery();
+        $page = $request->query->getInt('page', 1);
+
+        $investment_managements = $paginator->paginate(
+            $query,
+            $page,
+            6
+        );
+
+        return $this->render('investment_management/index.html.twig', [
+            'investment_managements' => $investment_managements,
+            'search' => $search,
+            'status' => $status,
+            'tri' => $tri,
+            'ordre' => strtolower($ordre),
         ]);
     }
 
     // ================= CREATE =================
-    #[Route('/new', name: 'app_management_new', methods: ['GET', 'POST'])]
+    #[Route('/new', name: 'app_management_new')]
     public function new(Request $request, EntityManagerInterface $em): Response
     {
-        $item = new InvestmentManagement();
+        if ($redirect = $this->checkInvestisseur($request)) return $redirect;
 
+        $item = new InvestmentManagement();
         $form = $this->createForm(InvestmentManagementType::class, $item);
         $form->handleRequest($request);
 
@@ -90,7 +106,7 @@ class InvestmentManagementController extends AbstractController
             $em->persist($item);
             $em->flush();
 
-            return $this->redirectToRoute('app_management_dashboard');
+            return $this->redirectToRoute('app_management_index');
         }
 
         return $this->render('investment_management/new.html.twig', [
@@ -99,18 +115,22 @@ class InvestmentManagementController extends AbstractController
     }
 
     // ================= SHOW =================
-    #[Route('/{managementId}', name: 'app_management_show', methods: ['GET'])]
-    public function show(InvestmentManagement $item): Response
+    #[Route('/{id}', name: 'app_management_show')]
+    public function show(Request $request, InvestmentManagement $item): Response
     {
+        if ($redirect = $this->checkAccess($request)) return $redirect;
+
         return $this->render('investment_management/show.html.twig', [
             'item' => $item,
         ]);
     }
 
     // ================= EDIT =================
-    #[Route('/{managementId}/edit', name: 'app_management_edit', methods: ['GET', 'POST'])]
+    #[Route('/{id}/edit', name: 'app_management_edit')]
     public function edit(Request $request, InvestmentManagement $item, EntityManagerInterface $em): Response
     {
+        if ($redirect = $this->checkInvestisseur($request)) return $redirect;
+
         $form = $this->createForm(InvestmentManagementType::class, $item);
         $form->handleRequest($request);
 
@@ -121,7 +141,7 @@ class InvestmentManagementController extends AbstractController
 
             $em->flush();
 
-            return $this->redirectToRoute('app_management_dashboard');
+            return $this->redirectToRoute('app_management_index');
         }
 
         return $this->render('investment_management/edit.html.twig', [
@@ -131,15 +151,16 @@ class InvestmentManagementController extends AbstractController
     }
 
     // ================= DELETE =================
-    #[Route('/{managementId}', name: 'app_management_delete', methods: ['POST'])]
+    #[Route('/{id}', name: 'app_management_delete', methods: ['POST'])]
     public function delete(Request $request, InvestmentManagement $item, EntityManagerInterface $em): Response
     {
-        if ($this->isCsrfTokenValid('delete'.$item->getManagementId(), $request->request->get('_token'))) {
+        if ($redirect = $this->checkInvestisseur($request)) return $redirect;
 
+        if ($this->isCsrfTokenValid('delete'.$item->getId(), $request->request->get('_token'))) {
             $em->remove($item);
             $em->flush();
         }
 
-        return $this->redirectToRoute('app_management_dashboard');
+        return $this->redirectToRoute('app_management_index');
     }
 }

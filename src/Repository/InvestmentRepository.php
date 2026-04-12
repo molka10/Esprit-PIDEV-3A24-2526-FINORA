@@ -16,28 +16,109 @@ class InvestmentRepository extends ServiceEntityRepository
         parent::__construct($registry, Investment::class);
     }
 
-//    /**
-//     * @return Investment[] Returns an array of Investment objects
-//     */
-//    public function findByExampleField($value): array
-//    {
-//        return $this->createQueryBuilder('i')
-//            ->andWhere('i.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->orderBy('i.id', 'ASC')
-//            ->setMaxResults(10)
-//            ->getQuery()
-//            ->getResult()
-//        ;
-//    }
+    /**
+     * 🔥 Top actifs par valeur (HOME + API)
+     */
+    public function findTopActiveByEstimatedValue(int $limit = 3): array
+    {
+        return $this->createQueryBuilder('i')
+            ->andWhere('i.status = :active')
+            ->setParameter('active', 'ACTIVE')
+            ->orderBy('i.estimatedValue', 'DESC')
+            ->addOrderBy('i.investmentId', 'ASC')
+            ->setMaxResults($limit)
+            ->getQuery()
+            ->getResult();
+    }
 
-//    public function findOneBySomeField($value): ?Investment
-//    {
-//        return $this->createQueryBuilder('i')
-//            ->andWhere('i.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->getQuery()
-//            ->getOneOrNullResult()
-//        ;
-//    }
+    /**
+     * 🔥 Top actifs avec risque faible (SMART RECOMMENDATION)
+     */
+    public function findTopActiveByLowestRisk(int $limit = 3): array
+    {
+        return $this->createQueryBuilder('i')
+            ->andWhere('i.status = :active')
+            ->setParameter('active', 'ACTIVE')
+            ->orderBy(
+                "CASE 
+                    WHEN i.riskLevel = 'LOW' THEN 1 
+                    WHEN i.riskLevel = 'MEDIUM' THEN 2 
+                    WHEN i.riskLevel = 'HIGH' THEN 3 
+                    ELSE 4 
+                END",
+                'ASC'
+            )
+            ->addOrderBy('i.estimatedValue', 'DESC')
+            ->addOrderBy('i.investmentId', 'ASC')
+            ->setMaxResults($limit)
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
+     * 🔥 Portfolio avec filtre catégorie
+     */
+    public function findForPortfolio(?string $category = null): array
+    {
+        $qb = $this->createQueryBuilder('i')
+            ->orderBy('i.name', 'ASC');
+
+        if ($category !== null && $category !== '') {
+            $qb->andWhere('i.category = :cat')
+               ->setParameter('cat', $category);
+        }
+
+        return $qb->getQuery()->getResult();
+    }
+
+    /**
+     * 🔥 Recherche globale (utile pour ton input search)
+     */
+    public function search(string $term): array
+    {
+        return $this->createQueryBuilder('i')
+            ->andWhere('LOWER(i.name) LIKE :term OR LOWER(i.location) LIKE :term')
+            ->setParameter('term', '%' . strtolower($term) . '%')
+            ->orderBy('i.createdAt', 'DESC')
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
+     * 🔥 Stats dashboard
+     */
+    public function countByStatus(string $status): int
+    {
+        return (int) $this->createQueryBuilder('i')
+            ->select('COUNT(i.investmentId)')
+            ->andWhere('i.status = :status')
+            ->setParameter('status', $status)
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+
+    /**
+     * 🔥 Somme totale des investissements
+     */
+    public function getTotalEstimatedValue(): float
+    {
+        return (float) $this->createQueryBuilder('i')
+            ->select('SUM(i.estimatedValue)')
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+
+    // ================= LEGACY =================
+
+    /** @deprecated */
+    public function findTopByEstimatedValue(int $limit = 3): array
+    {
+        return $this->findTopActiveByEstimatedValue($limit);
+    }
+
+    /** @deprecated */
+    public function findTopByLowestRisk(int $limit = 3): array
+    {
+        return $this->findTopActiveByLowestRisk($limit);
+    }
 }

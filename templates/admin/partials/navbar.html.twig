@@ -1,0 +1,50 @@
+<nav class="navbar top-bar navbar-light border-bottom py-2 px-4 bg-white">
+
+    <div class="container-fluid p-0 d-flex align-items-center">
+
+        <!-- 🔥 LEFT: LOGO -->
+        <a class="navbar-brand fw-bold text-primary" href="{{ path('admin_dashboard') }}">
+            FINORA
+        </a>
+
+        <!-- 🔍 SEARCH -->
+        <form class="d-none d-md-flex ms-4 w-50">
+            <input class="form-control border-0 bg-light" type="search" placeholder="Search...">
+        </form>
+
+        <!-- 🔥 RIGHT SIDE -->
+        <div class="ms-auto d-flex align-items-center gap-3">
+
+            {% set role = app.session.get('role') %}
+
+            <!-- ROLE -->
+            {% if role %}
+                <span class="badge bg-dark text-white">
+                    👤 {{ role|upper }}
+                </span>
+            {% endif %}
+
+            <!-- NOTIFICATION -->
+            <a class="btn btn-light btn-sm" href="#">
+                🔔
+            </a>
+
+            <!-- PROFILE -->
+            <img src="{{ asset('assets/images/avatar/01.jpg') }}"
+                 class="rounded-circle"
+                 width="35"
+                 height="35"
+                 alt="avatar">
+
+            <!-- LOGOUT -->
+            {% if role %}
+                <a href="{{ path('logout_role') }}" class="btn btn-outline-danger btn-sm">
+                    Logout
+                </a>
+            {% endif %}
+
+        </div>
+
+    </div>
+
+</nav>

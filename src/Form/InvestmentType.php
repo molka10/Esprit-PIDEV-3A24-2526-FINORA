@@ -3,16 +3,20 @@
 namespace App\Form;
 
 use App\Entity\Investment;
+use App\Enum\InvestmentCategory;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
 // TYPES
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\NumberType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
-use Symfony\Component\Form\Extension\Core\Type\UrlType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
+
+// VALIDATION
+use Symfony\Component\Validator\Constraints\File;
 
 class InvestmentType extends AbstractType
 {
@@ -20,83 +24,105 @@ class InvestmentType extends AbstractType
     {
         $builder
 
-            // NAME
+            // 🔹 NAME
             ->add('name', TextType::class, [
-                'required' => false,
+                'label' => 'Nom',
+                'required' => true,
                 'attr' => [
                     'class' => 'form-control',
-                    'placeholder' => 'Land Development Project'
+                    'placeholder' => 'Ex: Projet Immobilier',
+                    'minlength' => 3,
+                    'maxlength' => 255
                 ]
             ])
 
-            // CATEGORY
-            ->add('category', TextType::class, [
-                'required' => false,
-                'attr' => [
-                    'class' => 'form-control',
-                    'placeholder' => 'Real Estate'
-                ]
+            // 🔹 CATEGORY (ENUM + fallback propre)
+            ->add('category', ChoiceType::class, [
+                'label' => 'Type d’investissement',
+                'choices' => InvestmentCategory::formChoices(),
+                'placeholder' => 'Choisir une catégorie',
+                'required' => true,
+                'attr' => ['class' => 'form-select']
             ])
 
-            // LOCATION
+            // 🔹 LOCATION
             ->add('location', TextType::class, [
-                'required' => false,
+                'label' => 'Localisation',
+                'required' => true,
                 'attr' => [
                     'class' => 'form-control',
-                    'placeholder' => 'Tunis, Tunisia'
+                    'placeholder' => 'Ex: Tunis',
+                    'maxlength' => 255
                 ]
             ])
 
-            // VALUE
+            // 🔹 VALUE
             ->add('estimatedValue', NumberType::class, [
-                'required' => false,
+                'label' => 'Valeur estimée',
+                'required' => true,
                 'scale' => 2,
+                'html5' => true,
                 'attr' => [
                     'class' => 'form-control',
-                    'placeholder' => '150000'
+                    'placeholder' => 'Ex: 150000',
+                    'min' => 0,
+                    'step' => '0.01'
                 ]
             ])
 
-            // RISK
+            // 🔹 RISK
             ->add('riskLevel', ChoiceType::class, [
-                'required' => false,
+                'label' => 'Niveau de risque',
                 'choices' => [
-                    'Low' => 'LOW',
-                    'Medium' => 'MEDIUM',
-                    'High' => 'HIGH',
+                    'Faible' => 'LOW',
+                    'Moyen' => 'MEDIUM',
+                    'Élevé' => 'HIGH',
                 ],
-                'placeholder' => 'Select risk level',
-                'attr' => ['class' => 'form-control']
+                'placeholder' => 'Choisir un niveau',
+                'required' => true,
+                'attr' => ['class' => 'form-select']
             ])
 
-            // IMAGE
-            ->add('imageUrl', UrlType::class, [
+            // 🔥 IMAGE UPLOAD (IMPORTANT)
+            ->add('imageFile', FileType::class, [
+                'label' => 'Image',
+                'mapped' => false,
                 'required' => false,
                 'attr' => [
                     'class' => 'form-control',
-                    'placeholder' => 'https://example.com/image.jpg'
+                    'accept' => 'image/*'
+                ],
+                'constraints' => [
+                    new File([
+                        'maxSize' => '2M',
+                        'mimeTypes' => ['image/jpeg', 'image/png'],
+                        'mimeTypesMessage' => 'Formats acceptés : JPG, PNG',
+                    ])
                 ]
             ])
 
-            // DESCRIPTION
+            // 🔹 DESCRIPTION
             ->add('description', TextareaType::class, [
+                'label' => 'Description',
                 'required' => false,
                 'attr' => [
                     'class' => 'form-control',
                     'rows' => 4,
-                    'placeholder' => 'Write a short description...'
+                    'placeholder' => 'Description...',
+                    'maxlength' => 2000
                 ]
             ])
 
-            // STATUS
+            // 🔹 STATUS
             ->add('status', ChoiceType::class, [
-                'required' => false,
+                'label' => 'Statut',
                 'choices' => [
-                    'Active' => 'ACTIVE',
-                    'Inactive' => 'INACTIVE',
+                    'Actif' => 'ACTIVE',
+                    'Inactif' => 'INACTIVE',
                 ],
-                'placeholder' => 'Select status',
-                'attr' => ['class' => 'form-control']
+                'placeholder' => 'Choisir un statut',
+                'required' => true,
+                'attr' => ['class' => 'form-select']
             ]);
     }
 
@@ -104,6 +130,10 @@ class InvestmentType extends AbstractType
     {
         $resolver->setDefaults([
             'data_class' => Investment::class,
+            'attr' => [
+                'class' => 'investment-form',
+                'novalidate' => 'novalidate',
+            ],
         ]);
     }
 }

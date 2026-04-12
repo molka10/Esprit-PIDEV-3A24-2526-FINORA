@@ -1,0 +1,40 @@
+{% extends 'base.html.twig' %}
+
+{% block stylesheets %}
+    {{ parent() }}
+
+    <link rel="stylesheet" href="{{ asset('assets/vendor/apexcharts/css/apexcharts.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/vendor/overlay-scrollbar/css/overlayscrollbars.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/vendor/choices/css/choices.min.css') }}">
+
+    <style>
+        .page-content-wrapper {
+            background: linear-gradient(180deg, #fcfaff 0%, #f7f2ff 100%);
+            min-height: 100vh;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+<main>
+
+    {% include 'admin/partials/sidebar_admin.html.twig' %}
+
+    <div class="page-content">
+
+        {% include 'admin/partials/navbar_admin.html.twig' %}
+
+        <div class="page-content-wrapper p-4">
+            {% block admin_content %}{% endblock %}
+        </div>
+
+    </div>
+
+</main>
+{% endblock %}
+
+{% block javascripts %}
+    <script src="{{ asset('assets/vendor/bootstrap/dist/js/bootstrap.bundle.min.js') }}"></script>
+    <script src="{{ asset('assets/vendor/apexcharts/js/apexcharts.min.js') }}"></script>
+    <script src="{{ asset('assets/js/functions.js') }}"></script>
+{% endblock %}

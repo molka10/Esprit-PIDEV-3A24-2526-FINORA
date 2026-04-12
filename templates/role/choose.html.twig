@@ -1,0 +1,138 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+
+<style>
+    body {
+        background: linear-gradient(135deg, #eef2f7, #d9e2ec);
+        font-family: 'Segoe UI', sans-serif;
+    }
+
+    .main-container {
+        min-height: 100vh;
+    }
+
+    .title {
+        font-size: 42px;
+        font-weight: 700;
+        color: #2c3e50;
+    }
+
+    .subtitle {
+        color: #6c757d;
+        font-size: 18px;
+    }
+
+    .role-card {
+        border-radius: 25px;
+        padding: 50px 30px;
+        text-align: center;
+        transition: all 0.4s ease;
+        backdrop-filter: blur(10px);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+
+    .role-card:hover {
+        transform: translateY(-12px) scale(1.03);
+        box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+    }
+
+    .admin {
+        background: linear-gradient(135deg, #ff5f6d, #ff2e4d);
+        color: white;
+    }
+
+    .invest {
+        background: linear-gradient(135deg, #00c9a7, #00b894);
+        color: white;
+    }
+
+    .role-icon {
+        font-size: 45px;
+        margin-bottom: 15px;
+    }
+
+    .role-title {
+        font-size: 26px;
+        font-weight: bold;
+        margin-bottom: 10px;
+    }
+
+    .role-desc {
+        font-size: 15px;
+        opacity: 0.9;
+    }
+
+    .logout-btn {
+        margin-top: 40px;
+        border-radius: 30px;
+        padding: 10px 25px;
+    }
+</style>
+
+<div class="container d-flex justify-content-center align-items-center main-container">
+
+    <div class="text-center">
+
+        <h1 class="title mb-2">Bienvenue sur Finora</h1>
+        <p class="subtitle mb-5">Choisissez votre rôle pour continuer</p>
+
+        {% set role = app.session.get('role') %}
+
+        {% if role %}
+            <div class="alert alert-info mb-4">
+                 Rôle actuel : <strong>{{ role|upper }}</strong>
+            </div>
+        {% endif %}
+
+        <div class="row justify-content-center g-4">
+
+            <!-- ADMIN -->
+            <div class="col-md-4">
+                <a href="{{ path('set_role', {role: 'admin'}) }}" class="text-decoration-none">
+                    <div class="role-card admin">
+
+                        <div class="role-icon">👑</div>
+
+                        <div class="role-title">Admin</div>
+
+                        <div class="role-desc">
+                            Gérer les investissements<br>
+                            CRUD complet
+                        </div>
+
+                    </div>
+                </a>
+            </div>
+
+            <!-- INVESTISSEUR -->
+            <div class="col-md-4">
+                <a href="{{ path('set_role', {role: 'investisseur'}) }}" class="text-decoration-none">
+                    <div class="role-card invest">
+
+                        <div class="role-icon">💼</div>
+
+                        <div class="role-title">Investisseur</div>
+
+                        <div class="role-desc">
+                            Gérer vos investissements<br>
+                            Accès personnalisé
+                        </div>
+
+                    </div>
+                </a>
+            </div>
+
+        </div>
+
+        {% if role %}
+            <a href="{{ path('logout_role') }}" class="btn btn-outline-dark logout-btn">
+                 Changer de rôle
+            </a>
+        {% endif %}
+
+    </div>
+
+</div>
+
+{% endblock %}

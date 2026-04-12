@@ -1,85 +1,759 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Investment Marketplace{% endblock %}
+{% block title %}FINORA - Investissements{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('assets/vendor/choices/css/choices.min.css') }}">
+{% endblock %}
 
 {% block body %}
 
-<div class="container mt-5">
+<!-- ======================= HEADER START ======================= -->
+<header class="navbar-light navbar-sticky">
+    <nav class="navbar navbar-expand-xl z-index-9">
+        <div class="container">
 
-    <h1 class="mb-4 fw-bold">💼 Investment Marketplace</h1>
+            <a class="navbar-brand" href="{{ path('app_home') }}">
+                <img class="light-mode-item navbar-brand-item" src="{{ asset('assets/images/logo.svg') }}" alt="FINORA" style="height:40px;">
+                <img class="dark-mode-item navbar-brand-item" src="{{ asset('assets/images/logo-light.svg') }}" alt="FINORA" style="height:40px;">
+            </a>
 
-    <!-- 🔍 FILTER -->
-    <form id="filterForm" class="row g-2 mb-4">
+            <button class="navbar-toggler ms-auto" type="button"
+                    data-bs-toggle="collapse" data-bs-target="#navbarCollapse"
+                    aria-controls="navbarCollapse" aria-expanded="false">
+                <span class="navbar-toggler-animation">
+                    <span></span><span></span><span></span>
+                </span>
+            </button>
 
-        <div class="col-md-4">
-            <input type="text" name="search" class="form-control"
-                   placeholder="Search investment...">
+            <div class="navbar-collapse w-100 collapse" id="navbarCollapse">
+
+                <ul class="navbar-nav navbar-nav-scroll mx-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_home') }}">
+                            <i class="bi bi-house me-1"></i>Accueil
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{{ path('app_investment_index') }}">
+                            <i class="bi bi-graph-up-arrow me-1"></i>Investissements
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_management_index') }}">
+                            <i class="bi bi-briefcase me-1"></i>Management
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('admin_dashboard') }}">
+                            <i class="bi bi-speedometer2 me-1"></i>Dashboard
+                        </a>
+                    </li>
+                </ul>
+
+                <!-- Search -->
+                <div class="nav my-3 my-xl-0 px-4 flex-nowrap align-items-center">
+                    <div class="nav-item w-100">
+                        <form method="get" action="{{ path('app_investment_index') }}" class="position-relative">
+                            <input class="form-control pe-5 bg-transparent"
+                                   name="search" type="search"
+                                   placeholder="Rechercher un investissement..."
+                                   value="{{ app.request.get('search') }}">
+                            <button class="bg-transparent p-2 position-absolute top-50 end-0 translate-middle-y border-0 text-primary-hover text-reset" type="submit">
+                                <i class="fas fa-search fs-6"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Profile -->
+            <div class="dropdown ms-1 ms-lg-0">
+                <a class="avatar avatar-sm p-0" href="#"
+                   id="profileDropdown" role="button"
+                   data-bs-auto-close="outside" data-bs-display="static"
+                   data-bs-toggle="dropdown" aria-expanded="false">
+                    <img class="avatar-img rounded-circle" src="{{ asset('assets/images/avatar/01.jpg') }}" alt="avatar">
+                </a>
+                <ul class="dropdown-menu dropdown-animation dropdown-menu-end shadow pt-3" aria-labelledby="profileDropdown">
+                    <li class="px-3 mb-3">
+                        <div class="d-flex align-items-center">
+                            <div class="avatar me-3">
+                                <img class="avatar-img rounded-circle shadow" src="{{ asset('assets/images/avatar/01.jpg') }}" alt="avatar">
+                            </div>
+                            <div>
+                                <a class="h6" href="#">Mon Compte</a>
+                                <p class="small m-0">finora@example.com</p>
+                            </div>
+                        </div>
+                    </li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item" href="#"><i class="bi bi-person fa-fw me-2"></i>Profil</a></li>
+                    <li><a class="dropdown-item" href="{{ path('admin_dashboard') }}"><i class="bi bi-speedometer2 fa-fw me-2"></i>Dashboard</a></li>
+                    <li><a class="dropdown-item bg-danger-soft-hover" href="#"><i class="bi bi-power fa-fw me-2"></i>Déconnexion</a></li>
+                </ul>
+            </div>
+
         </div>
+    </nav>
+</header>
+<!-- ======================= HEADER END ======================= -->
 
-        <div class="col-md-2">
-            <select name="category" class="form-select">
-                <option value="">All Category</option>
-                <option value="Immobilier">Immobilier</option>
-                <option value="Startup">Startup</option>
-                <option value="Agriculture">Agriculture</option>
-            </select>
+
+<!-- ======================= MAIN CONTENT START ======================= -->
+<main>
+
+<!-- ======================= PAGE BANNER START ======================= -->
+<section class="bg-dark align-items-center d-flex"
+         style="background: url({{ asset('assets/images/pattern/04.png') }}) no-repeat center center; background-size: cover; min-height: 160px;">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <h1 class="text-white">Nos Investissements</h1>
+                <div class="d-flex">
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb breadcrumb-dark breadcrumb-dots mb-0">
+                            <li class="breadcrumb-item">
+                                <a href="{{ path('app_home') }}">Accueil</a>
+                            </li>
+                            <li class="breadcrumb-item active" aria-current="page">Investissements</li>
+                        </ol>
+                    </nav>
+                </div>
+            </div>
         </div>
-
-        <div class="col-md-2">
-            <select name="risk" class="form-select">
-                <option value="">All Risk</option>
-                <option value="LOW">Low</option>
-                <option value="MEDIUM">Medium</option>
-                <option value="HIGH">High</option>
-            </select>
-        </div>
-
-        <div class="col-md-2">
-            <select name="sort" class="form-select">
-                <option value="">Sort</option>
-                <option value="asc">Price ↑</option>
-                <option value="desc">Price ↓</option>
-            </select>
-        </div>
-
-    </form>
-
-    <!-- ADD -->
-    <div class="text-end mb-4">
-        <a href="{{ path('app_investment_new') }}" class="btn btn-success">
-            Add Investment
-        </a>
     </div>
+</section>
+<!-- ======================= PAGE BANNER END ======================= -->
 
-    <!-- 🔥 RESULTS -->
-    <div id="results">
-        {% include 'investment/_cards.html.twig' %}
+
+<!-- ======================= PAGE CONTENT START ======================= -->
+<section class="pb-0 py-sm-5">
+    <div class="container">
+
+        <!-- Title + sort bar START -->
+        <div class="row g-3 align-items-center mb-4">
+
+            <!-- Result count -->
+            <div class="col-md-4">
+                <h4 class="mb-0">{{ investments|length }} investissement(s) trouvé(s)</h4>
+            </div>
+
+            <!-- Filters & actions -->
+            <div class="col-md-8">
+                <form method="get" action="{{ path('app_investment_index') }}">
+                    <div class="row g-3 align-items-center justify-content-md-end">
+
+                        <!-- Grid/List toggle -->
+                        <div class="col-sm-auto d-none d-md-block">
+                            <ul class="list-inline mb-0">
+                                <li class="list-inline-item">
+                                    <button type="button" class="btn btn-outline-light mb-0 me-1" id="btn-grid" title="Vue grille">
+                                        <i class="fas fa-fw fa-th-large"></i>
+                                    </button>
+                                </li>
+                                <li class="list-inline-item">
+                                    <button type="button" class="btn btn-outline-light mb-0 active" id="btn-list" title="Vue liste">
+                                        <i class="fas fa-fw fa-list-ul"></i>
+                                    </button>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <!-- Category filter -->
+                        <div class="col-md-3 border rounded p-1 input-borderless">
+                            <select name="category" class="form-select js-choice z-index-9">
+                                <option value="">Toutes catégories</option>
+                                <option value="Immobilier" {{ app.request.get('category') == 'Immobilier' ? 'selected' }}>Immobilier</option>
+                                <option value="Startup"    {{ app.request.get('category') == 'Startup'    ? 'selected' }}>Startup</option>
+                                <option value="Agriculture"{{ app.request.get('category') == 'Agriculture'? 'selected' }}>Agriculture</option>
+                                <option value="Bourse"     {{ app.request.get('category') == 'Bourse'     ? 'selected' }}>Bourse</option>
+                                <option value="Crypto"     {{ app.request.get('category') == 'Crypto'     ? 'selected' }}>Crypto</option>
+                            </select>
+                        </div>
+
+                        <!-- Risk filter -->
+                        <div class="col-md-3 border rounded p-1 input-borderless">
+                            <select name="risk" class="form-select js-choice z-index-9">
+                                <option value="">Tous risques</option>
+                                <option value="LOW"    {{ app.request.get('risk') == 'LOW'    ? 'selected' }}>Faible</option>
+                                <option value="MEDIUM" {{ app.request.get('risk') == 'MEDIUM' ? 'selected' }}>Moyen</option>
+                                <option value="HIGH"   {{ app.request.get('risk') == 'HIGH'   ? 'selected' }}>Élevé</option>
+                            </select>
+                        </div>
+
+                        <!-- Sort -->
+                        <div class="col-md-2 border rounded p-1 input-borderless">
+                            <select name="sort" class="form-select js-choice z-index-9">
+                                <option value="">Trier par</option>
+                                <option value="asc"  {{ app.request.get('sort') == 'asc'  ? 'selected' }}>Prix ↑</option>
+                                <option value="desc" {{ app.request.get('sort') == 'desc' ? 'selected' }}>Prix ↓</option>
+                                <option value="new"  {{ app.request.get('sort') == 'new'  ? 'selected' }}>Plus récent</option>
+                            </select>
+                        </div>
+
+                        <!-- Buttons -->
+                        <div class="col-auto d-flex gap-2">
+                            <button type="submit" class="btn btn-primary mb-0">
+                                <i class="fas fa-search me-1"></i>Filtrer
+                            </button>
+                            <a href="{{ path('app_investment_index') }}" class="btn btn-outline-secondary mb-0">
+                                <i class="fas fa-redo me-1"></i>Reset
+                            </a>
+                        </div>
+
+                        <!-- Mobile filter toggle -->
+                        <div class="col-auto d-xl-none">
+                            <button class="btn btn-primary mb-0" type="button"
+                                    data-bs-toggle="offcanvas" data-bs-target="#offcanvasSidebar"
+                                    aria-controls="offcanvasSidebar">
+                                <i class="fas fa-sliders-h me-1"></i>Filtres
+                            </button>
+                        </div>
+
+                    </div>
+                </form>
+            </div>
+
+        </div>
+        <!-- Title + sort bar END -->
+
+
+        <div class="row">
+
+            <!-- ======================= MAIN LIST START ======================= -->
+            <div class="col-xl-9 col-xxl-8">
+
+                <!-- Admin: Add button -->
+                {% set role = app.session.get('role') %}
+                {% if role == 'admin' %}
+                <div class="d-flex justify-content-end mb-3">
+                    <a href="{{ path('app_investment_new') }}" class="btn btn-success">
+                        <i class="bi bi-plus-circle me-1"></i>Ajouter un investissement
+                    </a>
+                </div>
+                {% endif %}
+
+                {% if role == 'investisseur' %}
+                <div class="alert alert-warning d-flex align-items-center gap-2 mb-4">
+                    <i class="bi bi-eye fs-5"></i>
+                    <span>Mode lecture — Investisseur</span>
+                </div>
+                {% endif %}
+
+                <!-- Investment list -->
+                <div class="row g-4" id="investments-container">
+
+                    {% for investment in investments %}
+
+                    {# --- LIST VIEW CARD (default) --- #}
+                    <div class="col-12 investment-item">
+                        <div class="card shadow overflow-hidden p-2">
+                            <div class="row g-0">
+
+                                <!-- Image -->
+                                <div class="col-md-4 overflow-hidden position-relative">
+                                    <img src="{{ investment.imageUrl ?: asset('assets/images/courses/4by3/06.jpg') }}"
+                                         class="rounded-2 w-100 h-100 object-fit-cover"
+                                         style="min-height: 200px;"
+                                         alt="{{ investment.name }}">
+
+                                    {# Risk ribbon #}
+                                    <div class="card-img-overlay p-2">
+                                        {% if investment.riskLevel == 'HIGH' %}
+                                            <span class="badge bg-danger">Risque élevé</span>
+                                        {% elseif investment.riskLevel == 'MEDIUM' %}
+                                            <span class="badge bg-warning text-dark">Risque moyen</span>
+                                        {% else %}
+                                            <span class="badge bg-success">Risque faible</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+                                <!-- Body -->
+                                <div class="col-md-8">
+                                    <div class="card-body">
+
+                                        <!-- Badge + rating row -->
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <div class="hstack gap-2">
+                                                <a href="#" class="badge text-bg-primary">{{ investment.category }}</a>
+                                                {% if investment.location %}
+                                                    <span class="badge text-bg-secondary">
+                                                        <i class="bi bi-geo-alt me-1"></i>{{ investment.location }}
+                                                    </span>
+                                                {% endif %}
+                                            </div>
+                                            <div>
+                                                <span class="h6 fw-light me-3">
+                                                    <i class="fas fa-star text-warning me-1"></i>4.5
+                                                </span>
+                                                <a href="#" class="h6 fw-light"><i class="far fa-heart"></i></a>
+                                            </div>
+                                        </div>
+
+                                        <!-- Title -->
+                                        <h5 class="card-title">
+                                            <a href="{{ path('app_investment_show', {'id': investment.id}) }}">
+                                                {{ investment.name }}
+                                            </a>
+                                        </h5>
+
+                                        <!-- Description -->
+                                        <p class="text-truncate-2 d-none d-lg-block text-muted">
+                                            {{ investment.description ? investment.description|slice(0, 120) ~ '...' : 'Aucune description disponible.' }}
+                                        </p>
+
+                                        <!-- Meta info -->
+                                        <ul class="list-inline mb-3">
+                                            <li class="list-inline-item h6 fw-light mb-1 mb-sm-0">
+                                                <i class="bi bi-currency-dollar text-success me-1"></i>
+                                                <strong class="text-success">{{ investment.estimatedValue }} TND</strong>
+                                            </li>
+                                            <li class="list-inline-item h6 fw-light mb-1 mb-sm-0">
+                                                <i class="fas fa-signal text-primary me-1"></i>
+                                                {{ investment.riskLevel ?? 'N/A' }}
+                                            </li>
+                                            <li class="list-inline-item h6 fw-light">
+                                                <i class="bi bi-tag text-orange me-1"></i>
+                                                {{ investment.category }}
+                                            </li>
+                                        </ul>
+
+                                        <!-- Footer: actions -->
+                                        <div class="d-sm-flex justify-content-sm-between align-items-center">
+
+                                            <!-- Created by badge -->
+                                            <div class="d-flex align-items-center">
+                                                <div class="avatar">
+                                                    <img class="avatar-img rounded-circle"
+                                                         src="{{ asset('assets/images/avatar/10.jpg') }}" alt="avatar">
+                                                </div>
+                                                <p class="mb-0 ms-2">
+                                                    <span class="h6 fw-light">FINORA Analyst</span>
+                                                </p>
+                                            </div>
+
+                                            <!-- Action buttons -->
+                                            <div class="mt-3 mt-sm-0 d-flex gap-2">
+
+                                                <a href="{{ path('app_investment_show', {'id': investment.id}) }}"
+                                                   class="btn btn-dark btn-sm">
+                                                    <i class="bi bi-eye me-1"></i>Voir
+                                                </a>
+
+                                                {% if role == 'admin' %}
+                                                    <a href="{{ path('app_investment_edit', {'id': investment.id}) }}"
+                                                       class="btn btn-outline-warning btn-sm">
+                                                        <i class="bi bi-pencil me-1"></i>Modifier
+                                                    </a>
+
+                                                    <form method="post"
+                                                          action="{{ path('app_investment_delete', {'id': investment.id}) }}"
+                                                          onsubmit="return confirm('Supprimer cet investissement ?');"
+                                                          class="d-inline">
+                                                        <input type="hidden" name="_token"
+                                                               value="{{ csrf_token('delete' ~ investment.id) }}">
+                                                        <button class="btn btn-outline-danger btn-sm">
+                                                            <i class="bi bi-trash me-1"></i>Supprimer
+                                                        </button>
+                                                    </form>
+                                                {% endif %}
+
+                                            </div>
+
+                                        </div>
+
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    {% else %}
+                    <div class="col-12">
+                        <div class="card card-body text-center py-5">
+                            <i class="bi bi-inbox fs-1 text-muted mb-3"></i>
+                            <h5 class="text-muted">Aucun investissement trouvé</h5>
+                            <p class="text-muted mb-3">Essayez de modifier vos filtres ou ajoutez un nouvel investissement.</p>
+                            <div>
+                                <a href="{{ path('app_investment_index') }}" class="btn btn-outline-primary me-2">
+                                    <i class="fas fa-redo me-1"></i>Réinitialiser
+                                </a>
+                                {% if role == 'admin' %}
+                                <a href="{{ path('app_investment_new') }}" class="btn btn-success">
+                                    <i class="bi bi-plus-circle me-1"></i>Ajouter
+                                </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+
+                </div>
+                <!-- Investment list END -->
+
+                <!-- Pagination -->
+                {% if investments|length > 0 %}
+                <div class="col-12 mt-4">
+                    <nav class="d-flex justify-content-center" aria-label="navigation">
+                        <ul class="pagination pagination-primary-soft d-inline-block d-md-flex rounded mb-0">
+                            <li class="page-item mb-0">
+                                <a class="page-link" href="#" tabindex="-1">
+                                    <i class="fas fa-angle-double-left"></i>
+                                </a>
+                            </li>
+                            <li class="page-item mb-0 active"><a class="page-link" href="#">1</a></li>
+                            <li class="page-item mb-0"><a class="page-link" href="#">2</a></li>
+                            <li class="page-item mb-0"><a class="page-link" href="#">3</a></li>
+                            <li class="page-item mb-0">
+                                <a class="page-link" href="#">
+                                    <i class="fas fa-angle-double-right"></i>
+                                </a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+                {% endif %}
+
+            </div>
+            <!-- ======================= MAIN LIST END ======================= -->
+
+
+            <!-- ======================= SIDEBAR START ======================= -->
+            <div class="col-xl-3 col-xxl-4">
+                <div class="offcanvas-xl offcanvas-end" tabindex="-1" id="offcanvasSidebar">
+
+                    <!-- Mobile header -->
+                    <div class="offcanvas-header bg-light">
+                        <h5 class="offcanvas-title">Filtres avancés</h5>
+                        <button type="button" class="btn-close"
+                                data-bs-dismiss="offcanvas" data-bs-target="#offcanvasSidebar"
+                                aria-label="Close"></button>
+                    </div>
+
+                    <div class="offcanvas-body p-3 p-xl-0">
+                        <form method="get" action="{{ path('app_investment_index') }}">
+
+                            <!-- Category filter -->
+                            <div class="card card-body shadow p-4 mb-4">
+                                <h4 class="mb-4">Catégorie</h4>
+                                <div class="row">
+                                    <div class="col-12">
+                                        {% set categories = ['Immobilier', 'Startup', 'Agriculture', 'Bourse', 'Crypto', 'Fonds'] %}
+                                        <div class="form-check mb-2">
+                                            <input class="form-check-input" type="checkbox" name="category[]" value="" id="cat-all">
+                                            <label class="form-check-label" for="cat-all">Toutes</label>
+                                        </div>
+                                        {% for cat in categories %}
+                                        <div class="form-check mb-2">
+                                            <input class="form-check-input" type="checkbox"
+                                                   name="category[]" value="{{ cat }}" id="cat-{{ cat|lower }}">
+                                            <label class="form-check-label" for="cat-{{ cat|lower }}">{{ cat }}</label>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Risk level filter -->
+                            <div class="card card-body shadow p-4 mb-4">
+                                <h4 class="mb-3">Niveau de risque</h4>
+                                <ul class="list-inline mb-0">
+                                    <li class="list-inline-item mb-2">
+                                        <input type="radio" class="btn-check" name="risk" id="risk-all" value="">
+                                        <label class="btn btn-light btn-primary-soft-check" for="risk-all">Tous</label>
+                                    </li>
+                                    <li class="list-inline-item mb-2">
+                                        <input type="radio" class="btn-check" name="risk" id="risk-low" value="LOW">
+                                        <label class="btn btn-light btn-primary-soft-check" for="risk-low">Faible</label>
+                                    </li>
+                                    <li class="list-inline-item mb-2">
+                                        <input type="radio" class="btn-check" name="risk" id="risk-med" value="MEDIUM">
+                                        <label class="btn btn-light btn-primary-soft-check" for="risk-med">Moyen</label>
+                                    </li>
+                                    <li class="list-inline-item mb-2">
+                                        <input type="radio" class="btn-check" name="risk" id="risk-high" value="HIGH">
+                                        <label class="btn btn-light btn-primary-soft-check" for="risk-high">Élevé</label>
+                                    </li>
+                                </ul>
+                            </div>
+
+                            <!-- Price range filter -->
+                            <div class="card card-body shadow p-4 mb-4">
+                                <h4 class="mb-3">Valeur estimée</h4>
+                                <ul class="list-inline mb-0">
+                                    <li class="list-inline-item mb-2">
+                                        <input type="checkbox" class="btn-check" id="price-1">
+                                        <label class="btn btn-light btn-primary-soft-check" for="price-1">&lt; 10k TND</label>
+                                    </li>
+                                    <li class="list-inline-item mb-2">
+                                        <input type="checkbox" class="btn-check" id="price-2">
+                                        <label class="btn btn-light btn-primary-soft-check" for="price-2">10k–50k</label>
+                                    </li>
+                                    <li class="list-inline-item mb-2">
+                                        <input type="checkbox" class="btn-check" id="price-3">
+                                        <label class="btn btn-light btn-primary-soft-check" for="price-3">50k–200k</label>
+                                    </li>
+                                    <li class="list-inline-item mb-2">
+                                        <input type="checkbox" class="btn-check" id="price-4">
+                                        <label class="btn btn-light btn-primary-soft-check" for="price-4">&gt; 200k</label>
+                                    </li>
+                                </ul>
+                            </div>
+
+                            <!-- Sort filter -->
+                            <div class="card card-body shadow p-4 mb-4">
+                                <h4 class="mb-3">Trier par</h4>
+                                <ul class="list-inline mb-0">
+                                    <li class="list-inline-item mb-2">
+                                        <input type="checkbox" class="btn-check" id="sort-new">
+                                        <label class="btn btn-light btn-primary-soft-check" for="sort-new">Plus récent</label>
+                                    </li>
+                                    <li class="list-inline-item mb-2">
+                                        <input type="checkbox" class="btn-check" id="sort-pop">
+                                        <label class="btn btn-light btn-primary-soft-check" for="sort-pop">Populaire</label>
+                                    </li>
+                                    <li class="list-inline-item mb-2">
+                                        <input type="checkbox" class="btn-check" id="sort-asc">
+                                        <label class="btn btn-light btn-primary-soft-check" for="sort-asc">Prix ↑</label>
+                                    </li>
+                                    <li class="list-inline-item mb-2">
+                                        <input type="checkbox" class="btn-check" id="sort-desc">
+                                        <label class="btn btn-light btn-primary-soft-check" for="sort-desc">Prix ↓</label>
+                                    </li>
+                                </ul>
+                            </div>
+
+                            <!-- Filter button -->
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary mb-0">
+                                    <i class="fas fa-filter me-1"></i>Appliquer les filtres
+                                </button>
+                            </div>
+
+                        </form>
+                    </div>
+
+                </div>
+            </div>
+            <!-- ======================= SIDEBAR END ======================= -->
+
+        </div><!-- Row END -->
     </div>
+</section>
+<!-- ======================= PAGE CONTENT END ======================= -->
 
+
+<!-- ======================= NEWSLETTER START ======================= -->
+<section class="pt-5 pt-lg-0">
+    <div class="container position-relative overflow-hidden">
+        <figure class="position-absolute bottom-0 end-0 mb-5 d-none d-sm-block">
+            <svg class="rotate-130" width="258.7px" height="86.9px" viewBox="0 0 258.7 86.9">
+                <path stroke="white" fill="none" stroke-width="2" d="M0,7.2c16,0,16,25.5,31.9,25.5c16,0,16-25.5,31.9-25.5c16,0,16,25.5,31.9,25.5c16,0,16-25.5,31.9-25.5 c16,0,16,25.5,31.9,25.5c16,0,16-25.5,31.9-25.5c16,0,16,25.5,31.9,25.5s16-25.5,31.9-25.5"/>
+                <path stroke="white" fill="none" stroke-width="2" d="M0,57c16,0,16,25.5,31.9,25.5c16,0,16-25.5,31.9-25.5c16,0,16,25.5,31.9,25.5c16,0,16-25.5,31.9-25.5 c16,0,16,25.5,31.9,25.5c16,0,16-25.5,31.9-25.5c16,0,16,25.5,31.9,25.5s16-25.5,31.9-25.5"/>
+            </svg>
+        </figure>
+
+        <div class="bg-grad p-3 p-sm-5 rounded-3">
+            <div class="row justify-content-center position-relative">
+                <div class="col-12 position-relative my-2 my-sm-3">
+                    <div class="row align-items-center">
+                        <div class="col-lg-6">
+                            <h3 class="text-white mb-3 mb-lg-0">
+                                Restez informé des meilleures opportunités d'investissement !
+                            </h3>
+                        </div>
+                        <div class="col-lg-6 text-lg-end">
+                            <form class="bg-body rounded p-2">
+                                <div class="input-group">
+                                    <input class="form-control border-0 me-1" type="email"
+                                           placeholder="Votre adresse email">
+                                    <button type="button" class="btn btn-dark mb-0 rounded">
+                                        S'abonner
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- ======================= NEWSLETTER END ======================= -->
+
+
+<!-- ======================= FOOTER START ======================= -->
+<footer class="pt-5 bg-dark">
+    <div class="container">
+        <div class="row g-4">
+
+            <div class="col-lg-3">
+                <a class="me-0" href="{{ path('app_home') }}">
+                    <img class="h-40px" src="{{ asset('assets/images/logo-light.svg') }}" alt="FINORA">
+                </a>
+                <p class="my-3 text-body-secondary">
+                    FINORA — Votre plateforme de gestion d'investissements intelligente et sécurisée.
+                </p>
+                <ul class="list-inline mb-0 mt-3">
+                    <li class="list-inline-item"><a class="btn btn-white btn-sm shadow px-2 text-facebook" href="#"><i class="fab fa-fw fa-facebook-f"></i></a></li>
+                    <li class="list-inline-item"><a class="btn btn-white btn-sm shadow px-2 text-instagram" href="#"><i class="fab fa-fw fa-instagram"></i></a></li>
+                    <li class="list-inline-item"><a class="btn btn-white btn-sm shadow px-2 text-twitter" href="#"><i class="fab fa-fw fa-twitter"></i></a></li>
+                    <li class="list-inline-item"><a class="btn btn-white btn-sm shadow px-2 text-linkedin" href="#"><i class="fab fa-fw fa-linkedin-in"></i></a></li>
+                </ul>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="row g-4">
+                    <div class="col-6 col-md-4">
+                        <h5 class="mb-2 mb-md-4 text-white">Entreprise</h5>
+                        <ul class="nav flex-column text-primary-hover">
+                            <li class="nav-item"><a class="nav-link" href="#">À propos</a></li>
+                            <li class="nav-item"><a class="nav-link" href="#">Contact</a></li>
+                            <li class="nav-item"><a class="nav-link" href="#">Blog</a></li>
+                            <li class="nav-item"><a class="nav-link" href="#">Carrières</a></li>
+                        </ul>
+                    </div>
+                    <div class="col-6 col-md-4">
+                        <h5 class="mb-2 mb-md-4 text-white">Navigation</h5>
+                        <ul class="nav flex-column text-primary-hover">
+                            <li class="nav-item"><a class="nav-link" href="{{ path('app_home') }}">Accueil</a></li>
+                            <li class="nav-item"><a class="nav-link" href="{{ path('app_investment_index') }}">Investissements</a></li>
+                            <li class="nav-item"><a class="nav-link" href="{{ path('app_management_index') }}">Management</a></li>
+                            <li class="nav-item"><a class="nav-link" href="{{ path('admin_dashboard') }}">Dashboard</a></li>
+                        </ul>
+                    </div>
+                    <div class="col-6 col-md-4">
+                        <h5 class="mb-2 mb-md-4 text-white">Légal</h5>
+                        <ul class="nav flex-column text-primary-hover">
+                            <li class="nav-item"><a class="nav-link" href="#">FAQ</a></li>
+                            <li class="nav-item"><a class="nav-link" href="#">Conditions</a></li>
+                            <li class="nav-item"><a class="nav-link" href="#">Confidentialité</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-3">
+                <h5 class="mb-2 mb-md-4 text-white">Contact</h5>
+                <p class="mb-2 text-body-secondary">
+                    Tél:<span class="h6 fw-light text-white ms-2">+216 71 000 000</span>
+                    <span class="d-block small">(9h à 18h)</span>
+                </p>
+                <p class="mb-0 text-body-secondary">
+                    Email:<span class="h6 fw-light text-white ms-2">contact@finora.tn</span>
+                </p>
+                <div class="row g-2 mt-2">
+                    <div class="col-6 col-lg-6">
+                        <a href="#"><img src="{{ asset('assets/images/client/google-play.svg') }}" alt="Google Play"></a>
+                    </div>
+                    <div class="col-6 col-lg-6">
+                        <a href="#"><img src="{{ asset('assets/images/client/app-store.svg') }}" alt="App Store"></a>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <hr class="mt-4 mb-0">
+
+        <div class="py-3">
+            <div class="container px-0">
+                <div class="d-lg-flex justify-content-between align-items-center py-3 text-center">
+                    <div class="text-body-secondary">
+                        &copy; {{ "now"|date("Y") }} FINORA. Tous droits réservés.
+                    </div>
+                    <div class="nav justify-content-center mt-3 mt-lg-0">
+                        <ul class="list-inline mb-0">
+                            <li class="list-inline-item text-primary-hover">
+                                <div class="dropup mt-0">
+                                    <a class="dropdown-toggle nav-link" href="#" data-bs-toggle="dropdown">
+                                        <i class="fas fa-globe me-2"></i>Langue
+                                    </a>
+                                    <ul class="dropdown-menu min-w-auto">
+                                        <li><a class="dropdown-item" href="#">🇫🇷 Français</a></li>
+                                        <li><a class="dropdown-item" href="#">🇬🇧 English</a></li>
+                                        <li><a class="dropdown-item" href="#">🇹🇳 عربي</a></li>
+                                    </ul>
+                                </div>
+                            </li>
+                            <li class="list-inline-item text-primary-hover"><a class="nav-link" href="#">Conditions</a></li>
+                            <li class="list-inline-item text-primary-hover"><a class="nav-link pe-0" href="#">Confidentialité</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</footer>
+<!-- ======================= FOOTER END ======================= -->
+
+<!-- Back to top -->
+<div class="back-top">
+    <i class="bi bi-arrow-up-short position-absolute top-50 start-50 translate-middle"></i>
 </div>
 
 {% endblock %}
 
+
 {% block javascripts %}
-<script>
+    {{ parent() }}
+    <script src="{{ asset('assets/vendor/choices/js/choices.min.js') }}"></script>
 
-const form = document.getElementById("filterForm");
-const results = document.getElementById("results");
+    <script>
+    // Grid / List toggle
+    document.addEventListener('DOMContentLoaded', function () {
 
-form.addEventListener("input", function () {
+        const btnGrid = document.getElementById('btn-grid');
+        const btnList = document.getElementById('btn-list');
+        const container = document.getElementById('investments-container');
 
-    const data = new FormData(form);
-    const params = new URLSearchParams(data);
+        function setGrid() {
+            container.classList.remove('row');
+            container.classList.add('row');
+            container.querySelectorAll('.investment-item').forEach(function(item) {
+                item.classList.remove('col-12');
+                item.classList.add('col-md-6', 'col-xl-4');
+                // Make the inner card full-height grid style
+                const row = item.querySelector('.row.g-0');
+                if (row) {
+                    row.classList.remove('row', 'g-0');
+                    row.classList.add('d-block');
+                }
+                const imgCol = item.querySelector('.col-md-4');
+                if (imgCol) imgCol.className = 'w-100';
+                const bodyCol = item.querySelector('.col-md-8');
+                if (bodyCol) bodyCol.className = 'w-100';
+            });
+            btnGrid.classList.add('active');
+            btnList.classList.remove('active');
+        }
 
-    fetch("?" + params.toString(), {
-        headers: { "X-Requested-With": "XMLHttpRequest" }
-    })
-    .then(res => res.text())
-    .then(html => {
-        results.innerHTML = html;
+        function setList() {
+            container.querySelectorAll('.investment-item').forEach(function(item) {
+                item.classList.remove('col-md-6', 'col-xl-4');
+                item.classList.add('col-12');
+                const block = item.querySelector('.d-block');
+                if (block) {
+                    block.classList.remove('d-block');
+                    block.classList.add('row', 'g-0');
+                }
+                const imgCol = item.querySelector('.w-100:first-child');
+                if (imgCol) imgCol.className = 'col-md-4 overflow-hidden position-relative';
+                const bodyCol = item.querySelector('.card-body')?.parentElement;
+                if (bodyCol && bodyCol !== imgCol) bodyCol.className = 'col-md-8';
+            });
+            btnList.classList.add('active');
+            btnGrid.classList.remove('active');
+        }
+
+        if (btnGrid) btnGrid.addEventListener('click', setGrid);
+        if (btnList) btnList.addEventListener('click', setList);
     });
-
-});
-
-</script>
+    </script>
 {% endblock %}

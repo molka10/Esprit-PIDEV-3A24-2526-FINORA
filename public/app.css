@@ -1,0 +1,78 @@
+body {
+    background-color: skyblue;
+    font-family: system-ui, sans-serif;
+    margin: 1rem 1.5rem;
+}
+
+a {
+    color: #0645ad;
+}
+
+/* Formulaire investment : contrôle de saisie */
+.investment-form .form-field {
+    margin-bottom: 1rem;
+    max-width: 32rem;
+}
+
+.investment-form label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+.investment-form input[type="text"],
+.investment-form input[type="url"],
+.investment-form input[type="number"],
+.investment-form select,
+.investment-form textarea {
+    width: 100%;
+    max-width: 32rem;
+    box-sizing: border-box;
+    padding: 0.35rem 0.5rem;
+}
+
+.investment-form .help-text {
+    color: #444;
+    font-size: 0.85rem;
+    margin: 0.2rem 0 0;
+}
+
+.investment-form .field-errors,
+form .field-errors {
+    color: #c00;
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin: 0.35rem 0 0;
+    min-height: 0;
+}
+
+.investment-form .field-error-line,
+form .field-error-line {
+    color: #c00;
+    margin: 0.15rem 0 0;
+}
+
+.form-global-errors {
+    background: #ffe6e6;
+    border: 1px solid #c00;
+    padding: 0.75rem 1rem;
+    margin-bottom: 1rem;
+    max-width: 32rem;
+}
+
+table.data-table {
+    border-collapse: collapse;
+    background: #fff;
+    margin: 1rem 0;
+}
+
+table.data-table th,
+table.data-table td {
+    border: 1px solid #333;
+    padding: 0.4rem 0.6rem;
+    text-align: left;
+}
+
+table.data-table thead th {
+    background: #ddd;
+}
