@@ -22,7 +22,7 @@ final class InvestmentExtension extends AbstractExtension
         if (!$investment) {
             return null;
         }
-        $v = $investment->getImageFilename();
+        $v = $investment->getImageUrl();
         if ($v === null || $v === '') {
             return null;
         }

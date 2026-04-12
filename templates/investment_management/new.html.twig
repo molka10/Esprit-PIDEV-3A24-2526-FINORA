@@ -1,80 +1,120 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Create Investment Management{% endblock %}
+{% block title %}Financer un Investissement{% endblock %}
 
 {% block body %}
 
-<div class="container mt-5">
-
-    <div class="card shadow p-4" style="max-width:700px; margin:auto; border-radius:15px;">
-
-        <h3 class="mb-4 text-center">Create Investment Management</h3>
-
-        {{ form_start(form) }}
-
-        <!-- INVESTMENT -->
-        <div class="mb-3">
-            {{ form_label(form.investment) }}
-            {{ form_widget(form.investment, {'attr': {'class': 'form-control'}}) }}
-            <div class="text-danger">
-                {{ form_errors(form.investment) }}
-            </div>
-        </div>
-
-        <!-- TYPE -->
-        <div class="mb-3">
-            {{ form_label(form.investmentType) }}
-            {{ form_widget(form.investmentType, {'attr': {'class': 'form-control'}}) }}
-            <div class="text-danger">
-                {{ form_errors(form.investmentType) }}
-            </div>
-        </div>
-
-        <!-- AMOUNT -->
-        <div class="mb-3">
-            {{ form_label(form.amountInvested) }}
-            {{ form_widget(form.amountInvested, {'attr': {'class': 'form-control'}}) }}
-            <div class="text-danger">
-                {{ form_errors(form.amountInvested) }}
-            </div>
-        </div>
-
-        <!-- PERCENTAGE -->
-        <div class="mb-3">
-            {{ form_label(form.ownershipPercentage) }}
-            {{ form_widget(form.ownershipPercentage, {'attr': {'class': 'form-control'}}) }}
-            <div class="text-danger">
-                {{ form_errors(form.ownershipPercentage) }}
-            </div>
-        </div>
-
-        <!-- DATE -->
-        <div class="mb-3">
-            {{ form_label(form.startDate) }}
-            {{ form_widget(form.startDate, {'attr': {'class': 'form-control'}}) }}
-            <div class="text-danger">
-                {{ form_errors(form.startDate) }}
-            </div>
-        </div>
-
-        <!-- BUTTONS -->
-        <div class="d-flex justify-content-between mt-4">
-
-            <button class="btn btn-success">
-                Save
-            </button>
-
-            <a href="{{ path('app_management_index') }}"
-               class="btn btn-secondary">
-               Back to list
+<!-- HEADER -->
+<header class="navbar-light navbar-sticky">
+    <nav class="navbar navbar-expand-xl z-index-9">
+        <div class="container">
+            <a class="navbar-brand" href="{{ path('app_home') }}">
+                <img class="light-mode-item navbar-brand-item" src="{{ asset('assets/images/logo.svg') }}" alt="FINORA" style="height:40px;">
+                <img class="dark-mode-item navbar-brand-item" src="{{ asset('assets/images/logo-light.svg') }}" alt="FINORA" style="height:40px;">
             </a>
-
+            <div class="navbar-collapse w-100 collapse" id="navbarCollapse">
+                <ul class="navbar-nav navbar-nav-scroll mx-auto">
+                    <li class="nav-item"><a class="nav-link" href="{{ path('app_home') }}">Accueil</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ path('app_investment_index') }}">Investissements</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="{{ path('app_management_index') }}">Management</a></li>
+                </ul>
+            </div>
+            <div class="ms-1 ms-lg-0">
+                <a class="avatar avatar-sm p-0" href="#">
+                    <img class="avatar-img rounded-circle" src="{{ asset('assets/images/avatar/01.jpg') }}" alt="avatar">
+                </a>
+            </div>
         </div>
+    </nav>
+</header>
+<!-- HEADER END -->
 
-        {{ form_end(form) }}
+<main>
+    <section class="py-5 bg-light" style="min-height: 80vh;">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-8 col-xl-7">
+                    
+                    <div class="text-center mb-4">
+                        <div class="icon-lg bg-primary bg-opacity-10 text-primary rounded-circle mb-3 mx-auto">
+                            <i class="bi bi-wallet2 fs-2"></i>
+                        </div>
+                        <h2 class="mb-1">Ouvrir un Dossier d'Investissement</h2>
+                        <p class="text-muted">Configuration et suivi d'un nouvel investissement</p>
+                    </div>
 
-    </div>
+                    <div class="card shadow border-0" style="border-radius: 1rem;">
+                        <div class="card-body p-4 p-sm-5">
+                            
+                            {{ form_start(form, {'attr': {'class': 'row g-4'}}) }}
 
-</div>
+                                <!-- Ligne 1 : Investment -->
+                                <div class="col-12">
+                                    <label class="form-label fw-bold"><i class="bi bi-building me-2"></i>Projet visé</label>
+                                    {{ form_widget(form.investment, {'attr': {'class': 'form-select form-select-lg bg-light'}}) }}
+                                    <div class="text-danger small mt-1">{{ form_errors(form.investment) }}</div>
+                                </div>
+
+                                <!-- Ligne 2 : Type & Status -->
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold"><i class="bi bi-tag me-2"></i>Type d'investissement</label>
+                                    {{ form_widget(form.investmentType, {'attr': {'class': 'form-control bg-light'}}) }}
+                                    <div class="text-danger small mt-1">{{ form_errors(form.investmentType) }}</div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold"><i class="bi bi-toggle-on me-2"></i>Statut</label>
+                                    {{ form_widget(form.status, {'attr': {'class': 'form-select bg-light'}}) }}
+                                    <div class="text-danger small mt-1">{{ form_errors(form.status) }}</div>
+                                </div>
+
+                                <!-- Ligne 3 : Montant & Pourcentage -->
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold"><i class="bi bi-cash-stack me-2"></i>Montant Investi (TND)</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light border-end-0"><i class="bi bi-currency-dollar"></i></span>
+                                        {{ form_widget(form.amountInvested, {'attr': {'class': 'form-control bg-light border-start-0'}}) }}
+                                    </div>
+                                    <div class="text-danger small mt-1">{{ form_errors(form.amountInvested) }}</div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold"><i class="bi bi-pie-chart me-2"></i>Pourcentage Acquis</label>
+                                    <div class="input-group">
+                                        {{ form_widget(form.ownershipPercentage, {'attr': {'class': 'form-control bg-light border-end-0'}}) }}
+                                        <span class="input-group-text bg-light"><i class="bi bi-percent"></i></span>
+                                    </div>
+                                    <div class="text-danger small mt-1">{{ form_errors(form.ownershipPercentage) }}</div>
+                                </div>
+
+                                <!-- Ligne 4 : Date -->
+                                <div class="col-12">
+                                    <label class="form-label fw-bold"><i class="bi bi-calendar-event me-2"></i>Date de début</label>
+                                    {{ form_widget(form.startDate, {'attr': {'class': 'form-control bg-light'}}) }}
+                                    <div class="text-danger small mt-1">{{ form_errors(form.startDate) }}</div>
+                                </div>
+
+                                <!-- Ligne actions -->
+                                <div class="col-12 mt-5">
+                                    <div class="d-grid gap-2 d-md-flex justify-content-md-between align-items-center">
+                                        <a href="{{ path('app_investment_index') }}" class="btn btn-link text-muted px-0 text-decoration-none">
+                                            <i class="bi bi-arrow-left me-1"></i>Retour au Portfolio
+                                        </a>
+                                        <button type="submit" class="btn btn-primary btn-lg px-5">
+                                            Confirmer l'Investissement <i class="bi bi-check-circle ms-1"></i>
+                                        </button>
+                                    </div>
+                                </div>
+
+                            {{ form_end(form) }}
+
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
 
 {% endblock %}

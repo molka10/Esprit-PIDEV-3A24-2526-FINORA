@@ -48,7 +48,7 @@ class Investment
     /** Filename in public/uploads/investments (column historique: image_url). Anciennes URLs complètes restent affichables. */
     #[ORM\Column(name: 'image_url', type: 'string', length: 255, nullable: true)]
     #[Assert\Length(max: 255)]
-    private ?string $imageFilename = null;
+    private ?string $imageUrl = null;
 
     #[ORM\Column(type: 'text', nullable: true)]
     #[Assert\Length(max: 2000, maxMessage: 'Max 2000 caractères')]
@@ -86,6 +86,11 @@ class Investment
     public function __toString(): string
     {
         return $this->name ?? '';
+    }
+
+    public function getId(): ?int
+    {
+        return $this->investmentId;
     }
 
     public function getInvestmentId(): ?int
@@ -153,18 +158,14 @@ class Investment
         return $this;
     }
 
-   public function getImageUrl(): ?string
-{
-    if (!$this->getImageFilename()) {
-        return null;
+    public function getImageUrl(): ?string
+    {
+        return $this->imageUrl;
     }
 
-    return '/uploads/investments/' . $this->getImageFilename();
-}
-
-    public function setImageFilename(?string $imageFilename): self
+    public function setImageUrl(?string $imageUrl): self
     {
-        $this->imageFilename = $imageFilename;
+        $this->imageUrl = $imageUrl;
 
         return $this;
     }

@@ -45,7 +45,7 @@ class InvestmentManagementController extends AbstractController
 
         $search = trim((string)$request->query->get('search', ''));
         $status = trim((string)$request->query->get('status', ''));
-        $tri = (string)$request->query->get('tri', 'id');
+        $tri = (string)$request->query->get('tri', 'managementId');
         $ordre = strtolower((string)$request->query->get('ordre', 'desc'));
 
         $qb = $repo->createQueryBuilder('m')
@@ -62,9 +62,9 @@ class InvestmentManagementController extends AbstractController
                ->setParameter('status', $status);
         }
 
-        $allowedSortFields = ['id', 'amountInvested', 'ownershipPercentage', 'status'];
+        $allowedSortFields = ['managementId', 'amountInvested', 'ownershipPercentage', 'status'];
         if (!in_array($tri, $allowedSortFields, true)) {
-            $tri = 'id';
+            $tri = 'managementId';
         }
 
         $ordre = $ordre === 'asc' ? 'ASC' : 'DESC';
@@ -95,13 +95,19 @@ class InvestmentManagementController extends AbstractController
         if ($redirect = $this->checkInvestisseur($request)) return $redirect;
 
         $item = new InvestmentManagement();
+        
+        $inv_id = $request->query->get('inv_id');
+        if ($inv_id) {
+            $investment = $em->getRepository(\App\Entity\Investment::class)->find($inv_id);
+            if ($investment) {
+                $item->setInvestment($investment);
+            }
+        }
+
         $form = $this->createForm(InvestmentManagementType::class, $item);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-
-            $percent = (float)$item->getOwnershipPercentage();
-            $item->setStatus($percent == 100 ? 'CLOSED' : 'ACTIVE');
 
             $em->persist($item);
             $em->flush();

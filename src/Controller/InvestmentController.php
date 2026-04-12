@@ -28,8 +28,13 @@ final class InvestmentController extends AbstractController
     #[Route(name: 'app_investment_index', methods: ['GET'])]
     public function index(Request $request, InvestmentRepository $investmentRepository): Response
     {
+        $search = $request->query->get('search');
+        $category = $request->query->get('category');
+        $risk = $request->query->get('risk');
+        $sort = $request->query->get('sort');
+
         return $this->render('investment/index.html.twig', [
-            'investments' => $investmentRepository->findAll(),
+            'investments' => $investmentRepository->searchAndFilter($search, $category, $risk, $sort),
         ]);
     }
 
@@ -87,7 +92,7 @@ final class InvestmentController extends AbstractController
         Investment $investment,
         EntityManagerInterface $entityManager
     ): Response {
-        $previousImage = $investment->getImageFilename();
+        $previousImage = $investment->getImageUrl();
 
         $form = $this->createForm(InvestmentType::class, $investment);
         $form->handleRequest($request);
@@ -136,7 +141,7 @@ final class InvestmentController extends AbstractController
         if ($this->isCsrfTokenValid('delete'.$investment->getId(), $request->request->get('_token'))) {
 
             // 🔥 supprimer image aussi
-            $this->imageUploader->remove($investment->getImageFilename());
+            $this->imageUploader->remove($investment->getImageUrl());
 
             $entityManager->remove($investment);
             $entityManager->flush();
@@ -160,7 +165,7 @@ final class InvestmentController extends AbstractController
         }
 
         $newFilename = $this->imageUploader->upload($file);
-        $investment->setImageFilename($newFilename);
+        $investment->setImageUrl($newFilename);
 
         if ($previousFilename && $previousFilename !== $newFilename) {
             $this->imageUploader->remove($previousFilename);

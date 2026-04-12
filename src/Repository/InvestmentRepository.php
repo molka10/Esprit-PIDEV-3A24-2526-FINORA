@@ -72,16 +72,38 @@ class InvestmentRepository extends ServiceEntityRepository
     }
 
     /**
-     * 🔥 Recherche globale (utile pour ton input search)
+     * 🔥 Recherche et tri global
      */
-    public function search(string $term): array
+    public function searchAndFilter(?string $search, ?string $category, ?string $risk, ?string $sort): array
     {
-        return $this->createQueryBuilder('i')
-            ->andWhere('LOWER(i.name) LIKE :term OR LOWER(i.location) LIKE :term')
-            ->setParameter('term', '%' . strtolower($term) . '%')
-            ->orderBy('i.createdAt', 'DESC')
-            ->getQuery()
-            ->getResult();
+        $qb = $this->createQueryBuilder('i');
+
+        if ($search) {
+            $qb->andWhere('LOWER(i.name) LIKE :search OR LOWER(i.location) LIKE :search OR LOWER(i.description) LIKE :search')
+               ->setParameter('search', '%' . strtolower($search) . '%');
+        }
+
+        if ($category) {
+            $qb->andWhere('i.category = :category')
+               ->setParameter('category', $category);
+        }
+
+        if ($risk) {
+            $qb->andWhere('i.riskLevel = :risk')
+               ->setParameter('risk', $risk);
+        }
+
+        if ($sort === 'asc') {
+            $qb->orderBy('i.estimatedValue', 'ASC');
+        } elseif ($sort === 'desc') {
+            $qb->orderBy('i.estimatedValue', 'DESC');
+        } elseif ($sort === 'new') {
+            $qb->orderBy('i.createdAt', 'DESC');
+        } else {
+            $qb->orderBy('i.investmentId', 'DESC');
+        }
+
+        return $qb->getQuery()->getResult();
     }
 
     /**

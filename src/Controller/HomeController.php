@@ -44,20 +44,25 @@ class HomeController extends AbstractController
     ): Response {
 
         $investments = $investmentRepo->findAll();
-
         $totalInvestments = count($investments);
 
-        $activeManagement = count($managementRepo->findBy([
-            'status' => 'ACTIVE'
-        ]));
-
-        $closedManagement = count($managementRepo->findBy([
-            'status' => 'CLOSED'
-        ]));
+        $activeManagement = count($managementRepo->findBy(['status' => 'ACTIVE']));
+        $closedManagement = count($managementRepo->findBy(['status' => 'CLOSED']));
 
         $totalValue = 0;
+        $categoryDistribution = [];
+        $riskDistribution = ['LOW' => 0, 'MEDIUM' => 0, 'HIGH' => 0];
+
         foreach ($investments as $inv) {
-            $totalValue += $inv->getEstimatedValue();
+            $totalValue += (float)$inv->getEstimatedValue();
+
+            $cat = ltrim(trim($inv->getCategory() ?? 'Autre'));
+            $categoryDistribution[$cat] = ($categoryDistribution[$cat] ?? 0) + 1;
+
+            $risk = $inv->getRiskLevel() ?? 'MEDIUM';
+            if (isset($riskDistribution[$risk])) {
+                $riskDistribution[$risk]++;
+            }
         }
 
         return $this->render('admin/dashboard.html.twig', [
@@ -65,6 +70,9 @@ class HomeController extends AbstractController
             'activeManagement' => $activeManagement,
             'closedManagement' => $closedManagement,
             'totalValue' => $totalValue,
+            'chartCategories' => json_encode(array_keys($categoryDistribution)),
+            'chartCategoryData' => json_encode(array_values($categoryDistribution)),
+            'chartRisks' => json_encode(array_values($riskDistribution)),
         ]);
     }
 

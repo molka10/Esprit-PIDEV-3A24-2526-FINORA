@@ -520,10 +520,7 @@
                 <div class="card p-2 bg-transparent border">
                     <div class="row g-0">
                         <div class="col-md-3">
-                           {% set img = latestInv.imageFilename 
-    ? asset('uploads/investments/' ~ latestInv.imageFilename) 
-    : asset('assets/images/courses/4by3/01.jpg') 
-%}
+                           {% set img = investment_image_src(latestInv) ?: asset('assets/images/courses/4by3/01.jpg') %}
 
 <img src="{{ img }}"
      class="rounded-2 w-100 h-100 object-fit-cover"
@@ -638,10 +635,7 @@
             <div class="col-md-6 col-xl-4">
                 <div class="card shadow-hover overflow-hidden bg-transparent">
                     <div class="position-relative">
-                        {% set img = inv.imageFilename 
-    ? asset('uploads/investments/' ~ inv.imageFilename) 
-    : asset('assets/images/courses/4by3/16.jpg') 
-%}
+                        {% set img = investment_image_src(inv) ?: asset('assets/images/courses/4by3/16.jpg') %}
 
 <img class="card-img-top"
      src="{{ img }}"

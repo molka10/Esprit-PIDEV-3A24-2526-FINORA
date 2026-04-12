@@ -72,8 +72,9 @@
 
             <div class="card shadow h-100">
 
-                {% if inv.imageUrl %}
-                    <img src="{{ inv.imageUrl }}"
+                {% set imgSrc = investment_image_src(inv) %}
+                {% if imgSrc %}
+                    <img src="{{ imgSrc }}"
                          class="card-img-top"
                          style="height:180px; object-fit:cover;">
                 {% endif %}
