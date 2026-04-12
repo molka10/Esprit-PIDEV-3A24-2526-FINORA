@@ -1,87 +1,608 @@
 <!DOCTYPE html>
-<html>
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <title>{% block title %}Finora{% endblock %}</title>
+
+    <!-- Dark mode script (Eduport style) -->
+    <script>
+        const storedTheme = localStorage.getItem('theme')
+        const getPreferredTheme = () => storedTheme ? storedTheme : 'light'
+        const setTheme = function (theme) {
+            document.documentElement.setAttribute('data-bs-theme', theme === 'auto' && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : theme)
+        }
+        setTheme(getPreferredTheme())
+    </script>
+
+    <!-- Google Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700&family=Roboto:wght@400;500;700&display=swap">
 
     <!-- Bootstrap -->
     <link rel="stylesheet" href="{{ asset('assets/vendor/bootstrap/bootstrap.min.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/vendor/bootstrap-icons/bootstrap-icons.css') }}">
 
-    <!-- STYLE -->
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Custom style -->
     <link rel="stylesheet" href="{{ asset('assets/css/style.css') }}">
+
+    <style>
+        /* ===== EDUPORT BASE STYLES ===== */
+        :root {
+            --bs-primary: #0d6efd;
+            --edu-orange: #fd7e14;
+            --edu-dark: #1a1f2e;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f8f9fa;
+        }
+
+        /* ===== HEADER / NAVBAR ===== */
+        .eduport-header {
+            background: #fff;
+            box-shadow: 0 2px 12px rgba(0,0,0,.07);
+            position: sticky;
+            top: 0;
+            z-index: 1030;
+        }
+
+        .eduport-nav-top {
+            padding: 0;
+        }
+
+        .eduport-nav-top .container {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding-top: 10px;
+            padding-bottom: 10px;
+        }
+
+        .eduport-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            font-family: 'Heebo', sans-serif;
+            font-weight: 700;
+            font-size: 1.5rem;
+            color: var(--edu-dark);
+            flex-shrink: 0;
+        }
+
+        .eduport-brand .brand-icon {
+            width: 38px;
+            height: 38px;
+            background: linear-gradient(135deg, #0d6efd, #0a58ca);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 1.1rem;
+        }
+
+        .eduport-brand span {
+            background: linear-gradient(135deg, #0d6efd, #6610f2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Search bar */
+        .edu-search {
+            flex: 1;
+            max-width: 420px;
+        }
+
+        .edu-search .input-group {
+            border: 1.5px solid #e0e4ef;
+            border-radius: 50px;
+            overflow: hidden;
+            background: #f5f7fb;
+        }
+
+        .edu-search input {
+            border: none;
+            background: transparent;
+            padding: 8px 16px;
+            font-size: .9rem;
+        }
+
+        .edu-search input:focus {
+            box-shadow: none;
+            outline: none;
+        }
+
+        .edu-search .search-btn {
+            background: transparent;
+            border: none;
+            padding: 0 14px;
+            color: #0d6efd;
+        }
+
+        /* Nav actions */
+        .edu-nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-left: auto;
+        }
+
+        .edu-icon-btn {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background: #f1f3f8;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #444;
+            font-size: 1rem;
+            text-decoration: none;
+            transition: background .2s;
+        }
+
+        .edu-icon-btn:hover {
+            background: #e0e4ef;
+            color: #0d6efd;
+        }
+
+        /* Notification badge */
+        .edu-notif-wrap {
+            position: relative;
+        }
+
+        .edu-notif-dot {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            width: 8px;
+            height: 8px;
+            background: #dc3545;
+            border-radius: 50%;
+            border: 1.5px solid #fff;
+        }
+
+        /* Avatar */
+        .edu-avatar {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #0d6efd, #6610f2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-weight: 700;
+            font-size: .9rem;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        /* Dropdown */
+        .edu-dropdown {
+            position: relative;
+        }
+
+        .edu-dropdown-menu {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: calc(100% + 10px);
+            min-width: 220px;
+            background: #fff;
+            border-radius: 14px;
+            box-shadow: 0 8px 30px rgba(0,0,0,.12);
+            padding: 12px 0;
+            z-index: 999;
+        }
+
+        .edu-dropdown:hover .edu-dropdown-menu,
+        .edu-dropdown.open .edu-dropdown-menu {
+            display: block;
+        }
+
+        .edu-dropdown-menu a {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 9px 18px;
+            color: #333;
+            text-decoration: none;
+            font-size: .88rem;
+            transition: background .15s;
+        }
+
+        .edu-dropdown-menu a:hover {
+            background: #f5f7fb;
+            color: #0d6efd;
+        }
+
+        .edu-dropdown-divider {
+            border: none;
+            border-top: 1px solid #f0f0f0;
+            margin: 6px 0;
+        }
+
+        /* ===== CATEGORY NAV ===== */
+        .edu-cat-nav {
+            background: #fff;
+            border-top: 1px solid #f0f2f5;
+        }
+
+        .edu-cat-nav .container {
+            display: flex;
+            gap: 0;
+            overflow-x: auto;
+            scrollbar-width: none;
+        }
+
+        .edu-cat-nav .container::-webkit-scrollbar {
+            display: none;
+        }
+
+        .edu-cat-link {
+            white-space: nowrap;
+            padding: 10px 18px;
+            color: #555;
+            text-decoration: none;
+            font-size: .88rem;
+            font-weight: 500;
+            border-bottom: 2px solid transparent;
+            transition: all .2s;
+        }
+
+        .edu-cat-link:hover,
+        .edu-cat-link.active {
+            color: #0d6efd;
+            border-bottom-color: #0d6efd;
+        }
+
+        /* ===== MAIN CONTENT ===== */
+        .edu-main {
+            min-height: calc(100vh - 200px);
+            padding: 30px 0 50px;
+        }
+
+        /* ===== FOOTER ===== */
+        .edu-footer {
+            background: var(--edu-dark);
+            color: #9aa0b0;
+            padding: 50px 0 0;
+        }
+
+        .edu-footer h5 {
+            color: #fff;
+            font-family: 'Heebo', sans-serif;
+            font-weight: 600;
+            margin-bottom: 18px;
+            font-size: 1rem;
+        }
+
+        .edu-footer-brand p {
+            font-size: .88rem;
+            line-height: 1.7;
+            max-width: 240px;
+        }
+
+        .edu-footer-links {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .edu-footer-links li {
+            margin-bottom: 8px;
+        }
+
+        .edu-footer-links a {
+            color: #9aa0b0;
+            text-decoration: none;
+            font-size: .88rem;
+            transition: color .2s;
+        }
+
+        .edu-footer-links a:hover {
+            color: #fff;
+        }
+
+        .edu-footer-social {
+            display: flex;
+            gap: 8px;
+            margin-top: 16px;
+        }
+
+        .edu-social-btn {
+            width: 34px;
+            height: 34px;
+            border-radius: 8px;
+            background: rgba(255,255,255,.08);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ccc;
+            text-decoration: none;
+            font-size: .85rem;
+            transition: background .2s, color .2s;
+        }
+
+        .edu-social-btn:hover {
+            background: #0d6efd;
+            color: #fff;
+        }
+
+        .edu-footer-bottom {
+            border-top: 1px solid rgba(255,255,255,.08);
+            padding: 18px 0;
+            margin-top: 40px;
+        }
+
+        .edu-footer-bottom .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .edu-footer-bottom span,
+        .edu-footer-bottom a {
+            font-size: .82rem;
+            color: #6c757d;
+        }
+
+        .edu-footer-bottom a {
+            text-decoration: none;
+            margin-left: 16px;
+        }
+
+        .edu-footer-bottom a:hover {
+            color: #fff;
+        }
+
+        /* ===== CONTACT INFO ===== */
+        .edu-contact-item {
+            font-size: .88rem;
+            margin-bottom: 8px;
+        }
+
+        .edu-contact-item strong {
+            color: #fff;
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            .edu-search {
+                display: none;
+            }
+
+            .eduport-brand span {
+                display: none;
+            }
+        }
+    </style>
 
     {% block stylesheets %}{% endblock %}
 </head>
 
 <body>
 
-<!-- NAVBAR -->
-<nav class="navbar">
-    <div class="navbar-brand">
-        <img src="{{ asset('assets/images/logo.svg') }}">
-        FINORA
+<!-- ===== HEADER START ===== -->
+<header class="eduport-header">
+
+    <!-- Top nav -->
+    <nav class="eduport-nav-top">
+        <div class="container">
+
+            <!-- Logo -->
+            <a class="eduport-brand" href="{{ path('dashboard') }}">
+                <div class="brand-icon">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <span>FINORA</span>
+            </a>
+
+            <!-- Search bar -->
+            <div class="edu-search">
+                <div class="input-group">
+                    <input type="search" class="form-control" placeholder="Rechercher...">
+                    <button class="search-btn">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Nav actions -->
+            <div class="edu-nav-actions">
+
+                <!-- Dashboard link -->
+                <a href="{{ path('dashboard') }}" class="edu-icon-btn" title="Dashboard">
+                    <i class="bi bi-grid-1x2"></i>
+                </a>
+
+                <!-- Notification -->
+                <div class="edu-notif-wrap">
+                    <a href="#" class="edu-icon-btn" title="Notifications">
+                        <i class="bi bi-bell"></i>
+                    </a>
+                    <span class="edu-notif-dot"></span>
+                </div>
+
+                <!-- Profile dropdown -->
+                <div class="edu-dropdown">
+                    <a class="edu-avatar" href="#">F</a>
+
+                    <div class="edu-dropdown-menu">
+                        <a href="{{ path('dashboard') }}">
+                            <i class="bi bi-grid"></i> Dashboard
+                        </a>
+                        <hr class="edu-dropdown-divider">
+                        <a href="{{ path('app_admin') }}">
+                            <i class="bi bi-shield-check"></i> Admin
+                        </a>
+                        <a href="#">
+                            <i class="bi bi-person"></i> Mon compte
+                        </a>
+                        <a href="#">
+                            <i class="bi bi-gear"></i> Paramètres
+                        </a>
+                        <hr class="edu-dropdown-divider">
+                        <a href="#" style="color:#dc3545;">
+                            <i class="bi bi-power"></i> Déconnexion
+                        </a>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </nav>
+
+    <hr style="margin:0; border-color:#f0f2f5;">
+
+    <!-- Category nav -->
+    <nav class="edu-cat-nav">
+        <div class="container">
+            <a href="{{ path('dashboard') }}" class="edu-cat-link active">
+                <i class="bi bi-speedometer2 me-1"></i>Dashboard
+            </a>
+            <a href="{{ path('transactions') }}" class="edu-cat-link">
+                <i class="bi bi-arrow-left-right me-1"></i>Transactions
+            </a>
+            <a href="{{ path('wishlist') }}" class="edu-cat-link">
+                <i class="bi bi-heart me-1"></i>Wishlist
+            </a>
+            <a href="{{ path('app_admin') }}" class="edu-cat-link">
+                <i class="bi bi-shield me-1"></i>Admin
+            </a>
+        </div>
+    </nav>
+
+</header>
+<!-- ===== HEADER END ===== -->
+
+<!-- ===== MAIN CONTENT ===== -->
+<main class="edu-main">
+    <div class="container">
+        {% block content %}{% endblock %}
+    </div>
+</main>
+<!-- ===== MAIN CONTENT END ===== -->
+
+<!-- ===== FOOTER START ===== -->
+<footer class="edu-footer">
+    <div class="container">
+        <div class="row g-4">
+
+            <!-- Brand -->
+            <div class="col-lg-3 edu-footer-brand">
+                <h5>FINORA</h5>
+                <p>Plateforme de trading et d'investissement dédiée aux marchés financiers tunisiens.</p>
+                <div class="edu-footer-social">
+                    <a href="#" class="edu-social-btn"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#" class="edu-social-btn"><i class="fab fa-instagram"></i></a>
+                    <a href="#" class="edu-social-btn"><i class="fab fa-twitter"></i></a>
+                    <a href="#" class="edu-social-btn"><i class="fab fa-linkedin-in"></i></a>
+                </div>
+            </div>
+
+            <!-- Links col 1 -->
+            <div class="col-6 col-lg-2">
+                <h5>FINORA</h5>
+                <ul class="edu-footer-links">
+                    <li><a href="#">Marché</a></li>
+                    <li><a href="#">Historique</a></li>
+                    <li><a href="{{ path('dashboard') }}">Dashboard</a></li>
+                </ul>
+            </div>
+
+            <!-- Links col 2 -->
+            <div class="col-6 col-lg-2">
+                <h5>Communauté</h5>
+                <ul class="edu-footer-links">
+                    <li><a href="#">FAQ</a></li>
+                    <li><a href="#">Forum</a></li>
+                    <li><a href="#">Documentation</a></li>
+                </ul>
+            </div>
+
+            <!-- Links col 3 -->
+            <div class="col-6 col-lg-2">
+                <h5>Compte</h5>
+                <ul class="edu-footer-links">
+                    <li><a href="#">Mon profil</a></li>
+                    <li><a href="#">Paramètres</a></li>
+                    <li><a href="#" style="color:#ef4444;">Déconnexion</a></li>
+                </ul>
+            </div>
+
+            <!-- Contact -->
+            <div class="col-lg-3">
+                <h5>Contact</h5>
+                <p class="edu-contact-item">
+                    Email: <strong>contact@finora.tn</strong>
+                </p>
+                <p class="edu-contact-item">
+                    Tél: <strong>+216 XX XXX XXX</strong>
+                </p>
+                <p class="edu-contact-item" style="font-size:.82rem; margin-top:6px;">
+                    Lun – Ven · 9h à 18h
+                </p>
+            </div>
+
+        </div>
     </div>
 
-    <div class="ms-auto">
-        <a href="{{ path('dashboard') }}">📊 Dashboard</a>
-        <a href="{{ path('app_admin') }}" class="btn btn-primary">Admin</a>
-    </div>
-</nav>
-
-<!-- CONTENT -->
-<div class="container">
-    {% block content %}{% endblock %}
-</div>
-
-<!-- FOOTER -->
-<footer class="site-footer">
-    <div class="footer-inner">
-
-        <div class="footer-brand">
-            <h3>FINORA</h3>
-            <p>
-                Plateforme de trading et d’investissement dédiée aux marchés financiers tunisiens.
-            </p>
-        </div>
-
-        <div class="footer-col">
-            <h4>FINORA</h4>
-            <a href="#">Marché</a>
-            <a href="#">Historique</a>
-        </div>
-
-        <div class="footer-col">
-            <h4>Support</h4>
-            <a href="#">FAQ</a>
-            <a href="#">Contact</a>
-        </div>
-
-        <div class="footer-col">
-            <h4>Compte</h4>
-            <a href="#">Déconnexion</a>
-        </div>
-
-        <div class="footer-col">
-            <h4>Contact</h4>
-            <p>Email: contact@finora.tn</p>
-            <p>Tél: +216 XX XXX XXX</p>
-        </div>
-
-    </div>
-
-    <hr class="footer-divider">
-
-    <div class="footer-bottom">
-        <span>© 2026 FINORA</span>
-        <div class="footer-bottom-links">
-            <a href="#">Confidentialité</a>
-            <a href="#">Conditions</a>
+    <!-- Footer bottom -->
+    <div class="edu-footer-bottom">
+        <div class="container">
+            <span>© 2026 FINORA — Tous droits réservés</span>
+            <div>
+                <a href="#">Confidentialité</a>
+                <a href="#">Conditions</a>
+                <a href="#">Mentions légales</a>
+            </div>
         </div>
     </div>
 </footer>
+<!-- ===== FOOTER END ===== -->
+
+<!-- Bootstrap JS -->
 <script src="{{ asset('assets/vendor/bootstrap/bootstrap.bundle.min.js') }}"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js" defer></script>
+
+<script>
+    // Dropdown toggle on click (mobile friendly)
+    document.querySelectorAll('.edu-dropdown').forEach(function(el) {
+        el.querySelector('.edu-avatar')?.addEventListener('click', function(e) {
+            e.preventDefault();
+            el.classList.toggle('open');
+        });
+    });
+
+    document.addEventListener('click', function(e) {
+        document.querySelectorAll('.edu-dropdown').forEach(function(el) {
+            if (!el.contains(e.target)) el.classList.remove('open');
+        });
+    });
+
+    // Active nav link highlight
+    const currentPath = window.location.pathname;
+    document.querySelectorAll('.edu-cat-link').forEach(function(link) {
+        link.classList.remove('active');
+        if (link.getAttribute('href') && currentPath.startsWith(link.getAttribute('href')) && link.getAttribute('href') !== '/') {
+            link.classList.add('active');
+        }
+    });
+</script>
 
 {% block javascripts %}{% endblock %}
 </body>

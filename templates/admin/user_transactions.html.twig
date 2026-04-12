@@ -72,35 +72,62 @@ new Chart(document.getElementById('chartUser'), {
         labels: ['Income', 'Outcome'],
         datasets: [{
             data: [{{ income }}, {{ outcome }}],
-             backgroundColor: ['#1e3a8a', '#374151']
+            backgroundColor: [
+                '#2563eb',  // blue
+                '#e5e7eb'   // gray soft (كيف الصورة)
+            ],
+            borderWidth: 0
         }]
     },
     options: {
+        cutout: '75%',
         responsive: true,
-        maintainAspectRatio: false,
-        cutout: '65%'
+        maintainAspectRatio: false
     }
 });
-
 // ✅ line chart
-new Chart(document.getElementById('lineChartUser'), {
+const ctx = document.getElementById('lineChartUser').getContext('2d');
+
+// 🎨 gradient
+const gradient = ctx.createLinearGradient(0, 0, 0, 300);
+gradient.addColorStop(0, 'rgba(37,99,235,0.25)');
+gradient.addColorStop(1, 'rgba(124,58,237,0.05)');
+
+new Chart(ctx, {
     type: 'line',
     data: {
         labels: {{ chartLabels|json_encode|raw }},
         datasets: [{
             label: 'Montant',
             data: {{ chartData|json_encode|raw }},
-            borderColor: '#374151',
-            borderWidth: 4,
+            borderColor: '#2563eb',
+            borderWidth: 3,
             tension: 0.4,
             fill: true,
-            backgroundColor: 'rgba(108,92,231,0.1)'
+            backgroundColor: gradient,
+            pointBackgroundColor: '#2563eb',
+            pointBorderColor: '#fff',
+            pointBorderWidth: 2,
+            pointRadius: 5
         }]
     },
-   options: {
-    responsive: true,
-    maintainAspectRatio: false
-}
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: { display: false }
+        },
+        scales: {
+            x: {
+                grid: { display: false },
+                ticks: { color: '#9ca3af' }
+            },
+            y: {
+                grid: { color: '#f1f5f9' },
+                ticks: { color: '#9ca3af' }
+            }
+        }
+    }
 });
 </script>
 {% endblock %}

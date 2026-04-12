@@ -86,25 +86,23 @@
 
     </div>
 
-   <div class="chart-box ai-box">
 
-    <div class="ai-container">
+    <div class="dash-row">
 
-        <!-- LEFT -->
-        <div class="ai-left">
-            <h3> Analyse IA</h3>
+<div class="chart-box" style="margin-top: 20px; width: 100%;">
+  <div style="display:flex; align-items:center; gap:12px; margin-bottom:16px;">
+    <h3 style="font-size:15px; font-weight:700; color:var(--text-dark); margin:0;">
+      🤖 Analyse IA
+    </h3>
+    <button id="aiBtn" class="btn-purple" style="margin-left:auto;">Prediction IA</button>
+  </div>
 
-            <button id="aiBtn" class="btn-purple">
-                Prediction IA
-            </button>
-        </div>
-
-        <!-- RIGHT -->
-        <div class="ai-right">
-            <div id="aiResult"></div>
-        </div>
-
-    </div>
+  <div id="aiResult">
+    <p style="color:var(--text-light); font-size:14px;">
+      Click "Prediction IA" to generate your financial analysis.
+    </p>
+  </div>
+</div>
 
 </div>
 </div>
@@ -122,7 +120,7 @@ new Chart(document.getElementById('pieChart'), {
         labels: ['Income', 'Outcome'],
         datasets: [{
             data: [{{ income }}, {{ outcome }}],
-            backgroundColor: ['#1e3a8a', '#374151']
+            backgroundColor: ['#2563eb', '#e5e7eb']
         }]
     },
     options: {
@@ -189,8 +187,10 @@ new Chart(document.getElementById('incomeChart'), {
         labels: {{ incomeChartLabels|json_encode|raw }},
         datasets: [{
             data: {{ incomeChartData|json_encode|raw }},
-            borderColor: '#1e3a8a',
-            backgroundColor: 'transparent',
+            borderColor: '#2563eb',
+            backgroundColor: 'rgba(37,99,235,0.15)',
+            fill: true,
+            pointBackgroundColor: '#2563eb',
             borderWidth: 2,
             pointRadius: 2,
             tension: 0.4 
@@ -218,8 +218,10 @@ new Chart(document.getElementById('outcomeChart'), {
         labels: {{ outcomeChartLabels|json_encode|raw }},
         datasets: [{
             data: {{ outcomeChartData|json_encode|raw }},
-            borderColor: '#1e3a8a',
-            backgroundColor: 'transparent',
+            borderColor: '#7c3aed',
+            backgroundColor: 'rgba(124,58,237,0.15)',
+            fill: true,
+            pointBackgroundColor: '#7c3aed',
             borderWidth: 2,
             pointRadius: 2,
             tension: 0.4
@@ -269,12 +271,12 @@ new Chart(document.getElementById('dateChart'), {
             {
                 label: 'Income',
                 data: {{ incomeData|json_encode|raw }},
-                backgroundColor: '#1e3a8a'
+                backgroundColor: '#2563eb' 
             },
             {
                 label: 'Outcome',
                 data: {{ outcomeData|json_encode|raw }},
-                backgroundColor: '#374151'
+                backgroundColor: '#c7d2fe' 
             }
         ]
     },
@@ -301,31 +303,54 @@ new Chart(document.getElementById('dateChart'), {
     }
 });
 document.getElementById("aiBtn").addEventListener("click", function () {
+  fetch(`/ai/analyse-data?income={{ income }}&expenses={{ outcome }}`)
+    .then(res => res.json())
+    .then(data => {
+      document.getElementById("aiResult").innerHTML = `
+        <div style="
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0,1fr));
+  gap: 12px;
+  width: 100%;
+">
+          <div style="background:#f8faff; border-radius:12px; padding:16px; display:flex; flex-direction:column; gap:6px;">
+            <span style="font-size:11px; font-weight:600; color:var(--text-light); text-transform:uppercase; letter-spacing:0.08em;">Balance</span>
+            <strong style="font-family:'IBM Plex Mono',monospace; font-size:16px; color:var(--text-dark);">${data.balance} DT</strong>
+          </div>
 
-    fetch(`/ai/analyse-data?income={{ income }}&expenses={{ outcome }}`)
-        .then(res => res.json())
-        .then(data => {
+          <div style="background:#f8faff; border-radius:12px; padding:16px; display:flex; flex-direction:column; gap:6px;">
+            <span style="font-size:11px; font-weight:600; color:var(--text-light); text-transform:uppercase; letter-spacing:0.08em;">Ratio</span>
+            <strong style="font-family:'IBM Plex Mono',monospace; font-size:16px; color:var(--text-dark);">${data.ratio.toFixed(2)}%</strong>
+          </div>
 
-            let html = `
-    <div class="ai-content">
-        <p><strong> Situation:</strong></p>
-        <p>Balance: ${data.balance} DT</p>
-        <p>Ratio: ${data.ratio.toFixed(2)}%</p>
+          <div style="background:#f8faff; border-radius:12px; padding:16px; display:flex; flex-direction:column; gap:6px;">
+            <span style="font-size:11px; font-weight:600; color:var(--text-light); text-transform:uppercase; letter-spacing:0.08em;">Risk</span>
+            <strong class="risk ${data.risk.toLowerCase()}" style="font-size:16px;">${data.risk}</strong>
+          </div>
 
-        <p><strong> Risk:</strong> ${data.risk ?? "Unknown"}</p>
+          <div style="background:#f8faff; border-radius:12px; padding:16px; display:flex; flex-direction:column; gap:6px;">
+            <span style="font-size:11px; font-weight:600; color:var(--text-light); text-transform:uppercase; letter-spacing:0.08em;">Next expenses</span>
+            <strong style="font-family:'IBM Plex Mono',monospace; font-size:16px; color:var(--text-dark);">${data.predictedExpenses.toFixed(2)} DT</strong>
+          </div>
+        </div>
 
-        <p><strong> Prediction:</strong></p>
-        <p>Next expenses: ${data.predictedExpenses.toFixed(2)} DT</p>
-
-        <p><strong> Recommendations:</strong></p>
-        <ul>
-            ${data.recommendation.map(r => `<li>${r}</li>`).join("")}
-        </ul>
-    </div>
-`;
-
-            document.getElementById("aiResult").innerHTML = html;
-        });
+        <div style="
+  grid-column: span 4;
+  background:#f8faff;
+  border-radius:12px;
+  padding:16px;
+">
+          <p style="font-size:13px; font-weight:700; color:var(--text-dark); margin:0 0 10px;">
+            💡 Recommendations
+          </p>
+          <ul style="margin:0; padding-left:18px;">
+            ${data.recommendation.map(r => `
+              <li style="font-size:13px; color:var(--text-mid); margin-bottom:6px;">${r}</li>
+            `).join("")}
+          </ul>
+        </div>
+      `;
+    });
 });
 </script>
 {% endblock %}

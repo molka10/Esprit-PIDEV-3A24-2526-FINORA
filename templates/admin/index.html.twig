@@ -91,7 +91,16 @@ const labels = Object.values(usersData).map(u => u.name);
 const incomeData = Object.values(usersData).map(u => u.income);
 const outcomeData = Object.values(usersData).map(u => u.outcome);
 
-const ctx = document.getElementById('stackedChart');
+const ctx = document.getElementById('stackedChart').getContext('2d');
+
+// 🎨 gradients FINORA
+const incomeGradient = ctx.createLinearGradient(0, 0, 0, 300);
+incomeGradient.addColorStop(0, '#2563eb');   // blue
+incomeGradient.addColorStop(1, '#7c3aed');   // purple
+
+const outcomeGradient = ctx.createLinearGradient(0, 0, 0, 300);
+outcomeGradient.addColorStop(0, '#c7d2fe');  // light blue
+outcomeGradient.addColorStop(1, '#e5e7eb');  // light gray
 
 new Chart(ctx, {
     type: 'bar',
@@ -101,25 +110,41 @@ new Chart(ctx, {
             {
                 label: 'Income',
                 data: incomeData,
-                backgroundColor: '#1e3a8a'
+                backgroundColor: incomeGradient,
+                borderRadius: 10,
+                barThickness: 40
             },
             {
                 label: 'Outcome',
                 data: outcomeData,
-                backgroundColor: '#374151'
+                backgroundColor: outcomeGradient,
+                borderRadius: 10,
+                barThickness: 40
             }
         ]
     },
     options: {
         responsive: true,
+        maintainAspectRatio: false,
         plugins: {
             legend: {
-                position: 'top'
+                labels: {
+                    color: '#6b7280',
+                    font: { size: 12 }
+                }
             }
         },
         scales: {
-            x: { stacked: true },
-            y: { stacked: true }
+            x: {
+                stacked: true,
+                grid: { display: false },
+                ticks: { color: '#9ca3af' }
+            },
+            y: {
+                stacked: true,
+                grid: { color: '#f1f5f9' },
+                ticks: { color: '#9ca3af' }
+            }
         }
     }
 });
