@@ -304,15 +304,34 @@ document.addEventListener('DOMContentLoaded', function () {
         return;
     }
 
+    let isStopped = true;
+    let currentUrl = null;
+
     playBtn.addEventListener('click', async function () {
         try {
-            const freshUrl = baseTtsUrl + '?v=' + Date.now();
-            audio.src = freshUrl;
-            status.textContent = 'Chargement audio...';
+            if (audio.paused && audio.src && !isStopped) {
+                await audio.play();
+                status.textContent = 'Lecture en cours.';
+                return;
+            }
 
+            isStopped = false;
+            currentUrl = baseTtsUrl + '?v=' + Date.now();
+
+            audio.pause();
+            audio.removeAttribute('src');
             audio.load();
 
-            audio.oncanplaythrough = async function () {
+            audio.src = currentUrl;
+            status.textContent = 'Chargement audio...';
+
+            const onCanPlay = async () => {
+                audio.removeEventListener('canplaythrough', onCanPlay);
+
+                if (isStopped) {
+                    return;
+                }
+
                 try {
                     await audio.play();
                     status.textContent = 'Lecture en cours.';
@@ -321,6 +340,9 @@ document.addEventListener('DOMContentLoaded', function () {
                     status.textContent = 'Impossible de lancer la lecture.';
                 }
             };
+
+            audio.addEventListener('canplaythrough', onCanPlay, { once: true });
+            audio.load();
         } catch (error) {
             console.error('Erreur TTS:', error);
             status.textContent = 'Impossible de charger l’audio.';
@@ -328,21 +350,36 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     pauseBtn.addEventListener('click', function () {
+        if (!audio.src) {
+            return;
+        }
+
         audio.pause();
+        isStopped = false;
         status.textContent = 'Lecture en pause.';
     });
 
     stopBtn.addEventListener('click', function () {
+        isStopped = true;
+        currentUrl = null;
+
         audio.pause();
         audio.currentTime = 0;
+        audio.removeAttribute('src');
+        audio.load();
+
         status.textContent = 'Lecture arrêtée.';
     });
 
     audio.addEventListener('ended', function () {
+        isStopped = true;
+        currentUrl = null;
         status.textContent = 'Lecture terminée.';
     });
 
     audio.addEventListener('error', function () {
+        isStopped = true;
+        currentUrl = null;
         status.textContent = 'Erreur de chargement audio.';
     });
 });

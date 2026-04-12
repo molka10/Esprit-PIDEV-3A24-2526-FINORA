@@ -6,43 +6,40 @@ use App\Entity\Lesson;
 use App\Service\TextToSpeechService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\Routing\Attribute\Route;
 
 final class TextToSpeechController extends AbstractController
 {
-    #[Route('/tts/lesson/{id}', name: 'app_tts', methods: ['GET'])]
+    #[Route('/tts/lesson/{id}', name: 'app_tts')]
     public function speakLesson(
         int $id,
-        EntityManagerInterface $entityManager,
+        EntityManagerInterface $em,
         TextToSpeechService $tts
-    ): Response {
-        $lesson = $entityManager->getRepository(Lesson::class)->find($id);
+    ): BinaryFileResponse {
+        $lesson = $em->getRepository(Lesson::class)->find($id);
 
         if (!$lesson) {
-            throw $this->createNotFoundException('Lesson introuvable.');
+            throw $this->createNotFoundException();
         }
 
         $content = trim((string) $lesson->getContenu());
 
         if ($content === '') {
-            return new Response('Aucun contenu à lire.', Response::HTTP_BAD_REQUEST, [
-                'Content-Type' => 'text/plain; charset=UTF-8',
-            ]);
+            throw new \RuntimeException('Contenu vide');
         }
 
-        try {
-            $audio = $tts->generateAudio($content);
-        } catch (\Throwable $e) {
-            return new Response('Erreur TTS: ' . $e->getMessage(), Response::HTTP_INTERNAL_SERVER_ERROR, [
-                'Content-Type' => 'text/plain; charset=UTF-8',
-            ]);
+        $dir = $this->getParameter('kernel.project_dir') . '/public/uploads/tts';
+
+        if (!is_dir($dir)) {
+            mkdir($dir, 0777, true);
         }
 
-        return new Response($audio, Response::HTTP_OK, [
-            'Content-Type' => 'audio/wav',
-            'Content-Disposition' => 'inline; filename="lesson-' . $lesson->getId() . '.wav"',
-            'Cache-Control' => 'no-store, no-cache, must-revalidate, max-age=0',
-        ]);
+        $filePath = $dir . '/lesson_' . $lesson->getId() . '.wav';
+
+        // generate only once
+        $tts->generateAndSave($content, $filePath);
+
+        return new BinaryFileResponse($filePath);
     }
 }
