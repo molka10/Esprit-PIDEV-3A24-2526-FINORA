@@ -86,7 +86,7 @@
                     <td>{{ item.investmentType ?? '-' }}</td>
 
                     <td class="text-success fw-bold">
-                        {{ item.amountInvested ?? 0 }} TND
+                        {{ (item.amountInvested ?? 0)|format_currency }}
                     </td>
 
                     <td>{{ item.ownershipPercentage ?? 0 }}%</td>

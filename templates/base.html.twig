@@ -255,8 +255,10 @@
 
 {% endblock %}
 
-<!-- ======================= DARK MODE TOGGLE ======================= -->
-<div class="position-fixed" style="bottom: 20px; left: 20px; z-index: 1050;">
+<!-- ======================= QUICK ACTIONS TOGGLES ======================= -->
+<div class="position-fixed d-flex gap-2" style="bottom: 20px; left: 20px; z-index: 1050;">
+    
+    <!-- DARK MODE TOGGLE -->
     <div class="dropdown dropup">
         <button id="darkModeToggle" class="btn btn-dark shadow rounded-circle d-flex align-items-center justify-content-center" 
                 type="button" data-bs-toggle="dropdown" aria-expanded="false"
@@ -276,6 +278,7 @@
             </li>
         </ul>
     </div>
+
 </div>
 <script>
     // Initialize correct icon on load

@@ -67,7 +67,7 @@ final class InvestmentController extends AbstractController
     #[Route('/new', name: 'app_investment_new', methods: ['GET', 'POST'])]
     public function new(Request $request, EntityManagerInterface $entityManager): Response
     {
-        if ($redirect = $this->checkUser($request)) return $redirect;
+        if ($redirect = $this->checkAccess($request)) return $redirect;
 
         $investment = new Investment();
         $form = $this->createForm(InvestmentType::class, $investment);
@@ -120,7 +120,7 @@ final class InvestmentController extends AbstractController
         Investment $investment,
         EntityManagerInterface $entityManager
     ): Response {
-        if ($redirect = $this->checkUser($request)) return $redirect;
+        if ($redirect = $this->checkAccess($request)) return $redirect;
 
         $previousImage = $investment->getImageUrl();
 
@@ -170,7 +170,7 @@ final class InvestmentController extends AbstractController
         Investment $investment,
         EntityManagerInterface $entityManager
     ): Response {
-        if ($redirect = $this->checkUser($request)) return $redirect;
+        if ($redirect = $this->checkAccess($request)) return $redirect;
 
         if ($this->isCsrfTokenValid('delete'.$investment->getId(), $request->request->get('_token'))) {
 

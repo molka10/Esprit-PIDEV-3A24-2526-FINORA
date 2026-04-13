@@ -20,7 +20,7 @@ class RoleController extends AbstractController
     public function setRole(string $role, SessionInterface $session)
     {
         // 🔐 sécuriser les rôles autorisés
-        $allowedRoles = ['admin', 'investisseur'];
+        $allowedRoles = ['admin', 'investisseur', 'user'];
 
         if (!in_array($role, $allowedRoles)) {
             return $this->redirectToRoute('choose_role');
@@ -29,13 +29,17 @@ class RoleController extends AbstractController
         // stocker rôle en session
         $session->set('role', $role);
 
-        // ✅ REDIRECTION CORRECTE (LISTE CRUD)
+        // ✅ REDIRECTION CORRECTE SOUS FORME DE SIGN-IN
         if ($role === 'admin') {
-            return $this->redirectToRoute('app_investment_index'); // 🔥 FIX
+            return $this->redirectToRoute('admin_dashboard');
         }
 
         if ($role === 'investisseur') {
-            return $this->redirectToRoute('app_management_index'); // 🔥 FIX
+            return $this->redirectToRoute('app_management_index');
+        }
+        
+        if ($role === 'user') {
+            return $this->redirectToRoute('app_investment_index');
         }
 
         return $this->redirectToRoute('choose_role');

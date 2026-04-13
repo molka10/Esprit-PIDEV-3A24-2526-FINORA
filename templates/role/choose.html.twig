@@ -47,6 +47,11 @@
         color: white;
     }
 
+    .user-role {
+        background: linear-gradient(135deg, #3498db, #2980b9);
+        color: white;
+    }
+
     .role-icon {
         font-size: 45px;
         margin-bottom: 15px;
@@ -91,16 +96,12 @@
             <div class="col-md-4">
                 <a href="{{ path('set_role', {role: 'admin'}) }}" class="text-decoration-none">
                     <div class="role-card admin">
-
                         <div class="role-icon">👑</div>
-
                         <div class="role-title">Admin</div>
-
                         <div class="role-desc">
-                            Gérer les investissements<br>
-                            CRUD complet
+                            Gérer le système<br>
+                            Dashboard & Statistiques
                         </div>
-
                     </div>
                 </a>
             </div>
@@ -109,16 +110,26 @@
             <div class="col-md-4">
                 <a href="{{ path('set_role', {role: 'investisseur'}) }}" class="text-decoration-none">
                     <div class="role-card invest">
-
                         <div class="role-icon">💼</div>
-
                         <div class="role-title">Investisseur</div>
-
                         <div class="role-desc">
-                            Gérer vos investissements<br>
-                            Accès personnalisé
+                            Gérer Management<br>
+                            CRUD participations
                         </div>
+                    </div>
+                </a>
+            </div>
 
+            <!-- USER -->
+            <div class="col-md-4">
+                <a href="{{ path('set_role', {role: 'user'}) }}" class="text-decoration-none">
+                    <div class="role-card user-role">
+                        <div class="role-icon">👤</div>
+                        <div class="role-title">Utilisateur</div>
+                        <div class="role-desc">
+                            Créer Investissements<br>
+                            CRUD des projets
+                        </div>
                     </div>
                 </a>
             </div>

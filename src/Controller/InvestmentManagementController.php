@@ -92,7 +92,7 @@ class InvestmentManagementController extends AbstractController
     #[Route('/new', name: 'app_management_new')]
     public function new(Request $request, EntityManagerInterface $em): Response
     {
-        if ($redirect = $this->checkInvestisseur($request)) return $redirect;
+        if ($redirect = $this->checkAccess($request)) return $redirect;
 
         $item = new InvestmentManagement();
         

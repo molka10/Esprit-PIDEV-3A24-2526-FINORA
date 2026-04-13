@@ -113,32 +113,38 @@
                     </div>
                 </li>
 
-                <!-- Profile dropdown -->
+                <!-- Profile dropdown / Sign In -->
                 <li class="nav-item ms-3 dropdown">
-                    <a class="avatar avatar-sm p-0" href="#"
-                       id="profileDropdown" role="button"
-                       data-bs-auto-close="outside" data-bs-display="static" data-bs-toggle="dropdown" aria-expanded="false">
-                        <img class="avatar-img rounded-circle" src="{{ asset('assets/images/avatar/01.jpg') }}" alt="avatar">
-                    </a>
+                    {% set current_role = app.session.get('role') %}
+                    {% if current_role %}
+                        <a class="avatar avatar-sm p-0" href="#" id="profileDropdown" role="button" data-bs-auto-close="outside" data-bs-display="static" data-bs-toggle="dropdown" aria-expanded="false">
+                            <img class="avatar-img rounded-circle border border-2 border-primary" src="{{ asset('assets/images/avatar/01.jpg') }}" alt="avatar">
+                        </a>
 
-                    <ul class="dropdown-menu dropdown-animation dropdown-menu-end shadow pt-3" aria-labelledby="profileDropdown">
-                        <li class="px-3 mb-3">
-                            <div class="d-flex align-items-center">
-                                <div class="avatar me-3">
-                                    <img class="avatar-img rounded-circle shadow" src="{{ asset('assets/images/avatar/01.jpg') }}" alt="avatar">
+                        <ul class="dropdown-menu dropdown-animation dropdown-menu-end shadow pt-3" aria-labelledby="profileDropdown">
+                            <li class="px-3 mb-3">
+                                <div class="d-flex align-items-center">
+                                    <div class="avatar me-3">
+                                        <img class="avatar-img rounded-circle shadow" src="{{ asset('assets/images/avatar/01.jpg') }}" alt="avatar">
+                                    </div>
+                                    <div>
+                                        <a class="h6" href="#">Profil Actif</a>
+                                        <p class="small m-0 text-primary fw-bold">{{ current_role|upper }}</p>
+                                    </div>
                                 </div>
-                                <div>
-                                    <a class="h6" href="#">Mon Compte</a>
-                                    <p class="small m-0">finora@example.com</p>
-                                </div>
-                            </div>
-                        </li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item" href="#"><i class="bi bi-person fa-fw me-2"></i>Profil</a></li>
-                        <li><a class="dropdown-item" href="#"><i class="bi bi-gear fa-fw me-2"></i>Paramètres</a></li>
-                        <li><a class="dropdown-item" href="{{ path('admin_dashboard') }}"><i class="bi bi-speedometer2 fa-fw me-2"></i>Dashboard</a></li>
-                        <li><a class="dropdown-item bg-danger-soft-hover" href="#"><i class="bi bi-power fa-fw me-2"></i>Déconnexion</a></li>
-                    </ul>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="#"><i class="bi bi-person fa-fw me-2"></i>Mon Compte</a></li>
+                            {% if current_role == 'admin' %}
+                            <li><a class="dropdown-item" href="{{ path('admin_dashboard') }}"><i class="bi bi-speedometer2 fa-fw me-2"></i>Dashboard</a></li>
+                            {% endif %}
+                            <li><a class="dropdown-item bg-danger-soft-hover" href="{{ path('logout_role') }}"><i class="bi bi-power fa-fw me-2 text-danger"></i>Se déconnecter</a></li>
+                        </ul>
+                    {% else %}
+                        <a href="{{ path('choose_role') }}" class="btn btn-primary btn-sm mb-0">
+                            <i class="bi bi-box-arrow-in-right me-1"></i>Sign In
+                        </a>
+                    {% endif %}
                 </li>
 
             </ul>
@@ -455,7 +461,7 @@
                                 <div class="overflow-hidden mt-3">
                                     <div class="d-flex justify-content-between">
                                         <h6 class="uppercase">Progression globale</h6>
-                                        <span class="h6 mb-0">{{ latestInv.estimatedValue }} TND</span>
+                                        <span class="h6 mb-0">{{ latestInv.estimatedValue|format_currency }}</span>
                                     </div>
                                     <div class="progress progress-sm bg-success bg-opacity-10">
                                         <div class="progress-bar bg-success" role="progressbar"
@@ -571,8 +577,21 @@
                         <hr>
 
                         <div class="d-flex justify-content-between align-items-center mb-2 mt-4">
-                            <h4 class="text-success mb-0">{{ inv.estimated_value|number_format(2, ',', ' ') }} TND</h4>
-                            <a href="{{ path('app_investment_show', {'id': inv.id}) }}" class="btn btn-sm btn-primary-soft mb-0">Voir détails</a>
+                            <div class="d-flex align-items-center gap-2">
+                                <h4 class="text-success mb-0">{{ inv.estimated_value|format_currency }}</h4>
+                                <div class="dropdown">
+                                    <button class="btn btn-sm btn-light p-1 border lh-1" type="button" data-bs-toggle="dropdown"><i class="bi bi-arrow-left-right"></i></button>
+                                    <ul class="dropdown-menu dropdown-menu-end min-w-auto shadow-sm">
+                                        <li><a class="dropdown-item small py-1" href="{{ path('app_switch_currency', {'currency': 'TND'}) }}">🇹🇳 TND</a></li>
+                                        <li><a class="dropdown-item small py-1" href="{{ path('app_switch_currency', {'currency': 'EUR'}) }}">🇪🇺 EUR</a></li>
+                                        <li><a class="dropdown-item small py-1" href="{{ path('app_switch_currency', {'currency': 'USD'}) }}">🇺🇸 USD</a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="d-flex gap-2">
+                                <a href="{{ path('app_management_new', {'inv_id': inv.id}) }}" class="btn btn-sm btn-primary mb-0"><i class="bi bi-wallet2"></i> Investir</a>
+                                <a href="{{ path('app_investment_show', {'id': inv.id}) }}" class="btn btn-sm btn-primary-soft mb-0">Voir détails</a>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -617,8 +636,20 @@
                         <hr>
                         
                         <div class="d-flex justify-content-between align-items-center mb-2 mt-4">
-                            <h4 class="text-info mb-0">{{ inv.estimated_value|number_format(2, ',', ' ') }} TND</h4>
-                            <button class="btn btn-sm btn-info-soft mb-0" disabled>Bientôt disponible</button>
+                            <div class="d-flex align-items-center gap-2">
+                                <h4 class="text-info mb-0">{{ inv.estimated_value|format_currency }}</h4>
+                                <div class="dropdown">
+                                    <button class="btn btn-sm btn-light p-1 border lh-1" type="button" data-bs-toggle="dropdown"><i class="bi bi-arrow-left-right"></i></button>
+                                    <ul class="dropdown-menu dropdown-menu-end min-w-auto shadow-sm">
+                                        <li><a class="dropdown-item small py-1" href="{{ path('app_switch_currency', {'currency': 'TND'}) }}">🇹🇳 TND</a></li>
+                                        <li><a class="dropdown-item small py-1" href="{{ path('app_switch_currency', {'currency': 'EUR'}) }}">🇪🇺 EUR</a></li>
+                                        <li><a class="dropdown-item small py-1" href="{{ path('app_switch_currency', {'currency': 'USD'}) }}">🇺🇸 USD</a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="d-flex gap-2">
+                                <button class="btn btn-sm btn-info-soft mb-0" disabled>Bientôt disponible</button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -710,7 +741,7 @@
                                             </a>
                                             <div>
                                                 <span class="badge text-bg-info mb-1">6 mois</span>
-                                                <h5 class="mb-0">1 000 TND</h5>
+                                                <h5 class="mb-0">{{ 1000|format_currency }}</h5>
                                             </div>
                                         </div>
                                     </div>
@@ -721,7 +752,7 @@
                                             </a>
                                             <div>
                                                 <span class="badge text-bg-info mb-1">12 mois</span>
-                                                <h5 class="mb-0">5 000 TND</h5>
+                                                <h5 class="mb-0">{{ 5000|format_currency }}</h5>
                                             </div>
                                         </div>
                                     </div>
@@ -732,7 +763,7 @@
                                             </a>
                                             <div>
                                                 <span class="badge text-bg-info mb-1">18 mois</span>
-                                                <h5 class="mb-0">10 000 TND</h5>
+                                                <h5 class="mb-0">{{ 10000|format_currency }}</h5>
                                             </div>
                                         </div>
                                     </div>

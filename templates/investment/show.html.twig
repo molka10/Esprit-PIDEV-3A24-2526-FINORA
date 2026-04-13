@@ -191,9 +191,19 @@
                                 </span>
 
                                 <h6 class="text-muted mb-1">Valeur Estimée</h6>
-                                <h1 class="text-success mb-4 fw-bold">
-                                    {{ investment.estimatedValue|number_format(0, ',', ' ') }} <span class="fs-5 text-muted">TND</span>
-                                </h1>
+                                <div class="d-flex justify-content-center align-items-center gap-2 mb-4">
+                                    <h1 class="text-success mb-0 fw-bold">
+                                        {{ investment.estimatedValue|format_currency }}
+                                    </h1>
+                                    <div class="dropdown">
+                                        <button class="btn btn-sm btn-light border lh-1" type="button" data-bs-toggle="dropdown"><i class="bi bi-arrow-left-right"></i></button>
+                                        <ul class="dropdown-menu dropdown-menu-end min-w-auto shadow-sm">
+                                            <li><a class="dropdown-item small py-1" href="{{ path('app_switch_currency', {'currency': 'TND'}) }}">🇹🇳 TND</a></li>
+                                            <li><a class="dropdown-item small py-1" href="{{ path('app_switch_currency', {'currency': 'EUR'}) }}">🇪🇺 EUR</a></li>
+                                            <li><a class="dropdown-item small py-1" href="{{ path('app_switch_currency', {'currency': 'USD'}) }}">🇺🇸 USD</a></li>
+                                        </ul>
+                                    </div>
+                                </div>
 
                                 <h6 class="text-muted mb-2">Profil de Risque</h6>
                                 <div class="mb-4">
@@ -208,7 +218,6 @@
 
                                 <hr>
 
-                                {% if role == 'investisseur' %}
                                 <!-- INVEST BUTTON -->
                                 <div class="mt-4">
                                     <div class="d-grid">
@@ -218,14 +227,12 @@
                                     </div>
                                     <p class="small text-muted mb-0">Participez à ce projet dès aujourd'hui.</p>
                                 </div>
-                                {% endif %}
 
                             </div>
                         </div>
 
                         <!-- Admin Actions -->
-                        {% set role = app.session.get('role') %}
-                        {% if role == 'user' %}
+                        {% if app.session.get('role', 'user') == 'user' %}
                             <div class="card shadow-sm border-0 border-top border-warning border-3">
                                 <div class="card-header bg-transparent mb-0 pb-0">
                                     <h6 class="text-warning mb-0"><i class="bi bi-shield-lock me-1"></i>Gestion de l'Investissement</h6>

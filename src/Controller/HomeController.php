@@ -51,22 +51,31 @@ class HomeController extends AbstractController
         $investments = $investmentRepo->findAll();
         $totalInvestments = count($investments);
 
-        $activeManagement = count($managementRepo->findBy(['status' => 'ACTIVE']));
+        $activeManagements = $managementRepo->findBy(['status' => 'ACTIVE']);
         $closedManagement = count($managementRepo->findBy(['status' => 'CLOSED']));
+        $activeManagement = count($activeManagements);
 
         $totalValue = 0;
         $categoryDistribution = [];
         $riskDistribution = ['LOW' => 0, 'MEDIUM' => 0, 'HIGH' => 0];
 
-        foreach ($investments as $inv) {
-            $totalValue += (float)$inv->getEstimatedValue();
+        // Les statistiques doivent se baser sur le PORTFOLIO ACTIF et non sur tout le catalogue
+        foreach ($activeManagements as $mng) {
+            $inv = $mng->getInvestment();
+            
+            // Calcul de la valeur totale investie
+            $totalValue += (float)$mng->getAmountInvested();
 
-            $cat = ltrim(trim($inv->getCategory() ?? 'Autre'));
-            $categoryDistribution[$cat] = ($categoryDistribution[$cat] ?? 0) + 1;
+            if ($inv) {
+                // Catégories
+                $cat = ltrim(trim($inv->getCategory() ?? 'Autre'));
+                $categoryDistribution[$cat] = ($categoryDistribution[$cat] ?? 0) + 1;
 
-            $risk = $inv->getRiskLevel() ?? 'MEDIUM';
-            if (isset($riskDistribution[$risk])) {
-                $riskDistribution[$risk]++;
+                // Risques
+                $risk = $inv->getRiskLevel() ?? 'MEDIUM';
+                if (isset($riskDistribution[$risk])) {
+                    $riskDistribution[$risk]++;
+                }
             }
         }
 
@@ -78,6 +87,8 @@ class HomeController extends AbstractController
             'chartCategories' => json_encode(array_keys($categoryDistribution)),
             'chartCategoryData' => json_encode(array_values($categoryDistribution)),
             'chartRisks' => json_encode(array_values($riskDistribution)),
+            'invList' => $investments,
+            'mngList' => $managementRepo->findAll(),
         ]);
     }
 
