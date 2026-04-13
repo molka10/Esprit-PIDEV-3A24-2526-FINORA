@@ -3,33 +3,7 @@
 {% block title %}FINORA - Formations{% endblock %}
 
 {% block body %}
-<header class="navbar-light navbar-sticky">
-    <nav class="navbar navbar-expand-xl z-index-9">
-        <div class="container">
-            <a class="navbar-brand" href="{{ path('app_home') }}">
-                <img class="light-mode-item navbar-brand-item" src="{{ asset('assets/images/logo.svg') }}" alt="logo">
-                <img class="dark-mode-item navbar-brand-item" src="{{ asset('assets/images/logo-light.svg') }}" alt="logo">
-            </a>
 
-            <button class="navbar-toggler ms-auto" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-animation">
-                    <span></span>
-                    <span></span>
-                    <span></span>
-                </span>
-            </button>
-
-            <div class="navbar-collapse collapse" id="navbarCollapse">
-                <ul class="navbar-nav navbar-nav-scroll ms-auto">
-                    <li class="nav-item"><a class="nav-link" href="{{ path('app_home') }}">Accueil</a></li>
-                    <li class="nav-item"><a class="nav-link active" href="{{ path('app_formations') }}">Formations</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{{ path('app_lessons') }}">Lessons</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{{ path('admin_dashboard') }}">Dashboard</a></li>
-                </ul>
-            </div>
-        </div>
-    </nav>
-</header>
 
 <main>
     <section class="pt-5 pb-0">

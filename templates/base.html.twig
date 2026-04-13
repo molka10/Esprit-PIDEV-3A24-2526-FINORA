@@ -212,6 +212,34 @@
 </head>
 <body>
 
+<header class="navbar-light navbar-sticky" style="box-shadow: 0 4px 25px rgba(109, 40, 217, 0.05); position: sticky; top: 0; z-index: 1020;">
+    <nav class="navbar navbar-expand-xl z-index-9">
+        <div class="container">
+            <a class="navbar-brand" href="{{ path('app_home') }}">
+                <img class="light-mode-item navbar-brand-item" src="{{ asset('assets/images/logo.svg') }}" alt="logo">
+                <img class="dark-mode-item navbar-brand-item" src="{{ asset('assets/images/logo-light.svg') }}" alt="logo">
+            </a>
+
+            <button class="navbar-toggler ms-auto" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse">
+                <span class="navbar-toggler-animation">
+                    <span></span><span></span><span></span>
+                </span>
+            </button>
+
+            <div class="navbar-collapse collapse" id="navbarCollapse">
+                <ul class="navbar-nav navbar-nav-scroll ms-auto">
+                    <li class="nav-item"><a class="nav-link fw-semibold" href="{{ path('app_home') }}">Accueil</a></li>
+                    <li class="nav-item"><a class="nav-link fw-semibold" href="{{ path('app_formations') }}">Formations</a></li>
+                    <li class="nav-item"><a class="nav-link fw-semibold" href="{{ path('app_lessons') }}">Leçons</a></li>
+                    <li class="nav-item ms-lg-3"><a class="btn btn-primary d-none d-xl-block" style="padding: 8px 20px; border-radius: 99px;" href="{{ path('admin_dashboard') }}">Admin</a></li>
+                    <li class="nav-item d-xl-none mt-2"><a class="nav-link fw-bold text-primary" href="{{ path('admin_dashboard') }}">Admin</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    {% block subheader %}{% endblock %}
+</header>
+
 {% block body %}{% endblock %}
 
 {% block javascripts %}

@@ -5,6 +5,8 @@ namespace App\Controller;
 use App\Entity\Lesson;
 use App\Entity\QuizResult;
 use App\Service\GroqQuizService;
+use App\Service\QuizFraudService;
+use App\Service\QuizAiCommentService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -39,7 +41,9 @@ final class QuizController extends AbstractController
         Lesson $lesson,
         Request $request,
         SessionInterface $session,
-        EntityManagerInterface $entityManager
+        EntityManagerInterface $entityManager,
+        QuizFraudService $quizFraudService,
+        QuizAiCommentService $quizAiCommentService
     ): Response {
         $questions = $session->get('quiz_questions_' . $lesson->getId(), []);
 
@@ -68,6 +72,20 @@ final class QuizController extends AbstractController
         $score = (int) round(($correctAnswers / max($totalQuestions, 1)) * 100);
         $passed = $score >= 80 ? 1 : 0;
 
+        // --- Fraud Analysis Logic ---
+        $focusLossCount = (int) $request->request->get('focusLossCount', 0);
+        $exitFullscreenCount = (int) $request->request->get('exitFullscreenCount', 0);
+        $fastAnswers = (int) $request->request->get('fastAnswers', 0);
+
+        $fraudAnalysis = $quizFraudService->analyze($focusLossCount, $exitFullscreenCount, $fastAnswers);
+        
+        $fraudExplanation = null;
+        if ($fraudAnalysis['isFraud']) {
+            $passed = 0; // Invalidate the run
+            $fraudExplanation = $quizAiCommentService->generateFraudComment($fraudAnalysis['details']);
+        }
+        // -----------------------------
+
         $result = new QuizResult();
         $result
             ->setStudentName($studentName)
@@ -76,7 +94,9 @@ final class QuizController extends AbstractController
             ->setFormationTitle($lesson->getFormation() ? (string) $lesson->getFormation()->getTitre() : 'Formation inconnue')
             ->setScore($score)
             ->setPassed($passed)
-            ->setTakenAt(new \DateTime());
+            ->setTakenAt(new \DateTime())
+            ->setFraudSuspected($fraudAnalysis['isFraud'] ? 1 : 0)
+            ->setFraudExplanation($fraudExplanation);
 
         $entityManager->persist($result);
         $entityManager->flush();
@@ -91,6 +111,8 @@ final class QuizController extends AbstractController
             'passed' => $passed === 1,
             'studentName' => $studentName,
             'quizResult' => $result,
+            'fraudSuspected' => $fraudAnalysis['isFraud'],
+            'fraudExplanation' => $fraudExplanation,
         ]);
     }
 

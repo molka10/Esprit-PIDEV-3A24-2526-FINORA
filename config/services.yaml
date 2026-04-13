@@ -25,6 +25,10 @@ services:
         arguments:
             $apiKey: '%groq_api_key%'
 
+    App\Service\QuizAiCommentService:
+        arguments:
+            $groqApiKey: '%groq_api_key%'
+
     App\Service\SpeechToTextService:
         arguments:
             $apiKey: '%deepgram_api_key%'        

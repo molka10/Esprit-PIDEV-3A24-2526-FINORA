@@ -3,56 +3,68 @@
 {% block title %}Résultat du quiz{% endblock %}
 
 {% block body %}
-<header class="navbar-light navbar-sticky">
-    <nav class="navbar navbar-expand-xl z-index-9">
-        <div class="container">
-            <a class="navbar-brand" href="{{ path('app_home') }}">
-                <img class="light-mode-item navbar-brand-item" src="{{ asset('assets/images/logo.svg') }}" alt="logo">
-                <img class="dark-mode-item navbar-brand-item" src="{{ asset('assets/images/logo-light.svg') }}" alt="logo">
-            </a>
-        </div>
-    </nav>
-</header>
+
 
 <main>
-    <section class="py-5" style="background: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);">
+    <section class="py-5" style="background: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%); min-height: 100vh;">
         <div class="container">
             <div class="mx-auto" style="max-width: 760px;">
 
                 <div class="card border-0 shadow-sm overflow-hidden">
                     <div class="p-4 p-md-5 text-center" style="background: linear-gradient(135deg, #ede9fe 0%, #f5f3ff 55%, #ffffff 100%);">
-                        <span class="badge {{ passed ? 'bg-success' : 'bg-warning text-dark' }} mb-3">
-                            {{ passed ? 'Quiz réussi' : 'Quiz non réussi' }}
-                        </span>
+                        
+                        {% if fraudSuspected %}
+                            <span class="badge bg-danger mb-3">Triche Suspectée</span>
+                        {% else %}
+                            <span class="badge {{ passed ? 'bg-success' : 'bg-warning text-dark' }} mb-3">
+                                {{ passed ? 'Quiz réussi' : 'Quiz non réussi' }}
+                            </span>
+                        {% endif %}
 
                         <h1 class="h2 fw-bold mb-2">Résultat de {{ studentName }}</h1>
                         <p class="text-muted mb-4">{{ lesson.titre }}</p>
 
                         <div class="display-5 fw-bold mb-3" style="color:#6d28d9;">
-                            {{ score }}%
+                            {% if fraudSuspected %}
+                                N/A
+                            {% else %}
+                                {{ score }}%
+                            {% endif %}
                         </div>
 
-                        <p class="mb-4">
-                            Bonnes réponses : <strong>{{ correctAnswers }}/{{ totalQuestions }}</strong>
-                        </p>
-
-                        {% if passed %}
-                            <div class="alert alert-success border-0 mb-4" style="background:#ecfdf3; color:#166534;">
-                                Félicitations {{ studentName }} ! Vous avez réussi le quiz et obtenu votre certificat FINORA.
+                        {% if fraudSuspected %}
+                            <div class="alert text-start border-0 shadow-sm mb-4" style="background:#fef2f2; color:#991b1b; border-left: 4px solid #dc2626 !important;">
+                                <h4 class="h5 fw-bold mb-2 d-flex align-items-center gap-2">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                                    Évaluation invalidée
+                                </h4>
+                                <p class="mb-0 fs-6">
+                                    {{ fraudExplanation|nl2br }}
+                                </p>
                             </div>
+                        {% else %}
+                            <p class="mb-4 fs-5 text-muted">
+                                Bonnes réponses : <strong>{{ correctAnswers }}/{{ totalQuestions }}</strong>
+                            </p>
+
+                            {% if passed %}
+                                <div class="alert border-0 mb-4" style="background:#ecfdf3; color:#166534; border-left: 4px solid #16a34a !important;">
+                                    Félicitations {{ studentName }} ! Vous avez réussi le quiz et obtenu votre certificat FINORA.
+                                </div>
+                            {% endif %}
                         {% endif %}
 
                         <div class="d-flex justify-content-center gap-2 flex-wrap">
-                            <a href="{{ path('app_quiz_take', {'id': lesson.id}) }}" class="btn btn-primary">
+                            <a href="{{ path('app_quiz_take', {'id': lesson.id}) }}" class="btn btn-primary px-4 py-2">
                                 Refaire le quiz
                             </a>
 
-                            <a href="{{ path('app_lesson_show', {'id': lesson.id}) }}" class="btn btn-outline-secondary">
+                            <a href="{{ path('app_lesson_show', {'id': lesson.id}) }}" class="btn btn-outline-secondary px-4 py-2">
                                 Retour à la leçon
                             </a>
 
-                            {% if passed and quizResult is defined %}
-                                <a href="{{ path('app_quiz_certificate', {'id': quizResult.id}) }}" class="btn btn-warning">
+                            {% if passed and quizResult is defined and not fraudSuspected %}
+                                <a href="{{ path('app_quiz_certificate', {'id': quizResult.id}) }}" class="btn btn-warning px-4 py-2">
                                     🎓 Voir mon certificat
                                 </a>
                             {% endif %}

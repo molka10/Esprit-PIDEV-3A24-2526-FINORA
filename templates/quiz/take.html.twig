@@ -3,33 +3,39 @@
 {% block title %}Quiz - {{ lesson.titre }}{% endblock %}
 
 {% block body %}
-<header class="navbar-light navbar-sticky">
-    <nav class="navbar navbar-expand-xl z-index-9">
-        <div class="container">
-            <a class="navbar-brand" href="{{ path('app_home') }}">
-                <img class="light-mode-item navbar-brand-item" src="{{ asset('assets/images/logo.svg') }}" alt="logo">
-                <img class="dark-mode-item navbar-brand-item" src="{{ asset('assets/images/logo-light.svg') }}" alt="logo">
-            </a>
-        </div>
-    </nav>
-</header>
+
 
 <main>
-    <section class="py-5" style="background: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);">
+    <section class="py-5" style="background: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%); min-height: 100vh;">
         <div class="container">
-            <div class="mx-auto" style="max-width: 900px;">
-
-                <div class="card border-0 shadow-sm overflow-hidden mb-4">
+            <div class="mx-auto" style="max-width: 900px;" id="quiz-container">
+            
+                <div class="card border-0 shadow-sm overflow-hidden mb-4" id="quiz-header">
                     <div class="p-4 p-md-5" style="background: linear-gradient(135deg, #ede9fe 0%, #f5f3ff 55%, #ffffff 100%);">
                         <span class="badge bg-primary bg-opacity-10 text-primary mb-3">Quiz IA</span>
                         <h1 class="h2 fw-bold mb-2">{{ lesson.titre }}</h1>
                         <p class="text-muted mb-0">
-                            Répondez aux 5 questions générées à partir du contenu de cette leçon.
+                            Répondez aux 5 questions et gardez la page en plein écran. Ne quittez pas l'onglet.
                         </p>
                     </div>
                 </div>
 
-                <form method="post" action="{{ path('app_quiz_submit', {'id': lesson.id}) }}">
+                <div id="start-screen" class="text-center card border-0 shadow-sm p-4 p-md-5">
+                    <h3 class="mb-4">Prêt à commencer ?</h3>
+                    <p class="text-danger fw-semibold mb-4">
+                        ⚠️ Attention : Toute tentative de triche (changement d'onglet, sortie du mode plein écran, vitesse anormale) sera détectée.
+                    </p>
+                    <button class="btn btn-lg btn-primary" onclick="startQuiz()">Lancer le quiz en plein écran</button>
+                    <a href="{{ path('app_lesson_show', {'id': lesson.id}) }}" class="btn btn-lg btn-outline-secondary ms-2">Retour</a>
+                </div>
+
+                <form method="post" action="{{ path('app_quiz_submit', {'id': lesson.id}) }}" id="quiz-form" style="display: none;">
+                    
+                    <!-- Fraud detection fields -->
+                    <input type="hidden" name="focusLossCount" id="input_focusLossCount" value="0">
+                    <input type="hidden" name="exitFullscreenCount" id="input_exitFullscreenCount" value="0">
+                    <input type="hidden" name="fastAnswers" id="input_fastAnswers" value="0">
+
                     <div class="card border-0 shadow-sm mb-4">
                         <div class="card-body p-4">
                             <label for="student_name" class="form-label fw-semibold">Votre nom</label>
@@ -44,37 +50,59 @@
                         </div>
                     </div>
 
-                    {% for question in questions %}
-                        <div class="card border-0 shadow-sm mb-4">
-                            <div class="card-body p-4">
-                                <h3 class="h5 fw-bold mb-3">
-                                    Question {{ loop.index }} — {{ question.question }}
-                                </h3>
+                    <div id="questions-wrapper">
+                        {% for question in questions %}
+                            <div class="quiz-step" id="step-{{ loop.index }}" style="display: none;">
+                                <div class="card border-0 shadow-sm mb-4">
+                                    <div class="card-body p-4">
+                                        <div class="d-flex justify-content-between align-items-center mb-3">
+                                            <span class="text-muted fw-semibold">Question {{ loop.index }} sur {{ questions|length }}</span>
+                                        </div>
+                                        <h3 class="h5 fw-bold mb-4" style="color: #4c1d95;">
+                                            {{ question.question }}
+                                        </h3>
 
-                                <div class="d-grid gap-2">
-                                    {% for option in question.options %}
-                                        <label class="border rounded-3 p-3 d-flex align-items-center gap-2">
-                                            <input
-                                                type="radio"
-                                                name="answer_{{ loop.parent.loop.index0 }}"
-                                                value="{{ loop.index0 }}"
-                                                required
-                                            >
-                                            <span>{{ option }}</span>
-                                        </label>
-                                    {% endfor %}
+                                        <div class="d-grid gap-2 options-container">
+                                            {% for option in question.options %}
+                                                <label class="border rounded-3 p-3 d-flex align-items-center gap-2" 
+                                                       style="cursor:pointer; transition: 0.2s;" 
+                                                       onmouseover="this.style.background='#f5f3ff'" 
+                                                       onmouseout="this.style.background='transparent'">
+                                                    <input
+                                                        type="radio"
+                                                        name="answer_{{ loop.parent.loop.index0 }}"
+                                                        value="{{ loop.index0 }}"
+                                                        onchange="onAnswerSelected({{ loop.parent.loop.index }})"
+                                                        required
+                                                    >
+                                                    <span class="fs-6">{{ option }}</span>
+                                                </label>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="d-flex justify-content-between gap-2 flex-wrap">
+                                    {% if loop.index > 1 %}
+                                        <button type="button" class="btn btn-outline-secondary px-4 py-2" onclick="prevStep({{ loop.index }})">
+                                            Précédent
+                                        </button>
+                                    {% else %}
+                                        <div></div>
+                                    {% endif %}
+
+                                    {% if loop.last %}
+                                        <button type="button" class="btn btn-primary px-4 py-2" onclick="submitForm()">
+                                            Soumettre le quiz
+                                        </button>
+                                    {% else %}
+                                        <button type="button" class="btn btn-primary px-4 py-2" id="next-btn-{{ loop.index }}" onclick="nextStep({{ loop.index }})" disabled>
+                                            Suivant
+                                        </button>
+                                    {% endif %}
                                 </div>
                             </div>
-                        </div>
-                    {% endfor %}
-
-                    <div class="d-flex gap-2 flex-wrap">
-                        <button type="submit" class="btn btn-primary">
-                            Soumettre le quiz
-                        </button>
-                        <a href="{{ path('app_lesson_show', {'id': lesson.id}) }}" class="btn btn-outline-secondary">
-                            Retour à la leçon
-                        </a>
+                        {% endfor %}
                     </div>
                 </form>
 
@@ -82,4 +110,84 @@
         </div>
     </section>
 </main>
+
+<script>
+    // System Variables
+    let focusLossCount = 0;
+    let exitFullscreenCount = 0;
+    let fastAnswers = 0;
+    let isQuizActive = false;
+    let currentQuestionStartTime = 0;
+
+    const startScreen = document.getElementById('start-screen');
+    const quizForm = document.getElementById('quiz-form');
+    
+    function startQuiz() {
+        startScreen.style.display = 'none';
+        quizForm.style.display = 'block';
+        
+        // Setup anti cheat system
+        const elem = document.documentElement;
+        if (elem.requestFullscreen) {
+            elem.requestFullscreen().catch(err => {
+                console.warn(`Fullscreen error: ${err.message}`);
+            });
+        }
+        
+        isQuizActive = true;
+        showStep(1);
+    }
+
+    // Security Listeners
+    document.addEventListener("visibilitychange", () => {
+        if (document.hidden && isQuizActive) {
+            focusLossCount++;
+            document.getElementById('input_focusLossCount').value = focusLossCount;
+            alert("⚠️ Avertissement : Vous avez changé d'onglet. Ceci est enregistré !");
+        }
+    });
+
+    document.addEventListener('fullscreenchange', () => {
+        if (!document.fullscreenElement && isQuizActive) {
+            exitFullscreenCount++;
+            document.getElementById('input_exitFullscreenCount').value = exitFullscreenCount;
+            alert("⚠️ Avertissement : Vous avez quitté le mode plein écran !");
+        }
+    });
+
+    function showStep(step) {
+        document.querySelectorAll('.quiz-step').forEach(el => el.style.display = 'none');
+        document.getElementById('step-' + step).style.display = 'block';
+        currentQuestionStartTime = Date.now();
+    }
+    
+    function onAnswerSelected(step) {
+        const nextBtn = document.getElementById('next-btn-' + step);
+        if(nextBtn) nextBtn.disabled = false;
+    }
+    
+    function nextStep(currentStep) {
+        // Fast answer check (< 3 seconds)
+        const timeTaken = (Date.now() - currentQuestionStartTime) / 1000;
+        if (timeTaken < 3) {
+            fastAnswers++;
+            document.getElementById('input_fastAnswers').value = fastAnswers;
+        }
+        showStep(currentStep + 1);
+    }
+    
+    function prevStep(currentStep) {
+        showStep(currentStep - 1);
+    }
+    
+    function submitForm() {
+        const timeTaken = (Date.now() - currentQuestionStartTime) / 1000;
+        if (timeTaken < 3) {
+            fastAnswers++;
+            document.getElementById('input_fastAnswers').value = fastAnswers;
+        }
+        document.getElementById('quiz-form').submit();
+    }
+</script>
+
 {% endblock %}

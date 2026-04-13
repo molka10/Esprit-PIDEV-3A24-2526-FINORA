@@ -34,6 +34,12 @@ class QuizResult
     #[ORM\Column(type: 'datetime', nullable: true)]
     private ?\DateTimeInterface $takenAt = null;
 
+    #[ORM\Column(type: 'integer', nullable: false, options: ['default' => 0])]
+    private ?int $fraudSuspected = 0;
+
+    #[ORM\Column(type: 'text', nullable: true)]
+    private ?string $fraudExplanation = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -118,6 +124,33 @@ class QuizResult
     public function setTakenAt(?\DateTimeInterface $takenAt): self
     {
         $this->takenAt = $takenAt;
+        return $this;
+    }
+
+    public function getFraudSuspected(): ?int
+    {
+        return $this->fraudSuspected;
+    }
+
+    public function setFraudSuspected(int $fraudSuspected): self
+    {
+        $this->fraudSuspected = $fraudSuspected;
+        return $this;
+    }
+
+    public function isFraudSuspected(): bool
+    {
+        return (int) $this->fraudSuspected === 1;
+    }
+
+    public function getFraudExplanation(): ?string
+    {
+        return $this->fraudExplanation;
+    }
+
+    public function setFraudExplanation(?string $fraudExplanation): self
+    {
+        $this->fraudExplanation = $fraudExplanation;
         return $this;
     }
 }
