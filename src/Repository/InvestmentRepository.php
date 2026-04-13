@@ -76,6 +76,14 @@ class InvestmentRepository extends ServiceEntityRepository
      */
     public function searchAndFilter(?string $search, ?string $category, ?string $risk, ?string $sort): array
     {
+        return $this->searchAndFilterQuery($search, $category, $risk, $sort)->getQuery()->getResult();
+    }
+
+    /**
+     * 🔥 Recherche et tri global (Retourne le QueryBuilder pour la pagination)
+     */
+    public function searchAndFilterQuery(?string $search, ?string $category, ?string $risk, ?string $sort): \Doctrine\ORM\QueryBuilder
+    {
         $qb = $this->createQueryBuilder('i');
 
         if ($search) {
@@ -103,7 +111,7 @@ class InvestmentRepository extends ServiceEntityRepository
             $qb->orderBy('i.investmentId', 'DESC');
         }
 
-        return $qb->getQuery()->getResult();
+        return $qb;
     }
 
     /**

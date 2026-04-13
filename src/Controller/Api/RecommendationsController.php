@@ -16,14 +16,16 @@ final class RecommendationsController extends AbstractController
     }
 
     #[Route('/internal', name: 'api_recommendations_internal', methods: ['GET'])]
-    public function internal(): JsonResponse
+    public function internal(\Symfony\Component\HttpFoundation\Request $request): JsonResponse
     {
-        return $this->json($this->recommendationsBuilder->getInternalApiData());
+        $limit = $request->query->getInt('limit', 6);
+        return $this->json($this->recommendationsBuilder->getInternalApiData($limit));
     }
 
     #[Route('/external', name: 'api_recommendations_external', methods: ['GET'])]
-    public function external(): JsonResponse
+    public function external(\Symfony\Component\HttpFoundation\Request $request): JsonResponse
     {
-        return $this->json($this->recommendationsBuilder->getExternalApiData());
+        $limit = $request->query->getInt('limit', 6);
+        return $this->json($this->recommendationsBuilder->getExternalApiData($limit));
     }
 }

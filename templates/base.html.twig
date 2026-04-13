@@ -226,6 +226,13 @@
             [data-bs-theme="dark"] .page-content-wrapper {
                 background: linear-gradient(180deg, #130f1c 0%, #1a1625 100%) !important;
             }
+
+            /* ── Animations ── */
+            @keyframes pulse {
+                0% { box-shadow: 0 0 0 0 rgba(124, 58, 237, 0.7); }
+                70% { box-shadow: 0 0 0 10px rgba(124, 58, 237, 0); }
+                100% { box-shadow: 0 0 0 0 rgba(124, 58, 237, 0); }
+            }
         </style>
 
     {% endblock %}
@@ -258,6 +265,15 @@
 <!-- ======================= QUICK ACTIONS TOGGLES ======================= -->
 <div class="position-fixed d-flex gap-2" style="bottom: 20px; left: 20px; z-index: 1050;">
     
+    <!-- AI ASSISTANT TOGGLE -->
+    {% if app.session.get('role') in ['admin', 'investisseur', 'user'] %}
+    <a href="{{ path('app_marketplace_assistant') }}" class="btn btn-primary shadow rounded-circle d-flex align-items-center justify-content-center" 
+       style="width: 50px; height: 50px; background: linear-gradient(135deg, var(--finora-purple), #ff00d4); border: 2px solid #5b21b6; animation: pulse 2s infinite;"
+       data-bs-toggle="tooltip" data-bs-placement="right" title="Discuter avec l'IA">
+        <i class="bi bi-robot text-white fs-5"></i>
+    </a>
+    {% endif %}
+
     <!-- DARK MODE TOGGLE -->
     <div class="dropdown dropup">
         <button id="darkModeToggle" class="btn btn-dark shadow rounded-circle d-flex align-items-center justify-content-center" 

@@ -4,146 +4,300 @@
 
 {% block body %}
 
-<div class="container mt-4">
+    <!-- ======================= HEADER START ======================= -->
+    <header class="navbar-light navbar-sticky">
+        <nav class="navbar navbar-expand-xl z-index-9">
+            <div class="container">
 
-    <h1 class="mb-4 fw-bold text-primary">📊 Investment Management</h1>
-
-    {% set role = app.session.get('role') %}
-
-    <!-- FILTER -->
-    <form method="get" class="row g-2 mb-4">
-
-        <div class="col-md-6">
-            <input type="text" name="search" class="form-control"
-                   placeholder="Search..."
-                   value="{{ app.request.get('search') }}">
-        </div>
-
-        <div class="col-md-3">
-            <select name="status" class="form-select">
-                <option value="">All</option>
-                <option value="ACTIVE" {{ app.request.get('status') == 'ACTIVE' ? 'selected' }}>Active</option>
-                <option value="CLOSED" {{ app.request.get('status') == 'CLOSED' ? 'selected' }}>Closed</option>
-            </select>
-        </div>
-
-        <div class="col-md-3 d-flex gap-2">
-            <button class="btn btn-primary w-100">Search</button>
-            <a href="{{ path('app_management_index') }}" class="btn btn-outline-secondary w-100">Reset</a>
-        </div>
-
-    </form>
-
-    <!-- ACTIONS -->
-    <div class="d-flex justify-content-between mb-3">
-
-        <div class="d-flex gap-2">
-
-            <a href="{{ path('app_investment_index') }}" class="btn btn-outline-primary">
-                💼 Investments
-            </a>
-
-            {% if role in ['admin', 'investisseur'] %}
-                <a href="{{ path('app_management_new') }}" class="btn btn-success">
-                    ➕ New
+                <a class="navbar-brand" href="{{ path('app_home') }}">
+                    <img class="light-mode-item navbar-brand-item" src="{{ asset('assets/images/logo.svg') }}" alt="FINORA" style="height:40px;">
+                    <img class="dark-mode-item navbar-brand-item" src="{{ asset('assets/images/logo-light.svg') }}" alt="FINORA" style="height:40px;">
                 </a>
-            {% endif %}
 
-        </div>
+                <button class="navbar-toggler ms-auto" type="button"
+                        data-bs-toggle="collapse" data-bs-target="#navbarCollapse"
+                        aria-controls="navbarCollapse" aria-expanded="false">
+                    <span class="navbar-toggler-animation">
+                        <span></span><span></span><span></span>
+                    </span>
+                </button>
 
-        <a href="{{ path('admin_dashboard') }}" class="btn btn-dark">
-            📊 Dashboard
-        </a>
+                <div class="navbar-collapse w-100 collapse" id="navbarCollapse">
+                    <ul class="navbar-nav navbar-nav-scroll mx-auto">
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ path('app_home') }}">
+                                <i class="bi bi-house me-1"></i>Accueil
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ path('app_investment_index') }}">
+                                <i class="bi bi-graph-up-arrow me-1"></i>Investissements
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link active" href="{{ path('app_management_index') }}">
+                                <i class="bi bi-briefcase me-1"></i>Management
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ path('admin_dashboard') }}">
+                                <i class="bi bi-speedometer2 me-1"></i>Dashboard
+                            </a>
+                        </li>
+                    </ul>
 
-    </div>
-
-    <!-- TABLE -->
-    <div class="card shadow-sm p-3">
-
-        <table class="table table-hover text-center align-middle">
-
-            <thead class="table-dark">
-                <tr>
-                    <th>Investment</th>
-                    <th>Type</th>
-                    <th>Amount</th>
-                    <th>%</th>
-                    <th>Date</th>
-                    <th>Status</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-
-            <tbody>
-
-            {% for item in investment_managements %}
-                <tr>
-
-                    <td>
-                        <strong>{{ item.investment ? item.investment.name : 'N/A' }}</strong>
-                    </td>
-
-                    <td>{{ item.investmentType ?? '-' }}</td>
-
-                    <td class="text-success fw-bold">
-                        {{ (item.amountInvested ?? 0)|format_currency }}
-                    </td>
-
-                    <td>{{ item.ownershipPercentage ?? 0 }}%</td>
-
-                    <td>
-                        {{ item.startDate ? item.startDate|date('Y-m-d') : '-' }}
-                    </td>
-
-                    <td>
-                        {% if item.status == 'ACTIVE' %}
-                            <span class="badge bg-success">Active</span>
-                        {% else %}
-                            <span class="badge bg-danger">Closed</span>
-                        {% endif %}
-                    </td>
-
-                    <td class="d-flex justify-content-center gap-2">
-
-                        <!-- VIEW -->
-                        <a href="{{ path('app_management_show', {'id': item.id}) }}"
-                           class="btn btn-sm btn-primary">voir details</a>
-
-                        {% if role in ['admin', 'investisseur'] %}
-
-                            <!-- EDIT -->
-                            <a href="{{ path('app_management_edit', {'id': item.id}) }}"
-                               class="btn btn-sm btn-warning">modifier</a>
-
-                            <!-- DELETE -->
-                            <form method="post"
-                                  action="{{ path('app_management_delete', {'id': item.id}) }}"
-                                  onsubmit="return confirm('Delete?');">
-
-                                <input type="hidden"
-                                       name="_token"
-                                       value="{{ csrf_token('delete' ~ item.id) }}">
-
-                                <button class="btn btn-sm btn-danger">🗑</button>
+                    <!-- Search -->
+                    <div class="nav my-3 my-xl-0 px-4 flex-nowrap align-items-center">
+                        <div class="nav-item w-100">
+                            <form method="get" action="{{ path('app_management_index') }}" class="position-relative">
+                                <input class="form-control pe-5 bg-transparent"
+                                       name="search" type="search"
+                                       placeholder="Rechercher..."
+                                       value="{{ app.request.get('search') }}">
+                                <button class="bg-transparent p-2 position-absolute top-50 end-0 translate-middle-y border-0 text-primary-hover text-reset" type="submit">
+                                    <i class="fas fa-search fs-6"></i>
+                                </button>
                             </form>
+                        </div>
+                    </div>
+                </div>
 
+                <!-- Profile -->
+                <div class="dropdown ms-1 ms-lg-0">
+                    <a class="avatar avatar-sm p-0" href="#"
+                       id="profileDropdown" role="button"
+                       data-bs-auto-close="outside" data-bs-display="static"
+                       data-bs-toggle="dropdown" aria-expanded="false">
+                        <img class="avatar-img rounded-circle" src="{{ asset('assets/images/avatar/01.jpg') }}" alt="avatar">
+                    </a>
+                    <ul class="dropdown-menu dropdown-animation dropdown-menu-end shadow pt-3" aria-labelledby="profileDropdown">
+                        <li class="px-3 mb-3">
+                            <div class="d-flex align-items-center">
+                                <div class="avatar me-3">
+                                    <img class="avatar-img rounded-circle shadow" src="{{ asset('assets/images/avatar/01.jpg') }}" alt="avatar">
+                                </div>
+                                <div>
+                                    <a class="h6" href="#">Mon Compte</a>
+                                    <p class="small m-0">finora@example.com</p>
+                                </div>
+                            </div>
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="#"><i class="bi bi-person fa-fw me-2"></i>Profil</a></li>
+                        <li><a class="dropdown-item" href="{{ path('admin_dashboard') }}"><i class="bi bi-speedometer2 fa-fw me-2"></i>Dashboard</a></li>
+                        <li><a class="dropdown-item bg-danger-soft-hover" href="#"><i class="bi bi-power fa-fw me-2"></i>Déconnexion</a></li>
+                    </ul>
+                </div>
+
+            </div>
+        </nav>
+    </header>
+    <!-- ======================= HEADER END ======================= -->
+
+    <main>
+
+    <!-- ======================= PAGE BANNER START ======================= -->
+    <section class="align-items-center d-flex"
+             style="background: linear-gradient(135deg, #4b0082 0%, #6f42c1 100%); min-height: 160px;">
+        <div class="container">
+            <div class="row">
+                <div class="col-12">
+                    <h1 class="text-white">Gestion de Portefeuille</h1>
+                    <div class="d-flex">
+                        <nav aria-label="breadcrumb">
+                            <ol class="breadcrumb breadcrumb-dark breadcrumb-dots mb-0">
+                                <li class="breadcrumb-item">
+                                    <a href="{{ path('app_home') }}">Accueil</a>
+                                </li>
+                                <li class="breadcrumb-item active" aria-current="page">Management</li>
+                            </ol>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- ======================= PAGE BANNER END ======================= -->
+
+    <!-- ======================= PAGE CONTENT START ======================= -->
+    <section class="pb-0 py-sm-5">
+        <div class="container">
+            <div class="row">
+                {% set role = app.session.get('role') %}
+
+                <!-- ======================= MAIN LIST START ======================= -->
+                <div class="col-xl-9 col-xxl-9">
+
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h4 class="mb-0" style="color: #4b0082;">{{ investment_managements.getTotalItemCount }} investissement(s) géré(s)</h4>
+                        {% if role in ['admin', 'investisseur'] %}
+                            <a href="{{ path('app_management_new') }}" class="btn text-white shadow-sm mb-0" style="background: linear-gradient(90deg, #6f42c1, #5a32a3); border-radius: 8px;">
+                                <i class="bi bi-plus-lg me-1"></i>Nouveau Management
+                            </a>
                         {% endif %}
+                    </div>
 
-                    </td>
+                    <!-- GRID / CARDS -->
+                    <div class="row g-4 pb-4">
+                        {% for item in investment_managements %}
+                            <div class="col-md-6 col-lg-6">
+                                <div class="card shadow-lg h-100 overflow-hidden border-0 rounded-4 card-hover-shadow transition-base" style="background: linear-gradient(145deg, #ffffff, #f9f6ff);">
+                                    
+                                    <!-- Head: Investment Image / Badge -->
+                                    <div class="position-relative">
+                                        <img src="{{ investment_image_src(item.investment) ?: asset('assets/images/courses/4by3/06.jpg') }}" 
+                                             alt="{{ item.investment ? item.investment.name : 'Unknown' }}"
+                                             class="card-img-top object-fit-cover" 
+                                             style="height: 220px; border-bottom: 4px solid #6f42c1;">
+                                        
+                                        <div class="card-img-overlay d-flex flex-column justify-content-between p-3" style="background: linear-gradient(180deg, rgba(75, 0, 130, 0.8) 0%, rgba(75, 0, 130, 0) 60%);">
+                                            
+                                            <div class="d-flex justify-content-between w-100">
+                                                <span class="badge px-3 py-2 rounded-pill shadow-sm text-white" style="background: linear-gradient(90deg, #6f42c1, #8a2be2); font-weight: 500; letter-spacing: 0.5px;">
+                                                    {{ item.investmentType ?? 'N/A' }}
+                                                </span>
+                                                {% if item.status == 'ACTIVE' %}
+                                                    <span class="badge bg-success px-3 py-2 rounded-pill shadow-sm" style="font-weight: 500;"><i class="bi bi-activity me-1"></i>Actif</span>
+                                                {% else %}
+                                                    <span class="badge bg-danger px-3 py-2 rounded-pill shadow-sm" style="font-weight: 500;"><i class="bi bi-x-circle me-1"></i>Fermé</span>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
 
-                </tr>
-            {% else %}
-                <tr>
-                    <td colspan="7" class="text-muted text-center">No data</td>
-                </tr>
-            {% endfor %}
+                                    <!-- Body: Details -->
+                                    <div class="card-body d-flex flex-column p-4">
+                                        <h5 class="card-title fw-bold mb-3 d-flex align-items-center">
+                                            <i class="bi bi-briefcase-fill me-2" style="color: #6f42c1; font-size: 1.2rem;"></i>
+                                            <a href="{{ path('app_management_show', {'id': item.id}) }}" class="text-decoration-none" style="color: #2c003e; transition: color 0.3s; font-size: 1.15rem;">
+                                                {{ item.investment ? item.investment.name : 'Investissement inconnu' }}
+                                            </a>
+                                        </h5>
+                                        
+                                        <div class="bg-light rounded-3 p-3 mb-4 flex-grow-1 shadow-sm" style="border: 1px solid rgba(111, 66, 193, 0.1);">
+                                            <ul class="list-group list-group-flush">
+                                                <li class="list-group-item d-flex justify-content-between px-0 bg-transparent border-bottom border-light">
+                                                    <span class="text-muted" style="font-size: 0.9rem;"><i class="bi bi-cash-coin me-2" style="color: #6f42c1;"></i>Montant investi</span>
+                                                    <strong style="color: #4b0082; font-size: 1.05rem;">{{ (item.amountInvested ?? 0)|format_currency }}</strong>
+                                                </li>
+                                                <li class="list-group-item d-flex justify-content-between px-0 bg-transparent border-bottom border-light">
+                                                    <span class="text-muted" style="font-size: 0.9rem;"><i class="bi bi-pie-chart me-2" style="color: #6f42c1;"></i>Part détenue</span>
+                                                    <strong style="color: #2c003e;">{{ item.ownershipPercentage ?? 0 }}%</strong>
+                                                </li>
+                                                <li class="list-group-item d-flex justify-content-between px-0 bg-transparent border-0 pb-0">
+                                                    <span class="text-muted" style="font-size: 0.9rem;"><i class="bi bi-calendar-event me-2" style="color: #6f42c1;"></i>Date début</span>
+                                                    <strong style="color: #2c003e;">{{ item.startDate ? item.startDate|date('d/m/Y') : '-' }}</strong>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                        
+                                        <!-- Actions -->
+                                        <div class="d-flex justify-content-between align-items-center mt-auto">
+                                            <a href="{{ path('app_management_show', {'id': item.id}) }}" class="btn btn-sm px-4 py-2 text-white shadow-sm" style="background: linear-gradient(90deg, #6f42c1, #5a32a3); border-radius: 8px; font-weight: 600;">
+                                                <i class="bi bi-eye me-1"></i>Détails
+                                            </a>
 
-            </tbody>
+                                            {% if role in ['admin', 'investisseur'] %}
+                                            <div class="d-flex gap-2">
+                                                <a href="{{ path('app_management_edit', {'id': item.id}) }}" class="btn btn-sm px-3 shadow-sm text-white" style="background-color: #ff9800; border-radius: 8px;" title="Modifier">
+                                                    <i class="bi bi-pencil"></i>
+                                                </a>
 
-        </table>
+                                                <form method="post" action="{{ path('app_management_delete', {'id': item.id}) }}" onsubmit="return confirm('Souhaitez-vous vraiment supprimer cet enregistrement ?');" class="m-0">
+                                                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ item.id) }}">
+                                                    <button class="btn btn-sm px-3 shadow-sm text-white" style="background-color: #e53935; border-radius: 8px;" title="Supprimer">
+                                                        <i class="bi bi-trash"></i>
+                                                    </button>
+                                                </form>
+                                            </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% else %}
+                            <div class="col-12 py-5">
+                                <div class="card card-body text-center py-5 shadow-sm">
+                                    <i class="bi bi-inbox fs-1 text-muted mb-3"></i>
+                                    <h5 class="text-muted">Aucune gestion d'investissement trouvée</h5>
+                                    <p class="text-muted mb-3">Essayez de modifier vos filtres ou effectuez un nouvel investissement.</p>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
 
-    </div>
+                    <!-- PAGINATION -->
+                    {% if investment_managements.getTotalItemCount > 0 %}
+                        <div class="d-flex justify-content-center mt-2 mb-5">
+                            {{ knp_pagination_render(investment_managements) }}
+                        </div>
+                    {% endif %}
 
-</div>
+                </div>
+                <!-- ======================= MAIN LIST END ======================= -->
+
+                <!-- ======================= SIDEBAR START ======================= -->
+                <div class="col-xl-3 col-xxl-3 d-none d-xl-block">
+                    <div class="position-sticky" style="top: 100px;">
+                        <form method="get" action="{{ path('app_management_index') }}" class="w-100">
+                            <!-- Status filter -->
+                            <div class="card shadow-sm border-0 rounded-4 mb-4">
+                                <div class="card-header bg-transparent border-bottom-0 pt-4 pb-0">
+                                    <h5 class="mb-0" style="color: #4b0082;"><i class="bi bi-funnel me-2"></i>Filtrer le statut</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="d-grid gap-2">
+                                        <input type="radio" class="btn-check" name="status" id="status-all" value="" {{ app.request.get('status') == '' ? 'checked' : '' }}>
+                                        <label class="btn btn-outline-primary text-start" for="status-all">Tous</label>
+                                        
+                                        <input type="radio" class="btn-check" name="status" id="status-active" value="ACTIVE" {{ app.request.get('status') == 'ACTIVE' ? 'checked' : '' }}>
+                                        <label class="btn btn-outline-primary text-start" for="status-active">Actif</label>
+                                        
+                                        <input type="radio" class="btn-check" name="status" id="status-closed" value="CLOSED" {{ app.request.get('status') == 'CLOSED' ? 'checked' : '' }}>
+                                        <label class="btn btn-outline-primary text-start" for="status-closed">Fermé</label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Tri Status -->
+                            <div class="card shadow-sm border-0 rounded-4 mb-4">
+                                <div class="card-header bg-transparent border-bottom-0 pt-4 pb-0">
+                                    <h5 class="mb-0" style="color: #4b0082;"><i class="bi bi-sort-down me-2"></i>Trier par</h5>
+                                </div>
+                                <div class="card-body">
+                                    <select name="tri" class="form-select mb-3 rounded-3 shadow-none border-light text-muted">
+                                        <option value="managementId" {{ app.request.get('tri') == 'managementId' ? 'selected' : '' }}>Par Défaut</option>
+                                        <option value="amountInvested" {{ app.request.get('tri') == 'amountInvested' ? 'selected' : '' }}>Montant investi</option>
+                                        <option value="ownershipPercentage" {{ app.request.get('tri') == 'ownershipPercentage' ? 'selected' : '' }}>Part détenue</option>
+                                        <option value="status" {{ app.request.get('tri') == 'status' ? 'selected' : '' }}>Statut</option>
+                                    </select>
+
+                                    <select name="ordre" class="form-select rounded-3 shadow-none border-light text-muted">
+                                        <option value="desc" {{ app.request.get('ordre') == 'desc' ? 'selected' : '' }}>Décroissant</option>
+                                        <option value="asc" {{ app.request.get('ordre') == 'asc' ? 'selected' : '' }}>Croissant</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Filter button -->
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn text-white py-2 rounded-3 shadow-sm" style="background: linear-gradient(90deg, #6f42c1, #5a32a3); font-weight: 500;">
+                                    <i class="bi bi-check2-circle me-1"></i> Appliquer filtres
+                                </button>
+                                <a href="{{ path('app_management_index') }}" class="btn btn-light py-2 rounded-3 text-muted">
+                                    <i class="bi bi-arrow-clockwise me-1"></i> Réinitialiser
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <!-- ======================= SIDEBAR END ======================= -->
+
+            </div>
+        </div>
+    </section>
+    <!-- ======================= PAGE CONTENT END ======================= -->
+
+    </main>
 
 {% endblock %}

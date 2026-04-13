@@ -138,7 +138,7 @@
 
             <!-- Result count -->
             <div class="col-md-4">
-                <h4 class="mb-0">{{ investments|length }} investissement(s) trouvé(s)</h4>
+                <h4 class="mb-0">{{ investments.getTotalItemCount() }} investissement(s) trouvé(s)</h4>
             </div>
 
             <!-- Filters & actions -->
@@ -248,137 +248,140 @@
 
                     {# --- LIST VIEW CARD (default) --- #}
                     <div class="col-12 investment-item">
-                        <div class="card shadow overflow-hidden p-2">
-                            <div class="row g-0">
+                        <div class="card shadow-lg overflow-hidden border-0 rounded-4 card-hover-shadow transition-base" style="background: linear-gradient(145deg, #ffffff, #f9f6ff);">
+                            <div class="row g-0 h-100">
 
                                 <!-- Image -->
-                                <div class="col-md-4 overflow-hidden position-relative">
+                                <div class="col-md-4 overflow-hidden position-relative p-0">
                                     <img src="{{ investment_image_src(investment) ?: asset('assets/images/courses/4by3/06.jpg') }}"
-                                         class="rounded-2 w-100 h-100 object-fit-cover"
-                                         style="min-height: 200px;"
+                                         class="w-100 h-100 object-fit-cover"
+                                         style="min-height: 240px; border-bottom: 4px solid #6f42c1;"
                                          alt="{{ investment.name }}">
 
-                                    {# Risk ribbon #}
-                                    <div class="card-img-overlay p-2">
-                                        {% if investment.riskLevel == 'HIGH' %}
-                                            <span class="badge bg-danger">Risque élevé</span>
-                                        {% elseif investment.riskLevel == 'MEDIUM' %}
-                                            <span class="badge bg-warning text-dark">Risque moyen</span>
-                                        {% else %}
-                                            <span class="badge bg-success">Risque faible</span>
-                                        {% endif %}
+                                    {# Risk ribbon / Overlay #}
+                                    <div class="card-img-overlay d-flex flex-column justify-content-between p-3" style="background: linear-gradient(180deg, rgba(75, 0, 130, 0.6) 0%, rgba(75, 0, 130, 0) 60%); pointer-events: none;">
+                                        <div class="d-flex justify-content-end w-100">
+                                            {% if investment.riskLevel == 'HIGH' %}
+                                                <span class="badge bg-danger shadow-sm px-3 py-2 rounded-pill">Risque élevé</span>
+                                            {% elseif investment.riskLevel == 'MEDIUM' %}
+                                                <span class="badge bg-warning text-dark shadow-sm px-3 py-2 rounded-pill">Risque moyen</span>
+                                            {% else %}
+                                                <span class="badge bg-success shadow-sm px-3 py-2 rounded-pill">Risque faible</span>
+                                            {% endif %}
+                                        </div>
                                     </div>
                                 </div>
 
                                 <!-- Body -->
                                 <div class="col-md-8">
-                                    <div class="card-body">
+                                    <div class="card-body d-flex flex-column h-100 p-4">
 
                                         <!-- Badge + rating row -->
-                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <div class="d-flex justify-content-between align-items-center mb-3">
                                             <div class="hstack gap-2">
-                                                <a href="#" class="badge text-bg-primary">{{ investment.category }}</a>
+                                                <a href="#" class="badge px-3 py-2 rounded-pill shadow-sm text-white text-decoration-none" style="background: linear-gradient(90deg, #6f42c1, #8a2be2); font-weight: 500;">
+                                                    {{ investment.category }}
+                                                </a>
                                                 {% if investment.location %}
-                                                    <span class="badge text-bg-secondary">
+                                                    <span class="badge text-bg-secondary px-3 py-2 rounded-pill shadow-sm bg-opacity-75">
                                                         <i class="bi bi-geo-alt me-1"></i>{{ investment.location }}
                                                     </span>
                                                 {% endif %}
                                             </div>
                                             <div>
-                                                <span class="h6 fw-light me-3">
+                                                <span class="h6 fw-light me-3" style="color: #4b0082;">
                                                     <i class="fas fa-star text-warning me-1"></i>4.5
                                                 </span>
-                                                <a href="#" class="h6 fw-light"><i class="far fa-heart"></i></a>
+                                                <a href="#" class="h6 fw-light text-muted text-primary-hover"><i class="far fa-heart"></i></a>
                                             </div>
                                         </div>
 
                                         <!-- Title -->
-                                        <h5 class="card-title">
-                                            <a href="{{ path('app_investment_show', {'id': investment.id}) }}">
+                                        <h4 class="card-title fw-bold mb-2">
+                                            <a href="{{ path('app_investment_show', {'id': investment.id}) }}" class="text-decoration-none" style="color: #2c003e; transition: color 0.3s;">
                                                 {{ investment.name }}
                                             </a>
-                                        </h5>
+                                        </h4>
 
                                         <!-- Description -->
-                                        <p class="text-truncate-2 d-none d-lg-block text-muted">
-                                            {{ investment.description ? investment.description|slice(0, 120) ~ '...' : 'Aucune description disponible.' }}
+                                        <p class="text-truncate-2 d-none d-lg-block text-muted mb-4" style="font-size: 0.95rem;">
+                                            {{ investment.description ? investment.description|slice(0, 150) ~ '...' : 'Aucune description disponible.' }}
                                         </p>
 
                                         <!-- Meta info -->
-                                        <ul class="list-inline mb-3">
-                                            <li class="list-inline-item h6 fw-light mb-1 mb-sm-0 d-inline-flex align-items-center gap-1">
-                                                <i class="bi bi-currency-dollar text-success"></i>
-                                                <strong class="text-success">{{ investment.estimatedValue|format_currency }}</strong>
-                                                <div class="dropdown">
-                                                    <button class="btn btn-sm btn-light p-0 px-1 border lh-1 ms-1" type="button" data-bs-toggle="dropdown"><i class="bi bi-arrow-left-right small"></i></button>
-                                                    <ul class="dropdown-menu dropdown-menu-end min-w-auto shadow-sm">
-                                                        <li><a class="dropdown-item small py-1" href="{{ path('app_switch_currency', {'currency': 'TND'}) }}">🇹🇳 TND</a></li>
-                                                        <li><a class="dropdown-item small py-1" href="{{ path('app_switch_currency', {'currency': 'EUR'}) }}">🇪🇺 EUR</a></li>
-                                                        <li><a class="dropdown-item small py-1" href="{{ path('app_switch_currency', {'currency': 'USD'}) }}">🇺🇸 USD</a></li>
-                                                    </ul>
-                                                </div>
-                                            </li>
-                                            <li class="list-inline-item h6 fw-light mb-1 mb-sm-0">
-                                                <i class="fas fa-signal text-primary me-1"></i>
-                                                {{ investment.riskLevel ?? 'N/A' }}
-                                            </li>
-                                            <li class="list-inline-item h6 fw-light">
-                                                <i class="bi bi-tag text-orange me-1"></i>
-                                                {{ investment.category }}
-                                            </li>
-                                        </ul>
+                                        <div class="bg-light rounded-3 p-3 mb-4 flex-grow-1 shadow-sm" style="border: 1px solid rgba(111, 66, 193, 0.1);">
+                                            <ul class="list-inline mb-0 d-flex flex-wrap justify-content-between align-items-center">
+                                                <li class="list-inline-item h6 fw-bold mb-2 mb-sm-0 d-inline-flex align-items-center gap-1" style="font-size: 1.1rem;">
+                                                    <i class="bi bi-cash-coin" style="color: #6f42c1;"></i>
+                                                    <strong class="text-success">{{ investment.estimatedValue|format_currency }}</strong>
+                                                    <div class="dropdown ms-1">
+                                                        <button class="btn btn-sm btn-light p-0 px-1 border lh-1" type="button" data-bs-toggle="dropdown" style="border-radius: 4px;"><i class="bi bi-arrow-left-right small"></i></button>
+                                                        <ul class="dropdown-menu dropdown-menu-end min-w-auto shadow-sm">
+                                                            <li><a class="dropdown-item small py-1" href="{{ path('app_switch_currency', {'currency': 'TND'}) }}">🇹🇳 TND</a></li>
+                                                            <li><a class="dropdown-item small py-1" href="{{ path('app_switch_currency', {'currency': 'EUR'}) }}">🇪🇺 EUR</a></li>
+                                                            <li><a class="dropdown-item small py-1" href="{{ path('app_switch_currency', {'currency': 'USD'}) }}">🇺🇸 USD</a></li>
+                                                        </ul>
+                                                    </div>
+                                                </li>
+                                                <li class="list-inline-item h6 mb-2 mb-sm-0 d-inline-flex align-items-center" style="color: #4b0082; font-size: 0.95rem;">
+                                                    <i class="bi bi-activity border border-purple rounded p-1 me-1" style="color: #6f42c1; background: #f3ebff;"></i>
+                                                    {{ investment.riskLevel ?? 'N/A' }}
+                                                </li>
+                                                <li class="list-inline-item h6 mb-0 d-inline-flex align-items-center" style="color: #4b0082; font-size: 0.95rem;">
+                                                    <i class="bi bi-tag-fill me-1" style="color: #6f42c1;"></i>
+                                                    {{ investment.category }}
+                                                </li>
+                                            </ul>
+                                        </div>
 
                                         <!-- Footer: actions -->
-                                        <div class="d-sm-flex justify-content-sm-between align-items-center">
+                                        <div class="d-sm-flex justify-content-sm-between align-items-center mt-auto border-top pt-3" style="border-color: rgba(111, 66, 193, 0.1) !important;">
 
                                             <!-- Created by badge -->
-                                            <div class="d-flex align-items-center">
-                                                <div class="avatar">
-                                                    <img class="avatar-img rounded-circle"
+                                            <div class="d-flex align-items-center mb-3 mb-sm-0">
+                                                <div class="avatar avatar-sm">
+                                                    <img class="avatar-img rounded-circle shadow-sm border border-2" style="border-color: #6f42c1 !important;"
                                                          src="{{ asset('assets/images/avatar/10.jpg') }}" alt="avatar">
                                                 </div>
                                                 <p class="mb-0 ms-2">
-                                                    <span class="h6 fw-light">FINORA Analyst</span>
+                                                    <span class="h6 fw-bold mb-0" style="color: #4b0082; font-size: 0.9rem;">FINORA Analyst</span>
                                                 </p>
                                             </div>
 
                                             <!-- Action buttons -->
-                                            <div class="mt-3 mt-sm-0 d-flex gap-2">
-
-                                                <a href="{{ path('app_management_new', {'inv_id': investment.id}) }}" class="btn btn-primary btn-sm">
+                                            <div class="d-flex gap-2">
+                                                <a href="{{ path('app_management_new', {'inv_id': investment.id}) }}" class="btn btn-sm px-3 shadow-sm text-white" style="background: linear-gradient(90deg, #6f42c1, #5a32a3); border-radius: 8px;">
                                                     <i class="bi bi-wallet2 me-1"></i>Investir
                                                 </a>
 
                                                 <a href="{{ path('app_investment_show', {'id': investment.id}) }}"
-                                                   class="btn btn-dark btn-sm">
-                                                    <i class="bi bi-eye me-1"></i>Voir
+                                                   class="btn btn-dark btn-sm px-3 shadow-sm" style="border-radius: 8px;" title="Voir">
+                                                    <i class="bi bi-eye"></i>
                                                 </a>
 
                                                 {% if app.session.get('role', 'user') == 'user' %}
                                                     <a href="{{ path('app_investment_edit', {'id': investment.id}) }}"
-                                                       class="btn btn-outline-warning btn-sm">
-                                                        <i class="bi bi-pencil me-1"></i>Modifier
+                                                       class="btn btn-sm px-3 shadow-sm text-white" style="background-color: #ff9800; border-radius: 8px;" title="Modifier">
+                                                        <i class="bi bi-pencil"></i>
                                                     </a>
 
                                                     <form method="post"
                                                           action="{{ path('app_investment_delete', {'id': investment.id}) }}"
                                                           onsubmit="return confirm('Supprimer cet investissement ?');"
-                                                          class="d-inline">
+                                                          class="d-inline m-0">
                                                         <input type="hidden" name="_token"
                                                                value="{{ csrf_token('delete' ~ investment.id) }}">
-                                                        <button class="btn btn-outline-danger btn-sm">
-                                                            <i class="bi bi-trash me-1"></i>Supprimer
+                                                        <button class="btn btn-sm px-3 shadow-sm text-white" style="background-color: #e53935; border-radius: 8px;" title="Supprimer">
+                                                            <i class="bi bi-trash"></i>
                                                         </button>
                                                     </form>
                                                 {% endif %}
-
                                             </div>
 
                                         </div>
 
                                     </div>
                                 </div>
-
                             </div>
                         </div>
                     </div>
@@ -407,25 +410,9 @@
                 <!-- Investment list END -->
 
                 <!-- Pagination -->
-                {% if investments|length > 0 %}
-                <div class="col-12 mt-4">
-                    <nav class="d-flex justify-content-center" aria-label="navigation">
-                        <ul class="pagination pagination-primary-soft d-inline-block d-md-flex rounded mb-0">
-                            <li class="page-item mb-0">
-                                <a class="page-link" href="#" tabindex="-1">
-                                    <i class="fas fa-angle-double-left"></i>
-                                </a>
-                            </li>
-                            <li class="page-item mb-0 active"><a class="page-link" href="#">1</a></li>
-                            <li class="page-item mb-0"><a class="page-link" href="#">2</a></li>
-                            <li class="page-item mb-0"><a class="page-link" href="#">3</a></li>
-                            <li class="page-item mb-0">
-                                <a class="page-link" href="#">
-                                    <i class="fas fa-angle-double-right"></i>
-                                </a>
-                            </li>
-                        </ul>
-                    </nav>
+                {% if investments.getTotalItemCount() > 0 %}
+                <div class="col-12 mt-4 d-flex justify-content-center">
+                    {{ knp_pagination_render(investments) }}
                 </div>
                 {% endif %}
 

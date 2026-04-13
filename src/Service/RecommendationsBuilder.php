@@ -16,10 +16,10 @@ final class RecommendationsBuilder
     }
 
     /** @return array<string, mixed> */
-    public function getInternalApiData(): array
+    public function getInternalApiData(int $limit = 6): array
     {
-        $byValue = $this->investmentRepository->findTopActiveByEstimatedValue(3);
-        $byRisk = $this->investmentRepository->findTopActiveByLowestRisk(3);
+        $byValue = $this->investmentRepository->findTopActiveByEstimatedValue($limit);
+        $byRisk = $this->investmentRepository->findTopActiveByLowestRisk($limit);
 
         $topValue = array_map(fn (Investment $i) => $this->serializeInvestment($i, 'internal_value'), $byValue);
         $topRisk = array_map(fn (Investment $i) => $this->serializeInvestment($i, 'internal_risk'), $byRisk);
@@ -27,58 +27,59 @@ final class RecommendationsBuilder
         $mergedInternal = $this->mergeTopByEstimatedValue(
             $topValue,
             $topRisk,
-            3,
+            $limit,
         );
 
         return [
             'top_by_estimated_value' => $topValue,
             'top_by_lowest_risk' => $topRisk,
-            'merged_top_3' => $mergedInternal,
+            'merged_top' => $mergedInternal,
             'by_highest_estimated_value' => $topValue,
             'by_lowest_risk_level' => $topRisk,
             'meta' => [
                 'scope' => 'ACTIVE investments only',
-                'limit_per_ranking' => 3,
+                'limit_per_ranking' => $limit,
             ],
         ];
     }
 
     /** @return array<string, mixed> */
-    public function getExternalApiData(): array
+    public function getExternalApiData(int $limit = 6): array
     {
-        $internalValue = $this->investmentRepository->findTopActiveByEstimatedValue(3);
-        $internalRisk = $this->investmentRepository->findTopActiveByLowestRisk(3);
+        $internalValue = $this->investmentRepository->findTopActiveByEstimatedValue($limit);
+        $internalRisk = $this->investmentRepository->findTopActiveByLowestRisk($limit);
 
         $externalStatic = $this->getExternalStaticRows();
+        // Optionnel : Couper seulement une partie si on veut imiter une API ? On simule tout le tableau.
 
         $internalRows = array_merge(
             array_map(fn (Investment $i) => $this->serializeInvestment($i, 'internal_value'), $internalValue),
             array_map(fn (Investment $i) => $this->serializeInvestment($i, 'internal_risk'), $internalRisk),
         );
 
-        $mergedTop3 = $this->mergeInternalExternalBalanced($internalRows, $externalStatic, 3);
+        $mergedTop = $this->mergeInternalExternalBalanced($internalRows, $externalStatic, $limit);
 
         return [
             'internal' => [
                 'top_by_estimated_value' => array_map(fn (Investment $i) => $this->serializeInvestment($i, 'internal_value'), $internalValue),
                 'top_by_lowest_risk' => array_map(fn (Investment $i) => $this->serializeInvestment($i, 'internal_risk'), $internalRisk),
             ],
-            'external' => $externalStatic,
-            'merged_top_3' => $mergedTop3,
+            'external' => array_slice($externalStatic, 0, $limit),
+            'merged_top' => $mergedTop,
             'meta' => [
                 'internal_value_count' => \count($internalValue),
                 'internal_risk_count' => \count($internalRisk),
-                'external_count' => \count($externalStatic),
-                'note' => 'merged_top_3: quota 2 internes + 1 externe (si les deux sources existent), puis tri par valeur ; complété si moins de 3 lignes.',
+                'external_count' => min(\count($externalStatic), $limit),
+                'note' => 'merged_top: quota 2 internes + 1 externe (si les deux sources existent), puis tri par valeur.',
             ],
         ];
     }
 
     public function getMergedTopForHome(): array
     {
-        $data = $this->getExternalApiData();
+        $data = $this->getExternalApiData(3);
 
-        return $data['merged_top_3'];
+        return $data['merged_top'];
     }
 
     /**
@@ -136,6 +137,39 @@ final class RecommendationsBuilder
                 'category' => 'HOTEL',
                 'location' => 'Centre-ville',
                 'estimated_value' => '2100000.00',
+                'risk_level' => 'MEDIUM',
+                'image_filename' => null,
+                'status' => 'ACTIVE',
+            ],
+            [
+                'id' => 9004,
+                'source' => 'external_partner',
+                'name' => 'AgriTech Valley (simulé)',
+                'category' => 'STARTUP',
+                'location' => 'Zone Rurale',
+                'estimated_value' => '650000.00',
+                'risk_level' => 'HIGH',
+                'image_filename' => null,
+                'status' => 'ACTIVE',
+            ],
+            [
+                'id' => 9005,
+                'source' => 'external_partner',
+                'name' => 'Complexe Résidentiel (simulé)',
+                'category' => 'IMMOBILIER',
+                'location' => 'Quartier Nouveau',
+                'estimated_value' => '4500000.00',
+                'risk_level' => 'LOW',
+                'image_filename' => null,
+                'status' => 'ACTIVE',
+            ],
+            [
+                'id' => 9006,
+                'source' => 'external_partner',
+                'name' => 'Ferme Solaire Intelligente (simulé)',
+                'category' => 'STARTUP',
+                'location' => 'Désert',
+                'estimated_value' => '1000000.00',
                 'risk_level' => 'MEDIUM',
                 'image_filename' => null,
                 'status' => 'ACTIVE',

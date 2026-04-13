@@ -14,6 +14,7 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Knp\Component\Pager\PaginatorInterface;
 
 #[Route('/investment')]
 final class InvestmentController extends AbstractController
@@ -47,7 +48,7 @@ final class InvestmentController extends AbstractController
      * ================= INDEX =================
      */
     #[Route(name: 'app_investment_index', methods: ['GET'])]
-    public function index(Request $request, InvestmentRepository $investmentRepository): Response
+    public function index(Request $request, InvestmentRepository $investmentRepository, PaginatorInterface $paginator): Response
     {
         if ($redirect = $this->checkAccess($request)) return $redirect;
 
@@ -56,8 +57,16 @@ final class InvestmentController extends AbstractController
         $risk = $request->query->get('risk');
         $sort = $request->query->get('sort');
 
+        $queryBuilder = $investmentRepository->searchAndFilterQuery($search, $category, $risk, $sort);
+
+        $investments = $paginator->paginate(
+            $queryBuilder,
+            $request->query->getInt('page', 1),
+            6 // Number of items per page
+        );
+
         return $this->render('investment/index.html.twig', [
-            'investments' => $investmentRepository->searchAndFilter($search, $category, $risk, $sort),
+            'investments' => $investments,
         ]);
     }
 
