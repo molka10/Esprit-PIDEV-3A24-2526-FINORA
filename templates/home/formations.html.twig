@@ -60,6 +60,7 @@
                                 <i class="fas fa-search"></i>
                             </button>
                         </div>
+                        <div id="voice-status" class="small text-muted mt-2"></div>
                     </form>
 
                     <div class="row g-3">
@@ -413,6 +414,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const titreInput = document.getElementById('fo-titre-search');
     const voiceBtn = document.getElementById('voice-btn');
     const voiceSearchInput = document.getElementById('voice-search-input');
+    const voiceStatus = document.getElementById('voice-status');
 
     let timeout = null;
     let mediaRecorder = null;
@@ -439,51 +441,131 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (mediaRecorder && mediaRecorder.state === 'recording') {
                     mediaRecorder.stop();
                     voiceBtn.innerText = '🎤';
+                    if (voiceStatus) {
+                        voiceStatus.textContent = 'Analyse en cours...';
+                    }
+                    return;
+                }
+
+                if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                    if (voiceStatus) {
+                        voiceStatus.textContent = 'Le microphone n’est pas supporté sur ce navigateur.';
+                    }
+                    return;
+                }
+
+                if (!window.MediaRecorder) {
+                    if (voiceStatus) {
+                        voiceStatus.textContent = 'MediaRecorder n’est pas disponible sur ce navigateur.';
+                    }
                     return;
                 }
 
                 const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
 
-                mediaRecorder = new MediaRecorder(stream);
+                let mimeType = 'audio/webm';
+                if (MediaRecorder.isTypeSupported('audio/webm;codecs=opus')) {
+                    mimeType = 'audio/webm;codecs=opus';
+                } else if (MediaRecorder.isTypeSupported('audio/webm')) {
+                    mimeType = 'audio/webm';
+                } else if (MediaRecorder.isTypeSupported('audio/mp4')) {
+                    mimeType = 'audio/mp4';
+                }
+
+                mediaRecorder = new MediaRecorder(stream, { mimeType });
                 audioChunks = [];
 
                 mediaRecorder.ondataavailable = event => {
-                    audioChunks.push(event.data);
+                    if (event.data && event.data.size > 0) {
+                        audioChunks.push(event.data);
+                    }
                 };
 
                 mediaRecorder.onstop = async () => {
                     try {
-                        const blob = new Blob(audioChunks, { type: 'audio/webm' });
+                        const blob = new Blob(audioChunks, { type: mimeType });
+
+                        if (blob.size === 0) {
+                            if (voiceStatus) {
+                                voiceStatus.textContent = 'Aucun son détecté.';
+                            }
+                            return;
+                        }
 
                         const response = await fetch('{{ path('api_stt') }}', {
                             method: 'POST',
+                            headers: {
+                                'Content-Type': mimeType,
+                                'Accept': 'application/json'
+                            },
                             body: blob
                         });
 
-                        const data = await response.json();
+                        const rawText = await response.text();
+                        let data = null;
 
-                        if (data.text) {
+                        try {
+                            data = JSON.parse(rawText);
+                        } catch (jsonError) {
+                            if (voiceStatus) {
+                                voiceStatus.textContent = 'Réponse serveur invalide: ' + rawText.substring(0, 120);
+                            }
+                            return;
+                        }
+
+                        if (data.success && data.text) {
                             voiceSearchInput.value = data.text;
-                            form.querySelector('input[name="titre"]').value = data.text;
+
+                            const filterSearch = document.getElementById('fo-titre-search');
+                            if (filterSearch) {
+                                filterSearch.value = data.text;
+                            }
+
+                            if (voiceStatus) {
+                                voiceStatus.textContent = 'Texte reconnu : ' + data.text;
+                            }
+
                             document.getElementById('hero-search-form').submit();
+                        } else {
+                            if (voiceStatus) {
+                                voiceStatus.textContent = data.error
+                                    ? 'Erreur serveur: ' + data.error
+                                    : 'Aucun texte reconnu.';
+                            }
                         }
                     } catch (error) {
                         console.error('Erreur STT:', error);
+                        if (voiceStatus) {
+                            voiceStatus.textContent = error.message
+                                ? 'Erreur: ' + error.message
+                                : 'Erreur lors de la transcription.';
+                        }
+                    } finally {
+                        voiceBtn.innerText = '🎤';
+                        stream.getTracks().forEach(track => track.stop());
                     }
                 };
 
                 mediaRecorder.start();
                 voiceBtn.innerText = '⏹';
+                if (voiceStatus) {
+                    voiceStatus.textContent = 'Enregistrement... Parlez maintenant.';
+                }
 
                 setTimeout(() => {
                     if (mediaRecorder && mediaRecorder.state === 'recording') {
                         mediaRecorder.stop();
-                        voiceBtn.innerText = '🎤';
                     }
                 }, 6000);
 
             } catch (error) {
                 console.error('Erreur micro:', error);
+                if (voiceStatus) {
+                    voiceStatus.textContent = error.message
+                        ? 'Erreur micro: ' + error.message
+                        : 'Impossible d’accéder au microphone.';
+                }
+                voiceBtn.innerText = '🎤';
             }
         });
     }

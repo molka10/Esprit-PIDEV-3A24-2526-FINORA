@@ -1,7 +1,7 @@
 parameters:
     youtube_api_key: '%env(YOUTUBE_API_KEY)%'
     deepgram_api_key: '%env(DEEPGRAM_API_KEY)%'
-
+    groq_api_key: '%env(GROQ_API_KEY)%'
 services:
     _defaults:
         autowire: true
@@ -21,3 +21,10 @@ services:
     App\Service\TextToSpeechService:
         arguments:
             $apiKey: '%deepgram_api_key%'
+    App\Service\GroqQuizService:
+        arguments:
+            $apiKey: '%groq_api_key%'
+
+    App\Service\SpeechToTextService:
+        arguments:
+            $apiKey: '%deepgram_api_key%'        

@@ -1,0 +1,67 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Résultat du quiz{% endblock %}
+
+{% block body %}
+<header class="navbar-light navbar-sticky">
+    <nav class="navbar navbar-expand-xl z-index-9">
+        <div class="container">
+            <a class="navbar-brand" href="{{ path('app_home') }}">
+                <img class="light-mode-item navbar-brand-item" src="{{ asset('assets/images/logo.svg') }}" alt="logo">
+                <img class="dark-mode-item navbar-brand-item" src="{{ asset('assets/images/logo-light.svg') }}" alt="logo">
+            </a>
+        </div>
+    </nav>
+</header>
+
+<main>
+    <section class="py-5" style="background: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);">
+        <div class="container">
+            <div class="mx-auto" style="max-width: 760px;">
+
+                <div class="card border-0 shadow-sm overflow-hidden">
+                    <div class="p-4 p-md-5 text-center" style="background: linear-gradient(135deg, #ede9fe 0%, #f5f3ff 55%, #ffffff 100%);">
+                        <span class="badge {{ passed ? 'bg-success' : 'bg-warning text-dark' }} mb-3">
+                            {{ passed ? 'Quiz réussi' : 'Quiz non réussi' }}
+                        </span>
+
+                        <h1 class="h2 fw-bold mb-2">Résultat de {{ studentName }}</h1>
+                        <p class="text-muted mb-4">{{ lesson.titre }}</p>
+
+                        <div class="display-5 fw-bold mb-3" style="color:#6d28d9;">
+                            {{ score }}%
+                        </div>
+
+                        <p class="mb-4">
+                            Bonnes réponses : <strong>{{ correctAnswers }}/{{ totalQuestions }}</strong>
+                        </p>
+
+                        {% if passed %}
+                            <div class="alert alert-success border-0 mb-4" style="background:#ecfdf3; color:#166534;">
+                                Félicitations {{ studentName }} ! Vous avez réussi le quiz et obtenu votre certificat FINORA.
+                            </div>
+                        {% endif %}
+
+                        <div class="d-flex justify-content-center gap-2 flex-wrap">
+                            <a href="{{ path('app_quiz_take', {'id': lesson.id}) }}" class="btn btn-primary">
+                                Refaire le quiz
+                            </a>
+
+                            <a href="{{ path('app_lesson_show', {'id': lesson.id}) }}" class="btn btn-outline-secondary">
+                                Retour à la leçon
+                            </a>
+
+                            {% if passed and quizResult is defined %}
+                                <a href="{{ path('app_quiz_certificate', {'id': quizResult.id}) }}" class="btn btn-warning">
+                                    🎓 Voir mon certificat
+                                </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+</main>
+{% endblock %}

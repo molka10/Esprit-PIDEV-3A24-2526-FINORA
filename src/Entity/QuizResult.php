@@ -13,75 +13,75 @@ class QuizResult
     #[ORM\Column(type: 'integer')]
     private ?int $id = null;
 
+    #[ORM\Column(type: 'string', length: 255, nullable: false)]
+    private ?string $studentName = null;
+
+    #[ORM\Column(type: 'integer', nullable: false)]
+    private ?int $lessonId = null;
+
+    #[ORM\Column(type: 'string', length: 255, nullable: false)]
+    private ?string $lessonTitle = null;
+
+    #[ORM\Column(type: 'string', length: 255, nullable: false)]
+    private ?string $formationTitle = null;
+
+    #[ORM\Column(type: 'integer', nullable: false)]
+    private ?int $score = null;
+
+    #[ORM\Column(type: 'integer', nullable: false)]
+    private ?int $passed = null;
+
+    #[ORM\Column(type: 'datetime', nullable: true)]
+    private ?\DateTimeInterface $takenAt = null;
+
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function setId(int $id): self
+    public function getStudentName(): ?string
     {
-        $this->id = $id;
+        return $this->studentName;
+    }
+
+    public function setStudentName(string $studentName): self
+    {
+        $this->studentName = trim($studentName);
         return $this;
     }
 
-    #[ORM\Column(type: 'string', nullable: false)]
-    private ?string $student_name = null;
-
-    public function getStudent_name(): ?string
+    public function getLessonId(): ?int
     {
-        return $this->student_name;
+        return $this->lessonId;
     }
 
-    public function setStudent_name(string $student_name): self
+    public function setLessonId(int $lessonId): self
     {
-        $this->student_name = $student_name;
+        $this->lessonId = $lessonId;
         return $this;
     }
 
-    #[ORM\Column(type: 'integer', nullable: false)]
-    private ?int $lesson_id = null;
-
-    public function getLesson_id(): ?int
+    public function getLessonTitle(): ?string
     {
-        return $this->lesson_id;
+        return $this->lessonTitle;
     }
 
-    public function setLesson_id(int $lesson_id): self
+    public function setLessonTitle(string $lessonTitle): self
     {
-        $this->lesson_id = $lesson_id;
+        $this->lessonTitle = trim($lessonTitle);
         return $this;
     }
 
-    #[ORM\Column(type: 'string', nullable: false)]
-    private ?string $lesson_title = null;
-
-    public function getLesson_title(): ?string
+    public function getFormationTitle(): ?string
     {
-        return $this->lesson_title;
+        return $this->formationTitle;
     }
 
-    public function setLesson_title(string $lesson_title): self
+    public function setFormationTitle(string $formationTitle): self
     {
-        $this->lesson_title = $lesson_title;
+        $this->formationTitle = trim($formationTitle);
         return $this;
     }
-
-    #[ORM\Column(type: 'string', nullable: false)]
-    private ?string $formation_title = null;
-
-    public function getFormation_title(): ?string
-    {
-        return $this->formation_title;
-    }
-
-    public function setFormation_title(string $formation_title): self
-    {
-        $this->formation_title = $formation_title;
-        return $this;
-    }
-
-    #[ORM\Column(type: 'integer', nullable: false)]
-    private ?int $score = null;
 
     public function getScore(): ?int
     {
@@ -94,9 +94,6 @@ class QuizResult
         return $this;
     }
 
-    #[ORM\Column(type: 'integer', nullable: false)]
-    private ?int $passed = null;
-
     public function getPassed(): ?int
     {
         return $this->passed;
@@ -108,77 +105,19 @@ class QuizResult
         return $this;
     }
 
-    #[ORM\Column(type: 'datetime', nullable: true)]
-    private ?\DateTimeInterface $taken_at = null;
-
-    public function getTaken_at(): ?\DateTimeInterface
+    public function isPassed(): bool
     {
-        return $this->taken_at;
-    }
-
-    public function setTaken_at(\DateTimeInterface $taken_at): self
-    {
-        $this->taken_at = $taken_at;
-        return $this;
-    }
-
-    public function getStudentName(): ?string
-    {
-        return $this->student_name;
-    }
-
-    public function setStudentName(string $student_name): static
-    {
-        $this->student_name = $student_name;
-
-        return $this;
-    }
-
-    public function getLessonId(): ?int
-    {
-        return $this->lesson_id;
-    }
-
-    public function setLessonId(int $lesson_id): static
-    {
-        $this->lesson_id = $lesson_id;
-
-        return $this;
-    }
-
-    public function getLessonTitle(): ?string
-    {
-        return $this->lesson_title;
-    }
-
-    public function setLessonTitle(string $lesson_title): static
-    {
-        $this->lesson_title = $lesson_title;
-
-        return $this;
-    }
-
-    public function getFormationTitle(): ?string
-    {
-        return $this->formation_title;
-    }
-
-    public function setFormationTitle(string $formation_title): static
-    {
-        $this->formation_title = $formation_title;
-
-        return $this;
+        return (int) $this->passed === 1;
     }
 
     public function getTakenAt(): ?\DateTimeInterface
     {
-        return $this->taken_at;
+        return $this->takenAt;
     }
 
-    public function setTakenAt(?\DateTimeInterface $taken_at): static
+    public function setTakenAt(?\DateTimeInterface $takenAt): self
     {
-        $this->taken_at = $taken_at;
-
+        $this->takenAt = $takenAt;
         return $this;
     }
 }

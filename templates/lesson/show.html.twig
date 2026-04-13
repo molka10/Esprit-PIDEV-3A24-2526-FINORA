@@ -82,6 +82,10 @@
                                 <a href="{{ path('app_lesson_related_videos', {'id': lesson.id}) }}" class="btn btn-warning">
                                     🎥 Vidéos recommandées
                                 </a>
+
+                                <a href="{{ path('app_quiz_take', {'id': lesson.id}) }}" class="btn btn-primary">
+                                    🧠 Passer le quiz
+                                </a>
                             </div>
                         </div>
                     </div>
@@ -230,6 +234,10 @@
                                         <a href="{{ path('app_lesson_related_videos', {'id': lesson.id}) }}" class="btn btn-warning">
                                             🎥 Vidéos recommandées
                                         </a>
+
+                                        <a href="{{ path('app_quiz_take', {'id': lesson.id}) }}" class="btn btn-primary">
+                                            🧠 Passer le quiz
+                                        </a>
                                     </div>
                                 </div>
                             </div>
@@ -305,7 +313,6 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     let isStopped = true;
-    let currentUrl = null;
 
     playBtn.addEventListener('click', async function () {
         try {
@@ -316,13 +323,10 @@ document.addEventListener('DOMContentLoaded', function () {
             }
 
             isStopped = false;
-            currentUrl = baseTtsUrl + '?v=' + Date.now();
 
             audio.pause();
-            audio.removeAttribute('src');
-            audio.load();
-
-            audio.src = currentUrl;
+            audio.currentTime = 0;
+            audio.src = baseTtsUrl + '?v=' + Date.now();
             status.textContent = 'Chargement audio...';
 
             const onCanPlay = async () => {
@@ -361,25 +365,20 @@ document.addEventListener('DOMContentLoaded', function () {
 
     stopBtn.addEventListener('click', function () {
         isStopped = true;
-        currentUrl = null;
-
         audio.pause();
         audio.currentTime = 0;
         audio.removeAttribute('src');
         audio.load();
-
         status.textContent = 'Lecture arrêtée.';
     });
 
     audio.addEventListener('ended', function () {
         isStopped = true;
-        currentUrl = null;
         status.textContent = 'Lecture terminée.';
     });
 
     audio.addEventListener('error', function () {
         isStopped = true;
-        currentUrl = null;
         status.textContent = 'Erreur de chargement audio.';
     });
 });

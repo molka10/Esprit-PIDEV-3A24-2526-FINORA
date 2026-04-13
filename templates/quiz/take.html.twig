@@ -1,0 +1,85 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Quiz - {{ lesson.titre }}{% endblock %}
+
+{% block body %}
+<header class="navbar-light navbar-sticky">
+    <nav class="navbar navbar-expand-xl z-index-9">
+        <div class="container">
+            <a class="navbar-brand" href="{{ path('app_home') }}">
+                <img class="light-mode-item navbar-brand-item" src="{{ asset('assets/images/logo.svg') }}" alt="logo">
+                <img class="dark-mode-item navbar-brand-item" src="{{ asset('assets/images/logo-light.svg') }}" alt="logo">
+            </a>
+        </div>
+    </nav>
+</header>
+
+<main>
+    <section class="py-5" style="background: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);">
+        <div class="container">
+            <div class="mx-auto" style="max-width: 900px;">
+
+                <div class="card border-0 shadow-sm overflow-hidden mb-4">
+                    <div class="p-4 p-md-5" style="background: linear-gradient(135deg, #ede9fe 0%, #f5f3ff 55%, #ffffff 100%);">
+                        <span class="badge bg-primary bg-opacity-10 text-primary mb-3">Quiz IA</span>
+                        <h1 class="h2 fw-bold mb-2">{{ lesson.titre }}</h1>
+                        <p class="text-muted mb-0">
+                            Répondez aux 5 questions générées à partir du contenu de cette leçon.
+                        </p>
+                    </div>
+                </div>
+
+                <form method="post" action="{{ path('app_quiz_submit', {'id': lesson.id}) }}">
+                    <div class="card border-0 shadow-sm mb-4">
+                        <div class="card-body p-4">
+                            <label for="student_name" class="form-label fw-semibold">Votre nom</label>
+                            <input
+                                type="text"
+                                id="student_name"
+                                name="student_name"
+                                class="form-control"
+                                placeholder="Entrez votre nom"
+                                required
+                            >
+                        </div>
+                    </div>
+
+                    {% for question in questions %}
+                        <div class="card border-0 shadow-sm mb-4">
+                            <div class="card-body p-4">
+                                <h3 class="h5 fw-bold mb-3">
+                                    Question {{ loop.index }} — {{ question.question }}
+                                </h3>
+
+                                <div class="d-grid gap-2">
+                                    {% for option in question.options %}
+                                        <label class="border rounded-3 p-3 d-flex align-items-center gap-2">
+                                            <input
+                                                type="radio"
+                                                name="answer_{{ loop.parent.loop.index0 }}"
+                                                value="{{ loop.index0 }}"
+                                                required
+                                            >
+                                            <span>{{ option }}</span>
+                                        </label>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+
+                    <div class="d-flex gap-2 flex-wrap">
+                        <button type="submit" class="btn btn-primary">
+                            Soumettre le quiz
+                        </button>
+                        <a href="{{ path('app_lesson_show', {'id': lesson.id}) }}" class="btn btn-outline-secondary">
+                            Retour à la leçon
+                        </a>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+    </section>
+</main>
+{% endblock %}
