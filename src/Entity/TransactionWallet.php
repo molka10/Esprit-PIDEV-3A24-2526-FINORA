@@ -5,7 +5,7 @@ namespace App\Entity;
 use Doctrine\ORM\Mapping as ORM;
 use App\Entity\Category;
 use App\Repository\TransactionWalletRepository;
-
+use Symfony\Component\Validator\Constraints as Assert;
 #[ORM\Entity(repositoryClass: TransactionWalletRepository::class)]
 #[ORM\Table(name: "transaction_wallet")]
 class TransactionWallet
@@ -16,15 +16,20 @@ class TransactionWallet
     private ?int $id = null;
 
     #[ORM\Column(name: "nom_transaction")]
+    #[Assert\NotBlank(message: "Nom obligatoire")]
     private ?string $nomTransaction = null;
 
     #[ORM\Column]
     private ?string $type = null;
 
+
     #[ORM\Column(name: "montant")]
+    #[Assert\NotBlank(message: "Montant obligatoire")]
+
     private ?float $montant = null;
 
     #[ORM\Column(name: "date_transaction", type: "datetime")]    
+    #[Assert\NotNull(message: "Date obligatoire")]
     private ?\DateTimeInterface $dateTransaction = null;
 
     #[ORM\Column(nullable: true)]
@@ -57,7 +62,7 @@ class TransactionWallet
         return $this->nomTransaction;
     }
 
-    public function setNomTransaction(string $nomTransaction): static
+    public function setNomTransaction(?string $nomTransaction): static
     {
         $this->nomTransaction = $nomTransaction;
         return $this;
@@ -79,7 +84,7 @@ class TransactionWallet
         return $this->montant;
     }
 
-    public function setMontant(float $montant): static
+  public function setMontant(?float $montant): static
     {
         $this->montant = $montant;
         return $this;

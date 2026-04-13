@@ -212,8 +212,10 @@ $chartOutcome = array_column($chartDates, 'outcome');
 
 $data = $req->request->all();
 
-$type = $data['type'] ?? 'INCOME';
-$transaction->setType($type);
+
+if (isset($data['type'])) {
+    $transaction->setType($data['type']);
+}
 
         $form = $this->createForm(TransactionType::class, $transaction, [
     'show_type' => false,

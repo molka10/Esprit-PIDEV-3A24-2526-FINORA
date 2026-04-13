@@ -16,22 +16,34 @@
             </a>
         </div>
 
-        {{ form_start(form) }}
+        {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
 
-        <div class="form-group">
-            {{ form_label(form.nomTransaction) }}
-            {{ form_widget(form.nomTransaction) }}
-        </div>
+       <div class="form-group">
+    <div class="label-row">
+        {{ form_label(form.nomTransaction) }}
+        {{ form_errors(form.nomTransaction) }}
+    </div>
 
-        <div class="form-group">
-            {{ form_label(form.montant) }}
-            {{ form_widget(form.montant) }}
-        </div>
+    {{ form_widget(form.nomTransaction) }}
+</div>
 
-        <div class="form-group">
-            {{ form_label(form.dateTransaction) }}
-            {{ form_widget(form.dateTransaction) }}
-        </div>
+      <div class="form-group">
+    <div class="label-row">
+        {{ form_label(form.montant) }}
+        {{ form_errors(form.montant) }}
+    </div>
+
+    {{ form_widget(form.montant) }}
+</div>
+
+       <div class="form-group">
+    <div class="label-row">
+        {{ form_label(form.dateTransaction) }}
+        {{ form_errors(form.dateTransaction) }}
+    </div>
+
+    {{ form_widget(form.dateTransaction) }}
+</div>
 
         
         {{ form_end(form) }}

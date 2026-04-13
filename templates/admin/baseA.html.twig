@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>{% block title %}FINORA Admin{% endblock %}</title>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="/assets/vendor/bootstrap-icons/bootstrap-icons.css">
+
+    <style>
+        :root {
+            --bg: #f8faff;
+            --card: #ffffff;
+            --text: #0f172a;
+            --muted: #64748b;
+
+            --primary: #6c5ce7;
+            --primary-light: #a29bfe;
+
+            --border: #e5e7eb;
+            --shadow: 0 10px 25px rgba(0,0,0,0.05);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+        }
+
+        /* SIDEBAR */
+        .sidebar {
+    width: 240px;
+    height: 100vh;
+    position: fixed;
+    left: 0;
+    top: 0;
+    background: linear-gradient(180deg, #1e1b4b, #312e81);
+    padding: 20px;
+    color: white;
+}
+h1 {
+    margin-bottom: 20px;
+}
+.search-input {
+    margin-top: 10px;
+    margin-bottom: 25px;
+}
+/* TITLE */
+.sidebar h2 {
+    margin-bottom: 30px;
+    color: white;
+}
+
+/* LINKS */
+.nav-link {
+    display: block;
+    color: #c7d2fe;
+    padding: 10px 12px;
+    border-radius: 10px;
+    margin-bottom: 8px;
+    text-decoration: none;
+    transition: 0.3s;
+}
+
+/* HOVER */
+.nav-link:hover {
+    background: rgba(255,255,255,0.1);
+    color: white;
+}
+
+/* ACTIVE */
+.nav-link.active {
+    background: linear-gradient(135deg, #6c5ce7, #a29bfe);
+    color: white;
+    font-weight: 500;
+}
+
+        /* PAGE */
+        .page-content {
+            margin-left: 240px;
+            min-height: 100vh;
+        }
+
+        /* TOPBAR */
+        .top-bar {
+            background: white;
+            padding: 15px 25px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* CONTENT */
+       .page-content-wrapper {
+    padding: 35px 40px;
+}
+
+        /* CARDS */
+        .card, .box {
+            background: var(--card);
+            border-radius: 16px;
+              padding: 30px;
+    margin-bottom: 30px;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
+        }
+
+        /* BUTTON */
+        .btn-purple {
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            color: white;
+            border: none;
+            padding: 8px 18px;
+            border-radius: 999px;
+            cursor: pointer;
+        }
+
+        table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+}
+
+th {
+    background: var(--primary);
+    color: white;
+    padding: 12px;
+    text-align: left;
+    font-weight: 600;
+}
+
+td {
+    padding: 10px;
+    border-bottom: 1px solid var(--border);
+}
+
+tr:nth-child(even) {
+    background: #f9fafb;
+}
+
+.header-admin {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+}
+
+.header-left {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.search-input {
+    padding: 10px 14px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    width: 250px;
+}
+    </style>
+<link rel="stylesheet" href="{{ asset('css/style.css') }}">
+    {% block stylesheets %}{% endblock %}
+</head>
+
+<body>
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+    <h2>💰 FINORA</h2>
+
+    <a class="nav-link {{ app.request.get('_route') starts with 'app_admin' ? 'active' : '' }}"
+       href="{{ path('app_admin') }}">
+        Admin wallet
+    </a>
+</div>
+
+<!-- PAGE -->
+<div class="page-content">
+
+    <!-- TOP BAR -->
+    <div class="top-bar">
+        <h3>{% block page_title %}Dashboard{% endblock %}</h3>
+
+       
+    </div>
+
+    <!-- FLASH -->
+    {% for label, messages in app.flashes %}
+        {% for message in messages %}
+            <div class="card" style="margin:20px;">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endfor %}
+
+    <!-- CONTENT -->
+    <div class="page-content-wrapper">
+        {% block body %}{% endblock %}
+    </div>
+
+</div>
+
+{% block javascripts %}{% endblock %}
+
+</body>
+</html>

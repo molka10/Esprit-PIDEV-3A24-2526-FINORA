@@ -1,49 +1,114 @@
-<h2 style="text-align:center; margin-bottom:20px; color:#1e3a8a;">
-    Transactions Report
+<h2 style="
+    text-align:center;
+    margin-bottom:8px;
+    color:#1e3a8a;
+    font-size:24px;
+">
+     Transactions Report
 </h2>
 
-<table style="width:100%; border-collapse:collapse; font-family:Arial;">
+<p style="
+    text-align:center;
+    font-size:12px;
+    color:#64748b;
+    margin-bottom:20px;
+">
+    Generated on {{ "now"|date("Y-m-d H:i") }}
+</p>
+
+<table style="
+    width:100%;
+    border-collapse:separate;
+    border-spacing:0;
+    font-family:Arial;
+    border-radius:10px;
+    overflow:hidden;
+">
 
     <thead>
-        <tr style="background:#1e3a8a; color:white;">
-            <th style="padding:10px; border:1px solid #e5e7eb;">Nom</th>
-            <th style="padding:10px; border:1px solid #e5e7eb;">Type</th>
-            <th style="padding:10px; border:1px solid #e5e7eb;">Montant</th>
-            <th style="padding:10px; border:1px solid #e5e7eb;">Category</th>
-            <th style="padding:10px; border:1px solid #e5e7eb;">Date</th>
+        <tr style="
+            background:linear-gradient(135deg,#4f46e5,#7c3aed);
+            color:white;
+        ">
+            <th style="padding:12px;">Nom</th>
+            <th style="padding:12px;">Type</th>
+            <th style="padding:12px;">Montant</th>
+            <th style="padding:12px;">Category</th>
+            <th style="padding:12px;">Date</th>
         </tr>
     </thead>
 
     <tbody>
+    {% set total = 0 %}
+
     {% for t in transactions %}
-        <tr style="background:#f9fafb;">
+        {% set total = total + (t.type == 'INCOME' ? t.montant : -t.montant) %}
+
+        <tr style="
+            background:{{ loop.index is even ? '#f8faff' : '#ffffff' }};
+        ">
             
-            <td style="padding:8px; border:1px solid #e5e7eb;">
+            <td style="padding:10px;">
                 {{ t.nomTransaction }}
             </td>
 
-            <td style="padding:8px; border:1px solid #e5e7eb; text-align:center;">
+            <td style="padding:10px; text-align:center;">
                 {% if t.type == 'INCOME' %}
-                    <span style="color:#1e3a8a; font-weight:bold;">INCOME</span>
+                    <span style="
+                        color:#4f46e5;
+                        font-weight:600;
+                    ">
+                        INCOME
+                    </span>
                 {% else %}
-                    <span style="color:#374151; font-weight:bold;">OUTCOME</span>
+                    <span style="
+                        color:#ef4444;
+                        font-weight:600;
+                    ">
+                        OUTCOME
+                    </span>
                 {% endif %}
             </td>
 
-            <td style="padding:8px; border:1px solid #e5e7eb; text-align:center; color:#0f172a; font-weight:500;">
-                {{ t.montant }} DT
+            <td style="
+                padding:10px;
+                text-align:center;
+                font-weight:600;
+                color:#111827;
+            ">
+                {{ t.type == 'INCOME' ? '+' : '-' }}{{ t.montant }} DT
             </td>
 
-            <td style="padding:8px; border:1px solid #e5e7eb; color:#475569;">
-                {{ t.category ? t.category.nom : '' }}
+            <td style="padding:10px; color:#475569;">
+                {{ t.category ? t.category.nom : '-' }}
             </td>
 
-            <td style="padding:8px; border:1px solid #e5e7eb; color:#64748b;">
+            <td style="padding:10px; color:#64748b;">
                 {{ t.dateTransaction|date('Y-m-d') }}
             </td>
 
         </tr>
     {% endfor %}
+
+    <!-- TOTAL ROW -->
+    <tr style="
+        background:#eef2ff;
+        font-weight:bold;
+    ">
+        <td colspan="2">Total</td>
+        <td>{{ total }} DT</td>
+        <td colspan="2"></td>
+    </tr>
+
     </tbody>
 
 </table>
+
+<p style="
+    margin-top:20px;
+    text-align:right;
+    font-size:11px;
+    color:#94a3b8;
+">
+    Finora • Smart Finance System
+</p>

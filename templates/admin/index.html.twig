@@ -1,6 +1,6 @@
-{% extends 'base.html.twig' %}
+{% extends 'admin/baseA.html.twig' %}
 
-{% block content %}
+{% block body %}
 
 <div class="admin">
 
@@ -64,8 +64,14 @@
 
     </div>
 
-   <div class="chart-box" style="max-width:600px; margin:auto;">
-    <canvas id="stackedChart"></canvas>
+
+
+    
+  <div class="box">
+    <h3 class="center-title">Overview</h3>
+    <div class="chart-box big-chart">
+        <canvas id="stackedChart"></canvas>
+    </div>
 </div>
 
         
@@ -136,12 +142,10 @@ new Chart(ctx, {
         },
         scales: {
             x: {
-                stacked: true,
                 grid: { display: false },
                 ticks: { color: '#9ca3af' }
             },
             y: {
-                stacked: true,
                 grid: { color: '#f1f5f9' },
                 ticks: { color: '#9ca3af' }
             }

@@ -5,7 +5,7 @@ namespace App\Entity;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
-
+use Symfony\Component\Validator\Constraints as Assert;
 #[ORM\Entity]
 #[ORM\Table(name: "category")]
 
@@ -28,13 +28,20 @@ public function __construct()
     private ?int $id = null;
 
     #[ORM\Column]
-    private ?string $nom = null;
+#[Assert\NotBlank(message: "Le nom est obligatoire")]
+#[Assert\Length(
+    min: 3,
+    minMessage: "Le nom doit contenir au moins {{ limit }} caractères"
+)]
+private ?string $nom = null;
 
-    #[ORM\Column]
-    private ?string $type = null;
+#[ORM\Column]
+#[Assert\NotBlank(message: "Le type est obligatoire")]
+private ?string $type = null;
 
-   #[ORM\Column(type: "string")]
-    private ?string $priorite = null;
+#[ORM\Column(type: "string")]
+#[Assert\NotBlank(message: "La priorité est obligatoire")]
+private ?string $priorite = null;
 
     #[ORM\Column(name: "user_id", nullable: true)]
     private ?int $userId = null;
@@ -44,14 +51,14 @@ public function __construct()
     public function getId(): ?int { return $this->id; }
 
     public function getNom(): ?string { return $this->nom; }
-    public function setNom(string $nom): self { $this->nom = $nom; return $this; }
+    public function setNom(?string $nom): self { $this->nom = $nom; return $this; }
 
     public function getType(): ?string { return $this->type; }
-    public function setType(string $type): self { $this->type = $type; return $this; }
+    public function setType(?string $type): self { $this->type = $type; return $this; }
 
     public function getPriorite(): ?string { return $this->priorite; }
 
-    public function setPriorite(string $priorite): self { $this->priorite = $priorite; return $this; }
+    public function setPriorite(?string $priorite): self { $this->priorite = $priorite; return $this; }
 
     public function getUserId(): ?int { return $this->userId; }
     public function setUserId(int $id): self { $this->userId = $id; return $this; }

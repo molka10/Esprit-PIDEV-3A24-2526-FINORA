@@ -1,6 +1,6 @@
-{% extends 'base.html.twig' %}
+{% extends 'admin/baseA.html.twig' %}
 
-{% block content %}
+{% block body %}
 
 <div class="admin">
 
@@ -33,7 +33,7 @@
                         <td>{{ t.type }}</td>
 
                         <td class="{{ t.type == 'INCOME' ? 'green' : 'red' }}">
-                            {{ t.montant }} DT
+                            {{ t.type == 'INCOME' ? '' : '-' }}{{ t.montant }} DT
                         </td>
 
                         <td>{{ t.dateTransaction|date('Y-m-d') }}</td>
@@ -48,14 +48,14 @@
         </table>
 
     </div>
- <div class="chart-container">
+ <div class="chart-container" style="display:grid; grid-template-columns:1fr 1fr; gap:24px; margin-top:28px;">
 
-    <div class="chart-donut">
+    <div class="chart-donut" style="height:280px; position:relative;">
         <h3> Overview</h3>
         <canvas id="chartUser"></canvas>
     </div>
 
-    <div class="chart-line">
+    <div class="chart-line" style="height:280px; position:relative;">
         <h3>Transactions</h3>
         <canvas id="lineChartUser"></canvas>
     </div>

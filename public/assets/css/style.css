@@ -22,8 +22,8 @@
   --green:        #3b82f6;        /* income = blue */
   --green-bg:     #dbeafe;
 
-  --red:          #64748b;        /* outcome = gray */
-  --red-bg:       #e2e8f0;
+  --red:          #ef4444;        /* outcome = red */
+  --red-bg:       #fee2e2;
 
   --amber:        #94a3b8;
   --cyan:         #60a5fa;
@@ -46,7 +46,7 @@
 
   /* shadows متناسقة */
   --shadow-green: 0 4px 12px rgba(59,130,246,0.25);
-  --shadow-red:   0 4px 12px rgba(100,116,139,0.25);
+  --shadow-red:   0 4px 12px rgba(239,68,68,0.25);
   --shadow-btn:   0 4px 12px rgba(59,130,246,0.3);
 
   --ease: cubic-bezier(0.4,0,0.2,1);
@@ -753,7 +753,7 @@ input[type="radio"], input[type="checkbox"] { width: auto; accent-color: var(--n
   margin-bottom: 16px;
 }
 
-canvas { max-height: 220px; }
+canvas { max-height: 300px; }
 
 /* ── FOOTER — dark, matching screenshot 2 ─────────────────── */
 footer, .site-footer {
@@ -1220,4 +1220,47 @@ body {
 }
 .chart-box {
   overflow: hidden;
+  margin-top: 30px;
+    padding: 30px;
+}
+.box {
+    transition: 0.3s;
+}
+
+.box:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 15px 40px rgba(0,0,0,0.08);
+}
+.form-group {
+    position: relative;
+}
+
+/* error bubble */
+/* label + error in same line */
+.label-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+/* remove old bubble */
+.form-group ul {
+    position: static !important;
+    background: none !important;
+    box-shadow: none !important;
+    border: none !important;
+    padding: 0 !important;
+}
+
+/* remove arrow & icon */
+.form-group ul::before,
+.form-group ul::after {
+    display: none !important;
+}
+
+/* error text style */
+.form-group ul li {
+    color: #ef4444; /* red clean */
+    font-size: 12px;
+    font-weight: 500;
 }
