@@ -22,12 +22,35 @@ final class InvestmentController extends AbstractController
         private readonly InvestmentImageUploader $imageUploader,
     ) {}
 
+    private function getRole(Request $request)
+    {
+        return $request->getSession()->get('role');
+    }
+
+    private function checkAccess(Request $request)
+    {
+        if (!in_array($this->getRole($request), ['admin', 'investisseur', 'user'])) {
+            return $this->redirectToRoute('choose_role');
+        }
+        return null;
+    }
+
+    private function checkUser(Request $request)
+    {
+        if ($this->getRole($request) !== 'user') {
+            return $this->redirectToRoute('app_investment_index');
+        }
+        return null;
+    }
+
     /**
      * ================= INDEX =================
      */
     #[Route(name: 'app_investment_index', methods: ['GET'])]
     public function index(Request $request, InvestmentRepository $investmentRepository): Response
     {
+        if ($redirect = $this->checkAccess($request)) return $redirect;
+
         $search = $request->query->get('search');
         $category = $request->query->get('category');
         $risk = $request->query->get('risk');
@@ -44,6 +67,8 @@ final class InvestmentController extends AbstractController
     #[Route('/new', name: 'app_investment_new', methods: ['GET', 'POST'])]
     public function new(Request $request, EntityManagerInterface $entityManager): Response
     {
+        if ($redirect = $this->checkUser($request)) return $redirect;
+
         $investment = new Investment();
         $form = $this->createForm(InvestmentType::class, $investment);
         $form->handleRequest($request);
@@ -74,9 +99,12 @@ final class InvestmentController extends AbstractController
      */
     #[Route('/{id}/management', name: 'app_investment_management', methods: ['GET'])]
     public function management(
+        Request $request,
         Investment $investment,
         InvestmentManagementRepository $managementRepository
     ): Response {
+        if ($redirect = $this->checkAccess($request)) return $redirect;
+
         return $this->render('investment/management.html.twig', [
             'investment' => $investment,
             'managements' => $managementRepository->findBy(['investment' => $investment]),
@@ -92,6 +120,8 @@ final class InvestmentController extends AbstractController
         Investment $investment,
         EntityManagerInterface $entityManager
     ): Response {
+        if ($redirect = $this->checkUser($request)) return $redirect;
+
         $previousImage = $investment->getImageUrl();
 
         $form = $this->createForm(InvestmentType::class, $investment);
@@ -122,8 +152,10 @@ final class InvestmentController extends AbstractController
      * ================= SHOW =================
      */
     #[Route('/{id}', name: 'app_investment_show', methods: ['GET'])]
-    public function show(Investment $investment): Response
+    public function show(Request $request, Investment $investment): Response
     {
+        if ($redirect = $this->checkAccess($request)) return $redirect;
+
         return $this->render('investment/show.html.twig', [
             'investment' => $investment,
         ]);
@@ -138,6 +170,8 @@ final class InvestmentController extends AbstractController
         Investment $investment,
         EntityManagerInterface $entityManager
     ): Response {
+        if ($redirect = $this->checkUser($request)) return $redirect;
+
         if ($this->isCsrfTokenValid('delete'.$investment->getId(), $request->request->get('_token'))) {
 
             // 🔥 supprimer image aussi

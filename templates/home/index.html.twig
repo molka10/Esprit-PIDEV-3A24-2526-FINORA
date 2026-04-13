@@ -345,104 +345,7 @@
 </section>
 <!-- ======================= HERO SECTION END ======================= -->
 
-<!-- ======================= RECOMMENDATIONS START ======================= -->
-<section class="pt-4 pb-4">
-    <div class="container">
 
-        <!-- Title -->
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <div>
-                <h2 class="fw-bold mb-1">🔥 Recommandations intelligentes</h2>
-                <p class="mb-0 text-muted small">
-                    Basées sur votre portfolio + partenaires externes
-                </p>
-            </div>
-        </div>
-
-        {% if merged_recommendations is empty %}
-            <div class="alert alert-info text-center">
-                Aucune recommandation disponible pour le moment.
-            </div>
-        {% else %}
-
-        <div class="row g-4">
-
-            {% for row in merged_recommendations %}
-                <div class="col-md-6 col-xl-4">
-
-                    <div class="card shadow-hover border-0 h-100">
-
-                        <div class="card-body d-flex flex-column">
-
-                            <!-- badges -->
-                            <div class="d-flex justify-content-between mb-2">
-
-                                <span class="badge 
-                                    {% if row.source == 'external_partner' %}
-                                        bg-info
-                                    {% else %}
-                                        bg-primary
-                                    {% endif %}">
-                                    {{ row.source == 'external_partner' ? 'Externe' : 'Portfolio' }}
-                                </span>
-
-                                <span class="badge
-                                    {% if row.risk_level == 'LOW' %}
-                                        bg-success
-                                    {% elseif row.risk_level == 'MEDIUM' %}
-                                        bg-warning text-dark
-                                    {% else %}
-                                        bg-danger
-                                    {% endif %}">
-                                    {{ row.risk_level }}
-                                </span>
-
-                            </div>
-
-                            <!-- name -->
-                            <h5 class="card-title">
-                                {{ row.name }}
-                            </h5>
-
-                            <!-- category -->
-                            <p class="small text-muted mb-1">
-                                {{ investment_category_label(row.category) }}
-                            </p>
-
-                            <!-- location -->
-                            <p class="small mb-2">📍 {{ row.location }}</p>
-
-                            <!-- value -->
-                            <h5 class="text-primary mt-auto">
-                                {{ row.estimated_value }} TND
-                            </h5>
-
-                            <!-- action -->
-                            {% if row.source != 'external_partner' %}
-                                <a href="{{ path('app_investment_show', { id: row.id }) }}"
-                                   class="btn btn-sm btn-outline-primary mt-2">
-                                    Voir détail
-                                </a>
-                            {% else %}
-                                <small class="text-muted mt-2">
-                                    Suggestion partenaire (simulation)
-                                </small>
-                            {% endif %}
-
-                        </div>
-
-                    </div>
-
-                </div>
-            {% endfor %}
-
-        </div>
-
-        {% endif %}
-
-    </div>
-</section>
-<!-- ======================= RECOMMENDATIONS END ======================= -->
 <!-- ======================= CATEGORY SLIDER START ======================= -->
 <section>
     <div class="container">
@@ -630,28 +533,20 @@
             </div>
         </div>
 
-        <div class="row g-4">
-            {% for inv in investments|slice(0,3) %}
+        <!-- TOP 3 INTERNE -->
+        <div class="row g-4 mb-5">
+            <div class="col-12"><h4 class="mb-0 mt-4 text-primary"><i class="bi bi-star-fill text-warning me-2"></i>Nos Top 3 Internes</h4></div>
+            {% for inv in top3_interne %}
             <div class="col-md-6 col-xl-4">
                 <div class="card shadow-hover overflow-hidden bg-transparent">
                     <div class="position-relative">
-                        {% set img = investment_image_src(inv) ?: asset('assets/images/courses/4by3/16.jpg') %}
-
-<img class="card-img-top"
-     src="{{ img }}"
-     alt="{{ inv.name }}">
+                        {% set img = inv.image_url ? asset('uploads/investments/' ~ inv.image_url) : asset('assets/images/courses/4by3/16.jpg') %}
+                        <img class="card-img-top object-fit-cover" src="{{ img }}" alt="{{ inv.name }}" style="height: 250px;">
                         <div class="bg-overlay bg-dark opacity-4"></div>
                         <div class="card-img-overlay d-flex align-items-start flex-column">
                             <div class="w-100 mt-auto d-inline-flex">
                                 <div class="d-flex align-items-center bg-white p-2 rounded-2">
-                                    <div class="avatar avatar-sm me-2">
-                                        <img class="avatar-img rounded-1"
-                                             src="{{ asset('assets/images/avatar/10.jpg') }}" alt="avatar">
-                                    </div>
-                                    <div>
-                                        <h6 class="mb-0"><a href="#" class="text-dark">FINORA</a></h6>
-                                        <span class="small">Analyste</span>
-                                    </div>
+                                    <h6 class="mb-0 text-dark"><i class="bi bi-check-circle-fill text-success me-1"></i>Certifié</h6>
                                 </div>
                             </div>
                         </div>
@@ -660,41 +555,76 @@
                     <div class="card-body">
                         <div class="d-flex justify-content-between mb-3">
                             <div class="hstack gap-2">
-                                <a href="#" class="badge bg-orange bg-opacity-10 text-orange">{{ inv.category }}</a>
-                                <a href="#" class="badge text-bg-dark">Actif</a>
+                                <span class="badge bg-primary bg-opacity-10 text-primary">{{ inv.category }}</span>
+                                <span class="badge text-bg-success">Interne</span>
                             </div>
-                            <a href="#" class="h6 fw-light mb-0"><i class="far fa-bookmark"></i></a>
                         </div>
 
                         <h5 class="card-title">
                             <a href="{{ path('app_investment_show', {'id': inv.id}) }}">{{ inv.name }}</a>
                         </h5>
 
-                        <p class="small text-muted mb-2">{{ inv.description|slice(0,80) ~ '...' }}</p>
-
                         <ul class="list-inline mb-0">
-                            <li class="list-inline-item h6 fw-light mb-0">4.5</li>
-                            <li class="list-inline-item me-0 small"><i class="fas fa-star text-warning"></i></li>
-                            <li class="list-inline-item me-0 small"><i class="fas fa-star text-warning"></i></li>
-                            <li class="list-inline-item me-0 small"><i class="fas fa-star text-warning"></i></li>
-                            <li class="list-inline-item me-0 small"><i class="fas fa-star text-warning"></i></li>
-                            <li class="list-inline-item me-0 small"><i class="fas fa-star-half-alt text-warning"></i></li>
+                            <li class="list-inline-item me-0 small"><i class="bi bi-geo-alt me-1"></i>{{ inv.location ?? 'N/A' }}</li>
                         </ul>
 
                         <hr>
 
-                        <div class="d-flex justify-content-between align-items-center mb-2">
-                            <h4 class="text-success mb-0">{{ inv.estimatedValue }} TND</h4>
-                            <a href="{{ path('app_investment_show', {'id': inv.id}) }}"
-                               class="btn btn-sm btn-primary-soft mb-0">Voir détails</a>
+                        <div class="d-flex justify-content-between align-items-center mb-2 mt-4">
+                            <h4 class="text-success mb-0">{{ inv.estimated_value|number_format(2, ',', ' ') }} TND</h4>
+                            <a href="{{ path('app_investment_show', {'id': inv.id}) }}" class="btn btn-sm btn-primary-soft mb-0">Voir détails</a>
                         </div>
                     </div>
                 </div>
             </div>
             {% else %}
-            <div class="col-12">
-                <div class="alert alert-info">Aucun investissement disponible pour le moment.</div>
+            <div class="col-12"><div class="alert alert-info">Aucun investissement interne disponible.</div></div>
+            {% endfor %}
+        </div>
+
+        <!-- TOP 3 EXTERNE -->
+        <div class="row g-4">
+            <div class="col-12"><h4 class="mb-0 mt-2 text-info"><i class="bi bi-globe me-2"></i>Opportunités Partenaires</h4></div>
+            {% for inv in top3_externe %}
+            <div class="col-md-6 col-xl-4">
+                <div class="card shadow-hover overflow-hidden bg-transparent border-info border-opacity-25">
+                    <div class="position-relative">
+                        <img class="card-img-top object-fit-cover" src="{{ asset('assets/images/courses/4by3/04.jpg') }}" alt="{{ inv.name }}" style="height: 250px;">
+                        <div class="bg-overlay bg-info opacity-4"></div>
+                        <div class="card-img-overlay d-flex align-items-start flex-column">
+                            <div class="w-100 mt-auto d-inline-flex">
+                                <div class="d-flex align-items-center bg-white p-2 rounded-2">
+                                    <h6 class="mb-0 text-dark"><i class="bi bi-building text-info me-1"></i>Externe</h6>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between mb-3">
+                            <div class="hstack gap-2">
+                                <span class="badge bg-info bg-opacity-10 text-info">{{ inv.category }}</span>
+                                <span class="badge text-bg-dark">Partenaire</span>
+                            </div>
+                        </div>
+
+                        <h5 class="card-title">{{ inv.name }}</h5>
+
+                        <ul class="list-inline mb-0">
+                            <li class="list-inline-item me-0 small"><i class="bi bi-geo-alt-fill me-1"></i>{{ inv.location ?? 'N/A' }}</li>
+                        </ul>
+
+                        <hr>
+                        
+                        <div class="d-flex justify-content-between align-items-center mb-2 mt-4">
+                            <h4 class="text-info mb-0">{{ inv.estimated_value|number_format(2, ',', ' ') }} TND</h4>
+                            <button class="btn btn-sm btn-info-soft mb-0" disabled>Bientôt disponible</button>
+                        </div>
+                    </div>
+                </div>
             </div>
+            {% else %}
+            <div class="col-12"><div class="alert alert-info">Aucun investissement partenaire pour le moment.</div></div>
             {% endfor %}
         </div>
 

@@ -10,43 +10,35 @@
     <!-- ======================= FAVICON ======================= -->
     <link rel="shortcut icon" href="{{ asset('assets/images/favicon.ico') }}">
 
-    <!-- ======================= DARK MODE SCRIPT (must be first) ======================= -->
+    <!-- ======================= DARK MODE SCRIPT ======================= -->
     <script>
         const storedTheme = localStorage.getItem('theme');
         const getPreferredTheme = () => {
             if (storedTheme) return storedTheme;
-            return window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'light';
+            return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
         };
+
         const setTheme = function (theme) {
-            if (theme === 'auto' && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-                document.documentElement.setAttribute('data-bs-theme', 'dark');
-            } else {
-                document.documentElement.setAttribute('data-bs-theme', theme);
-            }
+            document.documentElement.setAttribute('data-bs-theme', theme);
         };
+        
         setTheme(getPreferredTheme());
 
         window.addEventListener('DOMContentLoaded', () => {
-            var el = document.querySelector('.theme-icon-active');
-            if (el != 'undefined' && el != null) {
-                const showActiveTheme = theme => {
-                    const activeThemeIcon = document.querySelector('.theme-icon-active use');
-                    const btnToActive = document.querySelector(`[data-bs-theme-value="${theme}"]`);
-                    const svgOfActiveBtn = btnToActive.querySelector('.mode-switch use').getAttribute('href');
-                    document.querySelectorAll('[data-bs-theme-value]').forEach(element => element.classList.remove('active'));
-                    btnToActive.classList.add('active');
-                    activeThemeIcon.setAttribute('href', svgOfActiveBtn);
-                };
-                window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
-                    if (storedTheme !== 'light' || storedTheme !== 'dark') setTheme(getPreferredTheme());
-                });
-                showActiveTheme(getPreferredTheme());
-                document.querySelectorAll('[data-bs-theme-value]').forEach(toggle => {
-                    toggle.addEventListener('click', () => {
-                        const theme = toggle.getAttribute('data-bs-theme-value');
-                        localStorage.setItem('theme', theme);
-                        setTheme(theme);
-                        showActiveTheme(theme);
+            const toggle = document.getElementById('darkModeToggle');
+            if (toggle) {
+                document.querySelectorAll('[data-bs-theme-value]').forEach(button => {
+                    button.addEventListener('click', () => {
+                        const next = button.getAttribute('data-bs-theme-value');
+                        localStorage.setItem('theme', next);
+                        setTheme(next);
+                        
+                        const mainIcon = document.getElementById('mainThemeIcon');
+                        if (next === 'dark') {
+                            mainIcon.className = 'bi bi-moon-stars-fill text-white fs-5';
+                        } else {
+                            mainIcon.className = 'bi bi-sun-fill text-warning fs-5';
+                        }
                     });
                 });
             }
@@ -176,6 +168,64 @@
                 from { opacity: 0; transform: translateY(8px); }
                 to   { opacity: 1; transform: translateY(0);   }
             }
+
+            /* ── DARK MODE OVERRIDES ── */
+            [data-bs-theme="dark"] body {
+                background: linear-gradient(180deg, #130f1c 0%, #1a1625 100%) !important;
+                color: #e2e8f0;
+            }
+            [data-bs-theme="dark"] .bg-light,
+            [data-bs-theme="dark"] .nav-light {
+                background-color: #1f1b2d !important;
+            }
+            [data-bs-theme="dark"] .card, 
+            [data-bs-theme="dark"] .dropdown-menu {
+                background-color: #1e1a2f;
+                border-color: #372f4f;
+                color: #e2e8f0;
+            }
+            [data-bs-theme="dark"] .card-header,
+            [data-bs-theme="dark"] .card-footer {
+                border-color: #372f4f;
+            }
+            [data-bs-theme="dark"] .text-muted {
+                color: #9ca3af !important;
+            }
+            [data-bs-theme="dark"] h1, [data-bs-theme="dark"] h2, 
+            [data-bs-theme="dark"] h3, [data-bs-theme="dark"] h4, 
+            [data-bs-theme="dark"] h5, [data-bs-theme="dark"] h6 {
+                color: #f8fafc;
+            }
+            [data-bs-theme="dark"] .form-control,
+            [data-bs-theme="dark"] .form-select,
+            [data-bs-theme="dark"] .input-group-text {
+                background-color: #161324 !important;
+                border-color: #372f4f;
+                color: #e2e8f0;
+            }
+            [data-bs-theme="dark"] .form-control:focus,
+            [data-bs-theme="dark"] .form-select:focus {
+                background-color: #161324 !important;
+                border-color: var(--finora-purple);
+                color: white;
+            }
+            [data-bs-theme="dark"] .navbar-light {
+                background-color: #130f1c !important;
+                border-bottom: 1px solid #372f4f;
+            }
+            [data-bs-theme="dark"] .table {
+                --bs-table-bg: transparent;
+                --bs-table-color: #e2e8f0;
+                border-color: #372f4f;
+            }
+            [data-bs-theme="dark"] .table-light,
+            [data-bs-theme="dark"] .table-hover>tbody>tr:hover>* {
+                background-color: #1f1b2d !important;
+                color: white;
+            }
+            [data-bs-theme="dark"] .page-content-wrapper {
+                background: linear-gradient(180deg, #130f1c 0%, #1a1625 100%) !important;
+            }
         </style>
 
     {% endblock %}
@@ -204,6 +254,41 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 {% endblock %}
+
+<!-- ======================= DARK MODE TOGGLE ======================= -->
+<div class="position-fixed" style="bottom: 20px; left: 20px; z-index: 1050;">
+    <div class="dropdown dropup">
+        <button id="darkModeToggle" class="btn btn-dark shadow rounded-circle d-flex align-items-center justify-content-center" 
+                type="button" data-bs-toggle="dropdown" aria-expanded="false"
+                style="width: 50px; height: 50px; border: 2px solid #5b21b6;">
+            <i id="mainThemeIcon" class="bi bi-circle-half text-white fs-5"></i>
+        </button>
+        <ul class="dropdown-menu dropdown-menu-start shadow mb-2 rounded-3 border-0 py-2" aria-labelledby="darkModeToggle">
+            <li>
+                <button type="button" class="dropdown-item d-flex align-items-center gap-2 fw-bold" data-bs-theme-value="light">
+                    <i class="bi bi-sun-fill text-warning"></i> Light Mode
+                </button>
+            </li>
+            <li>
+                <button type="button" class="dropdown-item d-flex align-items-center gap-2 fw-bold" data-bs-theme-value="dark">
+                    <i class="bi bi-moon-stars-fill text-dark"></i> Dark Mode
+                </button>
+            </li>
+        </ul>
+    </div>
+</div>
+<script>
+    // Initialize correct icon on load
+    window.addEventListener('DOMContentLoaded', () => {
+        const theme = document.documentElement.getAttribute('data-bs-theme');
+        const mainIcon = document.getElementById('mainThemeIcon');
+        if(theme === 'dark') {
+            mainIcon.className = 'bi bi-moon-stars-fill text-white fs-5';
+        } else {
+            mainIcon.className = 'bi bi-sun-fill text-warning fs-5';
+        }
+    });
+</script>
 
 <!-- ======================= BACK TO TOP ======================= -->
 <div class="back-top">

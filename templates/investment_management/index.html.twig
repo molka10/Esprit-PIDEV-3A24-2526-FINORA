@@ -43,7 +43,7 @@
                 💼 Investments
             </a>
 
-            {% if role == 'investisseur' %}
+            {% if role in ['admin', 'investisseur'] %}
                 <a href="{{ path('app_management_new') }}" class="btn btn-success">
                     ➕ New
                 </a>
@@ -107,13 +107,13 @@
 
                         <!-- VIEW -->
                         <a href="{{ path('app_management_show', {'id': item.id}) }}"
-                           class="btn btn-sm btn-primary">👁️</a>
+                           class="btn btn-sm btn-primary">voir details</a>
 
-                        {% if role == 'investisseur' %}
+                        {% if role in ['admin', 'investisseur'] %}
 
                             <!-- EDIT -->
                             <a href="{{ path('app_management_edit', {'id': item.id}) }}"
-                               class="btn btn-sm btn-warning">✏️</a>
+                               class="btn btn-sm btn-warning">modifier</a>
 
                             <!-- DELETE -->
                             <form method="post"

@@ -28,7 +28,8 @@ class HomeController extends AbstractController
     ): Response {
 
         return $this->render('home/index.html.twig', [
-            'merged_recommendations' => $this->recommendationsBuilder->getMergedTopForHome(),
+            'top3_interne' => $this->recommendationsBuilder->getTop3Interne(),
+            'top3_externe' => $this->recommendationsBuilder->getTop3Externe(),
             'investments' => $invRepo->findAll(),
             'managements' => $mgRepo->findAll(),
         ]);
@@ -39,9 +40,13 @@ class HomeController extends AbstractController
      */
     #[Route('/admin', name: 'admin_dashboard', methods: ['GET'])]
     public function dashboard(
+        \Symfony\Component\HttpFoundation\Request $request,
         InvestmentRepository $investmentRepo,
         InvestmentManagementRepository $managementRepo
     ): Response {
+        if ($request->getSession()->get('role') !== 'admin') {
+            return $this->redirectToRoute('choose_role');
+        }
 
         $investments = $investmentRepo->findAll();
         $totalInvestments = count($investments);

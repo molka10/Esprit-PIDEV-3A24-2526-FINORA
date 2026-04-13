@@ -23,7 +23,7 @@ class InvestmentManagementController extends AbstractController
 
     private function checkAccess(Request $request)
     {
-        if (!in_array($this->getRole($request), ['admin', 'investisseur'])) {
+        if (!in_array($this->getRole($request), ['admin', 'investisseur', 'user'])) {
             return $this->redirectToRoute('choose_role');
         }
         return null;
@@ -141,9 +141,6 @@ class InvestmentManagementController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-
-            $percent = (float)$item->getOwnershipPercentage();
-            $item->setStatus($percent == 100 ? 'CLOSED' : 'ACTIVE');
 
             $em->flush();
 

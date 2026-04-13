@@ -73,7 +73,7 @@ class InvestmentManagement
         return $this->investmentType;
     }
 
-    public function setInvestmentType(string $investmentType): self
+    public function setInvestmentType(?string $investmentType): self
     {
         $this->investmentType = $investmentType;
         return $this;
@@ -84,7 +84,7 @@ class InvestmentManagement
         return $this->amountInvested;
     }
 
-    public function setAmountInvested(string $amountInvested): self
+    public function setAmountInvested(?string $amountInvested): self
     {
         $this->amountInvested = $amountInvested;
         return $this;
@@ -95,7 +95,7 @@ class InvestmentManagement
         return $this->ownershipPercentage;
     }
 
-    public function setOwnershipPercentage(string $ownershipPercentage): self
+    public function setOwnershipPercentage(?string $ownershipPercentage): self
     {
         $this->ownershipPercentage = $ownershipPercentage;
         return $this;
@@ -106,7 +106,7 @@ class InvestmentManagement
         return $this->startDate;
     }
 
-    public function setStartDate(\DateTimeInterface $startDate): self
+    public function setStartDate(?\DateTimeInterface $startDate): self
     {
         $this->startDate = $startDate;
         return $this;
@@ -117,7 +117,7 @@ class InvestmentManagement
         return $this->status;
     }
 
-    public function setStatus(string $status): self
+    public function setStatus(?string $status): self
     {
         $this->status = $status;
         return $this;

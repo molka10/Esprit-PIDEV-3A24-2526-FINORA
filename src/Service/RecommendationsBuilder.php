@@ -74,16 +74,31 @@ final class RecommendationsBuilder
         ];
     }
 
-    /**
-     * Top 3 affiché sur l’accueil (même logique que l’API external merged_top_3).
-     *
-     * @return list<array<string, mixed>>
-     */
     public function getMergedTopForHome(): array
     {
         $data = $this->getExternalApiData();
 
         return $data['merged_top_3'];
+    }
+
+    /**
+     * @return list<array<string, mixed>>
+     */
+    public function getTop3Interne(): array
+    {
+        $internalValue = $this->investmentRepository->findTopActiveByEstimatedValue(3);
+        $topValue = array_map(fn (Investment $i) => $this->serializeInvestment($i, 'internal_value'), $internalValue);
+        
+        return $this->dedupeByIdSortByValueDesc($topValue);
+    }
+
+    /**
+     * @return list<array<string, mixed>>
+     */
+    public function getTop3Externe(): array
+    {
+        $externalStatic = $this->getExternalStaticRows();
+        return $this->dedupeByIdSortByValueDesc($externalStatic);
     }
 
     /**

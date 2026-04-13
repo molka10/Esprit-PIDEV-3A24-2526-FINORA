@@ -208,6 +208,7 @@
 
                                 <hr>
 
+                                {% if role == 'investisseur' %}
                                 <!-- INVEST BUTTON -->
                                 <div class="mt-4">
                                     <div class="d-grid">
@@ -217,16 +218,17 @@
                                     </div>
                                     <p class="small text-muted mb-0">Participez à ce projet dès aujourd'hui.</p>
                                 </div>
+                                {% endif %}
 
                             </div>
                         </div>
 
                         <!-- Admin Actions -->
                         {% set role = app.session.get('role') %}
-                        {% if role == 'admin' %}
+                        {% if role == 'user' %}
                             <div class="card shadow-sm border-0 border-top border-warning border-3">
                                 <div class="card-header bg-transparent mb-0 pb-0">
-                                    <h6 class="text-warning mb-0"><i class="bi bi-shield-lock me-1"></i>Administration</h6>
+                                    <h6 class="text-warning mb-0"><i class="bi bi-shield-lock me-1"></i>Gestion de l'Investissement</h6>
                                 </div>
                                 <div class="card-body">
                                     <div class="d-grid gap-2">
