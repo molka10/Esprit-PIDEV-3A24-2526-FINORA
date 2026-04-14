@@ -57,13 +57,21 @@ final class InvestmentController extends AbstractController
     {
         if ($redirect = $this->checkAccess($request)) return $redirect;
 
-        $search = $request->query->get('search');
-        $category = $request->query->get('category');
-        $risk = $request->query->get('risk');
-        $sort = $request->query->get('sort');
+        $params = $request->query->all();
+        $search = $params['search'] ?? null;
+        $category = $params['category'] ?? null;
+        $risk = $params['risk'] ?? null;
+        $sort = $params['sortBy'] ?? null;
+        $price = $params['price'] ?? null;
+
+        // Clean up array parameters (e.g. [''] to null)
+        if (is_array($category)) {
+            $category = array_filter($category);
+            $category = empty($category) ? null : array_values($category);
+        }
 
         // All roles see ALL investments (catalog)
-        $queryBuilder = $investmentRepository->searchAndFilterQuery($search, $category, $risk, $sort);
+        $queryBuilder = $investmentRepository->searchAndFilterQuery($search, $category, $risk, $sort, $price);
 
         $investments = $paginator->paginate(
             $queryBuilder,

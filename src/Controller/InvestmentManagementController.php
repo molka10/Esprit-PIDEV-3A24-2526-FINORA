@@ -159,8 +159,75 @@ class InvestmentManagementController extends AbstractController
         ]);
     }
 
+    // ================= AI PORTFOLIO REPORT =================
+    #[Route('/ai/report', name: 'app_management_ai_report', methods: ['POST'])]
+    public function generateAiReport(Request $request, InvestmentManagementRepository $repo, \App\Service\AiAssistantService $aiService): \Symfony\Component\HttpFoundation\JsonResponse
+    {
+        if ($redirect = $this->checkAccess($request)) {
+            return new \Symfony\Component\HttpFoundation\JsonResponse(['error' => 'Non autorisé'], 401);
+        }
+
+        $userId = $this->getUserId($request);
+        $role = $this->getRole($request);
+
+        $qb = $repo->createQueryBuilder('m')
+                   ->leftJoin('m.investment', 'i')
+                   ->addSelect('i');
+
+        if ($role !== 'admin' && $userId) {
+            $qb->andWhere('m.createdByUserId = :userId OR i.createdByUserId = :userId')
+               ->setParameter('userId', $userId);
+        }
+
+        $managements = $qb->getQuery()->getResult();
+
+        if (count($managements) === 0) {
+            return new \Symfony\Component\HttpFoundation\JsonResponse([
+                'html' => "<div class='alert alert-warning'>Votre portefeuille est vide. L'IA n'a pas de données à analyser.</div>"
+            ]);
+        }
+
+        $totalInvested = 0;
+        $riskCount = ['LOW' => 0, 'MEDIUM' => 0, 'HIGH' => 0];
+        $categoryCount = [];
+
+        foreach ($managements as $m) {
+            $amount = (float) $m->getAmountInvested();
+            $totalInvested += $amount;
+
+            $inv = $m->getInvestment();
+            if ($inv) {
+                $risk = $inv->getRiskLevel() ?? 'MEDIUM';
+                $cat = $inv->getCategory() ?? 'Autre';
+                
+                if (isset($riskCount[$risk])) {
+                    $riskCount[$risk] += $amount;
+                } else {
+                    $riskCount['MEDIUM'] += $amount;
+                }
+                
+                if (!isset($categoryCount[$cat])) {
+                    $categoryCount[$cat] = 0;
+                }
+                $categoryCount[$cat] += $amount;
+            } else {
+                $riskCount['MEDIUM'] += $amount;
+            }
+        }
+
+        $stats = [
+            'totalInvested' => $totalInvested,
+            'riskDistribution' => $riskCount,
+            'categoryDistribution' => $categoryCount
+        ];
+
+        $htmlReport = $aiService->generatePortfolioAnalysis($stats);
+
+        return new \Symfony\Component\HttpFoundation\JsonResponse(['html' => $htmlReport]);
+    }
+
     // ================= SHOW =================
-    #[Route('/{id}', name: 'app_management_show')]
+    #[Route('/{id}', name: 'app_management_show', requirements: ['id' => '\d+'])]
     public function show(Request $request, InvestmentManagement $item): Response
     {
         if ($redirect = $this->checkAccess($request)) return $redirect;

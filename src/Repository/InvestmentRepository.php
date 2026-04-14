@@ -74,15 +74,15 @@ class InvestmentRepository extends ServiceEntityRepository
     /**
      * 🔥 Recherche et tri global
      */
-    public function searchAndFilter(?string $search, ?string $category, ?string $risk, ?string $sort): array
+    public function searchAndFilter(?string $search, string|array|null $category, ?string $risk, ?string $sort, ?string $price = null): array
     {
-        return $this->searchAndFilterQuery($search, $category, $risk, $sort)->getQuery()->getResult();
+        return $this->searchAndFilterQuery($search, $category, $risk, $sort, $price)->getQuery()->getResult();
     }
 
     /**
      * 🔥 Recherche et tri global (Retourne le QueryBuilder pour la pagination)
      */
-    public function searchAndFilterQuery(?string $search, ?string $category, ?string $risk, ?string $sort): \Doctrine\ORM\QueryBuilder
+    public function searchAndFilterQuery(?string $search, string|array|null $category, ?string $risk, ?string $sort, ?string $price = null): \Doctrine\ORM\QueryBuilder
     {
         $qb = $this->createQueryBuilder('i');
 
@@ -91,14 +91,31 @@ class InvestmentRepository extends ServiceEntityRepository
                ->setParameter('search', '%' . strtolower($search) . '%');
         }
 
-        if ($category) {
-            $qb->andWhere('i.category = :category')
-               ->setParameter('category', $category);
+        if (!empty($category)) {
+            if (is_array($category)) {
+                $qb->andWhere('i.category IN (:category)')
+                   ->setParameter('category', $category);
+            } else {
+                $qb->andWhere('i.category = :category')
+                   ->setParameter('category', $category);
+            }
         }
 
         if ($risk) {
             $qb->andWhere('i.riskLevel = :risk')
                ->setParameter('risk', $risk);
+        }
+
+        if ($price) {
+            if ($price === '<10k') {
+                $qb->andWhere('i.estimatedValue < 10000');
+            } elseif ($price === '10k-50k') {
+                $qb->andWhere('i.estimatedValue >= 10000 AND i.estimatedValue <= 50000');
+            } elseif ($price === '50k-200k') {
+                $qb->andWhere('i.estimatedValue >= 50000 AND i.estimatedValue <= 200000');
+            } elseif ($price === '>200k') {
+                $qb->andWhere('i.estimatedValue > 200000');
+            }
         }
 
         if ($sort === 'asc') {
@@ -141,9 +158,9 @@ class InvestmentRepository extends ServiceEntityRepository
     /**
      * 🔐 Recherche et tri limité à un utilisateur (data isolation)
      */
-    public function searchAndFilterQueryForUser(?string $search, ?string $category, ?string $risk, ?string $sort, int $userId): \Doctrine\ORM\QueryBuilder
+    public function searchAndFilterQueryForUser(?string $search, string|array|null $category, ?string $risk, ?string $sort, int $userId): \Doctrine\ORM\QueryBuilder
     {
-        $qb = $this->searchAndFilterQuery($search, $category, $risk, $sort);
+        $qb = $this->searchAndFilterQuery($search, $category, $risk, $sort, null);
         $qb->andWhere('i.createdByUserId = :userId')
            ->setParameter('userId', $userId);
 

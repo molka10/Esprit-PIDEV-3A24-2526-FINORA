@@ -162,21 +162,7 @@
                 <form method="get" action="{{ path('app_investment_index') }}">
                     <div class="row g-3 align-items-center justify-content-md-end">
 
-                        <!-- Grid/List toggle -->
-                        <div class="col-sm-auto d-none d-md-block">
-                            <ul class="list-inline mb-0">
-                                <li class="list-inline-item">
-                                    <button type="button" class="btn btn-outline-light mb-0 me-1" id="btn-grid" title="Vue grille">
-                                        <i class="fas fa-fw fa-th-large"></i>
-                                    </button>
-                                </li>
-                                <li class="list-inline-item">
-                                    <button type="button" class="btn btn-outline-light mb-0 active" id="btn-list" title="Vue liste">
-                                        <i class="fas fa-fw fa-list-ul"></i>
-                                    </button>
-                                </li>
-                            </ul>
-                        </div>
+                        <!-- Icones supprimées à la demande -->
 
                         <!-- Category filter -->
                         <div class="col-md-3 border rounded p-1 input-borderless">
@@ -202,11 +188,11 @@
 
                         <!-- Sort -->
                         <div class="col-md-2 border rounded p-1 input-borderless">
-                            <select name="sort" class="form-select js-choice z-index-9">
+                            <select name="sortBy" class="form-select js-choice z-index-9">
                                 <option value="">Trier par</option>
-                                <option value="asc"  {{ app.request.get('sort') == 'asc'  ? 'selected' }}>Prix ↑</option>
-                                <option value="desc" {{ app.request.get('sort') == 'desc' ? 'selected' }}>Prix ↓</option>
-                                <option value="new"  {{ app.request.get('sort') == 'new'  ? 'selected' }}>Plus récent</option>
+                                <option value="asc"  {{ app.request.get('sortBy') == 'asc'  ? 'selected' }}>Prix ↑</option>
+                                <option value="desc" {{ app.request.get('sortBy') == 'desc' ? 'selected' }}>Prix ↓</option>
+                                <option value="new"  {{ app.request.get('sortBy') == 'new'  ? 'selected' }}>Plus récent</option>
                             </select>
                         </div>
 
@@ -499,19 +485,19 @@
                                 <h4 class="mb-3">Valeur estimée</h4>
                                 <ul class="list-inline mb-0">
                                     <li class="list-inline-item mb-2">
-                                        <input type="checkbox" class="btn-check" id="price-1">
+                                        <input type="radio" name="price" value="<10k" class="btn-check" id="price-1" {{ app.request.get('price') == '<10k' ? 'checked' }}>
                                         <label class="btn btn-light btn-primary-soft-check" for="price-1">&lt; 10k TND</label>
                                     </li>
                                     <li class="list-inline-item mb-2">
-                                        <input type="checkbox" class="btn-check" id="price-2">
+                                        <input type="radio" name="price" value="10k-50k" class="btn-check" id="price-2" {{ app.request.get('price') == '10k-50k' ? 'checked' }}>
                                         <label class="btn btn-light btn-primary-soft-check" for="price-2">10k–50k</label>
                                     </li>
                                     <li class="list-inline-item mb-2">
-                                        <input type="checkbox" class="btn-check" id="price-3">
+                                        <input type="radio" name="price" value="50k-200k" class="btn-check" id="price-3" {{ app.request.get('price') == '50k-200k' ? 'checked' }}>
                                         <label class="btn btn-light btn-primary-soft-check" for="price-3">50k–200k</label>
                                     </li>
                                     <li class="list-inline-item mb-2">
-                                        <input type="checkbox" class="btn-check" id="price-4">
+                                        <input type="radio" name="price" value=">200k" class="btn-check" id="price-4" {{ app.request.get('price') == '>200k' ? 'checked' }}>
                                         <label class="btn btn-light btn-primary-soft-check" for="price-4">&gt; 200k</label>
                                     </li>
                                 </ul>
@@ -522,19 +508,19 @@
                                 <h4 class="mb-3">Trier par</h4>
                                 <ul class="list-inline mb-0">
                                     <li class="list-inline-item mb-2">
-                                        <input type="checkbox" class="btn-check" id="sort-new">
+                                        <input type="radio" class="btn-check" name="sortBy" value="new" id="sort-new" {{ app.request.get('sortBy') == 'new' ? 'checked' }}>
                                         <label class="btn btn-light btn-primary-soft-check" for="sort-new">Plus récent</label>
                                     </li>
                                     <li class="list-inline-item mb-2">
-                                        <input type="checkbox" class="btn-check" id="sort-pop">
+                                        <input type="radio" class="btn-check" name="sortBy" value="" id="sort-pop" {{ app.request.get('sortBy') == '' ? 'checked' }}>
                                         <label class="btn btn-light btn-primary-soft-check" for="sort-pop">Populaire</label>
                                     </li>
                                     <li class="list-inline-item mb-2">
-                                        <input type="checkbox" class="btn-check" id="sort-asc">
+                                        <input type="radio" class="btn-check" name="sortBy" value="asc" id="sort-asc" {{ app.request.get('sortBy') == 'asc' ? 'checked' }}>
                                         <label class="btn btn-light btn-primary-soft-check" for="sort-asc">Prix ↑</label>
                                     </li>
                                     <li class="list-inline-item mb-2">
-                                        <input type="checkbox" class="btn-check" id="sort-desc">
+                                        <input type="radio" class="btn-check" name="sortBy" value="desc" id="sort-desc" {{ app.request.get('sortBy') == 'desc' ? 'checked' }}>
                                         <label class="btn btn-light btn-primary-soft-check" for="sort-desc">Prix ↓</label>
                                     </li>
                                 </ul>

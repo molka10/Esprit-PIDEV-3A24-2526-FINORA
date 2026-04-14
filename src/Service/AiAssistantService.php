@@ -436,4 +436,101 @@ TEXT;
 
         return $html;
     }
+
+    public function generatePortfolioAnalysis(array $portfolioStats): string
+    {
+        $jsonContext = json_encode($portfolioStats, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+
+        if (empty($this->geminiApiKey) || trim($this->geminiApiKey) === 'VOTRE_CLE_API_ICI') {
+            return "<div class='alert alert-warning'>API Gemini non configurée. Le Robo-Advisor est indisponible.</div>";
+        }
+
+        $systemInstruction = <<<TEXT
+# RÔLE ET IDENTITÉ
+Tu es "Finora Robo-Advisor", une intelligence artificielle d'analyse de portefeuille intégrée à la plateforme d'investissement Finora. Tu es professionnel, bienveillant, clair et extrêmement compétent en gestion de patrimoine.
+
+# CONTEXTE
+L'utilisateur te fournit le résumé complet de son portefeuille sous forme de données JSON (total investi, la répartition par catégorie, la répartition par niveau de risque).
+
+# TA MISSION
+Analyser ces données et produire un rapport de diagnostic condensé mais hautement stratégique. Tu dois absolument identifier :
+- Les forces du portefeuille (ex: bonne sélection si c'est diversifié).
+- Les faiblesses ou dangers (ex: trop concentré sur une seule catégorie, risque global trop élevé).
+- Une recommandation concrète sur le type d'actif à privilégier pour équilibrer le tout (ex: conseiller de l'immobilier "LOW RISK" si 100% de Startups "HIGH RISK").
+
+# RÈGLES DE SORTIE OBLIGATOIRES (HTML)
+- N'invente pas de chiffres. Reste strictement fidèle aux statistiques fournies.
+- Utilise UNIQUEMENT le HTML décrit ci-dessous, en utilisant les classes de Bootstrap 5.
+- INTERDIT d'utiliser markdown (pas de ```html).
+- Pas de balise <style>.
+- Fournis un rapport direct sans phrase d'intro bateau "Voici l'analyse demandée".
+
+UTILISE EXACTEMENT CE FORMAT HTML:
+
+<div class="p-4 rounded-3 mb-3 border-0" style="background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%); color: white; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1);">
+    <div class="d-flex align-items-center mb-4">
+        <div style="width: 50px; height: 50px; border-radius: 15px; background: linear-gradient(135deg, #7c3aed, #8b5cf6); display: flex; align-items: center; justify-content: center; margin-right: 15px;">
+            <i class="bi bi-robot fs-3 text-white"></i>
+        </div>
+        <div>
+            <h5 class="fw-bold mb-0">Diagnostic Robo-Advisor IA</h5>
+            <small class="text-white-50">Analyse de la diversification & risques</small>
+        </div>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-md-6">
+            <div class="p-3 rounded" style="background: rgba(255,255,255,0.05); border-left: 4px solid #10b981;">
+                <h6 class="fw-bold text-success"><i class="bi bi-shield-check me-2"></i>Points Forts</h6>
+                <p class="mb-0 small text-white-75">[Description des forces du portefeuille en 2 phrases]</p>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="p-3 rounded" style="background: rgba(255,255,255,0.05); border-left: 4px solid #f59e0b;">
+                <h6 class="fw-bold text-warning"><i class="bi bi-exclamation-triangle me-2"></i>Vigilance</h6>
+                <p class="mb-0 small text-white-75">[Description du manque de diversification ou du danger en 2 phrases]</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="p-3 rounded" style="background: rgba(124, 58, 237, 0.15); border: 1px solid rgba(124, 58, 237, 0.3);">
+        <h6 class="fw-bold" style="color: #c4b5fd;"><i class="bi bi-lightbulb me-2"></i>Recommandation Stratégique</h6>
+        <p class="mb-0 text-white">[Phrase claire recommandant précisément QUEL SECTEUR et QUEL NIVEAU DE RISQUE privilégier pour le prochain investissement afin de rééquilibrer]</p>
+    </div>
+</div>
+TEXT;
+
+        try {
+            $response = $this->httpClient->request('POST', 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent', [
+                'query' => [
+                    'key' => $this->geminiApiKey
+                ],
+                'json' => [
+                    'system_instruction' => [
+                        'parts' => [
+                            ['text' => $systemInstruction]
+                        ]
+                    ],
+                    'contents' => [
+                        ['role' => 'user', 'parts' => [['text' => "Voici les statistiques actuelles du portefeuille: " . $jsonContext]]]
+                    ],
+                    'generationConfig' => [
+                        'temperature' => 0.4,
+                    ]
+                ]
+            ]);
+
+            $data = $response->toArray();
+            if (isset($data['candidates'][0]['content']['parts'][0]['text'])) {
+                $text = $data['candidates'][0]['content']['parts'][0]['text'];
+                $text = str_replace('```html', '', $text);
+                $text = str_replace('```', '', $text);
+                return trim($text);
+            }
+        } catch (\Exception $e) {
+            return "<div class='alert alert-danger border-0'><i class='bi bi-exclamation-triangle me-2'></i>Erreur API: " . htmlspecialchars($e->getMessage()) . "</div>";
+        }
+
+        return "<div class='alert alert-danger border-0'>Impossible d'analyser le portefeuille.</div>";
+    }
 }
