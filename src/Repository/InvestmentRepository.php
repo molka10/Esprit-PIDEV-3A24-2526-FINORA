@@ -138,6 +138,18 @@ class InvestmentRepository extends ServiceEntityRepository
             ->getSingleScalarResult();
     }
 
+    /**
+     * 🔐 Recherche et tri limité à un utilisateur (data isolation)
+     */
+    public function searchAndFilterQueryForUser(?string $search, ?string $category, ?string $risk, ?string $sort, int $userId): \Doctrine\ORM\QueryBuilder
+    {
+        $qb = $this->searchAndFilterQuery($search, $category, $risk, $sort);
+        $qb->andWhere('i.createdByUserId = :userId')
+           ->setParameter('userId', $userId);
+
+        return $qb;
+    }
+
     // ================= LEGACY =================
 
     /** @deprecated */

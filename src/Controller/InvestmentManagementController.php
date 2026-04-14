@@ -37,6 +37,31 @@ class InvestmentManagementController extends AbstractController
         return null;
     }
 
+    private function getUserId(Request $request): ?int
+    {
+        return $request->getSession()->get('user_id');
+    }
+
+    /** 🔐 Check if the current non-admin user owns a management record (via its parent investment). */
+    private function checkOwnership(Request $request, InvestmentManagement $item): ?Response
+    {
+        $role = $this->getRole($request);
+        if ($role === 'admin') {
+            return null;
+        }
+        $userId = $this->getUserId($request);
+        $inv = $item->getInvestment();
+        // Check both the management record owner and the parent investment owner
+        if (
+            ($item->getCreatedByUserId() !== null && $item->getCreatedByUserId() !== $userId) ||
+            ($inv && $inv->getCreatedByUserId() !== null && $inv->getCreatedByUserId() !== $userId)
+        ) {
+            $this->addFlash('danger', 'Accès refusé.');
+            return $this->redirectToRoute('app_management_index');
+        }
+        return null;
+    }
+
     // ================= INDEX (COMME FORMATION) =================
     #[Route('/', name: 'app_management_index')]
     public function index(Request $request, InvestmentManagementRepository $repo, PaginatorInterface $paginator): Response
@@ -51,6 +76,14 @@ class InvestmentManagementController extends AbstractController
         $qb = $repo->createQueryBuilder('m')
                    ->leftJoin('m.investment', 'i')
                    ->addSelect('i');
+
+        // 🔐 Data isolation: non-admin users see only their own management records
+        $role = $this->getRole($request);
+        $userId = $this->getUserId($request);
+        if ($role !== 'admin' && $userId) {
+            $qb->andWhere('m.createdByUserId = :userId OR i.createdByUserId = :userId')
+               ->setParameter('userId', $userId);
+        }
 
         if ($search !== '') {
             $qb->andWhere('LOWER(m.investmentType) LIKE LOWER(:search)')
@@ -109,6 +142,12 @@ class InvestmentManagementController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
 
+            // 🔐 Stamp the owner
+            $userId = $this->getUserId($request);
+            if ($userId) {
+                $item->setCreatedByUserId($userId);
+            }
+
             $em->persist($item);
             $em->flush();
 
@@ -125,6 +164,7 @@ class InvestmentManagementController extends AbstractController
     public function show(Request $request, InvestmentManagement $item): Response
     {
         if ($redirect = $this->checkAccess($request)) return $redirect;
+        if ($redirect = $this->checkOwnership($request, $item)) return $redirect;
 
         return $this->render('investment_management/show.html.twig', [
             'item' => $item,
@@ -136,6 +176,7 @@ class InvestmentManagementController extends AbstractController
     public function edit(Request $request, InvestmentManagement $item, EntityManagerInterface $em): Response
     {
         if ($redirect = $this->checkInvestisseur($request)) return $redirect;
+        if ($redirect = $this->checkOwnership($request, $item)) return $redirect;
 
         $form = $this->createForm(InvestmentManagementType::class, $item);
         $form->handleRequest($request);
@@ -158,6 +199,7 @@ class InvestmentManagementController extends AbstractController
     public function delete(Request $request, InvestmentManagement $item, EntityManagerInterface $em): Response
     {
         if ($redirect = $this->checkInvestisseur($request)) return $redirect;
+        if ($redirect = $this->checkOwnership($request, $item)) return $redirect;
 
         if ($this->isCsrfTokenValid('delete'.$item->getId(), $request->request->get('_token'))) {
             $em->remove($item);

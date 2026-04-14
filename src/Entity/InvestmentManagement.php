@@ -44,6 +44,10 @@ class InvestmentManagement
     #[ORM\Column(name: "created_at", type: "datetime", nullable: true)]
     private ?\DateTimeInterface $createdAt = null;
 
+    /** Owner of this management record — used for data isolation. */
+    #[ORM\Column(name: 'created_by_user_id', type: 'integer', nullable: true)]
+    private ?int $createdByUserId = null;
+
     // 🔥 AJOUT IMPORTANT (comme Investment)
     public function getId(): ?int
     {
@@ -131,6 +135,17 @@ class InvestmentManagement
     public function setCreatedAt(?\DateTimeInterface $createdAt): self
     {
         $this->createdAt = $createdAt;
+        return $this;
+    }
+
+    public function getCreatedByUserId(): ?int
+    {
+        return $this->createdByUserId;
+    }
+
+    public function setCreatedByUserId(?int $createdByUserId): self
+    {
+        $this->createdByUserId = $createdByUserId;
         return $this;
     }
 }

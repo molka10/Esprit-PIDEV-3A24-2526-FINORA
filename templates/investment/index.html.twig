@@ -45,11 +45,14 @@
                             <i class="bi bi-briefcase me-1"></i>Management
                         </a>
                     </li>
+                    {% set role = app.session.get('role') %}
+                    {% if role == 'admin' %}
                     <li class="nav-item">
                         <a class="nav-link" href="{{ path('admin_dashboard') }}">
                             <i class="bi bi-speedometer2 me-1"></i>Dashboard
                         </a>
                     </li>
+                    {% endif %}
                 </ul>
 
                 <!-- Search -->
@@ -85,14 +88,18 @@
                             </div>
                             <div>
                                 <a class="h6" href="#">Mon Compte</a>
-                                <p class="small m-0">finora@example.com</p>
+                                <p class="small m-0">{{ app.session.get('role')|default('Visiteur')|capitalize }}</p>
                             </div>
                         </div>
                     </li>
                     <li><hr class="dropdown-divider"></li>
-                    <li><a class="dropdown-item" href="#"><i class="bi bi-person fa-fw me-2"></i>Profil</a></li>
+                    {% if app.session.get('role') == 'investisseur' %}
+                    <li><a class="dropdown-item" href="{{ path('app_investor_profile') }}"><i class="bi bi-person fa-fw me-2"></i>Mon Profil</a></li>
+                    {% endif %}
+                    {% if app.session.get('role') == 'admin' %}
                     <li><a class="dropdown-item" href="{{ path('admin_dashboard') }}"><i class="bi bi-speedometer2 fa-fw me-2"></i>Dashboard</a></li>
-                    <li><a class="dropdown-item bg-danger-soft-hover" href="#"><i class="bi bi-power fa-fw me-2"></i>Déconnexion</a></li>
+                    {% endif %}
+                    <li><a class="dropdown-item bg-danger-soft-hover" href="{{ path('logout_role') }}"><i class="bi bi-power fa-fw me-2"></i>Déconnexion</a></li>
                 </ul>
             </div>
 
@@ -228,11 +235,13 @@
 
                 <!-- Admin: Add button -->
                 {% set role = app.session.get('role') %}
+                {% if role in ['user', 'admin'] %}
                 <div class="d-flex justify-content-end mb-3">
                     <a href="{{ path('app_investment_new') }}" class="btn btn-success">
                         <i class="bi bi-plus-circle me-1"></i>Ajouter un investissement
                     </a>
                 </div>
+                {% endif %}
 
                 {% if role == 'investisseur' %}
                 <div class="alert alert-warning d-flex align-items-center gap-2 mb-4">
@@ -359,7 +368,7 @@
                                                     <i class="bi bi-eye"></i>
                                                 </a>
 
-                                                {% if app.session.get('role', 'user') == 'user' %}
+                                                {% if app.session.get('role') in ['user', 'admin'] %}
                                                     <a href="{{ path('app_investment_edit', {'id': investment.id}) }}"
                                                        class="btn btn-sm px-3 shadow-sm text-white" style="background-color: #ff9800; border-radius: 8px;" title="Modifier">
                                                         <i class="bi bi-pencil"></i>

@@ -91,26 +91,4 @@ class HomeController extends AbstractController
             'mngList' => $managementRepo->findAll(),
         ]);
     }
-
-    /**
-     * 📁 LISTE INVESTMENTS
-     */
-    #[Route('/investments', name: 'app_investment_index', methods: ['GET'])]
-    public function investments(InvestmentRepository $repo): Response
-    {
-        return $this->render('investment/index.html.twig', [
-            'investments' => $repo->findAll(),
-        ]);
-    }
-
-    /**
-     * 📁 LISTE MANAGEMENT
-     */
-    #[Route('/management', name: 'app_management_index', methods: ['GET'])]
-    public function management(InvestmentManagementRepository $repo): Response
-    {
-        return $this->render('investment_management/index.html.twig', [
-            'investment_managements' => $repo->findAll(),
-        ]);
-    }
 }

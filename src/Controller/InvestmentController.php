@@ -36,6 +36,11 @@ final class InvestmentController extends AbstractController
         return null;
     }
 
+    private function getUserId(Request $request): ?int
+    {
+        return $request->getSession()->get('user_id');
+    }
+
     private function checkUser(Request $request)
     {
         if ($this->getRole($request) !== 'user') {
@@ -57,6 +62,7 @@ final class InvestmentController extends AbstractController
         $risk = $request->query->get('risk');
         $sort = $request->query->get('sort');
 
+        // All roles see ALL investments (catalog)
         $queryBuilder = $investmentRepository->searchAndFilterQuery($search, $category, $risk, $sort);
 
         $investments = $paginator->paginate(
@@ -78,6 +84,12 @@ final class InvestmentController extends AbstractController
     {
         if ($redirect = $this->checkAccess($request)) return $redirect;
 
+        // 🔐 Investisseur cannot create investments (only browse & invest)
+        if ($this->getRole($request) === 'investisseur') {
+            $this->addFlash('danger', 'Les investisseurs ne peuvent pas créer d\'investissements.');
+            return $this->redirectToRoute('app_investment_index');
+        }
+
         $investment = new Investment();
         $form = $this->createForm(InvestmentType::class, $investment);
         $form->handleRequest($request);
@@ -89,6 +101,12 @@ final class InvestmentController extends AbstractController
                 $investment,
                 null
             );
+
+            // 🔐 Stamp the owner
+            $userId = $this->getUserId($request);
+            if ($userId) {
+                $investment->setCreatedByUserId($userId);
+            }
 
             $entityManager->persist($investment);
             $entityManager->flush();
@@ -114,6 +132,14 @@ final class InvestmentController extends AbstractController
     ): Response {
         if ($redirect = $this->checkAccess($request)) return $redirect;
 
+        // 🔐 Ownership check
+        $role = $this->getRole($request);
+        $userId = $this->getUserId($request);
+        if ($role !== 'admin' && $investment->getCreatedByUserId() !== $userId) {
+            $this->addFlash('danger', 'Accès refusé.');
+            return $this->redirectToRoute('app_investment_index');
+        }
+
         return $this->render('investment/management.html.twig', [
             'investment' => $investment,
             'managements' => $managementRepository->findBy(['investment' => $investment]),
@@ -130,6 +156,14 @@ final class InvestmentController extends AbstractController
         EntityManagerInterface $entityManager
     ): Response {
         if ($redirect = $this->checkAccess($request)) return $redirect;
+
+        // 🔐 Ownership check
+        $role = $this->getRole($request);
+        $userId = $this->getUserId($request);
+        if ($role !== 'admin' && $investment->getCreatedByUserId() !== $userId) {
+            $this->addFlash('danger', 'Accès refusé.');
+            return $this->redirectToRoute('app_investment_index');
+        }
 
         $previousImage = $investment->getImageUrl();
 
@@ -165,6 +199,14 @@ final class InvestmentController extends AbstractController
     {
         if ($redirect = $this->checkAccess($request)) return $redirect;
 
+        // 🔐 Ownership check
+        $role = $this->getRole($request);
+        $userId = $this->getUserId($request);
+        if ($role !== 'admin' && $investment->getCreatedByUserId() !== $userId) {
+            $this->addFlash('danger', 'Accès refusé.');
+            return $this->redirectToRoute('app_investment_index');
+        }
+
         return $this->render('investment/show.html.twig', [
             'investment' => $investment,
         ]);
@@ -180,6 +222,14 @@ final class InvestmentController extends AbstractController
         EntityManagerInterface $entityManager
     ): Response {
         if ($redirect = $this->checkAccess($request)) return $redirect;
+
+        // 🔐 Ownership check
+        $role = $this->getRole($request);
+        $userId = $this->getUserId($request);
+        if ($role !== 'admin' && $investment->getCreatedByUserId() !== $userId) {
+            $this->addFlash('danger', 'Accès refusé.');
+            return $this->redirectToRoute('app_investment_index');
+        }
 
         if ($this->isCsrfTokenValid('delete'.$investment->getId(), $request->request->get('_token'))) {
 

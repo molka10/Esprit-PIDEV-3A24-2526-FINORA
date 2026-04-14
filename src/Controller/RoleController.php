@@ -29,6 +29,10 @@ class RoleController extends AbstractController
         // stocker rôle en session
         $session->set('role', $role);
 
+        // Simuler un user_id unique par rôle (data isolation)
+        $userIdMap = ['admin' => 1, 'investisseur' => 2, 'user' => 3];
+        $session->set('user_id', $userIdMap[$role] ?? 0);
+
         // ✅ REDIRECTION CORRECTE SOUS FORME DE SIGN-IN
         if ($role === 'admin') {
             return $this->redirectToRoute('admin_dashboard');

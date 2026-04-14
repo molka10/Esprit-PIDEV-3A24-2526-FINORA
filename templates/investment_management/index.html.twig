@@ -39,11 +39,14 @@
                                 <i class="bi bi-briefcase me-1"></i>Management
                             </a>
                         </li>
+                        {% set role = app.session.get('role') %}
+                        {% if role == 'admin' %}
                         <li class="nav-item">
                             <a class="nav-link" href="{{ path('admin_dashboard') }}">
                                 <i class="bi bi-speedometer2 me-1"></i>Dashboard
                             </a>
                         </li>
+                        {% endif %}
                     </ul>
 
                     <!-- Search -->
@@ -78,14 +81,18 @@
                                 </div>
                                 <div>
                                     <a class="h6" href="#">Mon Compte</a>
-                                    <p class="small m-0">finora@example.com</p>
+                                    <p class="small m-0">{{ app.session.get('role')|default('Visiteur')|capitalize }}</p>
                                 </div>
                             </div>
                         </li>
                         <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item" href="#"><i class="bi bi-person fa-fw me-2"></i>Profil</a></li>
+                        {% if app.session.get('role') == 'investisseur' %}
+                        <li><a class="dropdown-item" href="{{ path('app_investor_profile') }}"><i class="bi bi-person fa-fw me-2"></i>Mon Profil</a></li>
+                        {% endif %}
+                        {% if app.session.get('role') == 'admin' %}
                         <li><a class="dropdown-item" href="{{ path('admin_dashboard') }}"><i class="bi bi-speedometer2 fa-fw me-2"></i>Dashboard</a></li>
-                        <li><a class="dropdown-item bg-danger-soft-hover" href="#"><i class="bi bi-power fa-fw me-2"></i>Déconnexion</a></li>
+                        {% endif %}
+                        <li><a class="dropdown-item bg-danger-soft-hover" href="{{ path('logout_role') }}"><i class="bi bi-power fa-fw me-2"></i>Déconnexion</a></li>
                     </ul>
                 </div>
 

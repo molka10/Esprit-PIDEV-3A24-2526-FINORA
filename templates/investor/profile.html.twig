@@ -1,0 +1,432 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}FINORA - Mon Profil Investisseur{% endblock %}
+
+{% block body %}
+
+<!-- ======================= HEADER START ======================= -->
+<header class="navbar-light navbar-sticky">
+    <nav class="navbar navbar-expand-xl z-index-9">
+        <div class="container">
+
+            <a class="navbar-brand" href="{{ path('app_home') }}">
+                <img class="light-mode-item navbar-brand-item" src="{{ asset('assets/images/logo.svg') }}" alt="FINORA" style="height:40px;">
+                <img class="dark-mode-item navbar-brand-item" src="{{ asset('assets/images/logo-light.svg') }}" alt="FINORA" style="height:40px;">
+            </a>
+
+            <button class="navbar-toggler ms-auto" type="button"
+                    data-bs-toggle="collapse" data-bs-target="#navbarCollapse"
+                    aria-controls="navbarCollapse" aria-expanded="false">
+                <span class="navbar-toggler-animation">
+                    <span></span><span></span><span></span>
+                </span>
+            </button>
+
+            <div class="navbar-collapse w-100 collapse" id="navbarCollapse">
+                <ul class="navbar-nav navbar-nav-scroll mx-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_home') }}">
+                            <i class="bi bi-house me-1"></i>Accueil
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_investment_index') }}">
+                            <i class="bi bi-graph-up-arrow me-1"></i>Investissements
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_management_index') }}">
+                            <i class="bi bi-briefcase me-1"></i>Management
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Profile -->
+            <div class="dropdown ms-1 ms-lg-0">
+                <a class="avatar avatar-sm p-0" href="#"
+                   id="profileDropdown" role="button"
+                   data-bs-auto-close="outside" data-bs-display="static"
+                   data-bs-toggle="dropdown" aria-expanded="false">
+                    <img class="avatar-img rounded-circle" src="{{ asset('assets/images/avatar/01.jpg') }}" alt="avatar">
+                </a>
+                <ul class="dropdown-menu dropdown-animation dropdown-menu-end shadow pt-3" aria-labelledby="profileDropdown">
+                    <li class="px-3 mb-3">
+                        <div class="d-flex align-items-center">
+                            <div class="avatar me-3">
+                                <img class="avatar-img rounded-circle shadow" src="{{ asset('assets/images/avatar/01.jpg') }}" alt="avatar">
+                            </div>
+                            <div>
+                                <a class="h6" href="#">Mon Compte</a>
+                                <p class="small m-0">Investisseur</p>
+                            </div>
+                        </div>
+                    </li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item active" href="{{ path('app_investor_profile') }}"><i class="bi bi-person fa-fw me-2"></i>Mon Profil</a></li>
+                    <li><a class="dropdown-item bg-danger-soft-hover" href="{{ path('logout_role') }}"><i class="bi bi-power fa-fw me-2"></i>Déconnexion</a></li>
+                </ul>
+            </div>
+
+        </div>
+    </nav>
+</header>
+<!-- ======================= HEADER END ======================= -->
+
+
+<main>
+
+<!-- ======================= HERO BANNER ======================= -->
+<section class="py-0">
+    <div class="container-fluid px-0">
+        <div class="position-relative" style="background: linear-gradient(135deg, #4b0082 0%, #7c3aed 50%, #9333ea 100%); min-height: 200px;">
+            <div class="container position-relative py-5">
+                <div class="row align-items-center">
+                    <div class="col-auto">
+                        <div class="avatar avatar-xxl border border-4 border-white rounded-circle shadow-lg" style="width: 100px; height: 100px;">
+                            <img class="avatar-img rounded-circle" src="{{ asset('assets/images/avatar/01.jpg') }}" alt="avatar" style="width: 100%; height: 100%; object-fit: cover;">
+                        </div>
+                    </div>
+                    <div class="col">
+                        <h1 class="text-white mb-1" style="font-size: 1.8rem; font-weight: 700;">Mon Profil Investisseur</h1>
+                        <p class="text-white-50 mb-0" style="font-size: 0.95rem;">
+                            <i class="bi bi-shield-check me-1"></i>Membre vérifié 
+                            <span class="mx-2">|</span>
+                            <i class="bi bi-calendar3 me-1"></i>Inscrit en {{ "now"|date("Y") }}
+                        </p>
+                    </div>
+                    <div class="col-auto d-none d-md-block">
+                        <a href="{{ path('app_investment_index') }}" class="btn btn-outline-light rounded-pill px-4">
+                            <i class="bi bi-search me-2"></i>Explorer
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ======================= STATS CARDS ======================= -->
+<section class="pt-4 pb-0">
+    <div class="container">
+        <div class="row g-4 mt-n5" style="position: relative; z-index: 2;">
+
+            <div class="col-sm-6 col-lg-3">
+                <div class="card card-body border-0 shadow h-100 rounded-4">
+                    <div class="d-flex align-items-center">
+                        <div class="rounded-circle p-3 me-3 d-flex align-items-center justify-content-center" style="width: 56px; height: 56px; background: linear-gradient(135deg, #7c3aed, #9333ea);">
+                            <i class="bi bi-cash-stack fs-4 text-white"></i>
+                        </div>
+                        <div>
+                            <p class="text-muted small mb-0">Total Investi</p>
+                            <h4 class="mb-0 fw-bold" style="color: #7c3aed;">{{ totalInvested|number_format(2, ',', ' ') }} <small class="fw-normal text-muted" style="font-size: 0.7rem;">TND</small></h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-sm-6 col-lg-3">
+                <div class="card card-body border-0 shadow h-100 rounded-4">
+                    <div class="d-flex align-items-center">
+                        <div class="rounded-circle p-3 me-3 d-flex align-items-center justify-content-center" style="width: 56px; height: 56px; background: linear-gradient(135deg, #10b981, #059f68);">
+                            <i class="bi bi-graph-up-arrow fs-4 text-white"></i>
+                        </div>
+                        <div>
+                            <p class="text-muted small mb-0">Actifs</p>
+                            <h4 class="mb-0 fw-bold text-success">{{ activeCount }}</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-sm-6 col-lg-3">
+                <div class="card card-body border-0 shadow h-100 rounded-4">
+                    <div class="d-flex align-items-center">
+                        <div class="rounded-circle p-3 me-3 d-flex align-items-center justify-content-center" style="width: 56px; height: 56px; background: linear-gradient(135deg, #ef4444, #dc2626);">
+                            <i class="bi bi-x-circle fs-4 text-white"></i>
+                        </div>
+                        <div>
+                            <p class="text-muted small mb-0">Clôturés</p>
+                            <h4 class="mb-0 fw-bold text-danger">{{ closedCount }}</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-sm-6 col-lg-3">
+                <div class="card card-body border-0 shadow h-100 rounded-4">
+                    <div class="d-flex align-items-center">
+                        <div class="rounded-circle p-3 me-3 d-flex align-items-center justify-content-center" style="width: 56px; height: 56px; background: linear-gradient(135deg, #3b82f6, #2563eb);">
+                            <i class="bi bi-briefcase-fill fs-4 text-white"></i>
+                        </div>
+                        <div>
+                            <p class="text-muted small mb-0">Participations</p>
+                            <h4 class="mb-0 fw-bold" style="color: #3b82f6;">{{ totalMgmt }}</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+
+<!-- ======================= TABS CONTENT ======================= -->
+<section class="pt-5 pb-5">
+    <div class="container">
+
+        <!-- Tab navigation -->
+        <div class="card border-0 shadow-sm rounded-4 mb-4">
+            <div class="card-body p-2">
+                <ul class="nav nav-pills" id="profileTabs" role="tablist">
+                    <li class="nav-item me-2" role="presentation">
+                        <button class="nav-link active rounded-3 px-4 py-2 fw-semibold" id="mgmt-tab" data-bs-toggle="pill" data-bs-target="#mgmt-panel" type="button" role="tab">
+                            <i class="bi bi-briefcase me-2"></i>Mes Participations <span class="badge bg-primary bg-opacity-25 text-primary ms-2 rounded-pill">{{ totalMgmt }}</span>
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link rounded-3 px-4 py-2 fw-semibold" id="inv-tab" data-bs-toggle="pill" data-bs-target="#inv-panel" type="button" role="tab">
+                            <i class="bi bi-graph-up-arrow me-2"></i>Mes Investissements <span class="badge bg-primary bg-opacity-25 text-primary ms-2 rounded-pill">{{ investments|length }}</span>
+                        </button>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="tab-content" id="profileTabContent">
+
+            <!-- ============ TAB 1: Management Records ============ -->
+            <div class="tab-pane fade show active" id="mgmt-panel" role="tabpanel">
+
+                {% if managements|length > 0 %}
+                <div class="row g-4">
+                    {% for m in managements %}
+                    <div class="col-md-6 col-xl-4">
+                        <div class="card border-0 shadow-sm h-100 overflow-hidden rounded-4">
+                            
+                            <!-- Card header with investment image -->
+                            <div class="position-relative">
+                                {% if m.investment %}
+                                <img src="{{ investment_image_src(m.investment) ?: asset('assets/images/courses/4by3/06.jpg') }}"
+                                     class="card-img-top" style="height: 160px; object-fit: cover;" alt="{{ m.investment.name }}">
+                                <div class="card-img-overlay d-flex flex-column justify-content-between p-3" style="background: linear-gradient(180deg, rgba(75, 0, 130, 0.7) 0%, rgba(75, 0, 130, 0) 60%);">
+                                    <div class="d-flex justify-content-between w-100">
+                                        <span class="badge px-3 py-2 rounded-pill shadow-sm text-white" style="background: linear-gradient(90deg, #6f42c1, #8a2be2);">
+                                            {{ m.investmentType }}
+                                        </span>
+                                        {% if m.status == 'ACTIVE' %}
+                                            <span class="badge bg-success px-3 py-2 rounded-pill shadow-sm"><i class="bi bi-check-circle me-1"></i>Actif</span>
+                                        {% elseif m.status == 'CLOSED' %}
+                                            <span class="badge bg-danger px-3 py-2 rounded-pill shadow-sm"><i class="bi bi-x-circle me-1"></i>Clôturé</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary px-3 py-2 rounded-pill shadow-sm">{{ m.status }}</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                {% else %}
+                                <div class="p-3" style="background: linear-gradient(135deg, #7c3aed, #9333ea); height: 80px;">
+                                    <span class="badge bg-white bg-opacity-25 text-white px-3 py-2 rounded-pill">{{ m.investmentType }}</span>
+                                </div>
+                                {% endif %}
+                            </div>
+
+                            <div class="card-body p-4">
+                                <!-- Investment name -->
+                                {% if m.investment %}
+                                <h5 class="fw-bold mb-1" style="color: #2c003e;">
+                                    <i class="bi bi-building me-2" style="color: #6f42c1;"></i>{{ m.investment.name }}
+                                </h5>
+                                <p class="text-muted small mb-3">
+                                    <i class="bi bi-geo-alt me-1"></i>{{ m.investment.location }}
+                                    {% if m.investment.category %}
+                                     · <i class="bi bi-tag me-1"></i>{{ m.investment.category }}
+                                    {% endif %}
+                                </p>
+                                {% endif %}
+
+                                <!-- Key metrics -->
+                                <div class="bg-light rounded-3 p-3 shadow-sm" style="border: 1px solid rgba(111, 66, 193, 0.1);">
+                                    <ul class="list-group list-group-flush">
+                                        <li class="list-group-item d-flex justify-content-between px-0 bg-transparent border-bottom border-light py-2">
+                                            <span class="text-muted" style="font-size: 0.88rem;"><i class="bi bi-cash-coin me-2" style="color: #6f42c1;"></i>Montant investi</span>
+                                            <strong class="text-success" style="font-size: 1rem;">{{ m.amountInvested|number_format(2, ',', ' ') }} TND</strong>
+                                        </li>
+                                        <li class="list-group-item d-flex justify-content-between px-0 bg-transparent border-bottom border-light py-2">
+                                            <span class="text-muted" style="font-size: 0.88rem;"><i class="bi bi-pie-chart me-2" style="color: #6f42c1;"></i>Part détenue</span>
+                                            <strong style="color: #7c3aed;">{{ m.ownershipPercentage }}%</strong>
+                                        </li>
+                                        <li class="list-group-item d-flex justify-content-between px-0 bg-transparent border-0 py-2">
+                                            <span class="text-muted" style="font-size: 0.88rem;"><i class="bi bi-calendar-event me-2" style="color: #6f42c1;"></i>Date début</span>
+                                            <strong style="color: #2c003e;">{{ m.startDate ? m.startDate|date('d/m/Y') : 'N/A' }}</strong>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <!-- Card footer -->
+                            <div class="card-footer bg-transparent border-top d-flex gap-2 justify-content-end py-3 px-4">
+                                <a href="{{ path('app_management_show', {'id': m.id}) }}" class="btn btn-sm px-4 py-2 text-white shadow-sm" style="background: linear-gradient(90deg, #6f42c1, #5a32a3); border-radius: 8px;">
+                                    <i class="bi bi-eye me-1"></i>Détails
+                                </a>
+                                <a href="{{ path('app_management_edit', {'id': m.id}) }}" class="btn btn-sm px-3 py-2 shadow-sm text-white" style="background-color: #ff9800; border-radius: 8px;">
+                                    <i class="bi bi-pencil me-1"></i>Modifier
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="card card-body text-center py-5 border-0 shadow-sm rounded-4">
+                    <div class="mb-3">
+                        <div class="rounded-circle mx-auto d-flex align-items-center justify-content-center" style="width: 90px; height: 90px; background: linear-gradient(135deg, #f5f3ff, #ede9fe);">
+                            <i class="bi bi-briefcase fs-1" style="color: #7c3aed;"></i>
+                        </div>
+                    </div>
+                    <h5 class="fw-bold">Aucune participation pour le moment</h5>
+                    <p class="text-muted mb-4">Vous n'avez pas encore investi. Explorez les opportunités disponibles et commencez à investir !</p>
+                    <div>
+                        <a href="{{ path('app_investment_index') }}" class="btn btn-primary rounded-pill px-5 py-2 shadow-sm">
+                            <i class="bi bi-search me-2"></i>Explorer les investissements
+                        </a>
+                    </div>
+                </div>
+                {% endif %}
+
+            </div>
+
+            <!-- ============ TAB 2: Investments Created ============ -->
+            <div class="tab-pane fade" id="inv-panel" role="tabpanel">
+
+                {% if investments|length > 0 %}
+                <div class="row g-4">
+                    {% for inv in investments %}
+                    <div class="col-md-6 col-xl-4">
+                        <div class="card border-0 shadow-sm h-100 overflow-hidden rounded-4">
+                            <!-- Image -->
+                            <div class="position-relative">
+                                <img src="{{ investment_image_src(inv) ?: asset('assets/images/courses/4by3/06.jpg') }}"
+                                     class="card-img-top" style="height: 180px; object-fit: cover;" alt="{{ inv.name }}">
+                                <div class="card-img-overlay d-flex flex-column justify-content-between p-3" style="background: linear-gradient(180deg, rgba(75, 0, 130, 0.6) 0%, transparent 60%); pointer-events: none;">
+                                    <div class="d-flex justify-content-between w-100">
+                                        <span class="badge text-white px-3 py-2 rounded-pill shadow-sm" style="background: linear-gradient(90deg, #6f42c1, #8a2be2);">
+                                            {{ inv.category }}
+                                        </span>
+                                        {% if inv.riskLevel == 'HIGH' %}
+                                            <span class="badge bg-danger shadow px-3 py-2 rounded-pill">Risque élevé</span>
+                                        {% elseif inv.riskLevel == 'MEDIUM' %}
+                                            <span class="badge bg-warning text-dark shadow px-3 py-2 rounded-pill">Risque moyen</span>
+                                        {% else %}
+                                            <span class="badge bg-success shadow px-3 py-2 rounded-pill">Risque faible</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="card-body p-4">
+                                <h5 class="card-title fw-bold mb-2">
+                                    <a href="{{ path('app_investment_show', {'id': inv.id}) }}" class="text-decoration-none" style="color: #2c003e;">
+                                        {{ inv.name }}
+                                    </a>
+                                </h5>
+                                <p class="text-muted small mb-3">
+                                    <i class="bi bi-geo-alt me-1"></i>{{ inv.location }}
+                                </p>
+
+                                {% if inv.description %}
+                                <p class="text-muted small mb-3" style="line-height: 1.5;">
+                                    {{ inv.description|length > 100 ? inv.description|slice(0, 100) ~ '...' : inv.description }}
+                                </p>
+                                {% endif %}
+
+                                <div class="bg-light rounded-3 p-3 shadow-sm" style="border: 1px solid rgba(111, 66, 193, 0.1);">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span class="text-muted small"><i class="bi bi-cash-coin me-1" style="color: #6f42c1;"></i>Valeur estimée</span>
+                                        <span class="fw-bold text-success" style="font-size: 1.05rem;">{{ inv.estimatedValue|number_format(2, ',', ' ') }} TND</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="card-footer bg-transparent border-top d-flex gap-2 justify-content-end py-3 px-4">
+                                <a href="{{ path('app_investment_show', {'id': inv.id}) }}" class="btn btn-sm px-4 py-2 text-white shadow-sm" style="background: linear-gradient(90deg, #6f42c1, #5a32a3); border-radius: 8px;">
+                                    <i class="bi bi-eye me-1"></i>Voir détails
+                                </a>
+                                <a href="{{ path('app_management_new', {'inv_id': inv.id}) }}" class="btn btn-sm px-3 py-2 text-white shadow-sm" style="background: linear-gradient(90deg, #10b981, #059f68); border-radius: 8px;">
+                                    <i class="bi bi-wallet2 me-1"></i>Investir
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="card card-body text-center py-5 border-0 shadow-sm rounded-4">
+                    <div class="mb-3">
+                        <div class="rounded-circle mx-auto d-flex align-items-center justify-content-center" style="width: 90px; height: 90px; background: linear-gradient(135deg, #f5f3ff, #ede9fe);">
+                            <i class="bi bi-graph-up-arrow fs-1" style="color: #7c3aed;"></i>
+                        </div>
+                    </div>
+                    <h5 class="fw-bold">Aucun investissement créé</h5>
+                    <p class="text-muted mb-0">Vous n'avez pas encore créé d'investissement dans votre catalogue.</p>
+                </div>
+                {% endif %}
+
+            </div>
+
+        </div>
+
+    </div>
+</section>
+
+
+<!-- ======================= FOOTER START ======================= -->
+<footer class="pt-5 bg-dark">
+    <div class="container">
+        <div class="row g-4">
+            <div class="col-lg-4">
+                <a href="{{ path('app_home') }}">
+                    <img class="h-40px" src="{{ asset('assets/images/logo-light.svg') }}" alt="FINORA">
+                </a>
+                <p class="my-3 text-body-secondary">
+                    FINORA — Votre plateforme de gestion d'investissements intelligente et sécurisée.
+                </p>
+                <ul class="list-inline mb-0 mt-3">
+                    <li class="list-inline-item"><a class="btn btn-white btn-sm shadow px-2 text-facebook" href="#"><i class="fab fa-fw fa-facebook-f"></i></a></li>
+                    <li class="list-inline-item"><a class="btn btn-white btn-sm shadow px-2 text-instagram" href="#"><i class="fab fa-fw fa-instagram"></i></a></li>
+                    <li class="list-inline-item"><a class="btn btn-white btn-sm shadow px-2 text-twitter" href="#"><i class="fab fa-fw fa-twitter"></i></a></li>
+                    <li class="list-inline-item"><a class="btn btn-white btn-sm shadow px-2 text-linkedin" href="#"><i class="fab fa-fw fa-linkedin-in"></i></a></li>
+                </ul>
+            </div>
+            <div class="col-lg-4">
+                <h5 class="mb-2 mb-md-4 text-white">Navigation</h5>
+                <ul class="nav flex-column text-primary-hover">
+                    <li class="nav-item"><a class="nav-link" href="{{ path('app_home') }}">Accueil</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ path('app_investment_index') }}">Investissements</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ path('app_management_index') }}">Management</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ path('app_investor_profile') }}">Mon Profil</a></li>
+                </ul>
+            </div>
+            <div class="col-lg-4">
+                <h5 class="mb-2 mb-md-4 text-white">Contact</h5>
+                <p class="mb-2 text-body-secondary">
+                    Tél:<span class="h6 fw-light text-white ms-2">+216 71 000 000</span>
+                    <span class="d-block small">(9h à 18h)</span>
+                </p>
+                <p class="mb-0 text-body-secondary">
+                    Email:<span class="h6 fw-light text-white ms-2">contact@finora.tn</span>
+                </p>
+            </div>
+        </div>
+        <hr class="mt-4 mb-0">
+        <div class="py-3 text-center text-body-secondary">
+            &copy; {{ "now"|date("Y") }} FINORA. Tous droits réservés.
+        </div>
+    </div>
+</footer>
+<!-- ======================= FOOTER END ======================= -->
+
+</main>
+
+{% endblock %}

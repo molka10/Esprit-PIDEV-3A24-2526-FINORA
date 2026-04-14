@@ -45,11 +45,14 @@
 
                 <!-- Nav links -->
                 <ul class="navbar-nav navbar-nav-scroll ms-auto">
+                    {% set current_nav_role = app.session.get('role') %}
+                    {% if current_nav_role == 'admin' %}
                     <li class="nav-item">
                         <a class="nav-link" href="{{ path('admin_dashboard') }}">
                             <i class="bi bi-speedometer2 me-1"></i>Dashboard
                         </a>
                     </li>
+                    {% endif %}
                     <li class="nav-item">
                         <a class="nav-link" href="{{ path('app_investment_index') }}">
                             <i class="bi bi-graph-up-arrow me-1"></i>Investments
@@ -134,7 +137,9 @@
                                 </div>
                             </li>
                             <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="#"><i class="bi bi-person fa-fw me-2"></i>Mon Compte</a></li>
+                            {% if current_role == 'investisseur' %}
+                            <li><a class="dropdown-item" href="{{ path('app_investor_profile') }}"><i class="bi bi-person fa-fw me-2"></i>Mon Profil</a></li>
+                            {% endif %}
                             {% if current_role == 'admin' %}
                             <li><a class="dropdown-item" href="{{ path('admin_dashboard') }}"><i class="bi bi-speedometer2 fa-fw me-2"></i>Dashboard</a></li>
                             {% endif %}
