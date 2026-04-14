@@ -1,0 +1,142 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+
+<div class="form-card">
+
+    <h1>Login</h1>
+
+    {# 🔴 Symfony error #}
+    {% if error %}
+        <div class="alert alert-danger text-center">
+            {{ error.messageKey|trans(error.messageData, 'security') }}
+        </div>
+    {% endif %}
+
+    {# 🔴 Form validation errors #}
+    {% for err in formErrors %}
+        <div class="alert alert-danger text-center">
+            {{ err }}
+        </div>
+    {% endfor %}
+
+    <form method="post" novalidate>
+
+        <label>Email</label>
+        <input type="email" name="_username" value="{{ last_username }}" placeholder="Enter your email" class="form-control mb-3">
+
+        <label>Password</label>
+        <input type="password" name="_password" placeholder="Enter your password" class="form-control mb-3">
+
+        <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+
+        {# 🔥 CAPTCHA #}
+        <div class="g-recaptcha" data-sitekey="6LenYbQsAAAAAGssPF5oG1xS1NZgKM_ZKOn5YYs0"></div>
+
+        <button type="submit" class="btn btn-primary btn-lg w-100 mt-3 shadow-sm rounded-pill">🔐 Login</button>
+
+        {# --- Face ID Login --- #}
+        <hr class="mt-4 mb-3">
+        <button type="button" id="faceLoginBtn" class="btn btn-outline-info w-100">👤 Login with Face ID</button>
+    </form>
+
+    {# Video & Canvas elements for webcam #}
+    <div id="webcamContainer" style="display:none; margin-top:20px; text-align: center;">
+        <video id="webcam" width="320" height="240" autoplay playsinline style="border:1px solid #ccc; border-radius:8px; width: 100%;"></video>
+        <br>
+        <button id="captureBtn" class="btn btn-success mt-2 w-100">Scan Face</button>
+        <button id="cancelBtn" class="btn btn-secondary mt-2 w-100">Cancel</button>
+        <canvas id="canvas" style="display:none;"></canvas>
+    </div>
+</div>
+
+<script src="https://www.google.com/recaptcha/api.js" async defer></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const faceLoginBtn = document.getElementById('faceLoginBtn');
+    const webcamContainer = document.getElementById('webcamContainer');
+    const video = document.getElementById('webcam');
+    const canvas = document.getElementById('canvas');
+    const captureBtn = document.getElementById('captureBtn');
+    const cancelBtn = document.getElementById('cancelBtn');
+
+    let stream = null;
+
+    faceLoginBtn.addEventListener('click', async () => {
+        const emailInput = document.querySelector('input[name="_username"]').value;
+        if (!emailInput) {
+            alert('Please enter your email first to use Face ID.');
+            return;
+        }
+
+        document.querySelector('form').style.display = 'none';
+        webcamContainer.style.display = 'block';
+
+        try {
+            stream = await navigator.mediaDevices.getUserMedia({ video: true });
+            video.srcObject = stream;
+        } catch (err) {
+            alert('Cannot access webcam: ' + err.message);
+            document.querySelector('form').style.display = 'block';
+            webcamContainer.style.display = 'none';
+        }
+    });
+
+    cancelBtn.addEventListener('click', () => {
+        stopWebcam();
+        document.querySelector('form').style.display = 'block';
+    });
+
+    captureBtn.addEventListener('click', async () => {
+        // Draw video frame to canvas
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+        // Get base64 image
+        const base64Image = canvas.toDataURL('image/jpeg', 0.8);
+        const emailInput = document.querySelector('input[name="_username"]').value;
+        
+        captureBtn.innerText = 'Scanning...';
+        captureBtn.disabled = true;
+
+        try {
+            const response = await fetch('{{ path("app_login_face") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ image: base64Image, email: emailInput })
+            });
+
+            const result = await response.json();
+            
+            if (result.success) {
+                // Success! Redirect to profile or home
+                window.location.href = '{{ path("app_profile") }}';
+            } else {
+                alert('Authentication Failed: ' + result.message);
+                captureBtn.innerText = 'Scan Face';
+                captureBtn.disabled = false;
+            }
+        } catch(e) {
+            alert('An error occurred while connecting to the server.');
+            captureBtn.innerText = 'Scan Face';
+            captureBtn.disabled = false;
+        }
+    });
+
+    function stopWebcam() {
+        if (stream) {
+            stream.getTracks().forEach(track => track.stop());
+        }
+        webcamContainer.style.display = 'none';
+        captureBtn.innerText = 'Scan Face';
+        captureBtn.disabled = false;
+    }
+});
+</script>
+
+{% endblock %}

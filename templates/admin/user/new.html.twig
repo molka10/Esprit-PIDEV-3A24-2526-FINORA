@@ -1,0 +1,16 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block body %}
+{% for message in app.flashes('error') %}
+    <div class="alert alert-danger">
+        {{ message }}
+    </div>
+{% endfor %}
+<h1>Create User</h1>
+
+{{ form_errors(form) }}
+
+{{ include('admin/user/_form.html.twig') }}
+
+<a href="{{ path('admin_user_index') }}" class="btn btn-secondary mt-3">⬅ Back</a>
+{% endblock %}

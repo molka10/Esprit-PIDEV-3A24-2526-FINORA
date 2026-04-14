@@ -1,0 +1,68 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block body %}
+
+<h1 class="mb-4">👥 User Management</h1>
+
+<div class="d-flex gap-2 mb-3">
+    <input 
+        type="text" 
+        id="searchInput"
+        placeholder="🔎 Search user..."
+        class="form-control"
+        style="max-width:300px;"
+    >
+
+    <a href="{{ path('admin_user_index') }}" class="btn btn-light border">
+        🔄 Reset
+    </a>
+
+    <a href="{{ path('admin_user_new') }}" class="btn btn-success ms-auto">
+        ➕ Create User
+    </a>
+</div>
+
+<div class="table-responsive">
+<table class="table table-hover align-middle bg-white shadow-sm">
+    <thead class="table-dark">
+        <tr>
+            <th>ID</th>
+            <th>User</th>
+            <th>Email</th>
+            <th>Role</th>
+            <th>Phone</th>
+            <th>Address</th>
+            <th>Status</th>
+            <th>Trust Score</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+
+    <tbody id="userTable">
+        {% include 'admin/user/_table.html.twig' %}
+    </tbody>
+</table>
+</div>
+<div class="mt-3">
+    {% for i in 1..totalPages %}
+        <a href="?page={{ i }}" class="btn btn-sm {{ i == currentPage ? 'btn-primary' : 'btn-outline-primary' }}">
+            {{ i }}
+        </a>
+    {% endfor %}
+</div>
+
+<script>
+const input = document.getElementById('searchInput');
+
+input.addEventListener('keyup', function () {
+    fetch(`?search=${this.value}`, {
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    })
+    .then(response => response.text())
+    .then(html => {
+        document.getElementById('userTable').innerHTML = html;
+    });
+});
+</script>
+
+{% endblock %}

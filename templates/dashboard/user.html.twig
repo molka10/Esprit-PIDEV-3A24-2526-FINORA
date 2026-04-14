@@ -1,0 +1,12 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+<div class="card p-4 shadow-sm">
+    <h2 class="mb-4">User Dashboard</h2>
+    <p class="lead">Welcome, <strong>{{ app.user.username }}</strong></p>
+
+    <div class="mt-4">
+        <a href="{{ path('app_profile') }}" class="btn btn-primary">Edit Profile</a>
+    </div>
+</div>
+{% endblock %}

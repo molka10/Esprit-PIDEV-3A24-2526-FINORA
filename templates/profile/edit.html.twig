@@ -1,0 +1,44 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+
+<div class="card p-4 shadow-sm max-w-md mx-auto">
+    <h2 class="mb-4">Edit Profile</h2>
+
+    {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+
+        {{ form_errors(form) }}
+
+        {{ form_row(form.username) }}
+        {{ form_row(form.email) }}
+        {{ form_row(form.password) }}
+        
+        <div class="mb-3">
+            {{ form_label(form.image) }}
+            {{ form_widget(form.image) }}
+            {{ form_errors(form.image) }}
+            {% if app.user.image %}
+                <div class="mt-2">
+                    <img src="{{ asset('uploads/' ~ app.user.image) }}" width="100" class="rounded shadow-sm">
+                </div>
+            {% endif %}
+        </div>
+
+        {{ form_row(form.role) }}
+        {{ form_row(form.phone) }}
+        {{ form_row(form.address) }}
+        {{ form_row(form.date_of_birth) }}
+
+        {% if form.isVerified is defined %}
+            {{ form_row(form.isVerified) }}
+        {% endif %}
+
+        <div class="mt-4 d-flex gap-2">
+            <button type="submit" class="btn btn-primary">Save Changes</button>
+            <a href="{{ path('app_profile') }}" class="btn btn-secondary">Back</a>
+        </div>
+
+    {{ form_end(form) }}
+</div>
+
+{% endblock %}

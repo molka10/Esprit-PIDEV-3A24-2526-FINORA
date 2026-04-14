@@ -1,0 +1,59 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+
+<div class="form-card">
+
+    <h1>Create Account</h1>
+
+    {{ form_errors(registrationForm) }}
+
+    {{ form_start(registrationForm, { 'attr': {'novalidate': 'novalidate'} }) }}
+
+        <div class="mb-3">
+            {{ form_label(registrationForm.username) }}
+            {{ form_widget(registrationForm.username, {'attr': {'class': 'form-control'}}) }}
+        </div>
+
+        <div class="mb-3">
+            {{ form_label(registrationForm.email) }}
+            {{ form_widget(registrationForm.email, {'attr': {'class': 'form-control'}}) }}
+        </div>
+
+        <div class="mb-3">
+            {{ form_label(registrationForm.plainPassword) }}
+            {{ form_widget(registrationForm.plainPassword, {'attr': {'class': 'form-control'}}) }}
+        </div>
+
+        <div class="mb-3">
+            {{ form_label(registrationForm.role) }}
+            {{ form_widget(registrationForm.role, {'attr': {'class': 'form-control'}}) }}
+        </div>
+
+        <div class="mb-3">
+            {{ form_label(registrationForm.phone) }}
+            {{ form_widget(registrationForm.phone, {'attr': {'class': 'form-control'}}) }}
+        </div>
+
+        <div class="mb-3">
+            {{ form_label(registrationForm.address) }}
+            {{ form_widget(registrationForm.address, {'attr': {'class': 'form-control'}}) }}
+        </div>
+
+        <div class="mb-3">
+            {{ form_label(registrationForm.date_of_birth) }}
+            {{ form_widget(registrationForm.date_of_birth, {'attr': {'class': 'form-control'}}) }}
+        </div>
+
+        <div class="mb-3 form-check">
+            {{ form_widget(registrationForm.agreeTerms) }}
+            {{ form_label(registrationForm.agreeTerms) }}
+        </div>
+
+        <button type="submit" class="btn w-100">🚀 Register</button>
+
+    {{ form_end(registrationForm) }}
+
+</div>
+
+{% endblock %}
