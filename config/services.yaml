@@ -31,4 +31,8 @@ services:
 
     App\Service\SpeechToTextService:
         arguments:
-            $apiKey: '%deepgram_api_key%'        
+            $apiKey: '%deepgram_api_key%'
+
+    App\Service\LessonChatbotService:
+        arguments:
+            $groqApiKey: '%groq_api_key%'

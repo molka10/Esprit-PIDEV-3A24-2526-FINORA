@@ -1,0 +1,327 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}FINORA - Nos Centres de Formation{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <!-- Leaflet Awesome Markers to use generic FontAwesome icons (Optional but brings better look) -->
+    <style>
+        #public-map {
+            height: 600px;
+            width: 100%;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(124, 58, 237, 0.1);
+            z-index: 1;
+            border: 2px solid white;
+        }
+        
+        .header-section {
+            background: linear-gradient(135deg, #fcfaff 0%, #f3e8ff 100%);
+            padding: 60px 0;
+            border-bottom: 1px solid #eadcff;
+        }
+        
+        .nearest-btn {
+            background: white;
+            color: var(--finora-purple);
+            border: 1px solid var(--finora-border);
+            border-radius: 99px;
+            padding: 10px 24px;
+            font-weight: 700;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+        
+        .nearest-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(124, 58, 237, 0.15);
+            border-color: var(--finora-purple);
+        }
+
+        .leaflet-popup-content-wrapper {
+            border-radius: 16px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            padding: 4px;
+        }
+        .leaflet-popup-content {
+            margin: 12px 16px;
+        }
+        
+        .center-popup-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--finora-text);
+            margin-bottom: 8px;
+            border-bottom: 2px solid var(--finora-purple-soft);
+            padding-bottom: 4px;
+        }
+        
+        .center-popup-info {
+            font-size: 0.9rem;
+            color: #6c757d;
+            margin-bottom: 4px;
+        }
+        
+        .center-popup-info i {
+            color: var(--finora-purple);
+            width: 16px;
+            text-align: center;
+            margin-right: 4px;
+        }
+        
+        /* Custom map tooltips */
+        .custom-tooltip {
+            background: var(--finora-purple);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            box-shadow: 0 4px 10px rgba(124, 58, 237, 0.3);
+        }
+        .custom-tooltip::before {
+            border-top-color: var(--finora-purple) !important;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+<main>
+    <section class="header-section text-center position-relative overflow-hidden">
+        <!-- Background decorative elements -->
+        <div style="position: absolute; top: -50px; left: -50px; width: 200px; height: 200px; background: radial-gradient(circle, rgba(167, 139, 250, 0.2), transparent 70%); border-radius: 50%;"></div>
+        <div style="position: absolute; bottom: 0; right: 10%; width: 300px; height: 300px; background: radial-gradient(circle, rgba(139, 92, 246, 0.15), transparent 60%); border-radius: 50%;"></div>
+        
+        <div class="container position-relative z-index-9">
+            <span class="purple-chip mb-3 d-inline-block"><i class="fas fa-map-marked-alt me-2"></i>Carte Interactive</span>
+            <h1 class="finora-title fw-bold mb-3" style="font-size: 3rem;">Trouvez un <span class="text-primary">Centre de Formation</span></h1>
+            <p class="text-muted fs-5 mb-4 mx-auto" style="max-width: 600px;">
+                Découvrez nos centres partenaires à travers toute la Tunisie pour suivre vos formations en présentiel ou hybride.
+            </p>
+            
+            <button id="find-nearest-btn" class="nearest-btn">
+                <i class="fas fa-location-arrow me-2 text-primary"></i> Trouver le centre le plus proche
+            </button>
+        </div>
+    </section>
+
+    <section class="py-5" style="background-color: #faf5ff;">
+        <div class="container">
+            <div class="row">
+                <div class="col-12">
+                    <div class="card p-3 border-0 bg-white" style="border-radius: 20px; box-shadow: 0 10px 40px rgba(124,58,237,0.06);">
+                        <div id="loading-overlay" class="d-flex justify-content-center align-items-center position-absolute w-100 h-100 bg-white" style="z-index: 10; border-radius: 20px; display: none !important;">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Chargement...</span>
+                            </div>
+                        </div>
+                        <div id="public-map"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row mt-4 align-items-center">
+                <div class="col-md-6 text-md-start text-center">
+                    <p class="text-muted mb-0"><i class="fas fa-info-circle text-primary me-2"></i> Cliquez sur un marqueur pour voir les détails d'un centre.</p>
+                </div>
+                <div class="col-md-6 text-md-end text-center mt-3 mt-md-0">
+                    <div id="nearest-result" class="d-inline-flex align-items-center p-2 px-3 rounded-pill" style="background: rgba(167, 139, 250, 0.1); border: 1px solid rgba(139, 92, 246, 0.2); display: none !important;">
+                        <span class="badge bg-primary rounded-circle p-2 me-2"><i class="fas fa-check"></i></span>
+                        <span id="nearest-text" class="fw-bold text-dark"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Map configuration for Tunisia centered map
+            const map = L.map('public-map').setView([34.0, 9.0], 6); // Tunisa default bounds overview
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 18,
+                attribution: '© OpenStreetMap contributors',
+                className: 'map-tiles-custom'
+            }).addTo(map);
+
+            // Custom icon definition (purple pin)
+            const finoraIcon = L.icon({
+                iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-violet.png',
+                shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+                iconSize: [25, 41],
+                iconAnchor: [12, 41],
+                popupAnchor: [1, -34],
+                shadowSize: [41, 41]
+            });
+
+            // Highlighted icon
+            const highlightIcon = L.icon({
+                iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-gold.png',
+                shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+                iconSize: [25, 41],
+                iconAnchor: [12, 41],
+                popupAnchor: [1, -34],
+                shadowSize: [41, 41]
+            });
+
+            let centersData = [];
+            let markersLayer = L.layerGroup().addTo(map);
+
+            // 1. Fetch active centers from API
+            fetch('{{ path('api_centres_json') }}')
+                .then(response => response.json())
+                .then(data => {
+                    centersData = data;
+                    
+                    if(data.length > 0) {
+                        let bounds = L.latLngBounds();
+                        
+                        data.forEach(center => {
+                            const lat = parseFloat(center.latitude);
+                            const lng = parseFloat(center.longitude);
+                            
+                            if(!isNaN(lat) && !isNaN(lng)) {
+                                const latLng = L.latLng(lat, lng);
+                                bounds.extend(latLng);
+                                
+                                // Build popup HTML
+                                let popupHtml = `
+                                    <div class="center-popup-title">${center.nom}</div>
+                                `;
+                                
+                                if (center.adresse || center.ville) {
+                                    popupHtml += `<div class="center-popup-info"><i class="fas fa-map-marker-alt"></i> ${center.adresse}, ${center.ville}</div>`;
+                                }
+                                if (center.telephone) {
+                                    popupHtml += `<div class="center-popup-info"><i class="fas fa-phone"></i> ${center.telephone}</div>`;
+                                }
+                                if (center.email) {
+                                    popupHtml += `<div class="center-popup-info"><i class="fas fa-envelope"></i> <a href="mailto:${center.email}">${center.email}</a></div>`;
+                                }
+                                if (center.siteWeb) {
+                                    popupHtml += `<div class="center-popup-info"><i class="fas fa-globe"></i> <a href="${center.siteWeb}" target="_blank">Visiter le site</a></div>`;
+                                }
+
+                                const marker = L.marker(latLng, {icon: finoraIcon, centerId: center.id})
+                                    .bindPopup(popupHtml, { minWidth: 200 })
+                                    .bindTooltip(center.nom, { className: 'custom-tooltip', direction: 'top', offset: [0, -35] });
+                                
+                                markersLayer.addLayer(marker);
+                            }
+                        });
+                        
+                        // Fit map to markers if we have any
+                        if (bounds.isValid()) {
+                            // Give some padding
+                            map.fitBounds(bounds, { padding: [50, 50] });
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error("Erreur de chargement des centres:", error);
+                });
+
+            // 2. Nearest center logic using geolocation
+            const nearestBtn = document.getElementById('find-nearest-btn');
+            const nearestResult = document.getElementById('nearest-result');
+            const nearestText = document.getElementById('nearest-text');
+            
+            // Marker for user's location
+            let userMarker = null;
+
+            nearestBtn.addEventListener('click', function() {
+                if (!navigator.geolocation) {
+                    alert("La géolocalisation n'est pas supportée par votre navigateur.");
+                    return;
+                }
+
+                nearestBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Recherche...';
+                nearestBtn.disabled = true;
+
+                navigator.geolocation.getCurrentPosition(
+                    function(position) {
+                        const userLat = position.coords.latitude;
+                        const userLng = position.coords.longitude;
+                        const userLatLng = L.latLng(userLat, userLng);
+
+                        // Reset button
+                        nearestBtn.innerHTML = '<i class="fas fa-location-arrow me-2 text-primary"></i> Trouver le centre le plus proche';
+                        nearestBtn.disabled = false;
+
+                        // Add user marker
+                        if(userMarker) {
+                            userMarker.setLatLng(userLatLng);
+                        } else {
+                            userMarker = L.circleMarker(userLatLng, {
+                                radius: 8,
+                                fillColor: "#2563eb",
+                                color: "#ffffff",
+                                weight: 2,
+                                opacity: 1,
+                                fillOpacity: 1
+                            }).bindTooltip("Votre position").addTo(map);
+                        }
+
+                        // Calculate nearest
+                        if(centersData.length === 0) return;
+
+                        let nearestCenter = null;
+                        let minDistance = Infinity; // in meters
+
+                        centersData.forEach(center => {
+                            const lat = parseFloat(center.latitude);
+                            const lng = parseFloat(center.longitude);
+                            if(!isNaN(lat) && !isNaN(lng)) {
+                                const distance = userLatLng.distanceTo(L.latLng(lat, lng));
+                                if(distance < minDistance) {
+                                    minDistance = distance;
+                                    nearestCenter = center;
+                                }
+                            }
+                        });
+
+                        if(nearestCenter) {
+                            const nLat = parseFloat(nearestCenter.latitude);
+                            const nLng = parseFloat(nearestCenter.longitude);
+                            
+                            // Highlight the nearest marker
+                            markersLayer.eachLayer(function(marker) {
+                                if(marker.options.centerId === nearestCenter.id) {
+                                    marker.setIcon(highlightIcon);
+                                    marker.openPopup();
+                                } else {
+                                    // Reset others to default
+                                    marker.setIcon(finoraIcon);
+                                }
+                            });
+
+                            // Display result message
+                            const distKm = (minDistance / 1000).toFixed(1);
+                            nearestResult.style.setProperty('display', 'inline-flex', 'important');
+                            nearestText.innerHTML = `Centre <strong>${nearestCenter.nom}</strong> à ${distKm} km.`;
+                            
+                            // Fly to location showing both user and center
+                            const bounds = L.latLngBounds([userLatLng, L.latLng(nLat, nLng)]);
+                            map.flyToBounds(bounds, { padding: [100, 100], duration: 1.5 });
+                        }
+                    },
+                    function(error) {
+                        nearestBtn.innerHTML = '<i class="fas fa-location-arrow me-2 text-primary"></i> Trouver le centre le plus proche';
+                        nearestBtn.disabled = false;
+                        alert("Erreur de géolocalisation. Veuillez autoriser l'accès à votre position.");
+                        console.error(error);
+                    },
+                    { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
+                );
+            });
+        });
+    </script>
+{% endblock %}
