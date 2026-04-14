@@ -220,9 +220,9 @@
                                     </p>
 
                                     <div class="formation-card-footer d-flex gap-2 flex-wrap mt-3">
-                                        <a href="{{ path('app_formation_inscription', {'id': formation.id}) }}" class="btn btn-sm formation-outline-btn">
-                                            S'inscrire
-                                        </a>
+                                        <button type="button" class="btn btn-sm formation-outline-btn" data-bs-toggle="modal" data-bs-target="#purchaseModal{{ formation.id }}">
+                                            Acheter
+                                        </button>
                                         <a href="{{ path('app_formation_show', {'id': formation.id}) }}" class="btn btn-sm formation-main-btn">
                                             Voir formation
                                         </a>
@@ -231,6 +231,49 @@
 
                             </div>
                         </div>
+
+                        <!-- Purchase Modal for Formation {{ formation.id }} -->
+                        <div class="modal fade" id="purchaseModal{{ formation.id }}" tabindex="-1" aria-labelledby="purchaseModalLabel{{ formation.id }}" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered">
+                                <div class="modal-content border-0" style="border-radius: 18px; box-shadow: 0 15px 35px rgba(0,0,0,0.15);">
+                                    <div class="modal-header border-bottom-0 pb-0">
+                                        <h5 class="modal-title fw-bold text-primary" id="purchaseModalLabel{{ formation.id }}">Acheter la formation</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <h6 class="fw-bold mb-3">{{ formation.titre }}</h6>
+                                        
+                                        <div class="bg-primary bg-opacity-10 p-3 rounded-3 mb-4">
+                                            <p class="mb-2 fw-semibold text-primary"><i class="bi bi-info-circle me-1"></i> Qu'allez-vous apprendre ?</p>
+                                            <p class="small mb-0 text-dark">
+                                                En rejoignant cette formation, vous maîtriserez les concepts clés, découvrirez des stratégies pratiques et acquerrez les compétences nécessaires pour progresser à votre rythme.
+                                            </p>
+                                        </div>
+
+                                        <form action="{{ path('app_formation_inscription', {'id': formation.id}) }}" method="post">
+                                            <div class="mb-3">
+                                                <label class="form-label small fw-bold">Nom complet</label>
+                                                <input type="text" class="form-control" required placeholder="Ex: Jean Dupont">
+                                            </div>
+                                            <div class="mb-4">
+                                                <label class="form-label small fw-bold">Méthode de paiement</label>
+                                                <select class="form-select">
+                                                    <option>Carte Bancaire</option>
+                                                    <option>PayPal</option>
+                                                    <option>Virement</option>
+                                                </select>
+                                            </div>
+                                            <div class="d-grid">
+                                                <button type="submit" class="btn btn-primary py-2 fw-bold" style="border-radius: 12px; background: linear-gradient(135deg, #7c3aed, #8b5cf6); border: none;">
+                                                    Confirmer l'achat
+                                                </button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                     {% endfor %}
                 </div>
 

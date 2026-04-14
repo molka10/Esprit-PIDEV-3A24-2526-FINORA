@@ -59,17 +59,64 @@
                             </p>
 
                             <div class="d-flex gap-2 flex-wrap">
-                                <a href="{{ path('app_formation_inscription', {'id': formation.id}) }}" class="btn formation-main-btn">
-                                    S'inscrire
-                                </a>
-                                <a href="{{ path('app_lessons', {'formation': formation.id}) }}" class="btn formation-outline-btn">
-                                    Voir uniquement ces lessons
-                                </a>
+                                {% if isPurchased %}
+                                    <button class="btn btn-success fw-bold" disabled>
+                                        <i class="bi bi-check-circle-fill me-1"></i> Déjà acheté
+                                    </button>
+                                {% else %}
+                                    <button type="button" class="btn formation-main-btn" data-bs-toggle="modal" data-bs-target="#purchaseModalShow">
+                                        <i class="bi bi-cart me-1"></i> Acheter
+                                    </button>
+                                {% endif %}
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
+
+            <!-- Purchase Modal for Show Page -->
+            {% if not isPurchased %}
+                <div class="modal fade" id="purchaseModalShow" tabindex="-1" aria-labelledby="purchaseModalShowLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content border-0" style="border-radius: 18px; box-shadow: 0 15px 35px rgba(0,0,0,0.15);">
+                            <div class="modal-header border-bottom-0 pb-0">
+                                <h5 class="modal-title fw-bold text-primary" id="purchaseModalShowLabel">Acheter la formation</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+                            </div>
+                            <div class="modal-body">
+                                <h6 class="fw-bold mb-3">{{ formation.titre }}</h6>
+                                
+                                <div class="bg-primary bg-opacity-10 p-3 rounded-3 mb-4">
+                                    <p class="mb-2 fw-semibold text-primary"><i class="bi bi-info-circle me-1"></i> Qu'allez-vous apprendre ?</p>
+                                    <p class="small mb-0 text-dark">
+                                        En rejoignant cette formation, vous maîtriserez les concepts clés, découvrirez des stratégies pratiques et acquerrez les compétences nécessaires pour progresser à votre rythme.
+                                    </p>
+                                </div>
+
+                                <form action="{{ path('app_formation_inscription', {'id': formation.id}) }}" method="post">
+                                    <div class="mb-3">
+                                        <label class="form-label small fw-bold">Nom complet</label>
+                                        <input type="text" class="form-control" required placeholder="Ex: Jean Dupont">
+                                    </div>
+                                    <div class="mb-4">
+                                        <label class="form-label small fw-bold">Méthode de paiement</label>
+                                        <select class="form-select">
+                                            <option>Carte Bancaire</option>
+                                            <option>PayPal</option>
+                                            <option>Virement</option>
+                                        </select>
+                                    </div>
+                                    <div class="d-grid">
+                                        <button type="submit" class="btn btn-primary py-2 fw-bold" style="border-radius: 12px; background: linear-gradient(135deg, #7c3aed, #8b5cf6); border: none;">
+                                            Confirmer l'achat
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
 
             <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
                 <div>
@@ -83,20 +130,23 @@
                 <div class="row g-4">
                     {% for lesson in lessons %}
                         <div class="col-md-6 col-xl-4">
-                            <div class="card lesson-card border-0 h-100">
+                            <div class="card lesson-card border-0 h-100 {% if not isPurchased %}locked-lesson{% endif %}">
 
                                 <div class="thumb">
                                     {% if lesson.videoUrl and lesson.youTubeVideoId %}
                                         <img src="https://img.youtube.com/vi/{{ lesson.youTubeVideoId }}/hqdefault.jpg" alt="{{ lesson.titre }}">
                                         <div class="thumb-overlay"></div>
-                                        <div class="play-badge">▶</div>
+                                        <div class="play-badge">{% if isPurchased %}▶{% else %}<i class="bi bi-lock-fill"></i>{% endif %}</div>
                                     {% elseif lesson.videoUrl and lesson.isUploadedVideo %}
                                         <div class="fallback with-video">▶ Vidéo</div>
                                         <div class="thumb-overlay"></div>
-                                        <div class="play-badge">▶</div>
+                                        <div class="play-badge">{% if isPurchased %}▶{% else %}<i class="bi bi-lock-fill"></i>{% endif %}</div>
                                     {% else %}
                                         <div class="fallback">FINORA</div>
                                         <div class="thumb-overlay soft"></div>
+                                        {% if not isPurchased %}
+                                            <div class="play-badge"><i class="bi bi-lock-fill"></i></div>
+                                        {% endif %}
                                     {% endif %}
 
                                     <div class="badge-order">
@@ -128,9 +178,15 @@
                                     <div class="d-flex justify-content-between align-items-center mt-3">
                                         <span class="duration-label">Ordre {{ lesson.ordre }}</span>
 
-                                        <a href="{{ path('app_lesson_show', {'id': lesson.id}) }}" class="btn btn-sm btn-primary lesson-btn">
-                                            Voir lesson
-                                        </a>
+                                        {% if isPurchased %}
+                                            <a href="{{ path('app_lesson_show', {'id': lesson.id}) }}" class="btn btn-sm btn-primary lesson-btn">
+                                                Accéder
+                                            </a>
+                                        {% else %}
+                                            <button type="button" class="btn btn-sm btn-light text-muted lesson-btn" data-bs-toggle="modal" data-bs-target="#purchaseModalShow">
+                                                <i class="bi bi-lock-fill"></i> Verrouillé
+                                            </button>
+                                        {% endif %}
                                     </div>
                                 </div>
 
@@ -419,6 +475,22 @@
     border-radius: 10px;
     padding-inline: 14px;
     font-weight: 700;
+}
+
+.locked-lesson {
+    opacity: 0.85;
+    filter: grayscale(40%);
+    transition: 0.3s;
+}
+
+.locked-lesson:hover {
+    opacity: 1;
+    filter: grayscale(0%);
+}
+
+.locked-lesson .play-badge {
+    background: rgba(31, 41, 55, 0.8);
+    color: #e5e7eb;
 }
 </style>
 {% endblock %}

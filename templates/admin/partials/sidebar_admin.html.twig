@@ -1,7 +1,24 @@
 <nav class="navbar sidebar navbar-expand-xl navbar-dark bg-dark">
     <div class="d-flex align-items-center">
-        <a class="navbar-brand" href="{{ path('admin_dashboard') }}">
-            <img class="navbar-brand-item" src="{{ asset('assets/images/logo-light.svg') }}" alt="">
+        <a class="navbar-brand d-flex align-items-center gap-2" href="{{ path('admin_dashboard') }}">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 44 44" height="32" width="32" style="flex-shrink:0;">
+              <defs>
+                <radialGradient id="sbg" cx="50%" cy="50%" r="50%">
+                  <stop offset="0%" stop-color="#ddd6fe" stop-opacity="0.65"/>
+                  <stop offset="100%" stop-color="#a78bfa" stop-opacity="0.28"/>
+                </radialGradient>
+                <linearGradient id="sfg" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#ede9fe"/>
+                  <stop offset="100%" stop-color="#c4b5fd"/>
+                </linearGradient>
+              </defs>
+              <circle cx="22" cy="22" r="20" fill="url(#sbg)"/>
+              <circle cx="22" cy="22" r="20" fill="none" stroke="#a78bfa" stroke-width="1" opacity="0.6"/>
+              <rect x="13" y="11" width="3.5" height="22" rx="1.2" fill="url(#sfg)"/>
+              <rect x="13" y="11" width="14" height="3.5" rx="1.2" fill="url(#sfg)"/>
+              <rect x="13" y="21" width="10" height="3" rx="1.2" fill="url(#sfg)"/>
+            </svg>
+            <span style="font-family:Helvetica Neue,Helvetica,Arial,sans-serif;font-size:18px;font-weight:800;color:#fff;letter-spacing:-0.3px;">Finora</span>
         </a>
     </div>
 

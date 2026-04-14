@@ -85,55 +85,73 @@
         </div>
     </section>
 
-    <section class="pt-5">
+    <section class="pt-5" style="background:#faf5ff;">
         <div class="container">
             <div class="d-flex justify-content-between align-items-center mb-4">
-                <h2 class="finora-title">Nos formations</h2>
-                <a href="{{ path('app_formations') }}" class="btn btn-primary">
-                    Voir toutes →
+                <h2 class="finora-title"><i class="bi bi-star-fill text-warning me-2"></i>Formations Bestsellers</h2>
+            </div>
+            <div class="tiny-slider arrow-round arrow-hover arrow-dark">
+                <div class="tiny-slider-inner" data-autoplay="true" data-arrow="true" data-dots="false" data-items="3" data-items-lg="3" data-items-md="2" data-items-sm="1" data-items-xs="1">
+                    {% for formation in formations|slice(0, 5) %}
+                        <div class="item pb-4">
+                            <div class="card shadow-sm h-100 mx-2" style="border-radius:18px; border:1px solid rgba(124,58,237,0.1);">
+                                {% if formation.imageUrl %}
+                                    <img src="{{ asset('uploads/formations/' ~ formation.imageUrl) }}" class="card-img-top" style="height:200px; object-fit:cover;" alt="{{ formation.titre }}">
+                                {% else %}
+                                    <img src="{{ asset('assets/images/courses/4by3/16.jpg') }}" class="card-img-top" style="height:200px; object-fit:cover;" alt="{{ formation.titre }}">
+                                {% endif %}
+                                <div class="card-body">
+                                    <div class="mb-2 d-flex flex-wrap gap-2">
+                                        <span class="badge bg-primary bg-opacity-10 text-primary">{{ formation.niveau }}</span>
+                                        <span class="badge bg-danger bg-opacity-10 text-danger"><i class="bi bi-fire"></i> Best-seller</span>
+                                    </div>
+                                    <h5 class="fw-bold text-dark">{{ formation.titre }}</h5>
+                                    <p class="text-muted small">{{ formation.description ? formation.description|slice(0, 80) ~ '...' : 'Pas de description' }}</p>
+                                    <div class="d-flex gap-2 mt-3">
+                                        <a href="{{ path('app_formation_show', {'id': formation.id}) }}" class="btn btn-primary w-100 fw-bold" style="border-radius:12px;">Découvrir</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% else %}
+                        <div class="item"><div class="alert alert-info">Aucune formation disponible.</div></div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="pt-5 pb-5">
+        <div class="container">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="finora-title">Toutes nos formations</h2>
+                <a href="{{ path('app_formations') }}" class="btn btn-outline-primary" style="border-radius:12px; font-weight:700;">
+                    Voir toutes <i class="bi bi-arrow-right"></i>
                 </a>
             </div>
 
             <div class="row g-4">
-                {% for formation in formations|slice(0, 3) %}
+                {% for formation in formations|slice(5, 6) %}
                     <div class="col-md-6 col-xl-4">
-                        <div class="card shadow-sm h-100">
-
+                        <div class="card shadow-sm h-100" style="border-radius:18px; border:1px solid rgba(124,58,237,0.08);">
                             {% if formation.imageUrl %}
-                                <img src="{{ asset('uploads/formations/' ~ formation.imageUrl) }}" class="card-img-top" alt="{{ formation.titre }}">
+                                <img src="{{ asset('uploads/formations/' ~ formation.imageUrl) }}" class="card-img-top" style="height:200px; object-fit:cover;" alt="{{ formation.titre }}">
                             {% else %}
-                                <img src="{{ asset('assets/images/courses/4by3/16.jpg') }}" class="card-img-top" alt="{{ formation.titre }}">
+                                <img src="{{ asset('assets/images/courses/4by3/16.jpg') }}" class="card-img-top" style="height:200px; object-fit:cover;" alt="{{ formation.titre }}">
                             {% endif %}
-
                             <div class="card-body">
-                                <div class="mb-2 d-flex flex-wrap gap-2">
-                                    <span class="badge bg-primary">{{ formation.niveau }}</span>
-
-                                    {% for tag in formation.categorie ? formation.categorie|split(',') : [] %}
-                                        {% if tag|trim != '' %}
-                                            <span class="purple-chip">{{ tag|trim }}</span>
-                                        {% endif %}
-                                    {% endfor %}
-                                </div>
-
-                                <h5>{{ formation.titre }}</h5>
-                                <p>{{ formation.description ?: 'Pas de description' }}</p>
-
-                                <div class="d-flex gap-2 flex-wrap">
-                                    <a href="{{ path('app_formations') }}" class="btn btn-outline-primary">
-                                        Explorer
-                                    </a>
-                                    <a href="{{ path('app_formation_show', {'id': formation.id}) }}" class="btn btn-primary">
-                                        Voir formation
+                                <span class="badge bg-primary bg-opacity-10 text-primary mb-2">{{ formation.niveau }}</span>
+                                <h5 class="fw-bold">{{ formation.titre }}</h5>
+                                <div class="mt-3">
+                                    <a href="{{ path('app_formation_show', {'id': formation.id}) }}" class="btn btn-outline-primary btn-sm w-100" style="border-radius:8px;">
+                                        Voir la formation
                                     </a>
                                 </div>
                             </div>
                         </div>
                     </div>
                 {% else %}
-                    <div class="col-12">
-                        <p>Aucune formation disponible.</p>
-                    </div>
+                    <div class="col-12"><p class="text-muted">Explorez nos bestsellers.</p></div>
                 {% endfor %}
             </div>
         </div>

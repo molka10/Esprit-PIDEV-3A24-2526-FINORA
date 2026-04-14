@@ -104,13 +104,17 @@ final class HomeController extends AbstractController
     }
 
     #[Route('/formations/{id}', name: 'app_formation_show')]
-    public function formationShow(int $id, EntityManagerInterface $entityManager): Response
+    public function formationShow(int $id, EntityManagerInterface $entityManager, Request $request): Response
     {
         $formation = $entityManager->getRepository(Formation::class)->find($id);
 
         if (!$formation) {
             throw $this->createNotFoundException('Formation introuvable');
         }
+
+        $session = $request->getSession();
+        $purchasedFormations = $session->get('purchased_formations', []);
+        $isPurchased = in_array($id, $purchasedFormations, true);
 
         $lessons = $entityManager->getRepository(Lesson::class)
             ->createQueryBuilder('l')
@@ -125,11 +129,12 @@ final class HomeController extends AbstractController
         return $this->render('home/formation_show.html.twig', [
             'formation' => $formation,
             'lessons' => $lessons,
+            'isPurchased' => $isPurchased,
         ]);
     }
 
     #[Route('/formations/{id}/inscription', name: 'app_formation_inscription')]
-    public function formationInscription(int $id, EntityManagerInterface $entityManager): Response
+    public function formationInscription(int $id, EntityManagerInterface $entityManager, Request $request): Response
     {
         $formation = $entityManager->getRepository(Formation::class)->find($id);
 
@@ -137,7 +142,15 @@ final class HomeController extends AbstractController
             throw $this->createNotFoundException('Formation introuvable');
         }
 
-        $this->addFlash('success', 'Inscription simulée à la formation "' . $formation->getTitre() . '".');
+        $session = $request->getSession();
+        $purchasedFormations = $session->get('purchased_formations', []);
+        
+        if (!in_array($id, $purchasedFormations, true)) {
+            $purchasedFormations[] = $id;
+            $session->set('purchased_formations', $purchasedFormations);
+        }
+
+        $this->addFlash('success', 'Achat de la formation "' . $formation->getTitre() . '" validé avec succès ! Les leçons sont désormais débloquées.');
 
         return $this->redirectToRoute('app_formation_show', ['id' => $id]);
     }

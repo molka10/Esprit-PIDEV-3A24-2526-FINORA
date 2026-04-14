@@ -215,9 +215,25 @@
 <header class="navbar-light navbar-sticky" style="box-shadow: 0 4px 25px rgba(109, 40, 217, 0.05); position: sticky; top: 0; z-index: 1020;">
     <nav class="navbar navbar-expand-xl z-index-9">
         <div class="container">
-            <a class="navbar-brand" href="{{ path('app_home') }}">
-                <img class="light-mode-item navbar-brand-item" src="{{ asset('assets/images/logo.svg') }}" alt="logo">
-                <img class="dark-mode-item navbar-brand-item" src="{{ asset('assets/images/logo-light.svg') }}" alt="logo">
+            <a class="navbar-brand d-flex align-items-center gap-2" href="{{ path('app_home') }}">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 44 44" height="36" width="36" style="flex-shrink:0;">
+                  <defs>
+                    <radialGradient id="nbg" cx="50%" cy="50%" r="50%">
+                      <stop offset="0%" stop-color="#c4b5fd" stop-opacity="0.7"/>
+                      <stop offset="100%" stop-color="#7c3aed" stop-opacity="0.22"/>
+                    </radialGradient>
+                    <linearGradient id="nfg" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stop-color="#5b21b6"/>
+                      <stop offset="100%" stop-color="#7c3aed"/>
+                    </linearGradient>
+                  </defs>
+                  <circle cx="22" cy="22" r="20" fill="url(#nbg)"/>
+                  <circle cx="22" cy="22" r="20" fill="none" stroke="#c4b5fd" stroke-width="1" opacity="0.7"/>
+                  <rect x="13" y="11" width="3.5" height="22" rx="1.2" fill="url(#nfg)"/>
+                  <rect x="13" y="11" width="14" height="3.5" rx="1.2" fill="url(#nfg)"/>
+                  <rect x="13" y="21" width="10" height="3" rx="1.2" fill="url(#nfg)"/>
+                </svg>
+                <span style="font-family:Helvetica Neue,Helvetica,Arial,sans-serif;font-size:20px;font-weight:800;color:#3b0764;letter-spacing:-0.3px;">Finora</span>
             </a>
 
             <button class="navbar-toggler ms-auto" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse">

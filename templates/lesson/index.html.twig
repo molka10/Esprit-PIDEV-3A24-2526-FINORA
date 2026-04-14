@@ -122,20 +122,23 @@
                                 {{ lesson.contenu ? lesson.contenu|slice(0, 100) ~ '...' : 'Pas de contenu' }}
                             </p>
 
-                            <div class="lesson-actions">
+                            <div class="lesson-actions justify-content-end align-items-center">
                                 <a href="{{ path('app_lesson_show', {'id': lesson.id}) }}"
-                                   class="btn btn-sm admin-success-btn">
-                                    Voir
+                                   class="action-icon-btn action-view"
+                                   data-bs-toggle="tooltip" data-bs-placement="top" title="Voir la leçon">
+                                    <i class="bi bi-eye-fill"></i>
                                 </a>
 
                                 <a href="{{ path('app_lesson_edit', {'id': lesson.id}) }}"
-                                   class="btn btn-sm admin-outline-btn">
-                                    Modifier
+                                   class="action-icon-btn action-edit"
+                                   data-bs-toggle="tooltip" data-bs-placement="top" title="Modifier">
+                                    <i class="bi bi-pencil-fill"></i>
                                 </a>
 
                                 <a href="{{ path('app_lesson_youtube_manage', {'id': lesson.id}) }}"
-                                   class="btn btn-sm admin-warning-btn">
-                                    YouTube
+                                   class="action-icon-btn action-youtube"
+                                   data-bs-toggle="tooltip" data-bs-placement="top" title="Gérer YouTube">
+                                    <i class="bi bi-youtube"></i>
                                 </a>
 
                                 <form method="post"
@@ -143,8 +146,10 @@
                                       onsubmit="return confirm('Supprimer cette lesson ?');"
                                       style="display:inline-block;">
                                     <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ lesson.id) }}">
-                                    <button type="submit" class="btn btn-sm admin-danger-btn">
-                                        Supprimer
+                                    <button type="submit"
+                                            class="action-icon-btn action-delete"
+                                            data-bs-toggle="tooltip" data-bs-placement="top" title="Supprimer">
+                                        <i class="bi bi-trash3-fill"></i>
                                     </button>
                                 </form>
                             </div>
@@ -377,6 +382,64 @@
 
 .empty-icon {
     font-size: 34px;
+}
+
+/* Icon Action Buttons */
+.action-icon-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    border: none;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    background: transparent;
+    padding: 0;
+}
+
+.action-icon-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+.action-view {
+    background: rgba(22, 163, 74, 0.1);
+    color: #16a34a;
+}
+.action-view:hover {
+    background: rgba(22, 163, 74, 0.2);
+    color: #15803d;
+}
+
+.action-edit {
+    background: rgba(124, 58, 237, 0.1);
+    color: #6d28d9;
+}
+.action-edit:hover {
+    background: rgba(124, 58, 237, 0.2);
+    color: #5b21b6;
+}
+
+.action-youtube {
+    background: rgba(245, 158, 11, 0.1);
+    color: #d97706;
+}
+.action-youtube:hover {
+    background: rgba(245, 158, 11, 0.2);
+    color: #b45309;
+}
+
+.action-delete {
+    background: rgba(239, 68, 68, 0.1);
+    color: #dc2626;
+}
+.action-delete:hover {
+    background: rgba(239, 68, 68, 0.2);
+    color: #b91c1c;
 }
 </style>
 

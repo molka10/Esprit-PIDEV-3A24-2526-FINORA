@@ -1,5 +1,5 @@
 /**
-* Eduport- LMS, Education and Course Theme
+* Finora - Learning Management Platform
 *
 * @author Webestica (https://www.webestica.com/)
 * @version 1.4.1

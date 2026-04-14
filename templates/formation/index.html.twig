@@ -157,18 +157,24 @@
                                 </td>
 
                                 <td class="text-end">
-                                    <div class="d-flex flex-wrap justify-content-end gap-2">
-                                        <a href="{{ path('formation_edit', {'id': formation.id}) }}" class="btn btn-sm admin-outline-btn">
-                                            Modifier
+                                    <div class="d-flex flex-wrap justify-content-end gap-2 align-items-center">
+                                        <a href="{{ path('formation_edit', {'id': formation.id}) }}"
+                                           class="action-icon-btn action-edit"
+                                           data-bs-toggle="tooltip" data-bs-placement="top" title="Modifier">
+                                            <i class="bi bi-pencil-fill"></i>
                                         </a>
 
                                         {% if lessonCounts[formation.id] is defined and lessonCounts[formation.id] > 0 %}
-                                            <a href="{{ path('app_lesson_index', {'formation': formation.id}) }}" class="btn btn-sm admin-main-btn">
-                                                Voir lessons
+                                            <a href="{{ path('app_lesson_index', {'formation': formation.id}) }}"
+                                               class="action-icon-btn action-lessons"
+                                               data-bs-toggle="tooltip" data-bs-placement="top" title="Voir les leçons">
+                                                <i class="bi bi-collection-play-fill"></i>
                                             </a>
                                         {% else %}
-                                            <a href="{{ path('app_lesson_new') }}" class="btn btn-sm admin-success-btn">
-                                                Ajouter lesson
+                                            <a href="{{ path('app_lesson_new') }}"
+                                               class="action-icon-btn action-add"
+                                               data-bs-toggle="tooltip" data-bs-placement="top" title="Ajouter une leçon">
+                                                <i class="bi bi-plus-circle-fill"></i>
                                             </a>
                                         {% endif %}
 
@@ -177,8 +183,10 @@
                                               style="display:inline-block;"
                                               onsubmit="return confirm('Supprimer cette formation ?');">
                                             <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ formation.id) }}">
-                                            <button type="submit" class="btn btn-sm admin-danger-btn">
-                                                Supprimer
+                                            <button type="submit"
+                                                    class="action-icon-btn action-delete"
+                                                    data-bs-toggle="tooltip" data-bs-placement="top" title="Supprimer">
+                                                <i class="bi bi-trash3-fill"></i>
                                             </button>
                                         </form>
                                     </div>
@@ -343,6 +351,65 @@
 .empty-state-icon {
     font-size: 34px;
 }
+
+/* Icon Action Buttons */
+.action-icon-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    border: none;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    background: transparent;
+    padding: 0;
+}
+
+.action-icon-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 14px rgba(0,0,0,0.12);
+}
+
+.action-edit {
+    background: rgba(124, 58, 237, 0.1);
+    color: #6d28d9;
+}
+.action-edit:hover {
+    background: rgba(124, 58, 237, 0.2);
+    color: #5b21b6;
+}
+
+.action-delete {
+    background: rgba(239, 68, 68, 0.1);
+    color: #dc2626;
+}
+.action-delete:hover {
+    background: rgba(239, 68, 68, 0.2);
+    color: #b91c1c;
+}
+
+.action-lessons {
+    background: rgba(99, 102, 241, 0.1);
+    color: #4f46e5;
+}
+.action-lessons:hover {
+    background: rgba(99, 102, 241, 0.2);
+    color: #3730a3;
+}
+
+.action-add {
+    background: rgba(22, 163, 74, 0.1);
+    color: #16a34a;
+}
+.action-add:hover {
+    background: rgba(22, 163, 74, 0.2);
+    color: #15803d;
+}
+
 </style>
 
 <script>
