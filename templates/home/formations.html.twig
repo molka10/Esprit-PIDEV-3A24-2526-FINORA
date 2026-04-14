@@ -243,17 +243,20 @@
                                     <div class="modal-body">
                                         <h6 class="fw-bold mb-3">{{ formation.titre }}</h6>
                                         
-                                        <div class="bg-primary bg-opacity-10 p-3 rounded-3 mb-4">
-                                            <p class="mb-2 fw-semibold text-primary"><i class="bi bi-info-circle me-1"></i> Qu'allez-vous apprendre ?</p>
-                                            <p class="small mb-0 text-dark">
-                                                En rejoignant cette formation, vous maîtriserez les concepts clés, découvrirez des stratégies pratiques et acquerrez les compétences nécessaires pour progresser à votre rythme.
-                                            </p>
-                                        </div>
+                                        {% if formation.pourquoiAcheter %}
+                                            <div class="bg-primary bg-opacity-10 p-3 rounded-3 mb-4">
+                                                <p class="mb-2 fw-semibold text-primary"><i class="bi bi-info-circle me-1"></i> Pourquoi acheter cette formation ?</p>
+                                                <p class="small mb-0 text-dark">
+                                                    {{ formation.pourquoiAcheter|nl2br }}
+                                                </p>
+                                            </div>
+                                        {% endif %}
 
-                                        <form action="{{ path('app_formation_inscription', {'id': formation.id}) }}" method="post">
+                                        <form action="{{ path('app_formation_inscription', {'id': formation.id}) }}" method="post" id="purchaseFormList{{ formation.id }}">
                                             <div class="mb-3">
                                                 <label class="form-label small fw-bold">Nom complet</label>
-                                                <input type="text" class="form-control" required placeholder="Ex: Jean Dupont">
+                                                <input type="text" class="form-control" id="fullNameList{{ formation.id }}" placeholder="Ex: Jean Dupont">
+                                                <div class="text-danger small mt-1 d-none" id="errorNameList{{ formation.id }}">Veuillez renseigner votre nom complet.</div>
                                             </div>
                                             <div class="mb-4">
                                                 <label class="form-label small fw-bold">Méthode de paiement</label>
@@ -273,6 +276,27 @@
                                 </div>
                             </div>
                         </div>
+
+                        <script>
+                            document.addEventListener('DOMContentLoaded', function() {
+                                const form{{ formation.id }} = document.getElementById('purchaseFormList{{ formation.id }}');
+                                const inputName{{ formation.id }} = document.getElementById('fullNameList{{ formation.id }}');
+                                const errorMsg{{ formation.id }} = document.getElementById('errorNameList{{ formation.id }}');
+
+                                if (form{{ formation.id }} && inputName{{ formation.id }}) {
+                                    form{{ formation.id }}.addEventListener('submit', function(e) {
+                                        if (inputName{{ formation.id }}.value.trim() === '') {
+                                            e.preventDefault();
+                                            inputName{{ formation.id }}.classList.add('is-invalid');
+                                            errorMsg{{ formation.id }}.classList.remove('d-none');
+                                        } else {
+                                            inputName{{ formation.id }}.classList.remove('is-invalid');
+                                            errorMsg{{ formation.id }}.classList.add('d-none');
+                                        }
+                                    });
+                                }
+                            });
+                        </script>
 
                     {% endfor %}
                 </div>

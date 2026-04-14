@@ -131,21 +131,28 @@ final class LessonController extends AbstractController
     public function youtubeManage(
         Lesson $lesson,
         Request $request,
-        YouTubeSearchService $youTubeSearchService
+        YouTubeSearchService $youTubeSearchService,
+        \Knp\Component\Pager\PaginatorInterface $paginator
     ): Response {
         $query = trim((string) $request->query->get('q', (string) $lesson->getTitre()));
         $sort = (string) $request->query->get('sort', 'relevance');
 
-        $results = [];
+        $rawResults = [];
         $error = null;
 
         if ($query !== '') {
             try {
-                $results = $youTubeSearchService->search($query, 8, $sort);
+                $rawResults = $youTubeSearchService->search($query, 10, $sort);
             } catch (\Throwable $e) {
                 $error = $e->getMessage();
             }
         }
+
+        $results = $paginator->paginate(
+            $rawResults,
+            $request->query->getInt('page', 1),
+            5
+        );
 
         return $this->render('lesson/youtube_manage.html.twig', [
             'lesson' => $lesson,
@@ -245,16 +252,24 @@ final class LessonController extends AbstractController
     #[Route('/{id}/videos', name: 'app_lesson_related_videos', methods: ['GET'])]
     public function relatedVideos(
         Lesson $lesson,
-        YouTubeSearchService $youTubeSearchService
+        Request $request,
+        YouTubeSearchService $youTubeSearchService,
+        \Knp\Component\Pager\PaginatorInterface $paginator
     ): Response {
-        $results = [];
+        $rawResults = [];
         $error = null;
 
         try {
-            $results = $youTubeSearchService->search((string) $lesson->getTitre(), 6);
+            $rawResults = $youTubeSearchService->search((string) $lesson->getTitre(), 10);
         } catch (\Throwable $e) {
             $error = $e->getMessage();
         }
+
+        $results = $paginator->paginate(
+            $rawResults,
+            $request->query->getInt('page', 1),
+            5
+        );
 
         return $this->render('lesson/related_videos.html.twig', [
             'lesson' => $lesson,

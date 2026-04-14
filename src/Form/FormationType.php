@@ -46,6 +46,11 @@ class FormationType extends AbstractType
                 'label' => 'Description',
                 'required' => false
             ])
+            ->add('pourquoiAcheter', TextareaType::class, [
+                'label' => 'Pourquoi acheter cette formation ?',
+                'required' => false,
+                'help' => 'Texte incitatif affiché aux visiteurs lorsque les leçons sont verrouillées.'
+            ])
             ->add('categorie', ChoiceType::class, [
                 'label' => 'Catégories',
                 'choices' => $categoryChoices,

@@ -63,6 +63,9 @@ class Formation
     #[ORM\Column(type: 'string', length: 255, nullable: true)]
     private ?string $image_url = null;
 
+    #[ORM\Column(type: 'text', nullable: true)]
+    private ?string $pourquoiAcheter = null;
+
     #[Vich\UploadableField(mapping: 'formation_images', fileNameProperty: 'image_url')]
     #[Assert\Image(
         maxSize: '4M',
@@ -142,6 +145,17 @@ class Formation
     public function setImageUrl(?string $image_url): self
     {
         $this->image_url = $image_url;
+        return $this;
+    }
+
+    public function getPourquoiAcheter(): ?string
+    {
+        return $this->pourquoiAcheter;
+    }
+
+    public function setPourquoiAcheter(?string $pourquoiAcheter): self
+    {
+        $this->pourquoiAcheter = $pourquoiAcheter;
         return $this;
     }
 

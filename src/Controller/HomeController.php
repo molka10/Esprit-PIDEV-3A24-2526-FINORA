@@ -16,7 +16,7 @@ final class HomeController extends AbstractController
     #[Route('/home', name: 'app_home')]
     public function index(EntityManagerInterface $entityManager): Response
     {
-        $formations = $entityManager->getRepository(Formation::class)->findAll();
+        $formations = $entityManager->getRepository(Formation::class)->findBy(['is_published' => 1]);
         $lessons = $entityManager->getRepository(Lesson::class)->findAll();
 
         return $this->render('home/index.html.twig', [
@@ -37,7 +37,8 @@ final class HomeController extends AbstractController
         $tri = (string) $request->query->get('tri', 'id');
         $ordre = strtolower((string) $request->query->get('ordre', 'desc'));
 
-        $qb = $entityManager->getRepository(Formation::class)->createQueryBuilder('f');
+        $qb = $entityManager->getRepository(Formation::class)->createQueryBuilder('f')
+            ->where('f.is_published = 1');
 
         if ($titre !== '') {
             $qb->andWhere('LOWER(f.titre) LIKE LOWER(:titre)')
@@ -169,7 +170,8 @@ final class HomeController extends AbstractController
         $qb = $entityManager->getRepository(Lesson::class)
             ->createQueryBuilder('l')
             ->leftJoin('l.formation', 'f')
-            ->addSelect('f');
+            ->addSelect('f')
+            ->where('f.is_published = 1');
 
         if ($titre !== '') {
             $qb->andWhere('LOWER(l.titre) LIKE LOWER(:titre) OR LOWER(l.contenu) LIKE LOWER(:titre)')
@@ -203,7 +205,7 @@ final class HomeController extends AbstractController
             6
         );
 
-        $formations = $entityManager->getRepository(Formation::class)->findAll();
+        $formations = $entityManager->getRepository(Formation::class)->findBy(['is_published' => 1]);
 
         return $this->render('home/lessons.html.twig', [
             'lessons' => $lessons,
