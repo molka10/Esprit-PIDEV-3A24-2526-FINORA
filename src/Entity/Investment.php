@@ -240,4 +240,62 @@ class Investment
 
         return $this;
     }
+
+    // ── Computed crowdfunding helpers (Bricks-like display, no DB changes) ──
+
+    /** Simulated annual return based on risk level for display purposes. */
+    public function getAnnualReturn(): float
+    {
+        return match ($this->riskLevel) {
+            'LOW'    => 7.5,
+            'MEDIUM' => 9.5,
+            'HIGH'   => 12.0,
+            default  => 8.0,
+        };
+    }
+
+    /** Simulated duration in months for display purposes. */
+    public function getDurationMonths(): int
+    {
+        return match ($this->riskLevel) {
+            'LOW'    => 36,
+            'MEDIUM' => 24,
+            'HIGH'   => 12,
+            default  => 24,
+        };
+    }
+
+    /** Funding goal equals estimated value (display purposes). */
+    public function getFundingGoal(): float
+    {
+        return (float) ($this->estimatedValue ?: 0);
+    }
+
+    /** Funding current = sum of all management amountInvested for this project. */
+    public function getFundingCurrent(): float
+    {
+        $total = 0;
+        foreach ($this->managements as $m) {
+            $total += (float) $m->getAmountInvested();
+        }
+        return $total;
+    }
+
+    /** Percentage of funding goal reached (0–100). */
+    public function getFundingPercentage(): float
+    {
+        $goal = $this->getFundingGoal();
+        $current = $this->getFundingCurrent();
+        if ($goal <= 0) {
+            return 0;
+        }
+
+        return min(100, round(($current / $goal) * 100, 1));
+    }
+
+    /** Investment count for this project (number of management records). */
+    public function getInvestorCount(): int
+    {
+        return $this->managements->count();
+    }
 }

@@ -18,6 +18,8 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 // VALIDATION
 use Symfony\Component\Validator\Constraints\File;
 
+use Symfony\Component\Form\Extension\Core\Type\IntegerType;
+
 class InvestmentType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
@@ -26,19 +28,19 @@ class InvestmentType extends AbstractType
 
             // 🔹 NAME
             ->add('name', TextType::class, [
-                'label' => 'Nom',
+                'label' => 'Nom du projet',
                 'required' => true,
                 'attr' => [
                     'class' => 'form-control',
-                    'placeholder' => 'Ex: Projet Immobilier',
+                    'placeholder' => 'Ex: Résidence Les Jardins de Tunis',
                     'minlength' => 3,
                     'maxlength' => 255
                 ]
             ])
 
-            // 🔹 CATEGORY (ENUM + fallback propre)
+            // 🔹 CATEGORY
             ->add('category', ChoiceType::class, [
-                'label' => 'Type d’investissement',
+                'label' => 'Type de bien',
                 'choices' => InvestmentCategory::formChoices(),
                 'placeholder' => 'Choisir une catégorie',
                 'required' => true,
@@ -51,20 +53,20 @@ class InvestmentType extends AbstractType
                 'required' => true,
                 'attr' => [
                     'class' => 'form-control',
-                    'placeholder' => 'Ex: Tunis',
+                    'placeholder' => 'Ex: Tunis, La Marsa',
                     'maxlength' => 255
                 ]
             ])
 
             // 🔹 VALUE
             ->add('estimatedValue', NumberType::class, [
-                'label' => 'Valeur estimée',
+                'label' => 'Valeur totale du bien (TND)',
                 'required' => true,
                 'scale' => 2,
                 'html5' => true,
                 'attr' => [
                     'class' => 'form-control',
-                    'placeholder' => 'Ex: 150000',
+                    'placeholder' => 'Ex: 500000',
                     'min' => 0,
                     'step' => '0.01'
                 ]
@@ -83,9 +85,9 @@ class InvestmentType extends AbstractType
                 'attr' => ['class' => 'form-select']
             ])
 
-            // 🔥 IMAGE UPLOAD (IMPORTANT)
+            // 🔥 IMAGE UPLOAD
             ->add('imageFile', FileType::class, [
-                'label' => 'Image',
+                'label' => 'Photo du projet',
                 'mapped' => false,
                 'required' => false,
                 'attr' => [
@@ -103,12 +105,12 @@ class InvestmentType extends AbstractType
 
             // 🔹 DESCRIPTION
             ->add('description', TextareaType::class, [
-                'label' => 'Description',
+                'label' => 'Description du projet',
                 'required' => false,
                 'attr' => [
                     'class' => 'form-control',
-                    'rows' => 4,
-                    'placeholder' => 'Description...',
+                    'rows' => 5,
+                    'placeholder' => 'Décrivez le projet d\'investissement, son potentiel, son emplacement...',
                     'maxlength' => 2000
                 ]
             ])
@@ -117,8 +119,8 @@ class InvestmentType extends AbstractType
             ->add('status', ChoiceType::class, [
                 'label' => 'Statut',
                 'choices' => [
-                    'Actif' => 'ACTIVE',
-                    'Inactif' => 'INACTIVE',
+                    'En cours de collecte' => 'ACTIVE',
+                    'Collecte terminée' => 'INACTIVE',
                 ],
                 'placeholder' => 'Choisir un statut',
                 'required' => true,

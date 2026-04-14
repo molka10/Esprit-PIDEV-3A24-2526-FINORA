@@ -199,14 +199,7 @@ final class InvestmentController extends AbstractController
     {
         if ($redirect = $this->checkAccess($request)) return $redirect;
 
-        // 🔐 Ownership check
-        $role = $this->getRole($request);
-        $userId = $this->getUserId($request);
-        if ($role !== 'admin' && $investment->getCreatedByUserId() !== $userId) {
-            $this->addFlash('danger', 'Accès refusé.');
-            return $this->redirectToRoute('app_investment_index');
-        }
-
+        // All authenticated users can view investment details (public catalog)
         return $this->render('investment/show.html.twig', [
             'investment' => $investment,
         ]);

@@ -4,8 +4,9 @@
 
 <style>
     body {
-        background: linear-gradient(135deg, #eef2f7, #d9e2ec);
-        font-family: 'Segoe UI', sans-serif;
+        background: linear-gradient(135deg, #1e1b4b 0%, #312e81 40%, #4c1d95 100%);
+        font-family: 'Inter', 'Segoe UI', sans-serif;
+        min-height: 100vh;
     }
 
     .main-container {
@@ -13,80 +14,127 @@
     }
 
     .title {
-        font-size: 42px;
-        font-weight: 700;
-        color: #2c3e50;
+        font-size: 38px;
+        font-weight: 800;
+        color: #ffffff;
     }
 
     .subtitle {
-        color: #6c757d;
-        font-size: 18px;
+        color: rgba(255,255,255,0.6);
+        font-size: 16px;
     }
 
     .role-card {
-        border-radius: 25px;
-        padding: 50px 30px;
+        border-radius: 24px;
+        padding: 48px 32px;
         text-align: center;
-        transition: all 0.4s ease;
-        backdrop-filter: blur(10px);
-        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        border: 1px solid rgba(255,255,255,0.1);
+        backdrop-filter: blur(20px);
     }
 
     .role-card:hover {
-        transform: translateY(-12px) scale(1.03);
-        box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+        transform: translateY(-10px);
+        box-shadow: 0 24px 60px rgba(0,0,0,0.3);
     }
 
     .admin {
-        background: linear-gradient(135deg, #ff5f6d, #ff2e4d);
-        color: white;
+        background: linear-gradient(145deg, rgba(124,58,237,0.9), rgba(139,92,246,0.85));
     }
 
     .invest {
-        background: linear-gradient(135deg, #00c9a7, #00b894);
-        color: white;
+        background: linear-gradient(145deg, rgba(16,185,129,0.9), rgba(5,150,105,0.85));
     }
 
     .user-role {
-        background: linear-gradient(135deg, #3498db, #2980b9);
+        background: linear-gradient(145deg, rgba(59,130,246,0.9), rgba(37,99,235,0.85));
+    }
+
+    .role-icon-circle {
+        width: 80px;
+        height: 80px;
+        border-radius: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 20px;
+        background: rgba(255,255,255,0.15);
+        backdrop-filter: blur(10px);
+    }
+
+    .role-icon-circle i {
+        font-size: 32px;
         color: white;
     }
 
-    .role-icon {
-        font-size: 45px;
-        margin-bottom: 15px;
-    }
-
     .role-title {
-        font-size: 26px;
-        font-weight: bold;
-        margin-bottom: 10px;
+        font-size: 22px;
+        font-weight: 700;
+        margin-bottom: 8px;
+        color: white;
     }
 
     .role-desc {
-        font-size: 15px;
-        opacity: 0.9;
+        font-size: 14px;
+        opacity: 0.8;
+        line-height: 1.6;
+        color: rgba(255,255,255,0.85);
     }
 
     .logout-btn {
-        margin-top: 40px;
-        border-radius: 30px;
-        padding: 10px 25px;
+        margin-top: 32px;
+        border-radius: 50px;
+        padding: 12px 32px;
+        border-color: rgba(255,255,255,0.3);
+        color: rgba(255,255,255,0.8);
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .logout-btn:hover {
+        background: rgba(255,255,255,0.1);
+        border-color: rgba(255,255,255,0.5);
+        color: white;
+    }
+
+    .brand-badge {
+        display: inline-block;
+        padding: 8px 20px;
+        border-radius: 50px;
+        background: rgba(255,255,255,0.1);
+        color: rgba(255,255,255,0.7);
+        font-size: 13px;
+        font-weight: 600;
+        letter-spacing: 1px;
+        margin-bottom: 24px;
+        border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .role-alert {
+        background: rgba(255,255,255,0.08);
+        border: 1px solid rgba(255,255,255,0.12);
+        border-radius: 16px;
+        color: rgba(255,255,255,0.85);
+        padding: 12px 20px;
     }
 </style>
 
 <div class="container d-flex justify-content-center align-items-center main-container">
 
-    <div class="text-center">
+    <div class="text-center" style="max-width: 900px;">
+
+        <div class="brand-badge">
+            <i class="bi bi-shield-check me-1"></i> FINORA INVESTMENT PLATFORM
+        </div>
 
         <h1 class="title mb-2">Bienvenue sur Finora</h1>
-        <p class="subtitle mb-5">Choisissez votre rôle pour continuer</p>
+        <p class="subtitle mb-5">Sélectionnez votre profil pour accéder à la plateforme</p>
 
         {% set role = app.session.get('role') %}
 
         {% if role %}
-            <div class="alert alert-info mb-4">
-                 Rôle actuel : <strong>{{ role|upper }}</strong>
+            <div class="role-alert mb-4 d-inline-block">
+                <i class="bi bi-person-check me-1"></i> Connecté en tant que : <strong>{{ role|upper }}</strong>
             </div>
         {% endif %}
 
@@ -96,11 +144,13 @@
             <div class="col-md-4">
                 <a href="{{ path('set_role', {role: 'admin'}) }}" class="text-decoration-none">
                     <div class="role-card admin">
-                        <div class="role-icon">👑</div>
-                        <div class="role-title">Admin</div>
+                        <div class="role-icon-circle">
+                            <i class="bi bi-speedometer2"></i>
+                        </div>
+                        <div class="role-title">Administrateur</div>
                         <div class="role-desc">
-                            Gérer le système<br>
-                            Dashboard & Statistiques
+                            Tableau de bord complet<br>
+                            Gestion & Statistiques
                         </div>
                     </div>
                 </a>
@@ -110,11 +160,13 @@
             <div class="col-md-4">
                 <a href="{{ path('set_role', {role: 'investisseur'}) }}" class="text-decoration-none">
                     <div class="role-card invest">
-                        <div class="role-icon">💼</div>
+                        <div class="role-icon-circle">
+                            <i class="bi bi-graph-up-arrow"></i>
+                        </div>
                         <div class="role-title">Investisseur</div>
                         <div class="role-desc">
-                            Gérer Management<br>
-                            CRUD participations
+                            Portefeuille personnel<br>
+                            Investir & Suivre rendements
                         </div>
                     </div>
                 </a>
@@ -124,11 +176,13 @@
             <div class="col-md-4">
                 <a href="{{ path('set_role', {role: 'user'}) }}" class="text-decoration-none">
                     <div class="role-card user-role">
-                        <div class="role-icon">👤</div>
-                        <div class="role-title">Utilisateur</div>
+                        <div class="role-icon-circle">
+                            <i class="bi bi-building"></i>
+                        </div>
+                        <div class="role-title">Gestionnaire</div>
                         <div class="role-desc">
-                            Créer Investissements<br>
-                            CRUD des projets
+                            Créer des projets<br>
+                            CRUD Investissements
                         </div>
                     </div>
                 </a>
@@ -137,8 +191,8 @@
         </div>
 
         {% if role %}
-            <a href="{{ path('logout_role') }}" class="btn btn-outline-dark logout-btn">
-                 Changer de rôle
+            <a href="{{ path('logout_role') }}" class="btn logout-btn">
+                <i class="bi bi-arrow-repeat me-1"></i> Changer de profil
             </a>
         {% endif %}
 

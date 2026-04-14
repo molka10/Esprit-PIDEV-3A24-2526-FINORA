@@ -1,9 +1,89 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Investissement : {{ investment.name }}{% endblock %}
+{% block title %}{{ investment.name }} — FINORA{% endblock %}
 
 {% block body %}
-<!-- ======================= HEADER START ======================= -->
+
+<style>
+    body { background: #f8f7fa; font-family: 'Inter', 'Segoe UI', sans-serif; }
+
+    .finora-nav { background: #7c3aed; }
+    .finora-nav .nav-link { color: rgba(255,255,255,0.8); font-size: 0.85rem; font-weight: 500; }
+    .finora-nav .nav-link:hover, .finora-nav .nav-link.active { color: white; }
+
+    .project-header { background: #f8f7fa; padding: 24px 0 0; }
+    .project-title { font-size: 1.5rem; font-weight: 700; color: #1e1b4b; }
+    .project-address { font-size: 0.9rem; color: #6b7280; }
+
+    .project-image { border-radius: 16px; overflow: hidden; }
+    .project-image img { width: 100%; height: 380px; object-fit: cover; }
+
+    /* Key Metrics Row */
+    .metrics-row { display: flex; gap: 0; border: 1px solid #e5e7eb; border-radius: 16px; overflow: hidden; background: white; margin-bottom: 8px; }
+    .metric-item { flex: 1; padding: 24px 20px; text-align: left; border-right: 1px solid #e5e7eb; }
+    .metric-item:last-child { border-right: none; }
+    .metric-value { font-size: 1.8rem; font-weight: 800; color: #1e1b4b; line-height: 1.1; }
+    .metric-label { font-size: 0.8rem; color: #9ca3af; margin-top: 4px; }
+    .metric-badge { display: inline-block; padding: 3px 10px; border-radius: 6px; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+    .badge-success { background: #ecfdf5; color: #059669; }
+    .badge-warning { background: #fef3c7; color: #d97706; }
+
+    /* Tabs */
+    .bricks-tabs { border-bottom: 2px solid #e5e7eb; margin-bottom: 24px; background: white; padding: 0 16px; border-radius: 16px 16px 0 0; }
+    .bricks-tabs .nav-link { font-weight: 600; font-size: 0.9rem; color: #6b7280; padding: 16px 20px; border: none; border-bottom: 3px solid transparent; margin-bottom: -2px; border-radius: 0; }
+    .bricks-tabs .nav-link.active { color: #7c3aed; border-bottom-color: #7c3aed; background: none; }
+    .bricks-tabs .nav-link:hover { color: #7c3aed; }
+
+    /* Info boxes */
+    .info-box { padding: 20px; border: 1px solid #f3f4f6; border-radius: 12px; display: flex; align-items: flex-start; gap: 14px; height: 100%; }
+    .info-icon { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .info-icon.purple { background: rgba(124,58,237,0.1); color: #7c3aed; }
+    .info-icon.green { background: rgba(16,185,129,0.1); color: #10b981; }
+    .info-icon.blue { background: rgba(59,130,246,0.1); color: #3b82f6; }
+    .info-icon.orange { background: rgba(245,158,11,0.1); color: #f59e0b; }
+    .info-title { font-weight: 700; font-size: 0.9rem; color: #1e1b4b; margin-bottom: 4px; }
+    .info-desc { font-size: 0.82rem; color: #6b7280; line-height: 1.5; margin: 0; }
+
+    /* Sticky Sidebar */
+    .funding-card { border-radius: 16px; border: 1px solid #e5e7eb; overflow: hidden; background: white; }
+    .funding-amount { font-size: 1.8rem; font-weight: 800; color: #1e1b4b; }
+    .funding-label { font-size: 0.85rem; color: #9ca3af; }
+    .funding-progress { height: 8px; border-radius: 10px; background: #e5e7eb; }
+    .funding-progress-bar { height: 100%; border-radius: 10px; background: linear-gradient(90deg, #7c3aed, #a78bfa); }
+    .invest-btn { background: linear-gradient(135deg, #7c3aed, #8b5cf6); border: none; color: white; font-weight: 700; font-size: 1rem; padding: 14px; border-radius: 12px; width: 100%; transition: all 0.3s; }
+    .invest-btn:hover { background: linear-gradient(135deg, #6d28d9, #7c3aed); color: white; transform: translateY(-1px); box-shadow: 0 4px 15px rgba(124,58,237,0.3); }
+    .sim-btn { border: 1px solid #e5e7eb; background: white; color: #1e1b4b; font-weight: 600; font-size: 0.85rem; padding: 10px; border-radius: 10px; width: 100%; }
+    .sim-btn:hover { background: #f8f7fa; }
+
+    /* Section cards */
+    .section-card { background: white; border-radius: 16px; border: 1px solid #f3f4f6; padding: 28px; margin-bottom: 20px; }
+    .section-title { font-size: 1.1rem; font-weight: 700; color: #1e1b4b; margin-bottom: 16px; }
+
+    /* Presentation stats */
+    .pres-stat { display: flex; align-items: center; gap: 8px; font-size: 0.85rem; color: #6b7280; }
+    .pres-stat i { color: #9ca3af; }
+
+    /* Timeline */
+    .timeline-item { text-align: center; flex: 1; }
+    .timeline-date { font-weight: 700; color: #1e1b4b; font-size: 0.95rem; }
+    .timeline-label { font-size: 0.75rem; color: #9ca3af; }
+    .timeline-line { height: 2px; background: #e5e7eb; position: relative; margin: 12px 0; }
+    .timeline-dot { width: 10px; height: 10px; border-radius: 50%; background: #7c3aed; position: absolute; top: -4px; left: 50%; transform: translateX(-50%); }
+
+    /* Document chips */
+    .doc-chip { display: inline-flex; align-items: center; gap: 8px; border: 1px solid #e5e7eb; border-radius: 10px; padding: 10px 16px; font-size: 0.85rem; font-weight: 500; color: #1e1b4b; background: white; cursor: pointer; transition: all 0.2s; }
+    .doc-chip:hover { border-color: #7c3aed; background: #faf5ff; }
+    .doc-chip i { color: #9ca3af; }
+
+    /* Sidebar details */
+    .sidebar-row { display: flex; align-items: center; gap: 8px; font-size: 0.82rem; color: #6b7280; padding: 6px 0; }
+    .sidebar-row i { color: #9ca3af; font-size: 0.85rem; flex-shrink: 0; }
+
+    .investor-avatars { display: flex; }
+    .investor-avatars span { width: 28px; height: 28px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 700; color: white; margin-right: -6px; border: 2px solid white; }
+</style>
+
+<!-- ======================= HEADER ======================= -->
 <header class="navbar-light navbar-sticky">
     <nav class="navbar navbar-expand-xl z-index-9">
         <div class="container">
@@ -11,56 +91,33 @@
                 <img class="light-mode-item navbar-brand-item" src="{{ asset('assets/images/logo.svg') }}" alt="FINORA" style="height:40px;">
                 <img class="dark-mode-item navbar-brand-item" src="{{ asset('assets/images/logo-light.svg') }}" alt="FINORA" style="height:40px;">
             </a>
-            <button class="navbar-toggler ms-auto" type="button"
-                    data-bs-toggle="collapse" data-bs-target="#navbarCollapse"
-                    aria-controls="navbarCollapse" aria-expanded="false">
-                <span class="navbar-toggler-animation">
-                    <span></span><span></span><span></span>
-                </span>
+            <button class="navbar-toggler ms-auto" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse">
+                <span class="navbar-toggler-animation"><span></span><span></span><span></span></span>
             </button>
             <div class="navbar-collapse w-100 collapse" id="navbarCollapse">
                 <ul class="navbar-nav navbar-nav-scroll mx-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ path('app_home') }}">Accueil</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link active" href="{{ path('app_investment_index') }}">Investissements</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ path('app_management_index') }}">Management</a>
-                    </li>
+                    <li class="nav-item"><a class="nav-link" href="{{ path('app_home') }}">Accueil</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="{{ path('app_investment_index') }}">Opportunités</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ path('app_management_index') }}">Suivi</a></li>
                     {% if app.session.get('role') == 'admin' %}
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ path('admin_dashboard') }}">Dashboard</a>
-                    </li>
+                    <li class="nav-item"><a class="nav-link" href="{{ path('admin_dashboard') }}">Dashboard</a></li>
                     {% endif %}
                 </ul>
             </div>
-            <!-- Profile -->
             <div class="dropdown ms-1 ms-lg-0">
-                <a class="avatar avatar-sm p-0" href="#"
-                   id="profileDropdown" role="button"
-                   data-bs-toggle="dropdown" aria-expanded="false">
+                <a class="avatar avatar-sm p-0" href="#" id="profileDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                     <img class="avatar-img rounded-circle" src="{{ asset('assets/images/avatar/01.jpg') }}" alt="avatar">
                 </a>
                 <ul class="dropdown-menu dropdown-animation dropdown-menu-end shadow pt-3" aria-labelledby="profileDropdown">
                     <li class="px-3 mb-3">
                         <div class="d-flex align-items-center">
-                            <div class="avatar me-3">
-                                <img class="avatar-img rounded-circle shadow" src="{{ asset('assets/images/avatar/01.jpg') }}" alt="avatar">
-                            </div>
-                            <div>
-                                <a class="h6" href="#">Mon Compte</a>
-                                <p class="small m-0">{{ app.session.get('role')|default('Visiteur')|capitalize }}</p>
-                            </div>
+                            <div class="avatar me-3"><img class="avatar-img rounded-circle shadow" src="{{ asset('assets/images/avatar/01.jpg') }}" alt="avatar"></div>
+                            <div><a class="h6" href="#">Mon Compte</a><p class="small m-0">{{ app.session.get('role')|default('Visiteur')|capitalize }}</p></div>
                         </div>
                     </li>
                     <li><hr class="dropdown-divider"></li>
                     {% if app.session.get('role') == 'investisseur' %}
                     <li><a class="dropdown-item" href="{{ path('app_investor_profile') }}"><i class="bi bi-person fa-fw me-2"></i>Mon Profil</a></li>
-                    {% endif %}
-                    {% if app.session.get('role') == 'admin' %}
-                    <li><a class="dropdown-item" href="{{ path('admin_dashboard') }}"><i class="bi bi-speedometer2 fa-fw me-2"></i>Dashboard</a></li>
                     {% endif %}
                     <li><a class="dropdown-item bg-danger-soft-hover" href="{{ path('logout_role') }}"><i class="bi bi-power fa-fw me-2"></i>Déconnexion</a></li>
                 </ul>
@@ -68,206 +125,408 @@
         </div>
     </nav>
 </header>
-<!-- ======================= HEADER END ======================= -->
 
 <main>
-    <!-- ======================= PAGE BANNER START ======================= -->
-    <section class="bg-dark align-items-center d-flex position-relative overflow-hidden" style="min-height: 250px;">
-        <!-- Background Image -->
-        {% set imgSrc = investment_image_src(investment) %}
-        {% if imgSrc %}
-            <div style="background: url('{{ imgSrc }}') no-repeat center center; background-size: cover; position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0.3; filter: blur(3px);"></div>
-        {% else %}
-            <div style="background: url('{{ asset('assets/images/pattern/04.png') }}') no-repeat center center; background-size: cover; position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0.3;"></div>
-        {% endif %}
-        
-        <div class="container position-relative z-index-9">
-            <div class="row">
-                <div class="col-12 text-center">
-                    <h1 class="text-white display-4">{{ investment.name }}</h1>
-                    <div class="d-flex justify-content-center">
-                        <nav aria-label="breadcrumb">
-                            <ol class="breadcrumb breadcrumb-dark breadcrumb-dots mb-0">
-                                <li class="breadcrumb-item"><a href="{{ path('app_home') }}">Accueil</a></li>
-                                <li class="breadcrumb-item"><a href="{{ path('app_investment_index') }}">Investissements</a></li>
-                                <li class="breadcrumb-item active" aria-current="page">{{ investment.name }}</li>
-                            </ol>
-                        </nav>
-                    </div>
+
+    {% set imgSrc = investment_image_src(investment) %}
+
+    <!-- ======================= PROJECT HEADER ======================= -->
+    <div class="project-header">
+        <div class="container">
+            <h1 class="project-title">{{ investment.name }}</h1>
+            <p class="project-address"><i class="bi bi-geo-alt me-1"></i>{{ investment.location ?: 'Localisation non spécifiée' }}</p>
+        </div>
+    </div>
+
+    <!-- ======================= PROJECT IMAGE ======================= -->
+    <div class="container mb-4">
+        <div class="project-image">
+            {% if imgSrc %}
+                <img src="{{ imgSrc }}" alt="{{ investment.name }}">
+            {% else %}
+                <img src="{{ asset('assets/images/courses/4by3/06.jpg') }}" alt="{{ investment.name }}">
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- ======================= KEY METRICS ROW ======================= -->
+    <div class="container mb-4">
+        <div class="metrics-row">
+            <div class="metric-item">
+                <div class="metric-value">{{ investment.annualReturn }} %</div>
+                <div class="metric-label">Renta. fixe /an <i class="bi bi-info-circle ms-1" data-bs-toggle="tooltip" title="Rendement annuel calculé selon le profil de risque"></i></div>
+            </div>
+            <div class="metric-item">
+                {% set months = investment.durationMonths %}
+                {% if months >= 12 %}
+                    <div class="metric-value">{{ (months / 12)|round(0, 'floor') }} an{{ months >= 24 ? 's' : '' }}</div>
+                {% else %}
+                    <div class="metric-value">{{ months }} mois</div>
+                {% endif %}
+                <div class="metric-label">Horizon <i class="bi bi-info-circle ms-1" data-bs-toggle="tooltip" title="Durée estimée de l'investissement"></i></div>
+            </div>
+            <div class="metric-item">
+                <div class="d-flex align-items-center gap-2">
+                    <div class="metric-value">{{ investment.fundingGoal|number_format(0, ',', ' ') }} TND</div>
+                    {% if investment.fundingPercentage >= 100 %}
+                        <span class="metric-badge badge-success">OBJECTIF ATTEINT</span>
+                    {% elseif investment.fundingPercentage >= 50 %}
+                        <span class="metric-badge badge-warning">EN COURS</span>
+                    {% endif %}
                 </div>
+                <div class="metric-label">Montant à financer</div>
             </div>
         </div>
-    </section>
-    <!-- ======================= PAGE BANNER END ======================= -->
+    </div>
 
-    <!-- ======================= DETAIL SECTION START ======================= -->
-    <section class="pt-5 pb-0">
-        <div class="container">
-            <div class="row g-4 g-sm-5">
-                
-                <!-- Left Sidebar: Details & Info -->
-                <div class="col-xl-8">
-                    
-                    <!-- Cover Image -->
-                    {% if imgSrc %}
-                        <div class="card shadow-sm mb-4 border-0">
-                            <img src="{{ imgSrc }}" class="card-img-top object-fit-cover" style="max-height: 400px;" alt="{{ investment.name }}">
+    <!-- ======================= MAIN CONTENT ======================= -->
+    <div class="container pb-5">
+        <div class="row g-4">
+
+            <!-- =================== LEFT COLUMN =================== -->
+            <div class="col-xl-8">
+
+                <!-- Tabs -->
+                <ul class="nav bricks-tabs" id="projectTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="general-tab" data-bs-toggle="pill" data-bs-target="#general-panel" type="button" role="tab">Général</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="finance-tab" data-bs-toggle="pill" data-bs-target="#finance-panel" type="button" role="tab">Finance</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="lieu-tab" data-bs-toggle="pill" data-bs-target="#lieu-panel" type="button" role="tab">Lieu</button>
+                    </li>
+                </ul>
+
+                <div class="tab-content" id="projectTabContent">
+
+                    <!-- ============ TAB: Général ============ -->
+                    <div class="tab-pane fade show active" id="general-panel" role="tabpanel">
+
+                        <!-- Info Boxes Grid -->
+                        <div class="section-card">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <div class="info-box">
+                                        <div class="info-icon purple"><i class="bi bi-building"></i></div>
+                                        <div>
+                                            <div class="info-title">{{ investment.category }}</div>
+                                            <p class="info-desc">Type de bien proposé dans cette opportunité d'investissement immobilier.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="info-box">
+                                        <div class="info-icon green"><i class="bi bi-shield-check"></i></div>
+                                        <div>
+                                            <div class="info-title">Garanties</div>
+                                            <p class="info-desc">Hypothèque de premier rang, apport initial, séquestre travaux et caution solidaire personnelle.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="info-box">
+                                        <div class="info-icon blue"><i class="bi bi-geo-alt"></i></div>
+                                        <div>
+                                            <div class="info-title">Localisation : {{ investment.location ?: 'À confirmer' }}</div>
+                                            <p class="info-desc">Situé dans un bassin résidentiel à forte demande et offre insuffisante.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="info-box">
+                                        <div class="info-icon orange"><i class="bi bi-tools"></i></div>
+                                        <div>
+                                            <div class="info-title">Statut du projet</div>
+                                            <p class="info-desc">
+                                                {% if investment.status == 'ACTIVE' %}
+                                                    Collecte en cours — Le projet est ouvert aux investisseurs.
+                                                {% else %}
+                                                    Clôturé — Ce projet n'accepte plus de nouveaux investissements.
+                                                {% endif %}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="info-box">
+                                        <div class="info-icon green"><i class="bi bi-file-earmark-check"></i></div>
+                                        <div>
+                                            <div class="info-title">Projet vérifié</div>
+                                            <p class="info-desc">Analysé et validé par notre équipe d'experts en investissement immobilier.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="info-box">
+                                        <div class="info-icon purple"><i class="bi bi-person-check"></i></div>
+                                        <div>
+                                            <div class="info-title">Porteur expérimenté</div>
+                                            <p class="info-desc">Opérateur avec plusieurs années d'expérience dans le secteur immobilier.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                    {% endif %}
 
-                    <!-- About -->
-                    <div class="card shadow-sm border-0 mb-4">
-                        <div class="card-body p-sm-5">
-                            <h3 class="mb-3">À propos de ce projet</h3>
-                            <p class="text-muted fs-6" style="line-height: 1.8;">
-                                {{ investment.description|nl2br ?: 'Aucune description complète n\'a été fournie pour ce projet pour le moment. Veuillez contacter notre équipe d\'analyse pour plus d\'informations.' }}
+                        <!-- Présentation -->
+                        <div class="section-card">
+                            <div class="section-title">Présentation</div>
+
+                            <div class="d-flex flex-wrap gap-4 mb-3">
+                                <div class="pres-stat"><i class="bi bi-layers"></i> Catégorie : {{ investment.category }}</div>
+                                <div class="pres-stat"><i class="bi bi-cash-stack"></i> Montant : {{ investment.estimatedValue|number_format(0, ',', ' ') }} TND</div>
+                                <div class="pres-stat"><i class="bi bi-graph-up-arrow"></i> Rendement : {{ investment.annualReturn }}% /an</div>
+                            </div>
+
+                            <h6 class="fw-bold mt-4 mb-2">Opportunité de l'investissement</h6>
+                            <p style="font-size: 0.9rem; color: #4b5563; line-height: 1.7;">
+                                {{ investment.description|nl2br ?: 'Aucune description détaillée n\'a été fournie pour ce projet. Contactez notre équipe pour plus d\'informations sur cette opportunité.' }}
                             </p>
-                            
+                        </div>
+
+                        <!-- Calendrier du projet -->
+                        <div class="section-card">
+                            <div class="section-title">Calendrier du projet</div>
+                            <div class="d-flex">
+                                <div class="timeline-item">
+                                    <div class="timeline-line"><div class="timeline-dot"></div></div>
+                                    <div class="timeline-date">{{ investment.createdAt ? investment.createdAt|date('M Y') : 'N/A' }}</div>
+                                    <div class="timeline-label">Début de la collecte</div>
+                                </div>
+                                <div class="timeline-item">
+                                    <div class="timeline-line"><div class="timeline-dot"></div></div>
+                                    {% set endDate = investment.createdAt ? investment.createdAt|date_modify('+1 month') : null %}
+                                    <div class="timeline-date">{{ endDate ? endDate|date('M Y') : 'N/A' }}</div>
+                                    <div class="timeline-label">Fin de la collecte</div>
+                                </div>
+                                <div class="timeline-item">
+                                    <div class="timeline-line"><div class="timeline-dot"></div></div>
+                                    {% set firstPay = investment.createdAt ? investment.createdAt|date_modify('+2 months') : null %}
+                                    <div class="timeline-date">{{ firstPay ? firstPay|date('M Y') : 'N/A' }}</div>
+                                    <div class="timeline-label">Premier reversement</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Documents -->
+                        <div class="section-card">
+                            <div class="section-title">Documents</div>
+                            <div class="d-flex flex-wrap gap-2">
+                                <div class="doc-chip"><i class="bi bi-file-earmark-text"></i> Contrat</div>
+                                <div class="doc-chip"><i class="bi bi-file-earmark-bar-graph"></i> FICI</div>
+                                <div class="doc-chip"><i class="bi bi-file-earmark-check"></i> PV Décision</div>
+                                <div class="doc-chip"><i class="bi bi-file-earmark-pdf"></i> Note d'opération</div>
+                            </div>
+                        </div>
+
+                        <!-- FAQ / Questions -->
+                        <div class="section-card">
+                            <div class="section-title">Vous avez des questions ?</div>
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="d-flex">
+                                    <img src="{{ asset('assets/images/avatar/01.jpg') }}" class="rounded-circle border border-2 border-white" style="width: 42px; height: 42px; object-fit: cover; margin-right: -8px;" alt="">
+                                    <img src="{{ asset('assets/images/avatar/02.jpg') }}" class="rounded-circle border border-2 border-white" style="width: 42px; height: 42px; object-fit: cover; margin-right: -8px;" alt="">
+                                    <img src="{{ asset('assets/images/avatar/03.jpg') }}" class="rounded-circle border border-2 border-white" style="width: 42px; height: 42px; object-fit: cover;" alt="">
+                                </div>
+                                <div>
+                                    <p class="mb-0" style="font-size: 0.9rem; color: #4b5563;">Notre service client est à votre disposition pour vous aider à tout moment.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- ============ TAB: Finance ============ -->
+                    <div class="tab-pane fade" id="finance-panel" role="tabpanel">
+                        <div class="section-card">
+                            <div class="section-title">Données financières</div>
+                            <div class="row g-3">
+                                <div class="col-sm-6">
+                                    <div class="p-3 rounded-3" style="background: #faf5ff; border: 1px solid #ede9fe;">
+                                        <small class="text-muted d-block">Valeur totale du bien</small>
+                                        <strong class="fs-5" style="color: #7c3aed;">{{ investment.estimatedValue|number_format(0, ',', ' ') }} TND</strong>
+                                    </div>
+                                </div>
+                                <div class="col-sm-6">
+                                    <div class="p-3 rounded-3" style="background: #ecfdf5; border: 1px solid #d1fae5;">
+                                        <small class="text-muted d-block">Rendement annuel</small>
+                                        <strong class="fs-5" style="color: #059669;">{{ investment.annualReturn }}%</strong>
+                                    </div>
+                                </div>
+                                <div class="col-sm-6">
+                                    <div class="p-3 rounded-3" style="background: #eff6ff; border: 1px solid #dbeafe;">
+                                        <small class="text-muted d-block">Objectif de collecte</small>
+                                        <strong class="fs-5" style="color: #3b82f6;">{{ investment.fundingGoal|number_format(0, ',', ' ') }} TND</strong>
+                                    </div>
+                                </div>
+                                <div class="col-sm-6">
+                                    <div class="p-3 rounded-3" style="background: #fef3c7; border: 1px solid #fde68a;">
+                                        <small class="text-muted d-block">Montant collecté</small>
+                                        <strong class="fs-5" style="color: #d97706;">{{ investment.fundingCurrent|number_format(0, ',', ' ') }} TND</strong>
+                                    </div>
+                                </div>
+                            </div>
+
                             <hr class="my-4">
 
-                            <!-- Feature Grid -->
-                            <h5 class="mb-3">Informations Clés</h5>
-                            <div class="row g-4">
-                                <div class="col-sm-6">
-                                    <div class="d-flex align-items-center">
-                                        <div class="icon-lg bg-primary bg-opacity-10 text-primary rounded flex-shrink-0">
-                                            <i class="bi bi-tag fs-4"></i>
-                                        </div>
-                                        <div class="ms-3">
-                                            <h6 class="mb-0 text-muted fw-normal">Catégorie</h6>
-                                            <h5 class="mb-0">{{ investment.category }}</h5>
-                                        </div>
-                                    </div>
+                            <!-- Simulateur -->
+                            <div class="section-title">Simulateur de rendement</div>
+                            <div class="row g-3 align-items-end">
+                                <div class="col-md-6">
+                                    <label class="form-label small text-muted">Montant à investir (TND)</label>
+                                    <input type="number" id="simAmount" class="form-control form-control-lg" style="border-radius: 12px; background: #f9fafb; border: 1px solid #e5e7eb;" placeholder="Ex: 5000" value="1000" min="10">
                                 </div>
-
-                                <div class="col-sm-6">
-                                    <div class="d-flex align-items-center">
-                                        <div class="icon-lg bg-info bg-opacity-10 text-info rounded flex-shrink-0">
-                                            <i class="bi bi-geo-alt fs-4"></i>
-                                        </div>
-                                        <div class="ms-3">
-                                            <h6 class="mb-0 text-muted fw-normal">Localisation</h6>
-                                            <h5 class="mb-0">{{ investment.location ?: 'Non spécifiée' }}</h5>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="col-sm-6">
-                                    <div class="d-flex align-items-center">
-                                        <div class="icon-lg bg-warning bg-opacity-10 text-warning rounded flex-shrink-0">
-                                            <i class="bi bi-activity fs-4"></i>
-                                        </div>
-                                        <div class="ms-3">
-                                            <h6 class="mb-0 text-muted fw-normal">Statut du Projet</h6>
-                                            <h5 class="mb-0">
-                                                {% if investment.status == 'ACTIVE' %}
-                                                    <span class="badge bg-success">Actif</span>
-                                                {% else %}
-                                                    <span class="badge bg-secondary">{{ investment.status }}</span>
-                                                {% endif %}
-                                            </h5>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="col-sm-6">
-                                    <div class="d-flex align-items-center">
-                                        <div class="icon-lg bg-purple bg-opacity-10 text-purple rounded flex-shrink-0">
-                                            <i class="bi bi-calendar-event fs-4"></i>
-                                        </div>
-                                        <div class="ms-3">
-                                            <h6 class="mb-0 text-muted fw-normal">Création</h6>
-                                            <h5 class="mb-0">{{ investment.createdAt ? investment.createdAt|date('d M Y') : 'N/A' }}</h5>
-                                        </div>
+                                <div class="col-md-6">
+                                    <div class="p-3 rounded-3 text-center" style="background: #ecfdf5; border: 1px solid #d1fae5;">
+                                        <small class="text-muted d-block">Rendement annuel estimé</small>
+                                        <h4 class="fw-bold mb-0" style="color: #059669;" id="simResult">{{ (1000 * investment.annualReturn / 100)|number_format(2) }} TND</h4>
+                                        <small class="text-muted" id="simMonthly">≈ {{ ((1000 * investment.annualReturn / 100) / 12)|number_format(2) }} TND / mois</small>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                </div>
-
-                <!-- Right Sidebar: Sticky Action Card -->
-                <div class="col-xl-4">
-                    <div style="position: sticky; top: 100px;">
-                        
-                        <!-- Actions & Price -->
-                        <div class="card shadow border-0 mb-4">
-                            <div class="card-body p-4 p-sm-5 text-center">
-                                
-                                <span class="badge bg-primary text-white py-2 px-3 fw-normal mb-3 rounded-pill">
-                                    <i class="fas fa-star text-warning me-1"></i>Opportunité Validée
-                                </span>
-
-                                <h6 class="text-muted mb-1">Valeur Estimée</h6>
-                                <div class="d-flex justify-content-center align-items-center gap-2 mb-4">
-                                    <h1 class="text-success mb-0 fw-bold">
-                                        {{ investment.estimatedValue|format_currency }}
-                                    </h1>
-                                    <div class="dropdown">
-                                        <button class="btn btn-sm btn-light border lh-1" type="button" data-bs-toggle="dropdown"><i class="bi bi-arrow-left-right"></i></button>
-                                        <ul class="dropdown-menu dropdown-menu-end min-w-auto shadow-sm">
-                                            <li><a class="dropdown-item small py-1" href="{{ path('app_switch_currency', {'currency': 'TND'}) }}">🇹🇳 TND</a></li>
-                                            <li><a class="dropdown-item small py-1" href="{{ path('app_switch_currency', {'currency': 'EUR'}) }}">🇪🇺 EUR</a></li>
-                                            <li><a class="dropdown-item small py-1" href="{{ path('app_switch_currency', {'currency': 'USD'}) }}">🇺🇸 USD</a></li>
-                                        </ul>
-                                    </div>
+                    <!-- ============ TAB: Lieu ============ -->
+                    <div class="tab-pane fade" id="lieu-panel" role="tabpanel">
+                        <div class="section-card">
+                            <div class="section-title">Localisation du projet</div>
+                            <div class="info-box mb-3">
+                                <div class="info-icon blue"><i class="bi bi-geo-alt-fill"></i></div>
+                                <div>
+                                    <div class="info-title">{{ investment.location ?: 'Adresse non communiquée' }}</div>
+                                    <p class="info-desc">L'emplacement exact est partagé avec les investisseurs après confirmation de la participation.</p>
                                 </div>
-
-                                <h6 class="text-muted mb-2">Profil de Risque</h6>
-                                <div class="mb-4">
-                                    {% if investment.riskLevel == 'HIGH' %}
-                                        <span class="fs-5 fw-bold text-danger"><i class="bi bi-exclamation-triangle-fill me-2"></i>Élevé</span>
-                                    {% elseif investment.riskLevel == 'MEDIUM' %}
-                                        <span class="fs-5 fw-bold text-warning"><i class="bi bi-exclamation-circle-fill me-2"></i>Moyen</span>
-                                    {% else %}
-                                        <span class="fs-5 fw-bold text-success"><i class="bi bi-shield-check me-2"></i>Faible</span>
-                                    {% endif %}
-                                </div>
-
-                                <hr>
-
-                                <!-- INVEST BUTTON -->
-                                <div class="mt-4">
-                                    <div class="d-grid">
-                                        <a href="{{ path('app_management_new', {'inv_id': investment.id}) }}" class="btn btn-primary btn-lg mb-2">
-                                            <i class="bi bi-wallet2 me-2"></i>Investir Maintenant
-                                        </a>
-                                    </div>
-                                    <p class="small text-muted mb-0">Participez à ce projet dès aujourd'hui.</p>
-                                </div>
-
                             </div>
-                        </div>
-
-                        <!-- Admin Actions -->
-                        {% if app.session.get('role') in ['user', 'admin'] %}
-                            <div class="card shadow-sm border-0 border-top border-warning border-3">
-                                <div class="card-header bg-transparent mb-0 pb-0">
-                                    <h6 class="text-warning mb-0"><i class="bi bi-shield-lock me-1"></i>Gestion de l'Investissement</h6>
-                                </div>
-                                <div class="card-body">
-                                    <div class="d-grid gap-2">
-                                        <a href="{{ path('app_investment_edit', {'id': investment.id}) }}" class="btn btn-outline-warning">
-                                            <i class="bi bi-pencil me-1"></i>Modifier
-                                        </a>
-
-                                        <form method="post" action="{{ path('app_investment_delete', {'id': investment.id}) }}" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cet investissement ?')" class="d-grid">
-                                            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ investment.id) }}">
-                                            <button class="btn btn-outline-danger"><i class="bi bi-trash me-1"></i>Supprimer</button>
-                                        </form>
+                            <div class="rounded-3 overflow-hidden" style="height: 300px; background: #e5e7eb;">
+                                <div class="d-flex align-items-center justify-content-center h-100">
+                                    <div class="text-center">
+                                        <i class="bi bi-map fs-1" style="color: #9ca3af;"></i>
+                                        <p class="text-muted mt-2 mb-0">Carte disponible après inscription</p>
                                     </div>
                                 </div>
                             </div>
-                        {% endif %}
-
+                        </div>
                     </div>
+
                 </div>
 
             </div>
+
+            <!-- =================== RIGHT SIDEBAR =================== -->
+            <div class="col-xl-4">
+                <div style="position: sticky; top: 90px;">
+
+                    <div class="funding-card">
+                        <div class="p-4">
+
+                            <!-- Amount & Status -->
+                            <div class="d-flex align-items-baseline gap-2 mb-1">
+                                <span class="funding-amount">{{ investment.fundingGoal|number_format(0, ',', ' ') }} TND</span>
+                                {% if investment.fundingPercentage >= 100 %}
+                                    <span class="metric-badge badge-success">OBJECTIF ATTEINT</span>
+                                {% endif %}
+                            </div>
+                            <div class="funding-label mb-3">Montant à financer</div>
+
+                            <!-- Progress -->
+                            <div class="d-flex justify-content-between small mb-1">
+                                <span style="color: #1e1b4b; font-weight: 600;">{{ investment.fundingCurrent|number_format(0, ',', ' ') }} TND financés</span>
+                                <span style="color: #1e1b4b; font-weight: 600;">{{ investment.fundingPercentage }}%</span>
+                            </div>
+                            <div class="funding-progress mb-4">
+                                <div class="funding-progress-bar" style="width: {{ investment.fundingPercentage > 100 ? 100 : investment.fundingPercentage }}%;"></div>
+                            </div>
+
+                            <!-- Invest Button -->
+                            <a href="{{ path('app_management_new', {'inv_id': investment.id}) }}" class="invest-btn d-block text-center text-decoration-none mb-3">
+                                Investir
+                            </a>
+
+                            <!-- Investor Count -->
+                            <div class="d-flex align-items-center gap-2 mb-3">
+                                <div class="investor-avatars">
+                                    <span style="background: #7c3aed;">F</span>
+                                    <span style="background: #8b5cf6;">I</span>
+                                    <span style="background: #a78bfa;">N</span>
+                                </div>
+                                <span style="font-size: 0.85rem; color: #4b5563; font-weight: 500;">{{ investment.investorCount }} investisseurs ont participé</span>
+                            </div>
+
+                            <!-- Simulate Button -->
+                            <button class="sim-btn mb-3" onclick="document.getElementById('finance-tab').click();">
+                                <i class="bi bi-calculator me-1"></i> Simuler mon investissement
+                            </button>
+
+                            <!-- Rating -->
+                            <div class="d-flex align-items-center gap-2 mb-3">
+                                <span style="font-size: 0.85rem;">⭐ 4.5/5</span>
+                                <a href="#" style="font-size: 0.82rem; color: #7c3aed;">Voir les avis de la communauté</a>
+                            </div>
+
+                            <hr class="my-3" style="border-color: #f3f4f6;">
+
+                            <!-- Meta infos -->
+                            <div class="sidebar-row">
+                                <i class="bi bi-calendar-event"></i>
+                                <span>Collecte ouverte depuis {{ investment.createdAt ? investment.createdAt|date('d/m/Y') : 'N/A' }}</span>
+                            </div>
+                            <div class="sidebar-row">
+                                <i class="bi bi-shield-check"></i>
+                                <span>Toute somme investie sera intégralement remboursée en cas de collecte non-aboutie.</span>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <!-- Admin Actions -->
+                    {% if app.session.get('role') in ['user', 'admin'] %}
+                    <div class="section-card mt-3" style="border-top: 3px solid #f59e0b;">
+                        <h6 class="fw-bold mb-3" style="color: #f59e0b;"><i class="bi bi-shield-lock me-1"></i>Administration</h6>
+                        <div class="d-grid gap-2">
+                            <a href="{{ path('app_investment_edit', {'id': investment.id}) }}" class="btn btn-outline-warning rounded-pill btn-sm">
+                                <i class="bi bi-pencil me-1"></i>Modifier
+                            </a>
+                            <form method="post" action="{{ path('app_investment_delete', {'id': investment.id}) }}" onsubmit="return confirm('Êtes-vous sûr ?')" class="d-grid">
+                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ investment.id) }}">
+                                <button class="btn btn-outline-danger rounded-pill btn-sm"><i class="bi bi-trash me-1"></i>Supprimer</button>
+                            </form>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                </div>
+            </div>
+
         </div>
-    </section>
-    <!-- ======================= DETAIL SECTION END ======================= -->
+    </div>
+
 </main>
+
+<!-- Yield simulator script -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const input = document.getElementById('simAmount');
+    const result = document.getElementById('simResult');
+    const monthly = document.getElementById('simMonthly');
+    const rate = {{ investment.annualReturn }};
+
+    if (input && result) {
+        input.addEventListener('input', function() {
+            const amount = parseFloat(this.value) || 0;
+            const annual = (amount * rate / 100);
+            const month = annual / 12;
+            result.textContent = annual.toLocaleString('fr-FR', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' TND';
+            monthly.textContent = '≈ ' + month.toLocaleString('fr-FR', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' TND / mois';
+        });
+    }
+
+    // Initialize tooltips
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    tooltipTriggerList.map(function (el) { return new bootstrap.Tooltip(el); });
+});
+</script>
 
 {% endblock %}

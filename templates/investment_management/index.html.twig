@@ -104,22 +104,19 @@
     <main>
 
     <!-- ======================= PAGE BANNER START ======================= -->
-    <section class="align-items-center d-flex"
-             style="background: linear-gradient(135deg, #4b0082 0%, #6f42c1 100%); min-height: 160px;">
-        <div class="container">
-            <div class="row">
-                <div class="col-12">
-                    <h1 class="text-white">Gestion de Portefeuille</h1>
-                    <div class="d-flex">
-                        <nav aria-label="breadcrumb">
-                            <ol class="breadcrumb breadcrumb-dark breadcrumb-dots mb-0">
-                                <li class="breadcrumb-item">
-                                    <a href="{{ path('app_home') }}">Accueil</a>
-                                </li>
-                                <li class="breadcrumb-item active" aria-current="page">Management</li>
-                            </ol>
-                        </nav>
-                    </div>
+    <section class="align-items-center d-flex position-relative overflow-hidden"
+             style="background: linear-gradient(135deg, #4b0082 0%, #7c3aed 50%, #8b5cf6 100%); min-height: 180px;">
+        <div class="container position-relative z-index-1">
+            <div class="row align-items-center">
+                <div class="col-lg-8">
+                    <h6 class="text-white text-opacity-75 text-uppercase fw-bold mb-2" style="letter-spacing: 2px; font-size: 0.75rem;">Mon portefeuille</h6>
+                    <h1 class="text-white fw-bold mb-2">Gestion de Portefeuille</h1>
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb breadcrumb-dark breadcrumb-dots mb-0">
+                            <li class="breadcrumb-item"><a href="{{ path('app_home') }}">Accueil</a></li>
+                            <li class="breadcrumb-item active" aria-current="page">Management</li>
+                        </ol>
+                    </nav>
                 </div>
             </div>
         </div>
@@ -136,10 +133,13 @@
                 <div class="col-xl-9 col-xxl-9">
 
                     <div class="d-flex justify-content-between align-items-center mb-4">
-                        <h4 class="mb-0" style="color: #4b0082;">{{ investment_managements.getTotalItemCount }} investissement(s) géré(s)</h4>
+                        <div>
+                            <h4 class="mb-0 fw-bold" style="color: #1e1b4b;">{{ investment_managements.getTotalItemCount }} investissement(s) géré(s)</h4>
+                            <small class="text-muted">Suivez vos investissements en cours</small>
+                        </div>
                         {% if role in ['admin', 'investisseur'] %}
-                            <a href="{{ path('app_management_new') }}" class="btn text-white shadow-sm mb-0" style="background: linear-gradient(90deg, #6f42c1, #5a32a3); border-radius: 8px;">
-                                <i class="bi bi-plus-lg me-1"></i>Nouveau Management
+                            <a href="{{ path('app_management_new') }}" class="btn text-white shadow-sm mb-0 rounded-pill px-4" style="background: linear-gradient(135deg, #7c3aed, #8b5cf6);">
+                                <i class="bi bi-plus-lg me-1"></i>Nouvel Investissement
                             </a>
                         {% endif %}
                     </div>
@@ -148,19 +148,19 @@
                     <div class="row g-4 pb-4">
                         {% for item in investment_managements %}
                             <div class="col-md-6 col-lg-6">
-                                <div class="card shadow-lg h-100 overflow-hidden border-0 rounded-4 card-hover-shadow transition-base" style="background: linear-gradient(145deg, #ffffff, #f9f6ff);">
+                                <div class="card shadow-sm h-100 overflow-hidden border-0 card-hover-shadow transition-base" style="background: linear-gradient(145deg, #ffffff, #faf5ff); border-radius: 20px;">
                                     
                                     <!-- Head: Investment Image / Badge -->
                                     <div class="position-relative">
                                         <img src="{{ investment_image_src(item.investment) ?: asset('assets/images/courses/4by3/06.jpg') }}" 
                                              alt="{{ item.investment ? item.investment.name : 'Unknown' }}"
                                              class="card-img-top object-fit-cover" 
-                                             style="height: 220px; border-bottom: 4px solid #6f42c1;">
+                                             style="height: 200px; border-bottom: 3px solid #7c3aed;">
                                         
                                         <div class="card-img-overlay d-flex flex-column justify-content-between p-3" style="background: linear-gradient(180deg, rgba(75, 0, 130, 0.8) 0%, rgba(75, 0, 130, 0) 60%);">
                                             
                                             <div class="d-flex justify-content-between w-100">
-                                                <span class="badge px-3 py-2 rounded-pill shadow-sm text-white" style="background: linear-gradient(90deg, #6f42c1, #8a2be2); font-weight: 500; letter-spacing: 0.5px;">
+                                                <span class="badge px-3 py-2 rounded-pill shadow-sm text-white" style="background: linear-gradient(90deg, #7c3aed, #8b5cf6); font-weight: 500; letter-spacing: 0.5px;">
                                                     {{ item.investmentType ?? 'N/A' }}
                                                 </span>
                                                 {% if item.status == 'ACTIVE' %}
@@ -200,7 +200,7 @@
                                         
                                         <!-- Actions -->
                                         <div class="d-flex justify-content-between align-items-center mt-auto">
-                                            <a href="{{ path('app_management_show', {'id': item.id}) }}" class="btn btn-sm px-4 py-2 text-white shadow-sm" style="background: linear-gradient(90deg, #6f42c1, #5a32a3); border-radius: 8px; font-weight: 600;">
+                                        <a href="{{ path('app_management_show', {'id': item.id}) }}" class="btn btn-sm px-4 py-2 text-white shadow-sm rounded-pill" style="background: linear-gradient(135deg, #7c3aed, #8b5cf6); font-weight: 600;">
                                                 <i class="bi bi-eye me-1"></i>Détails
                                             </a>
 
