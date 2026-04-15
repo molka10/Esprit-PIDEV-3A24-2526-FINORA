@@ -149,23 +149,24 @@
                 </div>
 
                 <div class="col-lg-8 col-xl-9">
-                    <div class="card border-0 shadow-sm mb-4 results-toolbar">
-                        <div class="card-body d-flex justify-content-between align-items-center flex-wrap gap-2">
-                            <div>
-                                <h5 class="mb-1 fw-bold">Résultats</h5>
-                                <div class="text-muted small">
-                                    {{ lessons.getTotalItemCount }} lesson(s)
-                                    {% if titre %} • "{{ titre }}"{% endif %}
-                                    {% if formationSelected %} • Formation filtrée{% endif %}
+                    <div id="results-container" style="transition: opacity 0.2s ease;">
+                        <div class="card border-0 shadow-sm mb-4 results-toolbar">
+                            <div class="card-body d-flex justify-content-between align-items-center flex-wrap gap-2">
+                                <div>
+                                    <h5 class="mb-1 fw-bold">Résultats</h5>
+                                    <div class="text-muted small">
+                                        {{ lessons.getTotalItemCount }} lesson(s)
+                                        {% if titre %} • "{{ titre }}"{% endif %}
+                                        {% if formationSelected %} • Formation filtrée{% endif %}
+                                    </div>
+                                </div>
+    
+                                <div class="d-flex gap-2 flex-wrap">
+                                    <span class="badge bg-light text-dark">Tri: {{ tri }}</span>
+                                    <span class="badge bg-light text-dark">{{ ordre|upper }}</span>
                                 </div>
                             </div>
-
-                            <div class="d-flex gap-2 flex-wrap">
-                                <span class="badge bg-light text-dark">Tri: {{ tri }}</span>
-                                <span class="badge bg-light text-dark">{{ ordre|upper }}</span>
-                            </div>
                         </div>
-                    </div>
 
                     {% if lessons|length > 0 %}
                         <div class="row g-4">
@@ -233,12 +234,13 @@
                         <div class="d-flex justify-content-center mt-5">
                             {{ knp_pagination_render(lessons) }}
                         </div>
-                    {% else %}
-                        <div class="text-center py-5">
-                            <h5>Aucune lesson trouvée</h5>
-                            <a href="{{ path('app_lessons') }}" class="btn btn-primary mt-3">Réinitialiser</a>
-                        </div>
-                    {% endif %}
+                        {% else %}
+                            <div class="text-center py-5">
+                                <h5>Aucune lesson trouvée</h5>
+                                <a href="{{ path('app_lessons') }}" class="btn btn-primary mt-3 ajax-link">Réinitialiser</a>
+                            </div>
+                        {% endif %}
+                    </div>
                 </div>
 
             </div>
@@ -465,19 +467,105 @@
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     const form = document.getElementById('filter-form');
+    const heroForm = document.getElementById('hero-lesson-search-form');
     const search = document.getElementById('search-input');
+    const heroSearch = heroForm ? heroForm.querySelector('input[name="titre"]') : null;
 
     let timeout;
+    
+    function setupAjaxForm(f) {
+        if (!f) return;
+        f.addEventListener('submit', async function (e) {
+            e.preventDefault();
+            const container = document.getElementById('results-container');
+            const url = new URL(f.action || window.location.href);
+            const formData = new FormData(f);
+            const params = new URLSearchParams();
+            for (const [key, value] of formData.entries()) {
+                if (value) params.append(key, value);
+            }
+            url.search = params.toString();
 
-    if (search) {
-        search.addEventListener('keyup', function () {
-            clearTimeout(timeout);
-            timeout = setTimeout(() => form.submit(), 500);
+            // sync inputs between forms
+            if (f === heroForm && search) search.value = heroSearch.value;
+            if (f === form && heroSearch && search) heroSearch.value = search.value;
+
+            window.history.pushState({}, '', url);
+
+            if (container) container.style.opacity = '0.5';
+            try {
+                const res = await fetch(url.toString(), {
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                });
+                const html = await res.text();
+                const doc = new DOMParser().parseFromString(html, "text/html");
+                if (container && doc.getElementById('results-container')) {
+                    container.innerHTML = doc.getElementById('results-container').innerHTML;
+                }
+            } catch (err) {
+                f.submit();
+            } finally {
+                if (container) container.style.opacity = '1';
+            }
         });
     }
 
+    setupAjaxForm(form);
+    setupAjaxForm(heroForm);
+
+    function triggerSearch(f, s) {
+        if (s) {
+            s.addEventListener('input', function () {
+                clearTimeout(timeout);
+                timeout = setTimeout(() => {
+                    if (f) f.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+                }, 400);
+            });
+        }
+    }
+    
+    triggerSearch(form, search);
+    triggerSearch(heroForm, heroSearch);
+
     document.querySelectorAll('.auto-submit').forEach(el => {
-        el.addEventListener('change', () => form.submit());
+        el.addEventListener('change', () => {
+            if (form) form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+        });
+    });
+
+    // Delegate ajax clicks for formations sidebar, pagination, and reset link
+    document.addEventListener('click', async function(e) {
+        let link = e.target.closest('.formation-item') || e.target.closest('.pagination a') || e.target.closest('.ajax-link');
+        if (link) {
+            e.preventDefault();
+            const container = document.getElementById('results-container');
+            const url = link.href;
+            
+            window.history.pushState({}, '', url);
+            
+            // update active state in sidebar visually if it's a formation link
+            if (e.target.closest('.formation-item')) {
+                document.querySelectorAll('.formation-item').forEach(el => el.classList.remove('active'));
+                link.classList.add('active');
+            }
+
+            if (container) container.style.opacity = '0.5';
+            try {
+                const res = await fetch(url);
+                const html = await res.text();
+                const doc = new DOMParser().parseFromString(html, "text/html");
+                if (container && doc.getElementById('results-container')) {
+                    container.innerHTML = doc.getElementById('results-container').innerHTML;
+                }
+            } catch (err) {
+                window.location.href = url;
+            } finally {
+                if (container) container.style.opacity = '1';
+                if (!e.target.closest('.formation-item')) {
+                    window.scrollTo({ top: container.offsetTop - 100, behavior: 'smooth' });
+                }
+            }
+        }
     });
 });
 </script>

@@ -29,6 +29,13 @@
                 </div>
 
                 <div class="mb-3">
+                    {{ form_label(form.pourquoiAcheter) }}
+                    {{ form_widget(form.pourquoiAcheter, {'attr': {'class': 'form-control', 'rows': 3}}) }}
+                    <div class="form-text">Texte incitatif affiché aux visiteurs lorsque les leçons sont verrouillées.</div>
+                    <div class="text-danger small mt-1">{{ form_errors(form.pourquoiAcheter) }}</div>
+                </div>
+
+                <div class="mb-3">
                     {{ form_label(form.categorie) }}
                     {{ form_widget(form.categorie, {'attr': {'class': 'form-select', 'size': '8'}}) }}
                     <div class="form-text">Maintenez Ctrl pour sélectionner plusieurs catégories.</div>
@@ -45,6 +52,15 @@
                     {{ form_label(form.is_published) }}
                     {{ form_widget(form.is_published, {'attr': {'class': 'form-select'}}) }}
                     <div class="text-danger small mt-1">{{ form_errors(form.is_published) }}</div>
+                </div>
+
+                <div class="mb-3">
+                    {{ form_label(form.prix) }}
+                    <div class="input-group">
+                        {{ form_widget(form.prix, {'attr': {'class': 'form-control'}}) }}
+                        <span class="input-group-text">TND</span>
+                    </div>
+                    <div class="text-danger small mt-1">{{ form_errors(form.prix) }}</div>
                 </div>
 
                 {% if formation.imageUrl %}

@@ -66,6 +66,13 @@ class Formation
     #[ORM\Column(type: 'text', nullable: true)]
     private ?string $pourquoiAcheter = null;
 
+    #[ORM\Column(type: 'float', nullable: true)]
+    private ?float $prix = null;
+
+    #[ORM\Column(type: 'float', nullable: true)]
+    #[Assert\Range(min: 0, max: 5)]
+    private ?float $rating = null;
+
     #[Vich\UploadableField(mapping: 'formation_images', fileNameProperty: 'image_url')]
     #[Assert\Image(
         maxSize: '4M',
@@ -156,6 +163,28 @@ class Formation
     public function setPourquoiAcheter(?string $pourquoiAcheter): self
     {
         $this->pourquoiAcheter = $pourquoiAcheter;
+        return $this;
+    }
+
+    public function getPrix(): ?float
+    {
+        return $this->prix;
+    }
+
+    public function setPrix(?float $prix): self
+    {
+        $this->prix = $prix;
+        return $this;
+    }
+
+    public function getRating(): ?float
+    {
+        return $this->rating;
+    }
+
+    public function setRating(?float $rating): self
+    {
+        $this->rating = $rating;
         return $this;
     }
 

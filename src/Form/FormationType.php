@@ -7,6 +7,7 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\CallbackTransformer;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
+use Symfony\Component\Form\Extension\Core\Type\NumberType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -73,6 +74,15 @@ class FormationType extends AbstractType
                 'choices' => [
                     'Oui' => 1,
                     'Non' => 0,
+                ]
+            ])
+            ->add('prix', NumberType::class, [
+                'label' => 'Prix (en TND)',
+                'required' => false,
+                'scale' => 2,
+                'attr' => [
+                    'min' => 0,
+                    'step' => 0.01,
                 ]
             ])
             ->add('imageFile', FileType::class, [

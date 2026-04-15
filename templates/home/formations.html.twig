@@ -88,19 +88,31 @@
             {% endfor %}
 
             <div class="mb-4">
-                <h4 class="mb-3 finora-title">Catégories populaires</h4>
-                <div class="d-flex flex-wrap gap-2">
-                    <a href="{{ path('app_formations') }}"
-                       class="btn btn-sm {{ categorie == '' ? 'btn-primary' : 'btn-outline-primary' }}">
-                        Toutes
-                    </a>
-
-                    {% for cat in categories %}
-                        <a href="{{ path('app_formations', {'categorie': cat}) }}"
-                           class="btn btn-sm {{ categorie == cat ? 'btn-primary' : 'btn-outline-primary' }}">
-                            {{ cat }}
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h4 class="mb-0 finora-title">Catégories populaires</h4>
+                </div>
+                
+                <div class="category-wrapper">
+                    <div class="d-flex flex-wrap gap-2" id="category-list">
+                        <a href="{{ path('app_formations') }}"
+                           class="btn btn-sm cat-pill {{ categorie == '' ? 'btn-primary' : 'btn-outline-primary' }}">
+                            Toutes
                         </a>
-                    {% endfor %}
+
+                        {% for cat in categories %}
+                            <a href="{{ path('app_formations', {'categorie': cat}) }}"
+                               class="btn btn-sm cat-pill category-item {{ categorie == cat ? 'btn-primary' : 'btn-outline-primary' }}"
+                               {% if loop.index > 5 %}style="display: none;"{% endif %}>
+                                {{ cat }}
+                            </a>
+                        {% endfor %}
+                        
+                        {% if categories|length > 5 %}
+                            <button class="btn btn-sm btn-light cat-pill text-muted fw-bold" id="toggle-categories-btn">
+                                <i class="bi bi-chevron-down"></i> Voir plus
+                            </button>
+                        {% endif %}
+                    </div>
                 </div>
             </div>
 
@@ -164,8 +176,9 @@
                 </div>
             </div>
 
-            {% if formations|length > 0 %}
-                <div class="row g-4">
+            <div id="results-container" style="transition: opacity 0.2s ease;">
+                {% if formations|length > 0 %}
+                    <div class="row g-4">
                     {% for formation in formations %}
                         <div class="col-md-6 col-xl-4">
                             <div class="card formation-card border-0 h-100 overflow-hidden">
@@ -192,15 +205,14 @@
                                             {{ formation.niveau }}
                                         </span>
 
-                                        {% if formation.isPublished %}
-                                            <span class="formation-status-badge published">
-                                                Publié
+                                        <div class="d-flex flex-wrap gap-2">
+                                            {% set fakeRating = 4.2 + ((formation.id % 8) * 0.1) %}
+                                            {% set fakeReviews = (formation.id * 123) % 4567 + 100 %}
+                                            <span class="formation-rating-badge text-dark">
+                                                <i class="bi bi-star-fill text-warning me-1"></i> {{ fakeRating|number_format(1) }} 
+                                                <small class="text-muted">({{ fakeReviews|number_format(0, '', ' ') }})</small>
                                             </span>
-                                        {% else %}
-                                            <span class="formation-status-badge draft">
-                                                Non publié
-                                            </span>
-                                        {% endif %}
+                                        </div>
                                     </div>
                                 </div>
 
@@ -215,11 +227,22 @@
 
                                     <h5 class="card-title formation-card-title">{{ formation.titre }}</h5>
 
-                                    <p class="card-text formation-card-text flex-grow-1">
+                                    <p class="card-text formation-card-text flex-grow-1 mb-2">
                                         {{ formation.description ? formation.description|slice(0, 120) ~ '...' : 'Pas de description' }}
                                     </p>
 
-                                    <div class="formation-card-footer d-flex gap-2 flex-wrap mt-3">
+                                    {% if formation.prix %}
+                                        <div class="d-flex align-items-center mb-3">
+                                            <span class="fw-bold fs-5 text-dark me-2">{{ formation.prix }} TND</span>
+                                            <span class="text-muted text-decoration-line-through small">{{ (formation.prix * 1.4)|number_format(2, '.', '') }} TND</span>
+                                        </div>
+                                    {% else %}
+                                        <div class="d-flex align-items-center mb-3">
+                                            <span class="fw-bold fs-5 text-dark">Gratuit</span>
+                                        </div>
+                                    {% endif %}
+                                    
+                                    <div class="formation-card-footer d-flex gap-2 flex-wrap mt-auto">
                                         <button type="button" class="btn btn-sm formation-outline-btn" data-bs-toggle="modal" data-bs-target="#purchaseModal{{ formation.id }}">
                                             Acheter
                                         </button>
@@ -299,16 +322,17 @@
                         </script>
 
                     {% endfor %}
-                </div>
+                    </div>
 
-                <div class="d-flex justify-content-center mt-5">
-                    {{ knp_pagination_render(formations) }}
-                </div>
-            {% else %}
-                <div class="alert alert-info">
-                    Aucune formation trouvée.
-                </div>
-            {% endif %}
+                    <div class="d-flex justify-content-center mt-5">
+                        {{ knp_pagination_render(formations) }}
+                    </div>
+                {% else %}
+                    <div class="alert alert-info">
+                        Aucune formation trouvée.
+                    </div>
+                {% endif %}
+            </div>
         </div>
     </section>
 </main>
@@ -373,22 +397,14 @@
     box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
 }
 
-.formation-status-badge {
+.formation-rating-badge {
+    background: rgba(255, 255, 255, 0.95);
+    color: #1f1147;
     padding: 7px 12px;
     border-radius: 999px;
-    font-size: 12px;
-    font-weight: 700;
+    font-size: 13px;
+    font-weight: 800;
     box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
-}
-
-.formation-status-badge.published {
-    background: rgba(220, 252, 231, 0.96);
-    color: #166534;
-}
-
-.formation-status-badge.draft {
-    background: rgba(254, 243, 199, 0.96);
-    color: #92400e;
 }
 
 .formation-card-title {
@@ -447,11 +463,48 @@
     color: #5b21b6;
     border-color: rgba(124, 58, 237, 0.35);
 }
+
+/* Category Pills */
+.cat-pill {
+    border-radius: 99px;
+    padding: 8px 18px;
+    font-weight: 600;
+    font-size: 14px;
+    border: 1px solid rgba(124, 58, 237, 0.2);
+    transition: all 0.2s ease;
+}
+
+.cat-pill.btn-outline-primary {
+    background: white;
+    color: #5b21b6;
+}
+
+.cat-pill.btn-outline-primary:hover {
+    background: rgba(124, 58, 237, 0.08);
+    transform: translateY(-2px);
+    border-color: rgba(124, 58, 237, 0.4);
+}
+
+.cat-pill.btn-primary {
+    background: linear-gradient(135deg, #7c3aed 0%, #8b5cf6 100%);
+    border: none;
+    box-shadow: 0 4px 12px rgba(124, 58, 237, 0.25);
+}
+
+#toggle-categories-btn {
+    border: 1px dashed rgba(124, 58, 237, 0.3);
+    background: #fdfcff;
+}
+#toggle-categories-btn:hover {
+    background: #f3e8ff;
+    color: #6d28d9 !important;
+}
 </style>
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     const form = document.getElementById('fo-formation-filter-form');
+    const heroForm = document.getElementById('hero-search-form');
     const titreInput = document.getElementById('fo-titre-search');
     const voiceBtn = document.getElementById('voice-btn');
     const voiceSearchInput = document.getElementById('voice-search-input');
@@ -461,20 +514,117 @@ document.addEventListener('DOMContentLoaded', function () {
     let mediaRecorder = null;
     let audioChunks = [];
 
+    // AJAX Search logic
+    function setupAjaxForm(f) {
+        if (!f) return;
+        f.addEventListener('submit', async function (e) {
+            e.preventDefault();
+            const container = document.getElementById('results-container');
+            const url = new URL(f.action || window.location.href);
+            const formData = new FormData(f);
+            const params = new URLSearchParams();
+            for (const [key, value] of formData.entries()) {
+                if (value) params.append(key, value);
+            }
+            url.search = params.toString();
+
+            // Update URL
+            window.history.pushState({}, '', url);
+
+            if (container) container.style.opacity = '0.5';
+            try {
+                const res = await fetch(url.toString(), {
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                });
+                const html = await res.text();
+                const doc = new DOMParser().parseFromString(html, "text/html");
+                const newContainer = doc.getElementById('results-container');
+                if (container && newContainer) {
+                    container.innerHTML = newContainer.innerHTML;
+                    
+                    // Reattach modal events if necessary for dynamically loaded content
+                    // ...
+                }
+            } catch (err) {
+                console.error('AJAX search error:', err);
+                // Fallback to normal submit
+                f.submit();
+            } finally {
+                if (container) container.style.opacity = '1';
+            }
+        });
+    }
+
+    setupAjaxForm(form);
+    setupAjaxForm(heroForm);
+
     if (titreInput) {
-        titreInput.addEventListener('keyup', function () {
+        titreInput.addEventListener('input', function () {
             clearTimeout(timeout);
             timeout = setTimeout(() => {
-                form.submit();
-            }, 500);
+                if (form) form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+            }, 400);
+        });
+    }
+
+    if (voiceSearchInput && heroForm) {
+        voiceSearchInput.addEventListener('input', function () {
+            clearTimeout(timeout);
+            timeout = setTimeout(() => {
+                if (heroForm) heroForm.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+            }, 400);
         });
     }
 
     document.querySelectorAll('#fo-formation-filter-form select').forEach(select => {
         select.addEventListener('change', function () {
-            form.submit();
+            if (form) form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
         });
     });
+
+    // Delegate pagination clicks inside results-container to use AJAX
+    document.getElementById('results-container')?.addEventListener('click', async function(e) {
+        const link = e.target.closest('.pagination a');
+        if (link) {
+            e.preventDefault();
+            const container = document.getElementById('results-container');
+            const url = link.href;
+            
+            window.history.pushState({}, '', url);
+            if (container) container.style.opacity = '0.5';
+            try {
+                const res = await fetch(url);
+                const html = await res.text();
+                const doc = new DOMParser().parseFromString(html, "text/html");
+                if (container && doc.getElementById('results-container')) {
+                    container.innerHTML = doc.getElementById('results-container').innerHTML;
+                }
+            } catch (err) {
+                window.location.href = url;
+            } finally {
+                if (container) container.style.opacity = '1';
+                window.scrollTo({ top: container.offsetTop - 100, behavior: 'smooth' });
+            }
+        }
+    });
+
+    // Handle "Voir plus" toggle for categories
+    const toggleCategoriesBtn = document.getElementById('toggle-categories-btn');
+    if (toggleCategoriesBtn) {
+        let expanded = false;
+        toggleCategoriesBtn.addEventListener('click', function() {
+            expanded = !expanded;
+            const items = document.querySelectorAll('.category-item');
+            items.forEach((item, index) => {
+                if (index > 4) { // keep first 5 visible
+                    item.style.display = expanded ? 'inline-block' : 'none';
+                }
+            });
+            this.innerHTML = expanded 
+                ? '<i class="bi bi-chevron-up"></i> Voir moins'
+                : '<i class="bi bi-chevron-down"></i> Voir plus';
+        });
+    }
 
     if (voiceBtn && voiceSearchInput) {
         voiceBtn.addEventListener('click', async () => {
