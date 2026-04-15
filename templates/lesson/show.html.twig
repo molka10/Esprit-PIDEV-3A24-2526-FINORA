@@ -226,17 +226,248 @@
     background: #ede9fe;
 }
 
-.tts-controls {
+/* --- TTS Player Premium --- */
+.tts-player {
+    background: linear-gradient(135deg, #1e1033 0%, #2d1b4e 100%);
+    border-radius: 16px;
+    padding: 1.2rem 1.5rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 8px 30px rgba(124, 58, 237, 0.2);
+    position: relative;
+    overflow: hidden;
+}
+.tts-player::before {
+    content: '';
+    position: absolute;
+    top: -40%; right: -20%;
+    width: 200px; height: 200px;
+    background: radial-gradient(circle, rgba(139, 92, 246, 0.3), transparent 60%);
+    border-radius: 50%;
+    pointer-events: none;
+}
+.tts-player-header {
     display: flex;
-    gap: 0.4rem;
-    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 1rem;
+    position: relative;
+    z-index: 1;
+}
+.tts-player-icon {
+    width: 42px; height: 42px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #7c3aed, #a78bfa);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.2rem;
+    box-shadow: 0 4px 12px rgba(124, 58, 237, 0.4);
+}
+.tts-player-title {
+    color: white;
+    font-size: 0.9rem;
+    font-weight: 700;
+}
+.tts-player-subtitle {
+    color: rgba(255,255,255,0.5);
+    font-size: 0.72rem;
 }
 
-.tts-controls .btn {
+/* Waveform visualization mock */
+.tts-waveform {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    height: 32px;
+    margin-bottom: 0.8rem;
+    position: relative;
+    z-index: 1;
+}
+.tts-waveform-bar {
     flex: 1;
-    min-width: 60px;
-    font-size: 0.78rem;
-    padding: 0.35rem 0.5rem;
+    background: rgba(167, 139, 250, 0.3);
+    border-radius: 99px;
+    min-width: 3px;
+    transition: height 0.15s ease, background 0.2s ease;
+}
+.tts-waveform-bar.active {
+    background: #a78bfa;
+}
+.tts-waveform-bar.played {
+    background: linear-gradient(180deg, #c4b5fd, #7c3aed);
+}
+
+.tts-controls-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    position: relative;
+    z-index: 1;
+}
+.tts-ctrl-btn {
+    width: 38px; height: 38px;
+    border-radius: 50%;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    color: white;
+    background: rgba(255,255,255,0.1);
+}
+.tts-ctrl-btn:hover { background: rgba(255,255,255,0.2); transform: scale(1.08); }
+.tts-ctrl-btn.tts-play-main {
+    width: 48px; height: 48px;
+    background: linear-gradient(135deg, #7c3aed, #a78bfa);
+    font-size: 1.1rem;
+    box-shadow: 0 4px 15px rgba(124, 58, 237, 0.5);
+}
+.tts-ctrl-btn.tts-play-main:hover {
+    box-shadow: 0 6px 20px rgba(124, 58, 237, 0.6);
+    transform: scale(1.1);
+}
+.tts-ctrl-btn:disabled { opacity: 0.3; cursor: not-allowed; transform: none; }
+
+.tts-time {
+    color: rgba(255,255,255,0.6);
+    font-size: 0.75rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    min-width: 45px;
+}
+
+.tts-progress-bar {
+    flex: 1;
+    height: 4px;
+    background: rgba(255,255,255,0.15);
+    border-radius: 99px;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+}
+.tts-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #a78bfa, #c4b5fd);
+    border-radius: 99px;
+    width: 0%;
+    transition: width 0.1s linear;
+}
+
+.tts-speed-btn {
+    background: rgba(255,255,255,0.1);
+    color: rgba(255,255,255,0.7);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 8px;
+    padding: 3px 10px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.tts-speed-btn:hover { background: rgba(255,255,255,0.2); color: white; }
+
+.tts-status-text {
+    color: rgba(255,255,255,0.5);
+    font-size: 0.72rem;
+    text-align: center;
+    margin-top: 0.5rem;
+    position: relative;
+    z-index: 1;
+}
+
+/* Text highlight effect */
+.book-page .tts-word {
+    transition: background 0.15s ease, color 0.15s ease;
+    border-radius: 3px;
+    padding: 0 1px;
+}
+.book-page .tts-word.tts-active {
+    background: linear-gradient(135deg, #c4b5fd, #ddd6fe);
+    color: #5b21b6;
+    font-weight: 700;
+    box-shadow: 0 1px 4px rgba(124, 58, 237, 0.2);
+}
+.book-page .tts-sentence {
+    transition: background 0.2s ease;
+    border-radius: 4px;
+}
+.book-page .tts-sentence.tts-active {
+    background: rgba(196, 181, 253, 0.18);
+}
+
+/* --- Continue Learning Card --- */
+.continue-card {
+    background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+    border-radius: 20px;
+    padding: 2rem;
+    color: white;
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 1.5rem;
+}
+.continue-card::before {
+    content: '';
+    position: absolute;
+    top: -30%; right: -10%;
+    width: 250px; height: 250px;
+    background: radial-gradient(circle, rgba(255,255,255,0.1), transparent 50%);
+    border-radius: 50%;
+}
+.continue-card-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255,255,255,0.15);
+    backdrop-filter: blur(4px);
+    border-radius: 99px;
+    padding: 5px 14px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+}
+.continue-card h3 {
+    font-size: 1.3rem;
+    font-weight: 800;
+    margin-bottom: 0.5rem;
+}
+.continue-card p {
+    color: rgba(255,255,255,0.75);
+    font-size: 0.9rem;
+    margin-bottom: 1.2rem;
+}
+.continue-card-btn {
+    background: white;
+    color: #6d28d9;
+    border: none;
+    border-radius: 12px;
+    padding: 10px 24px;
+    font-weight: 700;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+}
+.continue-card-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+    color: #5b21b6;
+}
+.continue-card-meta {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 1rem;
+}
+.continue-card-meta span {
+    font-size: 0.8rem;
+    color: rgba(255,255,255,0.7);
+    display: flex;
+    align-items: center;
+    gap: 6px;
 }
 
 /* --- Sidebar card shared --- */
@@ -405,18 +636,29 @@
                             </div>
                         </div>
 
-                        {# --- TTS controls (now minimal, below content) --- #}
-                        <div class="sidebar-card mb-4">
-                            <div class="sidebar-card-header">🔊 Lecture audio (TTS)</div>
-                            <div class="sidebar-card-body">
-                                <div class="tts-controls mb-2">
-                                    <button id="play-btn" class="btn btn-primary btn-sm">▶ Lire</button>
-                                    <button id="pause-btn" class="btn btn-outline-secondary btn-sm">⏸ Pause</button>
-                                    <button id="stop-btn" class="btn btn-outline-danger btn-sm">⏹ Stop</button>
+                        {# --- TTS Premium Player --- #}
+                        <div class="tts-player" id="tts-player">
+                            <div class="tts-player-header">
+                                <div class="tts-player-icon">🎧</div>
+                                <div>
+                                    <div class="tts-player-title">Écouter la leçon</div>
+                                    <div class="tts-player-subtitle">Lecture audio avec suivi du texte</div>
                                 </div>
-                                <audio id="audio-player" controls style="width:100%; height:36px;"></audio>
-                                <div id="tts-status" class="small text-muted mt-1"></div>
                             </div>
+                            <div class="tts-waveform" id="tts-waveform"></div>
+                            <div class="tts-controls-row">
+                                <button class="tts-ctrl-btn" id="stop-btn" title="Stop">⏹</button>
+                                <button class="tts-ctrl-btn tts-play-main" id="play-btn" title="Lecture">▶</button>
+                                <button class="tts-ctrl-btn" id="pause-btn" title="Pause">⏸</button>
+                                <span class="tts-time" id="tts-current">0:00</span>
+                                <div class="tts-progress-bar" id="tts-progress-bar">
+                                    <div class="tts-progress-fill" id="tts-progress-fill"></div>
+                                </div>
+                                <span class="tts-time" id="tts-duration">0:00</span>
+                                <button class="tts-speed-btn" id="tts-speed-btn" title="Vitesse">1x</button>
+                            </div>
+                            <audio id="audio-player" preload="none"></audio>
+                            <div class="tts-status-text" id="tts-status">Appuyez sur ▶ pour écouter</div>
                         </div>
 
                         {# --- Prev / Next lesson --- #}
@@ -442,6 +684,41 @@
                                 </div>
                             </div>
                         </div>
+
+                        {# --- Continue Learning Card --- #}
+                        {% if nextLesson %}
+                        <div class="continue-card" id="continue-learning-card">
+                            <div class="continue-card-badge">🎓 Continuez votre progression</div>
+                            <h3>Prochaine leçon recommandée</h3>
+                            <p>Poursuivez avec la leçon suivante de la formation <strong>{{ lesson.formation ? lesson.formation.titre : '' }}</strong>.</p>
+                            <div class="continue-card-meta">
+                                <span><i class="fas fa-book-open"></i> {{ nextLesson.titre }}</span>
+                                <span><i class="fas fa-clock"></i> {{ nextLesson.dureeMinutes }} min</span>
+                                <span><i class="fas fa-list-ol"></i> Leçon {{ '%02d'|format(nextLesson.ordre) }}</span>
+                                {% if lesson.formation %}
+                                    <span><i class="fas fa-layer-group"></i> {{ lesson.formation.niveau }}</span>
+                                    <span><i class="fas fa-tag"></i> {{ lesson.formation.categorie }}</span>
+                                {% endif %}
+                            </div>
+                            <a href="{{ path('app_lesson_show', {'id': nextLesson.id}) }}" class="continue-card-btn">
+                                Continuer la formation <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
+                        {% elseif lesson.formation %}
+                        <div class="continue-card" style="background: linear-gradient(135deg, #059669 0%, #047857 100%);">
+                            <div class="continue-card-badge">🏆 Félicitations !</div>
+                            <h3>Formation terminée</h3>
+                            <p>Vous avez terminé toutes les leçons de <strong>{{ lesson.formation.titre }}</strong>. Bravo !</p>
+                            <div class="d-flex gap-2 flex-wrap">
+                                <a href="{{ path('app_quiz_take', {'id': lesson.id}) }}" class="continue-card-btn">
+                                    🧠 Passer le quiz final <i class="fas fa-arrow-right"></i>
+                                </a>
+                                <a href="{{ path('app_formations') }}" class="continue-card-btn" style="background: rgba(255,255,255,0.2); color: white;">
+                                    Explorer d'autres formations
+                                </a>
+                            </div>
+                        </div>
+                        {% endif %}
 
                     </div>{# end col-lg-8 #}
 
@@ -756,64 +1033,292 @@
     renderPage();
 
     /* =========================================
-       TTS AUDIO PLAYER (unchanged logic)
+       TTS PREMIUM PLAYER + TEXT HIGHLIGHTING
     ========================================= */
-    const audio     = document.getElementById('audio-player');
-    const playBtn   = document.getElementById('play-btn');
-    const pauseBtn  = document.getElementById('pause-btn');
-    const stopBtn   = document.getElementById('stop-btn');
-    const ttsStatus = document.getElementById('tts-status');
+    const audio      = document.getElementById('audio-player');
+    const playBtn    = document.getElementById('play-btn');
+    const pauseBtn   = document.getElementById('pause-btn');
+    const stopBtn    = document.getElementById('stop-btn');
+    const ttsStatus  = document.getElementById('tts-status');
+    const progressBar  = document.getElementById('tts-progress-bar');
+    const progressFillTts = document.getElementById('tts-progress-fill');
+    const currentTimeEl = document.getElementById('tts-current');
+    const durationEl = document.getElementById('tts-duration');
+    const speedBtn   = document.getElementById('tts-speed-btn');
+    const waveformEl = document.getElementById('tts-waveform');
     const baseTtsUrl = "{{ path('app_tts', {'id': lesson.id}) }}";
 
     let isStopped = true;
+    let playbackRate = 1;
+    const speeds = [0.75, 1, 1.25, 1.5, 2];
+    let speedIndex = 1;
 
+    // Generate waveform bars
+    const BAR_COUNT = 60;
+    for (let i = 0; i < BAR_COUNT; i++) {
+        const bar = document.createElement('div');
+        bar.className = 'tts-waveform-bar';
+        bar.style.height = (Math.random() * 22 + 6) + 'px';
+        waveformEl.appendChild(bar);
+    }
+    const waveformBars = waveformEl.querySelectorAll('.tts-waveform-bar');
+
+    function formatTime(sec) {
+        if (isNaN(sec)) return '0:00';
+        const m = Math.floor(sec / 60);
+        const s = Math.floor(sec % 60);
+        return m + ':' + (s < 10 ? '0' : '') + s;
+    }
+
+    // Update progress bar and waveform
+    audio.addEventListener('timeupdate', function() {
+        if (!audio.duration) return;
+        const pct = (audio.currentTime / audio.duration) * 100;
+        progressFillTts.style.width = pct + '%';
+        currentTimeEl.textContent = formatTime(audio.currentTime);
+
+        // Update waveform bars
+        const activeIdx = Math.floor((audio.currentTime / audio.duration) * BAR_COUNT);
+        waveformBars.forEach((bar, i) => {
+            bar.classList.toggle('played', i < activeIdx);
+            bar.classList.toggle('active', i === activeIdx);
+        });
+
+        // Text highlighting: estimate sentence position
+        highlightTextAtProgress(audio.currentTime / audio.duration);
+    });
+
+    audio.addEventListener('loadedmetadata', function() {
+        durationEl.textContent = formatTime(audio.duration);
+    });
+
+    // Click on progress bar to seek
+    progressBar.addEventListener('click', function(e) {
+        if (!audio.duration) return;
+        const rect = progressBar.getBoundingClientRect();
+        const pct = (e.clientX - rect.left) / rect.width;
+        audio.currentTime = pct * audio.duration;
+    });
+
+    // Speed control
+    speedBtn.addEventListener('click', function() {
+        speedIndex = (speedIndex + 1) % speeds.length;
+        playbackRate = speeds[speedIndex];
+        audio.playbackRate = playbackRate;
+        speedBtn.textContent = playbackRate + 'x';
+    });
+
+    // Play
     playBtn.addEventListener('click', async function () {
         try {
             if (audio.paused && audio.src && !isStopped) {
                 await audio.play();
-                ttsStatus.textContent = 'Lecture en cours.';
+                playBtn.textContent = '⏸';
+                ttsStatus.textContent = '🎵 Lecture en cours...';
                 return;
             }
             isStopped = false;
             audio.pause();
             audio.currentTime = 0;
             audio.src = baseTtsUrl + '?v=' + Date.now();
-            ttsStatus.textContent = 'Chargement audio…';
+            audio.playbackRate = playbackRate;
+            ttsStatus.textContent = '⏳ Chargement de l\'audio...';
+            playBtn.textContent = '⌛';
+            playBtn.disabled = true;
             const onCanPlay = async () => {
                 audio.removeEventListener('canplaythrough', onCanPlay);
                 if (isStopped) return;
                 try {
                     await audio.play();
-                    ttsStatus.textContent = 'Lecture en cours.';
+                    playBtn.textContent = '⏸';
+                    playBtn.disabled = false;
+                    ttsStatus.textContent = '🎵 Lecture en cours...';
                 } catch (e) {
-                    ttsStatus.textContent = 'Impossible de lancer la lecture.';
+                    playBtn.textContent = '▶';
+                    playBtn.disabled = false;
+                    ttsStatus.textContent = '❌ Impossible de lancer la lecture.';
                 }
             };
             audio.addEventListener('canplaythrough', onCanPlay, { once: true });
             audio.load();
         } catch (error) {
-            ttsStatus.textContent = 'Impossible de charger l\'audio.';
+            playBtn.textContent = '▶';
+            playBtn.disabled = false;
+            ttsStatus.textContent = '❌ Erreur de chargement.';
         }
     });
 
+    // Pause
     pauseBtn.addEventListener('click', function () {
         if (!audio.src) return;
-        audio.pause();
-        isStopped = false;
-        ttsStatus.textContent = 'Lecture en pause.';
+        if (audio.paused) {
+            audio.play();
+            playBtn.textContent = '⏸';
+            ttsStatus.textContent = '🎵 Lecture en cours...';
+        } else {
+            audio.pause();
+            isStopped = false;
+            playBtn.textContent = '▶';
+            ttsStatus.textContent = '⏸ En pause';
+        }
     });
 
+    // Stop
     stopBtn.addEventListener('click', function () {
         isStopped = true;
         audio.pause();
         audio.currentTime = 0;
         audio.removeAttribute('src');
         audio.load();
-        ttsStatus.textContent = 'Lecture arrêtée.';
+        playBtn.textContent = '▶';
+        playBtn.disabled = false;
+        progressFillTts.style.width = '0%';
+        currentTimeEl.textContent = '0:00';
+        durationEl.textContent = '0:00';
+        ttsStatus.textContent = 'Appuyez sur ▶ pour écouter';
+        waveformBars.forEach(bar => { bar.classList.remove('played', 'active'); });
+        clearHighlight();
     });
 
-    audio.addEventListener('ended', () => { isStopped = true; ttsStatus.textContent = 'Lecture terminée.'; });
-    audio.addEventListener('error', () => { isStopped = true; ttsStatus.textContent = 'Erreur de chargement audio.'; });
+    audio.addEventListener('ended', () => {
+        isStopped = true;
+        playBtn.textContent = '▶';
+        ttsStatus.textContent = '✅ Lecture terminée.';
+        clearHighlight();
+    });
+    audio.addEventListener('error', () => {
+        isStopped = true;
+        playBtn.textContent = '▶';
+        playBtn.disabled = false;
+        ttsStatus.textContent = '❌ Erreur de chargement audio.';
+    });
+
+    /* =========================================
+       TEXT HIGHLIGHTING (subtitle-style)
+       - Character-count weighted timing
+       - Page-aware: only highlights when audio
+         position matches the current page
+    ========================================= */
+    let sentenceSpans = [];
+    let sentenceCharRanges = []; // [{startPct, endPct}] relative to CURRENT PAGE portion of audio
+
+    // Precompute character offsets for each page within the full content
+    const totalChars = originalPages.reduce((sum, p) => sum + p.length, 0);
+    function getPageCharOffset(pageIdx) {
+        let offset = 0;
+        for (let i = 0; i < pageIdx; i++) {
+            offset += originalPages[i].length;
+        }
+        return offset;
+    }
+
+    // Override renderPage to wrap sentences in spans
+    const _origRenderPage = renderPage;
+    renderPage = function() {
+        _origRenderPage();
+        wrapSentencesForHighlight();
+    };
+    // Re-render to apply wrapping
+    renderPage();
+
+    function wrapSentencesForHighlight() {
+        const container = document.getElementById('book-page-content');
+        const paragraphs = container.querySelectorAll('p');
+        sentenceSpans = [];
+        sentenceCharRanges = [];
+
+        // Gather all sentences with their text
+        const allSentences = [];
+        paragraphs.forEach(p => {
+            const text = p.textContent;
+            // Split by sentence-ending punctuation (keep the punctuation with the sentence)
+            const sentences = text.split(/(?<=[.!?;:।。！？]\s)|(?<=\n)/).filter(s => s.trim().length > 0);
+
+            p.textContent = '';
+            sentences.forEach(sentence => {
+                if (sentence.trim() === '') return;
+                const span = document.createElement('span');
+                span.className = 'tts-sentence';
+                span.textContent = sentence;
+                p.appendChild(span);
+                sentenceSpans.push(span);
+                allSentences.push(sentence);
+            });
+        });
+
+        if (allSentences.length === 0 || totalChars === 0) return;
+
+        // Compute this page's time window in the full audio (by char proportion)
+        const pageOffset = getPageCharOffset(currentPage);
+        const pageLen = originalPages[currentPage].length;
+        const pageStartPct = pageOffset / totalChars;
+        const pageEndPct = (pageOffset + pageLen) / totalChars;
+
+        // Within this page, weight each sentence by its character count
+        const pageTotalSentenceChars = allSentences.reduce((sum, s) => sum + s.length, 0);
+        let runningCharSum = 0;
+
+        for (let i = 0; i < allSentences.length; i++) {
+            const sentenceLen = allSentences[i].length;
+            const sentStartPct = pageStartPct + (runningCharSum / pageTotalSentenceChars) * (pageEndPct - pageStartPct);
+            runningCharSum += sentenceLen;
+            const sentEndPct = pageStartPct + (runningCharSum / pageTotalSentenceChars) * (pageEndPct - pageStartPct);
+            sentenceCharRanges.push({ startPct: sentStartPct, endPct: sentEndPct });
+        }
+    }
+
+    function highlightTextAtProgress(pct) {
+        if (sentenceSpans.length === 0 || sentenceCharRanges.length === 0) return;
+
+        // Find which sentence this progress % falls into
+        let activeIdx = -1;
+        for (let i = 0; i < sentenceCharRanges.length; i++) {
+            if (pct >= sentenceCharRanges[i].startPct && pct < sentenceCharRanges[i].endPct) {
+                activeIdx = i;
+                break;
+            }
+        }
+
+        // Update highlight
+        sentenceSpans.forEach((span, i) => {
+            const isActive = i === activeIdx;
+            const isPast = activeIdx >= 0 && i < activeIdx;
+            span.classList.toggle('tts-active', isActive);
+            span.style.opacity = isPast ? '0.6' : '1';
+        });
+
+        // Auto-scroll to keep active sentence visible
+        if (activeIdx >= 0 && sentenceSpans[activeIdx]) {
+            const span = sentenceSpans[activeIdx];
+            const container = document.getElementById('book-page-content');
+            const rect = span.getBoundingClientRect();
+            const containerRect = container.getBoundingClientRect();
+            if (rect.bottom > containerRect.bottom - 20 || rect.top < containerRect.top + 20) {
+                span.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+
+        // Auto-navigate to correct page if audio has moved past current page's range
+        if (pct > 0 && totalChars > 0 && !isStopped) {
+            const pageOffset = getPageCharOffset(currentPage);
+            const pageLen = originalPages[currentPage].length;
+            const pageEndPct = (pageOffset + pageLen) / totalChars;
+            const pageStartPct = pageOffset / totalChars;
+
+            if (pct >= pageEndPct && currentPage < originalPages.length - 1) {
+                currentPage++;
+                renderPage();
+                window.scrollTo({ top: document.getElementById('book-wrapper').offsetTop - 80, behavior: 'smooth' });
+            } else if (pct < pageStartPct && currentPage > 0) {
+                currentPage--;
+                renderPage();
+            }
+        }
+    }
+
+    function clearHighlight() {
+        sentenceSpans.forEach(span => span.classList.remove('tts-active'));
+    }
 
 })();
 </script>
