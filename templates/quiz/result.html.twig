@@ -64,8 +64,8 @@
                             </a>
 
                             {% if passed and quizResult is defined and not fraudSuspected %}
-                                <a href="{{ path('app_quiz_certificate', {'id': quizResult.id}) }}" class="btn btn-warning px-4 py-2">
-                                    🎓 Voir mon certificat
+                                <a href="{{ path('app_quiz_certificate', {'id': quizResult.id}) }}" class="btn btn-warning px-4 py-2" target="_blank">
+                                    🎓 Télécharger mon certificat
                                 </a>
                             {% endif %}
                         </div>

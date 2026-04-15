@@ -8,6 +8,7 @@ use App\Service\GroqQuizService;
 use App\Service\QuizFraudService;
 use App\Service\QuizAiCommentService;
 use Doctrine\ORM\EntityManagerInterface;
+use Nucleos\DompdfBundle\Wrapper\DompdfWrapperInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -111,6 +112,9 @@ final class QuizController extends AbstractController
         $entityManager->persist($result);
         $entityManager->flush();
 
+        // Store the student name in session to identify them for "My Certificates"
+        $session->set('last_student_name', $studentName);
+
         $session->remove('quiz_questions_' . $lesson->getId());
 
         return $this->render('quiz/result.html.twig', [
@@ -129,15 +133,42 @@ final class QuizController extends AbstractController
 
     #[Route('/certificate/{id}', name: 'app_quiz_certificate', methods: ['GET'])]
     public function certificate(
-        QuizResult $quizResult
+        QuizResult $quizResult,
+        DompdfWrapperInterface $dompdfWrapper
     ): Response {
         if (!$quizResult->isPassed()) {
             $this->addFlash('danger', 'Le certificat n’est disponible que pour un quiz réussi.');
             return $this->redirectToRoute('app_home');
         }
 
-        return $this->render('quiz/certificate.html.twig', [
+        $html = $this->renderView('quiz/certificate_pdf.html.twig', [
             'quizResult' => $quizResult,
+        ]);
+
+        return $dompdfWrapper->getStreamResponse($html, sprintf('certificat_%s.pdf', $quizResult->getStudentName()));
+    }
+
+    #[Route('/my-certificates', name: 'app_my_certificates', methods: ['GET'])]
+    public function myCertificates(
+        EntityManagerInterface $entityManager,
+        SessionInterface $session
+    ): Response {
+        $studentName = $session->get('last_student_name');
+        
+        $queryBuilder = $entityManager->getRepository(QuizResult::class)->createQueryBuilder('q')
+            ->where('q.passed = 1')
+            ->orderBy('q.takenAt', 'DESC');
+
+        if ($studentName) {
+            $queryBuilder->andWhere('q.studentName = :name')
+                ->setParameter('name', $studentName);
+        }
+
+        $certificates = $queryBuilder->getQuery()->getResult();
+
+        return $this->render('quiz/my_certificates.html.twig', [
+            'certificates' => $certificates,
+            'studentName' => $studentName,
         ]);
     }
 
