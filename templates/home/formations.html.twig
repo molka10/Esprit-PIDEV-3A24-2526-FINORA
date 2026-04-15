@@ -178,7 +178,7 @@
 
             <div id="results-container" style="transition: opacity 0.2s ease;">
                 {% if formations|length > 0 %}
-                    <div class="row g-4">
+                    <div class="row g-4" id="formations-grid-row">
                     {% for formation in formations %}
                         <div class="col-md-6 col-xl-4">
                             <div class="card formation-card border-0 h-100 overflow-hidden">
@@ -243,12 +243,26 @@
                                     {% endif %}
                                     
                                     <div class="formation-card-footer d-flex gap-2 flex-wrap mt-auto">
-                                        <button type="button" class="btn btn-sm formation-outline-btn" data-bs-toggle="modal" data-bs-target="#purchaseModal{{ formation.id }}">
+                                        <button type="button" class="btn btn-sm formation-outline-btn fw-bold px-3" data-bs-toggle="modal" data-bs-target="#purchaseModal{{ formation.id }}">
                                             Acheter
                                         </button>
-                                        <a href="{{ path('app_formation_show', {'id': formation.id}) }}" class="btn btn-sm formation-main-btn">
+                                        <a href="{{ path('app_formation_show', {'id': formation.id}) }}" class="btn btn-sm formation-main-btn flex-grow-1">
                                             Voir formation
                                         </a>
+                                        <button type="button" class="btn btn-sm btn-light quick-view-btn text-primary border" 
+                                            style="border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);"
+                                            data-title="{{ formation.titre|escape('html_attr') }}"
+                                            data-desc="{{ formation.description|default('Pas de description')|escape('html_attr') }}"
+                                            data-level="{{ formation.niveau }}"
+                                            data-img="{{ formation.imageUrl ? asset('uploads/formations/' ~ formation.imageUrl) : asset('assets/images/courses/4by3/16.jpg') }}"
+                                            data-category="{{ formation.categorie }}"
+                                            data-price="{{ formation.prix ? formation.prix ~ ' TND' : 'Gratuit' }}"
+                                            data-fakeprice="{{ formation.prix ? (formation.prix * 1.4)|number_format(2, '.', '') ~ ' TND' : '' }}"
+                                            data-rating="{{ fakeRating|number_format(1) }}"
+                                            data-reviews="{{ fakeReviews|number_format(0, '', ' ') }}"
+                                            onclick="openQuickView(this)">
+                                            <i class="bi bi-eye fw-bold"></i>
+                                        </button>
                                     </div>
                                 </div>
 
@@ -324,8 +338,14 @@
                     {% endfor %}
                     </div>
 
-                    <div class="d-flex justify-content-center mt-5">
+                    <div class="d-flex justify-content-center mt-5 pagination-container">
                         {{ knp_pagination_render(formations) }}
+                    </div>
+                    
+                    <div id="infinite-scroll-trigger" class="text-center mt-4 mb-4" style="display: none;">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Chargement...</span>
+                        </div>
                     </div>
                 {% else %}
                     <div class="alert alert-info">
@@ -335,6 +355,53 @@
             </div>
         </div>
     </section>
+
+    <!-- Unified Quick View Modal -->
+    <div class="modal fade" id="quickViewModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content border-0 overflow-hidden" style="border-radius: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.2);">
+                <button type="button" class="btn-close position-absolute top-0 end-0 m-3 z-3 bg-white" data-bs-dismiss="modal" aria-label="Close" style="border-radius: 50%; opacity: 0.9; box-shadow: 0 2px 5px rgba(0,0,0,0.1); padding: 10px;"></button>
+                <div class="row g-0">
+                    <div class="col-md-5 position-relative">
+                        <img src="" id="qv-img" class="img-fluid h-100 object-fit-cover" alt="Formation Image" style="min-height: 300px; width: 100%;">
+                        <div class="position-absolute bottom-0 start-0 w-100 p-3" style="background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);">
+                            <span class="badge bg-warning text-dark fw-bold" id="qv-level"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-7">
+                        <div class="modal-body p-4 p-md-5 d-flex flex-column h-100">
+                            <div class="d-flex align-items-center mb-2 gap-2" id="qv-category-container">
+                                <!-- Categories injected here -->
+                            </div>
+                            
+                            <h4 class="fw-bold text-dark mb-2" id="qv-title"></h4>
+                            
+                            <div class="d-flex align-items-center mb-3">
+                                <span class="text-warning fw-bold me-1"><i class="bi bi-star-fill"></i> <span id="qv-rating"></span></span>
+                                <span class="text-muted small">(<span id="qv-reviews"></span> avis)</span>
+                            </div>
+                            
+                            <div class="bg-light rounded p-3 mb-3">
+                                <div class="d-flex align-items-baseline">
+                                    <h3 class="fw-bold mb-0 text-primary me-2" id="qv-price"></h3>
+                                    <span class="text-muted text-decoration-line-through small fw-bold" id="qv-fakeprice"></span>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-4 flex-grow-1">
+                                <h6 class="fw-bold text-dark">À propos de cette formation</h6>
+                                <p class="text-muted small mb-0" id="qv-desc" style="line-height: 1.6;"></p>
+                            </div>
+                            
+                            <button type="button" class="btn btn-primary w-100 py-2 fw-bold" data-bs-dismiss="modal" style="border-radius: 12px;">
+                                Fermer l'aperçu
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </main>
 
 <style>
@@ -498,10 +565,57 @@
 #toggle-categories-btn:hover {
     background: #f3e8ff;
     color: #6d28d9 !important;
-}
 </style>
 
 <script>
+// Quick View functionality
+function openQuickView(button) {
+    const title = button.getAttribute('data-title');
+    const desc = button.getAttribute('data-desc');
+    const img = button.getAttribute('data-img');
+    const level = button.getAttribute('data-level');
+    const categories = button.getAttribute('data-category');
+    const price = button.getAttribute('data-price');
+    const fakePrice = button.getAttribute('data-fakeprice');
+    const rating = button.getAttribute('data-rating');
+    const reviews = button.getAttribute('data-reviews');
+
+    document.getElementById('qv-title').textContent = title;
+    document.getElementById('qv-desc').textContent = desc;
+    document.getElementById('qv-img').src = img;
+    document.getElementById('qv-level').textContent = level;
+    document.getElementById('qv-price').textContent = price;
+    
+    const fakePriceEl = document.getElementById('qv-fakeprice');
+    if (fakePrice) {
+        fakePriceEl.textContent = fakePrice;
+        fakePriceEl.style.display = 'inline';
+    } else {
+        fakePriceEl.style.display = 'none';
+    }
+    
+    document.getElementById('qv-rating').textContent = rating;
+    document.getElementById('qv-reviews').textContent = reviews;
+
+    const catContainer = document.getElementById('qv-category-container');
+    catContainer.innerHTML = '';
+    if (categories) {
+        categories.split(',').forEach(cat => {
+            if (cat.trim() !== '') {
+                const badge = document.createElement('span');
+                badge.className = 'badge bg-primary bg-opacity-10 text-primary border';
+                badge.textContent = cat.trim();
+                catContainer.appendChild(badge);
+            }
+        });
+    }
+
+    const modalEl = document.getElementById('quickViewModal');
+    let modal = bootstrap.Modal.getInstance(modalEl);
+    if (!modal) modal = new bootstrap.Modal(modalEl);
+    modal.show();
+}
+
 document.addEventListener('DOMContentLoaded', function () {
     const form = document.getElementById('fo-formation-filter-form');
     const heroForm = document.getElementById('hero-search-form');
@@ -542,8 +656,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (container && newContainer) {
                     container.innerHTML = newContainer.innerHTML;
                     
-                    // Reattach modal events if necessary for dynamically loaded content
-                    // ...
+                    // Reinitialize infinite scroll for the newly injected elements
+                    initInfiniteScroll();
                 }
             } catch (err) {
                 console.error('AJAX search error:', err);
@@ -557,6 +671,90 @@ document.addEventListener('DOMContentLoaded', function () {
 
     setupAjaxForm(form);
     setupAjaxForm(heroForm);
+
+    // Infinite Scroll Implementation
+    let globalObserver = null;
+
+    function initInfiniteScroll() {
+        const gridRow = document.getElementById('formations-grid-row');
+        const scrollTrigger = document.getElementById('infinite-scroll-trigger');
+        const paginationContainer = document.querySelector('.pagination-container');
+        
+        // Clean up old observer if it exists
+        if (globalObserver) {
+            globalObserver.disconnect();
+            globalObserver = null;
+        }
+
+        if (gridRow && scrollTrigger && paginationContainer) {
+            
+            // Extract the "next" page URL natively from the KnpPaginator generated HTML
+            const getNextUrl = () => {
+                const navLinks = Array.from(document.querySelectorAll('.pagination-container .page-link'));
+                const nextLink = navLinks.find(el => el.getAttribute('rel') === 'next');
+                return nextLink ? nextLink.href : null; // Handles Knp pagination correctly
+            };
+
+            const nextUrl = getNextUrl();
+            
+            if (nextUrl) {
+                // If there's a next page, hide normal pagination and show our loader trigger
+                paginationContainer.style.display = 'none';
+                scrollTrigger.style.display = 'block';
+            } else {
+                paginationContainer.style.display = 'none'; // hide pagination anyway for clean UX
+                scrollTrigger.style.display = 'none';
+                return; // Nothing to load
+            }
+
+            let isFetching = false;
+
+            globalObserver = new IntersectionObserver(async (entries) => {
+                if (entries[0].isIntersecting && !isFetching) {
+                    const currentNextUrl = getNextUrl();
+                    
+                    if (currentNextUrl) {
+                        isFetching = true;
+                        try {
+                            const res = await fetch(currentNextUrl, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+                            const html = await res.text();
+                            const doc = new DOMParser().parseFromString(html, "text/html");
+                            
+                            // Extract just the new cards and KnpPagination box
+                            const newCards = doc.querySelectorAll('#formations-grid-row > div');
+                            const newPagination = doc.querySelector('.pagination-container');
+                            
+                            if (newCards.length > 0) {
+                                newCards.forEach(card => gridRow.appendChild(card));
+                            }
+                            
+                            if (newPagination) {
+                                paginationContainer.innerHTML = newPagination.innerHTML;
+                            }
+                            
+                            // Check if there are no more pages
+                            if (!getNextUrl()) {
+                                scrollTrigger.style.display = 'none';
+                                globalObserver.disconnect();
+                            }
+                        } catch (err) {
+                            console.error('Infinite scroll error:', err);
+                        } finally {
+                            isFetching = false;
+                        }
+                    } else {
+                        scrollTrigger.style.display = 'none';
+                        globalObserver.disconnect();
+                    }
+                }
+            }, { rootMargin: "0px 0px 500px 0px" });
+
+            globalObserver.observe(scrollTrigger);
+        }
+    }
+
+    // Call on load
+    initInfiniteScroll();
 
     if (titreInput) {
         titreInput.addEventListener('input', function () {
