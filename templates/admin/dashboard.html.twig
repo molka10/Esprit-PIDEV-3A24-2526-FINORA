@@ -1,389 +1,341 @@
 {% extends 'admin/base_admin.html.twig' %}
 
-{% block title %}FINORA - Premium Dashboard{% endblock %}
+{% block title %}Tableau de Bord - FINORA Premium{% endblock %}
 
 {% block admin_content %}
 
 <style>
-/* ==================================
-   CSS Premium SaaS Dashboard
-=================================== */
-@keyframes fadeInUp { 
-    from { opacity: 0; transform: translateY(20px); } 
-    to { opacity: 1; transform: translateY(0); } 
-}
-.fade-in-up { animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; opacity: 0; }
-.delay-1 { animation-delay: 0.1s; }
-.delay-2 { animation-delay: 0.2s; }
-.delay-3 { animation-delay: 0.3s; }
-.delay-4 { animation-delay: 0.4s; }
-
-.saas-card {
-    border-radius: 20px;
-    border: 1px solid rgba(0, 0, 0, 0.05);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
-    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-    background-color: #fff;
+/* ── DASHBOARD COMPONENT STYLES ── */
+.premium-header {
+    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+    border-radius: 24px;
+    color: white;
     position: relative;
     overflow: hidden;
 }
-[data-bs-theme="dark"] .saas-card {
-    background-color: #1a1d2d;
-    border-color: rgba(255, 255, 255, 0.05);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-}
-.saas-card:hover {
-    transform: translateY(-6px);
-    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.08);
-}
-[data-bs-theme="dark"] .saas-card:hover {
-    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
-}
-
-.header-gradient {
-    background: linear-gradient(135deg, #ffffff 0%, #f4f6f8 100%);
-}
-[data-bs-theme="dark"] .header-gradient {
-    background: linear-gradient(135deg, #2b3044 0%, #1a1d2d 100%);
-}
-.header-glow {
+.header-overlay {
     position: absolute;
-    width: 350px; height: 350px;
-    background: radial-gradient(circle, rgba(99,102,241,0.15) 0%, rgba(255,255,255,0) 70%);
-    top: -100px; right: -50px;
-    border-radius: 50%;
-    pointer-events: none;
+    top: -50px; right: -50px;
+    width: 300px; height: 300px;
+    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 70%);
 }
 
-.stat-icon-wrapper {
-    width: 54px; height: 54px;
+.stat-card {
+    padding: 1.75rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+.stat-card .icon-box {
+    width: 52px; height: 52px;
     display: flex; align-items: center; justify-content: center;
     border-radius: 14px;
     font-size: 1.5rem;
+    margin-bottom: 1.25rem;
 }
-.icon-glow-primary { background: rgba(79, 70, 229, 0.1); color: #4f46e5; }
-.icon-glow-success { background: rgba(16, 185, 129, 0.1); color: #10b981; }
-.icon-glow-warning { background: rgba(245, 158, 11, 0.1); color: #f59e0b; }
-.icon-glow-purple  { background: rgba(139, 92, 246, 0.1); color: #8b5cf6; }
+.stat-icon-indigo { background: rgba(99, 102, 241, 0.1); color: #6366f1; }
+.stat-icon-emerald { background: rgba(16, 185, 129, 0.1); color: #10b981; }
+.stat-icon-amber { background: rgba(245, 158, 11, 0.1); color: #f59e0b; }
+.stat-icon-rose { background: rgba(244, 63, 94, 0.1); color: #f43f5e; }
 
-.value-card {
-    background: linear-gradient(135deg, #4f46e5 0%, #312e81 100%);
+.stat-value {
+    font-family: var(--fn-font-heading);
+    font-size: 2rem;
+    font-weight: 800;
+    line-height: 1;
+    margin-bottom: 0.25rem;
+}
+.stat-label {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--fn-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.action-card {
+    text-decoration: none;
+    transition: all 0.3s;
+    border: 1px solid var(--fn-border);
+}
+.action-card:hover {
+    border-color: var(--fn-primary);
+    background: rgba(99, 102, 241, 0.02);
+    transform: translateY(-5px);
+}
+
+.nav-tabs-premium {
+    border-bottom: 2px solid var(--fn-border);
+    gap: 2rem;
+}
+.nav-tabs-premium .nav-link {
     border: none;
+    padding: 1rem 0;
+    font-weight: 700;
+    color: var(--fn-text-muted);
+    position: relative;
+    background: none !important;
 }
-.value-card .header-glow {
-    background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 70%);
+.nav-tabs-premium .nav-link.active {
+    color: var(--fn-primary);
 }
-.value-card:hover {
-    box-shadow: 0 15px 35px rgba(79, 70, 229, 0.4) !important;
-}
-
-.module-card {
-    border-left: 4px solid transparent;
-}
-.module-card:hover {
-    border-left-color: #6366f1;
-}
-
-.bg-watermark {
+.nav-tabs-premium .nav-link.active::after {
+    content: '';
     position: absolute;
-    right: -10px;
-    bottom: -20px;
-    font-size: 8rem;
-    opacity: 0.04;
-    transition: opacity 0.3s;
+    bottom: -2px; left: 0;
+    width: 100%; height: 2px;
+    background: var(--fn-primary);
 }
-.value-card .bg-watermark { opacity: 0.15; color: white; }
-.saas-card:hover .bg-watermark { opacity: 0.08; }
-.value-card:hover .bg-watermark { opacity: 0.25; }
 
-.apexcharts-tooltip {
-    box-shadow: 0 10px 25px rgba(0,0,0,0.1) !important;
-    border-radius: 12px !important;
-    border: 0 !important;
+.table thead th {
+    background: #f8fafc;
+    color: #64748b;
+    font-weight: 700;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 1rem;
+    border-bottom: 1px solid var(--fn-border);
+}
+[data-bs-theme="dark"] .table thead th { background: #0f172a; }
+
+.table tbody td {
+    padding: 1.25rem 1rem;
+    font-weight: 500;
 }
 </style>
 
-<div class="container-fluid p-4">
+<div class="fade-in-up">
 
-    <!-- 🔥 HEADER -->
-    <div class="saas-card mb-4 header-gradient fade-in-up">
-        <div class="header-glow"></div>
-        <div class="card-body p-4 d-flex justify-content-between align-items-center position-relative z-1">
+    <!-- 🌟 DASHBOARD HEADER -->
+    <div class="card premium-header p-5 mb-5 border-0 shadow-lg">
+        <div class="header-overlay"></div>
+        <div class="position-relative z-1 d-flex justify-content-between align-items-center">
             <div>
-                <span class="badge bg-success bg-opacity-10 text-success mb-2 px-3 py-2 rounded-pill fw-bold border border-success-subtle">
-                    <i class="bi bi-circle-fill small me-1 pulse-animation"></i> Système En Ligne
-                </span>
-                <h2 class="fw-bold mb-1 text-body">Centre de Contrôle FINORA</h2>
-                <p class="text-muted mb-0">Aperçu en temps réel de vos performances financières et administratives.</p>
-            </div>
-            <div class="d-none d-md-block text-end">
-                <p class="text-muted small fw-bold mb-0 text-uppercase">{{ 'now'|date('d F Y') }}</p>
-                <div class="d-flex align-items-center justify-content-end">
-                    <i class="bi bi-clock text-primary me-2"></i>
-                    <h4 class="fw-bold m-0 text-primary">{{ 'now'|date('H:i') }}</h4>
+                <div class="badge bg-white bg-opacity-20 text-white rounded-pill px-3 py-2 mb-3 d-inline-flex align-items-center">
+                    <span id="status-dot" class="bg-success rounded-circle me-2 pulse-animation" style="width: 8px; height: 8px; box-shadow: 0 0 8px #10b981;"></span>
+                    <span class="fw-bold small" id="status-text">SYSTÈME : EN LIGNE (TUNISIE)</span>
                 </div>
+                <h1 class="display-5 fw-bold text-white mb-2">Centre de Pilotage FINORA</h1>
+                <p class="lead opacity-80 mb-0">Gestion centralisée des actifs et performances en temps réel.</p>
+            </div>
+            <div class="text-end d-none d-lg-block border-start border-white border-opacity-10 ps-5">
+                <p class="small fw-bold text-uppercase opacity-60 mb-0" id="live-date">{{ "now"|date("d F Y", "Africa/Tunis") }}</p>
+                <h2 class="display-6 fw-bold m-0" id="live-time">{{ "now"|date("H:i", "Africa/Tunis") }}</h2>
             </div>
         </div>
     </div>
 
-    <!-- 📊 STATS GLOBAL -->
-    <div class="row g-4 mb-4">
-
-        <div class="col-sm-6 col-lg-3 fade-in-up delay-1">
-            <div class="saas-card p-4 h-100">
-                <div class="d-flex align-items-center mb-3">
-                    <div class="stat-icon-wrapper icon-glow-primary me-3">
-                        <i class="bi bi-briefcase-fill"></i>
+    <!-- 📊 STATS GRID -->
+    <div class="row g-4 mb-5">
+        <div class="col-md-6 col-xl-3">
+            <div class="card stat-card h-100 border-0 shadow-sm">
+                <div>
+                    <div class="icon-box stat-icon-indigo">
+                        <i class="bi bi-wallet2"></i>
                     </div>
-                    <h6 class="mb-0 text-muted fw-bold">Total Investissements</h6>
+                    <div class="stat-value text-indigo-600">{{ totalInvestments }}</div>
+                    <div class="stat-label">Projets de Financement</div>
                 </div>
-                <h2 class="mb-0 fw-bold display-6">{{ totalInvestments }}</h2>
-                <div class="bg-watermark"><i class="bi bi-briefcase"></i></div>
             </div>
         </div>
-
-        <div class="col-sm-6 col-lg-3 fade-in-up delay-1">
-            <div class="saas-card p-4 h-100">
-                <div class="d-flex align-items-center mb-3">
-                    <div class="stat-icon-wrapper icon-glow-success me-3">
-                        <i class="bi bi-activity"></i>
+        <div class="col-md-6 col-xl-3">
+            <div class="card stat-card h-100 border-0 shadow-sm">
+                <div>
+                    <div class="icon-box stat-icon-emerald">
+                        <i class="bi bi-graph-up-arrow"></i>
                     </div>
-                    <h6 class="mb-0 text-muted fw-bold">Management Actif</h6>
+                    <div class="stat-value text-emerald-600">{{ activeManagement }}</div>
+                    <div class="stat-label">Dossiers Actifs</div>
                 </div>
-                <h2 class="mb-0 fw-bold display-6">{{ activeManagement }}</h2>
-                <div class="bg-watermark"><i class="bi bi-activity"></i></div>
             </div>
         </div>
-
-        <div class="col-sm-6 col-lg-3 fade-in-up delay-2">
-            <div class="saas-card p-4 h-100">
-                <div class="d-flex align-items-center mb-3">
-                    <div class="stat-icon-wrapper icon-glow-warning me-3">
-                        <i class="bi bi-door-closed-fill"></i>
+        <div class="col-md-6 col-xl-3">
+            <div class="card stat-card h-100 border-0 shadow-sm">
+                <div>
+                    <div class="icon-box stat-icon-amber">
+                        <i class="bi bi-clock-history"></i>
                     </div>
-                    <h6 class="mb-0 text-muted fw-bold">Dossiers Clôturés</h6>
+                    <div class="stat-value text-amber-600">{{ closedManagement }}</div>
+                    <div class="stat-label">Dossiers Clôturés</div>
                 </div>
-                <h2 class="mb-0 fw-bold display-6">{{ closedManagement }}</h2>
-                <div class="bg-watermark"><i class="bi bi-door-closed"></i></div>
             </div>
         </div>
-
-        <!-- CARTE PREMIUM VALEUR TOTALE -->
-        <div class="col-sm-6 col-lg-3 fade-in-up delay-2">
-            <div class="saas-card value-card p-4 h-100 text-white">
-                <div class="header-glow"></div>
-                <div class="d-flex align-items-center mb-3 position-relative z-1">
-                    <div class="stat-icon-wrapper bg-white bg-opacity-25 text-white me-3">
+        <div class="col-md-6 col-xl-3">
+            <div class="card stat-card h-100 border-0 shadow-sm" style="background: #eef2ff; border: 1px solid #c7d2fe;">
+                <div>
+                    <div class="icon-box bg-white text-indigo-600 shadow-sm">
                         <i class="bi bi-cash-stack"></i>
                     </div>
-                    <h6 class="mb-0 text-white opacity-75 fw-bold">Valeur Globale Estimée</h6>
+                    <div class="stat-value text-indigo-700">{{ totalValue|format_currency }}</div>
+                    <div class="stat-label">Valeur du Portfolio</div>
                 </div>
-                <h2 class="mb-0 fw-bold text-white position-relative z-1">{{ totalValue|format_currency }}</h2>
-                <div class="bg-watermark"><i class="bi bi-cash-stack"></i></div>
             </div>
         </div>
-
     </div>
 
-    <!-- 📊 GRAPHIQUES -->
-    <div class="row g-4 mb-4">
-        
-        <!-- Catégories Donut -->
-        <div class="col-lg-6 fade-in-up delay-3">
-            <div class="saas-card h-100">
-                <div class="border-bottom border-secondary border-opacity-10 p-4">
-                    <h5 class="fw-bold mb-1">Répartition par Catégories</h5>
-                    <p class="text-muted small mb-0">Distribution de l'exposition financière du portfolio</p>
+    <!-- 🎯 ANALYTICS & CHARTS -->
+    <div class="row g-4 mb-5">
+        <div class="col-lg-7">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-header border-0 bg-transparent p-4 pb-0">
+                    <h5 class="fw-bold mb-1">Exposition par Secteur</h5>
+                    <p class="text-muted small">Répartition analytique des actifs par catégorie.</p>
                 </div>
-                <div class="card-body p-4 d-flex justify-content-center align-items-center">
-                    <div id="chart-categories" class="w-100 d-flex justify-content-center"></div>
+                <div class="card-body p-4 pt-0">
+                    <div id="chart-categories" style="min-height: 380px;"></div>
                 </div>
             </div>
         </div>
-
-        <!-- Risques Bar -->
-        <div class="col-lg-6 fade-in-up delay-3">
-            <div class="saas-card h-100">
-                <div class="border-bottom border-secondary border-opacity-10 p-4">
-                    <h5 class="fw-bold mb-1">Analyse Analytique des Risques</h5>
-                    <p class="text-muted small mb-0">Volatilité et niveau d'exposition des actifs courants</p>
+        <div class="col-lg-5">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-header border-0 bg-transparent p-4 pb-0">
+                    <h5 class="fw-bold mb-1">Analyse des Risques</h5>
+                    <p class="text-muted small">Niveaux de volatilité du catalogue.</p>
                 </div>
-                <div class="card-body p-4">
-                    <div id="chart-risks"></div>
+                <div class="card-body p-4 pt-0">
+                    <div id="chart-risks" style="min-height: 380px;"></div>
                 </div>
             </div>
         </div>
-
     </div>
 
-    <!-- 🚀 MODULES RAPIDES -->
-    <div class="fade-in-up delay-4">
-        <h5 class="mb-3 fw-bold text-body"><i class="bi bi-lightning-charge-fill text-warning me-2"></i>Actions Rapides (CRUD)</h5>
+    <!-- ⚡ QUICK ACTIONS -->
+    <div class="mb-5">
+        <h6 class="sidebar-section-title ms-0">Actions Globales</h6>
         <div class="row g-4">
-            
-            <div class="col-md-3">
-                <div class="saas-card module-card p-3 h-100">
-                    <div class="d-flex align-items-center">
-                        <div class="icon-lg icon-glow-primary rounded flex-shrink-0">
-                            <i class="fas fa-graduation-cap fs-4"></i>
-                        </div>
-                        <div class="ms-3">
-                            <h6 class="mb-1 fw-bold">Formations</h6>
-                            <a href="#" class="text-muted small stretched-link text-decoration-none">Gérer le contenu <i class="bi bi-arrow-right ms-1"></i></a>
-                        </div>
+            <div class="col-md-4">
+                <a href="javascript:void(0)" onclick="showPanel('invest')" class="card action-card p-4 border-0 shadow-sm d-flex flex-row align-items-center">
+                    <div class="icon-box stat-icon-indigo mb-0 me-3 shadow-sm" style="width: 48px; height: 48px;"><i class="bi bi-search" style="font-size: 1.25rem;"></i></div>
+                    <div>
+                        <div class="fw-bold text-dark">Explorer</div>
+                        <div class="small text-muted">Aperçu du catalogue</div>
                     </div>
-                </div>
+                </a>
             </div>
-
-            <div class="col-md-3">
-                <div class="saas-card module-card p-3 h-100">
-                    <div class="d-flex align-items-center">
-                        <div class="icon-lg icon-glow-purple rounded flex-shrink-0">
-                            <i class="fas fa-book-open fs-4"></i>
-                        </div>
-                        <div class="ms-3">
-                            <h6 class="mb-1 fw-bold">Lessons</h6>
-                            <a href="#" class="text-muted small stretched-link text-decoration-none">Gérer les cours <i class="bi bi-arrow-right ms-1"></i></a>
-                        </div>
+            <div class="col-md-4">
+                <a href="javascript:void(0)" onclick="showPanel('mng')" class="card action-card p-4 border-0 shadow-sm d-flex flex-row align-items-center">
+                    <div class="icon-box stat-icon-emerald mb-0 me-3 shadow-sm" style="width: 48px; height: 48px;"><i class="bi bi-kanban" style="font-size: 1.25rem;"></i></div>
+                    <div>
+                        <div class="fw-bold text-dark">Gérer</div>
+                        <div class="small text-muted">Dossiers de management</div>
                     </div>
-                </div>
+                </a>
             </div>
-
-            <div class="col-md-3">
-                <div class="saas-card module-card p-3 h-100">
-                    <div class="d-flex align-items-center">
-                        <div class="icon-lg icon-glow-success rounded flex-shrink-0">
-                            <i class="bi bi-wallet2 fs-4"></i>
-                        </div>
-                        <div class="ms-3">
-                            <h6 class="mb-1 fw-bold">Investissements</h6>
-                            <a href="#data-tables-section" id="btn-tab-invest" class="text-muted small stretched-link text-decoration-none">Afficher la table <i class="bi bi-arrow-down-short ms-1"></i></a>
-                        </div>
+            <div class="col-md-4">
+                <a href="{{ path('app_investment_new') }}" class="card action-card p-4 border-0 shadow-sm d-flex flex-row align-items-center">
+                    <div class="icon-box stat-icon-amber mb-0 me-3 shadow-sm" style="width: 48px; height: 48px;"><i class="bi bi-plus-lg" style="font-size: 1.25rem;"></i></div>
+                    <div>
+                        <div class="fw-bold text-dark">Nouveau</div>
+                        <div class="small text-muted">Ajouter un actif</div>
                     </div>
-                </div>
+                </a>
             </div>
-
-            <div class="col-md-3">
-                <div class="saas-card module-card p-3 h-100">
-                    <div class="d-flex align-items-center">
-                        <div class="icon-lg icon-glow-warning rounded flex-shrink-0">
-                            <i class="bi bi-graph-up-arrow fs-4"></i>
-                        </div>
-                        <div class="ms-3">
-                            <h6 class="mb-1 fw-bold">Management</h6>
-                            <a href="#data-tables-section" id="btn-tab-management" class="text-muted small stretched-link text-decoration-none">Afficher la table <i class="bi bi-arrow-down-short ms-1"></i></a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
         </div>
     </div>
 
-    <!-- 📋 TABLES SECTION (DASHBOARD INLINE) -->
-    <div id="data-tables-section" class="mt-5 fade-in-up delay-4 d-none">
-        <div class="saas-card overflow-hidden">
-            <div class="card-header bg-transparent border-bottom p-4">
-                <ul class="nav nav-tabs nav-tabs-line nav-tabs-line-primary mb-0" id="dashboardDataTabs" role="tablist">
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link active fw-bold" id="tab-investments" data-bs-toggle="tab" data-bs-target="#pane-investments" type="button" role="tab"><i class="bi bi-wallet2 me-2"></i>Liste des Investissements</button>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link fw-bold" id="tab-management" data-bs-toggle="tab" data-bs-target="#pane-management" type="button" role="tab"><i class="bi bi-graph-up-arrow me-2"></i>Liste du Management</button>
-                    </li>
-                </ul>
-            </div>
-            <div class="card-body p-0">
-                <div class="tab-content" id="dashboardDataTabsContent">
-                    
-                    <!-- PANE : INVESTMENTS -->
-                    <div class="tab-pane fade show active" id="pane-investments" role="tabpanel">
-                        <div class="table-responsive">
-                            <table class="table table-hover table-align-middle mb-0">
-                                <thead class="bg-light">
-                                    <tr>
-                                        <th class="ps-4">ID</th>
-                                        <th>Visuel</th>
-                                        <th>Nom du Projet</th>
-                                        <th>Catégorie</th>
-                                        <th>Valeur Estimée</th>
-                                        <th>Risque</th>
-                                        <th class="text-end pe-4">Action</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
+    <!-- 📋 INTERACTIVE DATA PANELS -->
+    <div id="dashboard-data-panels" class="card border-0 shadow-lg d-none">
+        <div class="card-header bg-transparent p-4 pb-0 border-0">
+            <ul class="nav nav-tabs nav-tabs-premium border-0" id="premiumTabs" role="tablist">
+                <li class="nav-item">
+                    <button class="nav-link active" id="tab-investments" data-bs-toggle="tab" data-bs-target="#panel-invest">
+                        <i class="bi bi-wallet2 me-2"></i>Liste des Investissements
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link" id="tab-management" data-bs-toggle="tab" data-bs-target="#panel-mng">
+                        <i class="bi bi-graph-up-arrow me-2"></i>Actifs sous Gestion
+                    </button>
+                </li>
+            </ul>
+        </div>
+        <div class="card-body p-0">
+            <div class="tab-content">
+                <!-- PANEL INVEST -->
+                <div class="tab-pane fade show active" id="panel-invest">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead>
+                                <tr>
+                                    <th class="ps-4">Référence</th>
+                                    <th>Nom du Projet</th>
+                                    <th>Secteur</th>
+                                    <th>Valorisation</th>
+                                    <th>Risque</th>
+                                    <th class="text-end pe-4">Détails</th>
+                                </tr>
+                            </thead>
+                            <tbody>
                                 {% for inv in invList %}
-                                    <tr>
-                                        <td class="ps-4 text-muted">#{{ inv.id }}</td>
-                                        <td>
-                                            {% if investment_image_src(inv) %}
-                                                <img src="{{ investment_image_src(inv) }}" class="rounded avatar-sm" alt="img" style="width:40px; height:40px; object-fit:cover;">
-                                            {% else %}
-                                                <div class="avatar-sm bg-secondary bg-opacity-10 text-secondary rounded d-flex align-items-center justify-content-center" style="width:40px; height:40px;"><i class="bi bi-image"></i></div>
-                                            {% endif %}
-                                        </td>
-                                        <td class="fw-bold">{{ inv.name }}</td>
-                                        <td><span class="badge bg-primary bg-opacity-10 text-primary">{{ inv.category }}</span></td>
-                                        <td class="fw-bold text-success">{{ inv.estimatedValue|format_currency }}</td>
-                                        <td>
-                                            {% if inv.riskLevel == 'LOW' %}<span class="text-success"><i class="bi bi-shield-check me-1"></i>Faible</span>{% endif %}
-                                            {% if inv.riskLevel == 'MEDIUM' %}<span class="text-warning"><i class="bi bi-shield-exclamation me-1"></i>Moyen</span>{% endif %}
-                                            {% if inv.riskLevel == 'HIGH' %}<span class="text-danger"><i class="bi bi-shield-x me-1"></i>Élevé</span>{% endif %}
-                                        </td>
-                                        <td class="text-end pe-4">
-                                            <a href="{{ path('app_investment_show', {'id': inv.id}) }}" class="btn btn-sm btn-light mb-0"><i class="bi bi-eye"></i></a>
-                                        </td>
-                                    </tr>
-                                {% else %}
-                                    <tr><td colspan="7" class="text-center py-4 text-muted">Aucun investissement trouvé.</td></tr>
+                                <tr>
+                                    <td class="ps-4 text-muted small">#{{ inv.id }}</td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="rounded me-3" style="width: 40px; height: 40px; background: #f1f5f9; overflow: hidden;">
+                                                {% if investment_image_src(inv) %}
+                                                    <img src="{{ investment_image_src(inv) }}" style="width:100%; height:100%; object-fit:cover;">
+                                                {% else %}
+                                                    <div class="d-flex align-items-center justify-content-center h-100 text-muted"><i class="bi bi-image"></i></div>
+                                                {% endif %}
+                                            </div>
+                                            <span class="fw-bold">{{ inv.name }}</span>
+                                        </div>
+                                    </td>
+                                    <td><span class="badge bg-indigo-50 text-indigo-700 px-3 py-2" style="background: #eef2ff;">{{ inv.category }}</span></td>
+                                    <td class="fw-bold">{{ inv.estimatedValue|format_currency }}</td>
+                                    <td>
+                                        {% if inv.riskLevel == 'LOW' %}<span class="text-success"><i class="bi bi-shield-check me-1"></i>Modéré</span>{% endif %}
+                                        {% if inv.riskLevel == 'MEDIUM' %}<span class="text-warning"><i class="bi bi-shield-exclamation me-1"></i>Équilibré</span>{% endif %}
+                                        {% if inv.riskLevel == 'HIGH' %}<span class="text-danger"><i class="bi bi-shield-x me-1"></i>Élevé</span>{% endif %}
+                                    </td>
+                                    <td class="text-end pe-4">
+                                        <a href="{{ path('app_investment_show', {'id': inv.id}) }}" class="btn btn-sm btn-light border fw-bold px-3">Voir</a>
+                                    </td>
+                                </tr>
                                 {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
+                            </tbody>
+                        </table>
                     </div>
-
-                    <!-- PANE : MANAGEMENT -->
-                    <div class="tab-pane fade" id="pane-management" role="tabpanel">
-                        <div class="table-responsive">
-                            <table class="table table-hover table-align-middle mb-0">
-                                <thead class="bg-light">
-                                    <tr>
-                                        <th class="ps-4">ID Mngt</th>
-                                        <th>Projet (Investissement)</th>
-                                        <th>Type</th>
-                                        <th>Montant Investi</th>
-                                        <th>Parts (%)</th>
-                                        <th>Statut</th>
-                                        <th class="text-end pe-4">Action</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
+                </div>
+                <!-- PANEL MNG -->
+                <div class="tab-pane fade" id="panel-mng">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead>
+                                <tr>
+                                    <th class="ps-4">ID Mngt</th>
+                                    <th>Actif Associé</th>
+                                    <th>Type</th>
+                                    <th>Montant Investi</th>
+                                    <th>Détention</th>
+                                    <th>Status</th>
+                                    <th class="text-end pe-4">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
                                 {% for mng in mngList %}
-                                    <tr>
-                                        <td class="ps-4 text-muted">#{{ mng.managementId }}</td>
-                                        <td class="fw-bold">{{ mng.investment ? mng.investment.name : 'N/A' }}</td>
-                                        <td>{{ mng.investmentType }}</td>
-                                        <td class="fw-bold text-primary">{{ mng.amountInvested|format_currency }}</td>
-                                        <td>{{ mng.ownershipPercentage }} %</td>
-                                        <td>
-                                            {% if mng.status == 'ACTIVE' %}
-                                                <span class="badge bg-success">Actif</span>
-                                            {% else %}
-                                                <span class="badge bg-secondary">Clôturé</span>
-                                            {% endif %}
-                                        </td>
-                                        <td class="text-end pe-4">
-                                            <a href="{{ path('app_management_show', {'id': mng.managementId}) }}" class="btn btn-sm btn-light mb-0"><i class="bi bi-eye"></i></a>
-                                        </td>
-                                    </tr>
-                                {% else %}
-                                    <tr><td colspan="7" class="text-center py-4 text-muted">Aucun dossier de management trouvé.</td></tr>
+                                <tr>
+                                    <td class="ps-4 text-muted small">#{{ mng.managementId }}</td>
+                                    <td class="fw-bold">{{ mng.investment ? mng.investment.name : 'N/A' }}</td>
+                                    <td>{{ mng.investmentType }}</td>
+                                    <td class="fw-bold text-primary">{{ mng.amountInvested|format_currency }}</td>
+                                    <td><code class="px-2 py-1 rounded bg-light text-dark fw-bold">{{ mng.ownershipPercentage }}%</code></td>
+                                    <td>
+                                        {% if mng.status == 'ACTIVE' %}
+                                            <span class="badge bg-success rounded-pill px-3">Opérationnel</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary rounded-pill px-3">Clôturé</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-end pe-4">
+                                        <a href="{{ path('app_management_show', {'id': mng.managementId}) }}" class="btn btn-sm btn-light border fw-bold px-3">Gérer</a>
+                                    </td>
+                                </tr>
                                 {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
+                            </tbody>
+                        </table>
                     </div>
-
                 </div>
             </div>
         </div>
@@ -393,116 +345,127 @@
 
 <script>
 document.addEventListener("DOMContentLoaded", function() {
+    
+    // --- APEX CHARTS CONFIG ---
+    const isDark = (document.documentElement.getAttribute('data-bs-theme') === 'dark');
+    const primaryColor = '#6366f1';
+    const secondaryColor = '#8b5cf6';
+    const textColor = isDark ? '#94a3b8' : '#64748b';
+    const borderColor = isDark ? '#1e293b' : '#e2e8f0';
 
-    const theme = document.documentElement.getAttribute('data-bs-theme');
-    const isDark = (theme === 'dark');
-
-    // === CHART CATÉGORIES (DONUT) ===
-    const catCategories = {{ chartCategories|raw }};
-    const catData       = {{ chartCategoryData|raw }};
-
-    if (document.querySelector("#chart-categories") && catData.length > 0) {
-        new ApexCharts(document.querySelector("#chart-categories"), {
-            series: catData,
-            labels: catCategories,
-            chart: {
-                type: 'donut',
-                height: 320,
-                fontFamily: 'inherit',
-                animations: { enabled: true, easing: 'easeinout', speed: 800 }
-            },
-            plotOptions: {
-                pie: {
-                    donut: {
-                        size: '75%',
-                        labels: {
-                            show: true,
-                            name: { show: true, color: isDark ? '#9ca3af' : '#6b7280' },
-                            value: { show: true, fontSize: '26px', fontWeight: 'bold', color: isDark ? '#fff' : '#111827' },
-                            total: { show: true, label: 'Total', color: isDark ? '#9ca3af' : '#6b7280' }
-                        }
+    // Categories Donut
+    new ApexCharts(document.querySelector("#chart-categories"), {
+        series: {{ chartCategoryData|raw }},
+        labels: {{ chartCategories|raw }},
+        chart: { type: 'donut', height: 380, fontFamily: 'inherit' },
+        colors: [primaryColor, secondaryColor, '#3b82f6', '#10b981', '#f59e0b', '#f43f5e'],
+        stroke: { show: true, width: 4, colors: [isDark ? '#0f172a' : '#fff'] },
+        plotOptions: {
+            pie: {
+                donut: {
+                    size: '78%',
+                    labels: {
+                        show: true,
+                        total: { show: true, label: 'TOTAL CAPITAUX', fontSize: '11px', fontWeight: 700, color: textColor },
+                        value: { fontSize: '24px', fontWeight: 800, color: isDark ? '#fff' : '#0f172a' }
                     }
                 }
-            },
-            dataLabels: { enabled: false },
-            legend: { position: 'bottom', labels: { colors: isDark ? '#e5e7eb' : '#374151' } },
-            stroke: { show: true, colors: isDark ? '#1a1d2d' : '#fff', width: 3 },
-            colors: ['#4f46e5', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#0ea5e9']
-        }).render();
-    }
-
-    // === CHART RISQUES (BAR) ===
-    const riskData = {{ chartRisks|raw }}; 
-
-    if (document.querySelector("#chart-risks") && riskData.length > 0) {
-        new ApexCharts(document.querySelector("#chart-risks"), {
-            series: [{
-                name: 'Quantité',
-                data: riskData
-            }],
-            chart: {
-                type: 'bar',
-                height: 320,
-                toolbar: { show: false },
-                fontFamily: 'inherit',
-                animations: { enabled: true, easing: 'easeinout', speed: 800 }
-            },
-            plotOptions: {
-                bar: {
-                    borderRadius: 8,
-                    columnWidth: '45%',
-                    distributed: true
-                }
-            },
-            dataLabels: { enabled: false },
-            xaxis: {
-                categories: ['Faible', 'Moyen', 'Élevé'],
-                axisBorder: { show: false },
-                axisTicks: { show: false },
-                labels: { style: { fontSize: '13px', fontWeight: 600, colors: isDark ? '#9ca3af' : '#6b7280' } }
-            },
-            yaxis: {
-                labels: { style: { colors: isDark ? '#9ca3af' : '#6b7280' } }
-            },
-            grid: {
-                borderColor: isDark ? 'rgba(255,255,255,0.05)' : '#f3f4f6',
-                strokeDashArray: 5,
-                xaxis: { lines: { show: false } },
-                yaxis: { lines: { show: true } }
-            },
-            legend: { show: false },
-            colors: ['#10b981', '#f59e0b', '#ef4444'], // Vert, Orange, Rouge
-            tooltip: {
-                theme: isDark ? 'dark' : 'light',
-                y: { formatter: function (val) { return val + " Projets" } }
             }
-        }).render();
-    }
+        },
+        legend: { position: 'bottom', labels: { colors: textColor } },
+        dataLabels: { enabled: false }
+    }).render();
 
-    // === GESTION DYNAMIQUE DES TABLES ===
-    const tblSection = document.getElementById('data-tables-section');
-    const btnInvest = document.getElementById('btn-tab-invest');
-    const btnManagement = document.getElementById('btn-tab-management');
+    // Risk Analysis Bar
+    new ApexCharts(document.querySelector("#chart-risks"), {
+        series: [{ name: 'Actifs', data: {{ chartRisks|raw }} }],
+        chart: { type: 'bar', height: 380, toolbar: { show: false } },
+        plotOptions: { bar: { borderRadius: 10, columnWidth: '50%', distributed: true } },
+        colors: ['#10b981', '#f59e0b', '#f43f5e'],
+        xaxis: {
+            categories: ['Modéré', 'Équilibré', 'Élevé'],
+            labels: { style: { colors: textColor, fontWeight: 600 } },
+            axisBorder: { show: false },
+            axisTicks: { show: false }
+        },
+        yaxis: { labels: { style: { colors: textColor } } },
+        grid: { borderColor: borderColor, strokeDashArray: 4 },
+        legend: { show: false },
+        dataLabels: { enabled: false }
+    }).render();
 
-    if (btnInvest && btnManagement && tblSection) {
+    // --- INTERACTION LOGIC ---
+    const dataPanel = document.getElementById('dashboard-data-panels');
+    const mainStats = document.getElementById('panel-dashboard');
+    const tabInvest = new bootstrap.Tab(document.getElementById('tab-investments'));
+    const tabMng = new bootstrap.Tab(document.getElementById('tab-management'));
+
+    window.showPanel = function(type) {
+        if (type === 'main') {
+            dataPanel.classList.add('d-none');
+            mainStats.classList.remove('d-none');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        } else {
+            dataPanel.classList.remove('d-none');
+            if (type === 'invest') tabInvest.show();
+            else tabMng.show();
+            dataPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
         
-        btnInvest.addEventListener('click', function(e) {
-            // Afficher la section si cachée
-            tblSection.classList.remove('d-none');
-            // Activer la tab
-            const tabEl = document.querySelector('#tab-investments');
-            const tab = new bootstrap.Tab(tabEl);
-            tab.show();
-        });
-
-        btnManagement.addEventListener('click', function(e) {
-            tblSection.classList.remove('d-none');
-            const tabEl = document.querySelector('#tab-management');
-            const tab = new bootstrap.Tab(tabEl);
-            tab.show();
-        });
+        // Update active state in sidebar
+        document.querySelectorAll('.navbar-nav .nav-link').forEach(link => link.classList.remove('active'));
+        if (type === 'main') document.getElementById('sidebar-nav-dashboard')?.classList.add('active');
+        else if (type === 'invest') document.getElementById('sidebar-nav-invest')?.classList.add('active');
+        else if (type === 'mng') document.getElementById('sidebar-nav-management')?.classList.add('active');
     }
 
+    // Sidebar Links Integration
+    document.getElementById('sidebar-nav-dashboard')?.addEventListener('click', (e) => { e.preventDefault(); showPanel('main'); });
+    document.getElementById('sidebar-nav-invest')?.addEventListener('click', (e) => { e.preventDefault(); showPanel('invest'); });
+    document.getElementById('sidebar-nav-management')?.addEventListener('click', (e) => { e.preventDefault(); showPanel('mng'); });
+
+    // --- LIVE STATUS & CLOCK TUNISIA ---
+    const statusDot = document.getElementById('status-dot');
+    const statusText = document.getElementById('status-text');
+
+    function updateNetworkStatus() {
+        if (navigator.onLine) {
+            if (statusDot) { statusDot.classList.replace('bg-danger', 'bg-success'); statusDot.style.boxShadow = '0 0 8px #10b981'; }
+            if (statusText) statusText.textContent = 'SYSTÈME : EN LIGNE (TUNISIE)';
+        } else {
+            if (statusDot) { statusDot.classList.replace('bg-success', 'bg-danger'); statusDot.style.boxShadow = '0 0 8px #ef4444'; }
+            if (statusText) statusText.textContent = 'SYSTÈME : HORS LIGNE';
+        }
+    }
+
+    window.addEventListener('online', updateNetworkStatus);
+    window.addEventListener('offline', updateNetworkStatus);
+    updateNetworkStatus();
+
+    function updateTunisiaTime() {
+        const timeZone = 'Africa/Tunis';
+        const now = new Date();
+        
+        // Time
+        const timeStr = now.toLocaleTimeString('fr-FR', { timeZone, hour: '2-digit', minute: '2-digit' });
+        const timeEl = document.getElementById('live-time');
+        if(timeEl) timeEl.textContent = timeStr; 
+
+        // Date
+        const dateStr = now.toLocaleDateString('fr-FR', { timeZone, day: '2-digit', month: 'long', year: 'numeric' });
+        const dateEl = document.getElementById('live-date');
+        if(dateEl) dateEl.textContent = dateStr;
+    }
+    setInterval(updateTunisiaTime, 10000); 
+    updateTunisiaTime();
+
+    // Pulse effect for Online Status
+    const syncBadge = document.querySelector('.pulse-animation');
+    if (syncBadge) {
+        setInterval(() => {
+            syncBadge.style.opacity = syncBadge.style.opacity === '0.4' ? '1' : '0.4';
+        }, 800);
+    }
 });
 </script>
 

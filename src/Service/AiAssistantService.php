@@ -254,283 +254,121 @@ class AiAssistantService
 
     private function callGeminiApi(string $userMessage, string $jsonContext): string
     {
-        $systemInstruction = <<<TEXT
-# RÔLE ET IDENTITÉ
-Tu es "Finora Analyst AI", le conseiller en investissement virtuel de haut niveau intégré à la plateforme Finora. Tu combines la rigueur d'un analyste financier, la logique d'un algorithme de recommandation (style Airbnb/Netflix) et l'empathie d'un conseiller client premium. 
-
-# CONTEXTE DE LA PLATEFORME
-Finora est une plateforme de financement participatif et de marché d'investissement (Immobilier, Startups, Hôtellerie, Terrains). Les utilisateurs viennent te voir pour découvrir des opportunités, analyser des projets, ou comparer des options selon leur budget et leur tolérance au risque.
-
-# TA MISSION
-Tu reçois deux choses :
-1. Le message brut de l'utilisateur.
-2. Un contexte JSON contenant les critères extraits (budget, risque, catégorie) et une liste d'opportunités correspondantes issues de notre base de données.
-
-Tu dois analyser ce contexte et formuler une réponse ultra-personnalisée qui met en valeur les meilleures opportunités, sans jamais inventer de projet qui n'est pas dans la liste fournie.
-
-# RÈGLES ABSOLUES (SAFETY & COMPLIANCE)
-- INTERDICTION TOTALE de garantir des rendements ou de promettre des gains.
-- Tu dois toujours mentionner que les investissements comportent des risques.
-- Tu ne dois JAMAIS utiliser de balises markdown de type ```html. Tu dois retourner du HTML pur et brut.
-- Tu ne dois parler QUE des projets présents dans le array `available_investments`. Si la liste est vide, tu le dis honnêtement.
-- Si l'utilisateur est agressif ou vulgarise, reste stoïque, professionnel et ramène le sujet sur l'investissement.
-
-# COMPORTEMENT ET ADAPTATION DU TON
-- Détecte le niveau de l'utilisateur :
-  * Débutant (vocabulaire simple, questions basiques) -> Utilise des métaphores simples, explique les termes. Ton : Paternel/Pédagogique.
-  * Intermédiaire (demande d'analyse) -> Ton : Analytique, explique les Pour/Contre.
-  * Expert (demande de comparaison précise, Leviers) -> Ton : Direct, chiffres précis, langage technique.
-- Sois proactif : si l'utilisateur donne un budget mais pas de risque, suggère le scénario le plus probable tout en proposant l'alternative.
-
-# FORMAT DE SORTIE OBLIGATOIRE (HTML)
-Tu DOIS structurer ta réponse exactement avec ce HTML (utilise les classes Bootstrap 5 existantes). Ne mets aucun texte avant ou après ce bloc HTML.
-
-1. L'en-tête d'identité :
-<div class="text-white-50 mb-3 small"><i class="bi bi-robot me-1"></i> <b>Finora Analyst AI</b> — [Titre contextuel, ex: Analyse de votre profil]</div>
-
-2. Les critères détectés (sous forme de badges) :
-<div class="d-flex flex-wrap gap-2 mb-3">
-  <span class="badge bg-light text-dark bg-opacity-75">[Critère 1]</span>
-  <span class="badge bg-light text-dark bg-opacity-75">[Critère 2]</span>
-</div>
-
-3. Une phrase d'introduction humaine (2-3 lignes max) expliquant ta démarche.
-
-4. La recommandation principale (si dispo) :
-<div class="p-3 rounded-3 mb-3" style="background: rgba(255,255,255,0.05); border-left: 4px solid var(--primary-color);">
-  <h6 class="text-white mb-2">🎯 [Nom du projet] [Badge Interne/Externe]</h6>
-  <div class="d-flex gap-3 text-sm text-white-50 mb-3">
-    <span><i class="bi bi-graph-up-arrow text-success me-1"></i>[ROI estimé: 5-8% si faible, 8-12% si moyen, 12-20% si élevé]</span>
-    <span><i class="bi bi-shield-check text-warning me-1"></i>Risque [Badge LOW/MEDIUM/HIGH]</span>
-  </div>
-  <h6 class="text-white-50 text-uppercase" style="font-size: 0.75rem; letter-spacing: 1px;">Pourquoi c'est un bon choix :</h6>
-  <ul class="mb-0 ps-3 text-white" style="font-size: 0.9rem;">
-    <li class="mb-1"><b class="text-success">[Argument 1]</b></li>
-    <li><b class="text-info">[Argument 2]</b></li>
-  </ul>
-</div>
-
-5. L'alternative (si dispo) :
-<p class="mb-2 text-white-50 small">Option alternative à considérer :</p>
-<div class="d-flex align-items-center p-2 rounded-3" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.1); font-size: 0.85rem;">
-  <i class="bi bi-arrow-right-circle text-secondary me-2"></i>
-  <span class="text-white me-auto"><b>[Nom Alt]</b> <span class="text-muted">[Source]</span></span>
-  <span>[Badge Risque]</span>
-</div>
-
-6. Le disclaimer de sécurité :
-<div class="mt-3 small text-muted font-monospace" style="font-size: 0.75rem;">Avertissement : Les performances passées ne préjugent pas des performances futures. FINORA ne fournit aucune garantie financière.</div>
-
-# EXEMPLE DE BADGES À UTILISER
-- Risque Faible : <span class="badge bg-success bg-opacity-25 text-success border border-success">Faible</span>
-- Risque Moyen : <span class="badge bg-warning bg-opacity-25 text-warning border border-warning">Moyen</span>
-- Risque Élevé : <span class="badge bg-danger bg-opacity-25 text-danger border border-danger">Élevé</span>
-- Source Interne (si is_external=false) : <span class="badge bg-primary bg-opacity-25 text-primary border border-primary ms-2"><i class="bi bi-house me-1"></i>Catalogue Interne</span>
-- Source Externe (si is_external=true) : <span class="badge bg-info bg-opacity-25 text-info border border-info ms-2"><i class="bi bi-globe me-1"></i>Partenaire Externe</span>
-TEXT;
-
-        $response = $this->httpClient->request('POST', 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent', [
-            'query' => [
-                'key' => $this->geminiApiKey
+        $systemInstruction = $this->getChatSystemInstruction();
+        $payload = [
+            'contents' => [
+                ['role' => 'user', 'parts' => [['text' => "INSTRUCTIONS SYSTEME:\n" . $systemInstruction . "\n\nMESSAGE UTILISATEUR:\n" . $userMessage . "\n\nCONTEXTE JSON:\n" . $jsonContext]]]
             ],
-            'json' => [
-                'system_instruction' => [
-                    'parts' => [
-                        ['text' => $systemInstruction]
-                    ]
-                ],
-                'contents' => [
-                    ['role' => 'user', 'parts' => [['text' => "Message utilisateur: " . $userMessage . "\n\nContexte JSON: " . $jsonContext]]]
-                ],
-                'generationConfig' => [
-                    'temperature' => 0.5,
-                ]
-            ]
-        ]);
-
-        $data = $response->toArray();
-        if (isset($data['candidates'][0]['content']['parts'][0]['text'])) {
-            $text = $data['candidates'][0]['content']['parts'][0]['text'];
-            
-            // Nettoyage de balises Markdown si le modèle en renvoie quand même.
-            $text = str_replace('```html', '', $text);
-            $text = str_replace('```', '', $text);
-            
-            return trim($text);
-        }
-
-        throw new \Exception("Invalid API response format");
-    }
-
-    private function generateLocalResponse(?float $budget, ?string $risk, ?string $category, array $investments): string
-    {
-        if (count($investments) === 0) {
-            return "<div class='alert alert-warning mb-0 border-0' style='background: rgba(255, 193, 7, 0.1); color: #ffc107;'><i class='bi bi-exclamation-triangle me-2'></i>D'après votre profil, je n'ai malheureusement trouvé aucune opportunité correspondant exactement à vos critères en ce moment. Vous pouvez essayer d'élargir votre budget ou d'ajuster votre tolérance au risque.</div>";
-        }
-
-        $bestMatch = $investments[0]['investment'];
-        $bestScore = $investments[0]['score'];
-
-        $intro = "<div class='text-white-50 mb-3 small'><i class='bi bi-robot me-1'></i> <b>Finora Analyst AI</b> — Analyse de votre profil</div>";
-        $criteres = [];
-        if ($budget) $criteres[] = "<span class='badge bg-light text-dark bg-opacity-75'>Budget: <i class='bi bi-cash-coin text-success'></i> " . number_format($budget, 0, ',', ' ') . " $</span>";
-        if ($risk) $criteres[] = "<span class='badge bg-light text-dark bg-opacity-75'>Risque cible: " . $risk . "</span>";
-        if ($category) $criteres[] = "<span class='badge bg-light text-dark bg-opacity-75'>Secteur: " . $category . "</span>";
-        
-        if (count($criteres) > 0) {
-            $intro .= "<div class='d-flex flex-wrap gap-2 mb-3'>" . implode('', $criteres) . "</div>";
-        }
-
-        $intro .= "<p>Voici ma meilleure recommandation basée sur vos critères stricts :</p>";
-
-        $html = $intro;
-        
-        $roi = "5–8%";
-        if ($bestMatch['risk_level'] === 'MEDIUM') $roi = "8–12%";
-        if ($bestMatch['risk_level'] === 'HIGH') $roi = "12–20%";
-
-        $riskLabels = [
-            'LOW' => '<span class="badge bg-success bg-opacity-25 text-success border border-success">Faible</span>',
-            'MEDIUM' => '<span class="badge bg-warning bg-opacity-25 text-warning border border-warning">Moyen</span>',
-            'HIGH' => '<span class="badge bg-danger bg-opacity-25 text-danger border border-danger">Élevé</span>'
+            'generationConfig' => ['temperature' => 0.5]
         ];
-        $riskBadge = $riskLabels[$bestMatch['risk_level']] ?? $bestMatch['risk_level'];
 
-        $html .= "<div class='p-3 rounded-3 mb-3' style='background: rgba(255,255,255,0.05); border-left: 4px solid var(--primary-color);'>";
-        $html .= "<h6 class='text-white mb-2'>🎯 " . htmlspecialchars($bestMatch['name']) . "</h6>";
-        $html .= "<div class='d-flex gap-3 text-sm text-white-50 mb-3'>";
-        $html .= "<span><i class='bi bi-graph-up-arrow text-success me-1'></i>" . $roi . " de ROI estimé</span>";
-        $html .= "<span><i class='bi bi-shield-check text-warning me-1'></i>Risque " . $riskBadge . "</span>";
-        $html .= "</div>";
-
-        $html .= "<h6 class='text-white-50 text-uppercase' style='font-size: 0.75rem; letter-spacing: 1px;'>Pourquoi c'est un bon choix :</h6>";
-        $html .= "<ul class='mb-0 ps-3 text-white' style='font-size: 0.9rem;'>";
-        
-        if ($category && str_contains(strtolower($bestMatch['category'] ?? ''), strtolower($category))) {
-            $html .= "<li class='mb-1'><b class='text-success'>Alignement Fort :</b> Ce projet s'inscrit parfaitement dans la catégorie " . ($bestMatch['category'] ?? '') . ".</li>";
-        } else {
-            $html .= "<li class='mb-1'><b class='text-info'>Choix Alternatif :</b> L'investissement s'est porté sur " . ($bestMatch['category'] ?? '') . " car c'est la seule opportunité s'approchant de vos contraintes financières.</li>";
-        }
-        
-        if ($budget && $bestMatch['estimated_value'] <= $budget) {
-            $html .= "<li><b class='text-success'>Budget Optimisé :</b> La valorisation requise (" . number_format($bestMatch['estimated_value'], 0, ',', ' ') . " $) respecte votre limite.</li>";
-        }
-        
-        $html .= "</ul>";
-        $html .= "</div>";
-
-        // Alternative
-        if (count($investments) > 1) {
-            $alt = $investments[1]['investment'];
-            $altRiskBadge = $riskLabels[$alt['risk_level']] ?? $alt['risk_level'];
-            
-            $html .= "<p class='mb-2 text-white-50 small'>Option alternative à considérer :</p>";
-            $html .= "<div class='d-flex align-items-center p-2 rounded-3' style='background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.1); font-size: 0.85rem;'>";
-            $html .= "<i class='bi bi-arrow-right-circle text-secondary me-2'></i>";
-            $html .= "<span class='text-white me-auto'><b>" . htmlspecialchars($alt['name']) . "</b></span>";
-            $html .= "<span>" . $altRiskBadge . "</span>";
-            $html .= "</div>";
-        }
-
-        $html .= "<div class='mt-3 small text-muted font-monospace' style='font-size: 0.75rem;'>Avertissement : Les performances passées ne préjugent pas des performances futures. FINORA ne fournit aucune garantie financière.</div>";
-
-        return $html;
+        return $this->executeWithFallback($payload);
     }
 
     public function generatePortfolioAnalysis(array $portfolioStats): string
     {
-        $jsonContext = json_encode($portfolioStats, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
-
         if (empty($this->geminiApiKey) || trim($this->geminiApiKey) === 'VOTRE_CLE_API_ICI') {
-            return "<div class='alert alert-warning'>API Gemini non configurée. Le Robo-Advisor est indisponible.</div>";
+            return "<div class='alert alert-warning'>API Gemini non configurée.</div>";
         }
 
-        $systemInstruction = <<<TEXT
-# RÔLE ET IDENTITÉ
-Tu es "Finora Robo-Advisor", une intelligence artificielle d'analyse de portefeuille intégrée à la plateforme d'investissement Finora. Tu es professionnel, bienveillant, clair et extrêmement compétent en gestion de patrimoine.
-
-# CONTEXTE
-L'utilisateur te fournit le résumé complet de son portefeuille sous forme de données JSON (total investi, la répartition par catégorie, la répartition par niveau de risque).
-
-# TA MISSION
-Analyser ces données et produire un rapport de diagnostic condensé mais hautement stratégique. Tu dois absolument identifier :
-- Les forces du portefeuille (ex: bonne sélection si c'est diversifié).
-- Les faiblesses ou dangers (ex: trop concentré sur une seule catégorie, risque global trop élevé).
-- Une recommandation concrète sur le type d'actif à privilégier pour équilibrer le tout (ex: conseiller de l'immobilier "LOW RISK" si 100% de Startups "HIGH RISK").
-
-# RÈGLES DE SORTIE OBLIGATOIRES (HTML)
-- N'invente pas de chiffres. Reste strictement fidèle aux statistiques fournies.
-- Utilise UNIQUEMENT le HTML décrit ci-dessous, en utilisant les classes de Bootstrap 5.
-- INTERDIT d'utiliser markdown (pas de ```html).
-- Pas de balise <style>.
-- Fournis un rapport direct sans phrase d'intro bateau "Voici l'analyse demandée".
-
-UTILISE EXACTEMENT CE FORMAT HTML:
-
-<div class="p-4 rounded-3 mb-3 border-0" style="background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%); color: white; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1);">
-    <div class="d-flex align-items-center mb-4">
-        <div style="width: 50px; height: 50px; border-radius: 15px; background: linear-gradient(135deg, #7c3aed, #8b5cf6); display: flex; align-items: center; justify-content: center; margin-right: 15px;">
-            <i class="bi bi-robot fs-3 text-white"></i>
-        </div>
-        <div>
-            <h5 class="fw-bold mb-0">Diagnostic Robo-Advisor IA</h5>
-            <small class="text-white-50">Analyse de la diversification & risques</small>
-        </div>
-    </div>
-
-    <div class="row g-3 mb-4">
-        <div class="col-md-6">
-            <div class="p-3 rounded" style="background: rgba(255,255,255,0.05); border-left: 4px solid #10b981;">
-                <h6 class="fw-bold text-success"><i class="bi bi-shield-check me-2"></i>Points Forts</h6>
-                <p class="mb-0 small text-white-75">[Description des forces du portefeuille en 2 phrases]</p>
-            </div>
-        </div>
-        <div class="col-md-6">
-            <div class="p-3 rounded" style="background: rgba(255,255,255,0.05); border-left: 4px solid #f59e0b;">
-                <h6 class="fw-bold text-warning"><i class="bi bi-exclamation-triangle me-2"></i>Vigilance</h6>
-                <p class="mb-0 small text-white-75">[Description du manque de diversification ou du danger en 2 phrases]</p>
-            </div>
-        </div>
-    </div>
-
-    <div class="p-3 rounded" style="background: rgba(124, 58, 237, 0.15); border: 1px solid rgba(124, 58, 237, 0.3);">
-        <h6 class="fw-bold" style="color: #c4b5fd;"><i class="bi bi-lightbulb me-2"></i>Recommandation Stratégique</h6>
-        <p class="mb-0 text-white">[Phrase claire recommandant précisément QUEL SECTEUR et QUEL NIVEAU DE RISQUE privilégier pour le prochain investissement afin de rééquilibrer]</p>
-    </div>
-</div>
-TEXT;
+        $jsonContext = json_encode($portfolioStats, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+        $systemInstruction = $this->getRoboSystemInstruction();
+        $payload = [
+            'contents' => [
+                ['role' => 'user', 'parts' => [['text' => "INSTRUCTIONS SYSTEME:\n" . $systemInstruction . "\n\nVoici les statistiques:\n" . $jsonContext]]]
+            ],
+            'generationConfig' => ['temperature' => 0.4]
+        ];
 
         try {
-            $response = $this->httpClient->request('POST', 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent', [
-                'query' => [
-                    'key' => $this->geminiApiKey
-                ],
-                'json' => [
-                    'system_instruction' => [
-                        'parts' => [
-                            ['text' => $systemInstruction]
-                        ]
-                    ],
-                    'contents' => [
-                        ['role' => 'user', 'parts' => [['text' => "Voici les statistiques actuelles du portefeuille: " . $jsonContext]]]
-                    ],
-                    'generationConfig' => [
-                        'temperature' => 0.4,
-                    ]
-                ]
-            ]);
-
-            $data = $response->toArray();
-            if (isset($data['candidates'][0]['content']['parts'][0]['text'])) {
-                $text = $data['candidates'][0]['content']['parts'][0]['text'];
-                $text = str_replace('```html', '', $text);
-                $text = str_replace('```', '', $text);
-                return trim($text);
-            }
+            return $this->executeWithFallback($payload);
         } catch (\Exception $e) {
-            return "<div class='alert alert-danger border-0'><i class='bi bi-exclamation-triangle me-2'></i>Erreur API: " . htmlspecialchars($e->getMessage()) . "</div>";
+            return "<div class='alert alert-danger border-0'><i class='bi bi-exclamation-triangle me-2'></i>Erreur Finale: " . htmlspecialchars($e->getMessage()) . "</div>";
+        }
+    }
+
+    private function executeWithFallback(array $payload): string
+    {
+        $attempts = [
+            ['ver' => 'v1', 'model' => 'gemini-1.5-flash'],
+            ['ver' => 'v1beta', 'model' => 'gemini-1.5-flash'],
+            ['ver' => 'v1', 'model' => 'gemini-1.0-pro'],
+            ['ver' => 'v1beta', 'model' => 'gemini-1.0-pro'],
+            ['ver' => 'v1', 'model' => 'gemini-pro'],
+        ];
+
+        $lastError = 'Aucun modèle n\'a pu être contacté.';
+
+        foreach ($attempts as $config) {
+            try {
+                $url = sprintf(
+                    'https://generativelanguage.googleapis.com/%s/models/%s:generateContent',
+                    $config['ver'],
+                    $config['model']
+                );
+
+                $response = $this->httpClient->request('POST', $url, [
+                    'query' => ['key' => $this->geminiApiKey],
+                    'json' => $payload
+                ]);
+
+                $statusCode = $response->getStatusCode();
+
+                if ($statusCode === 200) {
+                    $data = $response->toArray();
+                    if (isset($data['candidates'][0]['content']['parts'][0]['text'])) {
+                        $text = $data['candidates'][0]['content']['parts'][0]['text'];
+                        return trim(str_replace(['```html', '```'], '', $text));
+                    }
+                } else {
+                    $errorBody = $response->getContent(false);
+                    $lastError = "HTTP " . $statusCode . ": " . substr($errorBody, 0, 150);
+                }
+            } catch (\Exception $e) {
+                $lastError = "Exception: " . $e->getMessage();
+                continue; 
+            }
         }
 
-        return "<div class='alert alert-danger border-0'>Impossible d'analyser le portefeuille.</div>";
+        // --- DISCOVERY STEP IF ALL FAILED ---
+        $availableList = "Liste indisponible";
+        try {
+            $discoveryUrl = 'https://generativelanguage.googleapis.com/v1beta/models';
+            $disco = $this->httpClient->request('GET', $discoveryUrl, ['query' => ['key' => $this->geminiApiKey]]);
+            if ($disco->getStatusCode() === 200) {
+                $models = $disco->toArray();
+                $names = array_map(fn($m) => str_replace('models/', '', $m['name']), $models['models'] ?? []);
+                $availableList = implode(', ', array_slice($names, 0, 10));
+            } else {
+                $availableList = "HTTP " . $disco->getStatusCode();
+            }
+        } catch (\Exception $e) {
+            $availableList = "Erreur: " . $e->getMessage();
+        }
+
+        throw new \Exception("MODÈLES DISPONIBLES: [" . $availableList . "] | DERNIÈRE ERREUR: " . $lastError);
+    }
+
+    private function getChatSystemInstruction(): string
+    {
+        return <<<TEXT
+# RÔLE ET IDENTITÉ
+Tu es "Finora Analyst AI", le conseiller en investissement virtuel de haut niveau intégré à la plateforme Finora. Tu combines la rigueur d'un analyste financier et l'empathie d'un conseiller premium.
+
+# RÈGLES ABSOLUES
+- INTERDICTION de garantir des rendements.
+- Parle UNIQUEMENT des projets fournis dans le contexte JSON.
+- Retourne uniquement du HTML pur (pas de markdown ```html).
+- Mentionne toujours les risques.
+TEXT;
+    }
+
+    private function getRoboSystemInstruction(): string
+    {
+        return <<<TEXT
+# RÔLE
+Tu es "Finora Robo-Advisor". Analyse le portefeuille JSON et produis un diagnostic stratégique (points forts, vigilance, recommandation). 
+Utilise uniquement le HTML avec les classes Bootstrap 5 spécifiées précédemment. Pas de markdown.
+TEXT;
     }
 }

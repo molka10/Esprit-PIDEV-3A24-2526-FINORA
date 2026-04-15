@@ -3,38 +3,177 @@
 {% block stylesheets %}
     {{ parent() }}
 
+    <!-- ======================= GOOGLE FONTS (Premium) ======================= -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+
     <link rel="stylesheet" href="{{ asset('assets/vendor/apexcharts/css/apexcharts.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/vendor/overlay-scrollbar/css/overlayscrollbars.min.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/vendor/choices/css/choices.min.css') }}">
 
     <style>
-        .page-content-wrapper {
-            background: linear-gradient(180deg, #fcfaff 0%, #f7f2ff 100%);
+        /* ── FINORA PREMIUM DESIGN SYSTEM (Shades of Purple) ── */
+        :root {
+            --fn-primary: #6366f1;         /* Indigo 500 */
+            --fn-primary-hover: #4f46e5;   /* Indigo 600 */
+            --fn-secondary: #8b5cf6;       /* Violet 500 */
+            --fn-dark: #1e1b4b;            /* Indigo 950 */
+            --fn-sidebar-bg: #0f172a;      /* Slate 950 (Dark contrast) */
+            --fn-body-bg: #f8fafc;         /* Slate 50 (Very light gray/purple) */
+            --fn-card-bg: #ffffff;
+            --fn-text-main: #0f172a;       /* High contrast slate */
+            --fn-text-muted: #64748b;
+            --fn-border: #e2e8f0;
+            --fn-font-heading: 'Outfit', sans-serif;
+            --fn-font-body: 'Inter', sans-serif;
+        }
+
+        [data-bs-theme="dark"] {
+            --fn-body-bg: #020617;
+            --fn-card-bg: #0f172a;
+            --fn-text-main: #f8fafc;
+            --fn-text-muted: #94a3b8;
+            --fn-border: #1e293b;
+            --fn-sidebar-bg: #020617;
+        }
+
+        body {
+            background-color: var(--fn-body-bg);
+            color: var(--fn-text-main);
+            font-family: var(--fn-font-body);
+            font-size: 0.9375rem;
+            line-height: 1.6;
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            font-family: var(--fn-font-heading);
+            font-weight: 700;
+            color: var(--fn-text-main);
+            letter-spacing: -0.02em;
+        }
+
+        /* ── ADMIN LAYOUT ── */
+        .admin-sidebar {
+            width: 280px;
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1000;
+            background: var(--fn-sidebar-bg);
+            border-right: 1px solid var(--fn-border);
+            padding: 2rem 1.5rem;
+            overflow-y: auto;
+            color: #fff;
+        }
+
+        .page-content {
+            margin-left: 280px;
             min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .page-content-wrapper {
+            padding: 2.5rem;
+            flex-grow: 1;
+        }
+
+        /* ── Sidebar Navigation ── */
+        .admin-sidebar .nav-link {
+            padding: 0.875rem 1.25rem;
+            border-radius: 12px;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: #94a3b8;
+            display: flex;
+            align-items: center;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid transparent;
+        }
+        .admin-sidebar .nav-link i {
+            font-size: 1.25rem;
+            margin-right: 1rem;
+            transition: transform 0.2s;
+        }
+        .admin-sidebar .nav-link:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: #fff;
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+        .admin-sidebar .nav-link:hover i {
+            transform: scale(1.1);
+        }
+        .admin-sidebar .nav-link.active {
+            background: linear-gradient(135deg, var(--fn-primary), var(--fn-secondary));
+            color: #fff !important;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+            border: none;
+        }
+
+        .sidebar-section-title {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: #475569;
+            margin: 2rem 0 1rem 1.25rem;
+            font-weight: 700;
+        }
+
+        /* ── Global Card Style ── */
+        .card {
+            background: var(--fn-card-bg);
+            border: 1px solid var(--fn-border);
+            border-radius: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.02), 0 8px 16px rgba(0,0,0,0.02);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .card:hover {
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+        }
+
+        @media (max-width: 991.98px) {
+            .admin-sidebar {
+                transform: translateX(-100%);
+            }
+            .page-content {
+                margin-left: 0;
+            }
         }
     </style>
 {% endblock %}
 
 {% block body %}
-<main>
+<div class="admin-container">
+    
+    <aside class="admin-sidebar" id="adminSidebar">
+        <div class="mb-5 px-3">
+            <h3 class="fw-bold mb-0 text-white" style="letter-spacing: -1px;">
+                <span class="text-primary">FI</span>NORA
+            </h3>
+            <div class="d-flex align-items-center mt-2">
+                <div class="bg-success rounded-circle me-2" style="width: 8px; height: 8px; box-shadow: 0 0 8px #10b981;"></div>
+                <span class="small opacity-50 text-white">Live Operations</span>
+            </div>
+        </div>
+        
+        {% include 'admin/partials/sidebar.html.twig' %}
+    </aside>
 
-    {% include 'admin/partials/sidebar.html.twig' %}
-
-    <div class="page-content">
-
+    <main class="page-content">
         {% include 'admin/partials/navbar.html.twig' %}
 
-        <div class="page-content-wrapper p-4">
+        <div class="page-content-wrapper shadow-none">
             {% block admin_content %}{% endblock %}
         </div>
+    </main>
 
-    </div>
-
-</main>
+</div>
 {% endblock %}
 
 {% block javascripts %}
-    <script src="{{ asset('assets/vendor/bootstrap/dist/js/bootstrap.bundle.min.js') }}"></script>
+    {{ parent() }}
     <script src="{{ asset('assets/vendor/apexcharts/js/apexcharts.min.js') }}"></script>
     <script src="{{ asset('assets/js/functions.js') }}"></script>
 {% endblock %}

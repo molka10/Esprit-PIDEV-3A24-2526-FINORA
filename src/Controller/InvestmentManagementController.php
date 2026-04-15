@@ -161,8 +161,12 @@ class InvestmentManagementController extends AbstractController
 
     // ================= AI PORTFOLIO REPORT =================
     #[Route('/ai/report', name: 'app_management_ai_report', methods: ['POST'])]
-    public function generateAiReport(Request $request, InvestmentManagementRepository $repo, \App\Service\AiAssistantService $aiService): \Symfony\Component\HttpFoundation\JsonResponse
-    {
+    public function generateAiReport(
+        Request $request, 
+        InvestmentManagementRepository $repo, 
+        \App\Service\AiAssistantService $aiService,
+        \App\Service\PortfolioAnalyticsService $analyticsService
+    ): \Symfony\Component\HttpFoundation\JsonResponse {
         if ($redirect = $this->checkAccess($request)) {
             return new \Symfony\Component\HttpFoundation\JsonResponse(['error' => 'Non autorisé'], 401);
         }
@@ -187,41 +191,27 @@ class InvestmentManagementController extends AbstractController
             ]);
         }
 
-        $totalInvested = 0;
-        $riskCount = ['LOW' => 0, 'MEDIUM' => 0, 'HIGH' => 0];
-        $categoryCount = [];
-
-        foreach ($managements as $m) {
-            $amount = (float) $m->getAmountInvested();
-            $totalInvested += $amount;
-
-            $inv = $m->getInvestment();
-            if ($inv) {
-                $risk = $inv->getRiskLevel() ?? 'MEDIUM';
-                $cat = $inv->getCategory() ?? 'Autre';
-                
-                if (isset($riskCount[$risk])) {
-                    $riskCount[$risk] += $amount;
-                } else {
-                    $riskCount['MEDIUM'] += $amount;
-                }
-                
-                if (!isset($categoryCount[$cat])) {
-                    $categoryCount[$cat] = 0;
-                }
-                $categoryCount[$cat] += $amount;
-            } else {
-                $riskCount['MEDIUM'] += $amount;
-            }
-        }
-
+        // Use the centralized service for stats
         $stats = [
-            'totalInvested' => $totalInvested,
-            'riskDistribution' => $riskCount,
-            'categoryDistribution' => $categoryCount
+            'totalInvested' => $analyticsService->calculateTotalValue($managements),
+            'riskDistribution' => $analyticsService->getRiskExposure($managements), // Note: generatePortfolioAnalysis expects array with LOW/MEDIUM/HIGH keys, my service returns indexed array. 
+            'categoryDistribution' => $analyticsService->getCategoryDistribution($managements)['data'] // Adjusting to match expected format
+        ];
+        
+        // Re-mapping risk for AI service specifically
+        $riskMap = ['LOW' => 0, 'MEDIUM' => 0, 'HIGH' => 0];
+        $riskData = $analyticsService->getRiskExposure($managements);
+        $riskMap['LOW'] = $riskData[0];
+        $riskMap['MEDIUM'] = $riskData[1];
+        $riskMap['HIGH'] = $riskData[2];
+        
+        $finalStats = [
+            'totalInvested' => $stats['totalInvested'],
+            'riskDistribution' => $riskMap,
+            'categoryDistribution' => array_combine($analyticsService->getCategoryDistribution($managements)['labels'], $stats['categoryDistribution'])
         ];
 
-        $htmlReport = $aiService->generatePortfolioAnalysis($stats);
+        $htmlReport = $aiService->generatePortfolioAnalysis($finalStats);
 
         return new \Symfony\Component\HttpFoundation\JsonResponse(['html' => $htmlReport]);
     }

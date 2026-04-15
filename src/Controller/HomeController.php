@@ -5,17 +5,23 @@ namespace App\Controller;
 use App\Repository\InvestmentRepository;
 use App\Repository\InvestmentManagementRepository;
 use App\Service\RecommendationsBuilder;
+use App\Service\PortfolioAnalyticsService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
 class HomeController extends AbstractController
 {
     private RecommendationsBuilder $recommendationsBuilder;
+    private PortfolioAnalyticsService $analyticsService;
 
-    public function __construct(RecommendationsBuilder $recommendationsBuilder)
-    {
+    public function __construct(
+        RecommendationsBuilder $recommendationsBuilder,
+        PortfolioAnalyticsService $analyticsService
+    ) {
         $this->recommendationsBuilder = $recommendationsBuilder;
+        $this->analyticsService = $analyticsService;
     }
 
     /**
@@ -40,7 +46,7 @@ class HomeController extends AbstractController
      */
     #[Route('/admin', name: 'admin_dashboard', methods: ['GET'])]
     public function dashboard(
-        \Symfony\Component\HttpFoundation\Request $request,
+        Request $request,
         InvestmentRepository $investmentRepo,
         InvestmentManagementRepository $managementRepo
     ): Response {
@@ -49,46 +55,13 @@ class HomeController extends AbstractController
         }
 
         $investments = $investmentRepo->findAll();
-        $totalInvestments = count($investments);
+        $managements = $managementRepo->findAll();
 
-        $activeManagements = $managementRepo->findBy(['status' => 'ACTIVE']);
-        $closedManagement = count($managementRepo->findBy(['status' => 'CLOSED']));
-        $activeManagement = count($activeManagements);
+        $stats = $this->analyticsService->getDashboardStats($investments, $managements);
 
-        $totalValue = 0;
-        $categoryDistribution = [];
-        $riskDistribution = ['LOW' => 0, 'MEDIUM' => 0, 'HIGH' => 0];
-
-        // Les statistiques doivent se baser sur le PORTFOLIO ACTIF et non sur tout le catalogue
-        foreach ($activeManagements as $mng) {
-            $inv = $mng->getInvestment();
-            
-            // Calcul de la valeur totale investie
-            $totalValue += (float)$mng->getAmountInvested();
-
-            if ($inv) {
-                // Catégories
-                $cat = ltrim(trim($inv->getCategory() ?? 'Autre'));
-                $categoryDistribution[$cat] = ($categoryDistribution[$cat] ?? 0) + 1;
-
-                // Risques
-                $risk = $inv->getRiskLevel() ?? 'MEDIUM';
-                if (isset($riskDistribution[$risk])) {
-                    $riskDistribution[$risk]++;
-                }
-            }
-        }
-
-        return $this->render('admin/dashboard.html.twig', [
-            'totalInvestments' => $totalInvestments,
-            'activeManagement' => $activeManagement,
-            'closedManagement' => $closedManagement,
-            'totalValue' => $totalValue,
-            'chartCategories' => json_encode(array_keys($categoryDistribution)),
-            'chartCategoryData' => json_encode(array_values($categoryDistribution)),
-            'chartRisks' => json_encode(array_values($riskDistribution)),
+        return $this->render('admin/dashboard.html.twig', array_merge($stats, [
             'invList' => $investments,
-            'mngList' => $managementRepo->findAll(),
-        ]);
+            'mngList' => $managements,
+        ]));
     }
 }
