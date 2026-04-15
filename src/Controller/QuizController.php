@@ -59,14 +59,24 @@ final class QuizController extends AbstractController
 
         $correctAnswers = 0;
         $totalQuestions = count($questions);
+        $reviewData = [];
 
         foreach ($questions as $index => $question) {
             $given = $request->request->get('answer_' . $index);
             $expected = $question['correct'] ?? null;
+            $isCorrect = ($given !== null && is_numeric($given) && $expected !== null && (int) $given === (int) $expected);
 
-            if ($given !== null && is_numeric($given) && $expected !== null && (int) $given === (int) $expected) {
+            if ($isCorrect) {
                 $correctAnswers++;
             }
+
+            $reviewData[] = [
+                'question' => $question['question'] ?? 'Question invalide',
+                'options' => $question['options'] ?? [],
+                'correct' => (int) ($expected ?? 0),
+                'given' => $given !== null ? (int) $given : -1,
+                'isCorrect' => $isCorrect,
+            ];
         }
 
         $score = (int) round(($correctAnswers / max($totalQuestions, 1)) * 100);
@@ -113,6 +123,7 @@ final class QuizController extends AbstractController
             'quizResult' => $result,
             'fraudSuspected' => $fraudAnalysis['isFraud'],
             'fraudExplanation' => $fraudExplanation,
+            'reviewData' => $reviewData,
         ]);
     }
 
@@ -128,5 +139,31 @@ final class QuizController extends AbstractController
         return $this->render('quiz/certificate.html.twig', [
             'quizResult' => $quizResult,
         ]);
+    }
+
+    #[Route('/lesson/{id}/explain', name: 'app_quiz_explain', methods: ['POST'])]
+    public function explainQuestion(
+        Lesson $lesson,
+        Request $request,
+        GroqQuizService $groqQuizService
+    ): \Symfony\Component\HttpFoundation\JsonResponse {
+        $data = json_decode($request->getContent(), true);
+        
+        $question = $data['question'] ?? '';
+        $correctAnswer = $data['correct'] ?? '';
+        $userAnswer = $data['given'] ?? '';
+
+        if (!$question || !$correctAnswer) {
+            return $this->json(['error' => 'Données invalides'], Response::HTTP_BAD_REQUEST);
+        }
+
+        $explanation = $groqQuizService->explainQuestion(
+            (string) $lesson->getContenu(),
+            $question,
+            $correctAnswer,
+            $userAnswer
+        );
+
+        return $this->json(['explanation' => $explanation]);
     }
 }

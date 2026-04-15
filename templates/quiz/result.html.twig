@@ -70,10 +70,117 @@
                             {% endif %}
                         </div>
                     </div>
+                    </div>
                 </div>
+
+                {% if not fraudSuspected and reviewData|length > 0 %}
+                <div class="mt-5">
+                    <h3 class="h4 fw-bold mb-4" style="color: #4c1d95;">Mode Révision</h3>
+                    <div class="row g-4">
+                        {% for i, data in reviewData %}
+                            <div class="col-12">
+                                <div class="card border-0 shadow-sm" style="border-radius: 12px; overflow: hidden;">
+                                    <div class="card-header border-0 bg-white d-flex align-items-center gap-3 py-3" style="border-bottom: 2px solid {% if data.isCorrect %}#86efac{% else %}#fca5a5{% endif %} !important;">
+                                        <div style="width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; background: {% if data.isCorrect %}#dcfce7; color: #166534{% else %}#fee2e2; color: #991b1b{% endif %};">
+                                            {% if data.isCorrect %}&#10003;{% else %}&#10007;{% endif %}
+                                        </div>
+                                        <h4 class="h6 mb-0 fw-bold m-0 flex-grow-1">Question {{ i + 1 }}</h4>
+                                        <button class="btn btn-sm btn-outline-primary explain-btn" data-question-index="{{ i }}" style="border-radius: 20px;">
+                                            🤖 Expliquer avec l'IA
+                                        </button>
+                                    </div>
+                                    <div class="card-body p-4 bg-light">
+                                        <p class="fw-bold mb-3">{{ data.question }}</p>
+                                        
+                                        <div class="d-flex flex-column gap-2 mb-3">
+                                            {% for optIndex, optionText in data.options %}
+                                                {% set isUserChoice = (optIndex == data.given) %}
+                                                {% set isCorrectChoice = (optIndex == data.correct) %}
+                                                
+                                                <div class="p-2 px-3 border rounded 
+                                                    {% if isCorrectChoice %}bg-success text-white border-success
+                                                    {% elseif isUserChoice and not data.isCorrect %}bg-danger text-white border-danger
+                                                    {% else %}bg-white text-muted{% endif %}
+                                                ">
+                                                    {{ ['A', 'B', 'C', 'D'][optIndex] }}. {{ optionText }}
+                                                    {% if isUserChoice %} <small class="float-end fw-bold">(Votre choix)</small>{% endif %}
+                                                    {% if isCorrectChoice and not isUserChoice %} <small class="float-end fw-bold">(Bonne réponse)</small>{% endif %}
+                                                </div>
+                                            {% endfor %}
+                                        </div>
+
+                                        <div id="explanation-container-{{ i }}" class="alert alert-info d-none mb-0 mt-3" style="background: #f5f3ff; border: 1px solid #ddd6fe; color: #5b21b6;">
+                                            <div class="d-flex align-items-center gap-2 mb-2">
+                                                <span class="spinner-border spinner-border-sm explanation-spinner d-none" role="status" aria-hidden="true"></span>
+                                                <strong class="explanation-title">Explication IA :</strong>
+                                            </div>
+                                            <p class="mb-0 explanation-text"></p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
 
             </div>
         </div>
     </section>
 </main>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const explainBtns = document.querySelectorAll('.explain-btn');
+    // PHP to JS data bridge
+    const reviewData = {{ reviewData|default([])|json_encode|raw }};
+    const lessonId = {{ lesson.id|default(0) }};
+
+    explainBtns.forEach(btn => {
+        btn.addEventListener('click', async function() {
+            const idx = this.dataset.questionIndex;
+            const container = document.getElementById('explanation-container-' + idx);
+            const spinner = container.querySelector('.explanation-spinner');
+            const textEl = container.querySelector('.explanation-text');
+            const dataItem = reviewData[idx];
+
+            if (!dataItem) return;
+
+            // Show container & spinner
+            container.classList.remove('d-none');
+            spinner.classList.remove('d-none');
+            textEl.textContent = 'Génération de l\'explication en cours...';
+            this.disabled = true;
+
+            try {
+                const response = await fetch(`/quiz/lesson/${lessonId}/explain`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        question: dataItem.question,
+                        correct: dataItem.options[dataItem.correct],
+                        given: dataItem.given >= 0 ? dataItem.options[dataItem.given] : "Aucune réponse"
+                    })
+                });
+
+                const result = await response.json();
+                spinner.classList.add('d-none');
+                
+                if (response.ok && result.explanation) {
+                    textEl.textContent = result.explanation;
+                } else {
+                    textEl.textContent = "Désolé, impossible de générer l'explication pour le moment.";
+                }
+            } catch (error) {
+                spinner.classList.add('d-none');
+                textEl.textContent = "Erreur de connexion.";
+            }
+            this.disabled = false;
+        });
+    });
+});
+</script>
 {% endblock %}

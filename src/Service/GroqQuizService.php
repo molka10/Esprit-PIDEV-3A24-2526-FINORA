@@ -91,6 +91,53 @@ PROMPT;
         return $this->parseCleanJson($decoded['choices'][0]['message']['content']);
     }
 
+    public function explainQuestion(string $lessonContent, string $question, string $correctAnswer, string $userAnswer): string
+    {
+        $content = $this->safe($lessonContent);
+        if (mb_strlen($content) > self::MAX_CONTENT_CHARS) {
+            $content = mb_substr($content, 0, self::MAX_CONTENT_CHARS);
+        }
+
+        $prompt = <<<PROMPT
+Tu es un professeur bienveillant.
+Voici le contenu d'une leçon :
+{$content}
+
+L'étudiant a répondu à la question suivante lors d'un quiz :
+Question : "{$question}"
+La bonne réponse est : "{$correctAnswer}"
+L'étudiant a répondu : "{$userAnswer}"
+
+Explique de manière concise (2 à 3 phrases maximum) pourquoi la bonne réponse est "{$correctAnswer}".
+Si l'étudiant a choisi une mauvaise réponse, explique brièvement pourquoi elle est fausse.
+Ton explication doit être directe, claire et basée uniquement sur le contenu de la leçon.
+PROMPT;
+
+        $body = [
+            'model' => self::MODEL,
+            'temperature' => 0.5,
+            'max_tokens' => 300,
+            'messages' => [
+                [
+                    'role' => 'user',
+                    'content' => $prompt,
+                ],
+            ],
+        ];
+
+        try {
+            $responseText = $this->sendWithRetries($body, 2);
+            $decoded = json_decode($responseText, true);
+            if (isset($decoded['choices'][0]['message']['content'])) {
+                return trim($decoded['choices'][0]['message']['content']);
+            }
+        } catch (\Throwable) {
+            // Silently fallback if the API fails
+        }
+
+        return "La réponse correcte est expliquée dans le contenu de la leçon.";
+    }
+
     private function sendWithRetries(array $body, int $maxAttempts): string
     {
         $lastException = null;
