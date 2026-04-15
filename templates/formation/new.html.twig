@@ -65,7 +65,25 @@
 
                 <div class="mb-3">
                     {{ form_label(form.imageFile, null, {'label_attr': {'class': 'form-label'}}) }}
-                    {{ form_widget(form.imageFile, {'attr': {'class': 'form-control'}}) }}
+                    
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                        <div class="flex-grow-1">
+                            {{ form_widget(form.imageFile, {'attr': {'class': 'form-control', 'id': 'local-upload-field'}}) }}
+                        </div>
+                        <span class="text-muted small">ou</span>
+                        <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#pexelsModal">
+                            <i class="bi bi-search"></i> Choisir en ligne
+                        </button>
+                    </div>
+                    
+                    <input type="hidden" name="remoteImageFilename" id="remoteImageFilename">
+                    
+                    <div id="remoteImagePreviewContainer" class="d-none mt-2">
+                        <small class="text-success fw-bold d-block mb-1"><i class="bi bi-check-circle"></i> Image en ligne sélectionnée :</small>
+                        <img id="remoteImagePreview" src="" alt="Aperçu" style="max-height: 120px; border-radius: 8px; border: 2px solid #10b981;">
+                        <button type="button" class="btn btn-sm btn-link text-danger" onclick="clearRemoteImage()">Annuler</button>
+                    </div>
+
                     <div class="text-danger small mt-1">{{ form_errors(form.imageFile) }}</div>
                 </div>
 
@@ -75,4 +93,160 @@
         </div>
     </div>
 </div>
+
+<!-- Modal Pexels -->
+<div class="modal fade" id="pexelsModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Choisir une image depuis Pexels</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="input-group mb-4">
+                    <input type="text" id="pexelsQuery" class="form-control" placeholder="Mots-clés (ex: finance, trading, office...)" value="finance">
+                    <button class="btn btn-primary" id="btnSearchPexels">Rechercher</button>
+                </div>
+                
+                <div id="pexelsLoading" class="text-center d-none py-4">
+                    <div class="spinner-border text-primary" role="status"></div>
+                    <div class="mt-2 text-muted">Recherche en cours...</div>
+                </div>
+
+                <div id="pexelsResults" class="row g-3">
+                    <!-- Images will appear here -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Fix Bootstrap modal backdrop issues by rendering it directly in the body
+    document.addEventListener('DOMContentLoaded', function() {
+        document.body.appendChild(document.getElementById('pexelsModal'));
+    });
+
+    document.getElementById('btnSearchPexels').addEventListener('click', async function(e) {
+        e.preventDefault();
+        const query = document.getElementById('pexelsQuery').value;
+        const resultsContainer = document.getElementById('pexelsResults');
+        const loading = document.getElementById('pexelsLoading');
+        
+        resultsContainer.innerHTML = '';
+        loading.classList.remove('d-none');
+        
+        try {
+            const formData = new FormData();
+            formData.append('query', query);
+            
+            const response = await fetch('{{ path("api_formation_search_images") }}', {
+                method: 'POST',
+                body: formData
+            });
+            const data = await response.json();
+            
+            loading.classList.add('d-none');
+            
+            if (data.error) {
+                resultsContainer.innerHTML = '<div class="alert alert-danger">' + data.error + '</div>';
+                return;
+            }
+            
+            if (!data.photos || data.photos.length === 0) {
+                resultsContainer.innerHTML = '<div class="alert alert-info">Aucune image trouvée.</div>';
+                return;
+            }
+            
+            data.photos.forEach(photo => {
+                const col = document.createElement('div');
+                col.className = 'col-md-3 col-sm-4 col-6';
+                
+                col.innerHTML = `
+                    <div class="card h-100 pexels-img-card" style="cursor: pointer; overflow: hidden;" onclick="selectPexelsImage('${photo.src.large}')">
+                        <img src="${photo.src.medium}" class="card-img-top" style="height: 150px; object-fit: cover;" alt="${photo.alt}">
+                        <div class="card-body p-2 text-center" style="background: rgba(0,0,0,0.03);">
+                            <small class="text-muted">Par ${photo.photographer}</small>
+                        </div>
+                        <div class="overlay d-flex align-items-center justify-content-center" style="position: absolute; top:0; left:0; right:0; bottom:0; background: rgba(0,0,0,0.5); opacity: 0; transition: opacity 0.2s;">
+                            <span class="btn btn-light btn-sm fw-bold">Choisir</span>
+                        </div>
+                    </div>
+                `;
+                
+                resultsContainer.appendChild(col);
+                
+                // Add hover effect
+                const card = col.querySelector('.pexels-img-card');
+                card.addEventListener('mouseenter', () => card.querySelector('.overlay').style.opacity = '1');
+                card.addEventListener('mouseleave', () => card.querySelector('.overlay').style.opacity = '0');
+            });
+        } catch (error) {
+            loading.classList.add('d-none');
+            resultsContainer.innerHTML = '<div class="alert alert-danger">Erreur de connexion serveur.</div>';
+        }
+    });
+
+    // Also trigger on Enter
+    document.getElementById('pexelsQuery').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            document.getElementById('btnSearchPexels').click();
+        }
+    });
+
+    async function selectPexelsImage(largeUrl) {
+        // Let user know download is beginning
+        document.getElementById('pexelsResults').innerHTML = `
+            <div class="text-center py-5 w-100">
+                <div class="spinner-border text-success" role="status"></div>
+                <h5 class="mt-3 text-success">Téléchargement de l'image...</h5>
+            </div>
+        `;
+        
+        try {
+            const formData = new FormData();
+            formData.append('url', largeUrl);
+            
+            const response = await fetch('{{ path("api_formation_download_image") }}', {
+                method: 'POST',
+                body: formData
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                // Set the hidden field
+                document.getElementById('remoteImageFilename').value = data.filename;
+                
+                // Show preview
+                document.getElementById('remoteImagePreview').src = data.url;
+                document.getElementById('remoteImagePreviewContainer').classList.remove('d-none');
+                
+                // Clear file input so Vich knows not to use local file
+                const localUpload = document.getElementById('local-upload-field');
+                if (localUpload) localUpload.value = '';
+                
+                const modalEl = document.getElementById('pexelsModal');
+                const modal = bootstrap.Modal.getInstance(modalEl);
+                if (modal) {
+                    modal.hide();
+                } else {
+                    const closeBtn = document.querySelector('#pexelsModal .btn-close');
+                    if (closeBtn) closeBtn.click();
+                }
+            } else {
+                alert(data.error || 'Erreur lors du téléchargement.');
+            }
+        } catch (error) {
+            console.error("Download Error:", error);
+            alert('Erreur lors du traitement du téléchargement.');
+        }
+    }
+    
+    function clearRemoteImage() {
+        document.getElementById('remoteImageFilename').value = '';
+        document.getElementById('remoteImagePreview').src = '';
+        document.getElementById('remoteImagePreviewContainer').classList.add('d-none');
+    }
+</script>
 {% endblock %}
