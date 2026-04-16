@@ -21,7 +21,59 @@ final class InvestmentController extends AbstractController
 {
     public function __construct(
         private readonly InvestmentImageUploader $imageUploader,
+        private readonly \App\Service\RecommendationsBuilder $recommendationsBuilder,
     ) {}
+
+    /**
+     * ================= EXTERNAL SHOW =================
+     */
+    #[Route('/external/{id}', name: 'app_investment_external_show', methods: ['GET'])]
+    public function externalShow(int $id): Response
+    {
+        $project = $this->recommendationsBuilder->findExternalById($id);
+        if (!$project) {
+            throw $this->createNotFoundException('Projet partenaire introuvable.');
+        }
+
+        return $this->render('investment/external_show.html.twig', [
+            'project' => $project,
+        ]);
+    }
+
+    /**
+     * ================= EXTERNAL INVEST (BRIDGE) =================
+     */
+    #[Route('/external/{id}/invest', name: 'app_investment_external_invest', methods: ['GET', 'POST'])]
+    public function investExternal(int $id, EntityManagerInterface $em, InvestmentRepository $repo): Response
+    {
+        if ($redirect = $this->checkAccess($this->container->get('request_stack')->getCurrentRequest())) return $redirect;
+
+        $projectData = $this->recommendationsBuilder->findExternalById($id);
+        if (!$projectData) {
+            throw $this->createNotFoundException('Projet partenaire introuvable.');
+        }
+
+        // Logic: Check if we already imported this external project to the DB
+        $investment = $repo->findOneBy(['name' => $projectData['name']]);
+
+        if (!$investment) {
+            // "Auto-Import" the project into the database
+            $investment = new Investment();
+            $investment->setName($projectData['name']);
+            $investment->setCategory($projectData['category']);
+            $investment->setLocation($projectData['location']);
+            $investment->setEstimatedValue($projectData['estimated_value']);
+            $investment->setRiskLevel($projectData['risk_level']);
+            $investment->setStatus('ACTIVE');
+            $investment->setDescription("Projet partenaire importé automatiquement depuis " . $projectData['location']);
+            
+            $em->persist($investment);
+            $em->flush();
+        }
+
+        // Redirect to the regular management creation form with this new ID
+        return $this->redirectToRoute('app_management_new', ['inv_id' => $investment->getId()]);
+    }
 
     private function getRole(Request $request)
     {

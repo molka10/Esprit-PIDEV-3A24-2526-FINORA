@@ -96,10 +96,24 @@ final class RecommendationsBuilder
     /**
      * @return list<array<string, mixed>>
      */
-    public function getTop3Externe(): array
+    public function getAllExterne(): array
     {
         $externalStatic = $this->getExternalStaticRows();
         return $this->dedupeByIdSortByValueDesc($externalStatic);
+    }
+
+    /**
+     * @return array<string, mixed>|null
+     */
+    public function findExternalById(int $id): ?array
+    {
+        $rows = $this->getExternalStaticRows();
+        foreach ($rows as $row) {
+            if ($row['id'] === $id) {
+                return $row;
+            }
+        }
+        return null;
     }
 
     /**

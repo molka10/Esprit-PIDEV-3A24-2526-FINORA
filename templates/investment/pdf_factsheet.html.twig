@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>{{ project.name }} - Fiche d'Investissement</title>
+    <style>
+        /**
+         * PDF RENDERING OPTIMIZATIONS (DomPDF)
+         */
+        @page {
+            margin: 0px 0px 0px 0px !important;
+            padding: 0px 0px 0px 0px !important;
+        }
+        body {
+            font-family: 'Helvetica', 'Arial', sans-serif;
+            color: #1e1b4b;
+            margin: 0;
+            padding: 0;
+            line-height: 1.5;
+            background-color: #ffffff;
+        }
+
+        /* COLORS */
+        .text-primary { color: #4f46e5; }
+        .text-muted { color: #6b7280; }
+        .bg-light { background-color: #f8fafc; }
+        .bg-purple { background-color: #4f46e5; }
+        
+        /* HEADER - Premium Gradient */
+        .pdf-header {
+            background: #1e1b4b; /* Fallback */
+            background: linear-gradient(135deg, #1e1b4b 0%, #4f46e5 100%);
+            color: white;
+            padding: 40px 50px;
+            width: 100%;
+        }
+        .header-table { width: 100%; border-collapse: collapse; }
+        .header-title { font-size: 28px; font-weight: bold; margin: 0; }
+        .header-subtitle { font-size: 14px; opacity: 0.8; margin-top: 5px; }
+
+        /* HERO AREA */
+        .hero-section { width: 100%; background: #ffffff; padding: 0; }
+        .hero-img { width: 100%; height: 300px; object-fit: cover; display: block; }
+        
+        /* DASHBOARD BAR */
+        .dashboard-bar {
+            width: 100%;
+            background: #4f46e5;
+            color: white;
+            padding: 20px 0;
+            margin-top: -5px;
+        }
+        .stat-item { text-align: center; width: 33.33%; padding: 0 15px; }
+        .stat-label { font-size: 11px; text-transform: uppercase; opacity: 0.8; letter-spacing: 1px; }
+        .stat-value { font-size: 22px; font-weight: bold; margin-top: 5px; }
+
+        /* CONTENT AREAS */
+        .main-container { padding: 40px 50px; }
+        .section-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #1e1b4b;
+            border-left: 5px solid #7c3aed;
+            padding-left: 15px;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+        }
+        .content-text { font-size: 13px; color: #374151; text-align: justify; line-height: 1.7; }
+
+        /* DATA CARDS GIRD (Using Table for compatibility) */
+        .indicator-table { width: 100%; border-collapse: separate; border-spacing: 15px 0; margin-left: -15px; margin-top: 20px; }
+        .indicator-card {
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            border: 1px solid #e2e8f0;
+        }
+        .indicator-label { font-size: 11px; color: #6b7280; font-weight: bold; text-transform: uppercase; margin-bottom: 5px; }
+        .indicator-value { font-size: 16px; font-weight: bold; color: #1e1b4b; }
+
+        /* PROJECTION TABLE */
+        .financial-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            font-size: 12px;
+        }
+        .financial-table th {
+            background: #f1f5f9;
+            color: #1e1b4b;
+            text-align: left;
+            padding: 12px 15px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        .financial-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        .financial-table .row-highlight { background-color: #f5f3ff; font-weight: bold; color: #4f46e5; }
+        
+        /* FOOTER */
+        .pdf-footer {
+            margin-top: 50px;
+            padding: 30px 50px;
+            border-top: 1px solid #e2e8f0;
+            width: 100%;
+        }
+        .footer-logo { height: 25px; opacity: 0.8; }
+        .footer-legal { font-size: 10px; color: #9ca3af; margin-top: 10px; line-height: 1.4; }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 10px;
+            font-weight: bold;
+            color: white;
+            background: #4f46e5;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 1. HEADER -->
+    <div class="pdf-header">
+        <table class="header-table">
+            <tr>
+                <td style="width: 70%;">
+                    <h1 class="header-title">FICHE D'INVESTISSEMENT</h1>
+                    <div class="header-subtitle">Dossier technique de synthèse certifié FINORA</div>
+                </td>
+                <td style="width: 30%; text-align: right; vertical-align: top;">
+                    <div style="font-size: 12px; font-weight: bold; margin-bottom: 5px;">PROJET #INV-{{ project.id|default('9000') }}</div>
+                    <div style="font-size: 11px; opacity: 0.8;">{{ "now"|date("d/m/Y") }}</div>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- 2. HERO SECTION -->
+    <div class="hero-section">
+        {% if project.imageUrl is defined and project.imageUrl %}
+            <img src="{{ image_path }}" class="hero-img">
+        {% else %}
+            <img src="https://images.unsplash.com/photo-1560518883-ce09059ee712?auto=format&fit=crop&w=1200" class="hero-img">
+        {% endif %}
+    </div>
+
+    <!-- DASHBOARD BAR -->
+    <div class="dashboard-bar">
+        <table style="width: 100%; border-collapse: collapse;">
+            <tr>
+                <td class="stat-item">
+                    <div class="stat-label">Rentabilité Annuelle</div>
+                    <div class="stat-value">{{ project.annualReturn|default('9.50') }}%</div>
+                </td>
+                <td class="stat-item border-left" style="border-left: 1px solid rgba(255,255,255,0.2);">
+                    <div class="stat-label">Horizon Temporel</div>
+                    <div class="stat-value">{{ project.durationMonths|default('24') }} Mois</div>
+                </td>
+                <td class="stat-item border-left" style="border-left: 1px solid rgba(255,255,255,0.2);">
+                    <div class="stat-label">Niveau de Risque</div>
+                    <div class="stat-value">{{ project.riskLevel|default('B+') }}</div>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- 3. MAIN CONTENT -->
+    <div class="main-container">
+        
+        <table style="width: 100%;">
+            <tr>
+                <td style="vertical-align: top;">
+                    <div style="font-size: 24px; font-weight: bold; color: #1e1b4b; margin-bottom: 5px;">{{ project.name }}</div>
+                    <div style="color: #4f46e5; font-size: 14px; margin-bottom: 25px;">
+                        <span style="font-weight: bold;">Catégorie :</span> {{ project.category }} | 
+                        <span style="font-weight: bold;">Lieu :</span> {{ project.location|default('Paris, France') }}
+                    </div>
+                </td>
+            </tr>
+        </table>
+
+        <!-- SYNTHÈSE -->
+        <div class="section-title">Synthèse du Projet</div>
+        <div class="content-text">
+            {{ project.description|default("Ce projet d’investissement immobilier représente une opportunité unique au cœur d’une zone à forte tension locative. L'analyse financière détaillée révèle un potentiel de plus-value significatif ainsi qu'un rendement locatif stable, sécurisé par des baux longue durée et un porteur de projet expérimenté.") }}
+        </div>
+
+        <!-- INDICATEURS CLÉS -->
+        <div class="section-title" style="margin-top: 40px;">Indicateurs et Conditions</div>
+        <table class="indicator-table">
+            <tr>
+                <td style="width: 50%;">
+                    <div class="indicator-card">
+                        <div class="indicator-label">Investissement Minimum</div>
+                        <div class="indicator-value">{{ project.minInvestment|default('1 000') }} TND</div>
+                    </div>
+                </td>
+                <td style="width: 50%;">
+                    <div class="indicator-card">
+                        <div class="indicator-label">Collecte Cible</div>
+                        <div class="indicator-value">{{ project.fundingGoal|default('150 000')|number_format(0, ',', ' ') }} TND</div>
+                    </div>
+                </td>
+            </tr>
+        </table>
+
+        <!-- 5. PROJECTIONS FINANCIÈRES -->
+        <div class="section-title" style="margin-top: 40px;">Projections Financières</div>
+        <table class="financial-table">
+            <thead>
+                <tr>
+                    <th>Indicateur</th>
+                    <th>Année 1</th>
+                    <th>Année 2</th>
+                    <th>Sortie (Année 3)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Revenus nets distribués</td>
+                    <td>7.50%</td>
+                    <td>8.00%</td>
+                    <td>8.50%</td>
+                </tr>
+                <tr>
+                    <td>Valorisation estimée</td>
+                    <td>+3.5%</td>
+                    <td>+4.2%</td>
+                    <td>+5.1%</td>
+                </tr>
+                <tr class="row-highlight">
+                    <td>Performance Globale</td>
+                    <td>11.00%</td>
+                    <td>12.20%</td>
+                    <td>113.60%</td>
+                </tr>
+            </tbody>
+        </table>
+
+    </div>
+
+    <!-- 6. FOOTER -->
+    <div class="pdf-footer">
+        <table style="width: 100%;">
+            <tr>
+                <td style="width: 60%;">
+                    <div style="font-weight: bold; font-size: 14px; color: #7c3aed;">FINORA.io</div>
+                    <div class="footer-legal">
+                        Ce document constitue une synthèse promotionnelle. L'investissement dans des actifs immobiliers comporte des risques de perte en capital et d'illiquidité. Nous vous recommandons de consulter votre conseiller financier. Document généré automatiquement le {{ "now"|date("d/m/Y H:i") }}.
+                    </div>
+                </td>
+                <td style="width: 40%; text-align: right; vertical-align: top;">
+                    <div style="font-size: 11px; font-weight: bold; color: #1e1b4b;">DOCUMENT OFFICIEL FINORA</div>
+                    <div style="font-size: 10px; color: #6b7280; margin-top: 5px;">Certification ID: #SEC-{{ "now"|date("U") }}</div>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+</body>
+</html>

@@ -262,7 +262,7 @@ class AiAssistantService
             'generationConfig' => ['temperature' => 0.5]
         ];
 
-        return $this->executeWithFallback($payload);
+        return $this->sendRequest($payload);
     }
 
     public function generatePortfolioAnalysis(array $portfolioStats): string
@@ -280,73 +280,29 @@ class AiAssistantService
             'generationConfig' => ['temperature' => 0.4]
         ];
 
-        try {
-            return $this->executeWithFallback($payload);
-        } catch (\Exception $e) {
-            return "<div class='alert alert-danger border-0'><i class='bi bi-exclamation-triangle me-2'></i>Erreur Finale: " . htmlspecialchars($e->getMessage()) . "</div>";
-        }
+        return $this->sendRequest($payload);
     }
 
-    private function executeWithFallback(array $payload): string
+    private function sendRequest(array $payload): string
     {
-        $attempts = [
-            ['ver' => 'v1', 'model' => 'gemini-1.5-flash'],
-            ['ver' => 'v1beta', 'model' => 'gemini-1.5-flash'],
-            ['ver' => 'v1', 'model' => 'gemini-1.0-pro'],
-            ['ver' => 'v1beta', 'model' => 'gemini-1.0-pro'],
-            ['ver' => 'v1', 'model' => 'gemini-pro'],
-        ];
-
-        $lastError = 'Aucun modèle n\'a pu être contacté.';
-
-        foreach ($attempts as $config) {
-            try {
-                $url = sprintf(
-                    'https://generativelanguage.googleapis.com/%s/models/%s:generateContent',
-                    $config['ver'],
-                    $config['model']
-                );
-
-                $response = $this->httpClient->request('POST', $url, [
-                    'query' => ['key' => $this->geminiApiKey],
-                    'json' => $payload
-                ]);
-
-                $statusCode = $response->getStatusCode();
-
-                if ($statusCode === 200) {
-                    $data = $response->toArray();
-                    if (isset($data['candidates'][0]['content']['parts'][0]['text'])) {
-                        $text = $data['candidates'][0]['content']['parts'][0]['text'];
-                        return trim(str_replace(['```html', '```'], '', $text));
-                    }
-                } else {
-                    $errorBody = $response->getContent(false);
-                    $lastError = "HTTP " . $statusCode . ": " . substr($errorBody, 0, 150);
-                }
-            } catch (\Exception $e) {
-                $lastError = "Exception: " . $e->getMessage();
-                continue; 
-            }
-        }
-
-        // --- DISCOVERY STEP IF ALL FAILED ---
-        $availableList = "Liste indisponible";
         try {
-            $discoveryUrl = 'https://generativelanguage.googleapis.com/v1beta/models';
-            $disco = $this->httpClient->request('GET', $discoveryUrl, ['query' => ['key' => $this->geminiApiKey]]);
-            if ($disco->getStatusCode() === 200) {
-                $models = $disco->toArray();
-                $names = array_map(fn($m) => str_replace('models/', '', $m['name']), $models['models'] ?? []);
-                $availableList = implode(', ', array_slice($names, 0, 10));
-            } else {
-                $availableList = "HTTP " . $disco->getStatusCode();
+            $url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent';
+
+            $response = $this->httpClient->request('POST', $url, [
+                'query' => ['key' => $this->geminiApiKey],
+                'json' => $payload
+            ]);
+
+            $data = $response->toArray();
+            if (isset($data['candidates'][0]['content']['parts'][0]['text'])) {
+                $text = $data['candidates'][0]['content']['parts'][0]['text'];
+                return trim(str_replace(['```html', '```'], '', $text));
             }
         } catch (\Exception $e) {
-            $availableList = "Erreur: " . $e->getMessage();
+            return "<div class='alert alert-danger border-0'><i class='bi bi-exclamation-triangle me-2'></i>Erreur de l'assistant IA: " . htmlspecialchars($e->getMessage()) . "</div>";
         }
 
-        throw new \Exception("MODÈLES DISPONIBLES: [" . $availableList . "] | DERNIÈRE ERREUR: " . $lastError);
+        return "<div class='alert alert-danger border-0'>Réponse IA vide ou invalide.</div>";
     }
 
     private function getChatSystemInstruction(): string
@@ -368,7 +324,7 @@ TEXT;
         return <<<TEXT
 # RÔLE
 Tu es "Finora Robo-Advisor". Analyse le portefeuille JSON et produis un diagnostic stratégique (points forts, vigilance, recommandation). 
-Utilise uniquement le HTML avec les classes Bootstrap 5 spécifiées précédemment. Pas de markdown.
+Utilise uniquement le HTML avec les classes Bootstrap 5 (p-3, rounded, alert, etc.). Pas de markdown.
 TEXT;
     }
 }

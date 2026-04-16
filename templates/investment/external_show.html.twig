@@ -1,0 +1,207 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ project.name }} - Fiche d'Investissement Professionnelle{% endblock %}
+
+{% block body %}
+<!-- ======================= PROFESSIONAL PDF HEADER ======================= -->
+<div class="print-only mb-4">
+    <div class="d-flex justify-content-between align-items-center border-bottom border-4 border-primary pb-3">
+        <div>
+            <img src="{{ asset('assets/images/logo-finora.png') }}" style="height: 50px;" alt="FINORA">
+            <h1 class="h3 fw-bold text-primary mt-2 mb-0">FICHE D'INFORMATION D'INVESTISSEMENT</h1>
+            <p class="text-muted small mb-0">Rapport de synthèse confidentiel réservé aux membres Finora</p>
+        </div>
+        <div class="text-end">
+            <div class="h6 fw-bold mb-1">REFERENCE: #FN-{{ project.id }}-{{ project.category|upper }}</div>
+            <div class="text-muted small">ID Client: {{ app.session.get('user_id') ?? 'GUEST' }}</div>
+            <div class="text-muted small">Date d'édition: {{ "now"|date("d/m/Y") }}</div>
+        </div>
+    </div>
+</div>
+
+<main class="py-5" style="background: #f8fafc;">
+    <div class="container">
+        <!-- Breadcrumb (No Print) -->
+        <nav aria-label="breadcrumb" class="mb-4 no-print">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ path('app_home') }}">Accueil</a></li>
+                <li class="breadcrumb-item active">{{ project.name }}</li>
+            </ol>
+        </nav>
+
+        <div class="row g-4">
+            <div class="col-lg-8">
+                <!-- Project Image & Banner -->
+                <div class="card border-0 shadow-sm overflow-hidden mb-4" style="border-radius: 24px;">
+                    <div class="position-relative">
+                        <img src="{{ asset('assets/images/courses/4by3/04.jpg') }}" class="w-100 object-fit-cover" style="height: 350px;" alt="{{ project.name }}">
+                        <div class="position-absolute top-0 start-0 p-4 no-print">
+                            <span class="badge bg-primary px-3 py-2 rounded-pill shadow-sm">{{ project.category }}</span>
+                        </div>
+                    </div>
+                    
+                    <!-- HIGHLIGHTS BAR (Institutional Style) -->
+                    <div class="card-body p-0 border-top">
+                        <div class="row g-0 text-center bg-primary text-white p-3">
+                            <div class="col-4 border-end border-white border-opacity-25">
+                                <small class="text-white text-opacity-75 d-block mb-1">Rendement Annuel</small>
+                                <h4 class="fw-bold mb-0">9.5% <span class="small fw-normal">TRI</span></h4>
+                            </div>
+                            <div class="col-4 border-end border-white border-opacity-25">
+                                <small class="text-white text-opacity-75 d-block mb-1">Niveau de Risque</small>
+                                <h4 class="fw-bold mb-0">{{ project.risk_level }}</h4>
+                            </div>
+                            <div class="col-4">
+                                <small class="text-white text-opacity-75 d-block mb-1">Horizon Temporel</small>
+                                <h4 class="fw-bold mb-0">24 MOIS</h4>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card-body p-4 p-md-5">
+                        <div class="d-flex justify-content-between align-items-start mb-4">
+                            <div>
+                                <h2 class="fw-bold mb-1" style="color: #1e1b4b;">{{ project.name }}</h2>
+                                <p class="text-muted fs-5"><i class="bi bi-geo-alt-fill me-2 text-primary"></i>{{ project.location }}</p>
+                            </div>
+                            <div class="text-end no-print">
+                                <span class="badge bg-dark-soft text-dark border px-3 py-2 rounded-pill">
+                                    <i class="bi bi-patch-check-fill me-1 text-primary"></i>Certifié Partenaire
+                                </span>
+                            </div>
+                        </div>
+
+                        <h4 class="fw-bold mb-3 border-start border-4 border-primary ps-3">Synthèse du Projet</h4>
+                        <p class="text-muted lh-lg">
+                            Ce projet constitue une opportunité d'investissement stratégique sélectionnée par les experts de <strong>FINORA</strong>. 
+                            Situé dans une zone à fort potentiel ({{ project.location }}), l'actif bénéficie d'une demande locative stable et d'une perspective 
+                            de revalorisation foncière estimée à 5% par an.
+                        </p>
+
+                        <!-- FINANCIAL PROJECTION TABLE -->
+                        <div class="mt-5">
+                            <h4 class="fw-bold mb-4 border-start border-4 border-primary ps-3">Projections Financières</h4>
+                            <div class="table-responsive">
+                                <table class="table table-bordered align-middle">
+                                    <thead class="table-light">
+                                        <tr class="text-primary fw-bold">
+                                            <th>Indicateur</th>
+                                            <th class="text-center">Année 1</th>
+                                            <th class="text-center">Année 2</th>
+                                            <th class="text-center">Année 3 (Sortie)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td class="fw-bold">Revenus nets distribués</td>
+                                            <td class="text-center">7.50%</td>
+                                            <td class="text-center">8.20%</td>
+                                            <td class="text-center">8.50%</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="fw-bold">Valorisation de l'actif</td>
+                                            <td class="text-center">+3.0%</td>
+                                            <td class="text-center">+4.5%</td>
+                                            <td class="text-center">+5.0%</td>
+                                        </tr>
+                                        <tr class="table-primary text-primary fw-bold">
+                                            <td>Performance Totale</td>
+                                            <td class="text-center">10.5%</td>
+                                            <td class="fw-bold">Rendement distribué</td>
+                                            <td class="text-center">4.75%</td>
+                                            <td class="text-center">4.75%</td>
+                                            <td class="text-center">9.50%</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="fw-bold">Valorisation capital</td>
+                                            <td class="text-center">Non-garantie</td>
+                                            <td class="text-center">Libération</td>
+                                            <td class="text-center">100%</td>
+                                        </tr>
+                                        <tr class="bg-primary text-white fw-bold">
+                                            <td class="text-white">Performance Globale</td>
+                                            <td class="text-center text-white">4.75%</td>
+                                            <td class="text-center text-white">104.75%</td>
+                                            <td class="text-center text-white">109.5%</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SIDEBAR AREA -->
+            <div class="col-lg-4 fn-pdf-side">
+                <div class="sticky-top" style="top: 2rem; z-index: 100;">
+                    <div class="card border-0 shadow-lg p-4" style="border-radius: 20px; border-top: 5px solid #7c3aed !important;">
+                        <h5 class="fw-bold mb-4">Analyse Stratégique</h5>
+                        
+                        <div class="mb-4">
+                            <label class="text-muted small d-block mb-1">Typologie du Projet</label>
+                            <h6 class="fw-bold mb-0 text-dark">{{ project.category }}</h6>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="text-muted small d-block mb-1">Localisation de l'Actif</label>
+                            <h6 class="fw-bold mb-0 text-dark">{{ project.location }}</h6>
+                        </div>
+
+                        <div class="p-3 border rounded mb-4 bg-light shadow-sm">
+                            <div class="d-flex align-items-center mb-2">
+                                <i class="bi bi-shield-check text-success me-2 fs-5"></i>
+                                <span class="small fw-bold text-success">Audit de Risque Validé</span>
+                            </div>
+                            <p class="extra-small text-muted mb-0">Le porteur de projet a été audité sur sa capacité financière et son historique de réalisation.</p>
+                        </div>
+
+                        <div class="d-grid gap-3 no-print">
+                            <a href="{{ path('app_investment_external_invest', {id: project.id}) }}" class="btn btn-primary py-3 fw-bold rounded-pill">
+                                Placer un ordre
+                            </a>
+                            <button class="btn btn-outline-primary py-2 rounded-pill" onclick="window.print()">
+                                Télécharger Factsheet PDF
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- FACTSHEET PDF FOOTER -->
+        <div class="print-only mt-5 pt-4 border-top">
+            <div class="row align-items-center">
+                <div class="col-9">
+                    <p class="extra-small text-muted mb-0">
+                        <strong>Avertissement :</strong> Ce document est une fiche d'information officielle générée par la plateforme <strong>FINORA</strong>. 
+                        Investir dans des projets immobiliers comporte des risques de perte partielle ou totale du capital. 
+                        Les performances passées ne préjugent pas des rendements futurs. Rapport certifié par le protocole FINORA Secured Audit.
+                    </p>
+                </div>
+                <div class="col-4 text-end">
+                    <img src="{{ asset('assets/images/favicon-finora.png') }}" style="height: 30px;" class="mb-2">
+                    <p class="small fw-bold text-dark mb-0">Plateforme Certifiée Finora</p>
+                    <p class="extra-small text-muted">www.finora.io</p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</main>
+
+<style>
+    .bg-dark-soft { background-color: rgba(30, 27, 75, 0.03); }
+    .bg-success-soft { background-color: rgba(25, 135, 84, 0.1); }
+    .extra-small { font-size: 0.7rem; }
+    .breadcrumb-item + .breadcrumb-item::before { content: "›"; }
+    
+    @media print {
+        .card { border-radius: 12px !important; }
+        .table { font-size: 10pt; }
+        .table-primary { background-color: #f5f3ff !important; }
+        thead { background-color: #f8fafc !important; }
+        h1, h2, h3, h4 { color: #1e1b4b !important; }
+    }
+</style>
+{% endblock %}

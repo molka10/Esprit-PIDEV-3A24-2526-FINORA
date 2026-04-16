@@ -88,8 +88,8 @@
     <nav class="navbar navbar-expand-xl z-index-9">
         <div class="container">
             <a class="navbar-brand" href="{{ path('app_home') }}">
-                <img class="light-mode-item navbar-brand-item" src="{{ asset('assets/images/logo.svg') }}" alt="FINORA" style="height:40px;">
-                <img class="dark-mode-item navbar-brand-item" src="{{ asset('assets/images/logo-light.svg') }}" alt="FINORA" style="height:40px;">
+                <img class="light-mode-item navbar-brand-item" src="{{ asset('assets/images/logo-finora.png') }}" alt="FINORA" style="height:40px;">
+                <img class="dark-mode-item navbar-brand-item" src="{{ asset('assets/images/logo-finora-light.png') }}" alt="FINORA" style="height:40px;">
             </a>
             <button class="navbar-toggler ms-auto" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse">
                 <span class="navbar-toggler-animation"><span></span><span></span><span></span></span>
@@ -126,12 +126,27 @@
     </nav>
 </header>
 
+<!-- ======================= FACTSHEET PDF HEADER ======================= -->
+<div class="print-only fn-pdf-header">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <img src="{{ asset('assets/images/logo-finora.png') }}" style="height: 55px;" alt="FINORA">
+            <h1 class="h3 fw-bold text-primary mt-2 mb-0">DOSSIER TECHNIQUE D'INVESTISSEMENT</h1>
+            <p class="mb-0 opacity-75 small">Analyse certifiée par le comité d'investissement FINORA</p>
+        </div>
+        <div class="text-end">
+            <div class="h6 fw-bold mb-1">REFERENCE #INV-{{ investment.id }}</div>
+            <div class="text-muted small">Date d'édition: {{ "now"|date("d/m/Y") }}</div>
+        </div>
+    </div>
+</div>
+
 <main>
 
     {% set imgSrc = investment_image_src(investment) %}
 
     <!-- ======================= PROJECT HEADER ======================= -->
-    <div class="project-header">
+    <div class="project-header no-print">
         <div class="container">
             <h1 class="project-title">{{ investment.name }}</h1>
             <p class="project-address"><i class="bi bi-geo-alt me-1"></i>{{ investment.location ?: 'Localisation non spécifiée' }}</p>
@@ -139,13 +154,36 @@
     </div>
 
     <!-- ======================= PROJECT IMAGE ======================= -->
-    <div class="container mb-4">
+    <div class="container mb-4 no-print">
         <div class="project-image">
             {% if imgSrc %}
                 <img src="{{ imgSrc }}" alt="{{ investment.name }}">
             {% else %}
                 <img src="{{ asset('assets/images/courses/4by3/06.jpg') }}" alt="{{ investment.name }}">
             {% endif %}
+        </div>
+    </div>
+
+    <!-- ======================= PDF-ONLY IMAGE ======================= -->
+    <div class="print-only mb-4">
+        <div class="card overflow-hidden" style="border-radius: 20px;">
+            <img src="{{ imgSrc ?: asset('assets/images/courses/4by3/06.jpg') }}" class="w-100 object-fit-cover" style="height: 350px;">
+            <div class="card-body p-0 border-top">
+                <div class="row g-0 text-center bg-primary text-white p-3">
+                    <div class="col-4 border-end border-white border-opacity-25">
+                        <small class="text-white text-opacity-75 d-block mb-1">Rendement</small>
+                        <h4 class="fw-bold mb-0 text-white">{{ investment.annualReturn }}% <small class="fw-normal">/an</small></h4>
+                    </div>
+                    <div class="col-4 border-end border-white border-opacity-25">
+                        <small class="text-white text-opacity-75 d-block mb-1">Horizon</small>
+                        <h4 class="fw-bold mb-0 text-white">{{ investment.durationMonths }} Mois</h4>
+                    </div>
+                    <div class="col-4">
+                        <small class="text-white text-opacity-75 d-block mb-1">Objectif Cible</small>
+                        <h4 class="fw-bold mb-0 text-white">{{ (investment.fundingGoal/1000)|number_format(0) }}k <small class="fw-normal">TND</small></h4>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -181,7 +219,7 @@
 
     <!-- ======================= MAIN CONTENT ======================= -->
     <div class="container pb-5">
-        <div class="row g-4">
+        <div class="row g-4 fn-pdf-layout">
 
             <!-- =================== LEFT COLUMN =================== -->
             <div class="col-xl-8">
@@ -435,6 +473,11 @@
                                 Investir
                             </a>
 
+                            <!-- Factsheet Button -->
+                            <button class="btn btn-outline-primary rounded-pill w-100 py-2 mb-3 no-print" onclick="window.print()">
+                                <i class="bi bi-file-earmark-pdf me-1"></i> Télécharger Factsheet
+                            </button>
+
                             <!-- Investor Count -->
                             <div class="d-flex align-items-center gap-2 mb-3">
                                 <div class="investor-avatars">
@@ -493,6 +536,22 @@
         </div>
     </div>
 
+    <!-- FACTSHEET PDF FOOTER -->
+    <div class="print-only mt-5 pt-4 border-top">
+        <div class="row align-items-center">
+            <div class="col-9">
+                <p class="extra-small text-muted mb-0">
+                    <strong>Avertissement :</strong> Ce document est une synthèse officielle générée par l'intelligence artificielle de la plateforme <strong>FINORA</strong>. 
+                    L'investissement comporte des risques. Les audits ont été réalisés sur la base des données fournies par le porteur de projet.
+                    Rapport #INV-{{ investment.id }} certifié conforme.
+                </p>
+            </div>
+            <div class="col-3 text-end">
+                <p class="small fw-bold text-primary mb-0">www.finora.io</p>
+                <p class="extra-small text-muted mb-0">Document de Synthèse</p>
+            </div>
+        </div>
+    </div>
 </main>
 
 <!-- Yield simulator script -->

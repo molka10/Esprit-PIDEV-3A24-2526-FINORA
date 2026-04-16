@@ -11,8 +11,8 @@
 
             <!-- Logo -->
             <a class="navbar-brand" href="{{ path('app_home') }}">
-                <img class="light-mode-item navbar-brand-item" src="{{ asset('assets/images/logo.svg') }}" alt="FINORA" style="height:40px;">
-                <img class="dark-mode-item navbar-brand-item" src="{{ asset('assets/images/logo-light.svg') }}" alt="FINORA" style="height:40px;">
+                <img class="light-mode-item navbar-brand-item" src="{{ asset('assets/images/logo-finora.png') }}" alt="FINORA" style="height:40px;">
+                <img class="dark-mode-item navbar-brand-item" src="{{ asset('assets/images/logo-finora-light.png') }}" alt="FINORA" style="height:40px;">
             </a>
 
             <!-- Mobile toggler -->
@@ -631,50 +631,103 @@
             {% endfor %}
         </div>
 
-        <!-- TOP 3 EXTERNE -->
-        <div class="row g-4">
-            <div class="col-12">
-                <h4 class="mb-1 mt-2 fw-bold"><i class="bi bi-globe me-2" style="color: #3b82f6;"></i>Opportunités Partenaires</h4>
-                <p class="text-muted small mb-0">Projets issus de nos partenaires immobiliers</p>
+        <!-- OPPORTUNITÉS PARTENAIRES (CAROUSEL) -->
+        <div class="row mb-3">
+            <div class="col-12 d-flex justify-content-between align-items-end">
+                <div>
+                    <h4 class="mb-1 mt-2 fw-bold"><i class="bi bi-globe me-2" style="color: #3b82f6;"></i>Opportunités Partenaires</h4>
+                    <p class="text-muted small mb-0">Découvrez tous les projets issus de nos partenaires mondiaux</p>
+                </div>
+                <!-- Nav Buttons -->
+                <div class="d-none d-lg-flex gap-2 mb-1">
+                    <button class="btn btn-outline-primary rounded-circle p-0" id="prevBtn" style="width: 40px; height: 40px; border-color: #dbeafe;">
+                        <i class="bi bi-chevron-left"></i>
+                    </button>
+                    <button class="btn btn-outline-primary rounded-circle p-0" id="nextBtn" style="width: 40px; height: 40px; border-color: #dbeafe;">
+                        <i class="bi bi-chevron-right"></i>
+                    </button>
+                </div>
             </div>
-            {% for inv in top3_externe %}
-            <div class="col-md-6 col-xl-4">
-                <div class="card border-0 shadow-sm overflow-hidden h-100" style="border-radius: 20px; border-left: 4px solid #3b82f6 !important;">
-                    <div class="position-relative">
-                        <img class="card-img-top object-fit-cover" src="{{ asset('assets/images/courses/4by3/04.jpg') }}" alt="{{ inv.name }}" style="height: 220px;">
-                        <div class="card-img-overlay d-flex align-items-start justify-content-between p-3" style="background: linear-gradient(180deg, rgba(59,130,246,0.4) 0%, transparent 60%); pointer-events: none;">
-                            <span class="badge rounded-pill px-3 py-2 text-white shadow-sm" style="background: #3b82f6; pointer-events: auto;">{{ inv.category }}</span>
-                            <span class="badge rounded-pill px-3 py-2 bg-dark text-white shadow-sm" style="pointer-events: auto;"><i class="bi bi-building me-1"></i>Partenaire</span>
-                        </div>
-                    </div>
+        </div>
 
-                    <div class="card-body p-4">
-                        <h5 class="card-title fw-bold mb-1" style="color: #1e1b4b;">{{ inv.name }}</h5>
-                        <p class="text-muted small mb-3"><i class="bi bi-geo-alt-fill me-1"></i>{{ inv.location ?? 'N/A' }}</p>
-
-                        <div class="d-flex justify-content-between align-items-center mb-3 p-3 rounded-3" style="background: #eff6ff; border: 1px solid #dbeafe;">
-                            <div>
-                                <small class="text-muted d-block">Valeur estimée</small>
-                                <strong class="fs-6" style="color: #3b82f6;">{{ inv.estimated_value|format_currency }}</strong>
-                            </div>
-                            <div class="text-end">
-                                <small class="text-muted d-block">Risque</small>
-                                <strong class="fs-6">{{ inv.risk_level == 'LOW' ? 'Faible' : (inv.risk_level == 'HIGH' ? 'Élevé' : 'Moyen') }}</strong>
+        <div class="fn-carousel-wrapper">
+            <div class="fn-carousel-container" id="recommendationsCarousel">
+                {% for inv in all_externe %}
+                <div class="fn-carousel-item">
+                    <div class="card border-0 shadow-sm overflow-hidden h-100" style="border-radius: 20px; border-left: 4px solid #3b82f6 !important;">
+                        <div class="position-relative">
+                            <img class="card-img-top object-fit-cover" src="{{ asset('assets/images/courses/4by3/04.jpg') }}" alt="{{ inv.name }}" style="height: 180px;">
+                            <div class="card-img-overlay d-flex align-items-start justify-content-between p-3" style="background: linear-gradient(180deg, rgba(59,130,246,0.3) 0%, transparent 60%);">
+                                <span class="badge rounded-pill px-3 py-2 text-white shadow-sm" style="background: #3b82f6;">{{ inv.category }}</span>
+                                <span class="badge rounded-pill px-3 py-2 bg-dark text-white shadow-sm"><i class="bi bi-building me-1"></i>Partenaire</span>
                             </div>
                         </div>
 
-                        <div class="d-grid">
-                            <button class="btn btn-outline-secondary rounded-pill" disabled>
-                                <i class="bi bi-clock me-1"></i>Bientôt disponible
-                            </button>
+                        <div class="card-body p-4">
+                            <h6 class="fw-bold mb-1" style="color: #1e1b4b;">{{ inv.name }}</h6>
+                            <p class="text-muted extra-small mb-3"><i class="bi bi-geo-alt-fill me-1"></i>{{ inv.location ?? 'N/A' }}</p>
+
+                            <div class="mb-3 p-2 rounded-3" style="background: #eff6ff; border: 1px solid #dbeafe;">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <small class="text-muted">Valeur</small>
+                                    <strong class="small" style="color: #3b82f6;">{{ inv.estimated_value|format_currency }}</strong>
+                                </div>
+                            </div>
+
+                            <div class="d-grid">
+                                <a href="{{ path('app_investment_external_show', {id: inv.id}) }}" class="btn btn-sm btn-outline-primary rounded-pill">
+                                    Voir Détails
+                                </a>
+                            </div>
                         </div>
                     </div>
                 </div>
+                {% else %}
+                <div class="col-12"><div class="alert alert-info border-0 shadow-sm" style="border-radius: 16px;">Aucun investissement partenaire pour le moment.</div></div>
+                {% endfor %}
             </div>
-            {% else %}
-            <div class="col-12"><div class="alert alert-info border-0 shadow-sm" style="border-radius: 16px;">Aucun investissement partenaire pour le moment.</div></div>
-            {% endfor %}
         </div>
+
+    </div>
+</section>
+
+<style>
+    .extra-small { font-size: 0.75rem; }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const carousel = document.getElementById('recommendationsCarousel');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+
+        if (carousel && prevBtn && nextBtn) {
+            const scrollAmount = 334; // Card width + gap
+
+            prevBtn.addEventListener('click', () => {
+                carousel.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+            });
+
+            nextBtn.addEventListener('click', () => {
+                carousel.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+            });
+
+            // Optional: Hide/Show buttons based on scroll position
+            carousel.addEventListener('scroll', () => {
+                prevBtn.style.opacity = carousel.scrollLeft <= 0 ? '0.3' : '1';
+                prevBtn.style.pointerEvents = carousel.scrollLeft <= 0 ? 'none' : 'auto';
+                
+                const isAtEnd = carousel.scrollLeft + carousel.offsetWidth >= carousel.scrollWidth - 10;
+                nextBtn.style.opacity = isAtEnd ? '0.3' : '1';
+                nextBtn.style.pointerEvents = isAtEnd ? 'none' : 'auto';
+            });
+            
+            // Initial state
+            prevBtn.style.opacity = '0.3';
+            prevBtn.style.pointerEvents = 'none';
+        }
+    });
+</script>
 
     </div>
 </section>
@@ -967,7 +1020,7 @@
             <!-- Widget 1 -->
             <div class="col-lg-3">
                 <a class="me-0" href="{{ path('app_home') }}">
-                    <img class="h-40px" src="{{ asset('assets/images/logo-light.svg') }}" alt="FINORA">
+                    <img class="h-40px" src="{{ asset('assets/images/logo-finora-light.png') }}" alt="FINORA">
                 </a>
                 <p class="my-3 text-body-secondary">
                     FINORA — Votre plateforme de gestion d'investissements intelligente, sécurisée et performante.

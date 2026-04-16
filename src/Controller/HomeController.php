@@ -35,7 +35,7 @@ class HomeController extends AbstractController
 
         return $this->render('home/index.html.twig', [
             'top3_interne' => $this->recommendationsBuilder->getTop3Interne(),
-            'top3_externe' => $this->recommendationsBuilder->getTop3Externe(),
+            'all_externe' => $this->recommendationsBuilder->getAllExterne(),
             'investments' => $invRepo->findAll(),
             'managements' => $mgRepo->findAll(),
         ]);

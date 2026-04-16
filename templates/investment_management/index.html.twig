@@ -10,8 +10,8 @@
             <div class="container">
 
                 <a class="navbar-brand" href="{{ path('app_home') }}">
-                    <img class="light-mode-item navbar-brand-item" src="{{ asset('assets/images/logo.svg') }}" alt="FINORA" style="height:40px;">
-                    <img class="dark-mode-item navbar-brand-item" src="{{ asset('assets/images/logo-light.svg') }}" alt="FINORA" style="height:40px;">
+                    <img class="light-mode-item navbar-brand-item" src="{{ asset('assets/images/logo-finora.png') }}" alt="FINORA" style="height:40px;">
+                    <img class="dark-mode-item navbar-brand-item" src="{{ asset('assets/images/logo-finora-light.png') }}" alt="FINORA" style="height:40px;">
                 </a>
 
                 <button class="navbar-toggler ms-auto" type="button"
@@ -177,8 +177,8 @@
                         {% endif %}
                     </div>
 
-                    <!-- GRID / CARDS -->
-                    <div class="row g-4 pb-4">
+
+                <div class="row g-4">
                         {% for item in investment_managements %}
                             <div class="col-md-6 col-lg-6">
                                 <div class="card shadow-sm h-100 overflow-hidden border-0 card-hover-shadow transition-base" style="background: linear-gradient(145deg, #ffffff, #faf5ff); border-radius: 20px;">
@@ -349,6 +349,7 @@
 
         if(btnAnalyze) {
             btnAnalyze.addEventListener('click', function() {
+                // UI State: Hide button, show container and loader
                 btnAnalyze.style.display = 'none';
                 reportContainer.style.display = 'block';
                 content.innerHTML = '';
@@ -368,11 +369,13 @@
                         content.innerHTML = data.html;
                     } else if(data.error) {
                         content.innerHTML = '<div class="alert alert-danger border-0">' + data.error + '</div>';
+                        btnAnalyze.style.display = 'inline-block'; // Allow retry
                     }
                 })
                 .catch(err => {
                     loader.style.display = 'none';
-                    content.innerHTML = '<div class="alert alert-danger border-0"><i class="bi bi-exclamation-triangle me-2"></i>Erreur de connexion avec les serveurs cognitifs. Veuillez réessayer.</div>';
+                    btnAnalyze.style.display = 'inline-block';
+                    content.innerHTML = '<div class="alert alert-danger border-0"><i class="bi bi-exclamation-triangle me-2"></i>Erreur de connexion. Veuillez réessayer.</div>';
                 });
             });
         }

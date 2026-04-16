@@ -8,7 +8,7 @@
     <meta name="description" content="{% block meta_description %}FINORA — Votre plateforme de gestion d'investissements{% endblock %}">
 
     <!-- ======================= FAVICON ======================= -->
-    <link rel="shortcut icon" href="{{ asset('assets/images/favicon.ico') }}">
+    <link rel="shortcut icon" href="{{ asset('assets/images/favicon-finora.png') }}">
 
     <!-- ======================= DARK MODE SCRIPT ======================= -->
     <script>
@@ -228,11 +228,104 @@
             }
 
             /* ── Animations ── */
-            @keyframes pulse {
-                0% { box-shadow: 0 0 0 0 rgba(124, 58, 237, 0.7); }
-                70% { box-shadow: 0 0 0 10px rgba(124, 58, 237, 0); }
-                100% { box-shadow: 0 0 0 0 rgba(124, 58, 237, 0); }
+            /* ── Carousel System ── */
+            .fn-carousel-wrapper {
+                position: relative;
+                margin-top: 1.5rem;
             }
+            .fn-carousel-container {
+                display: flex;
+                overflow-x: auto;
+                scroll-behavior: smooth;
+                scroll-snap-type: x mandatory;
+                gap: 1.5rem;
+                padding: 1rem 0 2rem 0;
+                scrollbar-width: none; /* Firefox */
+                -ms-overflow-style: none; /* IE edge */
+            }
+            .fn-carousel-container::-webkit-scrollbar {
+                display: none; /* Chrome, Safari */
+            }
+            .fn-carousel-item {
+                flex: 0 0 auto;
+                width: 310px;
+                scroll-snap-align: start;
+                transition: transform 0.3s ease;
+            }
+            .fn-carousel-item:hover {
+                transform: translateY(-5px);
+            }
+            .fn-carousel-btn {
+                position: absolute;
+                top: 50%;
+                transform: translateY(-50%);
+                width: 45px;
+                height: 45px;
+                background: white;
+                border: 1px solid var(--fn-border);
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                box-shadow: 0 4px 12px rgba(124, 58, 237, 0.2);
+                color: var(--fn-primary);
+                z-index: 10;
+                cursor: pointer;
+                transition: all 0.2s;
+            }
+            .fn-carousel-btn:hover {
+                background: var(--fn-primary);
+                color: white;
+            }
+            .fn-carousel-btn.prev { left: -22px; }
+            .fn-carousel-btn.next { right: -22px; }
+
+            @media (max-width: 991px) {
+                .fn-carousel-btn { display: none; }
+                .fn-carousel-container { gap: 1rem; padding-left: 1rem; }
+                .fn-carousel-item { width: 280px; }
+            }
+
+            @media print {
+                body { background: #fdfcff !important; color: #1e1b4b !important; font-size: 11pt; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+                .navbar, .footer, .btn, .breadcrumb, .sticky-top, .no-print, .bricks-tabs, .navbar-toggler, .dropdown, header { display: none !important; }
+                
+                .container { width: 100% !important; max-width: none !important; margin: 0 !important; padding: 0 !important; }
+                
+                /* Institutional Factsheet Header */
+                .fn-pdf-header { 
+                    background: linear-gradient(135deg, #1e1b4b 0%, #4f46e5 100%) !important; 
+                    color: white !important; 
+                    padding: 2.5rem !important;
+                    margin: -2cm -2cm 2rem -2cm !important;
+                    border-bottom: 5px solid #7c3aed !important;
+                }
+                .fn-pdf-header * { color: white !important; }
+                .fn-pdf-header img { filter: brightness(0) invert(1); }
+
+                /* Layout System */
+                .card { border: none !important; background: white !important; box-shadow: none !important; border-radius: 12px !important; break-inside: avoid; margin-bottom: 1.5rem !important; }
+                .card-header { background: #f5f3ff !important; border-bottom: 1px solid #e0e7ff !important; }
+                
+                .text-primary { color: #4f46e5 !important; }
+                .badge { background: #4f46e5 !important; color: white !important; border: none !important; padding: 5px 12px !important; border-radius: 30px !important; }
+                
+                /* Sidebar-style for PDF */
+                .fn-pdf-layout { display: flex !important; flex-wrap: wrap !important; }
+                .fn-pdf-main { width: 68% !important; padding-right: 2rem !important; }
+                .fn-pdf-side { width: 32% !important; }
+                
+                .table { border: 1px solid #e2e8f0 !important; font-size: 10pt !important; }
+                .table th { background: #f8fafc !important; color: #1e1b4b !important; }
+                
+                /* Typography */
+                h1, h2, h3, h4, h5, h6 { color: #1e1b4b !important; font-weight: 800 !important; }
+                p { line-height: 1.6 !important; }
+
+                @page { margin: 2cm; }
+                .print-full-width { width: 100% !important; }
+            }
+            .print-only { display: none; }
         </style>
 
     {% endblock %}
