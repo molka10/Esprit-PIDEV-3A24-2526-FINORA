@@ -4,86 +4,48 @@
 
 <div class="page">
 
-    <div class="left">
+    <div class="card">
 
-        <div class="card">
+        <div class="header-form">
+            <h2>Categories</h2>
 
-            <div class="header-form">
-                <h2> Add Category</h2>
+            <a href="{{ path('category_add') }}" class="btn">
+                ➕ Add Category
+            </a>
+        </div>
 
-                <a href="{{ path('transactions') }}" class="btn" style="background:#636e72;">
-                    ⬅ Retour
-                </a>
-            </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Nom</th>
+                    <th>Type</th>
+                    <th>Priority</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
 
-            {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+            <tbody>
+            {% for c in categories %}
+                <tr>
+                    <td>{{ c.nom }}</td>
+                    <td>{{ c.type }}</td>
+                    <td>{{ c.priorite }}</td>
+                    <td>
+                        <a href="{{ path('category_edit', {'id': c.id}) }}" class="btn">✏️</a>
+                        <a href="{{ path('category_delete', {'id': c.id}) }}" class="btn delete">🗑️</a>
+                    </td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td colspan="4">No categories found</td>
+                </tr>
+            {% endfor %}
+            </tbody>
 
-         <div class="form-group">
-    <div class="label-row">
-        {{ form_label(form.nom) }}
-        {{ form_errors(form.nom) }}
-    </div>
-
-    {{ form_widget(form.nom) }}
+        </table>
+        <div class="pagination">
+    {{ knp_pagination_render(categories) }}
 </div>
-
-            <div class="form-group">
-                {{ form_label(form.type) }}
-                {{ form_widget(form.type) }}
-                {{ form_errors(form.type) }}
-            </div>
-
-            <div class="form-group">
-                {{ form_label(form.priorite) }}
-                {{ form_widget(form.priorite) }}
-                {{ form_errors(form.priorite) }}
-            </div>
-
-           
-
-            {{ form_end(form) }}
-
-        </div>
-
-    </div>
-
-    <div class="right">
-
-        <div class="card">
-
-            <h2> Categories</h2>
-
-            <table>
-                <thead>
-                    <tr>
-                        <th>Nom</th>
-                        <th>Type</th>
-                        <th>Priority</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-
-                <tbody>
-                {% for c in categories %}
-                    <tr>
-                        <td>{{ c.nom }}</td>
-                        <td>{{ c.type }}</td>
-                        <td>{{ c.priorite }}</td>
-                        <td>
-                            <a href="{{ path('category_edit', {'id': c.id}) }}" class="btn">✏️</a>
-                            <a href="{{ path('category_delete', {'id': c.id}) }}" class="btn delete">🗑️</a>
-                        </td>
-                    </tr>
-                {% else %}
-                    <tr>
-                        <td colspan="4">No categories found</td>
-                    </tr>
-                {% endfor %}
-                </tbody>
-
-            </table>
-
-        </div>
 
     </div>
 

@@ -16,15 +16,19 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use Symfony\Component\HttpFoundation\StreamedResponse;
+
+use Knp\Component\Pager\PaginatorInterface;
+
 class TransactionController extends AbstractController
 {
 
+#[Route('/transaction/add', name: 'transaction_add')]
 
 public function add(Request $req, EntityManagerInterface $em): Response
 {
     $transaction = new TransactionWallet();
+    $transaction->setUserId(6);
 
-$transaction->setUserId(rand(1, 5));
     $transaction->setSource("manual");
 
     $categories = $em->getRepository(Category::class)->findAll();
@@ -42,6 +46,14 @@ $transaction->setUserId(rand(1, 5));
 if (!$transaction->getDateTransaction()) {
     $transaction->setDateTransaction(new \DateTime());
 }
+$data = $req->request->all('transaction_wallet');
+
+$categoryId = $data['category'] ?? null;
+
+if ($categoryId) {
+    $category = $em->getRepository(Category::class)->find($categoryId);
+    $transaction->setCategory($category);
+}
         $em->persist($transaction);
         $em->flush();
 
@@ -55,11 +67,16 @@ if (!$transaction->getDateTransaction()) {
 }
 
     #[Route('/transactions', name: 'transactions')]
-public function index(Request $req, EntityManagerInterface $em): Response
-{
+public function index(
+
+   Request $req,
+    EntityManagerInterface $em,
+    PaginatorInterface $paginator
+): Response {
+
     $transaction = new TransactionWallet();
 
-    $transaction->setUserId(1);
+    $transaction->setUserId(6);
     $transaction->setSource("manual");
 
     $data = $req->request->all('transaction_wallet');
@@ -85,22 +102,28 @@ $form = $this->createForm(TransactionType::class, $transaction, [
 
 $categoryId = $data['category'] ?? null;
 
-if ($categoryId) {
-    $category = $em->getRepository(Category::class)->find($categoryId);
-    $transaction->setCategory($category);
-}
 
         if ($categoryId) {
             $category = $em->getRepository(Category::class)->find($categoryId);
             $transaction->setCategory($category);
         }
+        
         $em->persist($transaction);
         $em->flush();
 
         return $this->redirectToRoute('transactions');
     }
 
-    $transactions = $em->getRepository(TransactionWallet::class)->findAll();
+$query = $em->getRepository(TransactionWallet::class)
+            ->createQueryBuilder('t')
+            ->orderBy('t.dateTransaction', 'DESC')
+            ->getQuery();
+
+$transactions = $paginator->paginate(
+    $query,
+    $req->query->getInt('page', 1),
+    5
+);
 
     $categories = $em->getRepository(Category::class)->findAll();
 
@@ -219,6 +242,7 @@ if (isset($data['type'])) {
 
         $form = $this->createForm(TransactionType::class, $transaction, [
     'show_type' => false,
+    'show_category' => false,
 ]);
         $form->handleRequest($req);
 

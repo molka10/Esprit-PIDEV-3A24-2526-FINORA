@@ -31,9 +31,22 @@ class TransactionType extends AbstractType
 }
 
     $builder
-        ->add('montant')
-        ->add('dateTransaction')
-        ->add('save', SubmitType::class);
+    ->add('montant')
+    ->add('dateTransaction'); 
+
+if ($options['show_category']) {
+    $builder->add('category', EntityType::class, [
+    'class' => Category::class,
+    'choice_label' => 'nom',
+    'query_builder' => function (EntityRepository $er) use ($options) {
+        return $er->createQueryBuilder('c')
+            ->where('c.type = :type')
+            ->setParameter('type', $options['type']);
+    },
+]);
+}
+
+$builder->add('save', SubmitType::class);
 }
 
     public function configureOptions(OptionsResolver $resolver)
@@ -42,6 +55,7 @@ class TransactionType extends AbstractType
             'data_class' => TransactionWallet::class,
             'type' => 'INCOME',
             'show_type' => true, 
+            'show_category' => true,
         ]);
     }
 }

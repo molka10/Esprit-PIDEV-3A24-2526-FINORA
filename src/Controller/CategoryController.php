@@ -1,5 +1,6 @@
 <?php
 
+
 namespace App\Controller;
 
 use App\Entity\Category;
@@ -9,12 +10,14 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Knp\Component\Pager\PaginatorInterface;
+
 
 class CategoryController extends AbstractController
 {
     
 
-    #[Route('/category/add', name: 'category_add')]
+#[Route('/category/add', name: 'category_add')]
     public function add(Request $req, EntityManagerInterface $em): Response
     {
         $category = new Category();
@@ -24,7 +27,7 @@ class CategoryController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
 
-            $category->setUserId(rand(1, 5));
+            $category->setUserId(6);
 
             $em->persist($category);
             $em->flush();
@@ -67,29 +70,26 @@ class CategoryController extends AbstractController
     }
 
 
-    #[Route('/category', name: 'category_list')]
-public function list(Request $request, EntityManagerInterface $em)
-{
-    $category = new Category();
-    $form = $this->createForm(CategoryType::class, $category);
 
-    $form->handleRequest($request);
+#[Route('/category', name: 'category_list')]
+    public function list(
+        Request $request,
+        EntityManagerInterface $em,
+        PaginatorInterface $paginator
+    ): Response {
+        $query = $em->getRepository(Category::class)
+                    ->createQueryBuilder('c')
+                    ->getQuery();
 
-    if ($form->isSubmitted() && $form->isValid()) {
+        $categories = $paginator->paginate(
+            $query,
+            $request->query->getInt('page', 1),
+            5
+        );
 
-        $category->setUserId(1);
-
-        $em->persist($category);
-        $em->flush();
-
-        return $this->redirectToRoute('category_list');
+        return $this->render('category/listC.html.twig', [
+            'categories' => $categories
+        ]);
     }
-
-    $categories = $em->getRepository(Category::class)->findAll();
-
-    return $this->render('category/listC.html.twig', [
-        'form' => $form->createView(),
-        'categories' => $categories
-    ]);
 }
-}
+
