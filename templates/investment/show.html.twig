@@ -474,9 +474,9 @@
                             </a>
 
                             <!-- Factsheet Button -->
-                            <button class="btn btn-outline-primary rounded-pill w-100 py-2 mb-3 no-print" onclick="window.print()">
-                                <i class="bi bi-file-earmark-pdf me-1"></i> Télécharger Factsheet
-                            </button>
+                            <a href="{{ path('app_investment_pdf', {id: investment.id}) }}" class="btn btn-outline-primary rounded-pill w-100 py-2 mb-3 no-print" target="_blank">
+                                <i class="bi bi-file-earmark-pdf me-2"></i> Télécharger Factsheet PDF
+                            </a>
 
                             <!-- Investor Count -->
                             <div class="d-flex align-items-center gap-2 mb-3">

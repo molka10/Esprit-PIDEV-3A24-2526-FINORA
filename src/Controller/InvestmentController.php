@@ -75,6 +75,107 @@ final class InvestmentController extends AbstractController
         return $this->redirectToRoute('app_management_new', ['inv_id' => $investment->getId()]);
     }
 
+    /**
+     * ================= PDF FACTSHEET =================
+     */
+    /**
+     * ================= PDF FACTSHEET =================
+     */
+    #[Route('/{id}/factsheet', name: 'app_investment_pdf', methods: ['GET'])]
+    public function pdfFactsheet(int $id, InvestmentRepository $repo): Response
+    {
+        // 1. Try to find in DB (real investment)
+        $project = $repo->find($id);
+        $projectData = null;
+
+        if ($project) {
+            $projectData = [
+                'id' => $project->getId(),
+                'name' => $project->getName(),
+                'category' => $project->getCategory(),
+                'location' => $project->getLocation(),
+                'description' => $project->getDescription(),
+                'annualReturn' => $project->getAnnualReturn(),
+                'durationMonths' => $project->getDurationMonths(),
+                'riskLevel' => $project->getRiskLevel(),
+                'fundingGoal' => $project->getFundingGoal(),
+                'minInvestment' => 500,
+                'imageUrl' => $project->getImageUrl()
+            ];
+        } else {
+            // 2. Try to find in External (simulated projects)
+            $ext = $this->recommendationsBuilder->findExternalById($id);
+            if ($ext) {
+                $projectData = [
+                    'id' => $ext['id'],
+                    'name' => $ext['name'],
+                    'category' => $ext['category'],
+                    'location' => $ext['location'],
+                    'description' => "Projet partenaire certifié FINORA. Haut potentiel de rendement.",
+                    'annualReturn' => 9.50,
+                    'durationMonths' => 24,
+                    'riskLevel' => $ext['risk_level'],
+                    'fundingGoal' => (float)$ext['estimated_value'],
+                    'minInvestment' => 500,
+                    'image_filename' => $ext['image_filename'] ?? null
+                ];
+            }
+        }
+
+        if (!$projectData) {
+            throw $this->createNotFoundException('Projet introuvable.');
+        }
+
+        // --- IMAGE HANDLING FOR DOMPDF ---
+        $imagePath = $this->getParameter('kernel.project_dir') . '/public/assets/images/courses/4by3/04.jpg';
+        
+        $imgName = $projectData['imageUrl'] ?? $projectData['image_filename'] ?? null;
+        
+        if ($imgName && str_starts_with($imgName, 'course-')) {
+            $imagePath = $this->getParameter('kernel.project_dir') . '/public/uploads/investments/' . $imgName;
+        }
+        
+        $logoPath = $this->getParameter('kernel.project_dir') . '/public/assets/images/logo-finora.png';
+        
+        $base64Image = $this->encodeImageToBase64($imagePath);
+        $base64Logo = $this->encodeImageToBase64($logoPath);
+
+        // --- GENERATE PDF ---
+        $html = $this->renderView('investment/pdf_factsheet.html.twig', [
+            'project' => $projectData,
+            'image_base64' => $base64Image,
+            'logo_base64' => $base64Logo,
+        ]);
+
+        $dompdf = new \Dompdf\Dompdf();
+        $dompdf->setOptions(new \Dompdf\Options([
+            'isRemoteEnabled' => true,
+            'defaultFont' => 'Helvetica'
+        ]));
+        
+        $dompdf->loadHtml($html);
+        $dompdf->setPaper('A4', 'portrait');
+        $dompdf->render();
+
+        $output = $dompdf->output();
+        $filename = 'Finora_Factsheet_' . $id . '.pdf';
+
+        return new Response($output, 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+        ]);
+    }
+
+    private function encodeImageToBase64(string $path): string
+    {
+        if (!file_exists($path)) {
+            return '';
+        }
+        $data = file_get_contents($path);
+        $type = pathinfo($path, PATHINFO_EXTENSION);
+        return 'data:image/' . $type . ';base64,' . base64_encode($data);
+    }
+
     private function getRole(Request $request)
     {
         return $request->getSession()->get('role');

@@ -105,24 +105,22 @@
                                             <td class="text-center">+5.0%</td>
                                         </tr>
                                         <tr class="table-primary text-primary fw-bold">
-                                            <td>Performance Totale</td>
-                                            <td class="text-center">10.5%</td>
-                                            <td class="fw-bold">Rendement distribué</td>
-                                            <td class="text-center">4.75%</td>
-                                            <td class="text-center">4.75%</td>
-                                            <td class="text-center">9.50%</td>
+                                            <td>Performance (Intermédiaire)</td>
+                                            <td class="text-center">10.50%</td>
+                                            <td class="text-center">12.70%</td>
+                                            <td class="text-center">13.50%</td>
                                         </tr>
                                         <tr>
                                             <td class="fw-bold">Valorisation capital</td>
                                             <td class="text-center">Non-garantie</td>
                                             <td class="text-center">Libération</td>
-                                            <td class="text-center">100%</td>
+                                            <td class="text-center">100.00%</td>
                                         </tr>
                                         <tr class="bg-primary text-white fw-bold">
                                             <td class="text-white">Performance Globale</td>
                                             <td class="text-center text-white">4.75%</td>
                                             <td class="text-center text-white">104.75%</td>
-                                            <td class="text-center text-white">109.5%</td>
+                                            <td class="text-center text-white">109.50%</td>
                                         </tr>
                                     </tbody>
                                 </table>
@@ -160,9 +158,9 @@
                             <a href="{{ path('app_investment_external_invest', {id: project.id}) }}" class="btn btn-primary py-3 fw-bold rounded-pill">
                                 Placer un ordre
                             </a>
-                            <button class="btn btn-outline-primary py-2 rounded-pill" onclick="window.print()">
-                                Télécharger Factsheet PDF
-                            </button>
+                            <a href="{{ path('app_investment_pdf', {id: project.id}) }}" class="btn btn-outline-primary py-2 rounded-pill" target="_blank">
+                                <i class="bi bi-file-earmark-pdf me-2"></i>Télécharger Factsheet PDF
+                            </a>
                         </div>
                     </div>
                 </div>

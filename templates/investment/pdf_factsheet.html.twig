@@ -126,13 +126,18 @@
     <div class="pdf-header">
         <table class="header-table">
             <tr>
-                <td style="width: 70%;">
-                    <h1 class="header-title">FICHE D'INVESTISSEMENT</h1>
-                    <div class="header-subtitle">Dossier technique de synthèse certifié FINORA</div>
+                <td style="width: 20%; vertical-align: middle;">
+                    {% if logo_base64 %}
+                        <img src="{{ logo_base64 }}" style="height: 50px; filter: brightness(0) invert(1);">
+                    {% endif %}
                 </td>
-                <td style="width: 30%; text-align: right; vertical-align: top;">
+                <td style="width: 50%; vertical-align: middle; padding-left: 20px;">
+                    <h1 class="header-title" style="font-size: 24px;">FICHE D'INVESTISSEMENT</h1>
+                    <div class="header-subtitle">Dossier technique certifié par FINORA</div>
+                </td>
+                <td style="width: 30%; text-align: right; vertical-align: middle;">
                     <div style="font-size: 12px; font-weight: bold; margin-bottom: 5px;">PROJET #INV-{{ project.id|default('9000') }}</div>
-                    <div style="font-size: 11px; opacity: 0.8;">{{ "now"|date("d/m/Y") }}</div>
+                    <div style="font-size: 11px; opacity: 0.8;">Édité le : {{ "now"|date("d/m/Y") }}</div>
                 </td>
             </tr>
         </table>
@@ -140,8 +145,8 @@
 
     <!-- 2. HERO SECTION -->
     <div class="hero-section">
-        {% if project.imageUrl is defined and project.imageUrl %}
-            <img src="{{ image_path }}" class="hero-img">
+        {% if image_base64 %}
+            <img src="{{ image_base64 }}" class="hero-img">
         {% else %}
             <img src="https://images.unsplash.com/photo-1560518883-ce09059ee712?auto=format&fit=crop&w=1200" class="hero-img">
         {% endif %}
@@ -212,30 +217,42 @@
         <table class="financial-table">
             <thead>
                 <tr>
-                    <th>Indicateur</th>
-                    <th>Année 1</th>
-                    <th>Année 2</th>
-                    <th>Sortie (Année 3)</th>
+                    <th style="width: 40%;">Indicateur</th>
+                    <th style="width: 20%; text-align: center;">Année 1</th>
+                    <th style="width: 20%; text-align: center;">Année 2</th>
+                    <th style="width: 20%; text-align: center;">Année 3 (Sortie)</th>
                 </tr>
             </thead>
             <tbody>
                 <tr>
                     <td>Revenus nets distribués</td>
-                    <td>7.50%</td>
-                    <td>8.00%</td>
-                    <td>8.50%</td>
+                    <td style="text-align: center;">7.50%</td>
+                    <td style="text-align: center;">8.20%</td>
+                    <td style="text-align: center;">8.50%</td>
                 </tr>
                 <tr>
-                    <td>Valorisation estimée</td>
-                    <td>+3.5%</td>
-                    <td>+4.2%</td>
-                    <td>+5.1%</td>
+                    <td>Valorisation de l'actif</td>
+                    <td style="text-align: center;">+3.0%</td>
+                    <td style="text-align: center;">+4.5%</td>
+                    <td style="text-align: center;">+5.0%</td>
                 </tr>
-                <tr class="row-highlight">
+                <tr style="background-color: #f5f3ff; color: #4f46e5; font-weight: bold;">
+                    <td>Performance (Intermédiaire)</td>
+                    <td style="text-align: center;">10.50%</td>
+                    <td style="text-align: center;">12.70%</td>
+                    <td style="text-align: center;">13.50%</td>
+                </tr>
+                <tr>
+                    <td>Valorisation capital</td>
+                    <td style="text-align: center;">Non-garantie</td>
+                    <td style="text-align: center;">Libération</td>
+                    <td style="text-align: center;">100.00%</td>
+                </tr>
+                <tr style="background-color: #7c3aed; color: #ffffff; font-weight: bold;">
                     <td>Performance Globale</td>
-                    <td>11.00%</td>
-                    <td>12.20%</td>
-                    <td>113.60%</td>
+                    <td style="text-align: center; color: white;">4.75%</td>
+                    <td style="text-align: center; color: white;">104.75%</td>
+                    <td style="text-align: center; color: white;">109.50%</td>
                 </tr>
             </tbody>
         </table>
@@ -246,10 +263,18 @@
     <div class="pdf-footer">
         <table style="width: 100%;">
             <tr>
-                <td style="width: 60%;">
-                    <div style="font-weight: bold; font-size: 14px; color: #7c3aed;">FINORA.io</div>
+                <td style="width: 65%;">
+                    <div style="margin-bottom: 10px;">
+                         {% if logo_base64 %}
+                            <img src="{{ logo_base64 }}" style="height: 25px;">
+                        {% else %}
+                            <div style="font-weight: bold; font-size: 16px; color: #7c3aed;">FINORA.io</div>
+                        {% endif %}
+                    </div>
                     <div class="footer-legal">
-                        Ce document constitue une synthèse promotionnelle. L'investissement dans des actifs immobiliers comporte des risques de perte en capital et d'illiquidité. Nous vous recommandons de consulter votre conseiller financier. Document généré automatiquement le {{ "now"|date("d/m/Y H:i") }}.
+                        Ce document constitue une synthèse promotionnelle officielle. L'investissement comporte des risques. 
+                        Rapport certifié par le protocole FINORA Secured Audit. 
+                        Document généré sur finora.io le {{ "now"|date("d/m/Y H:i") }}.
                     </div>
                 </td>
                 <td style="width: 40%; text-align: right; vertical-align: top;">
