@@ -1,0 +1,258 @@
+{% extends 'admin/baseA.html.twig' %}
+
+{% block title %}Tableau de Bord & Documentation API Admin{% endblock %}
+
+{% block body %}
+<div class="container-fluid py-5 px-4 px-xl-5">
+    <div class="d-flex justify-content-between align-items-center mb-5">
+        <div>
+            <h1 class="display-5 fw-bold text-primary mb-2">Admin</h1>
+        </div>
+      
+    </div>
+
+    <!-- Statistics Section -->
+    <div class="card border-0 shadow-sm mb-5">
+        <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center">
+            <h5 class="mb-0 fw-bold">
+                <i class="bi bi-bar-chart-fill text-success me-2"></i> Quick Statistics API Data
+            </h5>
+            <button class="btn btn-sm btn-outline-success" onclick="fetchStatistics()">
+                <i class="bi bi-arrow-clockwise"></i> Actualiser le Statut
+            </button>
+        </div>
+        <div class="card-body bg-light">
+            <div class="row text-center" id="statsContainer">
+                <div class="col-md-6 mx-auto">
+                    <div class="p-3 bg-white rounded shadow-sm text-center">
+                        <small class="text-muted text-uppercase fw-bold">Total Trans.</small>
+                        <h3 class="mb-0 mt-2" id="stat-total">-</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Data Search & Bulk Operations -->
+    <div class="card border-0 shadow-sm mb-5">
+         <div class="card-header bg-white border-bottom py-3">
+            <h5 class="mb-0 fw-bold">
+                <i class="bi bi-table text-primary me-2"></i> Grille des Transactions (Avec Filtres)
+            </h5>
+        </div>
+        <div class="card-body">
+            <!-- Filters -->
+            <form id="searchForm" class="row g-3 mb-4 bg-light p-3 rounded">
+                <div class="col-md-3">
+                    <label class="form-label small fw-bold">Recherche</label>
+                    <input type="text" id="filter-search" class="form-control form-control-sm" placeholder="Nom...">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label small fw-bold">Type</label>
+                    <select id="filter-type" class="form-select form-select-sm">
+                        <option value="">All</option>
+                        <option value="INCOME">Revenus</option>
+                        <option value="OUTCOME">Dépenses</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label small fw-bold">Montant Min</label>
+                    <input type="number" id="filter-min" class="form-control form-control-sm" placeholder="e.g. 100">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label small fw-bold">Montant Max</label>
+                    <input type="number" id="filter-max" class="form-control form-control-sm" placeholder="e.g. 5000">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label small fw-bold">Trier Par</label>
+                    <select id="filter-sort" class="form-select form-select-sm">
+                        <option value="dateTransaction">Date</option>
+                        <option value="montant">Montant</option>
+                        <option value="nomTransaction">Nom</option>
+                    </select>
+                </div>
+                <div class="col-md-1 d-flex align-items-end">
+                    <button type="submit" class="btn btn-sm btn-primary w-100">Search</button>
+                </div>
+            </form>
+
+            <div class="d-flex justify-content-between mb-3 align-items-center">
+                <div>
+                    <button class="btn btn-sm btn-danger" onclick="executeBulk('delete')">Bulk Supprimer</button>
+                </div>
+                <div>
+                    <span class="badge bg-secondary" id="page-info">Page 1 / 1</span>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-hover align-middle border">
+                    <thead class="table-light">
+                        <tr>
+                            <th style="width: 40px;">
+                                <input class="form-check-input" type="checkbox" id="checkAll">
+                            </th>
+                            <th>Nom Utilisateur</th>
+                            <th>Transaction</th>
+                            <th>Type</th>
+                            <th>Montant</th>
+                        </tr>
+                    </thead>
+                    <tbody id="apiTableBody">
+                        <tr><td colspan="7" class="text-center py-4">Chargement depuis l'API...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="d-flex justify-content-between mt-3">
+                <button class="btn btn-sm btn-outline-primary" id="btn-prev" onclick="changePage(-1)" disabled>Previous</button>
+                <button class="btn btn-sm btn-outline-primary" id="btn-next" onclick="changePage(1)" disabled>Next</button>
+            </div>
+        </div>
+    </div>
+    
+   
+</div>
+
+<script>
+    const API_KEY = 'finora-admin-secret-777';
+    const API_URL = '/api/admin';
+    let currentPage = 1;
+
+    // Utility fetch wrapper with API key
+    async function apiFetch(endpoint, options = {}) {
+        const headers = {
+            'Content-Type': 'application/json',
+            'X-API-KEY': API_KEY,
+            ...(options.headers || {})
+        };
+        const response = await fetch(API_URL + endpoint, { ...options, headers });
+        const result = await response.json();
+        
+        if (!response.ok) {
+            alert("API Error: " + (result.error || response.statusText));
+            throw new Error(result.error);
+        }
+        return result;
+    }
+
+    // Load Stats
+    async function fetchStatistics() {
+        try {
+            const data = await apiFetch('/statistics');
+            document.getElementById('stat-total').innerText = data.data.counts.total;
+        } catch (e) {}
+    }
+
+    // Load Grid
+    async function loadGrid() {
+        const queryParams = new URLSearchParams({
+            page: currentPage,
+            limit: 5,
+            sortBy: document.getElementById('filter-sort').value,
+            sortOrder: 'DESC'
+        });
+
+        const search = document.getElementById('filter-search').value;
+        const type = document.getElementById('filter-type').value;
+        const minMontant = document.getElementById('filter-min').value;
+        const maxMontant = document.getElementById('filter-max').value;
+        
+        if(search) queryParams.append('search', search);
+        if(type) queryParams.append('type', type);
+        if(minMontant) queryParams.append('minMontant', minMontant);
+        if(maxMontant) queryParams.append('maxMontant', maxMontant);
+
+        try {
+            const result = await apiFetch(`/transactions?${queryParams.toString()}`);
+            const tbody = document.getElementById('apiTableBody');
+            
+            if(result.data.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="text-center py-4 text-muted">Aucun enregistrement trouvé.</td></tr>`;
+            } else {
+                tbody.innerHTML = result.data.map(item => `
+                    <tr>
+                        <td><input class="form-check-input bulk-check" type="checkbox" value="${item.id}"></td>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="avatar avatar-xs me-2">
+                                    <div class="avatar-img rounded-circle bg-primary bg-opacity-10 text-primary d-flex align-items-center justify-content-center" style="width:24px; height:24px; font-size:12px;">
+                                        <i class="bi bi-person-fill"></i>
+                                    </div>
+                                </div>
+                                <span class="fw-bold">${item.userNom}</span>
+                            </div>
+                        </td>
+                        <td>${item.name}</td>
+                        <td><span class="badge bg-${item.type === 'INCOME' ? 'success' : 'danger'} bg-opacity-10 text-${item.type === 'INCOME' ? 'success' : 'danger'} border border-${item.type === 'INCOME' ? 'success' : 'danger'}">${item.type}</span></td>
+                        <td class="fw-bold fs-6">${item.amount} DT</td>
+                    </tr>
+                `).join('');
+            }
+            
+            // Pagination handling
+            const meta = result.meta;
+            document.getElementById('page-info').innerText = `Page ${meta.page} / ${meta.totalPages || 1}`;
+            document.getElementById('btn-prev').disabled = meta.page <= 1;
+            document.getElementById('btn-next').disabled = meta.page >= meta.totalPages;
+            
+        } catch (e) {}
+    }
+
+    // Toggle single status via PATCH
+    async function toggleStatus(id, checkbox) {
+        try {
+            await apiFetch(`/transactions/${id}/status`, {
+                method: 'PATCH',
+                body: JSON.stringify({ isActive: checkbox.checked })
+            });
+            fetchStatistics();
+        } catch(e) {
+            checkbox.checked = !checkbox.checked; // revert UI
+        }
+    }
+
+    // Bulk Operations
+    async function executeBulk(action) {
+        const checkboxes = document.querySelectorAll('.bulk-check:checked');
+        const ids = Array.from(checkboxes).map(cb => parseInt(cb.value));
+        
+        if(ids.length === 0) return alert("Veuillez sélectionner au moins un élément.");
+        
+        if(action === 'delete' && !confirm("Êtes-vous sûr de vouloir supprimer ces enregistrements ?")) return;
+
+        try {
+            await apiFetch('/transactions/bulk', {
+                method: 'POST',
+                body: JSON.stringify({ action, ids })
+            });
+            alert('Opération réussie');
+            loadGrid();
+            fetchStatistics();
+            document.getElementById('checkAll').checked = false;
+        } catch (e) {}
+    }
+
+    // Handlers
+    document.getElementById('searchForm').addEventListener('submit', (e) => {
+        e.preventDefault();
+        currentPage = 1;
+        loadGrid();
+    });
+
+    document.getElementById('checkAll').addEventListener('change', (e) => {
+        document.querySelectorAll('.bulk-check').forEach(cb => cb.checked = e.target.checked);
+    });
+
+    function changePage(delta) {
+        currentPage += delta;
+        loadGrid();
+    }
+
+    // Init
+    document.addEventListener("DOMContentLoaded", () => {
+        fetchStatistics();
+        loadGrid();
+    });
+</script>
+{% endblock %}

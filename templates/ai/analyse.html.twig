@@ -1,0 +1,106 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Analyse IA - Finora{% endblock %}
+
+{% block content %}
+<div class="container mt-5 mb-5 pt-4">
+    <div class="d-flex align-items-center justify-content-between mb-4">
+        <div>
+            <h1 class="fw-bold" style="color: #1e1b4b; margin: 0; font-size: 2.5rem;">
+               <i class="bi bi-robot text-primary me-2"></i> Analyse IA Financière
+            </h1>
+            <p class="text-muted mt-2 fs-5">Voici les prédictions intelligentes générées à partir de votre portefeuille.</p>
+        </div>
+        <a href="{{ path('dashboard') }}" class="btn btn-outline-secondary px-4 py-2" style="border-radius: 12px; font-weight: 600;">
+            <i class="bi bi-arrow-left me-2"></i> Retour au Tableau de Bord
+        </a>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 24px; width: 100%; margin-bottom: 30px;">
+        <!-- Solde Projeté -->
+        <div style="background: linear-gradient(135deg, #ffffff, #fcfaff); border: 1px solid #e2e8f0; border-radius: 20px; padding: 24px; display: flex; flex-direction: column; gap: 12px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05);">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <div style="width: 48px; height: 48px; border-radius: 12px; background: #eff6ff; display: flex; align-items: center; justify-content: center; color: #3b82f6; font-size: 1.5rem;">
+                    <i class="bi bi-wallet2"></i>
+                </div>
+                <span style="font-size:14px; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:0.05em;">Solde Projeté</span>
+            </div>
+            <strong style="font-family:'Inter', sans-serif; font-size:32px; color:#0f172a; margin-top: 8px;">{{ data.balance }} <span style="font-size: 16px; color: #64748b;">DT</span></strong>
+            <p class="mb-0 text-muted small">Basé sur vos transactions actuelles</p>
+        </div>
+
+        <!-- Ratio -->
+        <div style="background: linear-gradient(135deg, #ffffff, #fcfaff); border: 1px solid #e2e8f0; border-radius: 20px; padding: 24px; display: flex; flex-direction: column; gap: 12px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05);">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <div style="width: 48px; height: 48px; border-radius: 12px; background: #fdf4ff; display: flex; align-items: center; justify-content: center; color: #d946ef; font-size: 1.5rem;">
+                    <i class="bi bi-pie-chart-fill"></i>
+                </div>
+                <span style="font-size:14px; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:0.05em;">Ratio d'Activité</span>
+            </div>
+            <strong style="font-family:'Inter', sans-serif; font-size:32px; color:#0f172a; margin-top: 8px;">{{ data.ratio }}%</strong>
+             <p class="mb-0 text-muted small">Dépenses par rapport aux revenus</p>
+        </div>
+
+        <!-- Risk -->
+        <div style="background: linear-gradient(135deg, #ffffff, #fcfaff); border: 1px solid #e2e8f0; border-radius: 20px; padding: 24px; display: flex; flex-direction: column; gap: 12px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05);">
+             <div style="display: flex; align-items: center; gap: 12px;">
+                <div style="width: 48px; height: 48px; border-radius: 12px; background: #fff1f2; display: flex; align-items: center; justify-content: center; color: #e11d48; font-size: 1.5rem;">
+                    <i class="bi bi-shield-exclamation"></i>
+                </div>
+                <span style="font-size:14px; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:0.05em;">Niveau de Risque</span>
+            </div>
+            
+            {% set colorMap = {
+                'high': '#e11d48',
+                'medium': '#f59e0b',
+                'low': '#10b981'
+            } %}
+            <strong style="font-family:'Inter', sans-serif; font-size:30px; margin-top: 8px; color: {{ colorMap[data.cssClass] | default('#0f172a') }};">
+                {{ data.risk }}
+            </strong>
+            <p class="mb-0 text-muted small">Analyse de la volatilité financière</p>
+        </div>
+
+        <!-- Future Expenses -->
+        <div style="background: linear-gradient(135deg, #ffffff, #fcfaff); border: 1px solid #e2e8f0; border-radius: 20px; padding: 24px; display: flex; flex-direction: column; gap: 12px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05);">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <div style="width: 48px; height: 48px; border-radius: 12px; background: #f0fdf4; display: flex; align-items: center; justify-content: center; color: #16a34a; font-size: 1.5rem;">
+                    <i class="bi bi-graph-up-arrow"></i>
+                </div>
+                <span style="font-size:14px; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:0.05em;">Dépenses Futures</span>
+            </div>
+            <strong style="font-family:'Inter', sans-serif; font-size:32px; color:#0f172a; margin-top: 8px;">{{ data.predictedExpenses }} <span style="font-size: 16px; color: #64748b;">DT</span></strong>
+            <p class="mb-0 text-muted small">Estimation pour la prochaine période</p>
+        </div>
+    </div>
+
+    <!-- Recommendations Box -->
+    <div style="
+        background: white;
+        border-radius: 24px;
+        padding: 32px;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 20px 25px -5px rgba(0,0,0,0.05);
+    ">
+        <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 24px;">
+            <div style="background: linear-gradient(135deg, #7c3aed, #4f46e5); color: white; border-radius: 50%; width: 56px; height: 56px; display: flex; align-items: center; justify-content: center; font-size: 1.8rem;">
+                <i class="bi bi-lightbulb-fill"></i>
+            </div>
+            <div>
+                <h2 style="font-size:24px; font-weight:800; color:#1e293b; margin:0;">
+                    L'IA Vous Conseille
+                </h2>
+                <p class="text-muted mb-0" style="font-size: 15px;">Actions suggérées pour optimiser votre portefeuille.</p>
+            </div>
+        </div>
+        <ul style="margin:0; padding-left:0; list-style: none; display: flex; flex-direction: column; gap: 16px;">
+            {% for r in data.recommendation %}
+                <li style="font-size:16px; line-height: 1.6; color:#334155; background: #f8fafc; padding: 20px 24px; border-radius: 12px; border-left: 6px solid #7c3aed; display: flex; align-items: center; gap: 12px;">
+                    <i class="bi bi-chevron-double-right text-primary" style="opacity: 0.7;"></i> 
+                    <span>{{ r }}</span>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+{% endblock %}

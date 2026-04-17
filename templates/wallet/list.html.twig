@@ -2,65 +2,96 @@
 
 {% block content %}
 
-<div class="page">
-
-    <div class="card">
-
-        <div class="header-form">
-            <h2>Transactions</h2>
-
-            <a href="{{ path('transaction_add') }}" class="btn">
-                ➕ Add Transaction
+<div class="container py-5">
+    <div class="card border-0 shadow-sm mb-5">
+        <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center">
+            <h5 class="mb-0 fw-bold">
+                <i class="bi bi-table text-primary me-2"></i> Grille des Transactions
+            </h5>
+            <a href="{{ path('transaction_add') }}" class="btn btn-sm btn-primary">
+                <i class="bi bi-plus-lg me-1"></i> Ajouter une Transaction
             </a>
         </div>
+        
+        <div class="card-body">
+            <!-- Advanced Filters Form -->
+            <form method="get" class="row g-3 mb-4 bg-light p-3 rounded mx-1">
+                <div class="col-md-3">
+                    <label class="form-label small fw-bold">Recherche</label>
+                    <input type="text" name="search" class="form-control form-control-sm" placeholder="Nom..." value="{{ app.request.query.get('search') }}">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label small fw-bold">Type</label>
+                    <select name="filter_type" class="form-select form-select-sm">
+                        <option value="">Tous</option>
+                        <option value="INCOME" {% if app.request.query.get('filter_type') == 'INCOME' %}selected{% endif %}>Revenu</option>
+                        <option value="OUTCOME" {% if app.request.query.get('filter_type') == 'OUTCOME' %}selected{% endif %}>Dépense</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label small fw-bold">Montant Min</label>
+                    <input type="number" name="min" class="form-control form-control-sm" placeholder="ex. 100" value="{{ app.request.query.get('min') }}">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label small fw-bold">Montant Max</label>
+                    <input type="number" name="max" class="form-control form-control-sm" placeholder="ex. 5000" value="{{ app.request.query.get('max') }}">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label small fw-bold">Trier Par</label>
+                    <select name="sortBy" class="form-select form-select-sm">
+                        <option value="dateTransaction" {% if app.request.query.get('sortBy') == 'dateTransaction' %}selected{% endif %}>Date</option>
+                        <option value="montant" {% if app.request.query.get('sortBy') == 'montant' %}selected{% endif %}>Montant</option>
+                        <option value="nomTransaction" {% if app.request.query.get('sortBy') == 'nomTransaction' %}selected{% endif %}>Nom</option>
+                    </select>
+                </div>
+                <div class="col-md-1 d-flex align-items-end">
+                    <button type="submit" class="btn btn-sm btn-primary w-100"><i class="bi bi-search"></i></button>
+                </div>
+            </form>
 
-        <table>
-            <thead>
-                <tr>
-                    <th>Nom</th>
-                    <th>Type</th>
-                    <th>Montant</th>
-                    <th>Category</th>
-                    <th>Date</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle border">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Nom</th>
+                            <th>Type</th>
+                            <th>Montant</th>
+                            <th>Catégorie</th>
+                            <th>Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for t in transactions %}
+                        <tr>
+                            <td class="fw-bold">{{ t.nomTransaction }}</td>
+                            <td>
+                                <span class="badge bg-{{ t.type == 'INCOME' ? 'success' : 'danger' }} bg-opacity-10 text-{{ t.type == 'INCOME' ? 'success' : 'danger' }} border border-{{ t.type == 'INCOME' ? 'success' : 'danger' }}">
+                                    {{ t.type }}
+                                </span>
+                            </td>
+                            <td class="fw-bold fs-6">{{ t.montant }} DT</td>
+                            <td>{{ t.category ? t.category.nom : 'Aucune catégorie' }}</td>
+                            <td>{{ t.dateTransaction|date('Y-m-d') }}</td>
+                            <td>
+                                <a href="/edit/{{ t.id }}" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil"></i></a>
+                                <a href="/delete/{{ t.id }}" class="btn btn-sm btn-outline-danger delete"><i class="bi bi-trash"></i></a>
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="6" class="text-center py-4 text-muted">Aucun enregistrement trouvé.</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
 
-            <tbody>
-            {% for t in transactions %}
-                <tr>
-                    <td>{{ t.nomTransaction }}</td>
-
-                    <td>
-                        <span class="badge {{ t.type == 'INCOME' ? 'income' : 'outcome' }}">
-                            {{ t.type }}
-                        </span>
-                    </td>
-
-                    <td>
-                        <span class="badge {{ t.montant > 0 ? 'income' : 'outcome' }}">
-                            {{ t.montant }} DT
-                        </span>
-                    </td>
-
-                    <td>{{ t.category ? t.category.nom : 'No category' }}</td>
-
-                    <td>{{ t.dateTransaction|date('Y-m-d') }}</td>
-
-                    <td>
-                        <a href="/edit/{{ t.id }}" class="btn">✏️</a>
-                        <a href="/delete/{{ t.id }}" class="btn delete">🗑</a>
-                    </td>
-                </tr>
-            {% endfor %}
-            </tbody>
-        </table>
-       <div class="pagination">
-    {{ knp_pagination_render(transactions) }}
-</div>
-
+            <div class="d-flex justify-content-between mt-3">
+                {{ knp_pagination_render(transactions) }}
+            </div>
+        </div>
     </div>
-
 </div>
 
 {% endblock %}

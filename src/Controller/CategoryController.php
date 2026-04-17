@@ -77,9 +77,27 @@ class CategoryController extends AbstractController
         EntityManagerInterface $em,
         PaginatorInterface $paginator
     ): Response {
-        $query = $em->getRepository(Category::class)
-                    ->createQueryBuilder('c')
-                    ->getQuery();
+        $qb = $em->getRepository(Category::class)->createQueryBuilder('c');
+
+        $search = $request->query->get('search');
+        $filterType = $request->query->get('filter_type');
+        $sortBy = $request->query->get('sortBy', 'nom');
+
+        if ($search) {
+            $qb->andWhere('c.nom LIKE :search')->setParameter('search', '%' . $search . '%');
+        }
+        if ($filterType) {
+            $qb->andWhere('c.type = :type')->setParameter('type', $filterType);
+        }
+        
+        $allowedSorts = ['nom', 'priorite'];
+        if (in_array($sortBy, $allowedSorts)) {
+            $qb->orderBy('c.' . $sortBy, 'ASC');
+        } else {
+            $qb->orderBy('c.nom', 'ASC');
+        }
+
+        $query = $qb->getQuery();
 
         $categories = $paginator->paginate(
             $query,

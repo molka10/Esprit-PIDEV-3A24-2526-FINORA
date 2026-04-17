@@ -38,6 +38,9 @@ class TransactionWallet
     #[ORM\Column(name: "user_id")]
     private ?int $userId = null;
 
+    #[ORM\Column(type: "boolean", options: ["default" => true])]
+    private ?bool $isActive = true;
+
     public function getUserId(): ?int
 {
     return $this->userId;
@@ -110,6 +113,17 @@ class TransactionWallet
     public function setCategoryId(int $categoryId): static
     {
         $this->categoryId = $categoryId;
+        return $this;
+    }
+
+    public function getIsActive(): ?bool
+    {
+        return $this->isActive;
+    }
+
+    public function setIsActive(bool $isActive): static
+    {
+        $this->isActive = $isActive;
         return $this;
     }
 

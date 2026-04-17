@@ -116,10 +116,34 @@ $categoryId = $data['category'] ?? null;
         return $this->redirectToRoute('transactions');
     }
 
-$query = $em->getRepository(TransactionWallet::class)
-            ->createQueryBuilder('t')
-            ->orderBy('t.dateTransaction', 'DESC')
-            ->getQuery();
+$qb = $em->getRepository(TransactionWallet::class)->createQueryBuilder('t');
+
+$search = $req->query->get('search');
+$filterType = $req->query->get('filter_type');
+$min = $req->query->get('min');
+$max = $req->query->get('max');
+$sortBy = $req->query->get('sortBy', 'dateTransaction');
+
+if ($search) {
+    $qb->andWhere('t.nomTransaction LIKE :search')->setParameter('search', '%' . $search . '%');
+}
+if ($filterType) {
+    $qb->andWhere('t.type = :type')->setParameter('type', $filterType);
+}
+if ($min !== null && $min !== '') {
+    $qb->andWhere('t.montant >= :min')->setParameter('min', $min);
+}
+if ($max !== null && $max !== '') {
+    $qb->andWhere('t.montant <= :max')->setParameter('max', $max);
+}
+$allowedSorts = ['dateTransaction', 'montant', 'nomTransaction'];
+if (in_array($sortBy, $allowedSorts)) {
+    $qb->orderBy('t.' . $sortBy, 'DESC');
+} else {
+    $qb->orderBy('t.dateTransaction', 'DESC');
+}
+
+$query = $qb->getQuery();
 
 $transactions = $paginator->paginate(
     $query,

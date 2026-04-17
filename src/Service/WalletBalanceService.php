@@ -19,10 +19,12 @@ class WalletBalanceService
         $balance = 0.0;
 
         foreach ($transactions as $transaction) {
+            // Because outcomes are often saved as negative values natively in the DB, 
+            // we should just add the raw values, or strictly use absolute values.
             if (strtolower($transaction->getType()) === 'income' || strtolower($transaction->getType()) === 'revenu') {
-                $balance += $transaction->getMontant();
+                $balance += abs($transaction->getMontant());
             } else {
-                $balance -= $transaction->getMontant();
+                $balance -= abs($transaction->getMontant());
             }
         }
 

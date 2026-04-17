@@ -281,4 +281,29 @@ public function searchUsers(Request $request, TransactionWalletRepository $repo,
         'users' => $users
     ]);
 }
+
+    #[Route('/admin/fraud-audit', name: 'admin_fraud_audit')]
+    public function fraudAudit(TransactionWalletRepository $repo): Response
+    {
+        // Métier Logic: Detection of Fraud or Anomalies (Very high transactions)
+        $threshold = 5000;
+        
+        $qb = $repo->createQueryBuilder('t')
+            ->where('t.montant >= :threshold OR t.montant <= -:threshold')
+            ->setParameter('threshold', $threshold)
+            ->orderBy('t.montant', 'DESC');
+            
+        $anomalies = $qb->getQuery()->getResult();
+        
+        $totalRiskyVolume = 0;
+        foreach($anomalies as $t) {
+            $totalRiskyVolume += abs($t->getMontant());
+        }
+
+        return $this->render('admin/fraud.html.twig', [
+            'anomalies' => $anomalies,
+            'threshold' => $threshold,
+            'totalRiskyVolume' => $totalRiskyVolume
+        ]);
+    }
 }

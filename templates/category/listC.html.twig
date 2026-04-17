@@ -2,53 +2,85 @@
 
 {% block content %}
 
-<div class="page">
-
-    <div class="card">
-
-        <div class="header-form">
-            <h2>Categories</h2>
-
-            <a href="{{ path('category_add') }}" class="btn">
-                ➕ Add Category
+<div class="container py-5">
+    <div class="card border-0 shadow-sm mb-5">
+        <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center">
+            <h5 class="mb-0 fw-bold">
+                <i class="bi bi-tags-fill text-primary me-2"></i> Grille des Catégories
+            </h5>
+            <a href="{{ path('category_add') }}" class="btn btn-sm btn-primary">
+                <i class="bi bi-plus-lg me-1"></i> Ajouter une Catégorie
             </a>
         </div>
+        
+        <div class="card-body">
+            <!-- Advanced Filters Form -->
+            <form method="get" class="row g-3 mb-4 bg-light p-3 rounded mx-1">
+                <div class="col-md-4">
+                    <label class="form-label small fw-bold">Recherche</label>
+                    <input type="text" name="search" class="form-control form-control-sm" placeholder="Nom de Catégorie..." value="{{ app.request.query.get('search') }}">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label small fw-bold">Type</label>
+                    <select name="filter_type" class="form-select form-select-sm">
+                        <option value="">Tous</option>
+                        <option value="INCOME" {% if app.request.query.get('filter_type') == 'INCOME' %}selected{% endif %}>Revenu</option>
+                        <option value="OUTCOME" {% if app.request.query.get('filter_type') == 'OUTCOME' %}selected{% endif %}>Dépense</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label small fw-bold">Trier Par</label>
+                    <select name="sortBy" class="form-select form-select-sm">
+                        <option value="nom" {% if app.request.query.get('sortBy') == 'nom' %}selected{% endif %}>Nom</option>
+                        <option value="priorite" {% if app.request.query.get('sortBy') == 'priorite' %}selected{% endif %}>Priorité</option>
+                    </select>
+                </div>
+                <div class="col-md-2 d-flex align-items-end">
+                    <button type="submit" class="btn btn-sm btn-primary w-100"><i class="bi bi-search"></i> Rechercher</button>
+                </div>
+            </form>
 
-        <table>
-            <thead>
-                <tr>
-                    <th>Nom</th>
-                    <th>Type</th>
-                    <th>Priority</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle border">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Nom</th>
+                            <th>Type</th>
+                            <th>Priorité</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for c in categories %}
+                        <tr>
+                            <td class="fw-bold">{{ c.nom }}</td>
+                            <td>
+                                <span class="badge bg-{{ c.type == 'INCOME' ? 'success' : 'danger' }} bg-opacity-10 text-{{ c.type == 'INCOME' ? 'success' : 'danger' }} border border-{{ c.type == 'INCOME' ? 'success' : 'danger' }}">
+                                    {{ c.type }}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="badge bg-secondary">{{ c.priorite }}</span>
+                            </td>
+                            <td>
+                                <a href="{{ path('category_edit', {'id': c.id}) }}" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil"></i></a>
+                                <a href="{{ path('category_delete', {'id': c.id}) }}" class="btn btn-sm btn-outline-danger delete"><i class="bi bi-trash"></i></a>
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="4" class="text-center py-4 text-muted">Aucune catégorie trouvée.</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
 
-            <tbody>
-            {% for c in categories %}
-                <tr>
-                    <td>{{ c.nom }}</td>
-                    <td>{{ c.type }}</td>
-                    <td>{{ c.priorite }}</td>
-                    <td>
-                        <a href="{{ path('category_edit', {'id': c.id}) }}" class="btn">✏️</a>
-                        <a href="{{ path('category_delete', {'id': c.id}) }}" class="btn delete">🗑️</a>
-                    </td>
-                </tr>
-            {% else %}
-                <tr>
-                    <td colspan="4">No categories found</td>
-                </tr>
-            {% endfor %}
-            </tbody>
-
-        </table>
-        <div class="pagination">
-    {{ knp_pagination_render(categories) }}
-</div>
-
+            <div class="d-flex justify-content-between mt-3">
+                {{ knp_pagination_render(categories) }}
+            </div>
+        </div>
     </div>
-
 </div>
 
 {% endblock %}

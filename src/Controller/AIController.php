@@ -8,14 +8,26 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Request;
+use App\Repository\TransactionWalletRepository;
 
 class AIController extends AbstractController
 {
     #[Route('/ai/analyse', name: 'ai_analyse')]
-    public function analyse(AIAnalyzerService $ai): Response
+    public function analyse(AIAnalyzerService $ai, TransactionWalletRepository $repo): Response
     {
-        $income = 1992.54;
-        $expenses = 1656.72;
+        $transactions = $repo->findBy(['userId' => 6]); // Currently hardcoded user 6 
+        
+        $income = 0;
+        $expenses = 0;
+
+        foreach ($transactions as $t) {
+            $amount = abs($t->getMontant());
+            if (strtolower($t->getType()) === 'income' || strtolower($t->getType()) === 'revenu') {
+                $income += $amount;
+            } else {
+                $expenses += $amount;
+            }
+        }
 
         $result = $ai->analyze($income, $expenses);
 

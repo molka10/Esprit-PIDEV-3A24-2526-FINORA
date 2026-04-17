@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en" data-bs-theme="light">
 <head>
-    <title>{% block title %}FINORA - Admin Dashboard{% endblock %}</title>
+    <title>{% block title %}FINORA - Admin Tableau de Bord{% endblock %}</title>
 
     <!-- Meta Tags -->
     <meta charset="utf-8">
@@ -149,11 +149,19 @@
             border-radius: 8px !important;
         }
 
-        /* Sidebar active items */
-        .navbar-nav .nav-link.active {
+        /* Sidebar items */
+        .sidebar-content .navbar-nav .nav-link {
+            padding: 12px 20px !important;
+            margin-bottom: 8px;
+            border-radius: 12px;
+            transition: all 0.2s ease;
+        }
+        .sidebar-content .navbar-nav .nav-link:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+        .sidebar-content .navbar-nav .nav-link.active {
             color: #7c3aed !important;
             background-color: rgba(124, 58, 237, 0.1) !important;
-            border-radius: 12px;
         }
     </style>
 </head>
@@ -178,21 +186,40 @@
         <div class="offcanvas-body sidebar-content d-flex flex-column bg-dark">
 
             <!-- Sidebar menu START -->
-            <ul class="navbar-nav flex-column" id="navbar-sidebar">
-                
-                <!-- Menu item 1 - Dashboard -->
-                <li class="nav-item">
-                    <a href="{{ path('app_admin') }}" class="nav-link {{ app.request.get('_route') starts with 'app_admin' and not app.request.get('_route') starts with 'app_admin_' ? 'active' : '' }}">
-                        <i class="bi bi-house fa-fw me-2"></i>Dashboard
+            <ul class="navbar-nav flex-column px-3 pt-3" id="navbar-sidebar">
+                <!-- Administration Dropdown -->
+                <li class="nav-item mt-2">
+                    <a class="nav-link" data-bs-toggle="collapse" href="#collapseAdmin" role="button" aria-expanded="{{ app.request.get('_route') starts with 'app_admin' or app.request.get('_route') == 'api_admin_docs' ? 'true' : 'false' }}" aria-controls="collapseAdmin" style="display: flex; justify-content: space-between; align-items: center;">
+                        <div><i class="bi bi-gear fa-fw me-2"></i>wallet admin</div>
+                        
                     </a>
+                    
+                    <div class="collapse {{ app.request.get('_route') starts with 'app_admin' or app.request.get('_route') == 'api_admin_docs' ? 'show' : '' }}" id="collapseAdmin">
+                        <ul class="nav flex-column ps-4 mt-2" style="list-style-type: none; gap: 8px;">
+                            <li class="nav-item">
+                                <a href="{{ path('app_admin') }}" class="nav-link {{ app.request.get('_route') starts with 'app_admin' and not app.request.get('_route') starts with 'app_admin_' ? 'active' : '' }}" style="padding: 8px 16px !important; font-size: 14px;">
+                                    <i class="bi bi-house fa-fw me-2"></i>Tableau de Bord
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="{{ path('api_admin_docs') }}" class="nav-link {{ app.request.get('_route') == 'api_admin_docs' ? 'active' : '' }}" style="padding: 8px 16px !important; font-size: 14px;">
+                                    <i class="bi bi-diagram-3 fa-fw me-2"></i>API Management
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="{{ path('admin_fraud_audit') }}" class="nav-link {{ app.request.get('_route') == 'admin_fraud_audit' ? 'active' : '' }}" style="padding: 8px 16px !important; font-size: 14px; color: #dc3545;">
+                                    <i class="bi bi-shield-exclamation fa-fw me-2"></i>Audit des Fraudes
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
                 </li>
-                
                           <!-- Sidebar menu end -->
 
             <!-- Sidebar footer START -->
             <div class="px-3 mt-auto pt-3">
                 <div class="d-flex align-items-center justify-content-between text-primary-hover">
-                        <a class="h5 mb-0 text-body" href="#" data-bs-toggle="tooltip" data-bs-placement="top" title="Settings">
+                        <a class="h5 mb-0 text-body" href="#" data-bs-toggle="tooltip" data-bs-placement="top" title="Paramètres">
                             <i class="bi bi-gear-fill"></i>
                         </a>
                         <a class="h5 mb-0 text-body" href="#" data-bs-toggle="tooltip" data-bs-placement="top" title="Home">
@@ -331,7 +358,7 @@
                                                         </div>
                                                     </div>
                                                     <div>
-                                                        <h6 class="mb-1">Update v2.3 completed successfully</h6>
+                                                        <h6 class="mb-1">Mettre à jour v2.3 completed successfully</h6>
                                                         <p class="small text-body m-0">What's new! Find out about new features</p>
                                                         <small class="text-body">5 min ago</small>
                                                     </div>
@@ -349,16 +376,16 @@
                         </li>
                         <!-- Notification dropdown END -->
 
-                        <!-- Profile dropdown START -->
+                        <!-- Profil dropdown START -->
                         <li class="nav-item ms-2 ms-md-3 dropdown">
                             <!-- Avatar -->
                             <a class="avatar avatar-sm p-0" href="#" id="profileDropdown" role="button" data-bs-auto-close="outside" data-bs-display="static" data-bs-toggle="dropdown" aria-expanded="false">
                                 <img class="avatar-img rounded-circle" src="{{ asset('assets/images/avatar/01.jpg') }}" alt="avatar">
                             </a>
 
-                            <!-- Profile dropdown START -->
+                            <!-- Profil dropdown START -->
                             <ul class="dropdown-menu dropdown-animation dropdown-menu-end shadow pt-3" aria-labelledby="profileDropdown">
-                                <!-- Profile info -->
+                                <!-- Profil info -->
                                 <li class="px-3">
                                     <div class="d-flex align-items-center">
                                         <!-- Avatar -->
@@ -373,10 +400,10 @@
                                 </li>
                                 <li> <hr class="dropdown-divider"></li>
                                 <!-- Links -->
-                                <li><a class="dropdown-item" href="#"><i class="bi bi-person fa-fw me-2"></i>Edit Profile</a></li>
-                                <li><a class="dropdown-item" href="#"><i class="bi bi-gear fa-fw me-2"></i>Account Settings</a></li>
+                                <li><a class="dropdown-item" href="#"><i class="bi bi-person fa-fw me-2"></i>Modifier Profil</a></li>
+                                <li><a class="dropdown-item" href="#"><i class="bi bi-gear fa-fw me-2"></i>Account Paramètres</a></li>
                                 <li><a class="dropdown-item" href="#"><i class="bi bi-info-circle fa-fw me-2"></i>Help</a></li>
-                                <li><a class="dropdown-item bg-danger-soft-hover" href="#"><i class="bi bi-power fa-fw me-2"></i>Sign Out</a></li>
+                                <li><a class="dropdown-item bg-danger-soft-hover" href="#"><i class="bi bi-power fa-fw me-2"></i>Déconnexion</a></li>
                                 <li> <hr class="dropdown-divider"></li>
 
                                 <!-- Dark mode options START -->
@@ -405,9 +432,9 @@
                                 </li> 
                                 <!-- Dark mode options END-->
                             </ul>
-                            <!-- Profile dropdown END -->
+                            <!-- Profil dropdown END -->
                         </li>
-                        <!-- Profile dropdown END -->
+                        <!-- Profil dropdown END -->
                     </ul>
                 </div>
                 <!-- Top bar right END -->
@@ -417,7 +444,7 @@
     <!-- Top bar END -->
 
     <!-- Page main content START -->
-    <div class="page-content-wrapper border">
+    <div class="page-content-wrapper p-4 p-xxl-5 border">
 
         <!-- FLASH MESSAGES -->
         {% for label, messages in app.flashes %}

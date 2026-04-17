@@ -198,7 +198,7 @@
 			</div>
 			<!-- Main navbar END -->
 
-			<!-- Profile and notification START -->
+			<!-- Profil and notification START -->
 			<ul class="nav flex-row align-items-center list-unstyled ms-xl-auto">
 
 				<!-- Wishlist START -->
@@ -206,25 +206,15 @@
 					<a class="btn btn-light btn-round mb-0" href="{{ path('wishlist')|default('#') }}"> <i class="bi bi-heart fa-fw"></i></a>
 				</li>
 				<!-- Wishlist END -->
-
-				<!-- Notification dropdown START -->
-				<li class="nav-item ms-2 ms-sm-3 dropdown">
-					<!-- Notification button -->
-					<a class="btn btn-light btn-round mb-0" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" data-bs-auto-close="outside">
-						<i class="bi bi-bell fa-fw"></i>
-					</a>
-					<span class="notif-badge animation-blink"></span>
-				</li>
-				<!-- Notification dropdown END -->
-
-				<!-- Profile dropdown START -->
+				<!-- Notification dropdown removed, now located inside specific views -->
+				<!-- Profil dropdown START -->
 				<li class="nav-item ms-3 dropdown">
 					<!-- Avatar -->
 					<a class="avatar avatar-sm p-0" href="#" id="profileDropdown" role="button" data-bs-auto-close="outside" data-bs-display="static" data-bs-toggle="dropdown" aria-expanded="false">
 						<img class="avatar-img rounded-circle" src="{{ asset('assets/images/avatar/01.jpg') }}" alt="avatar">
 					</a>
 
-					<!-- Profile dropdown START -->
+					<!-- Profil dropdown START -->
 					<ul class="dropdown-menu dropdown-animation dropdown-menu-end shadow pt-3" aria-labelledby="profileDropdown">
 						<li class="px-3 mb-3">
 							<div class="d-flex align-items-center">
@@ -232,20 +222,20 @@
 									<img class="avatar-img rounded-circle shadow" src="{{ asset('assets/images/avatar/01.jpg') }}" alt="avatar">
 								</div>
 								<div>
-									<a class="h6" href="#">UserName</a>
+									<a class="h6" href="#">UserNom</a>
 									<p class="small m-0">example@gmail.com</p>
 								</div>
 							</div>
 						</li>
 						<li> <hr class="dropdown-divider"></li>
-						<li><a class="dropdown-item" href="#"><i class="bi bi-person fa-fw me-2"></i>Edit Profile</a></li>
-						<li><a class="dropdown-item" href="#"><i class="bi bi-gear fa-fw me-2"></i>Account Settings</a></li>
-						<li><a class="dropdown-item bg-danger-soft-hover" href="#"><i class="bi bi-power fa-fw me-2"></i>Sign Out</a></li>
+						<li><a class="dropdown-item" href="#"><i class="bi bi-person fa-fw me-2"></i>Modifier Profil</a></li>
+						<li><a class="dropdown-item" href="#"><i class="bi bi-gear fa-fw me-2"></i>Account Paramètres</a></li>
+						<li><a class="dropdown-item bg-danger-soft-hover" href="#"><i class="bi bi-power fa-fw me-2"></i>Déconnexion</a></li>
 					</ul>
-					<!-- Profile dropdown END -->
+					<!-- Profil dropdown END -->
 				</li>
 			</ul>
-			<!-- Profile and notification END -->
+			<!-- Profil and notification END -->
 		</div>
 	</nav>
 	<!-- Nav END -->
@@ -269,7 +259,7 @@
 					<li class="nav-item dropdown">
 						<a class="nav-link dropdown-toggle active" href="#" id="demoMenu" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">wallet</a>
 						<ul class="dropdown-menu" aria-labelledby="demoMenu">
-							<li class="nav-item"><a class="nav-link" href="{{ path('dashboard')|default('#') }}">Dashboard</a></li>
+							<li class="nav-item"><a class="nav-link" href="{{ path('dashboard')|default('#') }}">Tableau de Bord</a></li>
 							<li class="nav-item"><a class="nav-link" href="{{ path('transactions')|default('#') }}">Transactions</a></li>
 							<li class="nav-item"><a class="nav-link" href="{{ path('category_list')|default('#') }}">categorie</a></li>
 							<li class="nav-item"><a class="nav-link" href="{{ path('wishlist')|default('#') }}">Wishlist</a></li>
@@ -321,18 +311,18 @@ Footer START -->
 			<div class="col-lg-6">
 				<div class="row g-4">
 					<div class="col-6 col-md-4">
-						<h5 class="mb-2 mb-md-4 text-white">Company</h5>
+						<h5 class="mb-2 mb-md-4 text-white">Entreprise</h5>
 						<ul class="nav flex-column text-primary-hover">
-							<li class="nav-item"><a class="nav-link" href="#">About us</a></li>
-							<li class="nav-item"><a class="nav-link" href="#">Contact us</a></li>
-							<li class="nav-item"><a class="nav-link" href="#">News and Blogs</a></li>
+							<li class="nav-item"><a class="nav-link" href="#">À propos de nous</a></li>
+							<li class="nav-item"><a class="nav-link" href="#">Contactez-nous</a></li>
+							<li class="nav-item"><a class="nav-link" href="#">Actualités et Blogs</a></li>
 						</ul>
 					</div>
 					<div class="col-6 col-md-4">
-						<h5 class="mb-2 mb-md-4 text-white">Community</h5>
+						<h5 class="mb-2 mb-md-4 text-white">Communauté</h5>
 						<ul class="nav flex-column text-primary-hover">
 							<li class="nav-item"><a class="nav-link" href="#">Documentation</a></li>
-							<li class="nav-item"><a class="nav-link" href="#">Faq</a></li>
+							<li class="nav-item"><a class="nav-link" href="#">FAQ</a></li>
 							<li class="nav-item"><a class="nav-link" href="#">Forum</a></li>
 						</ul>
 					</div>
@@ -398,6 +388,43 @@ Footer END -->
 
 <!-- Template Functions -->
 <script src="{{ asset('assets/js/functions.js') }}"></script>
+
+<!-- Notification API Script -->
+<script>
+document.addEventListener("DOMContentLoaded", async () => {
+    try {
+        const res = await fetch('/api/user/notifications');
+        const data = await res.json();
+        
+        if (data.status === 'success') {
+            const notifList = document.getElementById('notif-list');
+            const notifBadge = document.getElementById('notif-badge');
+            const notifCount = document.getElementById('notif-count');
+            
+            if (data.data.length > 0) {
+                // Show red dot
+                notifBadge.classList.remove('d-none');
+                notifCount.innerText = data.summary.unreadCount;
+                
+                notifList.innerHTML = data.data.map(notif => `
+                    <li class="list-group-item p-3 border-0 bg-light bg-opacity-50">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h6 class="mb-1 text-danger"><i class="bi bi-exclamation-triangle-fill me-1"></i> ${notif.title}</h6>
+                            <small class="text-muted"><i class="bi bi-clock"></i> Just now</small>
+                        </div>
+                        <p class="mb-1 small text-dark">${notif.message}</p>
+                    </li>
+                `).join('');
+                
+            } else {
+                notifList.innerHTML = '<li class="list-group-item p-3 text-center text-muted small border-0">No new notifications</li>';
+            }
+        }
+    } catch(e) {
+        console.error('Failed to load notifications', e);
+    }
+});
+</script>
 
 {% block javascripts %}{% endblock %}
 

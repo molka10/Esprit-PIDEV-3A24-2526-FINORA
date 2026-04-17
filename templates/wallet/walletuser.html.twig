@@ -4,12 +4,33 @@
 <div class="clean-dashboard">
 
     <div class="clean-header">
-        <h1>Dashboard</h1>
+        <h1>Tableau de Bord</h1>
 
          <div class="header-actions">
-        
+        <div class="export-under d-flex align-items-center" style="gap: 12px;">
+            <!-- Notification Button -->
+            <div class="dropdown" style="display: inline-block;">
+                <a class="btn-outline position-relative d-flex align-items-center justify-content-center bg-white" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" data-bs-auto-close="outside" style="padding: 6px 12px; margin-right: 10px;">
+                    <i class="bi bi-bell fa-fw m-0" style="font-size: 1.1rem; color: #7c3aed;"></i>
+                    <span id="notif-badge" class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle d-none">
+                        <span class="visually-hidden">Nouvelles alertes</span>
+                    </span>
+                </a>
+                
+                <div class="dropdown-menu dropdown-animation dropdown-menu-end p-0 shadow-lg border-0" style="min-width: 320px; z-index: 1050;">
+                    <div class="card bg-transparent border-0">
+                        <div class="card-header bg-transparent border-bottom p-3 d-flex justify-content-between align-items-center">
+                            <h6 class="m-0 fw-bold" style="color:var(--text-dark);">Notifications <span id="notif-count" class="badge text-danger" style="background:#fee2e2; border-radius:5px; margin-left:5px;">0</span></h6>
+                        </div>
+                        <div class="card-body p-0">
+                            <ul class="list-group list-unstyled list-group-flush m-0" id="notif-list">
+                                <li class="list-group-item p-3 text-center text-muted small border-0" style="color:var(--text-light);">Chargement...</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-        <div class="export-under">
             <a href="{{ path('transactions_pdf') }}" class="btn-outline">PDF</a>
             <a href="{{ path('transactions_excel') }}" class="btn-outline">Excel</a>
         </div>
@@ -29,17 +50,17 @@
             <div class="clean-stats">
 
     <div>
-        <span>Balance</span>
+        <span>Solde</span>
         <h2>{{ balance }} {{ currencySymbol }}</h2>
     </div>
 
     <div>
-        <span>Income</span>
+        <span>Revenus</span>
         <h2 class="green">{{ income }} {{ currencySymbol }}</h2>
     </div>
 
     <div>
-        <span>Outcome</span>
+        <span>Dépenses</span>
         <h2 class="red">{{ outcome }} {{ currencySymbol }}</h2>
     </div>
 
@@ -52,12 +73,12 @@
 <div class="charts-row">
 
     <div class="chart-box">
-        <h3 class="chart-title">Income</h3>
+        <h3 class="chart-title">Revenus</h3>
         <canvas id="incomeChart"></canvas>
     </div>
 
     <div class="chart-box">
-        <h3 class="chart-title">Outcome</h3>
+        <h3 class="chart-title">Dépenses</h3>
         <canvas id="outcomeChart"></canvas>
     </div>
 
@@ -88,23 +109,44 @@
     </div>
 
 
-    <div class="dash-row">
-
-<div class="chart-box" style="margin-top: 20px; width: 100%;">
-  <div style="display:flex; align-items:center; gap:12px; margin-bottom:16px;">
-    <h3 style="font-size:15px; font-weight:700; color:var(--text-dark); margin:0;">
-      🤖 Analyse IA
-    </h3>
-    <button id="aiBtn" class="btn-purple" style="margin-left:auto;">Prediction IA</button>
-  </div>
-
-  <div id="aiResult">
-    <p style="color:var(--text-light); font-size:14px;">
-      Click "Prediction IA" to generate your financial analysis.
-    </p>
-  </div>
-</div>
-
+    <div style="margin-top: 10px; margin-bottom: 30px; display: flex; justify-content: center; width: 100%; position: relative; z-index: 10;">
+  <a href="{{ path('ai_analyse') }}" style="
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: linear-gradient(135deg, #7c3aed, #4f46e5);
+    padding: 16px 24px;
+    border-radius: 16px;
+    color: white;
+    text-decoration: none;
+    box-shadow: 0 10px 15px -3px rgba(124, 58, 237, 0.4);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    width: 100%;
+    max-width: 650px;
+    gap: 20px;
+  ">
+    <div style="display: flex; flex-direction: column; gap: 4px;">
+        <h3 style="font-size:20px; font-weight:800; margin:0; color: white;">
+            🤖 Analyse IA Financière
+        </h3>
+        <p style="margin: 0; font-size: 14px; color: rgba(255,255,255,0.8);">
+            Découvrez nos recommandations intelligentes.
+        </p>
+    </div>
+    <div style="
+        background: rgba(255,255,255,0.2);
+        backdrop-filter: blur(10px);
+        padding: 10px 20px;
+        border-radius: 10px;
+        font-weight: bold;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        white-space: nowrap;
+    ">
+        Accéder <i class="bi bi-arrow-right"></i>
+    </div>
+  </a>
 </div>
 </div>
 
@@ -120,7 +162,7 @@ const exchangeRate = {{ rate }};
 new Chart(document.getElementById('pieChart'), {
     type: 'doughnut',
     data: {
-        labels: ['Income', 'Outcome'],
+        labels: ['Revenus', 'Dépenses'],
         datasets: [{
             data: [{{ income }}, {{ outcome }}],
             backgroundColor: ['#2563eb', '#e5e7eb']
@@ -273,12 +315,12 @@ new Chart(document.getElementById('dateChart'), {
         labels: {{ chartLabels|json_encode|raw }},
         datasets: [
             {
-                label: 'Income',
+                label: 'Revenus',
                 data: {{ incomeData|json_encode|raw }},
                 backgroundColor: '#2563eb' 
             },
             {
-                label: 'Outcome',
+                label: 'Dépenses',
                 data: {{ outcomeData|json_encode|raw }},
                 backgroundColor: '#c7d2fe' 
             }
@@ -306,56 +348,7 @@ new Chart(document.getElementById('dateChart'), {
         }
     }
 });
-document.getElementById("aiBtn").addEventListener("click", function () {
-  fetch(`/ai/analyse-data?income={{ income }}&expenses={{ outcome }}`)
-    .then(res => res.json())
-    .then(data => {
-      document.getElementById("aiResult").innerHTML = `
-        <div style="
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0,1fr));
-  gap: 12px;
-  width: 100%;
-">
-          <div style="background:#f8faff; border-radius:12px; padding:16px; display:flex; flex-direction:column; gap:6px;">
-            <span style="font-size:11px; font-weight:600; color:var(--text-light); text-transform:uppercase; letter-spacing:0.08em;">Balance</span>
-            <strong style="font-family:'IBM Plex Mono',monospace; font-size:16px; color:var(--text-dark);">${data.balance} ${currencySymbol}</strong>
-          </div>
 
-          <div style="background:#f8faff; border-radius:12px; padding:16px; display:flex; flex-direction:column; gap:6px;">
-            <span style="font-size:11px; font-weight:600; color:var(--text-light); text-transform:uppercase; letter-spacing:0.08em;">Ratio</span>
-            <strong style="font-family:'IBM Plex Mono',monospace; font-size:16px; color:var(--text-dark);">${data.ratio.toFixed(2)}%</strong>
-          </div>
-
-          <div style="background:#f8faff; border-radius:12px; padding:16px; display:flex; flex-direction:column; gap:6px;">
-            <span style="font-size:11px; font-weight:600; color:var(--text-light); text-transform:uppercase; letter-spacing:0.08em;">Risk</span>
-            <strong class="risk ${data.risk.toLowerCase()}" style="font-size:16px;">${data.risk}</strong>
-          </div>
-
-          <div style="background:#f8faff; border-radius:12px; padding:16px; display:flex; flex-direction:column; gap:6px;">
-            <span style="font-size:11px; font-weight:600; color:var(--text-light); text-transform:uppercase; letter-spacing:0.08em;">Next expenses</span>
-            <strong style="font-family:'IBM Plex Mono',monospace; font-size:16px; color:var(--text-dark);">${data.predictedExpenses.toFixed(2)} ${currencySymbol}</strong>
-          </div>
-        </div>
-
-        <div style="
-  grid-column: span 4;
-  background:#f8faff;
-  border-radius:12px;
-  padding:16px;
-">
-          <p style="font-size:13px; font-weight:700; color:var(--text-dark); margin:0 0 10px;">
-            💡 Recommendations
-          </p>
-          <ul style="margin:0; padding-left:18px;">
-            ${data.recommendation.map(r => `
-              <li style="font-size:13px; color:var(--text-mid); margin-bottom:6px;">${r}</li>
-            `).join("")}
-          </ul>
-        </div>
-      `;
-    });
-});
 </script>
 {% endblock %}
 
