@@ -1,97 +1,432 @@
 {% extends 'base.html.twig' %}
 
+{% block stylesheets %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.css">
+<style>
+/* ── View-toggle pill tabs ─────────────────────────────── */
+.view-toggle {
+    display: inline-flex;
+    background: #ede9fe;
+    border-radius: 14px;
+    padding: 4px;
+    gap: 4px;
+}
+.view-toggle-btn {
+    padding: 7px 18px;
+    border: none;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    background: transparent;
+    color: #6d28d9;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.view-toggle-btn.active {
+    background: linear-gradient(135deg, #7c3aed, #8b5cf6);
+    color: #fff;
+    box-shadow: 0 3px 10px rgba(124,58,237,0.3);
+}
+.view-toggle-btn:hover:not(.active) {
+    background: rgba(124,58,237,0.1);
+}
+
+/* ── Calendar wrapper inside card ─────────────────────── */
+#cal-view-wrapper {
+    display: none;
+    padding: 10px 4px;
+    animation: fadeSlide 0.3s ease;
+}
+@keyframes fadeSlide {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Loading skeleton ──────────────────────────────────── */
+.skel-line {
+    border-radius: 8px;
+    background: linear-gradient(90deg, #ede9fe 25%, #ddd6fe 50%, #ede9fe 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.4s infinite;
+    margin-bottom: 10px;
+}
+@keyframes shimmer {
+    0%   { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+/* ── FullCalendar overrides ────────────────────────────── */
+.fc .fc-toolbar-title {
+    font-size: 17px !important;
+    font-weight: 700 !important;
+    color: #1e1b4b !important;
+}
+.fc .fc-button-primary {
+    background: linear-gradient(135deg, #7c3aed, #8b5cf6) !important;
+    border: none !important;
+    border-radius: 9px !important;
+    font-weight: 600 !important;
+    font-size: 13px !important;
+    box-shadow: 0 2px 8px rgba(124,58,237,0.2) !important;
+    transition: opacity 0.2s !important;
+}
+.fc .fc-button-primary:hover { opacity: 0.85 !important; }
+.fc .fc-button-primary:not(:disabled):active,
+.fc .fc-button-primary:not(:disabled).fc-button-active {
+    background: #6d28d9 !important;
+    box-shadow: none !important;
+}
+.fc-day-today { background: rgba(124,58,237,0.05) !important; }
+.fc-event {
+    border-radius: 6px !important;
+    font-size: 11.5px !important;
+    font-weight: 600 !important;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s;
+}
+.fc-event:hover {
+    transform: scale(1.03);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.18) !important;
+}
+.fc-col-header-cell-cushion,
+.fc-daygrid-day-number {
+    color: #4c1d95 !important;
+    font-weight: 600 !important;
+    text-decoration: none !important;
+}
+
+/* ── Inline Event tooltip/popover ─────────────────────── */
+.cal-tooltip {
+    position: fixed;
+    z-index: 9999;
+    background: #fff;
+    border-radius: 14px;
+    box-shadow: 0 16px 40px rgba(0,0,0,0.18);
+    padding: 16px 20px;
+    min-width: 220px;
+    border-top: 4px solid #7c3aed;
+    pointer-events: none;
+    opacity: 0;
+    transform: scale(0.93) translateY(-6px);
+    transition: opacity 0.18s, transform 0.18s;
+}
+.cal-tooltip.visible {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+    pointer-events: all;
+}
+.cal-tooltip-amount {
+    font-size: 22px;
+    font-weight: 900;
+    margin-bottom: 2px;
+}
+.cal-tooltip-name {
+    font-size: 13px;
+    color: #6b7280;
+    margin-bottom: 10px;
+}
+.cal-tooltip-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    padding: 5px 0;
+    border-bottom: 1px solid #f3f4f6;
+    color: #374151;
+}
+.cal-tooltip-row:last-child { border-bottom: none; }
+.cal-tooltip-row span:first-child { color: #9ca3af; }
+.cal-tooltip-row span:last-child  { font-weight: 600; }
+
+/* ── Calendar legend chips ─────────────────────────────── */
+.cal-legend {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 14px;
+    font-size: 12.5px;
+    color: #6b7280;
+    font-weight: 500;
+}
+.cal-legend-dot {
+    display: inline-block;
+    width: 11px;
+    height: 11px;
+    border-radius: 3px;
+    margin-right: 5px;
+}
+</style>
+{% endblock %}
+
 {% block content %}
 
 <div class="container py-5">
     <div class="card border-0 shadow-sm mb-5">
-        <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center">
+        <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
             <h5 class="mb-0 fw-bold">
                 <i class="bi bi-table text-primary me-2"></i> Grille des Transactions
             </h5>
-            <a href="{{ path('transaction_add') }}" class="btn btn-sm btn-primary">
-                <i class="bi bi-plus-lg me-1"></i> Ajouter une Transaction
-            </a>
+            <div class="d-flex align-items-center gap-2 flex-wrap">
+                <!-- View Toggle -->
+                <div class="view-toggle" role="group" aria-label="Mode d'affichage">
+                    <button class="view-toggle-btn active" id="btnTableView" onclick="switchView('table')">
+                        <i class="bi bi-table"></i> Tableau
+                    </button>
+                    <button class="view-toggle-btn" id="btnCalView" onclick="switchView('calendar')">
+                        <i class="bi bi-calendar3"></i> Calendrier
+                    </button>
+                </div>
+                <a href="{{ path('transaction_add') }}" class="btn btn-sm btn-primary">
+                    <i class="bi bi-plus-lg me-1"></i> Ajouter
+                </a>
+            </div>
         </div>
-        
+
         <div class="card-body">
-            <!-- Advanced Filters Form -->
-            <form method="get" class="row g-3 mb-4 bg-light p-3 rounded mx-1">
-                <div class="col-md-3">
-                    <label class="form-label small fw-bold">Recherche</label>
-                    <input type="text" name="search" class="form-control form-control-sm" placeholder="Nom..." value="{{ app.request.query.get('search') }}">
-                </div>
-                <div class="col-md-2">
-                    <label class="form-label small fw-bold">Type</label>
-                    <select name="filter_type" class="form-select form-select-sm">
-                        <option value="">Tous</option>
-                        <option value="INCOME" {% if app.request.query.get('filter_type') == 'INCOME' %}selected{% endif %}>Revenu</option>
-                        <option value="OUTCOME" {% if app.request.query.get('filter_type') == 'OUTCOME' %}selected{% endif %}>Dépense</option>
-                    </select>
-                </div>
-                <div class="col-md-2">
-                    <label class="form-label small fw-bold">Montant Min</label>
-                    <input type="number" name="min" class="form-control form-control-sm" placeholder="ex. 100" value="{{ app.request.query.get('min') }}">
-                </div>
-                <div class="col-md-2">
-                    <label class="form-label small fw-bold">Montant Max</label>
-                    <input type="number" name="max" class="form-control form-control-sm" placeholder="ex. 5000" value="{{ app.request.query.get('max') }}">
-                </div>
-                <div class="col-md-2">
-                    <label class="form-label small fw-bold">Trier Par</label>
-                    <select name="sortBy" class="form-select form-select-sm">
-                        <option value="dateTransaction" {% if app.request.query.get('sortBy') == 'dateTransaction' %}selected{% endif %}>Date</option>
-                        <option value="montant" {% if app.request.query.get('sortBy') == 'montant' %}selected{% endif %}>Montant</option>
-                        <option value="nomTransaction" {% if app.request.query.get('sortBy') == 'nomTransaction' %}selected{% endif %}>Nom</option>
-                    </select>
-                </div>
-                <div class="col-md-1 d-flex align-items-end">
-                    <button type="submit" class="btn btn-sm btn-primary w-100"><i class="bi bi-search"></i></button>
-                </div>
-            </form>
 
-            <div class="table-responsive">
-                <table class="table table-hover align-middle border">
-                    <thead class="table-light">
-                        <tr>
-                            <th>Nom</th>
-                            <th>Type</th>
-                            <th>Montant</th>
-                            <th>Catégorie</th>
-                            <th>Date</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                    {% for t in transactions %}
-                        <tr>
-                            <td class="fw-bold">{{ t.nomTransaction }}</td>
-                            <td>
-                                <span class="badge bg-{{ t.type == 'INCOME' ? 'success' : 'danger' }} bg-opacity-10 text-{{ t.type == 'INCOME' ? 'success' : 'danger' }} border border-{{ t.type == 'INCOME' ? 'success' : 'danger' }}">
-                                    {{ t.type }}
-                                </span>
-                            </td>
-                            <td class="fw-bold fs-6">{{ t.montant }} DT</td>
-                            <td>{{ t.category ? t.category.nom : 'Aucune catégorie' }}</td>
-                            <td>{{ t.dateTransaction|date('Y-m-d') }}</td>
-                            <td>
-                                <a href="/edit/{{ t.id }}" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil"></i></a>
-                                <a href="/delete/{{ t.id }}" class="btn btn-sm btn-outline-danger delete"><i class="bi bi-trash"></i></a>
-                            </td>
-                        </tr>
-                    {% else %}
-                        <tr>
-                            <td colspan="6" class="text-center py-4 text-muted">Aucun enregistrement trouvé.</td>
-                        </tr>
-                    {% endfor %}
-                    </tbody>
-                </table>
-            </div>
+            <!-- ══ TABLE VIEW ══════════════════════════════════════════════ -->
+            <div id="table-view-wrapper">
+                <!-- Advanced Filters Form -->
+                <form method="get" class="row g-3 mb-4 bg-light p-3 rounded mx-1">
+                    <div class="col-md-3">
+                        <label class="form-label small fw-bold">Recherche</label>
+                        <input type="text" name="search" class="form-control form-control-sm" placeholder="Nom..." value="{{ app.request.query.get('search') }}">
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label small fw-bold">Type</label>
+                        <select name="filter_type" class="form-select form-select-sm">
+                            <option value="">Tous</option>
+                            <option value="INCOME"  {% if app.request.query.get('filter_type') == 'INCOME'  %}selected{% endif %}>Revenu</option>
+                            <option value="OUTCOME" {% if app.request.query.get('filter_type') == 'OUTCOME' %}selected{% endif %}>Dépense</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label small fw-bold">Montant Min</label>
+                        <input type="number" name="min" class="form-control form-control-sm" placeholder="ex. 100" value="{{ app.request.query.get('min') }}">
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label small fw-bold">Montant Max</label>
+                        <input type="number" name="max" class="form-control form-control-sm" placeholder="ex. 5000" value="{{ app.request.query.get('max') }}">
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label small fw-bold">Trier Par</label>
+                        <select name="sortBy" class="form-select form-select-sm">
+                            <option value="dateTransaction" {% if app.request.query.get('sortBy') == 'dateTransaction' %}selected{% endif %}>Date</option>
+                            <option value="montant"         {% if app.request.query.get('sortBy') == 'montant'         %}selected{% endif %}>Montant</option>
+                            <option value="nomTransaction"  {% if app.request.query.get('sortBy') == 'nomTransaction'  %}selected{% endif %}>Nom</option>
+                        </select>
+                    </div>
+                    <div class="col-md-1 d-flex align-items-end">
+                        <button type="submit" class="btn btn-sm btn-primary w-100"><i class="bi bi-search"></i></button>
+                    </div>
+                </form>
 
-            <div class="d-flex justify-content-between mt-3">
-                {{ knp_pagination_render(transactions) }}
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle border">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Nom</th><th>Type</th><th>Montant</th>
+                                <th>Catégorie</th><th>Date</th><th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        {% for t in transactions %}
+                            <tr>
+                                <td class="fw-bold">{{ t.nomTransaction }}</td>
+                                <td>
+                                    <span class="badge bg-{{ t.type == 'INCOME' ? 'success' : 'danger' }} bg-opacity-10 text-{{ t.type == 'INCOME' ? 'success' : 'danger' }} border border-{{ t.type == 'INCOME' ? 'success' : 'danger' }}">
+                                        {{ t.type }}
+                                    </span>
+                                </td>
+                                <td class="fw-bold fs-6">{{ t.montant }} DT</td>
+                                <td>{{ t.category ? t.category.nom : 'Aucune catégorie' }}</td>
+                                <td>{{ t.dateTransaction|date('Y-m-d') }}</td>
+                                <td>
+                                    <a href="/edit/{{ t.id }}"   class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil"></i></a>
+                                    <a href="/delete/{{ t.id }}" class="btn btn-sm btn-outline-danger delete"><i class="bi bi-trash"></i></a>
+                                </td>
+                            </tr>
+                        {% else %}
+                            <tr><td colspan="6" class="text-center py-4 text-muted">Aucun enregistrement trouvé.</td></tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="d-flex justify-content-between mt-3">
+                    {{ knp_pagination_render(transactions) }}
+                </div>
             </div>
+            <!-- /TABLE VIEW -->
+
+            <!-- ══ CALENDAR VIEW ════════════════════════════════════════════ -->
+            <div id="cal-view-wrapper">
+                <!-- Legend -->
+                <div class="cal-legend">
+                    <span><span class="cal-legend-dot" style="background:#22c55e;"></span>Revenu</span>
+                    <span><span class="cal-legend-dot" style="background:#ef4444;"></span>Dépense</span>
+                    <span class="ms-auto text-muted" style="font-size:11.5px;">
+                        <i class="bi bi-hand-index me-1"></i>Cliquez sur un événement pour les détails
+                    </span>
+                </div>
+
+                <!-- Skeleton shown while loading -->
+                <div id="cal-skeleton">
+                    <div class="skel-line" style="height:38px;"></div>
+                    <div class="skel-line" style="height:28px;width:55%;"></div>
+                    <div class="skel-line" style="height:200px;"></div>
+                </div>
+
+                <div id="inline-fullcalendar" style="display:none;"></div>
+            </div>
+            <!-- /CALENDAR VIEW -->
+
         </div>
     </div>
 </div>
 
+<!-- ── Floating event tooltip ─────────────────────────────────── -->
+<div class="cal-tooltip" id="calTooltip">
+    <div class="cal-tooltip-amount" id="ttAmount"></div>
+    <div class="cal-tooltip-name"   id="ttName"></div>
+    <div class="cal-tooltip-row"><span>Date</span>      <span id="ttDate"></span></div>
+    <div class="cal-tooltip-row"><span>Catégorie</span> <span id="ttCat"></span></div>
+    <div class="cal-tooltip-row"><span>Type</span>      <span id="ttType"></span></div>
+</div>
+
 {% endblock %}
+
+{% block javascripts %}
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
+<script>
+/* ─────────────────────────────────────────────────────────
+   View switch
+───────────────────────────────────────────────────────── */
+let calendarInitialized = false;
+let fcInstance           = null;
+
+function switchView(view) {
+    const tableWrap = document.getElementById('table-view-wrapper');
+    const calWrap   = document.getElementById('cal-view-wrapper');
+    const btnTable  = document.getElementById('btnTableView');
+    const btnCal    = document.getElementById('btnCalView');
+
+    if (view === 'calendar') {
+        tableWrap.style.display = 'none';
+        calWrap.style.display   = 'block';
+        btnTable.classList.remove('active');
+        btnCal.classList.add('active');
+        if (!calendarInitialized) initCalendar();
+    } else {
+        calWrap.style.display   = 'none';
+        tableWrap.style.display = 'block';
+        btnCal.classList.remove('active');
+        btnTable.classList.add('active');
+    }
+}
+
+/* ─────────────────────────────────────────────────────────
+   Calendar init (lazy: only on first switch)
+───────────────────────────────────────────────────────── */
+async function initCalendar() {
+    calendarInitialized = true;
+
+    /* 1. Fetch events */
+    let events = [];
+    try {
+        const res  = await fetch('/api/user/calendar-events');
+        const json = await res.json();
+        if (json.status === 'success') events = json.data;
+    } catch (e) {
+        console.error('Calendar API error:', e);
+    }
+
+    /* 2. Hide skeleton, show calendar */
+    document.getElementById('cal-skeleton').style.display   = 'none';
+    const calEl = document.getElementById('inline-fullcalendar');
+    calEl.style.display = 'block';
+
+    /* 3. Build FullCalendar */
+    fcInstance = new FullCalendar.Calendar(calEl, {
+        initialView:   'dayGridMonth',
+        locale:        'fr',
+        height:        'auto',
+        headerToolbar: {
+            left:   'prev,next today',
+            center: 'title',
+            right:  'dayGridMonth,timeGridWeek,listWeek'
+        },
+        buttonText: {
+            today:    "Aujourd'hui",
+            month:    'Mois',
+            week:     'Semaine',
+            list:     'Liste',
+        },
+        events: events,
+        dayMaxEvents: 4,
+        eventTimeFormat: { hour: '2-digit', minute: '2-digit', meridiem: false },
+
+        /* Show tooltip on click */
+        eventClick: function(info) {
+            showTooltip(info.event, info.jsEvent);
+        },
+
+        /* Hide tooltip when clicking blank areas */
+        dateClick: function() { hideTooltip(); },
+    });
+
+    fcInstance.render();
+
+    /* 4. Close tooltip on outside click */
+    document.addEventListener('click', function(e) {
+        const tt = document.getElementById('calTooltip');
+        if (!tt.contains(e.target)) hideTooltip();
+    });
+}
+
+/* ─────────────────────────────────────────────────────────
+   Tooltip helpers
+───────────────────────────────────────────────────────── */
+function showTooltip(event, jsEvent) {
+    const ep     = event.extendedProps || {};
+    const isIn   = ep.isIncome;
+    const color  = isIn ? '#22c55e' : '#ef4444';
+    const sign   = isIn ? '+' : '-';
+    const amount = (ep.amount ?? 0).toFixed(2);
+    const dateD  = event.start
+        ? new Date(event.start).toLocaleDateString('fr-FR', { weekday:'short', year:'numeric', month:'short', day:'numeric' })
+        : '—';
+    const rawName = (event.title ?? '').replace(/^[+\-][\d.]+ DT - /, '');
+
+    const tt = document.getElementById('calTooltip');
+    document.getElementById('ttAmount').textContent = `${sign}${amount} DT`;
+    document.getElementById('ttAmount').style.color = color;
+    document.getElementById('ttName').textContent   = rawName || '—';
+    document.getElementById('ttDate').textContent   = dateD;
+    document.getElementById('ttCat').textContent    = ep.category ?? 'Sans catégorie';
+    document.getElementById('ttType').textContent   = ep.type ?? '—';
+
+    /* Border color follows income/outcome */
+    tt.style.borderTopColor = color;
+
+    /* Position near click, avoid overflow */
+    const vw = window.innerWidth, vh = window.innerHeight;
+    let x = jsEvent.clientX + 14;
+    let y = jsEvent.clientY + 14;
+    if (x + 240 > vw) x = jsEvent.clientX - 240;
+    if (y + 180 > vh) y = jsEvent.clientY - 180;
+    tt.style.left = x + 'px';
+    tt.style.top  = y + 'px';
+
+    tt.classList.add('visible');
+
+    jsEvent.stopPropagation();
+}
+
+function hideTooltip() {
+    document.getElementById('calTooltip').classList.remove('visible');
+}
+</script>
+{% endblock %}

@@ -79,9 +79,9 @@ class CategoryController extends AbstractController
     ): Response {
         $qb = $em->getRepository(Category::class)->createQueryBuilder('c');
 
-        $search = $request->query->get('search');
+        $search     = $request->query->get('search');
         $filterType = $request->query->get('filter_type');
-        $sortBy = $request->query->get('sortBy', 'nom');
+        $sortBy     = $request->query->get('sortBy', 'nom');
 
         if ($search) {
             $qb->andWhere('c.nom LIKE :search')->setParameter('search', '%' . $search . '%');
@@ -89,24 +89,81 @@ class CategoryController extends AbstractController
         if ($filterType) {
             $qb->andWhere('c.type = :type')->setParameter('type', $filterType);
         }
-        
-        $allowedSorts = ['nom', 'priorite'];
-        if (in_array($sortBy, $allowedSorts)) {
-            $qb->orderBy('c.' . $sortBy, 'ASC');
-        } else {
-            $qb->orderBy('c.nom', 'ASC');
-        }
 
-        $query = $qb->getQuery();
+        $allowedSorts = ['nom', 'priorite'];
+        $qb->orderBy('c.' . (in_array($sortBy, $allowedSorts) ? $sortBy : 'nom'), 'ASC');
 
         $categories = $paginator->paginate(
-            $query,
+            $qb->getQuery(),
             $request->query->getInt('page', 1),
             5
         );
 
+        // ── Métier: per-category statistics ──────────────────────────
+        $ALERT_THRESHOLD = 500; // DT — trigger budget warning for high-outcome categories
+        $thirtyDaysAgo   = new \DateTime('-30 days');
+
+        $categoryStats = [];
+        $totalBudgetRisk = 0;
+
+        foreach ($categories as $cat) {
+            $transactions = $em->getRepository(\App\Entity\TransactionWallet::class)
+                ->createQueryBuilder('t')
+                ->where('t.category = :cat')
+                ->setParameter('cat', $cat)
+                ->getQuery()
+                ->getResult();
+
+            $income  = 0;
+            $outcome = 0;
+            $recentCount = 0;
+
+            foreach ($transactions as $t) {
+                if ($t->getType() === 'INCOME') {
+                    $income += $t->getMontant();
+                } else {
+                    $outcome += abs($t->getMontant());
+                }
+                if ($t->getDateTransaction() >= $thirtyDaysAgo) {
+                    $recentCount++;
+                }
+            }
+
+            // Budget alert: OUTCOME category that is HAUTE priority and spent > threshold
+            $isAlert = ($cat->getType() === 'OUTCOME')
+                    && ($cat->getPriorite() === 'HAUTE')
+                    && ($outcome > $ALERT_THRESHOLD);
+
+            if ($isAlert) {
+                $totalBudgetRisk += $outcome;
+            }
+
+            $categoryStats[$cat->getId()] = [
+                'count'       => count($transactions),
+                'income'      => $income,
+                'outcome'     => $outcome,
+                'net'         => $income - $outcome,
+                'isActive'    => $recentCount > 0,
+                'recentCount' => $recentCount,
+                'isAlert'     => $isAlert,
+            ];
+        }
+
+        // Global health score: 100 = perfect, decreases for each risky category
+        $alertCount   = count(array_filter($categoryStats, fn($s) => $s['isAlert']));
+        $healthScore  = max(0, 100 - ($alertCount * 20));
+        $healthLabel  = $healthScore >= 80 ? 'Bonne santé' : ($healthScore >= 50 ? 'Attention' : 'Critique');
+        $healthColor  = $healthScore >= 80 ? 'success' : ($healthScore >= 50 ? 'warning' : 'danger');
+
         return $this->render('category/listC.html.twig', [
-            'categories' => $categories
+            'categories'     => $categories,
+            'categoryStats'  => $categoryStats,
+            'alertCount'     => $alertCount,
+            'totalBudgetRisk'=> $totalBudgetRisk,
+            'healthScore'    => $healthScore,
+            'healthLabel'    => $healthLabel,
+            'healthColor'    => $healthColor,
+            'alertThreshold' => $ALERT_THRESHOLD,
         ]);
     }
 }

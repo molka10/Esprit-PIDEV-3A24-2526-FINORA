@@ -1,0 +1,88 @@
+{% extends 'admin/baseA.html.twig' %}
+
+{% block body %}
+<div class="container-fluid p-0">
+
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex align-items-center justify-content-between p-4 rounded-4" style="background: linear-gradient(135deg, #1e1b4b 0%, #4338ca 100%);">
+                <div>
+                    <h2 class="text-white mb-1"><i class="bi bi-diagram-3-fill me-2"></i>Audit des Catégories Utilisateurs</h2>
+                    <p class="text-white text-opacity-75 mb-0">Contrôlez et analysez les structures de dépenses de chaque utilisateur.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% for uId, data in users %}
+    <div class="card border-0 shadow-sm mb-4 overflow-hidden">
+        <div class="card-header bg-light d-flex justify-content-between align-items-center p-3">
+            <h5 class="m-0 text-dark fw-bold">
+                <i class="bi bi-person-badge-fill me-2 text-primary"></i> {{ data.name }} 
+                <span class="badge bg-primary bg-opacity-10 text-primary ms-2" style="font-size: 11px;">{{ data.categories|length }} catégories</span>
+            </h5>
+            <a href="{{ path('user_transactions', { id: uId }) }}" class="btn btn-sm btn-outline-primary">
+                <i class="bi bi-eye me-1"></i> Voir transactions
+            </a>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="bg-light bg-opacity-50">
+                        <tr>
+                            <th class="ps-4" style="width: 35%;">Nom</th>
+                            <th style="width: 25%;">Type</th>
+                            <th style="width: 25%;">Priorité</th>
+                            <th class="pe-4 text-end" style="width: 15%;">Utilisation</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for cat in data.categories %}
+                        <tr>
+                            <td class="ps-4">
+                                <span class="fw-bold text-dark">{{ cat.entity.nom }}</span>
+                            </td>
+                            <td>
+                                {% if cat.entity.type == 'INCOME' %}
+                                    <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-3">
+                                        <i class="bi bi-plus-circle me-1"></i>REVENU
+                                    </span>
+                                {% else %}
+                                    <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 px-3">
+                                        <i class="bi bi-dash-circle me-1"></i>DÉPENSE
+                                    </span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% set p = cat.entity.priorite|upper %}
+                                <span class="badge {% if p == 'HAUTE' %}bg-danger{% elseif p == 'MOYENNE' %}bg-warning{% else %}bg-info{% endif %} px-3">
+                                    {{ cat.entity.priorite }}
+                                </span>
+                            </td>
+                            <td class="pe-4 text-end">
+                                <div class="d-flex align-items-center justify-content-end gap-2">
+                                    <div class="progress" style="height: 6px; width: 60px;">
+                                        <div class="progress-bar bg-primary" style="width: {{ min(100, cat.txCount * 10) }}%"></div>
+                                    </div>
+                                    <span class="small fw-bold text-muted">{{ cat.txCount }} tx</span>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="text-center py-5">
+        <div class="avatar avatar-xxl bg-light text-muted mb-3" style="width: 100px; height: 100px; display: inline-flex; align-items: center; justify-content: center; border-radius: 50%;">
+            <i class="bi bi-folder-x display-4"></i>
+        </div>
+        <h4>Aucune catégorie trouvée</h4>
+        <p class="text-muted">Les utilisateurs n'ont pas encore créé de catégories.</p>
+    </div>
+    {% endfor %}
+
+</div>
+{% endblock %}

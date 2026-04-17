@@ -202,8 +202,13 @@
                                 </a>
                             </li>
                             <li class="nav-item">
+                                <a href="{{ path('admin_categories') }}" class="nav-link {{ app.request.get('_route') == 'admin_categories' ? 'active' : '' }}" style="padding: 8px 16px !important; font-size: 14px;">
+                                    <i class="bi bi-diagram-3 fa-fw me-2"></i>Audit des Catégories
+                                </a>
+                            </li>
+                            <li class="nav-item">
                                 <a href="{{ path('api_admin_docs') }}" class="nav-link {{ app.request.get('_route') == 'api_admin_docs' ? 'active' : '' }}" style="padding: 8px 16px !important; font-size: 14px;">
-                                    <i class="bi bi-diagram-3 fa-fw me-2"></i>API Management
+                                    <i class="bi bi-code-square fa-fw me-2"></i>API Management
                                 </a>
                             </li>
                             <li class="nav-item">

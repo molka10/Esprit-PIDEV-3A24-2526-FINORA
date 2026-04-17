@@ -30,9 +30,18 @@
             <i class="bi bi-eye"></i> View History
         </a>
 
-        <a href="{{ path('user_transactions_pdf', {'id': u.id}) }}" class="btn btn-sm btn-danger-soft mb-0">
+        <a href="{{ path('user_transactions_pdf', {'id': u.id}) }}" class="btn btn-sm btn-danger-soft mb-0 me-1">
             <i class="bi bi-file-earmark-pdf"></i> PDF
         </a>
+
+        <button
+            class="btn btn-sm mb-0"
+            style="background:linear-gradient(135deg,#7c3aed,#8b5cf6);color:#fff;border:none;border-radius:10px;box-shadow:0 2px 8px rgba(124,58,237,0.25);"
+            onclick="openUserCalendarModal({{ u.id }}, '{{ u.name }}')"
+            title="Voir calendrier {{ u.name }}"
+        >
+            <i class="bi bi-calendar3"></i> Calendrier
+        </button>
     </td>
 </tr>
 

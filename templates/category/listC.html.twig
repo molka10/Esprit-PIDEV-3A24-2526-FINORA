@@ -1,86 +1,336 @@
 {% extends 'base.html.twig' %}
 
-{% block content %}
+{% block stylesheets %}
+<style>
+/* ── Design tokens ──────────────────────────────────────── */
+:root {
+    --p:  #7c3aed; --p2: #8b5cf6; --p3: #ede9fe;
+    --g:  #22c55e; --r:  #ef4444; --o: #f59e0b;
+    --ink:#1e1b4b; --muted:#94a3b8;
+    --card-shadow: 0 8px 32px -8px rgba(124,58,237,0.13);
+    --border: rgba(124,58,237,0.10);
+}
 
-<div class="container py-5">
-    <div class="card border-0 shadow-sm mb-5">
-        <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center">
-            <h5 class="mb-0 fw-bold">
-                <i class="bi bi-tags-fill text-primary me-2"></i> Grille des Catégories
-            </h5>
-            <a href="{{ path('category_add') }}" class="btn btn-sm btn-primary">
-                <i class="bi bi-plus-lg me-1"></i> Ajouter une Catégorie
+/* ── Page ───────────────────────────────────────────────── */
+.cat-page { padding: 36px 0 60px; background: #f8f5ff; min-height: 100vh; }
+
+/* ── Hero banner ─────────────────────────────────────────── */
+.cat-hero {
+    background: linear-gradient(135deg,#7c3aed,#4f46e5);
+    border-radius: 22px;
+    padding: 24px 28px;
+    margin-bottom: 26px;
+    display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap:14px;
+    box-shadow: 0 16px 40px rgba(124,58,237,0.28);
+    position: relative; overflow: hidden;
+}
+.cat-hero::after {
+    content:''; position: absolute; right:-50px; top:-50px;
+    width:200px;height:200px; border-radius:50%; background:rgba(255,255,255,0.06);
+}
+.cat-hero h1 { margin:0; font-size:24px; font-weight:900; color:#fff; }
+.cat-hero p  { margin:4px 0 0; font-size:13px; color:rgba(255,255,255,0.65); }
+.cat-hero-btns { display:flex; gap:10px; flex-wrap:wrap; position:relative; z-index:1; }
+.btn-hero {
+    display:inline-flex; align-items:center; gap:7px;
+    padding:9px 18px; border-radius:11px; font-size:13px; font-weight:700;
+    text-decoration:none; border:none; cursor:pointer;
+    transition:transform 0.15s, box-shadow 0.15s;
+}
+.btn-hero:hover { transform:translateY(-2px); }
+.btn-glass { background:rgba(255,255,255,0.15); color:#fff; border:1px solid rgba(255,255,255,0.25); }
+.btn-glass:hover { background:rgba(255,255,255,0.22); color:#fff; box-shadow:0 6px 20px rgba(0,0,0,0.15); }
+.btn-white { background:#fff; color:var(--p); box-shadow:0 4px 14px rgba(0,0,0,0.12); }
+.btn-white:hover { box-shadow:0 8px 22px rgba(0,0,0,0.16); color:var(--p); }
+
+/* ── Stat cards ─────────────────────────────────────────── */
+.cat-stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:14px; margin-bottom:22px; }
+.cat-stat {
+    background:#fff; border-radius:16px; padding:18px 20px;
+    box-shadow:var(--card-shadow); border:1px solid var(--border);
+    display:flex; align-items:center; gap:12px;
+    animation: fadeUp 0.4s ease both;
+}
+.cat-stat:nth-child(1){ animation-delay:.05s; }
+.cat-stat:nth-child(2){ animation-delay:.10s; }
+.cat-stat:nth-child(3){ animation-delay:.15s; }
+.cat-stat:nth-child(4){ animation-delay:.20s; }
+@keyframes fadeUp { from { opacity:0;transform:translateY(14px);} to { opacity:1;transform:translateY(0);} }
+.stat-icon { width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0; }
+.si-total   { background:#ede9fe;color:var(--p); }
+.si-health  { background:#dcfce7;color:#16a34a; }
+.si-alert   { background:#fee2e2;color:#dc2626; }
+.si-risk    { background:#fef3c7;color:#d97706; }
+.stat-info span   { display:block;font-size:10.5px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.5px; }
+.stat-info strong { font-size:18px;font-weight:900;color:var(--ink); }
+
+/* ── Health progress bar ─────────────────────────────────── */
+.health-bar-wrap {
+    background:#fff; border-radius:16px; padding:16px 20px;
+    box-shadow:var(--card-shadow); border:1px solid var(--border);
+    margin-bottom:22px; display:flex; align-items:center; gap:18px; flex-wrap:wrap;
+    animation: fadeUp 0.4s 0.2s ease both;
+}
+.health-label { font-size:13px; font-weight:700; color:var(--ink); flex-shrink:0; }
+.health-bar-outer { flex:1; background:#f1f5f9; border-radius:20px; height:10px; overflow:hidden; min-width:120px; }
+.health-bar-inner { height:100%; border-radius:20px; transition:width 0.8s ease; }
+.health-score-badge {
+    font-size:20px; font-weight:900; min-width:48px; text-align:right; flex-shrink:0;
+}
+
+/* ── Filters card ────────────────────────────────────────── */
+.cat-filters {
+    background:#fff; border-radius:16px; padding:18px 20px;
+    box-shadow:var(--card-shadow); border:1px solid var(--border);
+    margin-bottom:18px;
+    animation: fadeUp 0.4s 0.25s ease both;
+}
+
+/* ── Table card ──────────────────────────────────────────── */
+.cat-table-card {
+    background:#fff; border-radius:18px;
+    box-shadow:var(--card-shadow); border:1px solid var(--border);
+    overflow:hidden;
+    animation: fadeUp 0.4s 0.3s ease both;
+}
+.cat-table-header {
+    padding:16px 22px; border-bottom:1px solid var(--border);
+    display:flex; align-items:center; justify-content:space-between;
+    background:linear-gradient(135deg,#faf5ff,#fff);
+}
+.cat-table-title { font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--p); display:flex;align-items:center;gap:7px; }
+.cat-table { width:100%; border-collapse:collapse; font-size:13.5px; }
+.cat-table thead th {
+    padding:11px 16px; text-align:left;
+    font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:.5px;
+    color:var(--muted); border-bottom:2px solid var(--p3);
+    background:#fdfaff;
+}
+.cat-table tbody tr { border-bottom:1px solid rgba(124,58,237,0.05); transition:background 0.15s; }
+.cat-table tbody tr:hover { background:#faf5ff; }
+.cat-table tbody td { padding:14px 16px; color:#374151; vertical-align:middle; }
+.cat-table tbody td:first-child { font-weight:700; color:var(--ink); }
+
+/* ── Badges ──────────────────────────────────────────────── */
+.badge-type {
+    display:inline-flex;align-items:center;gap:4px;
+    padding:3px 11px;border-radius:20px;font-size:11px;font-weight:700;
+}
+.badge-income  { background:#dcfce7;color:#16a34a; }
+.badge-outcome { background:#fee2e2;color:#dc2626; }
+.badge-prio {
+    display:inline-flex;align-items:center;gap:4px;
+    padding:3px 10px;border-radius:20px;font-size:10.5px;font-weight:700;
+}
+.prio-haute  { background:#fee2e2;color:#dc2626; }
+.prio-moyenne{ background:#fef3c7;color:#d97706; }
+.prio-basse  { background:#dcfce7;color:#16a34a; }
+
+/* ── Activity dot ────────────────────────────────────────── */
+.activity-dot {
+    display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:600;
+}
+.dot { width:8px;height:8px;border-radius:50%;display:inline-block; }
+.dot-active   { background:#22c55e;box-shadow:0 0 6px rgba(34,197,94,0.5); }
+.dot-inactive { background:#d1d5db; }
+
+/* ── Alert row ────────────────────────────────────────────── */
+.row-alert { background:rgba(239,68,68,0.03) !important; }
+.alert-flag {
+    display:inline-flex;align-items:center;gap:5px;
+    font-size:11px;font-weight:700;color:#dc2626;
+    background:#fee2e2;border-radius:8px;padding:2px 8px;
+}
+
+/* ── Mini stats cell ─────────────────────────────────────── */
+.mini-stat { font-size:12px;line-height:1.4; }
+.mini-stat .ms-income { color:#16a34a;font-weight:700; }
+.mini-stat .ms-outcome{ color:#dc2626;font-weight:700; }
+.mini-stat .ms-count  { color:var(--muted); }
+
+/* ── Action buttons ──────────────────────────────────────── */
+.btn-edit {
+    display:inline-flex;align-items:center;gap:5px;
+    padding:6px 14px;border-radius:9px;font-size:12px;font-weight:600;
+    background:#1e1b4b;color:#fff;text-decoration:none;border:none;cursor:pointer;
+    transition:background 0.15s;
+}
+.btn-edit:hover { background:#2d2a5e;color:#fff; }
+.btn-del {
+    display:inline-flex;align-items:center;gap:5px;
+    padding:6px 14px;border-radius:9px;font-size:12px;font-weight:600;
+    background:transparent;color:#dc2626;border:1.5px solid #fecaca;text-decoration:none;cursor:pointer;
+    transition:all 0.15s;
+}
+.btn-del:hover { background:#fee2e2;color:#dc2626; }
+
+/* ── Pagination override ─────────────────────────────────── */
+.pagination .page-link { border-radius:10px !important; color:var(--p) !important; }
+.pagination .page-item.active .page-link { background:var(--p) !important; border-color:var(--p) !important; color:#fff !important; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="cat-page">
+<div class="container">
+
+    {# ── Hero ── #}
+    <div class="cat-hero">
+        <div style="position:relative;z-index:1;">
+            <h1><i class="bi bi-tags-fill me-2"></i>Gestion des Catégories</h1>
+            <p>{{ categories.getTotalItemCount() }} catégorie{{ categories.getTotalItemCount() != 1 ? 's' : '' }} · Analyse budgétaire en temps réel</p>
+        </div>
+        <div class="cat-hero-btns">
+            <a href="{{ path('category_add') }}" class="btn-hero btn-white">
+                <i class="bi bi-plus-lg"></i> Ajouter une Catégorie
             </a>
         </div>
-        
-        <div class="card-body">
-            <!-- Advanced Filters Form -->
-            <form method="get" class="row g-3 mb-4 bg-light p-3 rounded mx-1">
-                <div class="col-md-4">
-                    <label class="form-label small fw-bold">Recherche</label>
-                    <input type="text" name="search" class="form-control form-control-sm" placeholder="Nom de Catégorie..." value="{{ app.request.query.get('search') }}">
-                </div>
-                <div class="col-md-3">
-                    <label class="form-label small fw-bold">Type</label>
-                    <select name="filter_type" class="form-select form-select-sm">
-                        <option value="">Tous</option>
-                        <option value="INCOME" {% if app.request.query.get('filter_type') == 'INCOME' %}selected{% endif %}>Revenu</option>
-                        <option value="OUTCOME" {% if app.request.query.get('filter_type') == 'OUTCOME' %}selected{% endif %}>Dépense</option>
-                    </select>
-                </div>
-                <div class="col-md-3">
-                    <label class="form-label small fw-bold">Trier Par</label>
-                    <select name="sortBy" class="form-select form-select-sm">
-                        <option value="nom" {% if app.request.query.get('sortBy') == 'nom' %}selected{% endif %}>Nom</option>
-                        <option value="priorite" {% if app.request.query.get('sortBy') == 'priorite' %}selected{% endif %}>Priorité</option>
-                    </select>
-                </div>
-                <div class="col-md-2 d-flex align-items-end">
-                    <button type="submit" class="btn btn-sm btn-primary w-100"><i class="bi bi-search"></i> Rechercher</button>
-                </div>
-            </form>
+    </div>
 
-            <div class="table-responsive">
-                <table class="table table-hover align-middle border">
-                    <thead class="table-light">
-                        <tr>
-                            <th>Nom</th>
-                            <th>Type</th>
-                            <th>Priorité</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                    {% for c in categories %}
-                        <tr>
-                            <td class="fw-bold">{{ c.nom }}</td>
-                            <td>
-                                <span class="badge bg-{{ c.type == 'INCOME' ? 'success' : 'danger' }} bg-opacity-10 text-{{ c.type == 'INCOME' ? 'success' : 'danger' }} border border-{{ c.type == 'INCOME' ? 'success' : 'danger' }}">
-                                    {{ c.type }}
-                                </span>
-                            </td>
-                            <td>
-                                <span class="badge bg-secondary">{{ c.priorite }}</span>
-                            </td>
-                            <td>
-                                <a href="{{ path('category_edit', {'id': c.id}) }}" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil"></i></a>
-                                <a href="{{ path('category_delete', {'id': c.id}) }}" class="btn btn-sm btn-outline-danger delete"><i class="bi bi-trash"></i></a>
-                            </td>
-                        </tr>
-                    {% else %}
-                        <tr>
-                            <td colspan="4" class="text-center py-4 text-muted">Aucune catégorie trouvée.</td>
-                        </tr>
-                    {% endfor %}
-                    </tbody>
-                </table>
-            </div>
+    {# ── Stat cards ── #}
+    <div class="cat-stats">
+        <div class="cat-stat">
+            <div class="stat-icon si-total"><i class="bi bi-tags-fill"></i></div>
+            <div class="stat-info"><span>Total Catégories</span><strong>{{ categories.getTotalItemCount() }}</strong></div>
+        </div>
+     
+     
+    </div>
 
-            <div class="d-flex justify-content-between mt-3">
-                {{ knp_pagination_render(categories) }}
-            </div>
+    {# ── Budget health bar ── #}
+  
+
+    {# ── Alert banner ── #}
+    {% if alertCount > 0 %}
+    <div style="background:linear-gradient(135deg,#fee2e2,#fef2f2);border:1px solid #fecaca;border-radius:14px;padding:14px 20px;margin-bottom:18px;display:flex;align-items:center;gap:12px;animation:fadeUp 0.4s ease both;">
+        <i class="bi bi-exclamation-triangle-fill" style="color:#dc2626;font-size:20px;flex-shrink:0;"></i>
+        <div>
+            <strong style="color:#dc2626;">{{ alertCount }} catégorie{{ alertCount > 1 ? 's' : '' }} en dépassement de budget</strong>
+            <p style="margin:2px 0 0;font-size:12.5px;color:#b91c1c;">
+                Dépenses cumulées à risque : {{ totalBudgetRisk|number_format(2,'.','') }} DT — Vérifiez les catégories marquées ⚠️
+            </p>
         </div>
     </div>
-</div>
+    {% endif %}
 
+    {# ── Filters ── #}
+    <div class="cat-filters">
+        <form method="get" class="row g-3 align-items-end">
+            <div class="col-md-4">
+                <label class="form-label small fw-bold mb-1">Recherche</label>
+                <input type="text" name="search" class="form-control form-control-sm" placeholder="Nom de Catégorie..." value="{{ app.request.query.get('search') }}">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label small fw-bold mb-1">Type</label>
+                <select name="filter_type" class="form-select form-select-sm">
+                    <option value="">Tous</option>
+                    <option value="INCOME"  {% if app.request.query.get('filter_type') == 'INCOME'  %}selected{% endif %}>INCOME</option>
+                    <option value="OUTCOME" {% if app.request.query.get('filter_type') == 'OUTCOME' %}selected{% endif %}>OUTCOME</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label small fw-bold mb-1">Trier Par</label>
+                <select name="sortBy" class="form-select form-select-sm">
+                    <option value="nom"      {% if app.request.query.get('sortBy') == 'nom'      %}selected{% endif %}>Nom</option>
+                    <option value="priorite" {% if app.request.query.get('sortBy') == 'priorite' %}selected{% endif %}>Priorité</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-sm btn-primary w-100"><i class="bi bi-search me-1"></i>Rechercher</button>
+            </div>
+        </form>
+    </div>
+
+    {# ── Table ── #}
+    <div class="cat-table-card">
+        <div class="cat-table-header">
+            <div class="cat-table-title"><i class="bi bi-table"></i> Liste des Catégories</div>
+            <span style="font-size:12px;color:var(--muted);">
+                {% if alertCount > 0 %}<i class="bi bi-exclamation-triangle-fill text-danger me-1"></i>{% endif %}
+                {{ categories|length }} / {{ categories.getTotalItemCount() }} affichées
+            </span>
+        </div>
+        <div style="overflow-x:auto;">
+            <table class="cat-table">
+                <thead>
+                    <tr>
+                        <th>Nom</th>
+                        <th>Type</th>
+                        <th>Priorité</th>
+                        <th>Statistiques</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for c in categories %}
+                    {% set stats = categoryStats[c.id] ?? {count:0,income:0,outcome:0,net:0,isActive:false,recentCount:0,isAlert:false} %}
+                    <tr class="{{ stats.isAlert ? 'row-alert' : '' }}">
+
+                        {# Name #}
+                        <td>{{ c.nom }}</td>
+
+                        {# Type badge #}
+                        <td>
+                            {% if c.type == 'INCOME' %}
+                                <span class="badge-type badge-income"><i class="bi bi-arrow-down-circle-fill"></i> INCOME</span>
+                            {% else %}
+                                <span class="badge-type badge-outcome"><i class="bi bi-arrow-up-circle-fill"></i> OUTCOME</span>
+                            {% endif %}
+                        </td>
+
+                        {# Priority badge #}
+                        <td>
+                            {% set prio = c.priorite|upper %}
+                            <span class="badge-prio {{ prio == 'HAUTE' ? 'prio-haute' : (prio == 'BASSE' ? 'prio-basse' : 'prio-moyenne') }}">
+                                {% if prio == 'HAUTE' %}<i class="bi bi-chevron-double-up"></i>
+                                {% elseif prio == 'BASSE' %}<i class="bi bi-chevron-double-down"></i>
+                                {% else %}<i class="bi bi-dash"></i>{% endif %}
+                                {{ c.priorite }}
+                            </span>
+                        </td>
+
+                        {# Mini stats #}
+                        <td>
+                            <div class="mini-stat">
+                                <span class="ms-count">{{ stats.count }} transaction{{ stats.count != 1 ? 's' : '' }}</span><br>
+                                {% if stats.income > 0 %}
+                                    <span class="ms-income">+{{ stats.income|number_format(2,'.','') }} DT</span><br>
+                                {% endif %}
+                                {% if stats.outcome > 0 %}
+                                    <span class="ms-outcome">-{{ stats.outcome|number_format(2,'.','') }} DT</span>
+                                {% endif %}
+                            </div>
+                        </td>
+
+                        {# Actions #}
+                        <td>
+                            <div style="display:flex;gap:8px;">
+                                <a href="{{ path('category_edit', {'id': c.id}) }}" class="btn-edit">
+                                    <i class="bi bi-pencil-fill"></i>
+                                </a>
+                                <a href="{{ path('category_delete', {'id': c.id}) }}" class="btn-del" onclick="return confirm('Supprimer {{ c.nom }} ?')">
+                                    <i class="bi bi-trash-fill"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="5" style="text-align:center;padding:48px;color:var(--muted);">
+                            <i class="bi bi-tags" style="font-size:2.5rem;display:block;margin-bottom:10px;opacity:.3;"></i>
+                            Aucune catégorie trouvée.
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div style="padding:16px 20px;border-top:1px solid var(--border);">
+            {{ knp_pagination_render(categories) }}
+        </div>
+    </div>
+
+</div>
+</div>
 {% endblock %}

@@ -9,6 +9,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Request;
 use Dompdf\Dompdf;
 use App\Service\CurrencyConverterService;
+use Doctrine\ORM\EntityManagerInterface;
 
 class AdminController extends AbstractController
 {
@@ -169,37 +170,58 @@ public function userTransactions($id, TransactionWalletRepository $repo): Respon
         ->getQuery()
         ->getResult();
 
-    // ✅ chart data (par date)
-    $chartDates = [];
-    $income = 0;
-    $outcome = 0;
+    $chartDates   = [];
+    $income       = 0;
+    $outcome      = 0;
+    $categoryMap  = [];
+    $monthMap     = [];
 
     foreach ($transactions as $t) {
-        $date = $t->getDateTransaction()->format('Y-m-d');
+        $date    = $t->getDateTransaction()->format('Y-m-d');
+        $month   = $t->getDateTransaction()->format('Y-m');
+        $cat     = $t->getCategory() ? $t->getCategory()->getNom() : 'Sans catégorie';
+        $amount  = $t->getMontant();
+        $absAmt  = abs($amount);
+        $isInc   = $t->getType() === 'INCOME';
 
-        if (!isset($chartDates[$date])) {
-            $chartDates[$date] = 0;
+        // Daily net
+        $chartDates[$date] = ($chartDates[$date] ?? 0) + $amount;
+
+        // Totals
+        if ($isInc) { $income += $amount; }
+        else         { $outcome += $absAmt; }
+
+        // Category breakdown
+        if (!isset($categoryMap[$cat])) {
+            $categoryMap[$cat] = ['income' => 0, 'outcome' => 0];
         }
+        if ($isInc) { $categoryMap[$cat]['income']  += $amount; }
+        else         { $categoryMap[$cat]['outcome'] += $absAmt; }
 
-        $chartDates[$date] += $t->getMontant();
-
-        // donut
-        if ($t->getType() === 'INCOME') {
-            $income += $t->getMontant();
-        } else {
-            $outcome += abs($t->getMontant());
+        // Monthly income vs outcome
+        if (!isset($monthMap[$month])) {
+            $monthMap[$month] = ['income' => 0, 'outcome' => 0];
         }
+        if ($isInc) { $monthMap[$month]['income']  += $amount; }
+        else         { $monthMap[$month]['outcome'] += $absAmt; }
     }
 
     ksort($chartDates);
+    ksort($monthMap);
 
     return $this->render('admin/user_transactions.html.twig', [
-        'transactions' => $transactions,
-        'userId' => $id,
-        'chartLabels' => array_keys($chartDates),
-        'chartData' => array_values($chartDates),
-        'income' => $income,
-        'outcome' => $outcome
+        'transactions'    => $transactions,
+        'userId'          => $id,
+        'chartLabels'     => array_keys($chartDates),
+        'chartData'       => array_values($chartDates),
+        'income'          => $income,
+        'outcome'         => $outcome,
+        'categoryLabels'  => array_keys($categoryMap),
+        'categoryIncome'  => array_column($categoryMap, 'income'),
+        'categoryOutcome' => array_column($categoryMap, 'outcome'),
+        'monthLabels'     => array_keys($monthMap),
+        'monthIncome'     => array_column($monthMap, 'income'),
+        'monthOutcome'    => array_column($monthMap, 'outcome'),
     ]);
 }
 #[Route('/admin/user/{id}/pdf', name: 'user_transactions_pdf')]
@@ -304,6 +326,43 @@ public function searchUsers(Request $request, TransactionWalletRepository $repo,
             'anomalies' => $anomalies,
             'threshold' => $threshold,
             'totalRiskyVolume' => $totalRiskyVolume
+        ]);
+    }
+
+    #[Route('/admin/categories', name: 'admin_categories')]
+    public function adminCategories(EntityManagerInterface $em): Response
+    {
+        $categories = $em->getRepository(\App\Entity\Category::class)->findAll();
+        
+        $users = [];
+        foreach ($categories as $cat) {
+            $uId = $cat->getUserId() ?? 0;
+            $userName = 'User ' . $uId;
+            
+            if (!isset($users[$uId])) {
+                $users[$uId] = [
+                    'name' => $userName,
+                    'categories' => []
+                ];
+            }
+            
+            // Get transaction count for this category
+            $txCount = $em->getRepository(\App\Entity\TransactionWallet::class)
+                ->createQueryBuilder('t')
+                ->select('count(t.id)')
+                ->where('t.category = :cat')
+                ->setParameter('cat', $cat)
+                ->getQuery()
+                ->getSingleScalarResult();
+                
+            $users[$uId]['categories'][] = [
+                'entity' => $cat,
+                'txCount' => $txCount
+            ];
+        }
+        
+        return $this->render('admin/categories.html.twig', [
+            'users' => $users
         ]);
     }
 }

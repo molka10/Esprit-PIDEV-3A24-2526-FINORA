@@ -165,92 +165,139 @@ public function dashboard(Request $req, EntityManagerInterface $em, WalletBalanc
 {
     $transactions = $em->getRepository(TransactionWallet::class)->findAll();
 
-    $income = 0;
+    $income  = 0;
     $outcome = 0;
-
-    $incomeData = [];
+    $incomeData  = [];
     $outcomeData = [];
+    $categoryMap = [];
 
     $selectedCurrency = $req->query->get('currency', 'DT');
     $exchangeRate = $currencyConverter->getRate('DT', $selectedCurrency);
 
-    foreach ($transactions as $t) {
+    $biggestTransaction = null;
+    $biggestAmount      = 0;
 
-        $amount = $t->getMontant() * $exchangeRate; // Convert to target currency
-        $cat = $t->getCategory() ? $t->getCategory()->getNom() : 'Autre';
+    foreach ($transactions as $t) {
+        $amount = $t->getMontant() * $exchangeRate;
+        $cat    = $t->getCategory() ? $t->getCategory()->getNom() : 'Autre';
 
         if ($amount > 0) {
             $income += $amount;
-
-            if (!isset($incomeData[$cat])) {
-                $incomeData[$cat] = 0;
-            }
-            $incomeData[$cat] += $amount;
-
+            $incomeData[$cat] = ($incomeData[$cat] ?? 0) + $amount;
         } else {
             $outcome += abs($amount);
+            $outcomeData[$cat] = ($outcomeData[$cat] ?? 0) + abs($amount);
+        }
 
-            if (!isset($outcomeData[$cat])) {
-                $outcomeData[$cat] = 0;
-            }
-            $outcomeData[$cat] += abs($amount);
+        // Category total (for métier analysis)
+        $categoryMap[$cat] = ($categoryMap[$cat] ?? 0) + abs($amount);
+
+        // Biggest single transaction
+        if (abs($amount) > $biggestAmount) {
+            $biggestAmount      = abs($amount);
+            $biggestTransaction = $t;
         }
     }
 
     $balance = $income - $outcome;
+
+    // ── Daily breakdown (Changed from Y-m to Y-m-d for better detail) ──────
     $chartDates = [];
-
     foreach ($transactions as $t) {
-
-        // 🔥 month format
-        $month = $t->getDateTransaction()->format('Y-m'); 
-
-        if (!isset($chartDates[$month])) {
-            $chartDates[$month] = [
-                'income' => 0,
-                'outcome' => 0
-            ];
+        $day = $t->getDateTransaction()->format('Y-m-d');
+        if (!isset($chartDates[$day])) {
+            $chartDates[$day] = ['income' => 0, 'outcome' => 0];
         }
-
         $amt = $t->getMontant() * $exchangeRate;
-        if ($amt > 0) {
-            $chartDates[$month]['income'] += $amt;
+        if ($amt > 0) { $chartDates[$day]['income']  += $amt; }
+        else           { $chartDates[$day]['outcome'] += abs($amt); }
+    }
+    ksort($chartDates);
+    $chartLabels  = array_keys($chartDates);
+    $chartIncome  = array_column($chartDates, 'income');
+    $chartOutcome = array_column($chartDates, 'outcome');
+
+    // ── Métier insights ───────────────────────────────────
+
+    // 1. Top spending category
+    arsort($outcomeData);
+    $topSpendingCat   = !empty($outcomeData) ? array_key_first($outcomeData) : '—';
+    $topSpendingAmt   = !empty($outcomeData) ? reset($outcomeData) : 0;
+
+    // 2. Top income category
+    arsort($incomeData);
+    $topIncomeCat     = !empty($incomeData) ? array_key_first($incomeData) : '—';
+    $topIncomeAmt     = !empty($incomeData) ? reset($incomeData) : 0;
+
+    // 3. Savings rate (%) — income > 0 avoids division by zero
+    $savingsRate      = $income > 0 ? round((($income - $outcome) / $income) * 100, 1) : 0;
+
+    // 4. Spending trend — compare last month vs previous month
+    $months       = array_values($chartDates);
+    $monthCount   = count($months);
+    $spendingTrend = '—';
+    if ($monthCount >= 2) {
+        $lastOut = $months[$monthCount - 1]['outcome'];
+        $prevOut = $months[$monthCount - 2]['outcome'];
+        if ($prevOut > 0) {
+            $trendPct      = round((($lastOut - $prevOut) / $prevOut) * 100, 1);
+            $spendingTrend = ($trendPct <= 0 ? '▼ ' : '▲ +') . abs($trendPct) . '% vs mois précédent';
+            $trendGood     = $trendPct <= 0; // spending decreased = good
         } else {
-            $chartDates[$month]['outcome'] += abs($amt);
+            $spendingTrend = 'Nouveau mois';
+            $trendGood     = true;
         }
+    } else {
+        $trendGood = true;
     }
 
-    // final arrays
-    $chartLabels = array_keys($chartDates);
-    $chartIncome = array_column($chartDates, 'income');
-    $chartOutcome = array_column($chartDates, 'outcome');
-
-    ksort($chartDates);
-
-    $chartLabels = array_keys($chartDates);
-    $chartIncome = array_column($chartDates, 'income');
-    $chartOutcome = array_column($chartDates, 'outcome');
+    // 5. Best savings month
+    $bestMonth     = '—';
+    $bestSaving    = PHP_INT_MIN;
+    foreach ($chartDates as $m => $d) {
+        $net = $d['income'] - $d['outcome'];
+        if ($net > $bestSaving) { $bestSaving = $net; $bestMonth = $m; }
+    }
 
     return $this->render('wallet/walletuser.html.twig', [
-        'income' => number_format($income, 2, '.', ''),
-        'outcome' => number_format($outcome, 2, '.', ''),
-        'balance' => number_format($balance, 2, '.', ''),
+        'income'         => number_format($income,  2, '.', ''),
+        'outcome'        => number_format($outcome, 2, '.', ''),
+        'balance'        => number_format($balance, 2, '.', ''),
         'currencySymbol' => $selectedCurrency,
-        'rate' => $exchangeRate,
-        'transactions' => $transactions,
+        'rate'           => $exchangeRate,
+        'transactions'   => $transactions,
 
-        // 🔥 charts
-        'incomeChartLabels' => array_keys($incomeData),
-        'incomeChartData' => array_values($incomeData),
-
+        // category charts
+        'incomeChartLabels'  => array_keys($incomeData),
+        'incomeChartData'    => array_values($incomeData),
         'outcomeChartLabels' => array_keys($outcomeData),
-        'outcomeChartData' => array_values($outcomeData),
+        'outcomeChartData'   => array_values($outcomeData),
 
-        'chartLabels' => $chartLabels,
-    'incomeData' => $chartIncome,
-    'outcomeData' => $chartOutcome,
+        // timeseries
+        'chartLabels'  => $chartLabels,
+        'incomeData'   => $chartIncome,
+        'outcomeData'  => $chartOutcome,
+
+        // métier insights
+        'topSpendingCat' => $topSpendingCat,
+        'topSpendingAmt' => number_format($topSpendingAmt, 2, '.', ''),
+        'topIncomeCat'   => $topIncomeCat,
+        'topIncomeAmt'   => number_format($topIncomeAmt,   2, '.', ''),
+        'savingsRate'    => $savingsRate,
+        'spendingTrend'  => $spendingTrend,
+        'trendGood'      => $trendGood ?? true,
+        'bestMonth'      => $bestMonth,
+        'bestSaving'     => number_format(max(0, $bestSaving), 2, '.', ''),
+        'biggestTx'      => $biggestTransaction,
+        'biggestAmt'     => number_format($biggestAmount, 2, '.', ''),
     ]);
 }
+
+    #[Route('/calendar', name: 'user_calendar')]
+    public function calendar(): Response
+    {
+        return $this->render('wallet/calendar.html.twig');
+    }
 
     #[Route('/edit/{id}', name: 'transaction_edit')]
     public function edit($id, Request $req, EntityManagerInterface $em): Response

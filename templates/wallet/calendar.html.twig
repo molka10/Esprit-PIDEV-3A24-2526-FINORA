@@ -1,0 +1,601 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Finora – Calendrier des Transactions{% endblock %}
+
+{% block stylesheets %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.css">
+<style>
+/* ── Root tokens ─────────────────────────────────────────────── */
+:root {
+    --cal-purple:   #7c3aed;
+    --cal-purple-2: #8b5cf6;
+    --cal-green:    #22c55e;
+    --cal-red:      #ef4444;
+    --cal-bg:       #f5f3ff;
+    --cal-card:     #ffffff;
+    --cal-border:   rgba(124,58,237,0.10);
+    --cal-shadow:   0 10px 40px -10px rgba(124,58,237,0.15);
+    --cal-radius:   20px;
+}
+
+/* ── Page wrapper ─────────────────────────────────────────────── */
+.calendar-page {
+    background: var(--cal-bg);
+    min-height: 100vh;
+    padding: 32px 24px 60px;
+    font-family: 'Roboto', sans-serif;
+}
+
+/* ── Header ───────────────────────────────────────────────────── */
+.cal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-bottom: 28px;
+}
+.cal-header h1 {
+    font-size: 26px;
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--cal-purple), var(--cal-purple-2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin: 0;
+}
+.cal-back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, var(--cal-purple), var(--cal-purple-2));
+    color: #fff;
+    font-weight: 600;
+    font-size: 14px;
+    text-decoration: none;
+    transition: transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 4px 14px rgba(124,58,237,0.3);
+}
+.cal-back-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(124,58,237,0.35);
+    color: #fff;
+}
+
+/* ── Stat pillls ──────────────────────────────────────────────── */
+.cal-stats {
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+    margin-bottom: 24px;
+}
+.cal-stat-card {
+    flex: 1 1 160px;
+    background: var(--cal-card);
+    border-radius: 16px;
+    padding: 18px 22px;
+    box-shadow: var(--cal-shadow);
+    border: 1px solid var(--cal-border);
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    animation: slideUp 0.5s ease both;
+}
+.cal-stat-card:nth-child(1) { animation-delay: 0.05s; }
+.cal-stat-card:nth-child(2) { animation-delay: 0.10s; }
+.cal-stat-card:nth-child(3) { animation-delay: 0.15s; }
+.cal-stat-card:nth-child(4) { animation-delay: 0.20s; }
+@keyframes slideUp {
+    from { opacity:0; transform: translateY(18px); }
+    to   { opacity:1; transform: translateY(0); }
+}
+.cal-stat-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+}
+.icon-total   { background: #ede9fe; color: var(--cal-purple); }
+.icon-income  { background: #dcfce7; color: var(--cal-green);  }
+.icon-outcome { background: #fee2e2; color: var(--cal-red);    }
+.icon-cats    { background: #e0f2fe; color: #0284c7;           }
+.cal-stat-info span {
+    display: block;
+    font-size: 11px;
+    color: #94a3b8;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+.cal-stat-info strong {
+    font-size: 20px;
+    font-weight: 800;
+    color: #1e1b4b;
+    line-height: 1.2;
+}
+
+/* ── Main layout ──────────────────────────────────────────────── */
+.cal-main-grid {
+    display: grid;
+    grid-template-columns: 1fr 280px;
+    gap: 20px;
+    align-items: start;
+}
+@media (max-width: 900px) {
+    .cal-main-grid { grid-template-columns: 1fr; }
+}
+
+/* ── Calendar card ────────────────────────────────────────────── */
+.cal-card {
+    background: var(--cal-card);
+    border-radius: var(--cal-radius);
+    box-shadow: var(--cal-shadow);
+    border: 1px solid var(--cal-border);
+    padding: 24px;
+    animation: slideUp 0.45s ease both;
+}
+
+/* FullCalendar tweaks */
+.fc .fc-toolbar-title {
+    font-size: 18px !important;
+    font-weight: 700 !important;
+    color: #1e1b4b !important;
+}
+.fc .fc-button-primary {
+    background: linear-gradient(135deg, var(--cal-purple), var(--cal-purple-2)) !important;
+    border: none !important;
+    border-radius: 10px !important;
+    font-weight: 600 !important;
+    box-shadow: 0 3px 10px rgba(124,58,237,0.2) !important;
+    transition: opacity 0.2s !important;
+}
+.fc .fc-button-primary:hover { opacity: 0.85 !important; }
+.fc .fc-button-primary:not(:disabled):active,
+.fc .fc-button-primary:not(:disabled).fc-button-active {
+    background: var(--cal-purple) !important;
+    box-shadow: none !important;
+}
+.fc-daygrid-day:hover { background: rgba(124,58,237,0.04) !important; }
+.fc-day-today { background: rgba(124,58,237,0.06) !important; }
+.fc-event {
+    border-radius: 6px !important;
+    font-size: 11.5px !important;
+    font-weight: 600 !important;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s;
+}
+.fc-event:hover {
+    transform: scale(1.03);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.18) !important;
+}
+.fc-col-header-cell-cushion,
+.fc-daygrid-day-number {
+    color: #4c1d95 !important;
+    font-weight: 600 !important;
+    text-decoration: none !important;
+}
+
+/* ── Sidebar ──────────────────────────────────────────────────── */
+.cal-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+.cal-legend-card {
+    background: var(--cal-card);
+    border-radius: var(--cal-radius);
+    box-shadow: var(--cal-shadow);
+    border: 1px solid var(--cal-border);
+    padding: 20px 22px;
+    animation: slideUp 0.5s ease 0.1s both;
+}
+.cal-legend-card h5 {
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: #6d28d9;
+    margin-bottom: 14px;
+}
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+    font-size: 13px;
+    color: #374151;
+    font-weight: 500;
+}
+.legend-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 3px;
+    flex-shrink: 0;
+}
+
+/* ── Recent events list ───────────────────────────────────────── */
+.cal-recent-card {
+    background: var(--cal-card);
+    border-radius: var(--cal-radius);
+    box-shadow: var(--cal-shadow);
+    border: 1px solid var(--cal-border);
+    padding: 20px 22px;
+    animation: slideUp 0.5s ease 0.15s both;
+}
+.cal-recent-card h5 {
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: #6d28d9;
+    margin-bottom: 14px;
+}
+.recent-event-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(124,58,237,0.06);
+}
+.recent-event-item:last-child { border-bottom: none; }
+.recent-badge {
+    padding: 2px 8px;
+    border-radius: 6px;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+.badge-income  { background: #dcfce7; color: #16a34a; }
+.badge-outcome { background: #fee2e2; color: #dc2626; }
+.recent-event-body strong {
+    display: block;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: #1e1b4b;
+    line-height: 1.2;
+    margin-bottom: 2px;
+}
+.recent-event-body small {
+    font-size: 11px;
+    color: #94a3b8;
+}
+
+/* ── Loading skeleton ─────────────────────────────────────────── */
+#calendar-loading {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 20px 0;
+}
+.skeleton-line {
+    border-radius: 8px;
+    background: linear-gradient(90deg, #ede9fe 25%, #ddd6fe 50%, #ede9fe 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.4s infinite;
+}
+@keyframes shimmer {
+    0%   { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+/* ── Event detail modal ───────────────────────────────────────── */
+.event-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.45);
+    backdrop-filter: blur(4px);
+    z-index: 9000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+}
+.event-modal-overlay.open {
+    opacity: 1;
+    pointer-events: all;
+}
+.event-modal {
+    background: #fff;
+    border-radius: 24px;
+    width: min(420px, 92vw);
+    box-shadow: 0 25px 60px rgba(0,0,0,0.2);
+    overflow: hidden;
+    transform: scale(0.9) translateY(20px);
+    transition: transform 0.25s cubic-bezier(0.34,1.56,0.64,1);
+}
+.event-modal-overlay.open .event-modal {
+    transform: scale(1) translateY(0);
+}
+.event-modal-header {
+    padding: 22px 24px 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.event-modal-type-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 14px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+.modal-close {
+    width: 32px;
+    height: 32px;
+    border: none;
+    background: #f3f4f6;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 16px;
+    color: #6b7280;
+    transition: background 0.15s;
+}
+.modal-close:hover { background: #e5e7eb; }
+.event-modal-body {
+    padding: 0 24px 24px;
+}
+.event-modal-amount {
+    font-size: 36px;
+    font-weight: 900;
+    margin-bottom: 4px;
+}
+.event-modal-name {
+    font-size: 15px;
+    color: #6b7280;
+    margin-bottom: 22px;
+}
+.event-detail-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid #f3f4f6;
+    font-size: 13.5px;
+}
+.event-detail-row:last-child { border-bottom: none; }
+.event-detail-row span:first-child { color: #9ca3af; font-weight: 500; }
+.event-detail-row span:last-child  { color: #1e1b4b; font-weight: 600; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="calendar-page">
+
+    <!-- Header -->
+    <div class="cal-header">
+        <h1><i class="bi bi-calendar3 me-2"></i>Calendrier des Transactions</h1>
+        <a href="{{ path('dashboard') }}" class="cal-back-btn">
+            <i class="bi bi-arrow-left"></i> Tableau de Bord
+        </a>
+    </div>
+
+    <!-- Stats bar (filled via JS) -->
+    <div class="cal-stats" id="cal-stats">
+        <div class="cal-stat-card">
+            <div class="cal-stat-icon icon-total"><i class="bi bi-calendar-check"></i></div>
+            <div class="cal-stat-info"><span>Événements</span><strong id="stat-total">—</strong></div>
+        </div>
+        <div class="cal-stat-card">
+            <div class="cal-stat-icon icon-income"><i class="bi bi-arrow-down-circle"></i></div>
+            <div class="cal-stat-info"><span>Total Revenus</span><strong id="stat-income">—</strong></div>
+        </div>
+        <div class="cal-stat-card">
+            <div class="cal-stat-icon icon-outcome"><i class="bi bi-arrow-up-circle"></i></div>
+            <div class="cal-stat-info"><span>Total Dépenses</span><strong id="stat-outcome">—</strong></div>
+        </div>
+        <div class="cal-stat-card">
+            <div class="cal-stat-icon icon-cats"><i class="bi bi-tag"></i></div>
+            <div class="cal-stat-info"><span>Catégories</span><strong id="stat-cats">—</strong></div>
+        </div>
+    </div>
+
+    <!-- Main grid: calendar + sidebar -->
+    <div class="cal-main-grid">
+
+        <!-- Calendar -->
+        <div class="cal-card">
+            <div id="calendar-loading">
+                <div class="skeleton-line" style="height:40px;"></div>
+                <div class="skeleton-line" style="height:32px;"></div>
+                <div class="skeleton-line" style="height:180px;"></div>
+                <div class="skeleton-line" style="height:28px; width:60%;"></div>
+            </div>
+            <div id="fullcalendar" style="display:none;"></div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="cal-sidebar">
+
+            <!-- Legend -->
+            <div class="cal-legend-card">
+                <h5><i class="bi bi-info-circle me-1"></i> Légende</h5>
+                <div class="legend-item">
+                    <div class="legend-dot" style="background:#22c55e;"></div>
+                    Revenu (INCOME)
+                </div>
+                <div class="legend-item">
+                    <div class="legend-dot" style="background:#ef4444;"></div>
+                    Dépense (OUTCOME)
+                </div>
+                <hr style="border-color:rgba(124,58,237,0.08); margin:10px 0;">
+                <p style="font-size:12px;color:#94a3b8;margin:0;">
+                    Cliquez sur un événement pour voir ses détails. Naviguez entre les vues mois / semaine / jour.
+                </p>
+            </div>
+
+            <!-- Recent events -->
+            <div class="cal-recent-card">
+                <h5><i class="bi bi-clock-history me-1"></i> Récents</h5>
+                <div id="recent-events-list">
+                    <div class="skeleton-line" style="height:50px;margin-bottom:8px;border-radius:10px;"></div>
+                    <div class="skeleton-line" style="height:50px;margin-bottom:8px;border-radius:10px;"></div>
+                    <div class="skeleton-line" style="height:50px;border-radius:10px;"></div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- Event detail modal -->
+<div class="event-modal-overlay" id="eventModalOverlay">
+    <div class="event-modal">
+        <div class="event-modal-header">
+            <div id="modal-type-badge" class="event-modal-type-badge"></div>
+            <button class="modal-close" id="modalCloseBtn" aria-label="Fermer">✕</button>
+        </div>
+        <div class="event-modal-body">
+            <div id="modal-amount" class="event-modal-amount"></div>
+            <div id="modal-name"   class="event-modal-name"></div>
+            <div class="event-detail-row">
+                <span><i class="bi bi-calendar3 me-1"></i> Date</span>
+                <span id="modal-date"></span>
+            </div>
+            <div class="event-detail-row">
+                <span><i class="bi bi-tag me-1"></i> Catégorie</span>
+                <span id="modal-category"></span>
+            </div>
+            <div class="event-detail-row">
+                <span><i class="bi bi-arrow-left-right me-1"></i> Type</span>
+                <span id="modal-type-text"></span>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', async function () {
+
+    /* ── 1. Fetch events ───────────────────────────────────────── */
+    let allEvents = [];
+    try {
+        const res   = await fetch('/api/user/calendar-events');
+        const json  = await res.json();
+        if (json.status === 'success') allEvents = json.data;
+    } catch (err) {
+        console.error('Calendar API error:', err);
+    }
+
+    /* ── 2. Compute stats ──────────────────────────────────────── */
+    let totalIncome = 0, totalOutcome = 0;
+    const cats = new Set();
+    allEvents.forEach(ev => {
+        const ep = ev.extendedProps || {};
+        if (ep.isIncome) totalIncome  += ep.amount || 0;
+        else             totalOutcome += ep.amount || 0;
+        if (ep.category) cats.add(ep.category);
+    });
+    document.getElementById('stat-total').textContent   = allEvents.length;
+    document.getElementById('stat-income').textContent  = totalIncome.toFixed(2)  + ' DT';
+    document.getElementById('stat-outcome').textContent = totalOutcome.toFixed(2) + ' DT';
+    document.getElementById('stat-cats').textContent    = cats.size;
+
+    /* ── 3. Recent events sidebar ──────────────────────────────── */
+    const recentContainer = document.getElementById('recent-events-list');
+    const sorted = [...allEvents].sort((a, b) => new Date(b.start) - new Date(a.start)).slice(0, 6);
+    recentContainer.innerHTML = sorted.length === 0
+        ? '<p style="font-size:13px;color:#94a3b8;text-align:center;margin-top:16px;">Aucun événement</p>'
+        : sorted.map(ev => {
+            const ep      = ev.extendedProps || {};
+            const isIn    = ep.isIncome;
+            const dateStr = new Date(ev.start).toLocaleDateString('fr-FR', { day:'2-digit', month:'short', year:'numeric' });
+            return `
+            <div class="recent-event-item">
+                <span class="recent-badge ${isIn ? 'badge-income' : 'badge-outcome'}">${isIn ? '+' : '-'}</span>
+                <div class="recent-event-body">
+                    <strong>${escHtml(ep.amount?.toFixed(2) ?? '?')} DT</strong>
+                    <small>${escHtml(ev.title?.replace(/^[+-][\d.]+ DT - /, '') ?? '')} · ${dateStr}</small>
+                </div>
+            </div>`;
+        }).join('');
+
+    /* ── 4. Init FullCalendar ──────────────────────────────────── */
+    document.getElementById('calendar-loading').style.display = 'none';
+    const calEl = document.getElementById('fullcalendar');
+    calEl.style.display = 'block';
+
+    const calendar = new FullCalendar.Calendar(calEl, {
+        initialView:    'dayGridMonth',
+        locale:         'fr',
+        height:         'auto',
+        headerToolbar: {
+            left:   'prev,next today',
+            center: 'title',
+            right:  'dayGridMonth,timeGridWeek,timeGridDay'
+        },
+        buttonText: {
+            today:        "Aujourd'hui",
+            month:        'Mois',
+            week:         'Semaine',
+            day:          'Jour',
+        },
+        events: allEvents,
+        eventClick: function(info) {
+            openModal(info.event);
+        },
+        dayMaxEvents: 3,
+        eventTimeFormat: { hour: '2-digit', minute: '2-digit', meridiem: false },
+    });
+
+    calendar.render();
+
+    /* ── 5. Modal logic ────────────────────────────────────────── */
+    const overlay    = document.getElementById('eventModalOverlay');
+    const closeBtn   = document.getElementById('modalCloseBtn');
+
+    function openModal(event) {
+        const ep     = event.extendedProps || {};
+        const isIn   = ep.isIncome;
+        const color  = isIn ? '#22c55e' : '#ef4444';
+        const sign   = isIn ? '+' : '-';
+        const dateD  = event.start ? new Date(event.start).toLocaleDateString('fr-FR', {
+            weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+        }) : '—';
+
+        document.getElementById('modal-type-badge').innerHTML =
+            `<span style="background:${isIn ? '#dcfce7' : '#fee2e2'};color:${color};padding:5px 14px;border-radius:20px;font-size:12px;font-weight:700;">
+                <i class="bi bi-${isIn ? 'arrow-down-circle' : 'arrow-up-circle'} me-1"></i>
+                ${isIn ? 'Revenu' : 'Dépense'}
+            </span>`;
+        document.getElementById('modal-amount').style.color = color;
+        document.getElementById('modal-amount').textContent  = `${sign}${(ep.amount ?? 0).toFixed(2)} DT`;
+        document.getElementById('modal-name').textContent    = event.title?.replace(/^[+-][\d.]+ DT - /, '') ?? '—';
+        document.getElementById('modal-date').textContent    = dateD;
+        document.getElementById('modal-category').textContent = ep.category ?? 'Sans catégorie';
+        document.getElementById('modal-type-text').textContent = ep.type ?? '—';
+
+        overlay.classList.add('open');
+    }
+
+    closeBtn.addEventListener('click', () => overlay.classList.remove('open'));
+    overlay.addEventListener('click', e => { if (e.target === overlay) overlay.classList.remove('open'); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') overlay.classList.remove('open'); });
+
+    /* ── Helpers ───────────────────────────────────────────────── */
+    function escHtml(str) {
+        return String(str ?? '')
+            .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+            .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+});
+</script>
+{% endblock %}
