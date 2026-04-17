@@ -18,6 +18,8 @@ use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 use Knp\Component\Pager\PaginatorInterface;
+use App\Service\WalletBalanceService;
+use App\Service\CurrencyConverterService;
 
 class TransactionController extends AbstractController
 {
@@ -135,7 +137,7 @@ return $this->render('wallet/list.html.twig', [
 }
 
    #[Route('/walletuser', name: 'dashboard')]
-public function dashboard(EntityManagerInterface $em): Response
+public function dashboard(Request $req, EntityManagerInterface $em, WalletBalanceService $balanceService, CurrencyConverterService $currencyConverter): Response
 {
     $transactions = $em->getRepository(TransactionWallet::class)->findAll();
 
@@ -145,9 +147,12 @@ public function dashboard(EntityManagerInterface $em): Response
     $incomeData = [];
     $outcomeData = [];
 
+    $selectedCurrency = $req->query->get('currency', 'DT');
+    $exchangeRate = $currencyConverter->getRate('DT', $selectedCurrency);
+
     foreach ($transactions as $t) {
 
-        $amount = $t->getMontant();
+        $amount = $t->getMontant() * $exchangeRate; // Convert to target currency
         $cat = $t->getCategory() ? $t->getCategory()->getNom() : 'Autre';
 
         if ($amount > 0) {
@@ -171,44 +176,43 @@ public function dashboard(EntityManagerInterface $em): Response
     $balance = $income - $outcome;
     $chartDates = [];
 
-foreach ($transactions as $t) {
+    foreach ($transactions as $t) {
 
+        // 🔥 month format
+        $month = $t->getDateTransaction()->format('Y-m'); 
 
+        if (!isset($chartDates[$month])) {
+            $chartDates[$month] = [
+                'income' => 0,
+                'outcome' => 0
+            ];
+        }
 
-    // 🔥 month format
-    $month = $t->getDateTransaction()->format('Y-m'); 
-
-    if (!isset($chartDates[$month])) {
-        $chartDates[$month] = [
-            'income' => 0,
-            'outcome' => 0
-        ];
+        $amt = $t->getMontant() * $exchangeRate;
+        if ($amt > 0) {
+            $chartDates[$month]['income'] += $amt;
+        } else {
+            $chartDates[$month]['outcome'] += abs($amt);
+        }
     }
 
-    if ($t->getType() === 'INCOME') {
-        $chartDates[$month]['income'] += $t->getMontant();
-    } else {
-        $chartDates[$month]['outcome'] += abs($t->getMontant());
-    }
-}
+    // final arrays
+    $chartLabels = array_keys($chartDates);
+    $chartIncome = array_column($chartDates, 'income');
+    $chartOutcome = array_column($chartDates, 'outcome');
 
+    ksort($chartDates);
 
-
-// final arrays
-$chartLabels = array_keys($chartDates);
-$chartIncome = array_column($chartDates, 'income');
-$chartOutcome = array_column($chartDates, 'outcome');
-
-ksort($chartDates);
-
-$chartLabels = array_keys($chartDates);
-$chartIncome = array_column($chartDates, 'income');
-$chartOutcome = array_column($chartDates, 'outcome');
+    $chartLabels = array_keys($chartDates);
+    $chartIncome = array_column($chartDates, 'income');
+    $chartOutcome = array_column($chartDates, 'outcome');
 
     return $this->render('wallet/walletuser.html.twig', [
-        'income' => $income,
-        'outcome' => $outcome,
-        'balance' => $balance,
+        'income' => number_format($income, 2, '.', ''),
+        'outcome' => number_format($outcome, 2, '.', ''),
+        'balance' => number_format($balance, 2, '.', ''),
+        'currencySymbol' => $selectedCurrency,
+        'rate' => $exchangeRate,
         'transactions' => $transactions,
 
         // 🔥 charts

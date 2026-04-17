@@ -5,11 +5,11 @@
 {% block stylesheets %}
 <style>
 /* ===== VARIABLES ===== */
-{% set pct = (goal > 0 and total > 0) ? min((total / goal) * 100, 100) : 0 %}
-{% set remain = (goal > 0) ? max(goal - total, 0) : null %}
+{% set pct = (goal > 0 and balance > 0) ? min((balance / goal) * 100, 100) : 0 %}
+{% set remain = (goal > 0) ? max(goal - balance, 0) : null %}
 {% set sorted = wishlist %}
 {% set maxPrice = sorted is not empty ? sorted[0].getPrice() : 1 %}
-{% set need = (goal > total) ? goal - total : total %}
+{% set need = max(total - balance, 0) %}
 
 /* ===== LAYOUT ===== */
 .wl-page {
@@ -24,178 +24,181 @@
 /* ===== EDU CARD ===== */
 .edu-card {
     background: #fff;
-    border-radius: 18px;
-    padding: 24px;
-    box-shadow: 0 4px 20px rgba(0,0,0,.07);
-    border: 1px solid #f0f2f5;
-    margin-bottom: 18px;
+    border-radius: 24px;
+    padding: 28px;
+    box-shadow: 0 10px 40px -10px rgba(124, 58, 237, 0.12);
+    border: 1px solid rgba(124, 58, 237, 0.05);
+    margin-bottom: 24px;
 }
 
 .edu-card:last-child { margin-bottom: 0; }
 
 .edu-card-title {
     font-family: 'Heebo', sans-serif;
-    font-size: 1.05rem;
+    font-size: 1.1rem;
     font-weight: 700;
-    color: #1a1f2e;
-    margin-bottom: 18px;
+    color: #1e1b4b;
+    margin-bottom: 20px;
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
 }
 
 .edu-card-title .title-icon {
-    width: 34px;
-    height: 34px;
-    border-radius: 10px;
+    width: 38px;
+    height: 38px;
+    border-radius: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
     color: #fff;
-    font-size: .85rem;
+    font-size: .95rem;
+    box-shadow: 0 4px 10px rgba(124, 58, 237, 0.2);
 }
 
-.icon-blue   { background: linear-gradient(135deg, #0d6efd, #6610f2); }
-.icon-orange { background: linear-gradient(135deg, #fd7e14, #e55d00); }
-.icon-green  { background: linear-gradient(135deg, #198754, #0d6640); }
-.icon-purple { background: linear-gradient(135deg, #6610f2, #5305cc); }
-.icon-teal   { background: linear-gradient(135deg, #0d9488, #0a7a72); }
+.icon-blue   { background: linear-gradient(135deg, #7c3aed, #8b5cf6); }
+.icon-orange { background: linear-gradient(135deg, #8b5cf6, #a78bfa); }
+.icon-green  { background: linear-gradient(135deg, #6d28d9, #7c3aed); }
+.icon-purple { background: linear-gradient(135deg, #5b21b6, #6d28d9); }
+.icon-teal   { background: linear-gradient(135deg, #c4b5fd, #ddd6fe); color: #5b21b6 !important; }
 
 /* ===== BACK BUTTON ===== */
 .btn-back {
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    background: #f1f3f8;
-    color: #444;
+    background: #f5f3ff;
+    color: #6d28d9;
     padding: 8px 16px;
     border-radius: 50px;
     font-size: .85rem;
-    font-weight: 500;
+    font-weight: 600;
     text-decoration: none;
-    margin-bottom: 18px;
-    transition: background .2s;
+    margin-bottom: 20px;
+    transition: background .2s, color .2s;
 }
-.btn-back:hover { background: #e0e4ef; color: #1a1f2e; }
+.btn-back:hover { background: #ede9fe; color: #5b21b6; }
 
 /* ===== ADD FORM ===== */
 .wl-add-form {
     display: flex;
     flex-direction: column;
-    gap: 10px;
-    margin-bottom: 18px;
+    gap: 12px;
+    margin-bottom: 22px;
 }
 
 .wl-add-form input {
-    padding: 10px 14px;
-    border: 1.5px solid #e8ecf3;
-    border-radius: 10px;
+    padding: 12px 16px;
+    border: 1.5px solid #ede9fe;
+    border-radius: 14px;
     font-size: .9rem;
-    background: #f8f9fc;
-    color: #1a1f2e;
+    background: #fcfaff;
+    color: #1e1b4b;
     outline: none;
     transition: border-color .2s, box-shadow .2s;
     width: 100%;
 }
 
 .wl-add-form input:focus {
-    border-color: #0d6efd;
-    box-shadow: 0 0 0 3px rgba(13,110,253,.1);
+    border-color: #8b5cf6;
+    box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.15);
     background: #fff;
 }
 
 .btn-add {
-    background: linear-gradient(135deg, #0d6efd, #0a58ca);
+    background: linear-gradient(135deg, #7c3aed, #8b5cf6);
+    box-shadow: 0 4px 12px rgba(124, 58, 237, 0.25);
     color: #fff;
     border: none;
-    padding: 11px;
-    border-radius: 10px;
-    font-size: .9rem;
+    padding: 12px;
+    border-radius: 14px;
+    font-size: .95rem;
     font-weight: 600;
     cursor: pointer;
-    transition: opacity .2s, transform .15s;
+    transition: opacity .2s, transform .15s, box-shadow .2s;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 6px;
 }
 
-.btn-add:hover { opacity: .9; transform: translateY(-1px); }
+.btn-add:hover { opacity: .9; transform: translateY(-1px); box-shadow: 0 6px 16px rgba(124, 58, 237, 0.35); }
 
 /* ===== WISHLIST ITEMS ===== */
 .wl-items {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 10px;
     max-height: 280px;
     overflow-y: auto;
     scrollbar-width: thin;
-    scrollbar-color: #e0e4ef transparent;
+    scrollbar-color: #ede9fe transparent;
 }
 
 .wl-row {
     display: flex;
     align-items: center;
-    gap: 10px;
-    background: #f8f9fc;
-    padding: 12px 14px;
-    border-radius: 12px;
-    border: 1px solid #f0f2f5;
-    transition: background .15s;
+    gap: 12px;
+    background: #fcfaff;
+    padding: 14px 16px;
+    border-radius: 16px;
+    border: 1px solid #f3efff;
+    transition: background .2s, border-color .2s, transform .2s;
 }
 
-.wl-row:hover { background: #f0f3ff; }
+.wl-row:hover { background: #f5f3ff; border-color: #ede9fe; transform: translateX(2px); }
 
 .wl-row .wl-name {
     flex: 1;
     font-weight: 600;
-    color: #1a1f2e;
-    font-size: .88rem;
+    color: #1e1b4b;
+    font-size: .9rem;
 }
 
 .wl-row .wl-price {
     font-weight: 700;
-    color: #0d6efd;
-    font-size: .88rem;
+    color: #7c3aed;
+    font-size: .9rem;
     white-space: nowrap;
 }
 
 .wl-row .wl-delete {
-    width: 28px;
-    height: 28px;
-    border-radius: 8px;
-    background: #fdecea;
-    color: #dc3545;
+    width: 32px;
+    height: 32px;
+    border-radius: 10px;
+    background: #fee2e2;
+    color: #ef4444;
     display: flex;
     align-items: center;
     justify-content: center;
     text-decoration: none;
-    font-size: .8rem;
-    transition: background .15s;
+    font-size: .85rem;
+    transition: background .2s, color .2s;
     flex-shrink: 0;
 }
 
-.wl-row .wl-delete:hover { background: #fccac5; }
+.wl-row .wl-delete:hover { background: #fca5a5; color: #b91c1c; }
 
 /* Total bar */
 .wl-total-bar {
-    margin-top: 14px;
-    padding: 12px 14px;
-    background: linear-gradient(135deg, #1a1f2e, #2d3561);
-    border-radius: 12px;
+    margin-top: 18px;
+    padding: 16px 20px;
+    background: linear-gradient(135deg, #1e1b4b, #312e81);
+    border-radius: 16px;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    box-shadow: 0 4px 15px rgba(30, 27, 75, 0.15);
 }
 
-.wl-total-bar span { color: rgba(255,255,255,.7); font-size: .85rem; }
-.wl-total-bar strong { color: #fff; font-size: 1.1rem; font-family: 'Heebo', sans-serif; }
+.wl-total-bar span { color: rgba(255,255,255,.8); font-size: .9rem; font-weight: 500; }
+.wl-total-bar strong { color: #fff; font-size: 1.25rem; font-family: 'Heebo', sans-serif; }
 
 /* ===== RIGHT GRID ===== */
 .wl-right {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 18px;
+    gap: 24px;
 }
 
 @media (max-width: 768px) { .wl-right { grid-template-columns: 1fr; } }
@@ -204,79 +207,83 @@
 .goal-stats {
     display: flex;
     flex-direction: column;
-    gap: 10px;
-    margin-bottom: 16px;
+    gap: 12px;
+    margin-bottom: 20px;
 }
 
 .goal-stat-row {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 10px 14px;
-    background: #f8f9fc;
-    border-radius: 10px;
-    font-size: .88rem;
+    padding: 12px 16px;
+    background: #fcfaff;
+    border: 1px solid #f3efff;
+    border-radius: 14px;
+    font-size: .9rem;
 }
 
-.goal-stat-row span { color: #6c757d; }
-.goal-stat-row strong { color: #1a1f2e; font-weight: 700; }
+.goal-stat-row span { color: #6b7280; font-weight: 500; }
+.goal-stat-row strong { color: #1e1b4b; font-weight: 700; }
 
 .goal-form {
     display: flex;
-    gap: 8px;
-    margin-top: 12px;
+    gap: 10px;
+    margin-top: 16px;
 }
 
 .goal-form input {
     flex: 1;
-    padding: 9px 12px;
-    border: 1.5px solid #e8ecf3;
-    border-radius: 10px;
-    font-size: .88rem;
-    background: #f8f9fc;
+    padding: 10px 14px;
+    border: 1.5px solid #ede9fe;
+    border-radius: 12px;
+    font-size: .9rem;
+    background: #fcfaff;
     outline: none;
     transition: border-color .2s;
 }
 
-.goal-form input:focus { border-color: #0d6efd; background: #fff; }
+.goal-form input:focus { border-color: #8b5cf6; background: #fff; }
 
 .goal-form button {
-    background: linear-gradient(135deg, #fd7e14, #e55d00);
+    background: linear-gradient(135deg, #8b5cf6, #a78bfa);
+    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.25);
     color: #fff;
     border: none;
-    padding: 9px 16px;
-    border-radius: 10px;
-    font-size: .85rem;
+    padding: 10px 18px;
+    border-radius: 12px;
+    font-size: .9rem;
     font-weight: 600;
     cursor: pointer;
     white-space: nowrap;
+    transition: opacity .2s, transform .15s;
 }
+.goal-form button:hover { opacity: .9; transform: translateY(-1px); }
 
 /* Progress bar */
 .wl-progress-wrap {
-    margin-top: 14px;
+    margin-top: 18px;
 }
 
 .wl-progress-wrap label {
-    font-size: .78rem;
-    color: #6c757d;
+    font-size: .8rem;
+    color: #6b7280;
     font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: .04em;
-    margin-bottom: 6px;
+    letter-spacing: .05em;
+    margin-bottom: 8px;
     display: block;
 }
 
 .wl-progress {
-    height: 8px;
-    background: #f0f2f5;
+    height: 10px;
+    background: #f3efff;
     border-radius: 10px;
     overflow: hidden;
 }
 
 .wl-progress-fill {
     height: 100%;
-    background: linear-gradient(90deg, #0d6efd, #6610f2);
+    background: linear-gradient(90deg, #7c3aed, #8b5cf6);
     border-radius: 10px;
     transition: width .6s ease;
 }
@@ -285,80 +292,82 @@
 .months-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 8px;
-    margin-bottom: 14px;
+    gap: 10px;
+    margin-bottom: 18px;
 }
 
 .btn-month {
-    padding: 9px 4px;
-    border: 1.5px solid #e8ecf3;
-    background: #f8f9fc;
-    border-radius: 10px;
-    font-size: .82rem;
+    padding: 10px 4px;
+    border: 1.5px solid #ede9fe;
+    background: #fcfaff;
+    border-radius: 12px;
+    font-size: .85rem;
     font-weight: 600;
-    color: #444;
+    color: #4b5563;
     cursor: pointer;
     transition: all .2s;
 }
 
 .btn-month:hover {
-    border-color: #0d6efd;
-    background: #e8f0fe;
-    color: #0d6efd;
+    border-color: #8b5cf6;
+    background: #f5f3ff;
+    color: #7c3aed;
+    box-shadow: 0 2px 8px rgba(124, 58, 237, 0.1);
 }
 
 .monthly-result {
     text-align: center;
-    font-size: 1.2rem;
+    font-size: 1.3rem;
     font-weight: 700;
-    color: #0d6efd;
+    color: #7c3aed;
     font-family: 'Heebo', sans-serif;
-    padding: 10px;
-    background: #e8f0fe;
-    border-radius: 10px;
+    padding: 12px;
+    background: #f5f3ff;
+    border-radius: 14px;
+    border: 1px solid #ede9fe;
 }
 
 /* ===== CHART ===== */
 .chart-wrap {
     position: relative;
-    height: 160px;
+    height: 180px;
 }
 
 /* ===== PRIORITY ===== */
 .priority-list {
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 14px;
 }
 
 .p-item .p-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 5px;
-    font-size: .85rem;
+    margin-bottom: 6px;
+    font-size: .9rem;
 }
 
 .p-item .p-name {
     font-weight: 600;
-    color: #1a1f2e;
+    color: #1e1b4b;
 }
 
 .p-item .p-price {
     font-weight: 700;
-    color: #0d6efd;
+    color: #7c3aed;
 }
 
 .p-bar {
-    height: 6px;
-    background: #f0f2f5;
+    height: 8px;
+    background: #f3efff;
     border-radius: 10px;
     overflow: hidden;
 }
 
 .p-fill {
     height: 100%;
-    background: linear-gradient(90deg, #0d6efd, #6610f2);
+    background: linear-gradient(90deg, #7c3aed, #8b5cf6);
     border-radius: 10px;
     transition: width .6s ease;
 }
@@ -368,11 +377,12 @@
 {% block content %}
 
 {# Variables Twig — logique inchangée #}
-{% set pct     = (goal > 0 and total > 0) ? min((total / goal) * 100, 100) : 0 %}
-{% set remain  = (goal > 0) ? max(goal - total, 0) : null %}
+{# Variables Twig — logique inchangée #}
+{% set pct     = (goal > 0 and balance > 0) ? min((balance / goal) * 100, 100) : 0 %}
+{% set remain  = (goal > 0) ? max(goal - balance, 0) : null %}
 {% set sorted  = wishlist %}
 {% set maxPrice = sorted is not empty ? sorted[0].getPrice() : 1 %}
-{% set need    = (goal > total) ? goal - total : total %}
+{% set need    = max(total - balance, 0) %}
 
 <div class="wl-page">
 
@@ -401,8 +411,16 @@
             <!-- ITEMS LIST -->
             <div class="wl-items">
                 {% for item in wishlist %}
+                    {% set pred = predictions[item.getId()] %}
                     <div class="wl-row">
-                        <span class="wl-name">{{ item.getName() }}</span>
+                        <div class="wl-name">
+                            {{ item.getName() }}
+                            {% if pred.can_afford %}
+                                <span class="badge bg-success ms-2 rounded-pill"><i class="bi bi-check-circle me-1"></i>Affordable</span>
+                            {% else %}
+                                <span class="badge bg-warning text-dark ms-2 rounded-pill"><i class="bi bi-exclamation-circle me-1"></i>Need {{ pred.remaining_needed|number_format(0) }} DT</span>
+                            {% endif %}
+                        </div>
                         <span class="wl-price">{{ item.getPrice() }} DT</span>
                         <a href="{{ path('wishlist_delete', {id: item.getId()}) }}" class="wl-delete" title="Supprimer">
                             <i class="bi bi-x-lg"></i>
@@ -422,6 +440,11 @@
                 <strong>{{ total }} DT</strong>
             </div>
 
+            <div class="wl-total-bar" style="background: linear-gradient(135deg, #6d28d9, #7c3aed); margin-top: 10px; box-shadow: 0 4px 15px rgba(109, 40, 217, 0.2);">
+                <span>Mon Solde Actuel</span>
+                <strong>{{ balance|number_format(2) }} DT</strong>
+            </div>
+
         </div>
     </div>
 
@@ -437,8 +460,8 @@
 
             <div class="goal-stats">
                 <div class="goal-stat-row">
-                    <span>Total</span>
-                    <strong>{{ total }} DT</strong>
+                    <span>Mon Solde</span>
+                    <strong>{{ balance|number_format(0) }} DT</strong>
                 </div>
                 <div class="goal-stat-row">
                     <span>Objectif</span>
@@ -475,13 +498,17 @@
 
             <div class="months-grid">
                 {% for m in [3, 6, 12, 18, 24, 36] %}
-                    <button class="btn-month" onclick="calc({{ m }}, {{ need }})">{{ m }} mois</button>
+                    <button type="button" class="btn-month" onclick="calc({{ m }}, {{ need }})">{{ m }} mois</button>
                 {% endfor %}
             </div>
 
             <div class="monthly-result" id="monthly">
-                {{ (need / 3)|round }} DT / mois
-            </div>
+    {% if need > 0 %}
+        {{ (need / 3)|round }} DT / mois
+    {% else %}
+        Objectif atteint ✅
+    {% endif %}
+</div>
         </div>
 
         <!-- CHART -->
@@ -540,8 +567,8 @@ new Chart(document.getElementById('chart'), {
     data: {
         labels: ['Épargné', 'Restant'],
         datasets: [{
-            data: [{{ total }}, {{ goal > total ? goal - total : 0 }}],
-            backgroundColor: ['#0d6efd', '#f0f2f5'],
+            data: [{{ balance }}, {{ goal > balance ? goal - balance : 0 }}],
+            backgroundColor: ['#7c3aed', '#f3efff'],
             borderWidth: 0
         }]
     },

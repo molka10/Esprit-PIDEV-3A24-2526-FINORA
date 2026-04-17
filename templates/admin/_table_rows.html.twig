@@ -1,0 +1,49 @@
+{% for u in users %}
+<tr>
+    <td>
+        <div class="d-flex align-items-center">
+            <div class="avatar avatar-sm me-2">
+                <div class="avatar-img rounded-circle bg-primary bg-opacity-10 text-primary d-flex align-items-center justify-content-center">
+                    {{ u.name|first|upper }}
+                </div>
+            </div>
+            <h6 class="mb-0 fw-light">{{ u.name }}</h6>
+        </div>
+    </td>
+
+    <td><span class="badge bg-secondary">{{ u.count ?? 0 }}</span></td>
+
+    <td class="text-success">
+        +{{ (u.income ?? 0)|number_format(2, '.', ',') }}
+    </td>
+
+    <td class="text-danger">
+        -{{ (u.outcome ?? 0)|number_format(2, '.', ',') }}
+    </td>
+
+    <td class="fw-bold {{ (u.balance ?? 0) >= 0 ? 'text-success' : 'text-danger' }}">
+        {{ (u.balance ?? 0)|number_format(2, '.', ',') }}
+    </td>
+
+    <td>
+        <a href="{{ path('user_transactions', {'id': u.id}) }}" class="btn btn-sm btn-primary-soft me-1 mb-1 mb-md-0">
+            <i class="bi bi-eye"></i> View History
+        </a>
+
+        <a href="{{ path('user_transactions_pdf', {'id': u.id}) }}" class="btn btn-sm btn-danger-soft mb-0">
+            <i class="bi bi-file-earmark-pdf"></i> PDF
+        </a>
+    </td>
+</tr>
+
+{% else %}
+<tr>
+    <td colspan="6" class="text-center py-5">
+        <div class="d-flex flex-column align-items-center opacity-75 py-4">
+            <i class="bi bi-people d-block mb-3" style="font-size: 3rem; color: #a78bfa;"></i>
+            <span class="text-muted fw-bold mb-1">No users found.</span>
+            <span class="text-muted small">Try another search.</span>
+        </div>
+    </td>
+</tr>
+{% endfor %}

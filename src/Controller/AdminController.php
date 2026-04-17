@@ -8,39 +8,39 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Request;
 use Dompdf\Dompdf;
+use App\Service\CurrencyConverterService;
 
 class AdminController extends AbstractController
 {
     #[Route('/admin', name: 'app_admin')]
-    public function index(Request $request, TransactionWalletRepository $repo): Response
+    public function index(Request $request, TransactionWalletRepository $repo, CurrencyConverterService $currencyConverter): Response
     {
         $search = $request->query->get('search');
+        $selectedCurrency = $request->query->get('currency', 'DT');
+        $exchangeRate = $currencyConverter->getRate('DT', $selectedCurrency);
 
-        if ($search) {
-            $transactions = $repo->createQueryBuilder('t')
-                ->where('t.nomTransaction LIKE :search')
-                ->orWhere('t.userId LIKE :search')
-                ->orWhere('t.type LIKE :search')
-                ->orWhere('CAST(t.montant AS string) LIKE :search')
-                ->setParameter('search', '%' . $search . '%')
-                ->getQuery()
-                ->getResult();
-        } else {
-            $transactions = $repo->findAll();
-        }
+        $transactions = $repo->findAll();
 
         $income = 0;
         $outcome = 0;
         $users = [];
 
         foreach ($transactions as $t) {
-
             $userId = $t->getUserId();
+            $userName = 'User ' . $userId;
+
+            // Custom PHP-level filter to search by "User X" properly
+            if ($search) {
+                if (!str_contains(strtolower($userName), strtolower($search)) && 
+                    !str_contains((string)$userId, strtolower($search))) {
+                    continue; // Skip rendering/aggregating if it doesn't match the searched username
+                }
+            }
 
             if (!isset($users[$userId])) {
                 $users[$userId] = [
                     'id' => $userId,
-                    'name' => 'User ' . $userId,
+                    'name' => $userName,
                     'income' => 0,
                     'outcome' => 0,
                     'balance' => 0,
@@ -49,31 +49,36 @@ class AdminController extends AbstractController
                 ];
             }
 
+            $amount = $t->getMontant() * $exchangeRate;
+
             if ($t->getType() === 'INCOME') {
-                $income += $t->getMontant();
-                $users[$userId]['income'] += $t->getMontant();
+                $income += $amount;
+                $users[$userId]['income'] += $amount;
             } else {
-                $outcome += abs($t->getMontant());
-                $users[$userId]['outcome'] += abs($t->getMontant());
+                $outcome += abs($amount);
+                $users[$userId]['outcome'] += abs($amount);
             }
 
             $users[$userId]['count']++;
-            $users[$userId]['balance'] =
-                $users[$userId]['income'] - $users[$userId]['outcome'];
+            $users[$userId]['balance'] = $users[$userId]['income'] - $users[$userId]['outcome'];
 
             $users[$userId]['transactions'][] = $t;
         }
 
         $chartDates = [];
 
-        foreach ($transactions as $t) {
-            $date = $t->getDateTransaction()->format('Y-m-d');
+        // Now build chart only from filtered users data map
+        foreach ($users as $u) {
+            foreach ($u['transactions'] as $t) {
+                $date = $t->getDateTransaction()->format('Y-m-d');
 
-            if (!isset($chartDates[$date])) {
-                $chartDates[$date] = 0;
+                if (!isset($chartDates[$date])) {
+                    $chartDates[$date] = 0;
+                }
+
+                $amount = $t->getMontant() * $exchangeRate;
+                $chartDates[$date] += $amount;
             }
-
-            $chartDates[$date] += $t->getMontant();
         }
 
         ksort($chartDates);
@@ -84,11 +89,13 @@ class AdminController extends AbstractController
         return $this->render('admin/index.html.twig', [
             'transactions' => $transactions,
             'users' => $users,
-            'totalIncome' => $income,
-            'totalOutcome' => $outcome,
-            'totalBalance' => $income - $outcome,
+            'totalIncome' => round($income, 2),
+            'totalOutcome' => round($outcome, 2),
+            'totalBalance' => round($income - $outcome, 2),
             'chartLabels' => $labels,
-            'chartData' => $values
+            'chartData' => $values,
+            'currencySymbol' => $selectedCurrency,
+            'rate' => $exchangeRate
         ]);
     }
 
@@ -96,28 +103,24 @@ class AdminController extends AbstractController
     public function downloadPdf(Request $request, TransactionWalletRepository $repo): Response
     {
         $search = $request->query->get('search');
-
-        if ($search) {
-            $transactions = $repo->createQueryBuilder('t')
-                ->where('t.nomTransaction LIKE :search')
-                ->orWhere('t.userId LIKE :search')
-                ->orWhere('t.type LIKE :search')
-                ->orWhere('CAST(t.montant AS string) LIKE :search')
-                ->setParameter('search', '%' . $search . '%')
-                ->getQuery()
-                ->getResult();
-        } else {
-            $transactions = $repo->findAll();
-        }
+        $transactions = $repo->findAll();
 
         $users = [];
 
         foreach ($transactions as $t) {
             $userId = $t->getUserId();
+            $userName = 'User ' . $userId;
+
+            if ($search) {
+                if (!str_contains(strtolower($userName), strtolower($search)) && 
+                    !str_contains((string)$userId, strtolower($search))) {
+                    continue;
+                }
+            }
 
             if (!isset($users[$userId])) {
                 $users[$userId] = [
-                    'name' => 'User ' . $userId,
+                    'name' => $userName,
                     'income' => 0,
                     'outcome' => 0,
                     'balance' => 0,
@@ -132,9 +135,7 @@ class AdminController extends AbstractController
                 $users[$userId]['outcome'] += abs($t->getMontant());
             }
 
-            $users[$userId]['balance'] =
-                $users[$userId]['income'] - $users[$userId]['outcome'];
-
+            $users[$userId]['balance'] = $users[$userId]['income'] - $users[$userId]['outcome'];
             $users[$userId]['count']++;
             $users[$userId]['transactions'][] = $t;
         }
@@ -231,4 +232,53 @@ public function userTransactionsPdf($id, TransactionWalletRepository $repo): Res
     );
 }
 
+#[Route('/admin/search-users', name: 'search_users')]
+public function searchUsers(Request $request, TransactionWalletRepository $repo, CurrencyConverterService $currencyConverter): Response
+{
+    $search = $request->query->get('search');
+    $selectedCurrency = $request->query->get('currency', 'DT');
+    $exchangeRate = $currencyConverter->getRate('DT', $selectedCurrency);
+
+    $transactions = $repo->findAll();
+    
+    $users = [];
+
+    foreach ($transactions as $t) {
+        $userId = $t->getUserId();
+        $userName = 'User ' . $userId;
+
+        if ($search) {
+            if (!str_contains(strtolower($userName), strtolower($search)) && 
+                !str_contains((string)$userId, strtolower($search))) {
+                continue;
+            }
+        }
+
+        if (!isset($users[$userId])) {
+            $users[$userId] = [
+                'id' => $userId,
+                'name' => $userName,
+                'income' => 0,
+                'outcome' => 0,
+                'balance' => 0,
+                'count' => 0,
+            ];
+        }
+
+        $amount = $t->getMontant() * $exchangeRate;
+
+        if ($t->getType() === 'INCOME') {
+            $users[$userId]['income'] += $amount;
+        } else {
+            $users[$userId]['outcome'] += abs($amount);
+        }
+
+        $users[$userId]['count']++;
+        $users[$userId]['balance'] = $users[$userId]['income'] - $users[$userId]['outcome'];
+    }
+
+    return $this->render('admin/_table_rows.html.twig', [
+        'users' => $users
+    ]);
+}
 }

@@ -9,13 +9,15 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Routing\Annotation\Route;
+use App\Service\WalletBalanceService;
+use App\Service\WishlistPredictorService;
 
 class WishlistController extends AbstractController
 {
     #[Route('/wishlist', name: 'wishlist')]
-    public function index(Request $request, EntityManagerInterface $em, SessionInterface $session): Response
+    public function index(Request $request, EntityManagerInterface $em, SessionInterface $session, WalletBalanceService $balanceService, WishlistPredictorService $predictor): Response
     {
-        $userId = 1; // 🔥 بدّلها لاحقاً بالـ user connecté
+        $userId = 6; // To match the active transaction user ID
 
         // ➕ ADD ITEM
         if ($request->isMethod('POST') && $request->request->get('_action') !== 'set_goal') {
@@ -52,13 +54,30 @@ class WishlistController extends AbstractController
         // 🧮 Compute totals
         $total = array_reduce($wishlist, fn($carry, $item) => $carry + $item->getPrice(), 0.0);
         $goal  = $session->get('wishlist_goal_' . $userId, 0);
-usort($wishlist, function ($a, $b) {
-    return $b->getPrice() <=> $a->getPrice();
-});
+        usort($wishlist, function ($a, $b) {
+            return $b->getPrice() <=> $a->getPrice();
+        });
+
+        // 🎯 Predictions processing
+        $predictions = [];
+        $currentBalance = 0;
+        foreach ($wishlist as $item) {
+            $pred = $predictor->canAffordWishlistItem($userId, $item->getPrice());
+            $currentBalance = $pred['current_balance'];
+            $predictions[$item->getId()] = $pred;
+        }
+
+        // Just in case wishlist is empty
+        if (empty($wishlist)) {
+            $currentBalance = $balanceService->calculateUserBalance($userId);
+        }
+
         return $this->render('wallet/wishlist.html.twig', [
             'wishlist' => $wishlist,
             'total'    => $total,
             'goal'     => $goal,
+            'balance'  => $currentBalance,
+            'predictions' => $predictions
         ]);
     }
 

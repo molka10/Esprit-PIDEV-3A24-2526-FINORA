@@ -91,6 +91,67 @@
 
     {% block stylesheets %}{% endblock %}
 
+    <!-- Global Purple Modern UI Overrides -->
+    <style>
+        :root, [data-bs-theme="light"], [data-bs-theme="dark"] {
+            --bs-primary: #7c3aed;
+            --bs-primary-rgb: 124, 58, 237;
+            --bs-success: #8b5cf6;
+            --bs-success-rgb: 139, 92, 246;
+            --bs-info: #a78bfa;
+            --bs-info-rgb: 167, 139, 250;
+            --bs-danger: #ef4444; 
+            --bs-warning: #f59e0b;
+        }
+
+        .card {
+            border-radius: 20px !important;
+            box-shadow: 0 10px 40px -10px rgba(124, 58, 237, 0.12) !important;
+            border: 1px solid rgba(124, 58, 237, 0.05) !important;
+        }
+
+        .card-header {
+            border-bottom: 1px solid rgba(124, 58, 237, 0.08) !important;
+            background-color: transparent !important;
+        }
+
+        .btn {
+            border-radius: 12px !important;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-primary, .bg-primary {
+            background: linear-gradient(135deg, #7c3aed, #8b5cf6) !important;
+            border: none !important;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+        }
+
+        .form-control, .form-select {
+            border-radius: 12px !important;
+            border: 1.5px solid #ede9fe !important;
+            background-color: #fcfaff !important;
+            transition: all 0.2s;
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: #8b5cf6 !important;
+            box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.15) !important;
+            background-color: #fff !important;
+        }
+
+        .dropdown-menu {
+            border-radius: 16px !important;
+            box-shadow: 0 10px 40px -10px rgba(124, 58, 237, 0.15) !important;
+            border: 1px solid rgba(124, 58, 237, 0.08) !important;
+        }
+        
+        .badge {
+            border-radius: 8px !important;
+        }
+    </style>
 </head>
 
 <body>

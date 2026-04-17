@@ -1,196 +1,233 @@
 {% extends 'admin/baseA.html.twig' %}
 
+{% block title %}FINORA - Admin Dashboard{% endblock %}
+
 {% block body %}
-        <!-- Title -->
-        <div class="row">
-            <div class="col-12 mb-3 d-flex justify-content-between align-items-center">
-                <h1 class="h3 mb-2 mb-sm-0">Dashboard</h1>
-                <a href="{{ path('download_pdf', { search: app.request.get('search') }) }}" class="btn btn-primary mb-0"><i class="bi bi-file-earmark-pdf me-2"></i>Download PDF</a>
-            </div>
-        </div>
-
-        <!-- Counter boxes START -->
-       
-        <!-- Counter boxes END -->
-
-        <!-- Chart and Ticket START -->
-        <div class="row g-4 mb-4">
-            <!-- Chart START (User custom chart) -->
-            <div class="col-xxl-8">
-                <div class="card shadow h-100">
-                    <div class="card-header p-4 border-bottom">
-                        <h5 class="card-header-title">Earnings Overview</h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="chart-box big-chart" style="height: 300px;">
-                            <canvas id="stackedChart"></canvas>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <!-- Chart END -->
-
-            <!-- Ticket START -->
-           
-            <!-- Ticket END -->
+<!-- Title and Top Action -->
+<div class="row mb-4">
+    <div class="col-12 d-sm-flex justify-content-between align-items-center">
+        <h1 class="h3 mb-2 mb-sm-0">Dashboard Overview</h1>
         
-        <!-- Chart and Ticket END -->
+        <div class="d-flex align-items-center gap-2">
+            <!-- Currency Toggle -->
+            <div class="btn-group" role="group" aria-label="Currency toggle">
+                <a href="{{ path('app_admin', {'currency': 'DT', 'search': app.request.query.get('search')}) }}" class="btn btn-sm btn-{{ currencySymbol == 'DT' ? 'primary' : 'outline-primary' }}">DT</a>
+                <a href="{{ path('app_admin', {'currency': 'EUR', 'search': app.request.query.get('search')}) }}" class="btn btn-sm btn-{{ currencySymbol == 'EUR' ? 'primary' : 'outline-primary' }}">EUR</a>
+                <a href="{{ path('app_admin', {'currency': 'USD', 'search': app.request.query.get('search')}) }}" class="btn btn-sm btn-{{ currencySymbol == 'USD' ? 'primary' : 'outline-primary' }}">USD</a>
+            </div>
+            
+            <a href="{{ path('download_pdf', {'search': app.request.query.get('search')}) }}" class="btn btn-sm btn-danger mb-0">
+                <i class="bi bi-file-earmark-pdf me-2"></i>Export PDF
+            </a>
+        </div>
+    </div>
+</div>
 
-        <!-- Users Table START -->
-        <div class="row g-4 mb-4">
-            <div class="col-12">
-                <div class="card shadow h-100">
-                    <div class="card-header border-bottom d-flex justify-content-between align-items-center p-4">
-                        <h5 class="card-header-title">Users Configuration</h5>
-                        <form method="GET" class="position-relative">
-                            <input class="form-control pe-5 bg-secondary bg-opacity-10 border-0" type="search" placeholder="Search User" aria-label="Search User" id="searchUser" value="{{ app.request.get('search') }}">
-                        </form>
-                    </div>
+<!-- Search Bar -->
 
-                    <div class="card-body p-4">
-                        <div class="table-responsive">
-                            <table class="table table-borderless table-hover align-middle mb-0" id="userTable">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th>Name</th>
-                                        <th>Balance</th>
-                                        <th>Income</th>
-                                        <th>Outcome</th>
-                                        <th>Transactions</th>
-                                        <th>Status</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for u in users %}
-                                        <tr>
-                                            <td>{{ u.name }}</td>
-                                            <td>{{ u.balance }} DT</td>
-                                            <td class="text-success">{{ u.income }}</td>
-                                            <td class="text-danger">{{ u.outcome }}</td>
-                                            <td>{{ u.count }}</td>
-                                            <td>
-                                                {% if u.balance > 0 %}
-                                                    <span class="badge bg-success bg-opacity-10 text-success">Good</span>
-                                                {% else %}
-                                                    <span class="badge bg-danger bg-opacity-10 text-danger">Risk</span>
-                                                {% endif %}
-                                            </td>
-                                            <td>
-                                                <a href="{{ path('user_transactions', { id: u.id }) }}" class="btn btn-sm btn-info-soft mb-0">👁 View</a>
-                                            </td>
-                                        </tr>
-                                    {% else %}
-                                        <tr><td colspan="7">No users found.</td></tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
+
+<!-- Stat Cards -->
+<div class="row g-4 mb-5">
+    <!-- Total Income -->
+    <div class="col-md-4">
+        <div class="card h-100 border-0 p-4 position-relative overflow-hidden" style="background: linear-gradient(135deg, #ffffff, #fcfaff);">
+            <div class="position-absolute end-0 top-0 mt-3 me-3 opacity-10">
+                <i class="bi bi-graph-up-arrow" style="font-size: 5rem; color: #8b5cf6;"></i>
+            </div>
+            <div class="d-flex align-items-center mb-3 position-relative z-index-1">
+                <div class="icon-md rounded-circle text-white d-flex align-items-center justify-content-center me-3" style="width: 48px; height: 48px; background: linear-gradient(135deg, #10b981, #34d399); box-shadow: 0 4px 10px rgba(16, 185, 129, 0.2);">
+                    <i class="bi bi-arrow-down-left fs-4"></i>
+                </div>
+                <h5 class="mb-0 text-muted fw-normal">Total Income</h5>
+            </div>
+            <h2 class="mb-0 fw-bold position-relative z-index-1" style="color: #1e1b4b;">{{ totalIncome|number_format(2, '.', ',') }} <span class="fs-6 text-muted">{{ currencySymbol }}</span></h2>
+            <div class="mt-3 small position-relative z-index-1" style="color: #10b981;">
+                <i class="bi bi-check-circle-fill me-1"></i> Across active portfolios
+            </div>
+        </div>
+    </div>
+
+    <!-- Total Outcome -->
+    <div class="col-md-4">
+        <div class="card h-100 border-0 p-4 position-relative overflow-hidden" style="background: linear-gradient(135deg, #ffffff, #fcfaff);">
+            <div class="position-absolute end-0 top-0 mt-3 me-3 opacity-10">
+                <i class="bi bi-graph-down-arrow" style="font-size: 5rem; color: #ef4444;"></i>
+            </div>
+            <div class="d-flex align-items-center mb-3 position-relative z-index-1">
+                <div class="icon-md rounded-circle text-white d-flex align-items-center justify-content-center me-3" style="width: 48px; height: 48px; background: linear-gradient(135deg, #f43f5e, #fb7185); box-shadow: 0 4px 10px rgba(244, 63, 94, 0.2);">
+                    <i class="bi bi-arrow-up-right fs-4"></i>
+                </div>
+                <h5 class="mb-0 text-muted fw-normal">Total Outcome</h5>
+            </div>
+            <h2 class="mb-0 fw-bold position-relative z-index-1" style="color: #1e1b4b;">{{ totalOutcome|number_format(2, '.', ',') }} <span class="fs-6 text-muted">{{ currencySymbol }}</span></h2>
+            <div class="mt-3 small position-relative z-index-1" style="color: #f43f5e;">
+                <i class="bi bi-exclamation-circle-fill me-1"></i> Registered expenses
+            </div>
+        </div>
+    </div>
+
+    <!-- Net Balance -->
+    <div class="col-md-4">
+        <div class="card h-100 border-0 p-4 position-relative overflow-hidden" style="background: linear-gradient(135deg, #7c3aed, #5b21b6); color: white; box-shadow: 0 10px 30px rgba(124, 58, 237, 0.25) !important;">
+            <svg class="position-absolute end-0 top-0" style="opacity: 0.1;" width="150" height="150" viewBox="0 0 100 100" fill="white">
+                <circle cx="80" cy="20" r="50"></circle>
+                <circle cx="10" cy="90" r="20"></circle>
+            </svg>
+            <div class="d-flex align-items-center mb-3 position-relative z-index-1">
+                <div class="icon-md rounded-circle text-primary d-flex align-items-center justify-content-center me-3" style="width: 48px; height: 48px; background: #fff; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+                    <i class="bi bi-wallet2 fs-4" style="color: #7c3aed;"></i>
+                </div>
+                <h5 class="mb-0 fw-normal text-white-50">Net Balance</h5>
+            </div>
+            <h2 class="mb-0 fw-bold text-white position-relative z-index-1">{{ totalBalance|number_format(2, '.', ',') }} <span class="fs-6 text-white-50">{{ currencySymbol }}</span></h2>
+             <div class="mt-3 small text-white-50 position-relative z-index-1">
+                <i class="bi bi-shield-check me-1 text-white"></i> Secured funds
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Chart Section -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card shadow">
+            <div class="card-header border-bottom">
+                <h5 class="card-header-title">Transaction Volume Overview</h5>
+            </div>
+            <div class="card-body">
+                <div id="transactionsChart" style="height: 300px;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Users Table -->
+<div class="row">
+    <div class="col-12">
+        <div class="card shadow">
+            <div class="card-header border-bottom">
+                <h5 class="card-header-title">Users Summary</h5>
+            </div>
+            <!-- Search Bar -->
+<div class="row mb-4">
+    <div class="col-12 position-relative">
+        <input 
+            id="searchInput"
+            class="form-control bg-body pe-5"
+            type="search"
+            placeholder="Search users by name or ID..."
+            value="{{ app.request.query.get('search') }}"
+        >
+        <span class="bg-transparent p-2 position-absolute top-50 end-0 translate-middle-y border-0 text-muted" style="margin-right: 15px;">
+            <i class="bi bi-search fs-6"></i>
+        </span>
+    </div>
+</div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-dark-gray align-middle p-4 mb-0 table-hover">
+                        <thead>
+                            <tr>
+                                <th scope="col" class="border-0 rounded-start">User</th>
+                                <th scope="col" class="border-0">Total Transactions</th>
+                                <th scope="col" class="border-0">Income ({{ currencySymbol }})</th>
+                                <th scope="col" class="border-0">Outcome ({{ currencySymbol }})</th>
+                                <th scope="col" class="border-0">Balance ({{ currencySymbol }})</th>
+                                <th scope="col" class="border-0 rounded-end">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="usersTableBody">
+    {% include 'admin/_table_rows.html.twig' with { users: users } %}
+</tbody>
+                    </table>
                 </div>
             </div>
         </div>
-        <!-- Users Table END -->
+    </div>
+</div>
 
-        <!-- ========================================== -->
-        <!-- Top listed Cards START (From Static HTML) -->
-        <!-- ========================================== -->
-       
-            <!-- Traffic sources END -->
-
-     
-        <!-- Top listed Cards END -->
 
 {% endblock %}
 
 {% block javascripts %}
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="{{ asset('assets/vendor/apexcharts/js/apexcharts.min.js') }}"></script>
 <script>
-// Chart.js Logic
-const usersData = {{ users|json_encode|raw }};
-
-const labels = Object.values(usersData).map(u => u.name);
-const incomeData = Object.values(usersData).map(u => u.income);
-const outcomeData = Object.values(usersData).map(u => u.outcome);
-
-const ctx = document.getElementById('stackedChart').getContext('2d');
-
-const incomeGradient = ctx.createLinearGradient(0, 0, 0, 300);
-incomeGradient.addColorStop(0, '#2563eb');   
-incomeGradient.addColorStop(1, '#7c3aed');   
-
-const outcomeGradient = ctx.createLinearGradient(0, 0, 0, 300);
-outcomeGradient.addColorStop(0, '#c7d2fe');  
-outcomeGradient.addColorStop(1, '#e5e7eb');  
-
-new Chart(ctx, {
-    type: 'bar',
-    data: {
-        labels: labels,
-        datasets: [
-            {
-                label: 'Income',
-                data: incomeData,
-                backgroundColor: incomeGradient,
-                borderRadius: 10,
-                barThickness: 40
+    document.addEventListener("DOMContentLoaded", function () {
+        var options = {
+            series: [{
+                name: 'Transaction Volume',
+                data: {{ chartData|json_encode|raw }}
+            }],
+            chart: {
+                height: 300,
+                type: 'area',
+                toolbar: {
+                    show: false
+                }
             },
-            {
-                label: 'Outcome',
-                data: outcomeData,
-                backgroundColor: outcomeGradient,
-                borderRadius: 10,
-                barThickness: 40
-            }
-        ]
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-            legend: {
+            dataLabels: {
+                enabled: false
+            },
+            stroke: {
+                curve: 'smooth'
+            },
+            xaxis: {
+                type: 'category',
+                categories: {{ chartLabels|json_encode|raw }},
                 labels: {
-                    color: '#6b7280',
-                    font: { size: 12 }
+                    style: {
+                        colors: '#9ca3af'
+                    }
+                }
+            },
+            yaxis: {
+                labels: {
+                    style: {
+                        colors: '#9ca3af'
+                    },
+                    formatter: function (value) {
+                        return value.toFixed(2) + " {{ currencySymbol|raw }}";
+                    }
+                }
+            },
+            tooltip: {
+                y: {
+                    formatter: function (val) {
+                        return val.toFixed(2) + " {{ currencySymbol|raw }}"
+                    }
+                }
+            },
+            colors: ['#7c3aed'],
+            fill: {
+                type: 'gradient',
+                gradient: {
+                    shadeIntensity: 1,
+                    opacityFrom: 0.7,
+                    opacityTo: 0.1,
+                    stops: [0, 90, 100]
                 }
             }
-        },
-        scales: {
-            x: {
-                grid: { display: false },
-                ticks: { color: '#9ca3af' }
-            },
-            y: {
-                grid: { color: '#f1f5f9' },
-                ticks: { color: '#9ca3af' }
-            }
-        }
-    }
-});
+        };
+
+        var chart = new ApexCharts(document.querySelector("#transactionsChart"), options);
+        chart.render();
+    });
 </script>
-
 <script>
-// Search User Functionality (CORRIGÉ : accolade manquante)
-const input = document.getElementById('searchUser');
+document.addEventListener("DOMContentLoaded", function () {
+    const input = document.getElementById("searchInput");
 
-if (input) {
-    input.addEventListener('keyup', function () {
-        let value = input.value.toLowerCase();
-        let userRows = document.querySelectorAll("#userTable tbody tr");
+    input.addEventListener("keyup", function () {
+        let query = this.value;
+        let urlParams = new URLSearchParams(window.location.search);
+        let currency = urlParams.get('currency') || 'DT';
 
-        userRows.forEach(row => {
-            let text = row.innerText.toLowerCase();
-            row.style.display = text.includes(value) ? "" : "none";
-        });
-
-        let transactionRows = document.querySelectorAll("#transactionTable tbody tr");
-        if(transactionRows.length > 0) {
-            transactionRows.forEach(row => {
-                let text = row.innerText.toLowerCase();
-                row.style.display = text.includes(value) ? "" : "none";
+        fetch(`/admin/search-users?search=${encodeURIComponent(query)}&currency=${encodeURIComponent(currency)}`)
+            .then(response => response.text())
+            .then(data => {
+               document.getElementById("usersTableBody").innerHTML = data;
             });
-        }
-    }); // <-- Ajout de la parenthèse et accolade manquante ici
-}
+    });
+});
 </script>
 {% endblock %}

@@ -20,21 +20,27 @@
 
         <div class="left-side">
 
+<div class="currency-buttons" style="margin-bottom: 20px; display: flex; gap: 10px;">
+    <a href="?currency=DT" class="btn-outline" style="text-decoration:none; padding:5px 15px; border:1px solid #ccc; border-radius:5px; color:{{ currencySymbol == 'DT' ? '#fff' : '#333' }}; background:{{ currencySymbol == 'DT' ? '#2563eb' : 'transparent' }};">DT</a>
+    <a href="?currency=EUR" class="btn-outline" style="text-decoration:none; padding:5px 15px; border:1px solid #ccc; border-radius:5px; color:{{ currencySymbol == 'EUR' ? '#fff' : '#333' }}; background:{{ currencySymbol == 'EUR' ? '#2563eb' : 'transparent' }};">EUR</a>
+    <a href="?currency=USD" class="btn-outline" style="text-decoration:none; padding:5px 15px; border:1px solid #ccc; border-radius:5px; color:{{ currencySymbol == 'USD' ? '#fff' : '#333' }}; background:{{ currencySymbol == 'USD' ? '#2563eb' : 'transparent' }};">USD</a>
+</div>
+
             <div class="clean-stats">
 
     <div>
         <span>Balance</span>
-        <h2>{{ balance }} DT</h2>
+        <h2>{{ balance }} {{ currencySymbol }}</h2>
     </div>
 
     <div>
         <span>Income</span>
-        <h2 class="green">{{ income }} DT</h2>
+        <h2 class="green">{{ income }} {{ currencySymbol }}</h2>
     </div>
 
     <div>
         <span>Outcome</span>
-        <h2 class="red">{{ outcome }} DT</h2>
+        <h2 class="red">{{ outcome }} {{ currencySymbol }}</h2>
     </div>
 
     <div>
@@ -106,6 +112,8 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
 const transactions = {{ transactions|json_encode|raw }};
+const currencySymbol = '{{ currencySymbol }}';
+const exchangeRate = {{ rate }};
 </script>
 
 <script>
@@ -164,11 +172,12 @@ function updateTable(data) {
     table.innerHTML = "";
 
     data.forEach(t => {
+        let amount = (t.montant * exchangeRate).toFixed(2);
         table.innerHTML += `
             <tr>
                 <td>${t.nomTransaction}</td>
                 <td>${t.type}</td>
-                <td>${t.montant} DT</td>
+                <td>${amount} ${currencySymbol}</td>
                 <td>${t.category.nom}</td>
                 <td>${t.dateTransaction}</td>
             </tr>
@@ -310,7 +319,7 @@ document.getElementById("aiBtn").addEventListener("click", function () {
 ">
           <div style="background:#f8faff; border-radius:12px; padding:16px; display:flex; flex-direction:column; gap:6px;">
             <span style="font-size:11px; font-weight:600; color:var(--text-light); text-transform:uppercase; letter-spacing:0.08em;">Balance</span>
-            <strong style="font-family:'IBM Plex Mono',monospace; font-size:16px; color:var(--text-dark);">${data.balance} DT</strong>
+            <strong style="font-family:'IBM Plex Mono',monospace; font-size:16px; color:var(--text-dark);">${data.balance} ${currencySymbol}</strong>
           </div>
 
           <div style="background:#f8faff; border-radius:12px; padding:16px; display:flex; flex-direction:column; gap:6px;">
@@ -325,7 +334,7 @@ document.getElementById("aiBtn").addEventListener("click", function () {
 
           <div style="background:#f8faff; border-radius:12px; padding:16px; display:flex; flex-direction:column; gap:6px;">
             <span style="font-size:11px; font-weight:600; color:var(--text-light); text-transform:uppercase; letter-spacing:0.08em;">Next expenses</span>
-            <strong style="font-family:'IBM Plex Mono',monospace; font-size:16px; color:var(--text-dark);">${data.predictedExpenses.toFixed(2)} DT</strong>
+            <strong style="font-family:'IBM Plex Mono',monospace; font-size:16px; color:var(--text-dark);">${data.predictedExpenses.toFixed(2)} ${currencySymbol}</strong>
           </div>
         </div>
 
