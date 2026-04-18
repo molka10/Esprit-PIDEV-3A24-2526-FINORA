@@ -16,40 +16,45 @@
 
     .clean-dashboard {
         padding: 30px;
-        background: #fdfaff;
+        background: #f8f5ff;
         min-height: 100vh;
-        font-family: 'Inter', sans-serif;
+        font-family: 'Inter', 'Heebo', sans-serif;
     }
 
-    .clean-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 30px;
+    /* ── Hero Banner ── */
+    .dash-hero {
+        background: linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%);
+        border-radius: 22px; padding: 24px 28px; margin-bottom: 28px;
+        display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px;
+        box-shadow: 0 16px 48px rgba(124,58,237,0.28);
+        position: relative; overflow: hidden;
+        animation: dashIn 0.45s ease both;
     }
-
-    .clean-header h1 {
-        font-size: 28px;
-        font-weight: 800;
-        color: var(--text-dark);
-        margin: 0;
+    @keyframes dashIn { from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);} }
+    .dash-hero::before {
+        content:''; position:absolute; right:-50px; top:-50px;
+        width:200px; height:200px; border-radius:50%; background:rgba(255,255,255,0.06);
     }
+    .dash-hero h1 { color:#fff!important;font-size:24px!important;font-weight:900!important;margin:0!important;position:relative;z-index:1; }
+    .dash-hero p  { color:rgba(255,255,255,0.7)!important;font-size:13px!important;margin:4px 0 0;position:relative;z-index:1; }
 
     .btn-outline {
-        padding: 8px 16px;
-        border: 1px solid var(--p);
-        border-radius: 10px;
-        color: var(--p);
-        font-weight: 600;
-        text-decoration: none;
-        transition: all 0.2s;
-        background: white;
+        display: inline-flex; align-items: center; gap: 6px;
+        padding: 8px 16px; border: 1px solid rgba(255,255,255,0.25); border-radius: 40px;
+        color: rgba(255,255,255,0.85); font-weight: 600; text-decoration: none;
+        transition: all 0.2s; background: rgba(255,255,255,0.12);
+        font-size: 13px;
     }
+    .btn-outline:hover { background: rgba(255,255,255,0.22); color: #fff; }
 
-    .btn-outline:hover {
-        background: var(--p);
-        color: white;
+    /* currency toggle */
+    .currency-toggle { display:flex;gap:8px;flex-wrap:wrap;margin-bottom:22px; }
+    .currency-btn {
+        padding:6px 16px;border-radius:40px;font-size:13px;font-weight:700;
+        text-decoration:none;border:1.5px solid rgba(124,58,237,0.2);
+        color:#7c3aed;background:#fff;transition:all .2s;
     }
+    .currency-btn.active,.currency-btn:hover { background:#7c3aed;color:#fff;border-color:#7c3aed; }
 
     /* ── Stats Grid ── */
     .clean-stats {
@@ -61,30 +66,19 @@
 
     .stat-card {
         background: white;
-        padding: 24px;
+        padding: 22px 24px;
         border-radius: 20px;
-        box-shadow: var(--card-shadow);
-        border: 1px solid rgba(124, 58, 237, 0.05);
+        box-shadow: 0 8px 28px -8px rgba(124,58,237,0.10);
+        border: 1px solid rgba(124,58,237,0.07);
         display: flex;
         flex-direction: column;
         gap: 8px;
         position: relative;
         overflow: hidden;
+        transition: transform 0.2s, box-shadow 0.2s;
+        animation: dashIn 0.4s ease both;
     }
-
-    .stat-card::after {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 4px;
-        height: 100%;
-        background: var(--p);
-    }
-
-    .stat-card.green::after { background: var(--success); }
-    .stat-card.red::after { background: var(--danger); }
-    .stat-card.blue::after { background: #3b82f6; }
+    .stat-card:hover { transform: translateY(-3px); box-shadow: 0 16px 36px -8px rgba(124,58,237,0.14); }
 
     .stat-card span {
         font-size: 13px;
@@ -101,8 +95,6 @@
         margin: 0;
     }
 
-    .stat-card.green h2 { color: var(--success); }
-    .stat-card.red h2 { color: var(--danger); }
 
     /* ── Insights Section ── */
     .insights-grid {
@@ -175,8 +167,8 @@
         background: white;
         padding: 25px;
         border-radius: 24px;
-        box-shadow: var(--card-shadow);
-        border: 1px solid rgba(124, 58, 237, 0.05);
+        box-shadow: 0 8px 28px -8px rgba(124,58,237,0.10);
+        border: 1px solid rgba(124,58,237,0.07);
     }
 
     .chart-header {
@@ -204,83 +196,102 @@
 {% block content %}
 <div class="clean-dashboard">
 
-    <div class="clean-header">
-        <h1>Mon Portefeuille</h1>
-        <div class="header-actions">
-            <div class="d-flex align-items-center" style="gap: 12px;">
-                <!-- Notification Dropdown -->
-                <div class="dropdown">
-                    <a class="btn-outline position-relative" href="#" role="button" data-bs-toggle="dropdown">
-                        <i class="bi bi-bell"></i>
-                        <span id="notif-badge" class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle d-none"></span>
-                    </a>
-                    <div class="dropdown-menu dropdown-menu-end shadow-lg border-0 p-0" style="min-width: 320px;">
-                        <div class="card bg-transparent border-0">
-                            <div class="card-header bg-transparent border-bottom p-3 d-flex justify-content-between align-items-center">
-                                <h6 class="m-0 fw-bold">Notifications <span id="notif-count" class="badge bg-danger ms-1">0</span></h6>
-                            </div>
-                            <div class="card-body p-0">
-                                <ul class="list-group list-group-flush" id="notif-list">
-                                    <li class="list-group-item p-3 text-center text-muted small">Chargement...</li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <a href="{{ path('transactions_pdf') }}" class="btn-outline"><i class="bi bi-file-pdf"></i> PDF</a>
-                <a href="{{ path('transactions_excel') }}" class="btn-outline"><i class="bi bi-file-excel"></i> Excel</a>
-            </div>
+    {# ── Hero Banner ── #}
+    <div class="dash-hero">
+        <div style="position:relative;z-index:1;">
+            <h1><i class="bi bi-wallet2 me-2"></i>Mon Portefeuille</h1>
+            <p>Tableau de bord financier personnel — Finora</p>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;position:relative;z-index:1;flex-wrap:wrap;">
+            {# Notification dropdown #}
+            
+            <a href="{{ path('transactions_pdf') }}" class="btn-outline"><i class="bi bi-file-pdf"></i> PDF</a>
+            <a href="{{ path('transactions_excel') }}" class="btn-outline"><i class="bi bi-file-excel"></i> Excel</a>
         </div>
     </div>
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; flex-wrap:wrap; gap:12px;">
+        {# currency toggle #}
+        <div class="currency-toggle" style="margin-bottom:0;">
+            {% for c in ['DT', 'EUR', 'USD'] %}
+                <a href="?currency={{ c }}" class="currency-btn {{ currencySymbol == c ? 'active' : '' }}">{{ c }}</a>
+            {% endfor %}
+        </div>
 
-    <!-- Currency Selection -->
-    <div style="margin-bottom: 25px; display: flex; gap: 10px;">
-        {% for c in ['DT', 'EUR', 'USD'] %}
-            <a href="?currency={{ c }}" class="btn-outline" style="border-radius: 12px; font-size: 13px; {{ currencySymbol == c ? 'background:var(--p); color:white;' : '' }}">
-                {{ c }}
+        {# Alerts button #}
+        <div class="dropdown">
+            <a class="currency-btn position-relative d-inline-flex align-items-center gap-2" href="#" role="button" data-bs-toggle="dropdown">
+                <i class="bi bi-bell"></i> 
+                <span>Alertes</span>
+                <span id="notif-badge" class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle d-none"></span>
             </a>
-        {% endfor %}
+            <div class="dropdown-menu dropdown-menu-end shadow-lg border-0" style="min-width:320px; border-radius:16px; overflow:hidden;">
+                <div class="card bg-transparent border-0">
+                    <div class="card-header bg-transparent border-bottom p-3 d-flex justify-content-between align-items-center">
+                        <h6 class="m-0 fw-bold" style="color:var(--text-dark);">Notifications <span id="notif-count" class="badge bg-danger ms-1">0</span></h6>
+                    </div>
+                    <div class="card-body p-0" style="max-height:300px; overflow-y:auto;">
+                        <ul class="list-group list-group-flush" id="notif-list">
+                            <li class="list-group-item p-3 text-center text-muted small">Chargement...</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Key Stats -->
     <div class="clean-stats">
-        <div class="stat-card blue">
-            <span>Solde Actuel</span>
-            <h2>{{ balance }} {{ currencySymbol }}</h2>
-        </div>
-        <div class="stat-card green">
-            <span>Total Revenus</span>
-            <h2>+ {{ income }} {{ currencySymbol }}</h2>
-        </div>
-        <div class="stat-card red">
-            <span>Total Dépenses</span>
-            <h2>- {{ outcome }} {{ currencySymbol }}</h2>
-        </div>
         <div class="stat-card">
-            <span>Transactions</span>
-            <h2>{{ transactions|length }}</h2>
-        </div>
-    </div>
-
-    <!-- Métier Insights Section -->
-    <div class="insights-grid">
-      
-
-        <div class="insight-card">
-            <div class="insight-icon bg-r"><i class="bi bi-cart-x"></i></div>
-            <div class="insight-content">
-                <h4>Top Dépense</h4>
-                <p>{{ topSpendingCat }}</p>
-                <div class="insight-trend text-muted">
-                    {{ topSpendingAmt }} {{ currencySymbol }} cumulés
+            <div style="display:flex;align-items:center;gap:12px;">
+                <div style="width:46px;height:46px;border-radius:14px;background:#dbeafe;color:#2563eb;
+                           display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">
+                    <i class="bi bi-wallet2"></i>
+                </div>
+                <div>
+                    <span style="font-size:11px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.05em;">Solde Actuel</span>
+                    <h2 style="font-size:22px;font-weight:900;color:#1d4ed8;margin:0;">{{ balance }} {{ currencySymbol }}</h2>
                 </div>
             </div>
         </div>
-
-        
-
-        
+        <div class="stat-card">
+            <div style="display:flex;align-items:center;gap:12px;">
+                <div style="width:46px;height:46px;border-radius:14px;background:#dcfce7;color:#16a34a;
+                           display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">
+                    <i class="bi bi-arrow-down-circle-fill"></i>
+                </div>
+                <div>
+                    <span style="font-size:11px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.05em;">Total Revenus</span>
+                    <h2 style="font-size:22px;font-weight:900;color:#16a34a;margin:0;">+{{ income }} {{ currencySymbol }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div style="display:flex;align-items:center;gap:12px;">
+                <div style="width:46px;height:46px;border-radius:14px;background:#fee2e2;color:#dc2626;
+                           display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">
+                    <i class="bi bi-arrow-up-circle-fill"></i>
+                </div>
+                <div>
+                    <span style="font-size:11px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.05em;">Total Dépenses</span>
+                    <h2 style="font-size:22px;font-weight:900;color:#dc2626;margin:0;">-{{ outcome }} {{ currencySymbol }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div style="display:flex;align-items:center;gap:12px;">
+                <div style="width:46px;height:46px;border-radius:14px;background:#ede9fe;color:#7c3aed;
+                           display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">
+                    <i class="bi bi-lightning-fill"></i>
+                </div>
+                <div>
+                    <span style="font-size:11px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.05em;">Transactions</span>
+                    <h2 style="font-size:22px;font-weight:900;color:#1e1b4b;margin:0;">{{ transactions|length }}</h2>
+                </div>
+            </div>
+        </div>
     </div>
+
+    
 
     <!-- Main Charts Row -->
     <div class="dashboard-main-row">
@@ -303,13 +314,17 @@
             <div style="height: 250px; position: relative;">
                 <canvas id="globalDonut"></canvas>
             </div>
-            <div class="mt-4 p-3 rounded bg-light border-start border-4 border-primary">
-                <span class="small text-muted d-block">Plus grosse transaction</span>
+            <div style="margin-top:16px;padding:14px 18px;border-radius:14px;
+                        background:linear-gradient(135deg,#faf5ff,#f5f3ff);
+                        border-left:4px solid #7c3aed;">
+                <span style="font-size:11px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:4px;">Plus grosse transaction</span>
                 {% if biggestTx %}
-                    <strong class="text-dark">{{ biggestTx.nomTransaction }}</strong>
-                    <span class="float-end text-danger fw-bold">-{{ biggestAmt }} {{ currencySymbol }}</span>
+                    <div style="display:flex;justify-content:space-between;align-items:center;">
+                        <strong style="color:#1e1b4b;font-size:14px;">{{ biggestTx.nomTransaction }}</strong>
+                        <span style="color:#dc2626;font-weight:800;font-size:15px;">-{{ biggestAmt }} {{ currencySymbol }}</span>
+                    </div>
                 {% else %}
-                    <span class="text-muted">–</span>
+                    <span style="color:#9ca3af;">–</span>
                 {% endif %}
             </div>
         </div>
@@ -500,6 +515,34 @@
     }
 </style>
 
+    {# ── Recommended for You ── #}
+    <div style="margin-top: 30px;">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;">
+            <h3 style="font-size: 20px; font-weight: 800; color: var(--text-dark); margin: 0;">
+                <i class="bi bi-stars text-primary me-2"></i>Recommandés pour vous
+            </h3>
+            <span style="font-size: 12px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Sélection intelligente</span>
+        </div>
+        
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px;">
+            {% for rec in recommendations %}
+                <div style="background: white; border-radius: 20px; padding: 20px; border: 1px solid rgba(124,58,237,0.08); box-shadow: 0 4px 20px rgba(0,0,0,0.02); transition: all 0.3s; position: relative; overflow: hidden;" onmouseover="this.style.borderColor='var(--p)'; this.style.transform='translateY(-5px)';" onmouseout="this.style.borderColor='rgba(124,58,237,0.08)'; this.style.transform='translateY(0)';">
+                    <div style="width: 44px; height: 44px; border-radius: 12px; background: var(--p-light); color: var(--p); display: flex; align-items: center; justify-content: center; font-size: 20px; margin-bottom: 15px;">
+                        <i class="bi bi-lightning-charge"></i>
+                    </div>
+                    <div style="font-weight: 800; color: var(--text-dark); font-size: 15px; margin-bottom: 5px;">{{ rec.name }}</div>
+                    <div style="display: flex; align-items: center; justify-content: space-between;">
+                        <span style="font-size: 11px; font-weight: 700; color: var(--text-muted); background: #f1f5f9; padding: 3px 10px; border-radius: 30px; text-transform: uppercase;">{{ rec.category }}</span>
+                        <i class="bi bi-arrow-right-short" style="color: var(--p); font-size: 20px;"></i>
+                    </div>
+                </div>
+            {% else %}
+                <div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: var(--text-muted); border: 1px dashed #cbd5e1; border-radius: 20px;">
+                    Aucune recommandation personnalisée pour le moment.
+                </div>
+            {% endfor %}
+        </div>
+    </div>
 </div>
 
 {% block javascripts %}

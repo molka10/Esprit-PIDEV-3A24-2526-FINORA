@@ -17,19 +17,45 @@ class AIController extends AbstractController
     {
         $transactions = $repo->findBy(['userId' => 6]); // Currently hardcoded user 6 
         
-        $income = 0;
-        $expenses = 0;
+        $currentMonth = (int) date('m');
+        $currentYear = (int) date('Y');
+        
+        $prevMonth = $currentMonth - 1;
+        $prevYear = $currentYear;
+        if ($prevMonth === 0) {
+            $prevMonth = 12;
+            $prevYear--;
+        }
+
+        $currIncome = 0; $currExpenses = 0;
+        $prevIncome = 0; $prevExpenses = 0;
+        $globalIncome = 0; $globalExpenses = 0;
 
         foreach ($transactions as $t) {
-            $amount = abs($t->getMontant());
-            if (strtolower($t->getType()) === 'income' || strtolower($t->getType()) === 'revenu') {
-                $income += $amount;
-            } else {
-                $expenses += $amount;
+            $date = $t->getDateTransaction();
+            $m = (int) $date->format('m');
+            $y = (int) $date->format('Y');
+            $amt = abs($t->getMontant());
+            $isInc = (strtolower($t->getType()) === 'income' || strtolower($t->getType()) === 'revenu');
+
+            // Global (for overall prediction)
+            if ($isInc) { $globalIncome += $amt; } else { $globalExpenses += $amt; }
+
+            // Current Month
+            if ($m === $currentMonth && $y === $currentYear) {
+                if ($isInc) { $currIncome += $amt; } else { $currExpenses += $amt; }
+            }
+            // Previous Month
+            elseif ($m === $prevMonth && $y === $prevYear) {
+                if ($isInc) { $prevIncome += $amt; } else { $prevExpenses += $amt; }
             }
         }
 
-        $result = $ai->analyze($income, $expenses);
+        $result = $ai->analyze($globalIncome, $globalExpenses);
+        
+        // Add monthly comparison data
+        $result['currentMonth'] = ['income' => $currIncome, 'expenses' => $currExpenses, 'balance' => $currIncome - $currExpenses];
+        $result['prevMonth'] = ['income' => $prevIncome, 'expenses' => $prevExpenses, 'balance' => $prevIncome - $prevExpenses];
 
         return $this->render('ai/analyse.html.twig', [
             'data' => $result

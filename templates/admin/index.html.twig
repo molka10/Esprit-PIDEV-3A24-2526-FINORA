@@ -3,6 +3,251 @@
 {% block stylesheets %}
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.css">
 <style>
+/* ── Page Layout & Typography ───────────────────────── */
+:root {
+    --p: #7c3aed;
+    --p-light: #f5f3ff;
+    --text-main: #1e1b4b;
+    --text-muted: #64748b;
+    --card-shadow: 0 10px 30px -5px rgba(124, 58, 237, 0.12);
+}
+
+.admin-dashboard {
+    padding: 30px;
+    background: #f8f5ff;
+    min-height: 100vh;
+}
+
+/* ── Hero Header ─────────────────────────────────────── */
+.admin-hero {
+    background: linear-gradient(135deg, #1e1b4b 0%, #4338ca 100%);
+    border-radius: 24px;
+    padding: 32px 36px;
+    margin-bottom: 32px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 20px;
+    box-shadow: 0 20px 50px rgba(30, 27, 75, 0.3);
+    position: relative;
+    overflow: hidden;
+}
+.admin-hero::after {
+    content: '';
+    position: absolute;
+    top: -50px; right: -50px;
+    width: 250px; height: 250px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 0;
+}
+.admin-hero-content {
+    position: relative;
+    z-index: 5;
+}
+.admin-hero .d-flex {
+    position: relative;
+    z-index: 10;
+}
+.btn-export, .btn-glass {
+    cursor: pointer !important;
+    user-select: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+.admin-hero-content h1 {
+    color: #fff;
+    font-size: 28px;
+    font-weight: 900;
+    margin: 0;
+    letter-spacing: -0.5px;
+}
+.admin-hero-content p {
+    color: rgba(255,255,255,0.7);
+    margin: 5px 0 0;
+    font-size: 14px;
+}
+
+/* ── Dashboard Buttons ──────────────────────────────── */
+.btn-glass {
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #fff;
+    padding: 10px 20px;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 13px;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+}
+.btn-glass:hover {
+    background: rgba(255, 255, 255, 0.25);
+    color: #fff;
+    transform: translateY(-2px);
+}
+.btn-export {
+    background: #ef4444;
+    color: #fff;
+    padding: 10px 22px;
+    border-radius: 12px;
+    font-weight: 800;
+    font-size: 13px;
+    border: none;
+    transition: all 0.2s;
+    box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
+}
+.btn-export:hover {
+    background: #dc2626;
+    color: #fff;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(239, 68, 68, 0.4);
+}
+
+/* ── Stats Section ───────────────────────────────────── */
+.stat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 24px;
+    margin-bottom: 32px;
+}
+.stat-card {
+    background: #fff;
+    padding: 24px 28px;
+    border-radius: 20px;
+    border: 1px solid rgba(124, 58, 237, 0.08);
+    box-shadow: var(--card-shadow);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.2s ease;
+}
+.stat-card:hover { transform: translateY(-5px); }
+.stat-icon-box {
+    width: 48px; height: 48px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+}
+.green-box  { background: #dcfce7; color: #16a34a; }
+.red-box    { background: #fee2e2; color: #dc2626; }
+.purple-box { background: linear-gradient(135deg, #7c3aed, #4f46e5); color: #fff; }
+
+.stat-info span {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+.stat-info h2 {
+    font-size: 26px;
+    font-weight: 900;
+    color: var(--text-main);
+    margin: 4px 0 0;
+}
+
+/* ── Search & Table ─────────────────────────────────── */
+.table-card {
+    background: #fff;
+    border-radius: 24px;
+    border: 1px solid rgba(124, 58, 237, 0.08);
+    box-shadow: var(--card-shadow);
+    overflow: hidden;
+    margin-top: 32px;
+}
+.table-header {
+    padding: 24px 28px;
+    border-bottom: 1px solid #f3f4f6;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+.table-header h5 {
+    font-size: 16px;
+    font-weight: 800;
+    color: var(--text-main);
+    margin: 0;
+}
+.search-wrapper {
+    position: relative;
+    max-width: 380px;
+    width: 100%;
+}
+.search-wrapper input {
+    width: 100%;
+    padding: 12px 20px 12px 48px;
+    border-radius: 14px;
+    border: 1.5px solid #ede9fe;
+    outline: none;
+    font-size: 14px;
+    transition: all 0.2s;
+    background: #fafafa;
+}
+.search-wrapper input:focus {
+    border-color: var(--p);
+    background: #fff;
+    box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.1);
+}
+.search-wrapper i {
+    position: absolute;
+    left: 18px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    font-size: 16px;
+}
+
+.custom-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+.custom-table thead th {
+    background: #fafbff;
+    padding: 16px 24px;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 1.5px solid #f1f5f9;
+}
+.custom-table tbody td {
+    padding: 18px 24px;
+    border-bottom: 1px solid #f8fafc;
+}
+
+/* ── Charts Card ────────────────────────────────────── */
+.chart-card {
+    background: #fff;
+    border-radius: 24px;
+    padding: 28px;
+    border: 1px solid rgba(124, 58, 237, 0.08);
+    box-shadow: var(--card-shadow);
+    margin-bottom: 32px;
+}
+.chart-card-header {
+    margin-bottom: 24px;
+}
+.chart-card-header h5 {
+    font-size: 17px;
+    font-weight: 800;
+    color: var(--text-main);
+    margin: 0;
+}
+
 /* ── Admin Calendar Modal ──────────────────────────────── */
 .admin-cal-overlay {
     position: fixed;
@@ -72,7 +317,6 @@
     overflow-y: auto;
     flex: 1;
 }
-/* Stats mini-bar */
 .admin-cal-stats {
     display: flex;
     gap: 12px;
@@ -100,6 +344,7 @@
     font-weight: 800;
     color: #1e1b4b;
 }
+
 /* FullCalendar tweaks */
 .fc .fc-toolbar-title {
     font-size: 16px !important;
@@ -171,150 +416,121 @@
 {% block title %}FINORA - Admin Tableau de Bord{% endblock %}
 
 {% block body %}
-<!-- Title and Top Action -->
-<div class="row mb-4">
-    <div class="col-12 d-sm-flex justify-content-between align-items-center">
-        <h1 class="h3 mb-2 mb-sm-0">Tableau de Bord Overview</h1>
-        
-        <div class="d-flex align-items-center gap-2">
-            <!-- Currency Toggle -->
-            <div class="btn-group" role="group" aria-label="Currency toggle">
-                <a href="{{ path('app_admin', {'currency': 'DT', 'search': app.request.query.get('search')}) }}" class="btn btn-sm btn-{{ currencySymbol == 'DT' ? 'primary' : 'outline-primary' }}">DT</a>
-                <a href="{{ path('app_admin', {'currency': 'EUR', 'search': app.request.query.get('search')}) }}" class="btn btn-sm btn-{{ currencySymbol == 'EUR' ? 'primary' : 'outline-primary' }}">EUR</a>
-                <a href="{{ path('app_admin', {'currency': 'USD', 'search': app.request.query.get('search')}) }}" class="btn btn-sm btn-{{ currencySymbol == 'USD' ? 'primary' : 'outline-primary' }}">USD</a>
+<div class="admin-dashboard">
+
+    <!-- Hero Header -->
+    <div class="admin-hero">
+        <div class="admin-hero-content">
+            <h1>Tableau de Bord Overview</h1>
+            <p>Vue d'ensemble de l'activité financière globale de la plateforme.</p>
+        </div>
+        <div class="d-flex align-items-center gap-3">
+            <!-- Currency Toggles -->
+            <div style="display: flex; gap: 8px;">
+                {% for c in ['DT', 'EUR', 'USD'] %}
+                    <a href="{{ path('app_admin', {'currency': c, 'search': app.request.query.get('search')}) }}" 
+                       class="btn-glass" 
+                       style="{{ currencySymbol == c ? 'background: #fff; color: var(--p);' : '' }}">
+                        {{ c }}
+                    </a>
+                {% endfor %}
             </div>
             
-            <a href="{{ path('download_pdf', {'search': app.request.query.get('search')}) }}" class="btn btn-sm btn-danger mb-0">
+            <a href="{{ path('download_pdf', {'search': app.request.query.get('search')}) }}" class="btn-export">
                 <i class="bi bi-file-earmark-pdf me-2"></i>Export PDF
             </a>
         </div>
     </div>
-</div>
 
-<!-- Search Bar -->
-
-
-<!-- Stat Cards -->
-<div class="row g-4 mb-5">
-    <!-- Total Revenus -->
-    <div class="col-md-4">
-        <div class="card h-100 border-0 p-4 position-relative overflow-hidden" style="background: linear-gradient(135deg, #ffffff, #fcfaff);">
-            <div class="position-absolute end-0 top-0 mt-3 me-3 opacity-10">
-                <i class="bi bi-graph-up-arrow" style="font-size: 5rem; color: #8b5cf6;"></i>
+    <!-- Stats Section -->
+    <div class="stat-grid">
+        <!-- Revenue Stat -->
+        <div class="stat-card">
+            <div class="stat-icon-box green-box">
+                <i class="bi bi-arrow-down-left"></i>
             </div>
-            <div class="d-flex align-items-center mb-3 position-relative z-index-1">
-                <div class="icon-md rounded-circle text-white d-flex align-items-center justify-content-center me-3" style="width: 48px; height: 48px; background: linear-gradient(135deg, #10b981, #34d399); box-shadow: 0 4px 10px rgba(16, 185, 129, 0.2);">
-                    <i class="bi bi-arrow-down-left fs-4"></i>
-                </div>
-                <h5 class="mb-0 text-muted fw-normal">Total Revenus</h5>
+            <div class="stat-info">
+                <span>Total Revenus</span>
+                <h2>{{ totalIncome|number_format(2, '.', ',') }} <small style="font-size: 13px; color: var(--text-muted); font-weight: 600;">{{ currencySymbol }}</small></h2>
             </div>
-            <h2 class="mb-0 fw-bold position-relative z-index-1" style="color: #1e1b4b;">{{ totalIncome|number_format(2, '.', ',') }} <span class="fs-6 text-muted">{{ currencySymbol }}</span></h2>
-            <div class="mt-3 small position-relative z-index-1" style="color: #10b981;">
-                <i class="bi bi-check-circle-fill me-1"></i> Across active portfolios
+            <div style="color: #10b981; font-size: 11px; font-weight: 600;">
+                <i class="bi bi-star-fill me-1"></i> Performance positive
+            </div>
+        </div>
+
+        <!-- Expense Stat -->
+        <div class="stat-card">
+            <div class="stat-icon-box red-box">
+                <i class="bi bi-arrow-up-right"></i>
+            </div>
+            <div class="stat-info">
+                <span>Total Dépenses</span>
+                <h2>{{ totalOutcome|number_format(2, '.', ',') }} <small style="font-size: 13px; color: var(--text-muted); font-weight: 600;">{{ currencySymbol }}</small></h2>
+            </div>
+            <div style="color: #f43f5e; font-size: 11px; font-weight: 600;">
+                <i class="bi bi-exclamation-triangle-fill me-1"></i> Flux de sortie
+            </div>
+        </div>
+
+        <!-- Net Balance Stat -->
+        <div class="stat-card" style="background: linear-gradient(135deg, #7c3aed, #4f46e5); border: none;">
+            <div class="stat-icon-box" style="background: rgba(255,255,255,0.2); color: #fff;">
+                <i class="bi bi-wallet2"></i>
+            </div>
+            <div class="stat-info">
+                <span style="color: rgba(255,255,255,0.7);">Net Solde Global</span>
+                <h2 style="color: #fff;">{{ totalBalance|number_format(2, '.', ',') }} <small style="font-size: 13px; color: rgba(255,255,255,0.6); font-weight: 600;">{{ currencySymbol }}</small></h2>
+            </div>
+            <div style="color: rgba(255,255,255,0.8); font-size: 11px; font-weight: 600;">
+                <i class="bi bi-shield-lock-fill me-1"></i> Sécurité maximale
             </div>
         </div>
     </div>
 
-    <!-- Total Dépenses -->
-    <div class="col-md-4">
-        <div class="card h-100 border-0 p-4 position-relative overflow-hidden" style="background: linear-gradient(135deg, #ffffff, #fcfaff);">
-            <div class="position-absolute end-0 top-0 mt-3 me-3 opacity-10">
-                <i class="bi bi-graph-down-arrow" style="font-size: 5rem; color: #ef4444;"></i>
+    <!-- Chart Card -->
+    <div class="chart-card">
+        <div class="chart-card-header">
+            <h5><i class="bi bi-graph-up-arrow text-primary me-2"></i>Évolution du Volume des Transactions</h5>
+        </div>
+        <div id="transactionsChart" style="height: 320px;"></div>
+    </div>
+
+    <!-- Table Card -->
+    <div class="table-card">
+        <div class="table-header">
+            <h5><i class="bi bi-people-fill text-primary me-2"></i>Résumé des Utilisateurs</h5>
+            <div class="search-wrapper">
+                <i class="bi bi-search"></i>
+                <input 
+                    id="searchInput"
+                    type="search"
+                    placeholder="Chercher par nom ou ID..."
+                    value="{{ app.request.query.get('search') }}"
+                >
             </div>
-            <div class="d-flex align-items-center mb-3 position-relative z-index-1">
-                <div class="icon-md rounded-circle text-white d-flex align-items-center justify-content-center me-3" style="width: 48px; height: 48px; background: linear-gradient(135deg, #f43f5e, #fb7185); box-shadow: 0 4px 10px rgba(244, 63, 94, 0.2);">
-                    <i class="bi bi-arrow-up-right fs-4"></i>
-                </div>
-                <h5 class="mb-0 text-muted fw-normal">Total Dépenses</h5>
-            </div>
-            <h2 class="mb-0 fw-bold position-relative z-index-1" style="color: #1e1b4b;">{{ totalOutcome|number_format(2, '.', ',') }} <span class="fs-6 text-muted">{{ currencySymbol }}</span></h2>
-            <div class="mt-3 small position-relative z-index-1" style="color: #f43f5e;">
-                <i class="bi bi-exclamation-circle-fill me-1"></i> Registered expenses
-            </div>
+        </div>
+        <div style="overflow-x: auto;">
+            <table class="custom-table">
+                <thead>
+                    <tr>
+                        <th>Utilisateur</th>
+                        <th>Transactions</th>
+                        <th>Revenus ({{ currencySymbol }})</th>
+                        <th>Dépenses ({{ currencySymbol }})</th>
+                        <th>Solde ({{ currencySymbol }})</th>
+                        <th style="text-align: right;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="usersTableBody">
+                    {% include 'admin/_table_rows.html.twig' with { users: users } %}
+                </tbody>
+            </table>
         </div>
     </div>
 
-    <!-- Net Solde -->
-    <div class="col-md-4">
-        <div class="card h-100 border-0 p-4 position-relative overflow-hidden" style="background: linear-gradient(135deg, #7c3aed, #5b21b6); color: white; box-shadow: 0 10px 30px rgba(124, 58, 237, 0.25) !important;">
-            <svg class="position-absolute end-0 top-0" style="opacity: 0.1;" width="150" height="150" viewBox="0 0 100 100" fill="white">
-                <circle cx="80" cy="20" r="50"></circle>
-                <circle cx="10" cy="90" r="20"></circle>
-            </svg>
-            <div class="d-flex align-items-center mb-3 position-relative z-index-1">
-                <div class="icon-md rounded-circle text-primary d-flex align-items-center justify-content-center me-3" style="width: 48px; height: 48px; background: #fff; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
-                    <i class="bi bi-wallet2 fs-4" style="color: #7c3aed;"></i>
-                </div>
-                <h5 class="mb-0 fw-normal text-white-50">Net Solde</h5>
-            </div>
-            <h2 class="mb-0 fw-bold text-white position-relative z-index-1">{{ totalBalance|number_format(2, '.', ',') }} <span class="fs-6 text-white-50">{{ currencySymbol }}</span></h2>
-             <div class="mt-3 small text-white-50 position-relative z-index-1">
-                <i class="bi bi-shield-check me-1 text-white"></i> Secured funds
-            </div>
-        </div>
-    </div>
 </div>
 
-<!-- Chart Section -->
-<div class="row mb-4">
-    <div class="col-12">
-        <div class="card shadow">
-            <div class="card-header border-bottom">
-                <h5 class="card-header-title">Transaction Volume Overview</h5>
-            </div>
-            <div class="card-body">
-                <div id="transactionsChart" style="height: 300px;"></div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Users Table -->
-<div class="row">
-    <div class="col-12">
-        <div class="card shadow">
-            <div class="card-header border-bottom">
-                <h5 class="card-header-title">Users Summary</h5>
-            </div>
-            <!-- Search Bar -->
-<div class="row mb-4">
-    <div class="col-12 position-relative">
-        <input 
-            id="searchInput"
-            class="form-control bg-body pe-5"
-            type="search"
-            placeholder="Search users by name or ID..."
-            value="{{ app.request.query.get('search') }}"
-        >
-        <span class="bg-transparent p-2 position-absolute top-50 end-0 translate-middle-y border-0 text-muted" style="margin-right: 15px;">
-            <i class="bi bi-search fs-6"></i>
-        </span>
-    </div>
-</div>
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-dark-gray align-middle p-4 mb-0 table-hover">
-                        <thead>
-                            <tr>
-                                <th scope="col" class="border-0 rounded-start">User</th>
-                                <th scope="col" class="border-0">Total Transactions</th>
-                                <th scope="col" class="border-0">Revenus ({{ currencySymbol }})</th>
-                                <th scope="col" class="border-0">Dépenses ({{ currencySymbol }})</th>
-                                <th scope="col" class="border-0">Solde ({{ currencySymbol }})</th>
-                                <th scope="col" class="border-0 rounded-end">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody id="usersTableBody">
-    {% include 'admin/_table_rows.html.twig' with { users: users } %}
-</tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-{# ── Admin Calendar Modal (inside body block) ─────────────── #}
+{# ── Admin Calendar Modal ─────────────── #}
 <div class="admin-cal-overlay" id="adminCalOverlay">
     <div class="admin-cal-modal">
         <div class="admin-cal-header">
@@ -359,65 +575,51 @@
                 data: {{ chartData|json_encode|raw }}
             }],
             chart: {
-                height: 300,
+                height: 320,
                 type: 'area',
-                toolbar: {
-                    show: false
-                }
+                fontFamily: 'Inter, sans-serif',
+                toolbar: { show: false }
             },
-            dataLabels: {
-                enabled: false
-            },
-            stroke: {
-                curve: 'smooth'
-            },
-            xaxis: {
-                type: 'category',
-                categories: {{ chartLabels|json_encode|raw }},
-                labels: {
-                    style: {
-                        colors: '#9ca3af'
-                    }
-                }
-            },
-            yaxis: {
-                labels: {
-                    style: {
-                        colors: '#9ca3af'
-                    },
-                    formatter: function (value) {
-                        return value.toFixed(2) + " {{ currencySymbol|raw }}";
-                    }
-                }
-            },
-            tooltip: {
-                y: {
-                    formatter: function (val) {
-                        return val.toFixed(2) + " {{ currencySymbol|raw }}"
-                    }
-                }
-            },
+            dataLabels: { enabled: false },
             colors: ['#7c3aed'],
+            stroke: { curve: 'smooth', width: 3 },
             fill: {
                 type: 'gradient',
                 gradient: {
                     shadeIntensity: 1,
-                    opacityFrom: 0.7,
+                    opacityFrom: 0.6,
                     opacityTo: 0.1,
                     stops: [0, 90, 100]
                 }
+            },
+            xaxis: {
+                categories: {{ chartLabels|json_encode|raw }},
+                axisBorder: { show: false },
+                axisTicks: { show: false },
+                labels: { style: { colors: '#94a3b8', fontSize: '11px', fontWeight: 600 } }
+            },
+            yaxis: {
+                labels: {
+                    style: { colors: '#94a3b8', fontSize: '11px', fontWeight: 600 },
+                    formatter: function (value) { return value.toFixed(0) + " {{ currencySymbol|raw }}"; }
+                }
+            },
+            grid: {
+                borderColor: '#f1f5f9',
+                strokeDashArray: 4
+            },
+            tooltip: {
+                theme: 'light',
+                y: { formatter: function (val) { return val.toFixed(2) + " {{ currencySymbol|raw }}" } }
             }
         };
 
         var chart = new ApexCharts(document.querySelector("#transactionsChart"), options);
         chart.render();
     });
-</script>
-<script>
-document.addEventListener("DOMContentLoaded", function () {
-    const input = document.getElementById("searchInput");
 
-    input.addEventListener("keyup", function () {
+    /* ── Search Fetch ── */
+    document.getElementById("searchInput").addEventListener("keyup", function () {
         let query = this.value;
         let urlParams = new URLSearchParams(window.location.search);
         let currency = urlParams.get('currency') || 'DT';
@@ -428,7 +630,6 @@ document.addEventListener("DOMContentLoaded", function () {
                document.getElementById("usersTableBody").innerHTML = data;
             });
     });
-});
 </script>
 
 <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
@@ -443,7 +644,6 @@ async function openUserCalendarModal(userId, userName) {
     const container = document.getElementById('adminCalContainer');
     const skeleton  = document.getElementById('adminCalSkeleton');
 
-    // Reset
     title.textContent = `📅 Calendrier — ${userName}`;
     container.style.display = 'none';
     skeleton.style.display  = 'block';
@@ -451,7 +651,6 @@ async function openUserCalendarModal(userId, userName) {
     document.getElementById('acStat-income').textContent  = '—';
     document.getElementById('acStat-outcome').textContent = '—';
 
-    // Destroy previous calendar instance if switching users
     if (adminCalInstance && adminCalCurrentUser !== userId) {
         adminCalInstance.destroy();
         adminCalInstance = null;
@@ -461,17 +660,13 @@ async function openUserCalendarModal(userId, userName) {
 
     overlay.classList.add('open');
 
-    // Fetch events
     let events = [];
     try {
         const res  = await fetch(`/api/user/calendar-events/by-user?userId=${userId}`);
         const json = await res.json();
         if (json.status === 'success') events = json.data;
-    } catch(e) {
-        console.error('Calendar fetch error:', e);
-    }
+    } catch(e) { console.error('Calendar fetch error:', e); }
 
-    // Compute stats
     let totalIncome = 0, totalOutcome = 0;
     events.forEach(ev => {
         const ep = ev.extendedProps || {};
@@ -482,59 +677,43 @@ async function openUserCalendarModal(userId, userName) {
     document.getElementById('acStat-income').textContent  = '+' + totalIncome.toFixed(2)  + ' DT';
     document.getElementById('acStat-outcome').textContent = '-' + totalOutcome.toFixed(2) + ' DT';
 
-    // Show calendar
     skeleton.style.display  = 'none';
     container.style.display = 'block';
 
     if (!adminCalInstance) {
         adminCalInstance = new FullCalendar.Calendar(container, {
-            initialView:   'dayGridMonth',
-            locale:        'fr',
-            height:        'auto',
+            initialView: 'dayGridMonth',
+            locale: 'fr',
+            height: 'auto',
             headerToolbar: {
-                left:   'prev,next today',
+                left: 'prev,next today',
                 center: 'title',
-                right:  'dayGridMonth,timeGridWeek,listWeek'
+                right: 'dayGridMonth,timeGridWeek,listWeek'
             },
             buttonText: { today: "Aujourd'hui", month: 'Mois', week: 'Semaine', list: 'Liste' },
             events: events,
             dayMaxEvents: 3,
             eventTimeFormat: { hour: '2-digit', minute: '2-digit', meridiem: false },
             eventClick: function(info) {
-                const ep    = info.event.extendedProps || {};
-                const isIn  = ep.isIncome;
-                const sign  = isIn ? '+' : '-';
-                const amt   = (ep.amount ?? 0).toFixed(2);
-                const name  = (info.event.title ?? '').replace(/^[+\-][\d.]+ DT - /, '');
-                const date  = info.event.start
-                    ? new Date(info.event.start).toLocaleDateString('fr-FR', {weekday:'short', year:'numeric', month:'short', day:'numeric'})
-                    : '—';
-                alert(`${sign}${amt} DT — ${name}\nDate : ${date}\nCatégorie : ${ep.category ?? '—'}\nType : ${ep.type ?? '—'}`);
+                const ep = info.event.extendedProps || {};
+                const name = (info.event.title ?? '').replace(/^[+\-][\d.]+ DT - /, '');
+                alert(`${ep.isIncome?'+':'-'}${ep.amount.toFixed(2)} DT — ${name}\nCatégorie : ${ep.category ?? '—'}`);
             }
         });
-        // Wait for modal CSS transition (~280ms) to finish before rendering
-        // otherwise FullCalendar measures a zero-height container → empty grid
         setTimeout(() => {
             adminCalInstance.render();
             adminCalInstance.updateSize();
         }, 320);
     } else {
-        // Same user re-opened: refresh events and recalculate layout
         adminCalInstance.removeAllEvents();
         adminCalInstance.addEventSource(events);
         setTimeout(() => adminCalInstance.updateSize(), 320);
     }
 }
 
-// Close handlers
 document.getElementById('adminCalClose').addEventListener('click', closeAdminCal);
-document.getElementById('adminCalOverlay').addEventListener('click', function(e) {
-    if (e.target === this) closeAdminCal();
-});
+document.getElementById('adminCalOverlay').addEventListener('click', function(e) { if (e.target === this) closeAdminCal(); });
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeAdminCal(); });
-
-function closeAdminCal() {
-    document.getElementById('adminCalOverlay').classList.remove('open');
-}
+function closeAdminCal() { document.getElementById('adminCalOverlay').classList.remove('open'); }
 </script>
 {% endblock %}

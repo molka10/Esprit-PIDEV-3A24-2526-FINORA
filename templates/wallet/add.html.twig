@@ -1,95 +1,311 @@
 {% extends 'base.html.twig' %}
 
+{% block title %}Ajouter une Transaction — Finora{% endblock %}
+
+{% block stylesheets %}
+<style>
+.fp-form-page {
+    min-height: 80vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 48px 16px 72px;
+    background: linear-gradient(135deg, #f8f5ff 0%, #fdfaff 100%);
+}
+
+.fp-form-card {
+    width: 100%;
+    max-width: 560px;
+    background: #fff;
+    border-radius: 28px;
+    box-shadow: 0 24px 64px -16px rgba(124,58,237,0.22);
+    border: 1px solid rgba(124,58,237,0.08);
+    overflow: hidden;
+    animation: fp-in 0.45s cubic-bezier(0.34,1.56,0.64,1) both;
+}
+
+@keyframes fp-in {
+    from { opacity:0; transform: translateY(32px) scale(0.95); }
+    to   { opacity:1; transform: translateY(0) scale(1); }
+}
+
+.fp-form-head {
+    background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 50%, #4f46e5 100%);
+    padding: 30px 36px 26px;
+    position: relative;
+    overflow: hidden;
+}
+.fp-form-head::before {
+    content: '';
+    position: absolute;
+    top: -50px; right: -50px;
+    width: 200px; height: 200px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.07);
+}
+.fp-form-head::after {
+    content: '';
+    position: absolute;
+    bottom: -40px; left: -30px;
+    width: 130px; height: 130px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.04);
+}
+
+.fp-form-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: rgba(255,255,255,0.78);
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.18);
+    padding: 6px 14px;
+    border-radius: 40px;
+    transition: all 0.2s;
+    position: relative;
+    z-index: 1;
+    margin-bottom: 16px;
+    letter-spacing: 0.01em;
+}
+.fp-form-back:hover { background: rgba(255,255,255,0.2); color: #fff; }
+
+.fp-form-head-icon {
+    width: 54px; height: 54px;
+    border-radius: 16px;
+    background: rgba(255,255,255,0.14);
+    border: 1px solid rgba(255,255,255,0.2);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 24px; color: #fff;
+    margin-bottom: 14px;
+    position: relative; z-index: 1;
+}
+
+.fp-form-head h2 {
+    color: #fff !important;
+    font-size: 21px !important;
+    font-weight: 800 !important;
+    margin: 0 !important;
+    position: relative; z-index: 1;
+}
+.fp-form-head p {
+    color: rgba(255,255,255,0.68) !important;
+    font-size: 13px !important;
+    margin: 5px 0 0 !important;
+    position: relative; z-index: 1;
+}
+
+.fp-form-body { padding: 30px 36px 36px; }
+
+.fp-field { margin-bottom: 20px; }
+.fp-field label {
+    display: block;
+    font-size: 12.5px;
+    font-weight: 700;
+    color: #1e1b4b;
+    margin-bottom: 7px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.fp-field input,
+.fp-field select {
+    width: 100%;
+    padding: 11px 16px;
+    border: 1.5px solid #e9d5ff;
+    border-radius: 13px;
+    font-size: 14px;
+    background: #fcfaff;
+    color: #1e1b4b;
+    transition: all 0.2s;
+    outline: none;
+    font-family: 'Inter', sans-serif;
+}
+.fp-field input:focus, .fp-field select:focus {
+    border-color: #8b5cf6;
+    box-shadow: 0 0 0 4px rgba(139,92,246,0.12);
+    background: #fff;
+}
+
+/* ─── Type Toggle ─── */
+.type-toggle-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+.type-option { position: relative; }
+.type-option input[type="radio"] {
+    position: absolute; opacity: 0;
+    width: 100%; height: 100%;
+    cursor: pointer; z-index: 1; margin: 0;
+}
+.type-label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 13px 12px;
+    border-radius: 13px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    border: 2px solid #e9d5ff;
+    background: #fcfaff;
+    color: #6b7280;
+    transition: all 0.2s;
+    user-select: none;
+}
+.type-option input:checked + .type-label.income {
+    background: #dcfce7;
+    border-color: #22c55e;
+    color: #16a34a;
+    box-shadow: 0 4px 12px rgba(34,197,94,0.15);
+}
+.type-option input:checked + .type-label.outcome {
+    background: #fee2e2;
+    border-color: #ef4444;
+    color: #dc2626;
+    box-shadow: 0 4px 12px rgba(239,68,68,0.15);
+}
+.type-option:hover .type-label:not(.income):not(.outcome) {
+    border-color: #a78bfa;
+    background: #f5f3ff;
+    color: #7c3aed;
+}
+
+/* ─── Submit Button ─── */
+.fp-submit {
+    width: 100%;
+    padding: 14px;
+    border: none;
+    border-radius: 14px;
+    font-size: 15px;
+    font-weight: 700;
+    color: #fff;
+    background: linear-gradient(135deg, #7c3aed, #8b5cf6);
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 6px 18px rgba(124,58,237,0.32);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    letter-spacing: 0.01em;
+    font-family: 'Inter', sans-serif;
+    margin-top: 8px;
+}
+.fp-submit:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 28px rgba(124,58,237,0.42);
+}
+
+/* ─── Divider ─── */
+.fp-divider {
+    border: none;
+    height: 1px;
+    background: linear-gradient(to right, transparent, rgba(124,58,237,0.12), transparent);
+    margin: 22px 0;
+}
+
+/* ─── Error text ─── */
+.fp-error { font-size: 12px; color: #dc2626; font-weight: 600; margin-top: 5px; display: block; }
+</style>
+{% endblock %}
+
 {% block content %}
+<div class="fp-form-page">
+    <div class="fp-form-card">
 
-<div class="page">
-
-    <div class="card">
-
-        <div class="header-form">
-            <h2>Ajouter une Transaction</h2>
-
-            <a href="{{ path('transactions') }}" class="btn" style="background:#636e72;">
-                ⬅ Back
+        <div class="fp-form-head">
+            <a href="{{ path('transactions') }}" class="fp-form-back">
+                <i class="bi bi-arrow-left"></i> Retour aux transactions
             </a>
+            <div class="fp-form-head-icon">
+                <i class="bi bi-plus-circle-fill"></i>
+            </div>
+            <h2>Ajouter une Transaction</h2>
+            <p>Enregistrez une nouvelle entrée ou sortie financière</p>
         </div>
 
-        {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+        <div class="fp-form-body">
+            {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
 
-        <div class="form-group">
-            <div class="label-row">
+            <div class="fp-field">
                 {{ form_label(form.nomTransaction) }}
-                {{ form_errors(form.nomTransaction) }}
+                {{ form_widget(form.nomTransaction, {'attr': {'placeholder': 'Ex: Loyer, Salaire, Courses…'}}) }}
+                {% if form_errors(form.nomTransaction) %}
+                    <span class="fp-error">{{ form_errors(form.nomTransaction) }}</span>
+                {% endif %}
             </div>
-            {{ form_widget(form.nomTransaction) }}
-        </div>
 
-        <div class="form-group">
-           <label>Type</label>
+            <div class="fp-field">
+                <label>Type de Transaction</label>
+                <div class="type-toggle-grid">
+                    {% for choice in form.type %}
+                        <div class="type-option">
+                            {{ form_widget(choice) }}
+                            <label class="type-label {{ choice.vars.value == 'INCOME' ? 'income' : 'outcome' }}" for="{{ choice.vars.id }}">
+                                {% if choice.vars.value == 'INCOME' %}
+                                    <i class="bi bi-arrow-down-circle-fill"></i> Revenu
+                                {% else %}
+                                    <i class="bi bi-arrow-up-circle-fill"></i> Dépense
+                                {% endif %}
+                            </label>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
 
-    <div class="type-toggle">
+            <hr class="fp-divider">
 
-        {% for choice in form.type %}
-            <label class="type-btn">
-                {{ form_widget(choice) }}
-                <span>{{ choice.vars.label }}</span>
-            </label>
-        {% endfor %}
-
-    </div>
-</div>
-           
-
-        <div class="form-group">
-            <div class="label-row">
+            <div class="fp-field">
                 {{ form_label(form.montant) }}
-                {{ form_errors(form.montant) }}
+                {{ form_widget(form.montant, {'attr': {'placeholder': '0.00'}}) }}
+                {% if form_errors(form.montant) %}
+                    <span class="fp-error">{{ form_errors(form.montant) }}</span>
+                {% endif %}
             </div>
-            {{ form_widget(form.montant) }}
-        </div>
 
-        <div class="form-group">
-            <div class="label-row">
+            <div class="fp-field">
                 {{ form_label(form.dateTransaction) }}
-                {{ form_errors(form.dateTransaction) }}
+                {{ form_widget(form.dateTransaction) }}
+                {% if form_errors(form.dateTransaction) %}
+                    <span class="fp-error">{{ form_errors(form.dateTransaction) }}</span>
+                {% endif %}
             </div>
-            {{ form_widget(form.dateTransaction) }}
+
+            <div class="fp-field">
+                <label>Catégorie</label>
+                <select id="transaction_wallet_category" name="transaction_wallet[category]">
+                    <option value="">Sélectionner une catégorie</option>
+                </select>
+            </div>
+
+            <button type="submit" class="fp-submit">
+                <i class="bi bi-check-circle-fill"></i>
+                Enregistrer la Transaction
+            </button>
+
+            {{ form_end(form, {'render_rest': false}) }}
         </div>
-
-     <div class="form-group">
-    <label>Category</label>
-
-    <select id="transaction_wallet_category"
-            name="transaction_wallet[category]"
-            class="form-control">
-        <option value="">Select category</option>
-    </select>
-</div>
-
-        <div class="actions">
-            {{ form_row(form.save) }}
-        </div>
-
-        {{ form_end(form, {'render_rest': false}) }}
 
     </div>
-
 </div>
+
 {% block javascripts %}
 <script>
 document.addEventListener("DOMContentLoaded", function () {
-
     const radios = document.querySelectorAll('input[name="transaction_wallet[type]"]');
     const categorySelect = document.getElementById('transaction_wallet_category');
+    const labels = document.querySelectorAll('.type-option');
 
     function loadCategories(type) {
-
         fetch('/api/categories/' + type.toUpperCase())
             .then(res => res.json())
             .then(data => {
-
-                categorySelect.innerHTML = '<option value="">Select category</option>';
-
+                categorySelect.innerHTML = '<option value="">Sélectionner une catégorie</option>';
                 data.forEach(cat => {
                     let option = document.createElement('option');
                     option.value = cat.id;
@@ -98,61 +314,25 @@ document.addEventListener("DOMContentLoaded", function () {
                 });
             });
     }
+
+    labels.forEach(label => {
+        label.addEventListener("click", function () {
+            const radio = this.querySelector('input');
+            if (radio) {
+                radio.checked = true;
+                loadCategories(radio.value.toUpperCase());
+            }
+        });
+    });
 
     radios.forEach(radio => {
         radio.addEventListener("change", function () {
-            loadCategories(this.value);
+            loadCategories(this.value.toUpperCase());
         });
     });
 
-    // default load
-    const checked = document.querySelector('input[name="transaction_wallet[type]"]:checked');
-    if (checked) {
-        loadCategories(checked.value);
-    } else {
-        loadCategories('INCOME');
-    }
-
-});
-document.addEventListener("DOMContentLoaded", function () {
-
-    const radios = document.querySelectorAll('input[name="transaction_wallet[type]"]');
-    const labels = document.querySelectorAll('.type-btn');
-    const categorySelect = document.getElementById('transaction_wallet_category');
-
-    function loadCategories(type) {
-        console.log("TYPE:", type);
-
-        fetch('/api/categories/' + type)
-            .then(res => res.json())
-            .then(data => {
-
-                categorySelect.innerHTML = '<option value="">Select category</option>';
-
-                data.forEach(cat => {
-                    let option = document.createElement('option');
-                    option.value = cat.id;
-                    option.textContent = cat.nom;
-                    categorySelect.appendChild(option);
-                });
-            });
-    }
-
-    // 🔥 الحل هنا: click على label
-    labels.forEach(label => {
-        label.addEventListener("click", function () {
-
-            const radio = this.querySelector('input');
-            radio.checked = true;
-
-            loadCategories(radio.value.toUpperCase());
-        });
-    });
-
-    // default
     const checked = document.querySelector('input[name="transaction_wallet[type]"]:checked');
     loadCategories(checked ? checked.value.toUpperCase() : 'INCOME');
-
 });
 </script>
 {% endblock %}

@@ -1,89 +1,51 @@
-<h1 style="
-    text-align:center;
-    margin-bottom:25px;
-    color:#1e3a8a;
-    font-size:26px;
-    letter-spacing:1px;
-">
-     ADMIN REPORT
-</h1>
-
-<h2 style="
-    margin-bottom:12px;
-    color:#0f172a;
-    font-size:18px;
-">
-    Users Overview
-</h2>
-
-<table style="
-    width:100%;
-    border-collapse:separate;
-    border-spacing:0;
-    font-family:Arial;
-    overflow:hidden;
-    border-radius:12px;
-">
-
-    <thead>
-        <tr style="
-            background:linear-gradient(135deg,#4f46e5,#7c3aed);
-            color:white;
-        ">
-            <th style="padding:12px;">Nom</th>
-            <th style="padding:12px;">Solde</th>
-            <th style="padding:12px;">Revenus</th>
-            <th style="padding:12px;">Dépenses</th>
-            <th style="padding:12px;">Transactions</th>
-        </tr>
-    </thead>
-
-    <tbody>
-    {% for u in users %}
-        <tr style="
-            background:{{ loop.index is even ? '#f8faff' : '#ffffff' }};
-        ">
-            
-            <td style="padding:10px; color:#0f172a;">
-                {{ u.name }}
-            </td>
-
-            <td style="padding:10px; text-align:center;">
-                <strong style="color:#111827;">
-                    {{ u.balance }} DT
-                </strong>
-            </td>
-
-            <td style="
-                padding:10px;
-                text-align:center;
-                color:#4f46e5;
-                font-weight:600;
-            ">
-                +{{ u.income }}
-            </td>
-
-            <td style="
-                padding:10px;
-                text-align:center;
-                color:#64748b;
-                font-weight:600;
-            ">
-                -{{ u.outcome }}
-            </td>
-
-            <td style="
-                padding:10px;
-                text-align:center;
-                color:#475569;
-            ">
-                {{ u.count }}
-            </td>
-
-        </tr>
-       
-    
-    {% endfor %}
-    </tbody>
-
-</table>
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <style>
+        body { font-family: 'Helvetica', 'Arial', sans-serif; color: #1e1b4b; margin: 0; padding: 20px; }
+        .header { text-align: center; margin-bottom: 20px; }
+        .logo { font-size: 24px; font-weight: bold; color: #7c3aed; }
+        .title { font-size: 16px; font-weight: bold; color: #1e1b4b; margin-top: 5px; }
+        
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th { background-color: #7c3aed; color: #ffffff; padding: 10px; text-align: left; font-size: 11px; }
+        td { padding: 10px; border-bottom: 1px solid #e2e8f0; font-size: 12px; }
+        .amount-pos { color: #16a34a; font-weight: bold; }
+        .amount-neg { color: #dc2626; font-weight: bold; }
+        .footer { margin-top: 30px; text-align: center; font-size: 10px; color: #94a3b8; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo">FINORA</div>
+        <div class="title">RAPPORT GLOBAL ADMINISTRATEUR</div>
+        <div style="font-size: 10px; color: #64748b;">Généré le {{ "now"|date("d/m/Y H:i") }}</div>
+    </div>
+    <table>
+        <thead>
+            <tr>
+                <th>Utilisateur</th>
+                <th>Solde</th>
+                <th>Revenus</th>
+                <th>Dépenses</th>
+                <th>Transactions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for u in users %}
+            <tr>
+                <td style="font-weight: bold;">{{ u.name }}</td>
+                <td><strong>{{ u.balance|number_format(2, '.', ',') }} DT</strong></td>
+                <td class="amount-pos">+{{ u.income|number_format(2, '.', ',') }}</td>
+                <td class="amount-neg">-{{ u.outcome|number_format(2, '.', ',') }}</td>
+                <td style="text-align: center;">{{ u.count }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    <div class="footer">
+        © {{ "now"|date("Y") }} Finora Smart Finance.
+    </div>
+</body>
+</html>

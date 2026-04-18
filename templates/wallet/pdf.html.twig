@@ -1,114 +1,87 @@
-<h2 style="
-    text-align:center;
-    margin-bottom:8px;
-    color:#1e3a8a;
-    font-size:24px;
-">
-     Transactions Report
-</h2>
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <style>
+        body { font-family: 'Helvetica', 'Arial', sans-serif; color: #1e1b4b; margin: 0; padding: 20px; }
+        .header { text-align: center; margin-bottom: 20px; border-bottom: 2px solid #7c3aed; padding-bottom: 15px; }
+        .logo { font-size: 26px; font-weight: bold; color: #7c3aed; }
+        .title { font-size: 16px; font-weight: bold; color: #1e1b4b; margin-top: 5px; }
+        
+        .summary-table { width: 100%; margin-bottom: 20px; }
+        .summary-cell { background-color: #f8fafc; padding: 15px; text-align: center; border: 5px solid #fff; }
+        .summary-label { font-size: 9px; color: #64748b; font-weight: bold; text-transform: uppercase; }
+        .summary-value { display: block; font-size: 16px; font-weight: bold; color: #7c3aed; }
 
-<p style="
-    text-align:center;
-    font-size:12px;
-    color:#64748b;
-    margin-bottom:20px;
-">
-    Generated on {{ "now"|date("Y-m-d H:i") }}
-</p>
+        table.data-table { width: 100%; border-collapse: collapse; }
+        th { background-color: #7c3aed; color: #ffffff; padding: 10px; text-align: left; font-size: 10px; }
+        td { padding: 10px; border-bottom: 1px solid #e2e8f0; font-size: 11px; }
+        .footer { margin-top: 30px; text-align: center; font-size: 9px; color: #94a3b8; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo">FINORA</div>
+        <div class="title">RAPPORT D'ACTIVITÉ PERSONNEL</div>
+        <div style="font-size: 10px; color: #64748b;">Généré le {{ "now"|date("d/m/Y H:i") }}</div>
+    </div>
 
-<table style="
-    width:100%;
-    border-collapse:separate;
-    border-spacing:0;
-    font-family:Arial;
-    border-radius:10px;
-    overflow:hidden;
-">
-
-    <thead>
-        <tr style="
-            background:linear-gradient(135deg,#4f46e5,#7c3aed);
-            color:white;
-        ">
-            <th style="padding:12px;">Nom</th>
-            <th style="padding:12px;">Type</th>
-            <th style="padding:12px;">Montant</th>
-            <th style="padding:12px;">Category</th>
-            <th style="padding:12px;">Date</th>
-        </tr>
-    </thead>
-
-    <tbody>
-    {% set total = 0 %}
-
+    {% set total_inc = 0 %}
+    {% set total_out = 0 %}
     {% for t in transactions %}
-        {% set total = total + (t.type == 'INCOME' ? t.montant : -t.montant) %}
-
-        <tr style="
-            background:{{ loop.index is even ? '#f8faff' : '#ffffff' }};
-        ">
-            
-            <td style="padding:10px;">
-                {{ t.nomTransaction }}
-            </td>
-
-            <td style="padding:10px; text-align:center;">
-                {% if t.type == 'INCOME' %}
-                    <span style="
-                        color:#4f46e5;
-                        font-weight:600;
-                    ">
-                        INCOME
-                    </span>
-                {% else %}
-                    <span style="
-                        color:#ef4444;
-                        font-weight:600;
-                    ">
-                        OUTCOME
-                    </span>
-                {% endif %}
-            </td>
-
-            <td style="
-                padding:10px;
-                text-align:center;
-                font-weight:600;
-                color:#111827;
-            ">
-                {{ t.type == 'INCOME' ? '+' : '-' }}{{ t.montant }} DT
-            </td>
-
-            <td style="padding:10px; color:#475569;">
-                {{ t.category ? t.category.nom : '-' }}
-            </td>
-
-            <td style="padding:10px; color:#64748b;">
-                {{ t.dateTransaction|date('Y-m-d') }}
-            </td>
-
-        </tr>
+        {% if t.type == 'INCOME' %}
+            {% set total_inc = total_inc + t.montant %}
+        {% else %}
+            {% set total_out = total_out + (t.montant|abs) %}
+        {% endif %}
     {% endfor %}
 
-    <!-- TOTAL ROW -->
-    <tr style="
-        background:#eef2ff;
-        font-weight:bold;
-    ">
-        <td colspan="2">Total</td>
-        <td>{{ total }} DT</td>
-        <td colspan="2"></td>
-    </tr>
+    <table class="summary-table">
+        <tr>
+            <td class="summary-cell">
+                <span class="summary-label">Total Revenus</span>
+                <span class="summary-value">+{{ total_inc|number_format(2, '.', ',') }} DT</span>
+            </td>
+            <td class="summary-cell">
+                <span class="summary-label">Total Dépenses</span>
+                <span class="summary-value">-{{ total_out|number_format(2, '.', ',') }} DT</span>
+            </td>
+        </tr>
+    </table>
 
-    </tbody>
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Libellé</th>
+                <th>Type</th>
+                <th>Catégorie</th>
+                <th>Montant</th>
+                <th>Date</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for t in transactions %}
+            <tr>
+                <td style="font-weight: bold;">{{ t.nomTransaction }}</td>
+                <td>{{ t.type }}</td>
+                <td>{{ t.category ? t.category.nom : 'Divers' }}</td>
+                <td style="font-weight: bold; color: {{ t.type == 'INCOME' ? '#16a34a' : '#dc2626' }};">
+                    {{ t.type == 'INCOME' ? '+' : '-' }}{{ t.montant|abs|number_format(2, '.', ',') }} DT
+                </td>
+                <td style="color: #64748b;">{{ t.dateTransaction|date('d/m/Y') }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+        <tfoot>
+            <tr style="background-color: #f1f5f9;">
+                <td colspan="3" style="text-align: right; padding: 10px; font-weight: bold;">Solde Net:</td>
+                <td colspan="2" style="padding: 10px; font-weight: bold; color: {{ (total_inc - total_out) >= 0 ? '#16a34a' : '#dc2626' }};">
+                    {{ (total_inc - total_out)|number_format(2, '.', ',') }} DT
+                </td>
+            </tr>
+        </tfoot>
+    </table>
 
-</table>
-
-<p style="
-    margin-top:20px;
-    text-align:right;
-    font-size:11px;
-    color:#94a3b8;
-">
-    Finora • Smart Finance System
-</p>
+    <div class="footer">Finora Smart Finance Analytics</div>
+</body>
+</html>

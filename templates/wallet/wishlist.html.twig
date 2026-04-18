@@ -4,549 +4,345 @@
 
 {% block stylesheets %}
 <style>
-/* ===== VARIABLES ===== */
-{% set pct = (goal > 0 and balance > 0) ? min((balance / goal) * 100, 100) : 0 %}
-{% set remain = (goal > 0) ? max(goal - balance, 0) : null %}
-{% set sorted = wishlist %}
-{% set maxPrice = sorted is not empty ? sorted[0].getPrice() : 1 %}
-{% set need = max(total - balance, 0) %}
-
-/* ===== LAYOUT ===== */
-.wl-page {
-    display: grid;
-    grid-template-columns: 380px 1fr;
-    gap: 24px;
-    align-items: start;
+/* ===== DESIGN TOKENS ===== */
+:root {
+    --p: #7c3aed;
+    --p-light: #f5f3ff;
+    --text-dark: #1e1b4b;
+    --text-muted: #64748b;
+    --card-shadow: 0 10px 30px -5px rgba(124, 58, 237, 0.12);
 }
 
-@media (max-width: 992px) { .wl-page { grid-template-columns: 1fr; } }
+.wishlist-page {
+    padding: 30px;
+    background: #f8f5ff;
+    min-height: 100vh;
+    font-family: 'Inter', sans-serif;
+}
 
-/* ===== EDU CARD ===== */
-.edu-card {
+/* ===== HERO BANNER ===== */
+.wl-hero {
+    background: linear-gradient(135deg, #7c3aed 0%, #4338ca 100%);
+    border-radius: 24px;
+    padding: 32px 36px;
+    margin-bottom: 32px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 20px;
+    box-shadow: 0 20px 50px rgba(124, 58, 237, 0.3);
+    position: relative;
+    overflow: hidden;
+    animation: dashIn 0.45s ease both;
+}
+@keyframes dashIn { from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);} }
+
+.wl-hero-content h1 { color:#fff!important; font-size:26px!important; font-weight:900!important; margin:0!important; }
+.wl-hero-content p { color:rgba(255,255,255,0.7); margin:5px 0 0; font-size:14px; }
+
+.btn-back {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 10px 20px; border-radius: 12px;
+    background: rgba(255,255,255,0.15); backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.2);
+    color: #fff; font-weight: 700; font-size: 13px; text-decoration: none;
+    transition: all 0.2s;
+}
+.btn-back:hover { background: rgba(255,255,255,0.25); color: #fff; transform: translateX(-3px); }
+
+/* ===== LAYOUT ===== */
+.wl-grid {
+    display: grid;
+    grid-template-columns: 400px 1fr;
+    gap: 28px;
+    align-items: start;
+}
+@media (max-width: 992px) { .wl-grid { grid-template-columns: 1fr; } }
+
+/* ===== CARDS ===== */
+.wl-card {
     background: #fff;
     border-radius: 24px;
     padding: 28px;
-    box-shadow: 0 10px 40px -10px rgba(124, 58, 237, 0.12);
-    border: 1px solid rgba(124, 58, 237, 0.05);
+    box-shadow: var(--card-shadow);
+    border: 1px solid rgba(124, 58, 237, 0.08);
     margin-bottom: 24px;
 }
-
-.edu-card:last-child { margin-bottom: 0; }
-
-.edu-card-title {
-    font-family: 'Heebo', sans-serif;
-    font-size: 1.1rem;
-    font-weight: 700;
-    color: #1e1b4b;
-    margin-bottom: 20px;
+.wl-card-title {
+    font-size: 17px;
+    font-weight: 800;
+    color: var(--text-dark);
+    margin-bottom: 24px;
     display: flex;
     align-items: center;
     gap: 12px;
 }
-
-.edu-card-title .title-icon {
-    width: 38px;
-    height: 38px;
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #fff;
-    font-size: .95rem;
-    box-shadow: 0 4px 10px rgba(124, 58, 237, 0.2);
+.wl-icon {
+    width: 44px; height: 44px; border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; color: #fff;
 }
+.bg-purple { background: linear-gradient(135deg, #7c3aed, #8b5cf6); }
+.bg-indigo { background: linear-gradient(135deg, #4338ca, #6366f1); }
+.bg-teal   { background: linear-gradient(135deg, #10b981, #34d399); }
 
-.icon-blue   { background: linear-gradient(135deg, #7c3aed, #8b5cf6); }
-.icon-orange { background: linear-gradient(135deg, #8b5cf6, #a78bfa); }
-.icon-green  { background: linear-gradient(135deg, #6d28d9, #7c3aed); }
-.icon-purple { background: linear-gradient(135deg, #5b21b6, #6d28d9); }
-.icon-teal   { background: linear-gradient(135deg, #c4b5fd, #ddd6fe); color: #5b21b6 !important; }
-
-/* ===== BACK BUTTON ===== */
-.btn-back {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    background: #f5f3ff;
-    color: #6d28d9;
-    padding: 8px 16px;
-    border-radius: 50px;
-    font-size: .85rem;
-    font-weight: 600;
-    text-decoration: none;
-    margin-bottom: 20px;
-    transition: background .2s, color .2s;
-}
-.btn-back:hover { background: #ede9fe; color: #5b21b6; }
-
-/* ===== ADD FORM ===== */
-.wl-add-form {
+/* ===== FORMS ===== */
+.input-group-custom {
     display: flex;
     flex-direction: column;
     gap: 12px;
     margin-bottom: 22px;
 }
-
-.wl-add-form input {
-    padding: 12px 16px;
+.input-custom {
+    padding: 12px 18px;
     border: 1.5px solid #ede9fe;
     border-radius: 14px;
-    font-size: .9rem;
-    background: #fcfaff;
-    color: #1e1b4b;
     outline: none;
-    transition: border-color .2s, box-shadow .2s;
-    width: 100%;
+    transition: all 0.2s;
+    background: #fafafa;
 }
-
-.wl-add-form input:focus {
-    border-color: #8b5cf6;
-    box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.15);
+.input-custom:focus {
+    border-color: var(--p);
     background: #fff;
+    box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.1);
 }
-
-.btn-add {
+.btn-primary-custom {
     background: linear-gradient(135deg, #7c3aed, #8b5cf6);
-    box-shadow: 0 4px 12px rgba(124, 58, 237, 0.25);
-    color: #fff;
-    border: none;
-    padding: 12px;
-    border-radius: 14px;
-    font-size: .95rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: opacity .2s, transform .15s, box-shadow .2s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
+    color: #fff; border: none; padding: 14px;
+    border-radius: 14px; font-weight: 700; font-size: 15px;
+    cursor: pointer; transition: all 0.2s;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
 }
+.btn-primary-custom:hover { opacity: 0.9; transform: translateY(-1px); box-shadow: 0 8px 20px rgba(124, 58, 237, 0.25); }
 
-.btn-add:hover { opacity: .9; transform: translateY(-1px); box-shadow: 0 6px 16px rgba(124, 58, 237, 0.35); }
-
-/* ===== WISHLIST ITEMS ===== */
-.wl-items {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    max-height: 280px;
-    overflow-y: auto;
-    scrollbar-width: thin;
-    scrollbar-color: #ede9fe transparent;
+/* ===== LIST ITEMS ===== */
+.wl-item {
+    display: flex; align-items: center; gap: 15px;
+    padding: 16px 20px; background: #fafbff;
+    border: 1px solid #f1f0ff; border-radius: 18px;
+    margin-bottom: 12px; transition: all 0.2s;
 }
+.wl-item:hover { transform: translateX(4px); background: #f5f3ff; border-color: #ede9fe; }
 
-.wl-row {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    background: #fcfaff;
-    padding: 14px 16px;
-    border-radius: 16px;
-    border: 1px solid #f3efff;
-    transition: background .2s, border-color .2s, transform .2s;
+.wl-item-info { flex: 1; }
+.wl-item-name { display: block; font-weight: 700; color: var(--text-dark); margin-bottom: 2px; }
+.wl-item-price { font-weight: 800; color: var(--p); font-size: 14px; }
+
+.wl-del-btn {
+    width: 34px; height: 34px; border-radius: 10px;
+    background: #fee2e2; color: #ef4444; border: none;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s; cursor: pointer; text-decoration: none;
 }
+.wl-del-btn:hover { background: #ef4444; color: #fff; }
 
-.wl-row:hover { background: #f5f3ff; border-color: #ede9fe; transform: translateX(2px); }
-
-.wl-row .wl-name {
-    flex: 1;
-    font-weight: 600;
-    color: #1e1b4b;
-    font-size: .9rem;
+/* ===== PROGRESS ===== */
+.progress-box {
+    padding: 20px; background: #fcfaff; border-radius: 18px;
+    border: 1px solid #f3f0ff; margin-bottom: 20px;
 }
+.progress-header { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 13px; font-weight: 700; color: var(--text-muted); }
+.progress-bar-wrap { height: 10px; background: #f1eeff; border-radius: 40px; overflow: hidden; }
+.progress-bar-fill { height: 100%; background: linear-gradient(90deg, #7c3aed, #8b5cf6); border-radius: 40px; transition: width 0.8s ease; }
 
-.wl-row .wl-price {
-    font-weight: 700;
-    color: #7c3aed;
-    font-size: .9rem;
-    white-space: nowrap;
-}
+/* ===== STATS ROW ===== */
+.stat-mini-row { display: flex; justify-content: space-between; padding: 14px 0; border-bottom: 1px solid #f3f4f6; }
+.stat-mini-row:last-child { border-bottom: none; }
+.stat-mini-label { font-size: 13px; font-weight: 600; color: var(--text-muted); }
+.stat-mini-val { font-size: 14px; font-weight: 800; color: var(--text-dark); }
 
-.wl-row .wl-delete {
-    width: 32px;
-    height: 32px;
-    border-radius: 10px;
-    background: #fee2e2;
-    color: #ef4444;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-decoration: none;
-    font-size: .85rem;
-    transition: background .2s, color .2s;
-    flex-shrink: 0;
-}
-
-.wl-row .wl-delete:hover { background: #fca5a5; color: #b91c1c; }
-
-/* Total bar */
-.wl-total-bar {
-    margin-top: 18px;
-    padding: 16px 20px;
-    background: linear-gradient(135deg, #1e1b4b, #312e81);
-    border-radius: 16px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    box-shadow: 0 4px 15px rgba(30, 27, 75, 0.15);
-}
-
-.wl-total-bar span { color: rgba(255,255,255,.8); font-size: .9rem; font-weight: 500; }
-.wl-total-bar strong { color: #fff; font-size: 1.25rem; font-family: 'Heebo', sans-serif; }
-
-/* ===== RIGHT GRID ===== */
-.wl-right {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 24px;
-}
-
-@media (max-width: 768px) { .wl-right { grid-template-columns: 1fr; } }
-
-/* ===== GOAL CARD ===== */
-.goal-stats {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    margin-bottom: 20px;
-}
-
-.goal-stat-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 12px 16px;
-    background: #fcfaff;
-    border: 1px solid #f3efff;
-    border-radius: 14px;
-    font-size: .9rem;
-}
-
-.goal-stat-row span { color: #6b7280; font-weight: 500; }
-.goal-stat-row strong { color: #1e1b4b; font-weight: 700; }
-
-.goal-form {
-    display: flex;
-    gap: 10px;
-    margin-top: 16px;
-}
-
-.goal-form input {
-    flex: 1;
-    padding: 10px 14px;
-    border: 1.5px solid #ede9fe;
-    border-radius: 12px;
-    font-size: .9rem;
-    background: #fcfaff;
-    outline: none;
-    transition: border-color .2s;
-}
-
-.goal-form input:focus { border-color: #8b5cf6; background: #fff; }
-
-.goal-form button {
-    background: linear-gradient(135deg, #8b5cf6, #a78bfa);
-    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.25);
-    color: #fff;
-    border: none;
-    padding: 10px 18px;
-    border-radius: 12px;
-    font-size: .9rem;
-    font-weight: 600;
-    cursor: pointer;
-    white-space: nowrap;
-    transition: opacity .2s, transform .15s;
-}
-.goal-form button:hover { opacity: .9; transform: translateY(-1px); }
-
-/* Progress bar */
-.wl-progress-wrap {
-    margin-top: 18px;
-}
-
-.wl-progress-wrap label {
-    font-size: .8rem;
-    color: #6b7280;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: .05em;
-    margin-bottom: 8px;
-    display: block;
-}
-
-.wl-progress {
-    height: 10px;
-    background: #f3efff;
-    border-radius: 10px;
-    overflow: hidden;
-}
-
-.wl-progress-fill {
-    height: 100%;
-    background: linear-gradient(90deg, #7c3aed, #8b5cf6);
-    border-radius: 10px;
-    transition: width .6s ease;
-}
-
-/* ===== MONTHS PLAN ===== */
-.months-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 10px;
-    margin-bottom: 18px;
-}
-
-.btn-month {
-    padding: 10px 4px;
-    border: 1.5px solid #ede9fe;
-    background: #fcfaff;
-    border-radius: 12px;
-    font-size: .85rem;
-    font-weight: 600;
-    color: #4b5563;
-    cursor: pointer;
-    transition: all .2s;
-}
-
-.btn-month:hover {
-    border-color: #8b5cf6;
-    background: #f5f3ff;
-    color: #7c3aed;
-    box-shadow: 0 2px 8px rgba(124, 58, 237, 0.1);
-}
-
-.monthly-result {
-    text-align: center;
-    font-size: 1.3rem;
-    font-weight: 700;
-    color: #7c3aed;
-    font-family: 'Heebo', sans-serif;
-    padding: 12px;
-    background: #f5f3ff;
-    border-radius: 14px;
-    border: 1px solid #ede9fe;
-}
-
-/* ===== CHART ===== */
-.chart-wrap {
-    position: relative;
-    height: 180px;
-}
-
-/* ===== PRIORITY ===== */
-.priority-list {
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-}
-
-.p-item .p-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 6px;
-    font-size: .9rem;
-}
-
-.p-item .p-name {
-    font-weight: 600;
-    color: #1e1b4b;
-}
-
-.p-item .p-price {
-    font-weight: 700;
-    color: #7c3aed;
-}
-
-.p-bar {
-    height: 8px;
-    background: #f3efff;
-    border-radius: 10px;
-    overflow: hidden;
-}
-
-.p-fill {
-    height: 100%;
-    background: linear-gradient(90deg, #7c3aed, #8b5cf6);
-    border-radius: 10px;
-    transition: width .6s ease;
-}
 </style>
 {% endblock %}
 
 {% block content %}
 
-{# Variables Twig — logique inchangée #}
-{# Variables Twig — logique inchangée #}
+{# Twig logic #}
 {% set pct     = (goal > 0 and balance > 0) ? min((balance / goal) * 100, 100) : 0 %}
 {% set remain  = (goal > 0) ? max(goal - balance, 0) : null %}
 {% set sorted  = wishlist %}
 {% set maxPrice = sorted is not empty ? sorted[0].getPrice() : 1 %}
 {% set need    = max(total - balance, 0) %}
 
-<div class="wl-page">
+<div class="wishlist-page">
 
-    <!-- ===== LEFT ===== -->
-    <div class="wl-left">
-        <div class="edu-card">
-
-            <a href="{{ path('dashboard') }}" class="btn-back">
-                <i class="bi bi-arrow-left"></i> Tableau de Bord
-            </a>
-
-            <div class="edu-card-title">
-                <div class="title-icon icon-blue"><i class="bi bi-cart3"></i></div>
-                Ma Wishlist
-            </div>
-
-            <!-- ADD FORM -->
-            <form method="post" action="{{ path('wishlist') }}" class="wl-add-form">
-                <input type="text" name="name" placeholder="Nom du produit..." required>
-                <input type="number" name="price" placeholder="Montant (DT)" required>
-                <button type="submit" class="btn-add">
-                    <i class="bi bi-plus-lg"></i> Ajouter
-                </button>
-            </form>
-
-            <!-- ITEMS LIST -->
-            <div class="wl-items">
-                {% for item in wishlist %}
-                    {% set pred = predictions[item.getId()] %}
-                    <div class="wl-row">
-                        <div class="wl-name">
-                            {{ item.getName() }}
-                            {% if pred.can_afford %}
-                                <span class="badge bg-success ms-2 rounded-pill"><i class="bi bi-check-circle me-1"></i>Affordable</span>
-                            {% else %}
-                                <span class="badge bg-warning text-dark ms-2 rounded-pill"><i class="bi bi-exclamation-circle me-1"></i>Need {{ pred.remaining_needed|number_format(0) }} DT</span>
-                            {% endif %}
-                        </div>
-                        <span class="wl-price">{{ item.getPrice() }} DT</span>
-                        <a href="{{ path('wishlist_delete', {id: item.getId()}) }}" class="wl-delete" title="Supprimer">
-                            <i class="bi bi-x-lg"></i>
-                        </a>
-                    </div>
-                {% else %}
-                    <div style="text-align:center; padding:30px; color:#aaa;">
-                        <i class="bi bi-bag" style="font-size:2rem; display:block; margin-bottom:8px;"></i>
-                        Aucun article pour le moment
-                    </div>
-                {% endfor %}
-            </div>
-
-            <!-- TOTAL -->
-            <div class="wl-total-bar">
-                <span>Total wishlist</span>
-                <strong>{{ total }} DT</strong>
-            </div>
-
-            <div class="wl-total-bar" style="background: linear-gradient(135deg, #6d28d9, #7c3aed); margin-top: 10px; box-shadow: 0 4px 15px rgba(109, 40, 217, 0.2);">
-                <span>Mon Solde Actuel</span>
-                <strong>{{ balance|number_format(2) }} DT</strong>
-            </div>
-
+    <!-- Hero -->
+    <div class="wl-hero">
+        <div class="wl-hero-content">
+            <h1><i class="bi bi-magic me-2"></i>Ma Wishlist</h1>
+            <p>Planifiez vos achats et gérez vos objectifs d'épargne avec précision.</p>
         </div>
+        <a href="{{ path('dashboard') }}" class="btn-back">
+            <i class="bi bi-arrow-left"></i> Retour au Dashboard
+        </a>
     </div>
 
-    <!-- ===== RIGHT ===== -->
-    <div class="wl-right">
-
-        <!-- OBJECTIF -->
-        <div class="edu-card">
-            <div class="edu-card-title">
-                <div class="title-icon icon-orange"><i class="bi bi-bullseye"></i></div>
-                Objectif d'épargne
-            </div>
-
-            <div class="goal-stats">
-                <div class="goal-stat-row">
-                    <span>Mon Solde</span>
-                    <strong>{{ balance|number_format(0) }} DT</strong>
+    <div class="wl-grid">
+        
+        <!-- LEFT COL: ADD & LIST -->
+        <div class="wl-left">
+            
+            <div class="wl-card">
+                <div class="wl-card-title">
+                    <div class="wl-icon bg-purple"><i class="bi bi-cart-plus"></i></div>
+                    Ajouter un Article
                 </div>
-                <div class="goal-stat-row">
-                    <span>Objectif</span>
-                    <strong>{{ goal > 0 ? goal ~ ' DT' : '—' }}</strong>
-                </div>
-                <div class="goal-stat-row">
-                    <span>Reste</span>
-                    <strong>{{ remain is not null ? remain ~ ' DT' : '—' }}</strong>
-                </div>
-            </div>
-
-            {% if goal > 0 %}
-                <div class="wl-progress-wrap">
-                    <label>Progression — {{ pct|round }}%</label>
-                    <div class="wl-progress">
-                        <div class="wl-progress-fill" style="width: {{ pct }}%;"></div>
+                <form method="post" action="{{ path('wishlist') }}">
+                    <div class="input-group-custom">
+                        <input type="text" name="name" class="input-custom" placeholder="Qu'est-ce qui vous fait envie ?" required>
+                        <input type="number" name="price" class="input-custom" placeholder="Prix estimé (DT)" required>
+                        <button type="submit" class="btn-primary-custom">
+                            <i class="bi bi-plus-lg"></i> Ajouter à la liste
+                        </button>
                     </div>
+                </form>
+            </div>
+
+            <div class="wl-card">
+                <div class="wl-card-title">
+                    <div class="wl-icon bg-indigo"><i class="bi bi-stars"></i></div>
+                    Mes Envies ({{ wishlist|length }})
                 </div>
-            {% endif %}
-
-            <form method="post" action="{{ path('wishlist') }}" class="goal-form">
-                <input type="hidden" name="_action" value="set_goal">
-                <input type="number" name="goal" placeholder="Objectif (ex: 1000)">
-                <button type="submit">Définir</button>
-            </form>
-        </div>
-
-        <!-- PLAN MENSUEL -->
-        <div class="edu-card">
-            <div class="edu-card-title">
-                <div class="title-icon icon-green"><i class="bi bi-calendar3"></i></div>
-                Plan mensuel
-            </div>
-
-            <div class="months-grid">
-                {% for m in [3, 6, 12, 18, 24, 36] %}
-                    <button type="button" class="btn-month" onclick="calc({{ m }}, {{ need }})">{{ m }} mois</button>
-                {% endfor %}
-            </div>
-
-            <div class="monthly-result" id="monthly">
-    {% if need > 0 %}
-        {{ (need / 3)|round }} DT / mois
-    {% else %}
-        Objectif atteint ✅
-    {% endif %}
-</div>
-        </div>
-
-        <!-- CHART -->
-        <div class="edu-card">
-            <div class="edu-card-title">
-                <div class="title-icon icon-purple"><i class="bi bi-pie-chart"></i></div>
-                Statistiques
-            </div>
-            <div class="chart-wrap">
-                <canvas id="chart"></canvas>
-            </div>
-        </div>
-
-        <!-- PRIORITY -->
-        <div class="edu-card">
-            <div class="edu-card-title">
-                <div class="title-icon icon-teal"><i class="bi bi-star"></i></div>
-                Priorité des articles
-            </div>
-
-            <div class="priority-list">
-                {% for item in sorted %}
-                    {% set w = (item.getPrice() / maxPrice) * 100 %}
-                    <div class="p-item">
-                        <div class="p-header">
-                            <span class="p-name">#{{ loop.index }} {{ item.getName() }}</span>
-                            <span class="p-price">{{ item.getPrice() }} DT</span>
+                
+                <div style="max-height: 400px; overflow-y: auto; padding-right: 5px;">
+                    {% for item in wishlist %}
+                        {% set pred = predictions[item.getId()] %}
+                        <div class="wl-item">
+                            <div class="wl-item-info">
+                                <span class="wl-item-name">{{ item.getName() }}</span>
+                                <span class="wl-item-price">{{ item.getPrice()|number_format(2) }} DT</span>
+                                
+                                <div style="margin-top: 5px;">
+                                    {% if pred.can_afford %}
+                                        <span style="font-size: 10px; font-weight: 800; color: #10b981; text-transform: uppercase;">
+                                            <i class="bi bi-check-circle-fill me-1"></i>Achetable
+                                        </span>
+                                    {% else %}
+                                        <span style="font-size: 10px; font-weight: 800; color: #d97706; text-transform: uppercase;">
+                                            <i class="bi bi-hourglass-split me-1"></i>Manque {{ pred.remaining_needed|number_format(0) }} DT
+                                        </span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <a href="{{ path('wishlist_delete', {id: item.getId()}) }}" class="wl-del-btn">
+                                <i class="bi bi-trash"></i>
+                            </a>
                         </div>
-                        <div class="p-bar">
-                            <div class="p-fill" style="width: {{ w }}%;"></div>
+                    {% else %}
+                        <div style="text-align: center; padding: 40px; opacity: 0.5;">
+                            <i class="bi bi-bag-x" style="font-size: 3rem; display: block; margin-bottom: 10px;"></i>
+                            <p>Votre wishlist est vide.</p>
+                        </div>
+                    {% endfor %}
+                </div>
+
+                <div style="margin-top: 25px; padding: 20px; background: #1e1b4b; border-radius: 18px; color: #fff; display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-size: 13px; font-weight: 600; opacity: 0.8;">Total Wishlist</span>
+                    <strong style="font-size: 20px; font-weight: 900;">{{ total|number_format(2) }} DT</strong>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- RIGHT COL: GOALS & ANALYTICS -->
+        <div class="wl-right">
+
+            <div class="wl-card">
+                <div class="wl-card-title">
+                    <div class="wl-icon bg-teal"><i class="bi bi-bullseye"></i></div>
+                    Objectif d'Épargne
+                </div>
+
+                <div class="progress-box">
+                    <div class="progress-header">
+                        <span>Progression</span>
+                        <span>{{ pct|round }}%</span>
+                    </div>
+                    <div class="progress-bar-wrap">
+                        <div class="progress-bar-fill" style="width: {{ pct }}%;"></div>
+                    </div>
+                </div>
+
+                <div class="stat-mini-row">
+                    <span class="stat-mini-label">Solde Actuel</span>
+                    <span class="stat-mini-val">{{ balance|number_format(2) }} DT</span>
+                </div>
+                <div class="stat-mini-row">
+                    <span class="stat-mini-label">Objectif Ciblé</span>
+                    <span class="stat-mini-val" style="color: var(--p);">{{ goal > 0 ? (goal|number_format(2) ~ ' DT') : '—' }}</span>
+                </div>
+                <div class="stat-mini-row">
+                    <span class="stat-mini-label">Reste à Épargner</span>
+                    <span class="stat-mini-val" style="color: #ef4444;">{{ remain is not null ? (remain|number_format(2) ~ ' DT') : '—' }}</span>
+                </div>
+
+                <form method="post" action="{{ path('wishlist') }}" style="margin-top: 24px;">
+                    <input type="hidden" name="_action" value="set_goal">
+                    <div style="display: flex; gap: 10px;">
+                        <input type="number" name="goal" class="input-custom" style="flex: 1;" placeholder="Nouvel objectif (DT)">
+                        <button type="submit" class="btn-primary-custom" style="padding: 0 20px;">Définir</button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="wl-card">
+                        <div class="wl-card-title" style="font-size: 15px;">
+                            <i class="bi bi-calendar3 text-primary"></i> Plan Mensuel
+                        </div>
+                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 20px;">
+                            {% for m in [3, 6, 12, 18, 24, 36] %}
+                                <button type="button" 
+                                        style="padding: 8px 4px; border: 1.5px solid #ede9fe; background: #fff; border-radius: 10px; font-size: 11px; font-weight: 700; cursor: pointer; transition: all 0.2s;"
+                                        onmouseover="this.style.borderColor='#7c3aed'; this.style.color='#7c3aed'"
+                                        onmouseout="this.style.borderColor='#ede9fe'; this.style.color='inherit'"
+                                        onclick="calc({{ m }}, {{ need }})">
+                                    {{ m }}m
+                                </button>
+                            {% endfor %}
+                        </div>
+                        <div id="monthly" style="text-align: center; padding: 15px; background: #f5f3ff; border-radius: 14px; font-weight: 800; color: var(--p); font-size: 18px;">
+                            {% if need > 0 %}
+                                {{ (need / 3)|round }} DT/m
+                            {% else %}
+                                Prêt ! ✅
+                            {% endif %}
                         </div>
                     </div>
-                {% else %}
-                    <div style="color:#aaa; font-size:.85rem; text-align:center; padding:20px 0;">
-                        Aucun article dans la wishlist
+                </div>
+                <div class="col-md-6">
+                    <div class="wl-card">
+                        <div class="wl-card-title" style="font-size: 15px;">
+                            <i class="bi bi-pie-chart text-primary"></i> Répartition
+                        </div>
+                        <div style="height: 140px;">
+                            <canvas id="chart"></canvas>
+                        </div>
                     </div>
-                {% endfor %}
+                </div>
             </div>
+
+            <div class="wl-card">
+                <div class="wl-card-title" style="font-size: 15px;">
+                    <i class="bi bi-bar-chart-steps text-primary"></i> Analyse de Priorité
+                </div>
+                <div style="padding-top: 10px;">
+                    {% for item in sorted %}
+                        {% set w = (item.getPrice() / maxPrice) * 100 %}
+                        <div style="margin-bottom: 16px;">
+                            <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 5px;">
+                                <span style="font-weight: 700; color: var(--text-dark);">#{{ loop.index }} {{ item.getName() }}</span>
+                                <span style="font-weight: 800; color: var(--p);">{{ item.getPrice()|number_format(0) }} DT</span>
+                            </div>
+                            <div style="height: 6px; background: #f3f0ff; border-radius: 10px; overflow: hidden;">
+                                <div style="height: 100%; background: linear-gradient(90deg, #7c3aed, {{ loop.index == 1 ? '#4338ca' : '#a78bfa' }}); width: {{ w }}%; border-radius: 10px;"></div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+
         </div>
 
     </div>
@@ -559,28 +355,26 @@
 <script>
 function calc(months, need) {
     let val = Math.round(need / months);
-    document.getElementById('monthly').innerText = val + " DT / mois";
+    document.getElementById('monthly').innerText = val + " DT/m";
 }
 
 new Chart(document.getElementById('chart'), {
     type: 'doughnut',
     data: {
-        labels: ['Épargné', 'Restant'],
+        labels: ['Épargne', 'Besoin'],
         datasets: [{
             data: [{{ balance }}, {{ goal > balance ? goal - balance : 0 }}],
-            backgroundColor: ['#7c3aed', '#f3efff'],
-            borderWidth: 0
+            backgroundColor: ['#7c3aed', '#f1f0ff'],
+            borderWidth: 0,
+            hoverOffset: 10
         }]
     },
     options: {
-        cutout: '72%',
+        cutout: '75%',
         responsive: true,
         maintainAspectRatio: false,
         plugins: {
-            legend: {
-                position: 'bottom',
-                labels: { boxWidth: 12, padding: 10, font: { size: 11 }, color: '#6c757d' }
-            }
+            legend: { display: false }
         }
     }
 });

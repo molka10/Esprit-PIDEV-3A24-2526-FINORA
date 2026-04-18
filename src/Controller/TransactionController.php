@@ -17,9 +17,10 @@ use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
-use Knp\Component\Pager\PaginatorInterface;
+use App\Service\RecommendationService;
 use App\Service\WalletBalanceService;
 use App\Service\CurrencyConverterService;
+use Knp\Component\Pager\PaginatorInterface;
 
 class TransactionController extends AbstractController
 {
@@ -160,10 +161,13 @@ return $this->render('wallet/list.html.twig', [
 ]);
 }
 
-   #[Route('/walletuser', name: 'dashboard')]
-public function dashboard(Request $req, EntityManagerInterface $em, WalletBalanceService $balanceService, CurrencyConverterService $currencyConverter): Response
-{
-    $transactions = $em->getRepository(TransactionWallet::class)->findAll();
+    #[Route('/walletuser', name: 'dashboard')]
+    public function dashboard(Request $req, EntityManagerInterface $em, WalletBalanceService $balanceService, CurrencyConverterService $currencyConverter, RecommendationService $recService): Response
+    {
+        $transactions = $em->getRepository(TransactionWallet::class)->findAll();
+        
+        // Fetch recommendations for the user (simulating User ID 1 for now)
+        $recommendations = $recService->getRecommendations(1);
 
     $income  = 0;
     $outcome = 0;
@@ -290,6 +294,7 @@ public function dashboard(Request $req, EntityManagerInterface $em, WalletBalanc
         'bestSaving'     => number_format(max(0, $bestSaving), 2, '.', ''),
         'biggestTx'      => $biggestTransaction,
         'biggestAmt'     => number_format($biggestAmount, 2, '.', ''),
+        'recommendations' => $recommendations,
     ]);
 }
 

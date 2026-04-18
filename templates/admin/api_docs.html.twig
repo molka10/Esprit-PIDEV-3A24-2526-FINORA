@@ -1,258 +1,318 @@
 {% extends 'admin/baseA.html.twig' %}
 
-{% block title %}Tableau de Bord & Documentation API Admin{% endblock %}
+{% block title %}Grille API Admin — Finora{% endblock %}
+
+{% block stylesheets %}
+<style>
+/* ── Hero ── */
+.api-hero {
+    background: linear-gradient(135deg, #1e1b4b 0%, #4338ca 50%, #7c3aed 100%);
+    border-radius: 20px; padding: 24px 28px; margin-bottom: 26px;
+    display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px;
+    box-shadow: 0 16px 48px rgba(67,56,202,0.30);
+    position: relative; overflow: hidden;
+}
+.api-hero::before {
+    content:''; position:absolute; right:-50px; top:-50px;
+    width:200px; height:200px; border-radius:50%; background:rgba(255,255,255,0.05);
+}
+.api-hero h1 { color:#fff!important;font-size:22px!important;font-weight:800!important;margin:0!important;position:relative;z-index:1; }
+.api-hero p  { color:rgba(255,255,255,0.7)!important;font-size:13px!important;margin:4px 0 0;position:relative;z-index:1; }
+
+/* ── Stat card ── */
+.api-stat-card {
+    background:#fff;border-radius:18px;padding:20px 24px;
+    border:1px solid rgba(124,58,237,0.07);
+    box-shadow:0 8px 28px -8px rgba(124,58,237,0.10);
+    margin-bottom:24px;display:flex;align-items:center;gap:16px;
+}
+.api-stat-icon {
+    width:52px;height:52px;border-radius:14px;
+    background:linear-gradient(135deg,#7c3aed,#8b5cf6);color:#fff;
+    display:flex;align-items:center;justify-content:center;font-size:22px;
+    flex-shrink:0;box-shadow:0 6px 16px rgba(124,58,237,0.28);
+}
+.api-stat-label { font-size:12px;color:#6b7280;font-weight:600;text-transform:uppercase;letter-spacing:.04em;display:block; }
+.api-stat-value { font-size:32px;font-weight:900;color:#1e1b4b;line-height:1; }
+
+/* ── Filter card ── */
+.api-filter-card {
+    background:#fff;border-radius:18px;padding:22px 24px;margin-bottom:22px;
+    border:1px solid rgba(124,58,237,0.07);
+    box-shadow:0 6px 24px -8px rgba(124,58,237,0.09);
+}
+.api-filter-title {
+    font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;
+    color:#7c3aed;display:flex;align-items:center;gap:7px;margin-bottom:16px;
+}
+
+/* ── Table card ── */
+.api-table-card {
+    background:#fff;border-radius:18px;overflow:hidden;
+    border:1px solid rgba(124,58,237,0.07);
+    box-shadow:0 8px 32px -8px rgba(124,58,237,0.10);
+    margin-bottom:22px;
+}
+.api-table-header {
+    padding:16px 22px;border-bottom:1px solid rgba(124,58,237,0.07);
+    background:linear-gradient(135deg,#faf5ff,#fff);
+    display:flex;align-items:center;justify-content:space-between;
+}
+.api-table-header h6 { margin:0;font-weight:700;color:#1e1b4b;display:flex;align-items:center;gap:8px; }
+
+.api-table { width:100%;border-collapse:collapse;font-size:13.5px; }
+.api-table thead th {
+    padding:12px 16px;font-size:10.5px;font-weight:700;
+    text-transform:uppercase;letter-spacing:.5px;
+    color:#6b7280;border-bottom:2px solid #ede9fe;background:#faf5ff;
+}
+.api-table tbody tr { border-bottom:1px solid rgba(124,58,237,0.05);transition:background .15s; }
+.api-table tbody tr:hover { background:#faf5ff; }
+.api-table tbody td { padding:13px 16px;vertical-align:middle;color:#374151; }
+
+/* ── User avatar ── */
+.api-user-avatar {
+    width:32px;height:32px;border-radius:9px;
+    background:linear-gradient(135deg,#7c3aed,#8b5cf6);color:#fff;
+    font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center;
+    flex-shrink:0;
+}
+
+/* ── Bulk btn ── */
+.btn-bulk-del {
+    display:inline-flex;align-items:center;gap:6px;
+    padding:7px 16px;border-radius:10px;font-size:13px;font-weight:700;
+    background:#fee2e2;color:#dc2626;border:none;cursor:pointer;transition:all .15s;
+}
+.btn-bulk-del:hover { background:#dc2626;color:#fff; }
+
+/* ── Pagination btns ── */
+.api-pag-btn {
+    display:inline-flex;align-items:center;gap:6px;
+    padding:7px 16px;border-radius:10px;font-size:13px;font-weight:700;
+    background:#ede9fe;color:#7c3aed;border:none;cursor:pointer;transition:all .15s;
+}
+.api-pag-btn:hover:not(:disabled) { background:#7c3aed;color:#fff; }
+.api-pag-btn:disabled { opacity:.4;cursor:not-allowed; }
+</style>
+{% endblock %}
 
 {% block body %}
-<div class="container-fluid py-5 px-4 px-xl-5">
-    <div class="d-flex justify-content-between align-items-center mb-5">
-        <div>
-            <h1 class="display-5 fw-bold text-primary mb-2">Admin</h1>
-        </div>
-      
-    </div>
 
-    <!-- Statistics Section -->
-    <div class="card border-0 shadow-sm mb-5">
-        <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center">
-            <h5 class="mb-0 fw-bold">
-                <i class="bi bi-bar-chart-fill text-success me-2"></i> Quick Statistics API Data
-            </h5>
-            <button class="btn btn-sm btn-outline-success" onclick="fetchStatistics()">
-                <i class="bi bi-arrow-clockwise"></i> Actualiser le Statut
+{# ── Hero ── #}
+<div class="api-hero">
+    <div style="position:relative;z-index:1;">
+        <h1><i class="bi bi-grid-3x3-gap-fill me-2"></i>Grille Transactions API</h1>
+        <p>Filtrez, inspectez et gérez les transactions via l'API admin sécurisée</p>
+    </div>
+    <div style="position:relative;z-index:1;display:flex;gap:8px;align-items:center;">
+        <span style="background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.2);
+                     padding:6px 14px;border-radius:40px;font-size:12px;font-weight:600;color:rgba(255,255,255,0.85);">
+            <i class="bi bi-shield-lock-fill me-1"></i> API Sécurisée
+        </span>
+    </div>
+</div>
+
+{# ── Stat ── #}
+<div class="api-stat-card">
+    <div class="api-stat-icon"><i class="bi bi-lightning-fill"></i></div>
+    <div>
+        <span class="api-stat-label">Total Transactions</span>
+        <div class="api-stat-value" id="stat-total">—</div>
+    </div>
+    <div style="margin-left:auto;">
+        <button class="api-pag-btn" onclick="fetchStatistics()" style="gap:6px;">
+            <i class="bi bi-arrow-clockwise"></i> Actualiser
+        </button>
+    </div>
+</div>
+
+{# ── Filter form ── #}
+<div class="api-filter-card">
+    <div class="api-filter-title">
+        <i class="bi bi-funnel-fill"></i> Filtres de Recherche
+    </div>
+    <form id="searchForm">
+        <div class="row g-3">
+            <div class="col-md-3">
+                <label class="form-label">Recherche</label>
+                <input type="text" id="filter-search" class="form-control form-control-sm" placeholder="Nom de transaction...">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Type</label>
+                <select id="filter-type" class="form-select form-select-sm">
+                    <option value="">Tous</option>
+                    <option value="INCOME">Revenus</option>
+                    <option value="OUTCOME">Dépenses</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Montant Min</label>
+                <input type="number" id="filter-min" class="form-control form-control-sm" placeholder="ex. 100">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Montant Max</label>
+                <input type="number" id="filter-max" class="form-control form-control-sm" placeholder="ex. 5000">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Trier Par</label>
+                <select id="filter-sort" class="form-select form-select-sm">
+                    <option value="dateTransaction">Date</option>
+                    <option value="montant">Montant</option>
+                    <option value="nomTransaction">Nom</option>
+                </select>
+            </div>
+            <div class="col-md-1 d-flex align-items-end">
+                <button type="submit" class="btn btn-sm btn-primary w-100">
+                    <i class="bi bi-search"></i>
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+
+{# ── Table card ── #}
+<div class="api-table-card">
+    <div class="api-table-header">
+        <h6><i class="bi bi-table text-primary"></i> Transactions</h6>
+        <div style="display:flex;align-items:center;gap:10px;">
+            <span class="badge" style="background:#ede9fe;color:#7c3aed;" id="page-info">Page 1 / 1</span>
+            <button class="btn-bulk-del" onclick="executeBulk('delete')">
+                <i class="bi bi-trash-fill"></i> Supprimer sélection
             </button>
         </div>
-        <div class="card-body bg-light">
-            <div class="row text-center" id="statsContainer">
-                <div class="col-md-6 mx-auto">
-                    <div class="p-3 bg-white rounded shadow-sm text-center">
-                        <small class="text-muted text-uppercase fw-bold">Total Trans.</small>
-                        <h3 class="mb-0 mt-2" id="stat-total">-</h3>
-                    </div>
-                </div>
-            </div>
-        </div>
     </div>
 
-    <!-- Data Search & Bulk Operations -->
-    <div class="card border-0 shadow-sm mb-5">
-         <div class="card-header bg-white border-bottom py-3">
-            <h5 class="mb-0 fw-bold">
-                <i class="bi bi-table text-primary me-2"></i> Grille des Transactions (Avec Filtres)
-            </h5>
-        </div>
-        <div class="card-body">
-            <!-- Filters -->
-            <form id="searchForm" class="row g-3 mb-4 bg-light p-3 rounded">
-                <div class="col-md-3">
-                    <label class="form-label small fw-bold">Recherche</label>
-                    <input type="text" id="filter-search" class="form-control form-control-sm" placeholder="Nom...">
-                </div>
-                <div class="col-md-2">
-                    <label class="form-label small fw-bold">Type</label>
-                    <select id="filter-type" class="form-select form-select-sm">
-                        <option value="">All</option>
-                        <option value="INCOME">Revenus</option>
-                        <option value="OUTCOME">Dépenses</option>
-                    </select>
-                </div>
-                <div class="col-md-2">
-                    <label class="form-label small fw-bold">Montant Min</label>
-                    <input type="number" id="filter-min" class="form-control form-control-sm" placeholder="e.g. 100">
-                </div>
-                <div class="col-md-2">
-                    <label class="form-label small fw-bold">Montant Max</label>
-                    <input type="number" id="filter-max" class="form-control form-control-sm" placeholder="e.g. 5000">
-                </div>
-                <div class="col-md-2">
-                    <label class="form-label small fw-bold">Trier Par</label>
-                    <select id="filter-sort" class="form-select form-select-sm">
-                        <option value="dateTransaction">Date</option>
-                        <option value="montant">Montant</option>
-                        <option value="nomTransaction">Nom</option>
-                    </select>
-                </div>
-                <div class="col-md-1 d-flex align-items-end">
-                    <button type="submit" class="btn btn-sm btn-primary w-100">Search</button>
-                </div>
-            </form>
-
-            <div class="d-flex justify-content-between mb-3 align-items-center">
-                <div>
-                    <button class="btn btn-sm btn-danger" onclick="executeBulk('delete')">Bulk Supprimer</button>
-                </div>
-                <div>
-                    <span class="badge bg-secondary" id="page-info">Page 1 / 1</span>
-                </div>
-            </div>
-
-            <div class="table-responsive">
-                <table class="table table-hover align-middle border">
-                    <thead class="table-light">
-                        <tr>
-                            <th style="width: 40px;">
-                                <input class="form-check-input" type="checkbox" id="checkAll">
-                            </th>
-                            <th>Nom Utilisateur</th>
-                            <th>Transaction</th>
-                            <th>Type</th>
-                            <th>Montant</th>
-                        </tr>
-                    </thead>
-                    <tbody id="apiTableBody">
-                        <tr><td colspan="7" class="text-center py-4">Chargement depuis l'API...</td></tr>
-                    </tbody>
-                </table>
-            </div>
-
-            <div class="d-flex justify-content-between mt-3">
-                <button class="btn btn-sm btn-outline-primary" id="btn-prev" onclick="changePage(-1)" disabled>Previous</button>
-                <button class="btn btn-sm btn-outline-primary" id="btn-next" onclick="changePage(1)" disabled>Next</button>
-            </div>
-        </div>
+    <div style="overflow-x:auto;">
+        <table class="api-table">
+            <thead>
+                <tr>
+                    <th style="width:40px;">
+                        <input class="form-check-input" type="checkbox" id="checkAll"
+                               style="width:16px;height:16px;border-radius:5px;cursor:pointer;">
+                    </th>
+                    <th>Utilisateur</th>
+                    <th>Transaction</th>
+                    <th>Type</th>
+                    <th>Montant</th>
+                </tr>
+            </thead>
+            <tbody id="apiTableBody">
+                <tr><td colspan="5" style="text-align:center;padding:48px;color:#9ca3af;">
+                    <i class="bi bi-hourglass-split" style="font-size:2rem;display:block;margin-bottom:8px;opacity:.3;"></i>
+                    Chargement depuis l'API...
+                </td></tr>
+            </tbody>
+        </table>
     </div>
-    
-   
+
+    <div style="padding:14px 20px;border-top:1px solid rgba(124,58,237,0.07);display:flex;justify-content:space-between;align-items:center;">
+        <button class="api-pag-btn" id="btn-prev" onclick="changePage(-1)" disabled>
+            <i class="bi bi-chevron-left"></i> Précédent
+        </button>
+        <button class="api-pag-btn" id="btn-next" onclick="changePage(1)" disabled>
+            Suivant <i class="bi bi-chevron-right"></i>
+        </button>
+    </div>
 </div>
 
 <script>
-    const API_KEY = 'finora-admin-secret-777';
-    const API_URL = '/api/admin';
-    let currentPage = 1;
+const API_KEY = 'finora-admin-secret-777';
+const API_URL = '/api/admin';
+let currentPage = 1;
 
-    // Utility fetch wrapper with API key
-    async function apiFetch(endpoint, options = {}) {
-        const headers = {
-            'Content-Type': 'application/json',
-            'X-API-KEY': API_KEY,
-            ...(options.headers || {})
-        };
-        const response = await fetch(API_URL + endpoint, { ...options, headers });
-        const result = await response.json();
-        
-        if (!response.ok) {
-            alert("API Error: " + (result.error || response.statusText));
-            throw new Error(result.error);
+async function apiFetch(endpoint, options = {}) {
+    const headers = {
+        'Content-Type': 'application/json',
+        'X-API-KEY': API_KEY,
+        ...(options.headers || {})
+    };
+    const response = await fetch(API_URL + endpoint, { ...options, headers });
+    const result = await response.json();
+    if (!response.ok) { alert("API Error: " + (result.error || response.statusText)); throw new Error(result.error); }
+    return result;
+}
+
+async function fetchStatistics() {
+    try {
+        const data = await apiFetch('/statistics');
+        document.getElementById('stat-total').innerText = data.data.counts.total;
+    } catch (e) {}
+}
+
+async function loadGrid() {
+    const queryParams = new URLSearchParams({
+        page: currentPage,
+        limit: 8,
+        sortBy: document.getElementById('filter-sort').value,
+        sortOrder: 'DESC'
+    });
+    const search = document.getElementById('filter-search').value;
+    const type   = document.getElementById('filter-type').value;
+    const min    = document.getElementById('filter-min').value;
+    const max    = document.getElementById('filter-max').value;
+    if (search) queryParams.append('search', search);
+    if (type)   queryParams.append('type', type);
+    if (min)    queryParams.append('minMontant', min);
+    if (max)    queryParams.append('maxMontant', max);
+
+    const tbody = document.getElementById('apiTableBody');
+    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:36px;color:#9ca3af;">
+        <i class="bi bi-hourglass-split" style="font-size:1.5rem;display:block;margin-bottom:6px;opacity:.3;"></i>Chargement...</td></tr>`;
+
+    try {
+        const result = await apiFetch(`/transactions?${queryParams.toString()}`);
+        if (result.data.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:48px;color:#9ca3af;">
+                <i class="bi bi-inbox" style="font-size:2rem;display:block;margin-bottom:8px;opacity:.3;"></i>
+                Aucun enregistrement trouvé.</td></tr>`;
+        } else {
+            tbody.innerHTML = result.data.map(item => `
+                <tr>
+                    <td><input class="form-check-input bulk-check" type="checkbox" value="${item.id}"
+                               style="width:16px;height:16px;border-radius:5px;cursor:pointer;"></td>
+                    <td>
+                        <div style="display:flex;align-items:center;gap:8px;">
+                            <div class="api-user-avatar"><i class="bi bi-person-fill"></i></div>
+                            <span style="font-weight:700;color:#1e1b4b;">${item.userName}</span>
+                        </div>
+                    </td>
+                    <td style="color:#374151;font-weight:600;">${item.name}</td>
+                    <td><span style="
+                        display:inline-flex;align-items:center;gap:4px;
+                        padding:3px 11px;border-radius:20px;font-size:11px;font-weight:700;
+                        background:${item.type==='INCOME'?'#dcfce7':'#fee2e2'};
+                        color:${item.type==='INCOME'?'#16a34a':'#dc2626'};
+                    ">${item.type === 'INCOME' ? '<i class="bi bi-arrow-down-circle-fill"></i>' : '<i class="bi bi-arrow-up-circle-fill"></i>'} ${item.type}</span></td>
+                    <td style="font-weight:800;font-size:14px;color:#1e1b4b;">${item.amount} DT</td>
+                </tr>
+            `).join('');
         }
-        return result;
-    }
+        const meta = result.meta;
+        document.getElementById('page-info').innerText = `Page ${meta.page} / ${meta.totalPages || 1}`;
+        document.getElementById('btn-prev').disabled = meta.page <= 1;
+        document.getElementById('btn-next').disabled = meta.page >= meta.totalPages;
+    } catch (e) {}
+}
 
-    // Load Stats
-    async function fetchStatistics() {
-        try {
-            const data = await apiFetch('/statistics');
-            document.getElementById('stat-total').innerText = data.data.counts.total;
-        } catch (e) {}
-    }
+async function executeBulk(action) {
+    const checkboxes = document.querySelectorAll('.bulk-check:checked');
+    const ids = Array.from(checkboxes).map(cb => parseInt(cb.value));
+    if (ids.length === 0) return alert("Veuillez sélectionner au moins un élément.");
+    if (action === 'delete' && !confirm("Supprimer les enregistrements sélectionnés ?")) return;
+    try {
+        await apiFetch('/transactions/bulk', { method: 'POST', body: JSON.stringify({ action, ids }) });
+        alert('Opération réussie'); loadGrid(); fetchStatistics();
+        document.getElementById('checkAll').checked = false;
+    } catch (e) {}
+}
 
-    // Load Grid
-    async function loadGrid() {
-        const queryParams = new URLSearchParams({
-            page: currentPage,
-            limit: 5,
-            sortBy: document.getElementById('filter-sort').value,
-            sortOrder: 'DESC'
-        });
+document.getElementById('searchForm').addEventListener('submit', e => { e.preventDefault(); currentPage = 1; loadGrid(); });
+document.getElementById('checkAll').addEventListener('change', e => {
+    document.querySelectorAll('.bulk-check').forEach(cb => cb.checked = e.target.checked);
+});
+function changePage(delta) { currentPage += delta; loadGrid(); }
 
-        const search = document.getElementById('filter-search').value;
-        const type = document.getElementById('filter-type').value;
-        const minMontant = document.getElementById('filter-min').value;
-        const maxMontant = document.getElementById('filter-max').value;
-        
-        if(search) queryParams.append('search', search);
-        if(type) queryParams.append('type', type);
-        if(minMontant) queryParams.append('minMontant', minMontant);
-        if(maxMontant) queryParams.append('maxMontant', maxMontant);
-
-        try {
-            const result = await apiFetch(`/transactions?${queryParams.toString()}`);
-            const tbody = document.getElementById('apiTableBody');
-            
-            if(result.data.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" class="text-center py-4 text-muted">Aucun enregistrement trouvé.</td></tr>`;
-            } else {
-                tbody.innerHTML = result.data.map(item => `
-                    <tr>
-                        <td><input class="form-check-input bulk-check" type="checkbox" value="${item.id}"></td>
-                        <td>
-                            <div class="d-flex align-items-center">
-                                <div class="avatar avatar-xs me-2">
-                                    <div class="avatar-img rounded-circle bg-primary bg-opacity-10 text-primary d-flex align-items-center justify-content-center" style="width:24px; height:24px; font-size:12px;">
-                                        <i class="bi bi-person-fill"></i>
-                                    </div>
-                                </div>
-                                <span class="fw-bold">${item.userName}</span>
-                            </div>
-                        </td>
-                        <td>${item.name}</td>
-                        <td><span class="badge bg-${item.type === 'INCOME' ? 'success' : 'danger'} bg-opacity-10 text-${item.type === 'INCOME' ? 'success' : 'danger'} border border-${item.type === 'INCOME' ? 'success' : 'danger'}">${item.type}</span></td>
-                        <td class="fw-bold fs-6">${item.amount} DT</td>
-                    </tr>
-                `).join('');
-            }
-            
-            // Pagination handling
-            const meta = result.meta;
-            document.getElementById('page-info').innerText = `Page ${meta.page} / ${meta.totalPages || 1}`;
-            document.getElementById('btn-prev').disabled = meta.page <= 1;
-            document.getElementById('btn-next').disabled = meta.page >= meta.totalPages;
-            
-        } catch (e) {}
-    }
-
-    // Toggle single status via PATCH
-    async function toggleStatus(id, checkbox) {
-        try {
-            await apiFetch(`/transactions/${id}/status`, {
-                method: 'PATCH',
-                body: JSON.stringify({ isActive: checkbox.checked })
-            });
-            fetchStatistics();
-        } catch(e) {
-            checkbox.checked = !checkbox.checked; // revert UI
-        }
-    }
-
-    // Bulk Operations
-    async function executeBulk(action) {
-        const checkboxes = document.querySelectorAll('.bulk-check:checked');
-        const ids = Array.from(checkboxes).map(cb => parseInt(cb.value));
-        
-        if(ids.length === 0) return alert("Veuillez sélectionner au moins un élément.");
-        
-        if(action === 'delete' && !confirm("Êtes-vous sûr de vouloir supprimer ces enregistrements ?")) return;
-
-        try {
-            await apiFetch('/transactions/bulk', {
-                method: 'POST',
-                body: JSON.stringify({ action, ids })
-            });
-            alert('Opération réussie');
-            loadGrid();
-            fetchStatistics();
-            document.getElementById('checkAll').checked = false;
-        } catch (e) {}
-    }
-
-    // Handlers
-    document.getElementById('searchForm').addEventListener('submit', (e) => {
-        e.preventDefault();
-        currentPage = 1;
-        loadGrid();
-    });
-
-    document.getElementById('checkAll').addEventListener('change', (e) => {
-        document.querySelectorAll('.bulk-check').forEach(cb => cb.checked = e.target.checked);
-    });
-
-    function changePage(delta) {
-        currentPage += delta;
-        loadGrid();
-    }
-
-    // Init
-    document.addEventListener("DOMContentLoaded", () => {
-        fetchStatistics();
-        loadGrid();
-    });
+document.addEventListener("DOMContentLoaded", () => { fetchStatistics(); loadGrid(); });
 </script>
 {% endblock %}
