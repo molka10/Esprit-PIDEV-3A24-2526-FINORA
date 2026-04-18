@@ -1,0 +1,106 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Modifier mon Profil — FINORA{% endblock %}
+
+{% block body %}
+<div class="container py-5">
+<div class="row justify-content-center">
+
+    <div class="col-lg-8 col-xl-6">
+        <div class="card border-0 shadow-sm" style="border-radius: 20px; overflow: hidden;">
+            <div class="card-header p-4 text-white" style="background: linear-gradient(135deg, #1e1b4b 0%, #2d1b69 100%);">
+                <div class="d-flex align-items-center gap-3">
+                    <div style="background: rgba(255,255,255,0.1); width:48px; height:48px; border-radius:12px; display:flex; align-items:center; justify-content:center;">
+                        <i class="bi bi-person-gear fs-4"></i>
+                    </div>
+                    <div>
+                        <h4 class="mb-0 text-white">Modifier mon Profil</h4>
+                        <p class="mb-0 opacity-75 small text-white">Mettez à jour vos informations personnelles.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card-body p-4">
+                {{ form_start(form, {'attr': {'novalidate': 'novalidate', 'class': 'row g-3'}}) }}
+
+                    <div class="col-12">
+                        {{ form_errors(form) }}
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        {{ form_label(form.username, 'Nom d\'utilisateur', {'label_attr': {'class': 'form-label fw-bold small text-uppercase text-muted'}}) }}
+                        {{ form_widget(form.username, {'attr': {'class': 'form-control border-light-subtle bg-light-subtle', 'placeholder': 'Votre pseudo'}}) }}
+                        {{ form_errors(form.username) }}
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        {{ form_label(form.email, 'Adresse Email', {'label_attr': {'class': 'form-label fw-bold small text-uppercase text-muted'}}) }}
+                        {{ form_widget(form.email, {'attr': {'class': 'form-control border-light-subtle bg-light-subtle', 'placeholder': 'exemple@mail.com'}}) }}
+                        {{ form_errors(form.email) }}
+                    </div>
+
+                    <div class="col-12 mb-3">
+                        {{ form_label(form.password, 'Nouveau Mot de passe', {'label_attr': {'class': 'form-label fw-bold small text-uppercase text-muted'}}) }}
+                        {{ form_widget(form.password, {'attr': {'class': 'form-control border-light-subtle bg-light-subtle', 'placeholder': 'Laissez vide pour ne pas changer'}}) }}
+                        <small class="text-muted">Laissez vide si vous ne souhaitez pas modifier votre mot de passe.</small>
+                        {{ form_errors(form.password) }}
+                    </div>
+                    
+                    <div class="col-12 mb-3">
+                        <label class="form-label fw-bold small text-uppercase text-muted">Photo de profil</label>
+                        <div class="d-flex align-items-center gap-4 p-3 border rounded-3 bg-light-subtle">
+                            {% if app.user.image %}
+                                <div class="position-relative">
+                                    <img src="{{ asset('uploads/' ~ app.user.image) }}" width="80" height="80" class="rounded-circle shadow-sm border border-2 border-white object-fit-cover">
+                                    <span class="position-absolute bottom-0 end-0 bg-primary text-white p-1 rounded-circle" style="line-height:0;"><i class="bi bi-camera" style="font-size:10px;"></i></span>
+                                </div>
+                            {% endif %}
+                            <div class="flex-grow-1">
+                                {{ form_widget(form.image, {'attr': {'class': 'form-control form-control-sm'}}) }}
+                                <small class="text-muted d-block mt-1">Format recommandé: Carré (JPG, PNG)</small>
+                            </div>
+                        </div>
+                        {{ form_errors(form.image) }}
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        {{ form_label(form.phone, 'Téléphone', {'label_attr': {'class': 'form-label fw-bold small text-uppercase text-muted'}}) }}
+                        {{ form_widget(form.phone, {'attr': {'class': 'form-control border-light-subtle bg-light-subtle'}}) }}
+                        {{ form_errors(form.phone) }}
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        {{ form_label(form.date_of_birth, 'Date de naissance', {'label_attr': {'class': 'form-label fw-bold small text-uppercase text-muted'}}) }}
+                        {{ form_widget(form.date_of_birth, {'attr': {'class': 'form-control border-light-subtle bg-light-subtle'}}) }}
+                        {{ form_errors(form.date_of_birth) }}
+                    </div>
+
+                    <div class="col-12 mb-4">
+                        {{ form_label(form.address, 'Adresse complète', {'label_attr': {'class': 'form-label fw-bold small text-uppercase text-muted'}}) }}
+                        {{ form_widget(form.address, {'attr': {'class': 'form-control border-light-subtle bg-light-subtle', 'rows': '2'}}) }}
+                        {{ form_errors(form.address) }}
+                    </div>
+
+                    {# Hidden or restricted fields if any #}
+                    <div class="d-none">
+                         {{ form_row(form.role) }}
+                        {% if form.isVerified is defined %}{{ form_row(form.isVerified) }}{% endif %}
+                    </div>
+
+                    <div class="col-12 mt-4">
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg px-5 fw-bold" style="border-radius:12px;">
+                                Enregistrer les modifications
+                            </button>
+                            <a href="{{ path('app_profile') }}" class="btn btn-light btn-lg px-4 text-muted border" style="border-radius:12px;">
+                                Annuler
+                            </a>
+                        </div>
+                    </div>
+
+                {{ form_end(form) }}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

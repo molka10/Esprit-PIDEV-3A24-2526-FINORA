@@ -1,0 +1,568 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block title %}Gestion des Bourses{% endblock %}
+
+{% block body %}
+<style>
+    .bourses-wrap {
+        background: #f4f6fb;
+        min-height: 100vh;
+        padding: 28px;
+        font-family: 'Inter', sans-serif;
+    }
+
+    /* ── HEADER ── */
+    .bourses-header {
+        background: #fff;
+        border: 1px solid #e8ecf4;
+        border-radius: 16px;
+        padding: 24px 28px;
+        margin-bottom: 24px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+    .bourses-header h1 {
+        font-size: 22px;
+        font-weight: 700;
+        color: #0f172a;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .bourses-header h1 .icon-wrap {
+        width: 40px; height: 40px;
+        background: linear-gradient(135deg, #7c3aed, #a78bfa);
+        border-radius: 12px;
+        display: flex; align-items: center; justify-content: center;
+        color: white; font-size: 18px;
+    }
+    .btn-add {
+        background: linear-gradient(135deg, #7c3aed, #6d28d9);
+        color: white;
+        border: none;
+        padding: 10px 22px;
+        border-radius: 12px;
+        font-size: 13px;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.2s;
+        box-shadow: 0 4px 14px rgba(124,58,237,0.3);
+    }
+    .btn-add:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(124,58,237,0.4);
+        color: white;
+    }
+
+    /* ── TABLE PANEL ── */
+    .table-panel {
+        background: #fff;
+        border: 1px solid #e8ecf4;
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+        margin-bottom: 24px;
+    }
+    .table-panel-head {
+        padding: 18px 24px;
+        border-bottom: 1px solid #f1f3f9;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .table-panel-head h6 {
+        color: #0f172a;
+        font-size: 14px;
+        font-weight: 700;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .table-count {
+        background: #f3f0ff;
+        color: #7c3aed;
+        padding: 4px 12px;
+        border-radius: 8px;
+        font-size: 12px;
+        font-weight: 700;
+    }
+
+    .btable { width: 100%; border-collapse: collapse; }
+    .btable thead th {
+        background: #f8f9fc;
+        color: #8892a8;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.7px;
+        padding: 14px 20px;
+        text-align: left;
+        border: none;
+        border-bottom: 2px solid #e8ecf4;
+    }
+    .btable tbody td {
+        padding: 16px 20px;
+        border-bottom: 1px solid #f4f6fb;
+        font-size: 14px;
+        vertical-align: middle;
+    }
+    .btable tbody tr:last-child td { border-bottom: none; }
+    .btable tbody tr:hover { background: #faf8ff; }
+    .btable tbody tr.row-warning { background: #fffdf5; }
+    .btable tbody tr.row-warning:hover { background: #fff9e6; }
+
+    /* ── CELL ELEMENTS ── */
+    .bourse-name {
+        font-weight: 700;
+        color: #0f172a;
+        font-size: 14px;
+    }
+    .bourse-empty-tag {
+        background: #fff3cd;
+        color: #92400e;
+        padding: 3px 10px;
+        border-radius: 6px;
+        font-size: 11px;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        margin-left: 8px;
+    }
+    .country-cell {
+        color: #64748b;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+    .devise-tag {
+        background: #e0f2fe;
+        color: #0369a1;
+        padding: 5px 14px;
+        border-radius: 8px;
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+    }
+    .status-active {
+        background: #dcfce7;
+        color: #16a34a;
+        padding: 5px 14px;
+        border-radius: 8px;
+        font-size: 12px;
+        font-weight: 700;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+    }
+    .status-active .dot {
+        width: 6px; height: 6px;
+        background: #16a34a;
+        border-radius: 50%;
+    }
+    .status-inactive {
+        background: #f1f5f9;
+        color: #64748b;
+        padding: 5px 14px;
+        border-radius: 8px;
+        font-size: 12px;
+        font-weight: 700;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+    }
+    .status-inactive .dot {
+        width: 6px; height: 6px;
+        background: #94a3b8;
+        border-radius: 50%;
+    }
+    .actions-link {
+        color: #7c3aed;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 13px;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        transition: color 0.2s;
+    }
+    .actions-link:hover { color: #6d28d9; }
+    .no-actions-cell {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .no-actions-text {
+        color: #d97706;
+        font-size: 13px;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+    }
+    .btn-add-small {
+        background: #16a34a;
+        color: white;
+        border: none;
+        padding: 5px 12px;
+        border-radius: 8px;
+        font-size: 11px;
+        font-weight: 700;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        transition: 0.2s;
+    }
+    .btn-add-small:hover { background: #15803d; color: white; transform: translateY(-1px); }
+    .date-cell { color: #94a3b8; font-size: 13px; }
+
+    /* ── ICON ACTION BUTTONS ── */
+    .icon-actions {
+        display: flex;
+        gap: 6px;
+    }
+    .icon-btn {
+        width: 36px; height: 36px;
+        border: 1px solid #e8ecf4;
+        background: white;
+        border-radius: 10px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 15px;
+        text-decoration: none;
+        transition: all 0.2s;
+        position: relative;
+        cursor: pointer;
+    }
+    .icon-btn .tooltip-text {
+        visibility: hidden;
+        opacity: 0;
+        position: absolute;
+        bottom: calc(100% + 6px);
+        left: 50%;
+        transform: translateX(-50%);
+        background: #0f172a;
+        color: white;
+        padding: 4px 10px;
+        border-radius: 6px;
+        font-size: 11px;
+        font-weight: 600;
+        white-space: nowrap;
+        transition: all 0.15s;
+        pointer-events: none;
+    }
+    .icon-btn .tooltip-text::after {
+        content: '';
+        position: absolute;
+        top: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        border: 4px solid transparent;
+        border-top-color: #0f172a;
+    }
+    .icon-btn:hover .tooltip-text {
+        visibility: visible;
+        opacity: 1;
+    }
+    .icon-btn.view {
+        color: #3b82f6;
+    }
+    .icon-btn.view:hover {
+        background: #eff6ff;
+        border-color: #bfdbfe;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(59,130,246,0.15);
+    }
+    .icon-btn.edit {
+        color: #f59e0b;
+    }
+    .icon-btn.edit:hover {
+        background: #fffbeb;
+        border-color: #fde68a;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(245,158,11,0.15);
+    }
+    .icon-btn.delete {
+        color: #ef4444;
+    }
+    .icon-btn.delete:hover {
+        background: #fef2f2;
+        border-color: #fecaca;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(239,68,68,0.15);
+    }
+    .icon-btn.disabled {
+        color: #cbd5e1;
+        cursor: not-allowed;
+        pointer-events: none;
+    }
+    .icon-btn-form {
+        padding: 0;
+        margin: 0;
+        background: none;
+        font-size: 15px;
+    }
+
+    /* ── STAT CARDS ── */
+    .stat-cards-row {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 20px;
+    }
+    .stat-card-b {
+        background: #fff;
+        border: 1px solid #e8ecf4;
+        border-radius: 16px;
+        padding: 24px;
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        transition: all 0.25s;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+        position: relative;
+        overflow: hidden;
+    }
+    .stat-card-b:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+    }
+    .stat-card-b .sc-icon {
+        width: 60px; height: 60px;
+        border-radius: 16px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 24px;
+        color: white;
+        flex-shrink: 0;
+    }
+    .stat-card-b .sc-icon.purple { background: linear-gradient(135deg, #7c3aed, #a78bfa); }
+    .stat-card-b .sc-icon.green { background: linear-gradient(135deg, #16a34a, #4ade80); }
+    .stat-card-b .sc-icon.amber { background: linear-gradient(135deg, #d97706, #fbbf24); }
+    .stat-card-b .sc-value {
+        font-size: 28px;
+        font-weight: 800;
+        color: #0f172a;
+        line-height: 1;
+    }
+    .stat-card-b .sc-label {
+        font-size: 13px;
+        color: #8892a8;
+        margin-top: 4px;
+    }
+    .stat-card-b .sc-bar {
+        position: absolute;
+        bottom: 0; left: 0; right: 0;
+        height: 3px;
+    }
+    .stat-card-b .sc-bar.purple { background: linear-gradient(90deg, #7c3aed, #a78bfa); }
+    .stat-card-b .sc-bar.green { background: linear-gradient(90deg, #16a34a, #4ade80); }
+    .stat-card-b .sc-bar.amber { background: linear-gradient(90deg, #d97706, #fbbf24); }
+
+    @media (max-width: 768px) {
+        .bourses-wrap { padding: 16px; }
+        .bourses-header { flex-direction: column; gap: 12px; align-items: flex-start; }
+        .stat-cards-row { grid-template-columns: 1fr; }
+        .icon-actions { flex-wrap: nowrap; }
+    }
+</style>
+
+<div class="bourses-wrap">
+
+    {# ═══ HEADER ═══ #}
+    <div class="bourses-header">
+        <h1>
+            <span class="icon-wrap"><i class="bi bi-building"></i></span>
+            Gestion des Bourses
+        </h1>
+        <a href="{{ path('app_bourse_new') }}" class="btn-add">
+            <i class="bi bi-plus-lg"></i> Ajouter une Bourse
+        </a>
+    </div>
+
+    {# ═══ TABLE ═══ #}
+    <div class="table-panel">
+        <div class="table-panel-head">
+            <h6>
+                <i class="bi bi-table" style="color:#7c3aed;"></i> Liste des Bourses
+            </h6>
+            <span class="table-count">{{ boursesData|length }} bourse(s)</span>
+        </div>
+
+        <table class="btable">
+            <thead>
+                <tr>
+                    <th>Nom</th>
+                    <th>Pays</th>
+                    <th>Devise</th>
+                    <th>Statut</th>
+                    <th>Actions</th>
+                    <th>Date Création</th>
+                    <th style="text-align:center;">Opérations</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for data in boursesData %}
+                    {% set bourse = data[0] %}
+                    {% set nbActions = data.nbActions %}
+
+                    <tr class="{{ nbActions == 0 ? 'row-warning' : '' }}">
+                        {# Nom #}
+                        <td>
+                            <span class="bourse-name">{{ bourse.nomBourse }}</span>
+                            {% if nbActions == 0 %}
+                                <span class="bourse-empty-tag">
+                                    <i class="bi bi-exclamation-triangle-fill"></i> Vide
+                                </span>
+                            {% endif %}
+                        </td>
+
+                        {# Pays #}
+                        <td>
+                            <span class="country-cell">
+                                <i class="bi bi-geo-alt"></i> {{ bourse.pays }}
+                            </span>
+                        </td>
+
+                        {# Devise #}
+                        <td>
+                            <span class="devise-tag">{{ bourse.devise }}</span>
+                        </td>
+
+                        {# Statut #}
+                        <td>
+                            {% if bourse.statut == 'ACTIVE' %}
+                                <span class="status-active"><span class="dot"></span> Actif</span>
+                            {% else %}
+                                <span class="status-inactive"><span class="dot"></span> Inactif</span>
+                            {% endif %}
+                        </td>
+
+                        {# Actions (nombre) #}
+                        <td>
+                            {% if nbActions > 0 %}
+                                <a href="{{ path('app_action_index') }}?bourse={{ bourse.id }}" class="actions-link">
+                                    <i class="bi bi-bar-chart-line"></i> {{ nbActions }} action(s)
+                                </a>
+                            {% else %}
+                                <div class="no-actions-cell">
+                                    <span class="no-actions-text">
+                                        <i class="bi bi-info-circle"></i> Aucune
+                                    </span>
+                                    <a href="{{ path('app_action_new') }}?bourse={{ bourse.id }}" class="btn-add-small">
+                                        <i class="bi bi-plus-lg"></i> Ajouter
+                                    </a>
+                                </div>
+                            {% endif %}
+                        </td>
+
+                        {# Date #}
+                        <td>
+                            <span class="date-cell">
+                                <i class="bi bi-calendar3 me-1"></i>{{ bourse.dateCreation|date('d/m/Y H:i') }}
+                            </span>
+                        </td>
+
+                        {# Opérations (icônes) #}
+                        <td>
+                            <div class="icon-actions">
+                                {# Voir #}
+                                <a href="{{ path('app_bourse_show', {id: bourse.id}) }}" class="icon-btn view">
+                                    <i class="bi bi-eye"></i>
+                                    <span class="tooltip-text">Voir</span>
+                                </a>
+
+                                {# Éditer #}
+                                <a href="{{ path('app_bourse_edit', {id: bourse.id}) }}" class="icon-btn edit">
+                                    <i class="bi bi-pencil-square"></i>
+                                    <span class="tooltip-text">Éditer</span>
+                                </a>
+
+                                {# Supprimer #}
+                                {% if nbActions == 0 %}
+                                    <form method="post"
+                                          action="{{ path('app_bourse_delete', {id: bourse.id}) }}"
+                                          onsubmit="return confirm('Supprimer cette bourse ?');">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ bourse.id) }}">
+                                        <button type="submit" class="icon-btn delete icon-btn-form">
+                                            <i class="bi bi-trash3"></i>
+                                            <span class="tooltip-text">Supprimer</span>
+                                        </button>
+                                    </form>
+                                {% else %}
+                                    <span class="icon-btn disabled" title="Supprimez d'abord les {{ nbActions }} action(s)">
+                                        <i class="bi bi-trash3"></i>
+                                        <span class="tooltip-text" style="background:#94a3b8;">Bloqué</span>
+                                    </span>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {# ═══ STAT CARDS ═══ #}
+    <div class="stat-cards-row">
+        {# Total Bourses #}
+        <div class="stat-card-b">
+            <div class="sc-icon purple">
+                <i class="bi bi-building"></i>
+            </div>
+            <div>
+                <div class="sc-value">{{ boursesData|length }}</div>
+                <div class="sc-label">Total Bourses</div>
+            </div>
+            <div class="sc-bar purple"></div>
+        </div>
+
+        {# Avec Actions #}
+        <div class="stat-card-b">
+            <div class="sc-icon green">
+                <i class="bi bi-check-circle"></i>
+            </div>
+            <div>
+                <div class="sc-value">
+                    {% set withActions = 0 %}
+                    {% for data in boursesData %}
+                        {% if data.nbActions > 0 %}
+                            {% set withActions = withActions + 1 %}
+                        {% endif %}
+                    {% endfor %}
+                    {{ withActions }}
+                </div>
+                <div class="sc-label">Avec Actions</div>
+            </div>
+            <div class="sc-bar green"></div>
+        </div>
+
+        {# Sans Actions #}
+        <div class="stat-card-b">
+            <div class="sc-icon amber">
+                <i class="bi bi-exclamation-triangle"></i>
+            </div>
+            <div>
+                <div class="sc-value">
+                    {% set withoutActions = 0 %}
+                    {% for data in boursesData %}
+                        {% if data.nbActions == 0 %}
+                            {% set withoutActions = withoutActions + 1 %}
+                        {% endif %}
+                    {% endfor %}
+                    {{ withoutActions }}
+                </div>
+                <div class="sc-label">Sans Actions</div>
+            </div>
+            <div class="sc-bar amber"></div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

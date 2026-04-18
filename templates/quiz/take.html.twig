@@ -1,0 +1,349 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Quiz - {{ lesson.titre }}{% endblock %}
+
+{% block body %}
+
+<!-- Fullscreen Lock Overlay (Hidden by default) -->
+<div id="fullscreen-lock-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); z-index:9999; color:white; justify-content:center; align-items:center; flex-direction:column; padding: 20px; text-align: center;">
+    <div class="card p-5 border-0 bg-dark text-white shadow-lg" style="max-width: 500px; border-radius: 25px; border: 1px solid #7c3aed !important;">
+        <i class="fas fa-expand-arrows-alt text-primary mb-4" style="font-size: 4rem;"></i>
+        <h2 class="fw-bold mb-3">Plein Écran Requis</h2>
+        <p class="text-muted mb-4 fs-5">Pour garantir l'intégrité de l'évaluation, ce quiz doit être passé exclusivement en mode plein écran.</p>
+        <button onclick="reEnterFullscreen()" class="btn btn-primary btn-lg px-5 rounded-pill shadow">
+            Revenir au Quiz
+        </button>
+        <div class="mt-4 small text-danger"><i class="fas fa-exclamation-triangle me-2"></i>Toute sortie est enregistrée comme tentative de fraude.</div>
+    </div>
+</div>
+
+<main>
+    <section class="py-5" style="background: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%); min-height: 100vh;">
+        <div class="container">
+            <div class="mx-auto" style="max-width: 900px;" id="quiz-container">
+            
+                {# Floating Timer - Positioned below fixed navbar with higher prominence #}
+                <div id="quiz-timer-bar" class="position-fixed translate-middle-x bg-white shadow-lg rounded-pill d-none" 
+                     style="z-index: 9999; left: 50%; top: 110px; padding: 12px 30px; border: 2px solid #7c3aed !important; min-width: 180px;">
+                    <div class="d-flex align-items-center justify-content-center gap-3">
+                        <i class="fas fa-clock text-primary fs-4 animation-pulse"></i>
+                        <span id="timer-display" class="fw-bold fs-4 text-dark font-monospace" style="letter-spacing: 1px;">10:00</span>
+                    </div>
+                </div>
+
+                <div class="card border-0 shadow-sm overflow-hidden mb-4" id="quiz-header" {% if lang == 'ar' %}dir="rtl"{% endif %}>
+                    <div class="p-4 p-md-5" style="background: linear-gradient(135deg, #ede9fe 0%, #f5f3ff 55%, #ffffff 100%);">
+                        <span class="badge bg-primary bg-opacity-10 text-primary mb-3">
+                            {% if lang == 'en' %}AI Quiz - Secure Session{% elseif lang == 'ar' %}اختبار الذكاء الاصطناعي - جلسة آمنة{% else %}Quiz IA - Session Sécurisée{% endif %}
+                        </span>
+                        <h1 class="h2 fw-bold mb-2">{{ lesson.titre }}</h1>
+                        <p class="text-muted mb-0">
+                            {% if lang == 'en' %}Answer with integrity. Fullscreen is mandatory.{% elseif lang == 'ar' %}أجب بنزاهة. وضع ملء الشاشة إلزامي.{% else %}Répondez aux questions avec intégrité. Le plein écran est obligatoire.{% endif %}
+                        </p>
+                    </div>
+                </div>
+
+                {% if not questions %}
+                    {# Language Selection Screen #}
+                    <div class="card border-0 shadow-lg mb-5" style="border-radius: 20px;">
+                        <div class="card-body p-5 text-center">
+                            <h3 class="fw-bold mb-4">Choisissez votre langue de quiz</h3>
+                            <p class="text-muted mb-5">L'IA générera des questions personnalisées dans la langue de votre choix.</p>
+                            
+                            <div class="row g-4 justify-content-center">
+                                <div class="col-6 col-md-4">
+                                    <a href="{{ path('app_quiz_take', {'id': lesson.id, 'lang': 'fr'}) }}" class="lang-card">
+                                        <span class="fs-1 d-block mb-3">🇫🇷</span>
+                                        <span class="fw-bold">Français</span>
+                                    </a>
+                                </div>
+                                <div class="col-6 col-md-4">
+                                    <a href="{{ path('app_quiz_take', {'id': lesson.id, 'lang': 'en'}) }}" class="lang-card">
+                                        <span class="fs-1 d-block mb-3">🇺🇸</span>
+                                        <span class="fw-bold">English</span>
+                                    </a>
+                                </div>
+                                <div class="col-6 col-md-4">
+                                    <a href="{{ path('app_quiz_take', {'id': lesson.id, 'lang': 'ar'}) }}" class="lang-card">
+                                        <span class="fs-1 d-block mb-3">🇸🇦</span>
+                                        <span class="fw-bold">العربية</span>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <style>
+                        .lang-card {
+                            display: block;
+                            padding: 30px;
+                            border-radius: 20px;
+                            border: 2px solid #f1f5f9;
+                            text-decoration: none;
+                            color: #1e293b;
+                            transition: all 0.3s ease;
+                            background: white;
+                        }
+                        .lang-card:hover {
+                            border-color: #7c3aed;
+                            background: #f5f3ff;
+                            transform: translateY(-5px);
+                            box-shadow: 0 10px 25px rgba(124, 58, 237, 0.1);
+                        }
+                    </style>
+                {% else %}
+
+
+                <div id="start-screen" class="card border-0 shadow-sm overflow-hidden" style="border-radius: 20px;" {% if lang == 'ar' %}dir="rtl"{% endif %}>
+                    <div class="card-header bg-dark text-white p-4 border-0">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <h4 class="mb-0 fw-bold">
+                                <i class="fas fa-shield-alt me-2 text-warning"></i>
+                                {% if lang == 'en' %}Integrity Protocol{% elseif lang == 'ar' %}بروتوكول النزاهة{% else %}Protocole d'Intégrité{% endif %}
+                            </h4>
+                            <span class="badge bg-warning text-dark px-3 py-2">
+                                {% if lang == 'en' %}Ready for assessment{% elseif lang == 'ar' %}جاهز للتقييم{% else %}Prêt pour évaluation{% endif %}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="card-body p-4 p-md-5 text-center">
+                        <div class="row g-4 mb-5 text-start" {% if lang == 'ar' %}style="text-align: right !important;"{% endif %}>
+                            <div class="col-md-6">
+                                <div class="p-3 bg-light rounded-4 h-100">
+                                    <h6 class="fw-bold"><i class="fas fa-expand text-primary me-2"></i>{% if lang == 'en' %}Exclusive Fullscreen{% elseif lang == 'ar' %}ملء الشاشة الحصري{% else %}Plein Écran Exclusif{% endif %}</h6>
+                                    <p class="small text-muted mb-0">{% if lang == 'en' %}The attempt stops if you navigate away.{% elseif lang == 'ar' %}تتوقف المحاولة إذا قمت بالخروج.{% else %}La tentative s'arrête si vous naviguez ailleurs.{% endif %}</p>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="p-3 bg-light rounded-4 h-100">
+                                    <h6 class="fw-bold"><i class="fas fa-hourglass-half text-warning me-2"></i>{% if lang == 'en' %}Time Limit{% elseif lang == 'ar' %}الوقت المحدد{% else %}Limite de Temps{% endif %}</h6>
+                                    <p class="small text-muted mb-0">{% if lang == 'en' %}You have 10 minutes to submit.{% elseif lang == 'ar' %}لديك 10 دقائق للإرسال.{% else %}Vous disposez de 10 minutes pour soumettre vos réponses.{% endif %}</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="alert alert-secondary border-0 p-3 mb-5" style="background: #f8fafc;">
+                            <div class="form-check text-start" {% if lang == 'ar' %}style="text-align: right !important; padding-right: 1.5em; padding-left: 0;"{% endif %}>
+                                <input class="form-check-input" type="checkbox" id="honorCodeCheck" onchange="document.getElementById('start-btn').disabled = !this.checked" {% if lang == 'ar' %}style="float: right; margin-right: -1.5em; margin-left: 0;"{% endif %}>
+                                <label class="form-check-label small fw-bold" for="honorCodeCheck">
+                                    {% if lang == 'en' %}I understand that leaving fullscreen or switching tabs is considered fraud.{% elseif lang == 'ar' %}أفهم أن مغادرة ملء الشاشة أو التبديل بين التبويب يعتبر غشًا.{% else %}Je comprends que quitter le plein écran ou changer d'onglet sera considéré comme une fraude.{% endif %}
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-center gap-3">
+                            <a href="{{ path('app_lesson_show', {'id': lesson.id}) }}" class="btn btn-outline-secondary px-4">{% if lang == 'en' %}Cancel{% elseif lang == 'ar' %}إلغاء{% else %}Annuler{% endif %}</a>
+                            <button id="start-btn" class="btn btn-primary px-5 fw-bold btn-lg rounded-pill" onclick="startQuiz()" disabled>
+                                {% if lang == 'en' %}Start Session{% elseif lang == 'ar' %}بدء الجلسة{% else %}Démarrer la Session{% endif %}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <form method="post" action="{{ path('app_quiz_submit', {'id': lesson.id}) }}" id="quiz-form" style="display: none;">
+                    {# Fraud detection fields #}
+                    <input type="hidden" name="focusLossCount" id="input_focusLossCount" value="0">
+                    <input type="hidden" name="exitFullscreenCount" id="input_exitFullscreenCount" value="0">
+                    <input type="hidden" name="fastAnswers" id="input_fastAnswers" value="0">
+
+                    <div id="questions-wrapper" {% if lang == 'ar' %}dir="rtl" style="text-align: right !important;"{% endif %}>
+                        {% for question in questions %}
+                            <div class="quiz-step" id="step-{{ loop.index }}" style="display: none;">
+                                <div class="card border-0 shadow-sm mb-4" style="border-radius: 20px;">
+                                    <div class="card-body p-4 p-md-5">
+                                        <h4 class="h5 fw-bold text-muted mb-4">
+                                            {% if lang == 'en' %}Question {{ loop.index }} / {{ questions|length }}{% elseif lang == 'ar' %}سؤال {{ loop.index }} / {{ questions|length }}{% else %}Question {{ loop.index }} / {{ questions|length }}{% endif %}
+                                        </h4>
+                                        <h3 class="h4 fw-bold mb-5" style="color: #4c1d95;">{{ question.question }}</h3>
+
+                                        <div class="d-grid gap-3 options-container">
+                                            {% for option in question.options %}
+                                                <label class="border rounded-4 p-4 d-flex align-items-center gap-3 shadow-sm-hover transition-all" 
+                                                       style="cursor:pointer; border: 2px solid #f1f5f9 !important;">
+                                                    <input type="radio" class="form-check-input flex-shrink-0" name="answer_{{ loop.parent.loop.index0 }}" 
+                                                           value="{{ loop.index0 }}" onchange="onAnswerSelected({{ loop.parent.loop.index }})" required>
+                                                    <span class="fs-5 text-dark">{{ option }}</span>
+                                                </label>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="d-flex justify-content-between gap-2 mt-4">
+                                    {% if loop.index > 1 %}
+                                        <button type="button" class="btn btn-light border px-5" onclick="prevStep({{ loop.index }})">
+                                            {% if lang == 'en' %}Previous{% elseif lang == 'ar' %}السابق{% else %}Précédent{% endif %}
+                                        </button>
+                                    {% else %}
+                                        <div></div>
+                                    {% endif %}
+
+                                    {% if loop.last %}
+                                        <button type="button" class="btn btn-primary px-5 fw-bold" onclick="submitForm()">
+                                            {% if lang == 'en' %}Finalize Quiz{% elseif lang == 'ar' %}إنهاء الاختبار{% else %}Finaliser le Quiz{% endif %}
+                                        </button>
+                                    {% else %}
+                                        <button type="button" class="btn btn-primary px-5" id="next-btn-{{ loop.index }}" onclick="nextStep({{ loop.index }})" disabled>
+                                            {% if lang == 'en' %}Next{% elseif lang == 'ar' %}التالي{% else %}Suivant{% endif %}
+                                        </button>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+                </form>
+
+            </div>
+        </div>
+    </section>
+</main>
+
+<style>
+    /* Fixed Navbar specifically for quiz page */
+    header.navbar-sticky {
+        position: fixed !important;
+        top: 0;
+        width: 100%;
+        z-index: 10000;
+        background: white;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+    
+    body { padding-top: 80px; } /* Offset for fixed navbar */
+
+    .shadow-sm-hover:hover { 
+        border-color: #8b5cf6 !important; 
+        background: #fdfcff; 
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(124,58,237,0.1);
+    }
+    .transition-all { transition: all 0.2s ease; }
+
+    @keyframes pulse {
+        0% { transform: scale(1); opacity: 1; }
+        50% { transform: scale(1.1); opacity: 0.8; }
+        100% { transform: scale(1); opacity: 1; }
+    }
+    .animation-pulse {
+        animation: pulse 2s infinite ease-in-out;
+    }
+</style>
+
+<script>
+    let focusLossCount = 0;
+    let exitFullscreenCount = 0;
+    let fastAnswers = 0;
+    let isQuizActive = false;
+    let currentQuestionStartTime = 0;
+    
+    // Timer Variables
+    let timeLeft = 600; // 10 minutes (600 seconds)
+    let timerInterval = null;
+
+    const startScreen = document.getElementById('start-screen');
+    const quizForm = document.getElementById('quiz-form');
+    const timerBar = document.getElementById('quiz-timer-bar');
+    const lockOverlay = document.getElementById('fullscreen-lock-overlay');
+    
+    function startQuiz() {
+        startScreen.style.display = 'none';
+        quizForm.style.display = 'block';
+        timerBar.classList.remove('d-none');
+        
+        reEnterFullscreen();
+        
+        isQuizActive = true;
+        showStep(1);
+        startTimer();
+    }
+
+    function reEnterFullscreen() {
+        const elem = document.documentElement;
+        if (elem.requestFullscreen) {
+            elem.requestFullscreen().catch(() => {
+                alert("Erreur : Le mode plein écran est requis !");
+            });
+        }
+    }
+
+    function startTimer() {
+        timerInterval = setInterval(() => {
+            timeLeft--;
+            updateTimerDisplay();
+            
+            if (timeLeft <= 60) {
+                document.getElementById('timer-display').classList.add('text-danger');
+            }
+            
+            if (timeLeft <= 0) {
+                clearInterval(timerInterval);
+                alert("Temps écoulé ! Votre quiz va être soumis automatiquement.");
+                submitForm();
+            }
+        }, 1000);
+    }
+
+    function updateTimerDisplay() {
+        const mins = Math.floor(timeLeft / 60);
+        const secs = timeLeft % 60;
+        document.getElementById('timer-display').innerText = 
+            `${mins}:${secs.toString().padStart(2, '0')}`;
+    }
+
+    // Security Listeners
+    document.addEventListener("visibilitychange", () => {
+        if (document.hidden && isQuizActive) {
+            focusLossCount++;
+            document.getElementById('input_focusLossCount').value = focusLossCount;
+        }
+    });
+
+    document.addEventListener('fullscreenchange', () => {
+        if (!document.fullscreenElement && isQuizActive) {
+            exitFullscreenCount++;
+            document.getElementById('input_exitFullscreenCount').value = exitFullscreenCount;
+            // SHOW LOCK OVERLAY
+            lockOverlay.style.display = 'flex';
+        } else {
+            // HIDE LOCK OVERLAY
+            lockOverlay.style.display = 'none';
+        }
+    });
+
+    function showStep(step) {
+        document.querySelectorAll('.quiz-step').forEach(el => el.style.display = 'none');
+        document.getElementById('step-' + step).style.display = 'block';
+        currentQuestionStartTime = Date.now();
+    }
+    
+    function onAnswerSelected(step) {
+        const nextBtn = document.getElementById('next-btn-' + step);
+        if(nextBtn) nextBtn.disabled = false;
+    }
+    
+    function nextStep(currentStep) {
+        checkFastAnswer();
+        showStep(currentStep + 1);
+    }
+    
+    function prevStep(currentStep) {
+        showStep(currentStep - 1);
+    }
+
+    function checkFastAnswer() {
+        const timeTaken = (Date.now() - currentQuestionStartTime) / 1000;
+        if (timeTaken < 3) {
+            fastAnswers++;
+            document.getElementById('input_fastAnswers').value = fastAnswers;
+        }
+    }
+    
+    function submitForm() {
+        checkFastAnswer();
+        isQuizActive = false; // Stop tracking before redirect
+        if (timerInterval) clearInterval(timerInterval);
+        quizForm.submit();
+    }
+</script>
+{% endblock %}

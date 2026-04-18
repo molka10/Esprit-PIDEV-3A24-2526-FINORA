@@ -1,0 +1,161 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block title %}Toutes les Transactions — Finora Admin{% endblock %}
+
+{% block body %}
+<div class="row g-4 mb-4">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center">
+            <h1 class="h3 mb-0 text-gray-800">📜 Toutes les Transactions</h1>
+            <div class="d-flex gap-2">
+                <button onclick="window.print()" class="btn btn-outline-primary"><i class="bi bi-printer me-2"></i>Imprimer</button>
+            </div>
+        </div>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mt-2">
+                <li class="breadcrumb-item"><a href="{{ path('app_admin') }}">Admin</a></li>
+                <li class="breadcrumb-item"><a href="{{ path('app_bourse_admin') }}">Bourse</a></li>
+                <li class="breadcrumb-item active">Transactions</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="card shadow-sm border-0 rounded-4 overflow-hidden">
+    <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+        <h6 class="m-0 font-weight-bold text-primary"><i class="bi bi-clock-history me-2"></i>Flux de trading global</h6>
+        <div class="d-flex gap-2">
+             <div class="dropdown">
+                <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" id="filterTypeDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="bi bi-funnel me-1"></i> {{ currentType|default('Tous les types') }}
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="filterTypeDropdown">
+                    <li><a class="dropdown-item {{ not currentType ? 'active' }}" href="{{ path('app_admin_bourse_transactions') }}">Tous les types</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item {{ currentType == 'ACHAT' ? 'active' }}" href="{{ path('app_admin_bourse_transactions', {type: 'ACHAT'}) }}">🛍️ ACHAT uniquement</a></li>
+                    <li><a class="dropdown-item {{ currentType == 'VENTE' ? 'active' }}" href="{{ path('app_admin_bourse_transactions', {type: 'VENTE'}) }}">💰 VENTE uniquement</a></li>
+                </ul>
+             </div>
+             <input type="text" id="txnSearch" class="form-control form-control-sm" style="width: 200px;" placeholder="Rechercher..." onkeyup="filterTxnTable()">
+        </div>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0" id="txnTable">
+                <thead class="bg-light">
+                    <tr>
+                        <th class="ps-4">#ID</th>
+                        <th>Investisseur</th>
+                        <th>Type</th>
+                        <th>Action</th>
+                        <th>Quantité</th>
+                        <th>Prix Unit.</th>
+                        <th>Total</th>
+                        <th>Commission</th>
+                        <th>Date</th>
+                        <th class="pe-4">Statut</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for t in transactions %}
+                    <tr>
+                        <td class="ps-4 text-muted small">#{{ t.id }}</td>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="avatar avatar-xs me-2">
+                                    <img class="avatar-img rounded-circle" src="https://ui-avatars.com/api/?name={{ t.user ? t.user.username : (t.acteurLabel|default('Anonyme')) }}&background=6366f1&color=fff" alt="" style="width: 32px; height: 32px;">
+                                </div>
+                                <div>
+                                    <div class="fw-bold text-dark">{{ t.user ? t.user.username : (t.acteurLabel|default('Utilisateur inconnu')) }}</div>
+                                    <div class="text-muted small" style="font-size: 11px;">{{ t.user ? t.user.email : 'No email' }}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            {% if t.typeTransaction == 'ACHAT' %}
+                                <span class="badge bg-success-soft text-success"><i class="bi bi-arrow-down-circle me-1"></i>ACHAT</span>
+                            {% else %}
+                                <span class="badge bg-danger-soft text-danger"><i class="bi bi-arrow-up-circle me-1"></i>VENTE</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="fw-bold text-primary">{{ t.action ? t.action.symbole : 'N/A' }}</div>
+                            <div class="text-muted small" style="font-size: 11px;">{{ t.action ? t.action.nomEntreprise : 'Bourse de Tunis' }}</div>
+                        </td>
+                        <td><span class="fw-bold">{{ t.quantite }}</span></td>
+                        <td>{{ t.prixUnitaire }} <small class="text-muted">TND</small></td>
+                        <td><span class="fw-bold">{{ t.montantTotal }}</span> <small class="text-muted">TND</small></td>
+                        <td><span class="text-warning fw-semibold">{{ (t.montantTotal * 0.01)|number_format(2) }}</span> <small class="text-muted">TND</small></td>
+                        <td>
+                            <div class="text-dark">{{ t.dateTransaction|date('d/m/Y') }}</div>
+                            <div class="text-muted small">{{ t.dateTransaction|date('H:i') }}</div>
+                        </td>
+                        <td class="pe-4">
+                            <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-10">Complété</span>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="10" class="text-center py-5 text-muted">Aucune transaction enregistrée.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {# 🔥 PAGINATION #}
+        <div class="card-footer bg-white py-3 border-top">
+            <div class="d-flex justify-content-between align-items-center">
+                <div class="text-muted small">
+                    Affichage de <b>{{ transactions|length }}</b> sur <b>{{ total }}</b> transactions
+                </div>
+                <nav aria-label="Page navigation">
+                    <ul class="pagination pagination-sm mb-0">
+                        <li class="page-item {{ page <= 1 ? 'disabled' }}">
+                            <a class="page-link" href="{{ path('app_admin_bourse_transactions', {page: page - 1, type: currentType}) }}" tabindex="-1"><i class="bi bi-chevron-left"></i></a>
+                        </li>
+                        
+                        {% for p in 1..pages %}
+                        <li class="page-item {{ p == page ? 'active' }}">
+                            <a class="page-link" href="{{ path('app_admin_bourse_transactions', {page: p, type: currentType}) }}">{{ p }}</a>
+                        </li>
+                        {% endfor %}
+
+                        <li class="page-item {{ page >= pages ? 'disabled' }}">
+                            <a class="page-link" href="{{ path('app_admin_bourse_transactions', {page: page + 1, type: currentType}) }}"><i class="bi bi-chevron-right"></i></a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .bg-success-soft { background-color: rgba(25, 135, 84, 0.1); }
+    .bg-danger-soft { background-color: rgba(220, 53, 69, 0.1); }
+    .avatar-xs { width: 32px; height: 32px; }
+    .breadcrumb-item + .breadcrumb-item::before { content: "\F138"; font-family: "bootstrap-icons"; font-size: 10px; }
+</style>
+
+<script>
+function filterTxnTable() {
+    var input = document.getElementById("txnSearch");
+    var filter = input.value.toUpperCase();
+    var table = document.getElementById("txnTable");
+    var tr = table.getElementsByTagName("tr");
+
+    for (var i = 1; i < tr.length; i++) {
+        var found = false;
+        var tds = tr[i].getElementsByTagName("td");
+        for (var j = 0; j < tds.length; j++) {
+            if (tds[j].textContent.toUpperCase().indexOf(filter) > -1) {
+                found = true;
+                break;
+            }
+        }
+        tr[i].style.display = found ? "" : "none";
+    }
+}
+</script>
+{% endblock %}

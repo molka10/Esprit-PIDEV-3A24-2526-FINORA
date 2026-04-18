@@ -1,0 +1,55 @@
+<tbody>
+{% for user in users %}
+<tr>
+    <td>{{ user.id }}</td>
+    <td>{{ user.username }}</td>
+    <td>{{ user.email }}</td>
+
+    <td>
+        {% if user.role == 'ADMIN' %}
+            <span class="badge bg-danger">ADMIN</span>
+        {% elseif user.role == 'ENTREPRISE' %}
+            <span class="badge bg-warning text-dark">ENTREPRISE</span>
+        {% else %}
+            <span class="badge bg-primary">USER</span>
+        {% endif %}
+    </td>
+
+    <td>{{ user.phone }}</td>
+    <td>{{ user.address }}</td>
+
+    <td>
+        {% if user.isVerified %}
+            <span class="badge bg-success">✔ Verified</span>
+        {% else %}
+            <span class="badge bg-secondary">✖ Not Verified</span>
+        {% endif %}
+    </td>
+
+    <td>
+        {% set risk = riskScores[user.id]|default({'score': 0, 'level': 'LOW'}) %}
+        {% if risk.level == 'HIGH' %}
+            <span class="badge bg-danger">HIGH • {{ risk.score }}</span>
+        {% elseif risk.level == 'MEDIUM' %}
+            <span class="badge bg-warning text-dark">MED • {{ risk.score }}</span>
+        {% else %}
+            <span class="badge bg-success">LOW • {{ risk.score }}</span>
+        {% endif %}
+    </td>
+
+    <td>
+        <a href="{{ path('admin_user_show', {'id': user.id}) }}" class="btn btn-sm btn-info">👁</a>
+        <a href="{{ path('admin_user_edit', {'id': user.id}) }}" class="btn btn-sm btn-warning">✏</a>
+
+        <form method="post"
+              action="{{ path('admin_user_delete', {'id': user.id}) }}"
+              style="display:inline;">
+            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ user.id) }}">
+            <button class="btn btn-sm btn-danger">🗑</button>
+        </form>
+    </td>
+</tr>
+{% else %}
+<tr><td colspan="9">No users found</td></tr>
+{% endfor %}
+</tbody>

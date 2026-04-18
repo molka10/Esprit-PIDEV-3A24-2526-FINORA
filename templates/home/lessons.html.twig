@@ -1,0 +1,697 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}FINORA - Lessons{% endblock %}
+
+{% block body %}
+
+
+<main>
+    <section class="pt-5 pb-0">
+        <div class="container">
+            <div class="row align-items-center g-4 purple-section p-4 p-lg-5 rounded-4 overflow-hidden hero-finora">
+                <div class="col-lg-6">
+                    <span class="badge bg-primary bg-opacity-10 text-primary mb-3">Catalogue Lessons</span>
+                    <h1 class="display-5 mb-3 finora-title">Explorez les lessons FINORA</h1>
+                    <p class="mb-4">
+                        Parcourez les lessons disponibles, filtrez par formation et trouvez rapidement le contenu qui vous intéresse.
+                    </p>
+                    <div class="mb-4">
+                        {% include 'home/_badges.html.twig' %}
+                    </div>
+
+                    <form method="get" action="{{ path('app_lessons') }}" class="border rounded p-2 mb-4 bg-white hero-search-form" id="hero-lesson-search-form">
+                        <div class="input-group">
+                            <input
+                                type="text"
+                                name="titre"
+                                class="form-control border-0 me-1"
+                                placeholder="Trouver une lesson"
+                                value="{{ titre }}"
+                            >
+                            <button class="btn btn-primary rounded" type="submit">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </div>
+                    </form>
+
+                    <div class="row g-3">
+                        <div class="col-sm-6">
+                            <div class="card h-100 border-0 shadow-sm hero-stat-card">
+                                <div class="card-body d-flex align-items-center">
+                                    <div class="icon-lg fs-4 text-primary bg-primary bg-opacity-10 rounded">
+                                        <i class="bi bi-play-btn"></i>
+                                    </div>
+                                    <div class="ms-3">
+                                        <div class="d-flex">
+                                            <h4 class="fw-bold mb-0">{{ lessons.getTotalItemCount }}</h4>
+                                            <span class="h4 mb-0">+</span>
+                                        </div>
+                                        <div>Lessons disponibles</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-sm-6">
+                            <div class="card h-100 border-0 shadow-sm hero-stat-card">
+                                <div class="card-body d-flex align-items-center">
+                                    <div class="icon-lg fs-4 text-primary bg-primary bg-opacity-10 rounded">
+                                        <i class="fas fa-book-open"></i>
+                                    </div>
+                                    <div class="ms-3">
+                                        <div class="d-flex">
+                                            <h4 class="fw-bold mb-0">{{ formations|length }}</h4>
+                                        </div>
+                                        <div>Formations liées</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-6 text-center">
+                    <img src="{{ asset('assets/images/element/06.png') }}" class="img-fluid" style="max-height: 380px;" alt="hero image">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="py-5">
+        <div class="container">
+            <div class="row g-4">
+
+                <div class="col-lg-4 col-xl-3">
+                    <div class="card border-0 shadow-sm filter-sidebar">
+                        <div class="card-body p-4">
+                            <h4 class="mb-4 fw-bold text-purple">Filtres</h4>
+
+                            <form method="get" action="{{ path('app_lessons') }}" id="filter-form">
+                                <div class="mb-4">
+                                    <label class="form-label fw-semibold">Recherche</label>
+                                    <input type="text"
+                                           name="titre"
+                                           id="search-input"
+                                           class="form-control"
+                                           placeholder="Titre ou contenu"
+                                           value="{{ titre }}">
+                                </div>
+
+                                <div class="mb-4">
+                                    <label class="form-label fw-semibold">Formation</label>
+
+                                    <div class="formation-list">
+                                        <a href="{{ path('app_lessons', {
+                                            'titre': titre,
+                                            'tri': tri,
+                                            'ordre': ordre
+                                        }) }}"
+                                           class="formation-item {{ formationSelected == '' ? 'active' : '' }}">
+                                            Toutes les formations
+                                        </a>
+
+                                        {% for formation in formations %}
+                                            <a href="{{ path('app_lessons', {
+                                                'titre': titre,
+                                                'formation': formation.id,
+                                                'tri': tri,
+                                                'ordre': ordre
+                                            }) }}"
+                                               class="formation-item {{ formationSelected == formation.id ? 'active' : '' }}">
+                                                {{ formation.titre }}
+                                            </a>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+
+                                <div class="mb-4">
+                                    <label class="form-label fw-semibold">Trier</label>
+                                    <select name="tri" class="form-select auto-submit">
+                                        <option value="ordre" {{ tri == 'ordre' ? 'selected' : '' }}>Ordre</option>
+                                        <option value="id" {{ tri == 'id' ? 'selected' : '' }}>ID</option>
+                                        <option value="titre" {{ tri == 'titre' ? 'selected' : '' }}>Titre</option>
+                                        <option value="dureeMinutes" {{ tri == 'dureeMinutes' ? 'selected' : '' }}>Durée</option>
+                                    </select>
+                                </div>
+
+                                <div class="mb-4">
+                                    <label class="form-label fw-semibold">Ordre</label>
+                                    <select name="ordre" class="form-select auto-submit">
+                                        <option value="asc" {{ ordre == 'asc' ? 'selected' : '' }}>Ascendant</option>
+                                        <option value="desc" {{ ordre == 'desc' ? 'selected' : '' }}>Descendant</option>
+                                    </select>
+                                </div>
+
+                                <div class="d-grid gap-2">
+                                    <button class="btn btn-primary">Appliquer</button>
+                                    <a href="{{ path('app_lessons') }}" class="btn btn-outline-secondary">Reset</a>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-8 col-xl-9">
+                    <div id="results-container" style="transition: opacity 0.2s ease;">
+                        <div class="card border-0 shadow-sm mb-4 results-toolbar">
+                            <div class="card-body d-flex justify-content-between align-items-center flex-wrap gap-2">
+                                <div>
+                                    <h5 class="mb-1 fw-bold">Résultats</h5>
+                                    <div class="text-muted small">
+                                        {{ lessons.getTotalItemCount }} lesson(s)
+                                        {% if titre %} • "{{ titre }}"{% endif %}
+                                        {% if formationSelected %} • Formation filtrée{% endif %}
+                                    </div>
+                                </div>
+    
+                                <div class="d-flex gap-2 flex-wrap">
+                                    <span class="badge bg-light text-dark">Tri: {{ tri }}</span>
+                                    <span class="badge bg-light text-dark">{{ ordre|upper }}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                    {% if lessons|length > 0 %}
+
+                        {# ── Badges Section ── #}
+                        {% if userBadges is defined and userBadges|length > 0 %}
+                        <div class="card border-0 shadow-sm mb-4 p-4" style="border-radius: 20px; background: linear-gradient(135deg, #faf5ff 0%, #ede9fe 100%);">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="icon-lg fs-4 text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width:44px;height:44px;background:linear-gradient(135deg,#7c3aed,#a78bfa);">
+                                    <i class="fas fa-trophy"></i>
+                                </div>
+                                <div>
+                                    <h5 class="fw-bold mb-0" style="color:#4c1d95;">Mes Badges</h5>
+                                    <small class="text-muted">Badges obtenus en passant des quiz</small>
+                                </div>
+                            </div>
+                            <div class="d-flex flex-wrap gap-3">
+                                {% for badge in userBadges %}
+                                    {% set badgeIcon = 'fas fa-star' %}
+                                    {% set badgeColor = '#7c3aed' %}
+                                    {% set badgeBg = '#ede9fe' %}
+                                    {% set badgeLabel = 'Standard' %}
+
+                                    {# Detect formation level from title #}
+                                    {% if 'débutant' in badge.formationTitle|lower or 'debutant' in badge.formationTitle|lower or 'beginner' in badge.formationTitle|lower %}
+                                        {% set badgeIcon = 'fas fa-seedling' %}
+                                        {% set badgeColor = '#059669' %}
+                                        {% set badgeBg = '#d1fae5' %}
+                                        {% set badgeLabel = 'Débutant' %}
+                                    {% elseif 'intermédiaire' in badge.formationTitle|lower or 'intermediaire' in badge.formationTitle|lower or 'intermediate' in badge.formationTitle|lower %}
+                                        {% set badgeIcon = 'fas fa-fire' %}
+                                        {% set badgeColor = '#d97706' %}
+                                        {% set badgeBg = '#fef3c7' %}
+                                        {% set badgeLabel = 'Intermédiaire' %}
+                                    {% elseif 'avancé' in badge.formationTitle|lower or 'avance' in badge.formationTitle|lower or 'advanced' in badge.formationTitle|lower or 'expert' in badge.formationTitle|lower %}
+                                        {% set badgeIcon = 'fas fa-gem' %}
+                                        {% set badgeColor = '#dc2626' %}
+                                        {% set badgeBg = '#fee2e2' %}
+                                        {% set badgeLabel = 'Avancé' %}
+                                    {% endif %}
+
+                                    <div class="badge-item d-flex align-items-center gap-2 px-3 py-2 rounded-pill" style="background:{{ badgeBg }}; border:1px solid {{ badgeColor }}22;">
+                                        <i class="{{ badgeIcon }}" style="color:{{ badgeColor }}; font-size:16px;"></i>
+                                        <div>
+                                            <div class="fw-bold" style="font-size:13px; color:{{ badgeColor }};">{{ badgeLabel }}</div>
+                                            <div style="font-size:11px; color:#6b7280;">{{ badge.formationTitle|slice(0,25) }}{% if badge.formationTitle|length > 25 %}...{% endif %} · {{ badge.score }}%</div>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        <div class="row g-4">
+                            {% for lesson in lessons %}
+                                {% set formationId = lesson.formation ? lesson.formation.id : 0 %}
+                                {% set isUnlocked = formationId in purchasedFormationIds %}
+                                <div class="col-md-6 col-xl-4">
+                                    <div class="card lesson-card h-100 border-0 {{ not isUnlocked ? 'lesson-locked' : '' }}">
+
+                                        <div class="thumb">
+                                            {% if lesson.videoUrl and lesson.youTubeVideoId %}
+                                                <img src="https://img.youtube.com/vi/{{ lesson.youTubeVideoId }}/hqdefault.jpg" alt="{{ lesson.titre }}">
+                                                <div class="thumb-overlay"></div>
+                                                <div class="play-badge">▶</div>
+                                            {% elseif lesson.videoUrl and lesson.isUploadedVideo %}
+                                                <div class="fallback with-video">▶ Vidéo</div>
+                                                <div class="thumb-overlay"></div>
+                                                <div class="play-badge">▶</div>
+                                            {% else %}
+                                                <div class="fallback">FINORA</div>
+                                                <div class="thumb-overlay soft"></div>
+                                            {% endif %}
+
+                                            <div class="badge-order">
+                                                Leçon {{ '%02d'|format(lesson.ordre) }}
+                                            </div>
+
+                                            {% if lesson.videoUrl %}
+                                                <div class="badge-video">Vidéo</div>
+                                            {% endif %}
+
+                                            {% if not isUnlocked %}
+                                                <div class="lock-overlay">
+                                                    <i class="fas fa-lock"></i>
+                                                </div>
+                                            {% endif %}
+                                        </div>
+
+                                        <div class="card-body d-flex flex-column">
+                                            <div class="mb-2 d-flex flex-wrap gap-2">
+                                                <span class="chip">
+                                                    {{ lesson.formation ? lesson.formation.titre : 'Formation inconnue' }}
+                                                </span>
+
+                                                {% if not isUnlocked %}
+                                                    <span class="mini-chip locked-chip"><i class="fas fa-lock me-1"></i>Verrouillée</span>
+                                                {% elseif lesson.videoUrl %}
+                                                    <span class="mini-chip video-chip">Avec vidéo</span>
+                                                {% else %}
+                                                    <span class="mini-chip neutral-chip">Contenu texte</span>
+                                                {% endif %}
+                                            </div>
+
+                                            <h5 class="fw-bold lesson-title">{{ lesson.titre }}</h5>
+
+                                            <p class="text-muted small flex-grow-1 lesson-text">
+                                                {{ lesson.contenu ? lesson.contenu|slice(0, 100) ~ '...' : 'Pas de contenu' }}
+                                            </p>
+
+                                            <div class="d-flex justify-content-between align-items-center mt-3">
+                                                <span class="duration">⏱ {{ lesson.dureeMinutes }} min</span>
+
+                                                {% if isUnlocked %}
+                                                    <a href="{{ path('app_lesson_show', {'id': lesson.id}) }}"
+                                                       class="btn btn-sm btn-primary lesson-btn">
+                                                        Voir
+                                                    </a>
+                                                {% else %}
+                                                    <a href="{{ path('app_formation_show', {'id': formationId}) }}"
+                                                       class="btn btn-sm btn-outline-secondary lesson-btn" title="Achetez la formation pour débloquer">
+                                                        <i class="fas fa-lock me-1"></i> Débloquer
+                                                    </a>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+
+                        <div class="d-flex justify-content-center mt-5">
+                            {{ knp_pagination_render(lessons) }}
+                        </div>
+                        {% else %}
+                            <div class="text-center py-5">
+                                <h5>Aucune lesson trouvée</h5>
+                                <a href="{{ path('app_lessons') }}" class="btn btn-primary mt-3 ajax-link">Réinitialiser</a>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+</main>
+
+<style>
+.text-purple {
+    color: #6d28d9;
+}
+
+.hero-finora {
+    background: linear-gradient(135deg, rgba(124, 58, 237, 0.08), rgba(167, 139, 250, 0.12));
+    border: 1px solid rgba(124, 58, 237, 0.08);
+}
+
+.hero-search-form {
+    box-shadow: 0 8px 20px rgba(124, 58, 237, 0.08);
+}
+
+.hero-stat-card {
+    border-radius: 16px;
+}
+
+.filter-sidebar {
+    border-radius: 20px;
+    overflow: hidden;
+}
+
+.formation-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.formation-item {
+    padding: 9px 12px;
+    border-radius: 12px;
+    text-decoration: none;
+    color: #444;
+    background: #f9f9ff;
+    transition: 0.22s ease;
+    font-weight: 500;
+}
+
+.formation-item:hover {
+    background: #ede9fe;
+    color: #6d28d9;
+}
+
+.formation-item.active {
+    background: linear-gradient(135deg, #7c3aed, #8b5cf6);
+    color: white;
+    box-shadow: 0 8px 18px rgba(124, 58, 237, 0.2);
+}
+
+.results-toolbar {
+    border-radius: 18px;
+}
+
+.lesson-card {
+    border-radius: 20px;
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.06);
+    border: 1px solid rgba(124, 58, 237, 0.08);
+}
+
+.lesson-card:hover {
+    transform: translateY(-7px);
+    box-shadow: 0 18px 40px rgba(124, 58, 237, 0.18);
+}
+
+.thumb {
+    height: 190px;
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(135deg, #7c3aed, #a78bfa);
+}
+
+.thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.45s ease;
+}
+
+.lesson-card:hover .thumb img {
+    transform: scale(1.06);
+}
+
+.fallback {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    font-size: 18px;
+    background: linear-gradient(135deg, #7c3aed, #a78bfa);
+}
+
+.fallback.with-video {
+    font-size: 20px;
+}
+
+.thumb-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(46, 16, 101, 0.55), rgba(46, 16, 101, 0.08));
+    pointer-events: none;
+}
+
+.thumb-overlay.soft {
+    background: linear-gradient(to top, rgba(46, 16, 101, 0.35), rgba(46, 16, 101, 0.05));
+}
+
+.play-badge {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(1);
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.92);
+    color: #6d28d9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 900;
+    font-size: 20px;
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.18);
+    transition: transform 0.28s ease, background 0.28s ease;
+}
+
+.lesson-card:hover .play-badge {
+    transform: translate(-50%, -50%) scale(1.08);
+    background: #ffffff;
+}
+
+.badge-order {
+    position: absolute;
+    bottom: 12px;
+    left: 12px;
+    background: white;
+    color: #6d28d9;
+    padding: 5px 11px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+    z-index: 2;
+}
+
+.badge-video {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: #fde68a;
+    color: #92400e;
+    padding: 5px 11px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+    z-index: 2;
+}
+
+.chip {
+    background: #ede9fe;
+    color: #6d28d9;
+    padding: 5px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.mini-chip {
+    padding: 5px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.video-chip {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.neutral-chip {
+    background: #f3f4f6;
+    color: #4b5563;
+}
+
+.lesson-title {
+    color: #1f1147;
+    line-height: 1.35;
+}
+
+.lesson-text {
+    line-height: 1.7;
+}
+
+.duration {
+    font-size: 13px;
+    color: #666;
+    font-weight: 600;
+}
+
+.lesson-btn {
+    border-radius: 10px;
+    padding-inline: 14px;
+    font-weight: 700;
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: #a78bfa;
+    box-shadow: 0 0 0 0.2rem rgba(124, 58, 237, 0.12);
+}
+
+/* ── Locked lesson cards ── */
+.lesson-locked {
+    position: relative;
+}
+
+.lesson-locked .thumb img,
+.lesson-locked .fallback {
+    filter: grayscale(70%) brightness(0.75);
+}
+
+.lesson-locked .card-body {
+    opacity: 0.7;
+}
+
+.lesson-locked:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 30px rgba(0,0,0,0.10);
+}
+
+.lock-overlay {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    background: rgba(0,0,0,0.55);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 5;
+}
+
+.lock-overlay i {
+    color: #fff;
+    font-size: 20px;
+}
+
+.locked-chip {
+    background: #f3f4f6;
+    color: #9ca3af;
+    border: 1px solid #e5e7eb;
+}
+
+/* ── Badge items ── */
+.badge-item {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    cursor: default;
+}
+
+.badge-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.08);
+}</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const form = document.getElementById('filter-form');
+    const heroForm = document.getElementById('hero-lesson-search-form');
+    const search = document.getElementById('search-input');
+    const heroSearch = heroForm ? heroForm.querySelector('input[name="titre"]') : null;
+
+    let timeout;
+    
+    function setupAjaxForm(f) {
+        if (!f) return;
+        f.addEventListener('submit', async function (e) {
+            e.preventDefault();
+            const container = document.getElementById('results-container');
+            const url = new URL(f.action || window.location.href);
+            const formData = new FormData(f);
+            const params = new URLSearchParams();
+            for (const [key, value] of formData.entries()) {
+                if (value) params.append(key, value);
+            }
+            url.search = params.toString();
+
+            // sync inputs between forms
+            if (f === heroForm && search) search.value = heroSearch.value;
+            if (f === form && heroSearch && search) heroSearch.value = search.value;
+
+            window.history.pushState({}, '', url);
+
+            if (container) container.style.opacity = '0.5';
+            try {
+                const res = await fetch(url.toString(), {
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                });
+                const html = await res.text();
+                const doc = new DOMParser().parseFromString(html, "text/html");
+                if (container && doc.getElementById('results-container')) {
+                    container.innerHTML = doc.getElementById('results-container').innerHTML;
+                }
+            } catch (err) {
+                f.submit();
+            } finally {
+                if (container) container.style.opacity = '1';
+            }
+        });
+    }
+
+    setupAjaxForm(form);
+    setupAjaxForm(heroForm);
+
+    function triggerSearch(f, s) {
+        if (s) {
+            s.addEventListener('input', function () {
+                clearTimeout(timeout);
+                timeout = setTimeout(() => {
+                    if (f) f.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+                }, 400);
+            });
+        }
+    }
+    
+    triggerSearch(form, search);
+    triggerSearch(heroForm, heroSearch);
+
+    document.querySelectorAll('.auto-submit').forEach(el => {
+        el.addEventListener('change', () => {
+            if (form) form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+        });
+    });
+
+    // Delegate ajax clicks for formations sidebar, pagination, and reset link
+    document.addEventListener('click', async function(e) {
+        let link = e.target.closest('.formation-item') || e.target.closest('.pagination a') || e.target.closest('.ajax-link');
+        if (link) {
+            e.preventDefault();
+            const container = document.getElementById('results-container');
+            const url = link.href;
+            
+            window.history.pushState({}, '', url);
+            
+            // update active state in sidebar visually if it's a formation link
+            if (e.target.closest('.formation-item')) {
+                document.querySelectorAll('.formation-item').forEach(el => el.classList.remove('active'));
+                link.classList.add('active');
+            }
+
+            if (container) container.style.opacity = '0.5';
+            try {
+                const res = await fetch(url);
+                const html = await res.text();
+                const doc = new DOMParser().parseFromString(html, "text/html");
+                if (container && doc.getElementById('results-container')) {
+                    container.innerHTML = doc.getElementById('results-container').innerHTML;
+                }
+            } catch (err) {
+                window.location.href = url;
+            } finally {
+                if (container) container.style.opacity = '1';
+                if (!e.target.closest('.formation-item')) {
+                    window.scrollTo({ top: container.offsetTop - 100, behavior: 'smooth' });
+                }
+            }
+        }
+    });
+});
+</script>
+{% endblock %}

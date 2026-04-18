@@ -1,0 +1,222 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block title %}Résultats des Quizz - Admin{% endblock %}
+
+{% block body %}
+{# KPIs Header #}
+<div class="row g-4 mb-5">
+    <!-- Stat Card 1 -->
+    <div class="col-md-4">
+        <div class="card card-body shadow-sm h-100 p-4 border-0" style="border-radius: 20px; background: white; border-left: 5px solid #8b5cf6 !important;">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h6 class="mb-1 fw-bold text-muted">Total Tentatives</h6>
+                    <h2 class="mb-1 fw-bold text-dark">{{ totalAttempts }}</h2>
+                    <span class="badge {{ growth >= 0 ? 'bg-success' : 'bg-danger' }} bg-opacity-10 {{ growth >= 0 ? 'text-success' : 'text-danger' }} rounded-pill small">
+                        <i class="fas fa-arrow-{{ growth >= 0 ? 'up' : 'down' }} me-1"></i> {{ growth|abs }}% vs mois dernier
+                    </span>
+                </div>
+                <div class="icon-lg bg-primary bg-opacity-10 rounded-circle text-primary d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                    <i class="fas fa-pencil-alt"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Stat Card 2 -->
+    <div class="col-md-4">
+        <div class="card card-body shadow-sm h-100 p-4 border-0" style="border-radius: 20px; background: white; border-left: 5px solid #10b981 !important;">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h6 class="mb-1 fw-bold text-muted">Taux de Réussite</h6>
+                    <h2 class="mb-1 fw-bold text-dark">{{ passRate }}%</h2>
+                    <span class="text-muted small">Moyenne plateforme</span>
+                </div>
+                <div class="icon-lg bg-success bg-opacity-10 rounded-circle text-success d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Stat Card 3 -->
+    <div class="col-md-4">
+        <div class="card card-body shadow-sm h-100 p-4 border-0" style="border-radius: 20px; background: white; border-left: 5px solid #ef4444 !important;">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h6 class="mb-1 fw-bold text-muted">Alertes Fraude</h6>
+                    <h2 class="mb-1 fw-bold text-danger">{{ fraudAttempts|length }}</h2>
+                    <span class="text-muted small">Tentatives suspectes</span>
+                </div>
+                <div class="icon-lg bg-danger bg-opacity-10 rounded-circle text-danger d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                    <i class="fas fa-user-secret"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mb-5">
+    {# User Segmentation #}
+    <div class="col-12">
+        <div class="card shadow-sm border-0" style="border-radius: 20px; background: #fdfcff;">
+            <div class="card-header border-0 bg-transparent p-4 pb-0">
+                <h5 class="fw-bold mb-1 text-dark">Segmentation des Utilisateurs</h5>
+                <p class="text-muted small mb-0">Basé sur le nombre de certifications obtenues</p>
+            </div>
+            <div class="card-body p-4">
+                <div class="row g-4">
+                    <div class="col-md-4">
+                        <div class="p-3 rounded-4 border border-light bg-white text-center">
+                            <i class="fas fa-seedling text-success fs-3 mb-2"></i>
+                            <h6 class="fw-bold text-dark mb-1">Débutants (Novice)</h6>
+                            <h3 class="fw-bold text-success mb-0">{{ segments.beginner }}</h3>
+                            <small class="text-muted">0-1 certification</small>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="p-3 rounded-4 border border-light bg-white text-center">
+                            <i class="fas fa-star text-primary fs-3 mb-2"></i>
+                            <h6 class="fw-bold text-dark mb-1">Intermédiaires</h6>
+                            <h3 class="fw-bold text-primary mb-0">{{ segments.intermediate }}</h3>
+                            <small class="text-muted">2-4 certifications</small>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="p-3 rounded-4 border border-light bg-white text-center">
+                            <i class="fas fa-crown text-warning fs-3 mb-2"></i>
+                            <h6 class="fw-bold text-dark mb-1">Experts (Avancé)</h6>
+                            <h3 class="fw-bold text-warning mb-0">{{ segments.expert }}</h3>
+                            <small class="text-muted">5+ certifications</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    {# Main Activity Table #}
+    <div class="col-xl-8">
+        <div class="card shadow-sm border-0 h-100" style="border-radius: 20px;">
+            <div class="card-header border-0 p-4 bg-transparent d-flex justify-content-between align-items-center">
+                <h5 class="mb-0 fw-bold text-dark"><i class="fas fa-history me-2 text-primary"></i>Tentatives Récentes</h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="bg-light text-muted small">
+                            <tr>
+                                <th class="border-0 px-4 py-3">Utilisateur</th>
+                                <th class="border-0 py-3">Score</th>
+                                <th class="border-0 py-3">Statut</th>
+                                <th class="border-0 px-4 py-3 text-end">Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for result in latestResults %}
+                                <tr>
+                                    <td class="px-4 py-3">
+                                        <div class="fw-bold text-dark">{{ result.studentName }}</div>
+                                        <div class="small text-muted">{{ result.lessonTitle }}</div>
+                                    </td>
+                                    <td class="py-3">
+                                        <span class="fw-bold {{ result.score >= 50 ? 'text-success' : 'text-danger' }}">{{ result.score }}%</span>
+                                    </td>
+                                    <td class="py-3">
+                                        {% if result.passed %}
+                                            <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-3">Réussi</span>
+                                        {% else %}
+                                            <span class="badge bg-danger bg-opacity-10 text-danger rounded-pill px-3">Échoué</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="px-4 py-3 text-end">
+                                        <span class="small text-muted">{{ result.takenAt ? result.takenAt|date('d M, H:i') : 'N/A' }}</span>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# Sidebar: Top & Fraud #}
+    <div class="col-xl-4">
+        <div class="row g-4">
+            {# Fraud Detection #}
+            <div class="col-12">
+                <div class="card shadow-sm border-0 h-100" style="border-radius: 20px; border: 1px solid #ffebeb !important; background: #fffafb;">
+                    <div class="card-header border-0 bg-transparent p-4 pb-0 d-flex justify-content-between align-items-center">
+                        <h5 class="fw-bold text-danger mb-0"><i class="fas fa-shield-virus me-2"></i>Alertes Fraude</h5>
+                        <span class="badge bg-danger rounded-pill">{{ fraudAttempts|length }}</span>
+                    </div>
+                    <div class="card-body p-4">
+                        {% if fraudAttempts|length > 0 %}
+                            <div class="accordion accordion-flush" id="fraudAccordion">
+                                {% for fraud in fraudAttempts %}
+                                    <div class="accordion-item bg-transparent border-0 mb-3 shadow-sm rounded-4 overflow-hidden" style="border: 1px solid #ffd6d6 !important;">
+                                        <h2 class="accordion-header" id="headingFraud{{ fraud.id }}">
+                                            <button class="accordion-button collapsed fw-bold text-dark px-3 py-3 bg-white" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFraud{{ fraud.id }}" aria-expanded="false" aria-controls="collapseFraud{{ fraud.id }}">
+                                                <div class="d-flex flex-column">
+                                                    <span class="text-danger small fw-bold text-uppercase mb-1" style="font-size: 0.65rem;">Flagged Attempt</span>
+                                                    <span class="fs-6">{{ fraud.studentName }}</span>
+                                                    <span class="text-muted small fw-normal">{{ fraud.lessonTitle|length > 25 ? fraud.lessonTitle|slice(0, 25) ~ '...' : fraud.lessonTitle }}</span>
+                                                </div>
+                                            </button>
+                                        </h2>
+                                        <div id="collapseFraud{{ fraud.id }}" class="accordion-collapse collapse" aria-labelledby="headingFraud{{ fraud.id }}" data-bs-parent="#fraudAccordion">
+                                            <div class="accordion-body bg-white border-top p-3" style="font-size: 0.85rem;">
+                                                <div class="bg-light p-2 rounded mb-3 text-danger border border-danger border-opacity-10">
+                                                    <strong>Analyse IA :</strong><br>
+                                                    {{ fraud.fraudExplanation ?: 'Aucune explication détaillée générée.' }}
+                                                </div>
+                                                <div class="d-flex justify-content-between mb-2">
+                                                    <span class="text-muted">Score Obtenu :</span>
+                                                    <span class="fw-bold">{{ fraud.score }}%</span>
+                                                </div>
+                                                <div class="d-flex justify-content-between">
+                                                    <span class="text-muted">Date :</span>
+                                                    <span class="small">{{ fraud.takenAt|date('d M, H:i') }}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="text-center py-5">
+                                <i class="fas fa-check-shield text-success fs-1 opacity-25 mb-3"></i>
+                                <p class="text-muted small">Sécurité maximale. Aucune fraude détectée.</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            {# Top Quizzes #}
+            <div class="col-12">
+                <div class="card shadow-sm border-0" style="border-radius: 20px;">
+                    <div class="card-header border-0 bg-transparent p-4 pb-0">
+                        <h5 class="fw-bold text-primary mb-0"><i class="fas fa-award me-2"></i>Top Formations</h5>
+                    </div>
+                    <div class="card-body p-4">
+                        {% for top in topQuizzes %}
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <span class="small fw-bold text-truncate" style="max-width: 180px;">{{ top.lessonTitle }}</span>
+                                    <span class="small badge bg-primary bg-opacity-10 text-primary">{{ top.totalPassed }} réussis</span>
+                                </div>
+                                <div class="progress" style="height: 4px;">
+                                    {% set maxP = topQuizzes[0].totalPassed %}
+                                    <div class="progress-bar bg-primary" style="width: {{ (top.totalPassed / maxP * 100)|round }}%"></div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,97 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Certificat FINORA{% endblock %}
+
+{% block body %}
+<main>
+    <section class="py-5" style="background: linear-gradient(180deg, #f5f3ff 0%, #ffffff 100%); min-height:100vh;">
+        <div class="container">
+            <div class="mx-auto" style="max-width: 980px;">
+
+                <div class="text-center mb-4">
+                    <a href="{{ path('app_home') }}" class="navbar-brand d-inline-block mb-3">
+                        <img class="light-mode-item navbar-brand-item" src="{{ asset('assets/images/logo.svg') }}" alt="FINORA logo" style="max-height:50px;">
+                    </a>
+                </div>
+
+                <div class="card border-0 shadow-lg overflow-hidden" style="border-radius: 28px;">
+                    <div class="p-4 p-md-5 text-center" style="background: linear-gradient(135deg, #ede9fe 0%, #f5f3ff 45%, #ffffff 100%); border: 10px solid #7c3aed;">
+
+                        <div class="mb-3">
+                            <span class="badge rounded-pill px-3 py-2" style="background:#7c3aed; color:#ffffff; font-weight:700; font-size:14px;">
+                                CERTIFICAT OFFICIEL FINORA
+                            </span>
+                        </div>
+
+                        <h1 class="display-5 fw-bold mb-3" style="color:#4c1d95;">
+                            Certificat de réussite
+                        </h1>
+
+                        <p class="text-muted mb-4" style="font-size:1.1rem;">
+                            Ce certificat est fièrement décerné à
+                        </p>
+
+                        <div class="mb-4">
+                            <h2 class="fw-bold mb-0" style="font-size:2.6rem; color:#6d28d9; font-family: Georgia, serif;">
+                                {{ quizResult.studentName }}
+                            </h2>
+                        </div>
+
+                        <p class="mb-2" style="font-size:1.1rem; color:#374151;">
+                            pour avoir réussi avec succès le quiz de la leçon
+                        </p>
+
+                        <h3 class="fw-bold mb-2" style="color:#111827;">
+                            {{ quizResult.lessonTitle }}
+                        </h3>
+
+                        <p class="mb-4 text-muted">
+                            Formation : <strong>{{ quizResult.formationTitle }}</strong>
+                        </p>
+
+                        <div class="row g-3 justify-content-center mb-4">
+                            <div class="col-md-4">
+                                <div class="p-3 rounded-4" style="background:#ffffff; border:1px solid #e9d5ff;">
+                                    <div class="small text-muted mb-1">Score obtenu</div>
+                                    <div class="fw-bold" style="font-size:1.5rem; color:#16a34a;">
+                                        {{ quizResult.score }}%
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <div class="p-3 rounded-4" style="background:#ffffff; border:1px solid #e9d5ff;">
+                                    <div class="small text-muted mb-1">Date</div>
+                                    <div class="fw-bold" style="font-size:1.1rem; color:#4c1d95;">
+                                        {{ quizResult.takenAt ? quizResult.takenAt|date('d/m/Y') : 'Non disponible' }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <p class="mb-4 text-muted" style="max-width:700px; margin:auto;">
+                            FINORA reconnaît officiellement votre réussite et votre engagement dans l’apprentissage
+                            de cette thématique financière.
+                        </p>
+
+                        <div class="d-flex justify-content-center gap-2 flex-wrap mt-4">
+                            <a href="{{ path('app_home') }}" class="btn btn-outline-secondary">
+                                Retour à l’accueil
+                            </a>
+                            <a href="{{ path('app_formations') }}" class="btn btn-primary">
+                                Continuer sur FINORA
+                            </a>
+                        </div>
+
+                        <div class="mt-5 pt-4" style="border-top:1px dashed #c4b5fd;">
+                            <div class="fw-bold" style="color:#6d28d9;">FINORA</div>
+                            <div class="small text-muted">Plateforme d’apprentissage en finance</div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+</main>
+{% endblock %}

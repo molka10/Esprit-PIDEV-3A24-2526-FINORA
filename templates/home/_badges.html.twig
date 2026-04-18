@@ -1,0 +1,55 @@
+{# templates/home/_badges.html.twig #}
+{% if app.user %}
+    {% set highestLevel = 'Novice' %}
+    {% set badgeColor = '#94a3b8' %} {# Gray for Novice #}
+    {% set badgeIcon = 'bi-award' %}
+    {% set badgeLabel = 'Novice' %}
+    {% set badgeBg = 'rgba(148, 163, 184, 0.1)' %}
+
+    {% if userBadges is defined and userBadges|length > 0 %}
+        {# Determine highest reached level #}
+        {% set levels = [] %}
+        {% for b in userBadges %}
+            {% set levels = levels|merge([b.level]) %}
+        {% endfor %}
+
+        {% if 'Avancé' in levels %}
+            {% set highestLevel = 'Avancé' %}
+            {% set badgeColor = '#f59e0b' %} {# Gold/Orange #}
+            {% set badgeIcon = 'bi-gem' %}
+            {% set badgeLabel = 'Avancé' %}
+            {% set badgeBg = 'rgba(245, 158, 11, 0.15)' %}
+        {% elseif 'Intermédiaire' in levels %}
+            {% set highestLevel = 'Intermédiaire' %}
+            {% set badgeColor = '#8b5cf6' %} {# Purple/Blue #}
+            {% set badgeIcon = 'bi-fire' %}
+            {% set badgeLabel = 'Intermédiaire' %}
+            {% set badgeBg = 'rgba(139, 92, 246, 0.15)' %}
+        {% elseif 'Débutant' in levels %}
+            {% set highestLevel = 'Débutant' %}
+            {% set badgeColor = '#10b981' %} {# Green #}
+            {% set badgeIcon = 'bi-seedling' %}
+            {% set badgeLabel = 'Débutant' %}
+            {% set badgeBg = 'rgba(16, 185, 129, 0.15)' %}
+        {% endif %}
+    {% endif %}
+
+    <div class="user-achievement-badge py-2 px-3 rounded-pill d-inline-flex align-items-center shadow-sm border border-light" 
+         style="background: {{ badgeBg }}; border: 1px solid {{ badgeColor }}20 !important; cursor: default; transition: transform 0.3s ease;">
+        <div class="icon-small rounded-circle d-flex align-items-center justify-content-center me-2" 
+             style="width: 28px; height: 28px; background: {{ badgeColor }}; color: #fff; font-size: 14px;">
+            <i class="bi {{ badgeIcon }}"></i>
+        </div>
+        <div>
+            <span class="small text-muted d-block" style="font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 700; line-height: 1;">Niveau</span>
+            <span class="fw-bold" style="color: {{ badgeColor }}; font-size: 0.9rem; line-height: 1.1;">{{ badgeLabel }}</span>
+        </div>
+    </div>
+
+    <style>
+        .user-achievement-badge:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px {{ badgeColor }}20 !important;
+        }
+    </style>
+{% endif %}

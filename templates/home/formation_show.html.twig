@@ -1,0 +1,730 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ formation.titre }} - FINORA{% endblock %}
+
+{% block body %}
+
+
+<main>
+    <section class="py-5">
+        <div class="container">
+
+            {% for message in app.flashes('success') %}
+                <div class="alert alert-success">{{ message }}</div>
+            {% endfor %}
+
+            <div class="card formation-hero-card border-0 shadow-sm overflow-hidden mb-5">
+                <div class="row g-0 align-items-stretch">
+                    <div class="col-lg-5">
+                        <div class="formation-hero-media-wrapper">
+                            {% if formation.imageUrl %}
+                                <img
+                                    src="{{ asset('uploads/formations/' ~ formation.imageUrl) }}"
+                                    alt="{{ formation.titre }}"
+                                    class="formation-hero-media"
+                                >
+                            {% else %}
+                                <img
+                                    src="{{ asset('assets/images/courses/4by3/16.jpg') }}"
+                                    alt="{{ formation.titre }}"
+                                    class="formation-hero-media"
+                                >
+                            {% endif %}
+                            <div class="formation-hero-overlay"></div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-7">
+                        <div class="card-body p-4 p-lg-5 h-100 d-flex flex-column justify-content-center">
+                            <div class="d-flex flex-wrap gap-2 mb-3">
+                                <span class="hero-level-badge">{{ formation.niveau }}</span>
+
+                                {% for tag in formation.categorie ? formation.categorie|split(',') : [] %}
+                                    {% if tag|trim != '' %}
+                                        <span class="purple-chip">{{ tag|trim }}</span>
+                                    {% endif %}
+                                {% endfor %}
+
+                                {% if formation.isPublished %}
+                                    <span class="hero-status-badge published">Publié</span>
+                                {% else %}
+                                    <span class="hero-status-badge draft">Non publié</span>
+                                {% endif %}
+                            </div>
+
+                            <h1 class="h2 mb-3 formation-hero-title">{{ formation.titre }}</h1>
+
+                            <p class="formation-hero-text mb-4">
+                                {{ formation.description ?: 'Pas de description disponible.' }}
+                            </p>
+
+                            <div class="d-flex gap-2 flex-wrap mb-4">
+                                {% if isPurchased %}
+                                    <div class="purchased-badge shadow-sm">
+                                        <i class="bi bi-patch-check-fill me-2"></i> Accès Membre Activé
+                                    </div>
+                                {% else %}
+                                    <button type="button" class="btn formation-main-btn" data-bs-toggle="modal" data-bs-target="#purchaseModalShow">
+                                        <i class="bi bi-cart me-1"></i> Acheter
+                                    </button>
+                                {% endif %}
+                            </div>
+                            <div class="mt-4 pt-2">
+                                {% include 'home/_badges.html.twig' %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Purchase Modal for Show Page -->
+            {% if not isPurchased %}
+                <div class="modal fade" id="purchaseModalShow" tabindex="-1" aria-labelledby="purchaseModalShowLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered modal-lg">
+                        <div class="modal-content border-0 overflow-hidden" style="border-radius: 20px; box-shadow: 0 25px 50px -12px rgba(124, 58, 237, 0.25);">
+                            <div class="modal-header border-bottom-0 pb-0 pt-4 px-4">
+                                <h5 class="modal-title fw-bold" id="purchaseModalShowLabel" style="color: #4c1d95;">Confirmation d'inscription</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+                            </div>
+                            <div class="modal-body p-4">
+                                <div class="row g-4">
+                                    <div class="col-md-6">
+                                        <div class="d-flex align-items-center mb-4">
+                                            <div class="icon-md bg-primary bg-opacity-10 text-primary rounded-circle me-3 d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
+                                                <i class="fas fa-user-circle fs-4"></i>
+                                            </div>
+                                            <div>
+                                                <label class="small text-muted d-block">Identité de l'apprenant</label>
+                                                <span class="fw-bold text-dark">{{ app.user ? app.user.username : 'Utilisateur Connecté' }}</span>
+                                            </div>
+                                        </div>
+
+                                        <h6 class="fw-bold mb-3 text-dark">Détails de la formation</h6>
+                                        <div class="p-3 rounded-4 mb-4" style="background: #f8fafc; border: 1px solid #e2e8f0;">
+                                            <h5 class="h6 fw-bold mb-2">{{ formation.titre }}</h5>
+                                            <p class="small text-muted mb-0">
+                                                {{ formation.description|slice(0, 150) }}{% if formation.description|length > 150 %}...{% endif %}
+                                            </p>
+                                        </div>
+
+                                        <div class="bg-primary bg-opacity-10 p-3 rounded-4 mb-3">
+                                            <p class="mb-2 fw-semibold text-primary small"><i class="fas fa-check-circle me-1"></i> Bénéfices inclus :</p>
+                                            <ul class="list-unstyled small mb-0 text-dark">
+                                                <li class="mb-1">✅ Accès illimité à toutes les leçons</li>
+                                                <li class="mb-1">✅ Quiz d'évaluation et certification</li>
+                                                <li>✅ Support et ressources pédagogiques</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <div class="p-4 rounded-4 h-100" style="background: #faf5ff; border: 1px solid #ede9fe;">
+                                            <label class="small fw-bold mb-3 d-block" style="color: #6d28d9;">
+                                                <i class="fas fa-list-ul me-1"></i> Programme ({{ lessons|length }} Leçons)
+                                            </label>
+                                            <div class="lesson-preview-list" style="max-height: 250px; overflow-y: auto; padding-right: 5px;">
+                                                {% for lesson in lessons %}
+                                                    <div class="d-flex align-items-center mb-2 p-2 rounded-3 bg-white border border-light transition-all hover-shadow-sm">
+                                                        <div class="small fw-bold text-primary me-2">{{ loop.index }}.</div>
+                                                        <div class="small text-dark text-truncate">{{ lesson.titre }}</div>
+                                                    </div>
+                                                {% endfor %}
+                                            </div>
+
+                                            <form action="{{ path('app_formation_inscription', {'id': formation.id}) }}" method="post" id="purchaseFormShow" class="mt-4">
+                                                <div class="mb-3">
+                                                    <label class="form-label small fw-bold text-muted">Mode de paiement sécurisé</label>
+                                                    <div class="d-flex gap-2">
+                                                        <div class="flex-fill border rounded-3 p-2 text-center bg-white">
+                                                            <i class="fab fa-cc-visa text-primary fa-lg"></i>
+                                                        </div>
+                                                        <div class="flex-fill border rounded-3 p-2 text-center bg-white">
+                                                            <i class="fab fa-cc-mastercard text-danger fa-lg"></i>
+                                                        </div>
+                                                        <div class="flex-fill border rounded-3 p-2 text-center bg-white">
+                                                            <i class="fab fa-paypal text-info fa-lg"></i>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="d-grid mt-4">
+                                                    <button type="submit" class="btn btn-primary py-3 fw-bold shadow-lg" style="border-radius: 14px; background: linear-gradient(135deg, #7c3aed, #8b5cf6); border: none; transition: transform 0.2s;">
+                                                        Débloquer l'accès maintenant
+                                                    </button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <style>
+                    .hover-shadow-sm:hover {
+                        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+                        transform: translateX(3px);
+                    }
+                    .transition-all {
+                        transition: all 0.2s ease;
+                    }
+                    .lesson-preview-list::-webkit-scrollbar {
+                        width: 4px;
+                    }
+                    .lesson-preview-list::-webkit-scrollbar-track {
+                        background: #f1f1f1;
+                        border-radius: 10px;
+                    }
+                    .lesson-preview-list::-webkit-scrollbar-thumb {
+                        background: #ddd6fe;
+                        border-radius: 10px;
+                    }
+                    .lesson-preview-list::-webkit-scrollbar-thumb:hover {
+                        background: #c4b5fd;
+                    }
+                </style>
+            {% endif %}
+
+            {% if isPurchased %}
+                <!-- 📊 Quiz Progress Dashboard -->
+                <div class="card border-0 shadow-lg mb-5 overflow-hidden" style="border-radius: 24px; background: rgba(255,255,255,0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.5) !important;">
+                    <div class="card-header bg-dark text-white p-4 border-0 d-flex justify-content-between align-items-center">
+                        <h4 class="mb-0 fw-bold"><i class="bi bi-graph-up-arrow me-2 text-warning"></i>Tableau de bord des Quiz</h4>
+                        <span class="badge bg-primary px-3 py-2 rounded-pill">
+                            {% set totalPassed = 0 %}
+                            {% for quiz in quizResultsMap %}{% set totalPassed = totalPassed + 1 %}{% endfor %}
+                            {{ totalPassed }} / {{ lessons|length }} Quiz Réussis
+                        </span>
+                    </div>
+                    <div class="card-body p-4 p-md-5">
+                        <div class="row g-4">
+                            {# 🟢 Quiz Réussis #}
+                            <div class="col-lg-6">
+                                <div class="px-2 mb-3 border-bottom d-flex align-items-center gap-2 pb-2">
+                                    <h5 class="fw-bold mb-0 text-success"><i class="bi bi-check-circle-fill me-2"></i>Vos Succès</h5>
+                                </div>
+                                <div class="d-grid gap-3" style="max-height: 400px; overflow-y: auto; padding-right: 5px;">
+                                    {% set countPassed = 0 %}
+                                    {% for lesson in lessons %}
+                                        {% if quizResultsMap[lesson.id] is defined %}
+                                            {% set countPassed = countPassed + 1 %}
+                                            <div class="d-flex align-items-center justify-content-between p-3 rounded-4 bg-white border shadow-sm transition-all hover-scale">
+                                                <div class="d-flex align-items-center gap-3">
+                                                    <div class="score-circle">
+                                                        {{ quizResultsMap[lesson.id].score }}%
+                                                    </div>
+                                                    <div>
+                                                        <div class="fw-bold text-dark text-truncate" style="max-width: 200px;">{{ lesson.titre }}</div>
+                                                        <small class="text-muted"><i class="bi bi-calendar-check me-1"></i>{{ quizResultsMap[lesson.id].takenAt|date('d/m/Y') }}</small>
+                                                    </div>
+                                                </div>
+                                                <a href="{{ path('app_quiz_certificate', {'id': quizResultsMap[lesson.id].id}) }}" class="btn btn-sm btn-outline-success rounded-pill px-3">
+                                                    <i class="bi bi-file-earmark-pdf-fill me-1"></i> Certificat
+                                                </a>
+                                            </div>
+                                        {% endif %}
+                                    {% endfor %}
+                                    
+                                    {% if countPassed == 0 %}
+                                        <div class="text-center py-5 text-muted">
+                                            <i class="bi bi-journal-x fs-1 mb-2 d-block"></i>
+                                            Aucun quiz validé pour le moment.
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            {# 🔵 Quiz à Passer #}
+                            <div class="col-lg-6">
+                                <div class="px-2 mb-3 border-bottom d-flex align-items-center gap-2 pb-2">
+                                    <h5 class="fw-bold mb-0 text-primary"><i class="bi bi-hourglass-split me-2"></i>Examens Restants</h5>
+                                </div>
+                                <div class="d-grid gap-3" style="max-height: 400px; overflow-y: auto; padding-right: 5px;">
+                                    {% set countPending = 0 %}
+                                    {% for lesson in lessons %}
+                                        {% if quizResultsMap[lesson.id] is not defined %}
+                                            {% set countPending = countPending + 1 %}
+                                            <div class="d-flex align-items-center justify-content-between p-3 rounded-4 bg-light bg-opacity-50 border transition-all hover-scale">
+                                                <div class="d-flex align-items-center gap-3">
+                                                    {% if fraudMap[lesson.id] is defined and fraudMap[lesson.id] >= 3 %}
+                                                        <div class="restricted-circle"><i class="bi bi-slash-circle"></i></div>
+                                                        <div>
+                                                            <div class="fw-bold text-danger text-truncate" style="max-width: 200px;">{{ lesson.titre }}</div>
+                                                            <small class="text-danger fw-bold"><i class="bi bi-exclamation-triangle-fill me-1"></i> Accès Interdit (Fraude)</small>
+                                                        </div>
+                                                    {% else %}
+                                                        <div class="pending-circle">Q</div>
+                                                        <div>
+                                                            <div class="fw-bold text-dark text-truncate" style="max-width: 200px;">{{ lesson.titre }}</div>
+                                                            <small class="text-muted">Évaluation requise</small>
+                                                        </div>
+                                                    {% endif %}
+                                                </div>
+                                                
+                                                {% if fraudMap[lesson.id] is defined and fraudMap[lesson.id] >= 3 %}
+                                                    <span class="badge bg-danger rounded-pill px-3 shadow-none opacity-75">
+                                                        Banni
+                                                    </span>
+                                                {% else %}
+                                                    <a href="{{ path('app_quiz_take', {'id': lesson.id}) }}" class="btn btn-sm btn-primary rounded-pill px-3 shadow-sm">
+                                                        <i class="bi bi-play-fill me-1"></i> Passer
+                                                    </a>
+                                                {% endif %}
+                                            </div>
+                                        {% endif %}
+                                    {% endfor %}
+                                    
+                                    {% if countPending == 0 %}
+                                        <div class="text-center py-5 text-success">
+                                            <i class="bi bi-award-fill fs-1 mb-2 d-block"></i>
+                                            Félicitations ! Tous les quiz sont validés.
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <style>
+                    .score-circle {
+                        width: 48px;
+                        height: 48px;
+                        background: #dcfce7;
+                        color: #166534;
+                        border-radius: 50%;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        font-weight: 800;
+                        font-size: 0.85rem;
+                        border: 2px solid #bdf1d2;
+                    }
+                    .pending-circle {
+                        width: 48px;
+                        height: 48px;
+                        background: #f1f5f9;
+                        color: #64748b;
+                        border-radius: 50%;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        font-weight: 800;
+                        font-size: 1.1rem;
+                        border: 2px solid #e2e8f0;
+                    }
+                    .restricted-circle {
+                        width: 48px;
+                        height: 48px;
+                        background: #fee2e2;
+                        color: #dc2626;
+                        border-radius: 50%;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        font-weight: 800;
+                        font-size: 1.1rem;
+                        border: 2px solid #fecaca;
+                    }
+                    .hover-scale:hover {
+                        transform: scale(1.02);
+                        box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+                        background: white !important;
+                    }
+                </style>
+            {% endif %}
+
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+                <div>
+                    <h2 class="h3 mb-1 formation-section-title">Lessons de cette formation</h2>
+                    <p class="text-muted mb-0">Découvrez les lessons incluses dans ce parcours.</p>
+                </div>
+                <span class="lesson-count-badge">{{ lessons|length }} lesson(s)</span>
+            </div>
+
+            {% if lessons|length > 0 %}
+                <div class="row g-4">
+                    {% for lesson in lessons %}
+                        <div class="col-md-6 col-xl-4">
+                            <div class="card lesson-card border-0 h-100 {% if not isPurchased %}locked-lesson{% endif %}">
+
+                                <div class="thumb">
+                                    {% if lesson.videoUrl and lesson.youTubeVideoId %}
+                                        <img src="https://img.youtube.com/vi/{{ lesson.youTubeVideoId }}/hqdefault.jpg" alt="{{ lesson.titre }}">
+                                        <div class="thumb-overlay"></div>
+                                        <div class="play-badge">{% if isPurchased %}▶{% else %}<i class="bi bi-lock-fill"></i>{% endif %}</div>
+                                    {% elseif lesson.videoUrl and lesson.isUploadedVideo %}
+                                        <div class="fallback with-video">▶ Vidéo</div>
+                                        <div class="thumb-overlay"></div>
+                                        <div class="play-badge">{% if isPurchased %}▶{% else %}<i class="bi bi-lock-fill"></i>{% endif %}</div>
+                                    {% else %}
+                                        <div class="fallback">FINORA</div>
+                                        <div class="thumb-overlay soft"></div>
+                                        {% if not isPurchased %}
+                                            <div class="play-badge"><i class="bi bi-lock-fill"></i></div>
+                                        {% endif %}
+                                    {% endif %}
+
+                                    <div class="badge-order">
+                                        Leçon {{ '%02d'|format(lesson.ordre) }}
+                                    </div>
+
+                                    {% if lesson.videoUrl %}
+                                        <div class="badge-video">Vidéo</div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="card-body d-flex flex-column">
+                                    <div class="mb-2 d-flex flex-wrap gap-2">
+                                        <span class="mini-chip duration-chip">⏱ {{ lesson.dureeMinutes }} min</span>
+
+                                        {% if lesson.videoUrl %}
+                                            <span class="mini-chip video-chip">Avec vidéo</span>
+                                        {% else %}
+                                            <span class="mini-chip neutral-chip">Contenu texte</span>
+                                        {% endif %}
+                                    </div>
+
+                                    <h5 class="fw-bold lesson-title">{{ lesson.titre }}</h5>
+
+                                    <p class="text-muted small flex-grow-1 lesson-text">
+                                        {{ lesson.contenu ? lesson.contenu|slice(0, 120) ~ '...' : 'Pas de contenu' }}
+                                    </p>
+
+                                    <div class="d-flex justify-content-between align-items-center mt-3">
+                                        <span class="duration-label">Ordre {{ lesson.ordre }}</span>
+
+                                        {% if isPurchased %}
+                                            <a href="{{ path('app_lesson_show', {'id': lesson.id}) }}" class="btn btn-sm btn-primary lesson-btn">
+                                                Accéder
+                                            </a>
+                                        {% else %}
+                                            <button type="button" class="btn btn-sm btn-light text-muted lesson-btn" data-bs-toggle="modal" data-bs-target="#purchaseModalShow">
+                                                <i class="bi bi-lock-fill"></i> Verrouillé
+                                            </button>
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="alert alert-info">
+                    Cette formation ne contient encore aucune lesson.
+                </div>
+            {% endif %}
+        </div>
+    </section>
+</main>
+
+<style>
+.formation-hero-card {
+    border-radius: 26px;
+    background: #ffffff;
+    border: 1px solid rgba(124, 58, 237, 0.08);
+    box-shadow: 0 14px 40px rgba(109, 40, 217, 0.08);
+}
+
+.formation-hero-media-wrapper {
+    position: relative;
+    height: 100%;
+    min-height: 360px;
+    overflow: hidden;
+    background: linear-gradient(135deg, #ede9fe 0%, #ddd6fe 50%, #c4b5fd 100%);
+}
+
+.formation-hero-media {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.formation-hero-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(46, 16, 101, 0.28), rgba(46, 16, 101, 0.04));
+    pointer-events: none;
+}
+
+.formation-hero-title {
+    color: #1f1147;
+    font-weight: 800;
+    line-height: 1.25;
+}
+
+.formation-hero-text {
+    color: #6b7280;
+    line-height: 1.85;
+    font-size: 1rem;
+}
+
+.hero-level-badge {
+    background: rgba(124, 58, 237, 0.1);
+    color: #6d28d9;
+    padding: 7px 12px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 800;
+}
+
+.hero-status-badge {
+    padding: 7px 12px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.hero-status-badge.published {
+    background: rgba(220, 252, 231, 0.95);
+    color: #166534;
+}
+
+.hero-status-badge.draft {
+    background: rgba(254, 243, 199, 0.95);
+    color: #92400e;
+}
+
+.purple-chip {
+    background: #f3e8ff;
+    color: #6d28d9;
+    padding: 7px 12px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+    border: 1px solid rgba(124, 58, 237, 0.12);
+}
+
+.purchased-badge {
+    display: inline-flex;
+    align-items: center;
+    background: linear-gradient(135deg, #dcfce7, #f0fdf4);
+    color: #166534;
+    padding: 10px 20px;
+    border-radius: 14px;
+    font-weight: 800;
+    font-size: 14px;
+    border: 1px solid #bdf1d2;
+    transition: all 0.3s ease;
+}
+
+.purchased-badge:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 15px -3px rgba(22, 101, 52, 0.1);
+}
+
+.formation-main-btn {
+    background: linear-gradient(135deg, #7c3aed 0%, #8b5cf6 100%);
+    color: #ffffff;
+    border: none;
+    border-radius: 12px;
+    padding: 10px 16px;
+    font-weight: 700;
+    box-shadow: 0 8px 18px rgba(124, 58, 237, 0.22);
+}
+
+.formation-main-btn:hover {
+    color: #ffffff;
+    background: linear-gradient(135deg, #6d28d9 0%, #7c3aed 100%);
+}
+
+.formation-outline-btn {
+    border-radius: 12px;
+    padding: 10px 16px;
+    font-weight: 700;
+    border: 1px solid rgba(124, 58, 237, 0.24);
+    color: #6d28d9;
+    background: #faf5ff;
+}
+
+.formation-outline-btn:hover {
+    background: #f3e8ff;
+    color: #5b21b6;
+    border-color: rgba(124, 58, 237, 0.35);
+}
+
+.formation-section-title {
+    color: #1f1147;
+    font-weight: 800;
+}
+
+.lesson-count-badge {
+    background: linear-gradient(135deg, #ede9fe, #f5f3ff);
+    color: #6d28d9;
+    border: 1px solid rgba(124, 58, 237, 0.12);
+    padding: 8px 14px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 800;
+}
+
+.lesson-card {
+    border-radius: 20px;
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.06);
+    border: 1px solid rgba(124, 58, 237, 0.08);
+}
+
+.lesson-card:hover {
+    transform: translateY(-7px);
+    box-shadow: 0 18px 40px rgba(124, 58, 237, 0.18);
+}
+
+.thumb {
+    height: 190px;
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(135deg, #7c3aed, #a78bfa);
+}
+
+.thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.45s ease;
+}
+
+.lesson-card:hover .thumb img {
+    transform: scale(1.06);
+}
+
+.fallback {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    font-size: 18px;
+    background: linear-gradient(135deg, #7c3aed, #a78bfa);
+}
+
+.fallback.with-video {
+    font-size: 20px;
+}
+
+.thumb-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(46, 16, 101, 0.55), rgba(46, 16, 101, 0.08));
+    pointer-events: none;
+}
+
+.thumb-overlay.soft {
+    background: linear-gradient(to top, rgba(46, 16, 101, 0.35), rgba(46, 16, 101, 0.05));
+}
+
+.play-badge {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(1);
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.92);
+    color: #6d28d9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 900;
+    font-size: 20px;
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.18);
+    transition: transform 0.28s ease, background 0.28s ease;
+}
+
+.lesson-card:hover .play-badge {
+    transform: translate(-50%, -50%) scale(1.08);
+    background: #ffffff;
+}
+
+.badge-order {
+    position: absolute;
+    bottom: 12px;
+    left: 12px;
+    background: white;
+    color: #6d28d9;
+    padding: 5px 11px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+    z-index: 2;
+}
+
+.badge-video {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: #fde68a;
+    color: #92400e;
+    padding: 5px 11px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+    z-index: 2;
+}
+
+.lesson-title {
+    color: #1f1147;
+    line-height: 1.35;
+}
+
+.lesson-text {
+    line-height: 1.7;
+}
+
+.mini-chip {
+    padding: 5px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.video-chip {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.neutral-chip {
+    background: #f3f4f6;
+    color: #4b5563;
+}
+
+.duration-chip {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.duration-label {
+    font-size: 13px;
+    color: #666;
+    font-weight: 600;
+}
+
+.lesson-btn {
+    border-radius: 10px;
+    padding-inline: 14px;
+    font-weight: 700;
+}
+
+.locked-lesson {
+    opacity: 0.85;
+    filter: grayscale(40%);
+    transition: 0.3s;
+}
+
+.locked-lesson:hover {
+    opacity: 1;
+    filter: grayscale(0%);
+}
+
+.locked-lesson .play-badge {
+    background: rgba(31, 41, 55, 0.8);
+    color: #e5e7eb;
+}
+</style>
+{% endblock %}

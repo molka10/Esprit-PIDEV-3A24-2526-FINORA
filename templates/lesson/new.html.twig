@@ -1,0 +1,61 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block title %}Ajouter une lesson{% endblock %}
+
+{% block body %}
+<div class="container py-4">
+    <div class="card shadow-sm border-0">
+        <div class="card-body p-4">
+            <h1 class="h3 mb-4">Ajouter une lesson</h1>
+
+            {{ form_start(form, {'attr': {'novalidate': 'novalidate', 'enctype': 'multipart/form-data'}}) }}
+
+                {% if not form.vars.valid %}
+                    <div class="alert alert-danger">
+                        {{ form_errors(form) }}
+                    </div>
+                {% endif %}
+
+                <div class="mb-3">
+                    {{ form_label(form.formation) }}
+                    {{ form_widget(form.formation, {'attr': {'class': 'form-select'}}) }}
+                    <div class="text-danger small mt-1">{{ form_errors(form.formation) }}</div>
+                </div>
+
+                <div class="mb-3">
+                    {{ form_label(form.titre) }}
+                    {{ form_widget(form.titre, {'attr': {'class': 'form-control'}}) }}
+                    <div class="text-danger small mt-1">{{ form_errors(form.titre) }}</div>
+                </div>
+
+                <div class="mb-3">
+                    {{ form_label(form.contenu) }}
+                    {{ form_widget(form.contenu, {'attr': {'class': 'form-control', 'rows': 5}}) }}
+                    <div class="text-danger small mt-1">{{ form_errors(form.contenu) }}</div>
+                </div>
+
+                <div class="mb-3">
+                    {{ form_label(form.videoFile) }}
+                    {{ form_widget(form.videoFile, {'attr': {'class': 'form-control'}}) }}
+                    <div class="text-danger small mt-1">{{ form_errors(form.videoFile) }}</div>
+                </div>
+
+                <div class="mb-3">
+                    {{ form_label(form.ordre) }}
+                    {{ form_widget(form.ordre, {'attr': {'class': 'form-control'}}) }}
+                    <div class="text-danger small mt-1">{{ form_errors(form.ordre) }}</div>
+                </div>
+
+                <div class="mb-3">
+                    {{ form_label(form.dureeMinutes) }}
+                    {{ form_widget(form.dureeMinutes, {'attr': {'class': 'form-control'}}) }}
+                    <div class="text-danger small mt-1">{{ form_errors(form.dureeMinutes) }}</div>
+                </div>
+
+                <button class="btn btn-primary">Enregistrer</button>
+
+            {{ form_end(form) }}
+        </div>
+    </div>
+</div>
+{% endblock %}

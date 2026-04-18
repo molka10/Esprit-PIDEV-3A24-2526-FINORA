@@ -1,0 +1,213 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mon Profil — FINORA{% endblock %}
+
+{% block body %}
+<div class="container py-5">
+<div class="row g-4">
+
+    <!-- Profile Info Card -->
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-sm" style="border-radius: 20px; overflow: hidden;">
+            <div class="card-header p-4 text-white" style="background: linear-gradient(135deg, #1e1b4b 0%, #2d1b69 100%);">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="avatar avatar-xl">
+                        {% if app.user.image %}
+                            <img class="avatar-img rounded-circle border border-white border-3" src="{{ asset('uploads/' ~ app.user.image) }}" alt="avatar">
+                        {% else %}
+                            <img class="avatar-img rounded-circle border border-white border-3" src="https://ui-avatars.com/api/?name={{ app.user.username }}&background=7c3aed&color=fff" alt="avatar">
+                        {% endif %}
+                    </div>
+                    <div>
+                        <h4 class="mb-0 text-white">{{ app.user.username }}</h4>
+                        <p class="mb-0 opacity-75 small"><i class="bi bi-envelope me-1"></i> {{ app.user.email }}</p>
+                    </div>
+                    <div class="ms-auto">
+                        <a href="{{ path('app_profile_edit') }}" class="btn btn-white btn-sm text-primary fw-bold px-3">
+                            <i class="bi bi-pencil-square me-1"></i> Modifier
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card-body p-4">
+                <h5 class="mb-4">Informations Personnelles</h5>
+                
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <div class="p-3 bg-light rounded-3 border">
+                            <label class="text-muted small text-uppercase fw-bold mb-1 d-block">Nom d'utilisateur</label>
+                            <div class="fw-semibold">{{ app.user.username }}</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="p-3 bg-light rounded-3 border">
+                            <label class="text-muted small text-uppercase fw-bold mb-1 d-block">Adresse Email</label>
+                            <div class="fw-semibold">{{ app.user.email }}</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="p-3 bg-light rounded-3 border">
+                            <label class="text-muted small text-uppercase fw-bold mb-1 d-block">Téléphone</label>
+                            <div class="fw-semibold">{{ app.user.phone|default('Non renseigné') }}</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="p-3 bg-light rounded-3 border">
+                            <label class="text-muted small text-uppercase fw-bold mb-1 d-block">Adresse</label>
+                            <div class="fw-semibold">{{ app.user.address|default('Non renseignée') }}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <hr class="my-5">
+
+                <h5 class="mb-4 d-flex align-items-center">
+                    <i class="bi bi-shield-lock me-2 text-primary"></i> Sécurité Biométrique
+                </h5>
+
+                <div class="p-4 rounded-4 border-2 border-dashed bg-light text-center" id="faceConfigContainer">
+                    <div class="mb-3">
+                        <i class="bi bi-person-bounding-box fs-1 text-primary"></i>
+                    </div>
+                    
+                    {% if app.user.userBiometrics and app.user.userBiometrics.faceEmbedding %}
+                        <h6 class="text-success mb-2">✅ Face ID est configuré</h6>
+                        <p class="small text-muted mb-4 px-lg-5">Votre empreinte faciale est enregistrée de manière sécurisée. Vous pouvez l'utiliser pour vous connecter rapidement.</p>
+                        <button id="enrollFaceBtn" class="btn btn-outline-primary fw-bold px-4">Ré-initialiser Face ID</button>
+                    {% else %}
+                        <h6 class="text-dark mb-2">Configurez la reconnaissance faciale</h6>
+                        <p class="small text-muted mb-4 px-lg-5">Ajoutez une couche de sécurité supplémentaire en configurant le Face ID pour votre compte.</p>
+                        <button id="enrollFaceBtn" class="btn btn-primary fw-bold px-4">Activer Face ID</button>
+                    {% endif %}
+                </div>
+
+                {# Video & Canvas elements for webcam #}
+                <div id="webcamContainer" style="display:none; margin-top:30px; text-center: center;">
+                    <div class="card bg-dark p-3 text-center d-inline-block shadow-lg" style="border-radius: 20px;">
+                        <video id="webcam" width="400" height="300" autoplay playsinline style="border-radius:15px; margin-bottom:15px; background: #000;"></video>
+                        <div class="d-flex justify-content-center gap-2">
+                            <button id="captureBtn" class="btn btn-success fw-bold px-3">
+                                <i class="bi bi-camera me-1"></i> Capturer & Enregistrer
+                            </button>
+                            <button id="cancelBtn" class="btn btn-outline-light px-3">Annuler</button>
+                        </div>
+                        <canvas id="canvas" style="display:none;"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Side Stats Card -->
+    <div class="col-lg-4">
+        <div class="card border-0 shadow-sm mb-4" style="border-radius: 20px;">
+            <div class="card-body p-4 text-center">
+                <div class="stat-icon bg-primary-soft text-primary mx-auto mb-3" style="width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                    <i class="bi bi-calendar-check fs-3"></i>
+                </div>
+                <h6 class="mb-1">Membre depuis</h6>
+                <div class="fw-bold fs-5 text-dark">Avril 2026</div>
+                <hr>
+                <div class="row">
+                    <div class="col-6 border-end">
+                        <div class="text-muted small">Rôle</div>
+                        <div class="fw-bold text-primary">Utilisateur</div>
+                    </div>
+                    <div class="col-6">
+                        <div class="text-muted small">Statut</div>
+                        <div class="fw-bold text-success">Actif</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card border-0 shadow-sm" style="border-radius: 20px;">
+            <div class="card-body p-4">
+                <h6 class="mb-3">Besoin d'aide ?</h6>
+                <p class="small text-muted">Si vous avez des questions concernant la sécurité de votre compte, contactez notre support technique.</p>
+                <a href="#" class="btn btn-light w-100 fw-bold">Contacter le Support</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const enrollBtn = document.getElementById('enrollFaceBtn');
+    const webcamContainer = document.getElementById('webcamContainer');
+    const faceConfig = document.getElementById('faceConfigContainer');
+    const video = document.getElementById('webcam');
+    const canvas = document.getElementById('canvas');
+    const captureBtn = document.getElementById('captureBtn');
+    const cancelBtn = document.getElementById('cancelBtn');
+
+    let stream = null;
+
+    enrollBtn.addEventListener('click', async () => {
+        faceConfig.style.display = 'none';
+        webcamContainer.style.display = 'block';
+
+        try {
+            stream = await navigator.mediaDevices.getUserMedia({ video: true });
+            video.srcObject = stream;
+        } catch (err) {
+            alert('Impossible d\'accéder à la webcam: ' + err.message);
+            faceConfig.style.display = 'block';
+            webcamContainer.style.display = 'none';
+        }
+    });
+
+    cancelBtn.addEventListener('click', () => {
+        stopWebcam();
+    });
+
+    captureBtn.addEventListener('click', async () => {
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+        const base64Image = canvas.toDataURL('image/jpeg', 0.8);
+        
+        captureBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Traitement...';
+        captureBtn.disabled = true;
+
+        try {
+            const response = await fetch('{{ path("app_profile_face_enroll") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ image: base64Image })
+            });
+
+            const result = await response.json();
+            
+            if (result.success) {
+                alert(result.message);
+                window.location.reload();
+            } else {
+                alert('Erreur: ' + result.message);
+                captureBtn.innerHTML = '<i class="bi bi-camera me-1"></i> Capturer & Enregistrer';
+                captureBtn.disabled = false;
+            }
+        } catch(e) {
+            alert('Une erreur est survenue.');
+            captureBtn.innerHTML = '<i class="bi bi-camera me-1"></i> Capturer & Enregistrer';
+            captureBtn.disabled = false;
+        }
+    });
+
+    function stopWebcam() {
+        if (stream) {
+            stream.getTracks().forEach(track => track.stop());
+        }
+        webcamContainer.style.display = 'none';
+        faceConfig.style.display = 'block';
+        captureBtn.innerHTML = '<i class="bi bi-camera me-1"></i> Capturer & Enregistrer';
+        </div>
+    </div>
+</div>
+</div>
+{% endblock %}

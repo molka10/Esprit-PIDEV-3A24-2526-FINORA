@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="fr" data-bs-theme="light">
+
+<head>
+	<title>{% block title %}Finora - Espace Utilisateur{% endblock %}</title>
+
+	<!-- Meta Tags -->
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+	<meta name="author" content="Finora">
+	<meta name="description" content="Finora - User Dashboard">
+
+	<!-- Dark mode -->
+	<script>
+		const storedTheme = localStorage.getItem('theme')
+ 
+		const getPreferredTheme = () => {
+			if (storedTheme) {
+				return storedTheme
+			}
+			return window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'light'
+		}
+
+		const setTheme = function (theme) {
+			if (theme === 'auto' && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+				document.documentElement.setAttribute('data-bs-theme', 'dark')
+			} else {
+				document.documentElement.setAttribute('data-bs-theme', theme)
+			}
+		}
+
+		setTheme(getPreferredTheme())
+
+		window.addEventListener('DOMContentLoaded', () => {
+		    var el = document.querySelector('.theme-icon-active');
+			if(el != 'undefined' && el != null) {
+				const showActiveTheme = theme => {
+				const activeThemeIcon = document.querySelector('.theme-icon-active use')
+				const btnToActive = document.querySelector(`[data-bs-theme-value="${theme}"]`)
+				const svgOfActiveBtn = btnToActive.querySelector('.mode-switch use').getAttribute('href')
+
+				document.querySelectorAll('[data-bs-theme-value]').forEach(element => {
+					element.classList.remove('active')
+				})
+
+				btnToActive.classList.add('active')
+				activeThemeIcon.setAttribute('href', svgOfActiveBtn)
+			}
+
+			window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+				if (storedTheme !== 'light' || storedTheme !== 'dark') {
+					setTheme(getPreferredTheme())
+				}
+			})
+
+			showActiveTheme(getPreferredTheme())
+
+			document.querySelectorAll('[data-bs-theme-value]')
+				.forEach(toggle => {
+					toggle.addEventListener('click', () => {
+						const theme = toggle.getAttribute('data-bs-theme-value')
+						localStorage.setItem('theme', theme)
+						setTheme(theme)
+						showActiveTheme(theme)
+					})
+				})
+
+			}
+		})
+	</script>
+
+	<!-- Favicon -->
+	<link rel="shortcut icon" href="{{ asset('assets/images/favicon.ico') }}">
+
+	<!-- Google Font -->
+	<link rel="preconnect" href="https://fonts.googleapis.com/">
+	<link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin>
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700&amp;family=Roboto:wght@400;500;700&amp;display=swap">
+
+	<!-- Plugins CSS -->
+	<link rel="stylesheet" type="text/css" href="{{ asset('assets/vendor/font-awesome/css/all.min.css') }}">
+	<link rel="stylesheet" type="text/css" href="{{ asset('assets/vendor/bootstrap-icons/bootstrap-icons.css') }}">
+	<link rel="stylesheet" type="text/css" href="{{ asset('assets/vendor/apexcharts/css/apexcharts.css') }}">
+	<link rel="stylesheet" type="text/css" href="{{ asset('assets/vendor/overlay-scrollbar/css/overlayscrollbars.min.css') }}">
+
+	<!-- Theme CSS -->
+	<link rel="stylesheet" type="text/css" href="{{ asset('assets/css/style.css') }}">
+    
+    {% block stylesheets %}{% endblock %}
+
+    <style>
+        :root {
+            --finora-purple: #7c3aed;
+            --finora-light-purple: #a855f7;
+            --finora-dark: #1e1b4b;
+        }
+        .sidebar-user {
+            background: linear-gradient(180deg, var(--finora-dark) 0%, #2d1b69 100%);
+        }
+        .nav-link.active {
+            background-color: rgba(124, 58, 237, 0.2) !important;
+            border-left: 4px solid var(--finora-purple);
+            color: #fff !important;
+        }
+        .sidebar.navbar-dark .navbar-nav .nav-link {
+            color: rgba(255, 255, 255, 0.7);
+            padding: 0.8rem 1.5rem;
+            font-weight: 500;
+        }
+        .sidebar.navbar-dark .navbar-nav .nav-link:hover {
+            color: #fff;
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+    </style>
+</head>
+
+<body>
+
+<!-- **************** MAIN CONTENT START **************** -->
+<main>
+	
+<!-- Sidebar START -->
+<nav class="navbar sidebar navbar-expand-xl navbar-dark sidebar-user">
+
+	<!-- Navbar brand for xl START -->
+	<div class="d-flex align-items-center">
+		<a class="navbar-brand" href="{{ path('app_home') }}">
+			<img class="navbar-brand-item" src="{{ asset('assets/images/logo-light.svg') }}" alt="Finora" style="height: 40px;">
+		</a>
+	</div>
+	<!-- Navbar brand for xl END -->
+	
+	<div class="offcanvas offcanvas-start flex-row custom-scrollbar h-100" data-bs-backdrop="true" tabindex="-1" id="offcanvasSidebar">
+		<div class="offcanvas-body sidebar-content d-flex flex-column sidebar-user">
+
+			<!-- Sidebar menu START -->
+			<ul class="navbar-nav flex-column" id="navbar-sidebar">
+				
+				<!-- Menu item 1: Dashboard -->
+				<li class="nav-item">
+                    <a href="{{ path('app_dashboard') }}" class="nav-link {% if app.request.attributes.get('_route') == 'app_dashboard' %}active{% endif %}">
+                        <i class="bi bi-ui-checks-grid fa-fw me-2"></i>Tableau de bord
+                    </a>
+                </li>
+				
+				<!-- Title -->
+				<li class="nav-item ms-3 my-2 text-white-50 small text-uppercase mt-4">Menu Principal</li>
+
+                <!-- Menu item 2: Bourse -->
+				<li class="nav-item"> 
+                    <a class="nav-link {% if app.request.attributes.get('_route') == 'app_market' %}active{% endif %}" href="{{ path('app_market') }}">
+                        <i class="bi bi-graph-up-arrow fa-fw me-2"></i>📊 Marché Boursier
+                    </a>
+                </li>
+
+				<li class="nav-item"> 
+                    <a class="nav-link {% if app.request.attributes.get('_route') == 'app_history' %}active{% endif %}" href="{{ path('app_history') }}">
+                        <i class="bi bi-clock-history fa-fw me-2"></i>📜 Mon Historique
+                    </a>
+                </li>
+
+                <li class="nav-item"> 
+                    <a class="nav-link" href="#">
+                        <i class="bi bi-wallet2 fa-fw me-2"></i>💼 Mon Portefeuille
+                    </a>
+                </li>
+
+				<!-- Title -->
+				<li class="nav-item ms-3 my-2 text-white-50 small text-uppercase mt-4">Compte</li>
+
+				<li class="nav-item"> 
+                    <a class="nav-link {% if app.request.attributes.get('_route') == 'app_profile' %}active{% endif %}" href="{{ path('app_profile') }}">
+                        <i class="bi bi-person-circle fa-fw me-2"></i>👤 Mon Profil
+                    </a>
+                </li>
+
+                <li class="nav-item"> 
+                    <a class="nav-link" href="#">
+                        <i class="bi bi-gear fa-fw me-2"></i>Paramètres
+                    </a>
+                </li>
+
+			</ul>
+			<!-- Sidebar menu end -->
+
+			<!-- Sidebar footer START -->
+			<div class="px-3 mt-auto pt-3 border-top border-white border-opacity-10">
+				<div class="d-flex align-items-center justify-content-between text-primary-hover mb-3">
+						<a class="h5 mb-0 text-white opacity-70" href="{{ path('app_home') }}" data-bs-toggle="tooltip" data-bs-placement="top" title="Retour à l'accueil">
+							<i class="bi bi-house"></i>
+						</a>
+						<a class="h5 mb-0 text-white opacity-70" href="{{ path('app_logout') }}" data-bs-toggle="tooltip" data-bs-placement="top" title="Déconnexion">
+							<i class="bi bi-power"></i>
+						</a>
+				</div>
+			</div>
+			<!-- Sidebar footer END -->
+			
+		</div>
+	</div>
+</nav>
+<!-- Sidebar END -->
+
+<!-- Page content START -->
+<div class="page-content bg-light">
+
+	<!-- Top bar START -->
+	<nav class="navbar top-bar navbar-light border-bottom py-0 py-xl-3">
+		<div class="container-fluid p-0">
+			<div class="d-flex align-items-center w-100">
+
+				<!-- Logo START -->
+				<div class="d-flex align-items-center d-xl-none text-center w-100">
+					<a class="navbar-brand" href="{{ path('app_dashboard') }}">
+						<img class="light-mode-item navbar-brand-item h-30px" src="{{ asset('assets/images/logo.svg') }}" alt="logo">
+						<img class="dark-mode-item navbar-brand-item h-30px" src="{{ asset('assets/images/logo-light.svg') }}" alt="logo">
+					</a>
+				</div>
+				<!-- Logo END -->
+
+				<!-- Toggler for sidebar START -->
+				<div class="navbar-expand-xl sidebar-offcanvas-menu">
+					<button class="navbar-toggler me-auto" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasSidebar" aria-controls="offcanvasSidebar" aria-expanded="false" aria-label="Toggle navigation" data-bs-auto-close="outside">
+						<i class="bi bi-text-left fa-fw h2 lh-0 mb-0 rtl-flip"> </i>
+					</button>
+				</div>
+				<!-- Toggler for sidebar END -->
+				
+				<!-- Top bar left -->
+				<div class="navbar-expand-lg ms-auto ms-xl-4 d-none d-md-block">
+					<form class="rounded position-relative">
+                        <input class="form-control pe-5 bg-secondary bg-opacity-10 border-0" type="search" placeholder="Rechercher..." aria-label="Search">
+                        <button class="btn btn-link bg-transparent px-2 py-0 position-absolute top-50 end-0 translate-middle-y text-primary" type="submit"><i class="fas fa-search fs-6"></i></button>
+                    </form>
+				</div>
+				<!-- Top bar left END -->
+				
+				<!-- Top bar right START -->
+				<div class="ms-auto">
+					<ul class="navbar-nav flex-row align-items-center">
+
+                        <!-- Dark mode switch -->
+                        <li class="nav-item dropdown ms-2 ms-md-3">
+                            <button class="btn btn-light btn-round mb-0" id="bd-theme" type="button" aria-expanded="false" data-bs-toggle="dropdown" data-bs-display="static">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-circle-half fa-fw theme-icon-active" viewBox="0 0 16 16">
+                                    <path d="M8 15A7 7 0 1 0 8 1v14zm0 1A8 8 0 1 1 8 0a8 8 0 0 1 0 16z"/>
+                                    <use href="#"></use>
+                                </svg>
+                            </button>
+    
+                            <ul class="dropdown-menu dropdown-menu-end min-w-auto shadow" aria-labelledby="bd-theme">
+                                <li class="mb-1">
+                                    <button type="button" class="dropdown-item d-flex align-items-center" data-bs-theme-value="light">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-sun fa-fw mode-switch me-2" viewBox="0 0 16 16">
+                                            <path d="M8 11a3 3 0 1 1 0-6 3 3 0 0 1 0 6zm0 1a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM8 0a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 0zm0 13a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 13zm8-5a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2a.5.5 0 0 1 .5.5zM3 8a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2A.5.5 0 0 1 3 8zm10.657-5.657a.5.5 0 0 1 0 .707l-1.414 1.415a.5.5 0 1 1-.707-.708l1.414-1.414a.5.5 0 0 1 .707 0zm-9.193 9.193a.5.5 0 0 1 0 .707L3.05 13.657a.5.5 0 0 1-.707-.707l1.414-1.414a.5.5 0 0 1 .707 0zm9.193 2.121a.5.5 0 0 1-.707 0l-1.414-1.414a.5.5 0 0 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .707zM4.464 4.465a.5.5 0 0 1-.707 0L2.343 3.05a.5.5 0 1 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .708z"/>
+                                            <use href="#"></use>
+                                        </svg>Light
+                                    </button>
+                                </li>
+                                <li class="mb-1">
+                                    <button type="button" class="dropdown-item d-flex align-items-center" data-bs-theme-value="dark">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-moon-stars fa-fw mode-switch me-2" viewBox="0 0 16 16">
+                                            <path d="M6 .278a.768.768 0 0 1 .08.858 7.208 7.208 0 0 0-.878 3.46c0 4.021 3.278 7.277 7.318 7.277.527 0 1.04-.055 1.533-.16a.787.787 0 0 1 .81.316.733.733 0 0 1-.031.893A8.349 8.349 0 0 1 8.344 16C3.734 16 0 12.286 0 7.71 0 4.266 2.114 1.312 5.124.06A.752.752 0 0 1 6 .278zM4.858 1.311A7.269 7.269 0 0 0 1.025 7.71c0 4.02 3.279 7.276 7.319 7.276a7.316 7.316 0 0 0 5.205-2.162c-.337.042-.68.063-1.029.063-4.61 0-8.343-3.714-8.343-8.29 0-1.167.242-2.278.681-3.286z"/>
+                                            <path d="M10.794 3.148a.217.217 0 0 1 .412 0l.387 1.162c.173.518.579.924 1.097 1.097l1.162.387a.217.217 0 0 1 0 .412l-1.162.387a1.734 1.734 0 0 0-1.097 1.097l-.387 1.162a.217.217 0 0 1-.412 0l-.387-1.162A1.734 1.734 0 0 0 9.31 6.593l-1.162-.387a.217.217 0 0 1 0-.412l1.162-.387a1.734 1.734 0 0 0 1.097-1.097l.387-1.162zM13.863.099a.145.145 0 0 1 .274 0l.258.774c.115.346.386.617.732.732l.774.258a.145.145 0 0 1 0 .274l-.774.258a1.156 1.156 0 0 0-.732.732l-.258.774a.145.145 0 0 1-.274 0l-.258-.774a1.156 1.156 0 0 0-.732-.732l-.774-.258a.145.145 0 0 1 0-.274l.774-.258c.346-.115.617-.386.732-.732L13.863.1z"/>
+                                            <use href="#"></use>
+                                        </svg>Dark
+                                    </button>
+                                </li>
+                                <li>
+                                    <button type="button" class="dropdown-item d-flex align-items-center active" data-bs-theme-value="auto">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-circle-half fa-fw mode-switch me-2" viewBox="0 0 16 16">
+                                            <path d="M8 15A7 7 0 1 0 8 1v14zm0 1A8 8 0 1 1 8 0a8 8 0 0 1 0 16z"/>
+                                            <use href="#"></use>
+                                        </svg>Auto
+                                    </button>
+                                </li>
+                            </ul>
+                        </li>
+
+						<!-- Profile dropdown START -->
+						<li class="nav-item ms-2 ms-md-3 dropdown">
+							<!-- Avatar -->
+							<a class="avatar avatar-sm p-0" href="#" id="profileDropdown" role="button" data-bs-auto-close="outside" data-bs-display="static" data-bs-toggle="dropdown" aria-expanded="false">
+                                {% if app.user.image %}
+                                    <img class="avatar-img rounded-circle" src="{{ asset('uploads/' ~ app.user.image) }}" alt="avatar">
+                                {% else %}
+                                    <img class="avatar-img rounded-circle" src="https://ui-avatars.com/api/?name={{ app.user.username }}" alt="avatar">
+                                {% endif %}
+							</a>
+
+							<!-- Profile dropdown START -->
+							<ul class="dropdown-menu dropdown-animation dropdown-menu-end shadow pt-3" aria-labelledby="profileDropdown">
+								<!-- Profile info -->
+								<li class="px-3">
+									<div class="d-flex align-items-center">
+										<!-- Avatar -->
+										<div class="avatar me-3 mb-3">
+                                            {% if app.user.image %}
+                                                <img class="avatar-img rounded-circle shadow" src="{{ asset('uploads/' ~ app.user.image) }}" alt="avatar">
+                                            {% else %}
+                                                <img class="avatar-img rounded-circle shadow" src="https://ui-avatars.com/api/?name={{ app.user.username }}" alt="avatar">
+                                            {% endif %}
+										</div>
+										<div>
+											<a class="h6 mt-2 mt-sm-0" href="#">{{ app.user.username }}</a>
+											<p class="small m-0">{{ app.user.email }}</p>
+										</div>
+									</div>
+								</li>
+                                <li> <hr class="dropdown-divider"></li>
+								<!-- Links -->
+								<li><a class="dropdown-item" href="{{ path('app_profile') }}"><i class="bi bi-person fa-fw me-2"></i>Mon Profil</a></li>
+								<li><a class="dropdown-item" href="#"><i class="bi bi-gear fa-fw me-2"></i>Paramètres</a></li>
+								<li><a class="dropdown-item bg-danger-soft-hover" href="{{ path('app_logout') }}"><i class="bi bi-power fa-fw me-2"></i>Déconnexion</a></li>
+							</ul>
+							<!-- Profile dropdown END -->
+						</li>
+					</ul>
+				</div>
+				<!-- Top bar right END -->
+			</div>
+		</div>
+	</nav>
+	<!-- Top bar END -->
+
+	<!-- Page main content START -->
+	<div class="page-content-wrapper p-3 p-md-4">
+        {% block body %}{% endblock %}
+	</div>
+	<!-- Page main content END -->
+</div>
+<!-- Page content END -->
+
+</main>
+<!-- **************** MAIN CONTENT END **************** -->
+
+<!-- Back to top -->
+<div class="back-top"><i class="bi bi-arrow-up-short position-absolute top-50 start-50 translate-middle"></i></div>
+
+<!-- Bootstrap JS -->
+<script src="{{ asset('assets/vendor/bootstrap/dist/js/bootstrap.bundle.min.js') }}"></script>
+
+<!-- Vendors -->
+<script src="{{ asset('assets/vendor/purecounterjs/dist/purecounter_vanilla.js') }}"></script>
+<script src="{{ asset('assets/vendor/apexcharts/js/apexcharts.min.js') }}"></script>
+<script src="{{ asset('assets/vendor/overlay-scrollbar/js/overlayscrollbars.min.js') }}"></script>
+
+<!-- Template Functions -->
+<script src="{{ asset('assets/js/functions.js') }}"></script>
+
+{% block javascripts %}{% endblock %}
+
+</body>
+</html>

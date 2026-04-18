@@ -1,0 +1,537 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block title %}Dashboard Actions{% endblock %}
+{% block page_title %}Gestion des Actions{% endblock %}
+
+{% block body %}
+<style>
+    .actions-wrap {
+        background: #f4f6fb;
+        min-height: 100vh;
+        padding: 28px;
+        font-family: 'Inter', sans-serif;
+    }
+
+    /* ── HEADER BAR ── */
+    .actions-header {
+        background: #fff;
+        border: 1px solid #e8ecf4;
+        border-radius: 16px;
+        padding: 20px 24px;
+        margin-bottom: 24px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 14px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+    .actions-header h5 {
+        color: #0f172a;
+        font-size: 18px;
+        font-weight: 700;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .actions-header h5 .h-icon {
+        width: 38px; height: 38px;
+        background: linear-gradient(135deg, #7c3aed, #a78bfa);
+        border-radius: 10px;
+        display: flex; align-items: center; justify-content: center;
+        color: white; font-size: 16px;
+    }
+    .header-right {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .search-box {
+        position: relative;
+    }
+    .search-box i {
+        position: absolute;
+        left: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #a0a8be;
+        font-size: 14px;
+    }
+    .search-box input {
+        width: 260px;
+        padding: 10px 14px 10px 40px;
+        border: 1px solid #e8ecf4;
+        border-radius: 12px;
+        font-size: 13px;
+        color: #0f172a;
+        background: #f8f9fc;
+        outline: none;
+        transition: all 0.2s;
+    }
+    .search-box input:focus {
+        border-color: #7c3aed;
+        background: #fff;
+        box-shadow: 0 0 0 3px rgba(124,58,237,0.1);
+    }
+    .search-box input::placeholder { color: #a0a8be; }
+    .btn-add-action {
+        background: linear-gradient(135deg, #7c3aed, #6d28d9);
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 12px;
+        font-size: 13px;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        transition: all 0.2s;
+        box-shadow: 0 4px 14px rgba(124,58,237,0.3);
+        white-space: nowrap;
+    }
+    .btn-add-action:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(124,58,237,0.4);
+        color: white;
+    }
+
+    /* ── TABLE PANEL ── */
+    .table-panel {
+        background: #fff;
+        border: 1px solid #e8ecf4;
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+        margin-bottom: 24px;
+    }
+    .atable { width: 100%; border-collapse: collapse; }
+    .atable thead th {
+        background: #f8f9fc;
+        color: #8892a8;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.7px;
+        padding: 14px 20px;
+        text-align: left;
+        border: none;
+        border-bottom: 2px solid #e8ecf4;
+    }
+    .atable thead th:last-child { text-align: center; }
+    .atable tbody td {
+        padding: 16px 20px;
+        border-bottom: 1px solid #f4f6fb;
+        font-size: 14px;
+        vertical-align: middle;
+    }
+    .atable tbody tr:last-child td { border-bottom: none; }
+    .atable tbody tr:hover { background: #faf8ff; }
+
+    .sym-badge {
+        background: #0f172a;
+        color: white;
+        padding: 5px 12px;
+        border-radius: 8px;
+        font-weight: 700;
+        font-size: 12px;
+        font-family: monospace;
+        letter-spacing: 1.5px;
+    }
+    .entreprise-name {
+        font-weight: 600;
+        color: #0f172a;
+    }
+    .prix-val {
+        font-weight: 700;
+        color: #0f172a;
+        font-family: monospace;
+    }
+    .prix-currency {
+        font-size: 12px;
+        color: #94a3b8;
+        font-weight: 500;
+    }
+    .qty-cell {
+        color: #64748b;
+    }
+    .status-dot {
+        width: 7px; height: 7px;
+        border-radius: 50%;
+        display: inline-block;
+        margin-right: 6px;
+    }
+    .status-dot.active { background: #22c55e; }
+    .status-dot.inactive { background: #ef4444; }
+    .status-tag {
+        padding: 4px 12px;
+        border-radius: 8px;
+        font-size: 12px;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+    }
+    .status-tag.active { background: #dcfce7; color: #16a34a; }
+    .status-tag.inactive { background: #fee2e2; color: #dc2626; }
+    .no-data-row td {
+        text-align: center;
+        padding: 40px 20px !important;
+        color: #94a3b8;
+    }
+
+    /* ── ICON BUTTONS ── */
+    .icon-actions {
+        display: flex;
+        gap: 6px;
+        justify-content: center;
+    }
+    .icon-btn {
+        width: 36px; height: 36px;
+        border: 1px solid #e8ecf4;
+        background: white;
+        border-radius: 10px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 15px;
+        text-decoration: none;
+        transition: all 0.2s;
+        position: relative;
+        cursor: pointer;
+    }
+    .icon-btn .tip {
+        visibility: hidden;
+        opacity: 0;
+        position: absolute;
+        bottom: calc(100% + 6px);
+        left: 50%;
+        transform: translateX(-50%);
+        background: #0f172a;
+        color: white;
+        padding: 4px 10px;
+        border-radius: 6px;
+        font-size: 11px;
+        font-weight: 600;
+        white-space: nowrap;
+        transition: all 0.15s;
+        pointer-events: none;
+    }
+    .icon-btn .tip::after {
+        content: '';
+        position: absolute;
+        top: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        border: 4px solid transparent;
+        border-top-color: #0f172a;
+    }
+    .icon-btn:hover .tip { visibility: visible; opacity: 1; }
+    .icon-btn.view { color: #3b82f6; }
+    .icon-btn.view:hover { background: #eff6ff; border-color: #bfdbfe; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(59,130,246,0.15); }
+    .icon-btn.edit { color: #f59e0b; }
+    .icon-btn.edit:hover { background: #fffbeb; border-color: #fde68a; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(245,158,11,0.15); }
+    .icon-btn.delete { color: #ef4444; }
+    .icon-btn.delete:hover { background: #fef2f2; border-color: #fecaca; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(239,68,68,0.15); }
+    .icon-btn-form {
+        padding: 0; margin: 0;
+        background: none;
+        font-size: 15px;
+    }
+
+    /* ── STAT CARDS ── */
+    .stats-row {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 16px;
+        margin-bottom: 24px;
+    }
+    .stat-mini {
+        background: #fff;
+        border: 1px solid #e8ecf4;
+        border-radius: 14px;
+        padding: 20px;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        transition: all 0.25s;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+        position: relative;
+        overflow: hidden;
+    }
+    .stat-mini:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+    }
+    .stat-mini .sm-icon {
+        width: 48px; height: 48px;
+        border-radius: 12px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 20px;
+        color: white;
+        flex-shrink: 0;
+    }
+    .stat-mini .sm-icon.purple { background: linear-gradient(135deg, #7c3aed, #a78bfa); }
+    .stat-mini .sm-icon.green { background: linear-gradient(135deg, #16a34a, #4ade80); }
+    .stat-mini .sm-icon.red { background: linear-gradient(135deg, #dc2626, #f87171); }
+    .stat-mini .sm-icon.blue { background: linear-gradient(135deg, #2563eb, #60a5fa); }
+    .stat-mini .sm-val {
+        font-size: 22px;
+        font-weight: 800;
+        color: #0f172a;
+        line-height: 1;
+    }
+    .stat-mini .sm-label {
+        font-size: 12px;
+        color: #8892a8;
+        margin-top: 3px;
+    }
+    .stat-mini .sm-bar {
+        position: absolute;
+        bottom: 0; left: 0; right: 0;
+        height: 3px;
+    }
+    .stat-mini .sm-bar.purple { background: linear-gradient(90deg, #7c3aed, #a78bfa); }
+    .stat-mini .sm-bar.green { background: linear-gradient(90deg, #16a34a, #4ade80); }
+    .stat-mini .sm-bar.red { background: linear-gradient(90deg, #dc2626, #f87171); }
+    .stat-mini .sm-bar.blue { background: linear-gradient(90deg, #2563eb, #60a5fa); }
+
+    /* ── CHART PANEL ── */
+    .chart-panel {
+        background: #fff;
+        border: 1px solid #e8ecf4;
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+    .chart-panel-head {
+        padding: 18px 24px;
+        border-bottom: 1px solid #f1f3f9;
+    }
+    .chart-panel-head h6 {
+        color: #0f172a;
+        font-size: 14px;
+        font-weight: 700;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .chart-panel-body {
+        padding: 20px 24px 24px;
+    }
+
+    @media (max-width: 1024px) {
+        .stats-row { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 640px) {
+        .actions-wrap { padding: 16px; }
+        .actions-header { flex-direction: column; align-items: stretch; }
+        .header-right { flex-direction: column; }
+        .search-box input { width: 100%; }
+        .stats-row { grid-template-columns: 1fr; }
+    }
+</style>
+
+<div class="actions-wrap">
+
+    {# ═══ HEADER ═══ #}
+    <div class="actions-header">
+        <h5>
+            <span class="h-icon"><i class="bi bi-bar-chart-line"></i></span>
+            Liste des Actions
+        </h5>
+        <div class="header-right">
+            <div class="search-box">
+                <i class="bi bi-search"></i>
+                <input type="text" id="searchInput" placeholder="Rechercher par symbole, entreprise...">
+            </div>
+            <a href="{{ path('app_action_new') }}" class="btn-add-action">
+                <i class="bi bi-plus-lg"></i> Ajouter
+            </a>
+        </div>
+    </div>
+
+    {# ═══ TABLE ═══ #}
+    <div class="table-panel">
+        <table class="atable">
+            <thead>
+                <tr>
+                    <th>Symbole</th>
+                    <th>Entreprise</th>
+                    <th>Prix</th>
+                    <th>Quantité</th>
+                    <th>Statut</th>
+                    <th>Opérations</th>
+                </tr>
+            </thead>
+            <tbody id="actionsTable">
+                {% for action in actions %}
+                <tr>
+                    <td><span class="sym-badge">{{ action.symbole }}</span></td>
+                    <td><span class="entreprise-name">{{ action.nomEntreprise }}</span></td>
+                    <td>
+                        <span class="prix-val">{{ action.prixUnitaire }}</span>
+                        <span class="prix-currency">TND</span>
+                    </td>
+                    <td><span class="qty-cell">{{ action.quantiteDisponible }}</span></td>
+                    <td>
+                        {% if action.statut == 'DISPONIBLE' %}
+                            <span class="status-tag active"><span class="status-dot active"></span> Disponible</span>
+                        {% else %}
+                            <span class="status-tag inactive"><span class="status-dot inactive"></span> Indisponible</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div class="icon-actions">
+                            <a href="{{ path('app_action_show', {id: action.id}) }}" class="icon-btn view">
+                                <i class="bi bi-eye"></i>
+                                <span class="tip">Voir</span>
+                            </a>
+                            <a href="{{ path('app_action_edit', {id: action.id}) }}" class="icon-btn edit">
+                                <i class="bi bi-pencil-square"></i>
+                                <span class="tip">Éditer</span>
+                            </a>
+                            <form method="POST"
+                                  action="{{ path('app_action_delete', {id: action.id}) }}"
+                                  onsubmit="return confirm('Supprimer cette action ?');">
+                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ action.id) }}">
+                                <button type="submit" class="icon-btn delete icon-btn-form">
+                                    <i class="bi bi-trash3"></i>
+                                    <span class="tip">Supprimer</span>
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% else %}
+                <tr class="no-data-row">
+                    <td colspan="6">
+                        <i class="bi bi-inbox" style="font-size:36px; display:block; margin-bottom:8px; opacity:0.4;"></i>
+                        Aucune action trouvée
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {# ═══ STAT CARDS ═══ #}
+    <div class="stats-row">
+        <div class="stat-mini">
+            <div class="sm-icon purple"><i class="bi bi-bar-chart-line"></i></div>
+            <div>
+                <div class="sm-val">{{ actions|length }}</div>
+                <div class="sm-label">Total Actions</div>
+            </div>
+            <div class="sm-bar purple"></div>
+        </div>
+        <div class="stat-mini">
+            <div class="sm-icon green"><i class="bi bi-check-circle"></i></div>
+            <div>
+                <div class="sm-val">{{ actions|filter(a => a.statut == 'DISPONIBLE')|length }}</div>
+                <div class="sm-label">Disponibles</div>
+            </div>
+            <div class="sm-bar green"></div>
+        </div>
+        <div class="stat-mini">
+            <div class="sm-icon red"><i class="bi bi-x-circle"></i></div>
+            <div>
+                <div class="sm-val">{{ actions|filter(a => a.statut != 'DISPONIBLE')|length }}</div>
+                <div class="sm-label">Indisponibles</div>
+            </div>
+            <div class="sm-bar red"></div>
+        </div>
+        <div class="stat-mini">
+            <div class="sm-icon blue"><i class="bi bi-cash-stack"></i></div>
+            <div>
+                <div class="sm-val">{{ actions|reduce((c,a)=>c+(a.prixUnitaire*a.quantiteDisponible),0)|number_format(2) }}</div>
+                <div class="sm-label">Valeur Totale (TND)</div>
+            </div>
+            <div class="sm-bar blue"></div>
+        </div>
+    </div>
+
+    {# ═══ CHART ═══ #}
+    <div class="chart-panel">
+        <div class="chart-panel-head">
+            <h6><i class="bi bi-graph-up" style="color:#7c3aed;"></i> Évolution</h6>
+        </div>
+        <div class="chart-panel-body">
+            <canvas id="chart"></canvas>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block javascripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+// ── Chart stylisé ──
+const ctx = document.getElementById('chart').getContext('2d');
+
+const gradient = ctx.createLinearGradient(0, 0, 0, 300);
+gradient.addColorStop(0, 'rgba(124, 58, 237, 0.2)');
+gradient.addColorStop(1, 'rgba(124, 58, 237, 0.0)');
+
+new Chart(ctx, {
+    type: 'line',
+    data: {
+        labels: ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Jun'],
+        datasets: [{
+            label: 'Actions',
+            data: [10, 20, 15, 30, 25, 40],
+            borderColor: '#7c3aed',
+            backgroundColor: gradient,
+            borderWidth: 2.5,
+            fill: true,
+            tension: 0.4,
+            pointBackgroundColor: '#7c3aed',
+            pointBorderColor: '#fff',
+            pointBorderWidth: 2,
+            pointRadius: 5,
+            pointHoverRadius: 7
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: { display: false },
+            tooltip: {
+                backgroundColor: '#0f172a',
+                titleFont: { size: 12, weight: '600' },
+                bodyFont: { size: 13 },
+                padding: 12,
+                cornerRadius: 10,
+                displayColors: false
+            }
+        },
+        scales: {
+            x: {
+                grid: { display: false },
+                ticks: { color: '#8892a8', font: { size: 12 } }
+            },
+            y: {
+                grid: { color: '#f1f3f9' },
+                ticks: { color: '#8892a8', font: { size: 12 } }
+            }
+        },
+        interaction: {
+            intersect: false,
+            mode: 'index'
+        }
+    }
+});
+
+// ── Recherche ──
+document.getElementById('searchInput').addEventListener('keyup', function() {
+    let value = this.value.toLowerCase();
+    let rows = document.querySelectorAll('#actionsTable tr');
+
+    rows.forEach(function(row) {
+        row.style.display = row.innerText.toLowerCase().includes(value) ? '' : 'none';
+    });
+});
+</script>
+{% endblock %}

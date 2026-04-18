@@ -1,0 +1,507 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block title %}FINORA - Formations{% endblock %}
+
+{% block body %}
+<div class="container-fluid px-4 py-4">
+
+    <div class="admin-page-header d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+        <div>
+            <span class="admin-soft-badge mb-2">FINORA Admin</span>
+            <h1 class="h3 mb-1 admin-purple-title">Formations</h1>
+            <p class="text-muted mb-0">Gérez les formations, leurs catégories, leur niveau et leurs lessons associées.</p>
+        </div>
+
+        <a href="{{ path('admin_formation_new') }}" class="btn admin-main-btn px-4 py-2">
+            + Ajouter une formation
+        </a>
+    </div>
+
+    <div class="card admin-filter-card border-0 mb-4">
+        <div class="card-body p-4">
+            <form method="get" action="{{ path('admin_formation_index') }}" id="formation-filter-form">
+                <div class="row g-3 align-items-center">
+                    <div class="col-md-3">
+                        <label class="form-label fw-semibold text-muted small">Recherche</label>
+                        <input
+                            class="form-control bg-body"
+                            type="text"
+                            name="titre"
+                            value="{{ titre }}"
+                            placeholder="Rechercher par titre"
+                            id="titre-search"
+                        >
+                    </div>
+
+                    <div class="col-md-2">
+                        <label class="form-label fw-semibold text-muted small">Catégorie</label>
+                        <select class="form-select bg-body" name="categorie">
+                            <option value="">Toutes catégories</option>
+                            {% for cat in categories %}
+                                <option value="{{ cat }}" {{ categorie == cat ? 'selected' : '' }}>{{ cat }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="col-md-2">
+                        <label class="form-label fw-semibold text-muted small">Niveau</label>
+                        <select class="form-select bg-body" name="niveau">
+                            <option value="">Tous niveaux</option>
+                            <option value="Débutant" {{ niveau == 'Débutant' ? 'selected' : '' }}>Débutant</option>
+                            <option value="Intermédiaire" {{ niveau == 'Intermédiaire' ? 'selected' : '' }}>Intermédiaire</option>
+                            <option value="Avancé" {{ niveau == 'Avancé' ? 'selected' : '' }}>Avancé</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-2">
+                        <label class="form-label fw-semibold text-muted small">Trier par</label>
+                        <select class="form-select bg-body" name="tri">
+                            <option value="id" {{ tri == 'id' ? 'selected' : '' }}>Trier par ID</option>
+                            <option value="titre" {{ tri == 'titre' ? 'selected' : '' }}>Titre</option>
+                            <option value="categorie" {{ tri == 'categorie' ? 'selected' : '' }}>Catégorie</option>
+                            <option value="niveau" {{ tri == 'niveau' ? 'selected' : '' }}>Niveau</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-1">
+                        <label class="form-label fw-semibold text-muted small">Ordre</label>
+                        <select class="form-select bg-body" name="ordre">
+                            <option value="asc" {{ ordre == 'asc' ? 'selected' : '' }}>ASC</option>
+                            <option value="desc" {{ ordre == 'desc' ? 'selected' : '' }}>DESC</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-2">
+                        <label class="form-label fw-semibold text-muted small d-block opacity-0">Actions</label>
+                        <div class="d-flex gap-2">
+                            <button class="btn admin-main-btn w-100" type="submit">Filtrer</button>
+                            <a href="{{ path('admin_formation_index') }}" class="btn admin-outline-btn w-100">Reset</a>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="results-container" style="transition: opacity 0.2s ease;">
+        <div class="card admin-table-card border-0">
+        <div class="card-header border-0 bg-transparent px-4 pt-4 pb-0">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2">
+                <div>
+                    <h5 class="mb-1 fw-bold admin-purple-title">Liste des formations</h5>
+                    <p class="text-muted mb-0 small">
+                        {{ formations.getTotalItemCount is defined ? formations.getTotalItemCount : formations|length }} formation(s) trouvée(s)
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="card-body p-4">
+            <div class="table-responsive rounded-4 overflow-hidden">
+                <table class="table admin-custom-table align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>Titre</th>
+                            <th>Catégorie</th>
+                            <th>Niveau</th>
+                            <th>Publié</th>
+                            <th>Image</th>
+                            <th class="text-end">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for formation in formations %}
+                            <tr>
+                                <td>
+                                    <div class="d-flex flex-column">
+                                        <strong class="table-main-title">{{ formation.titre }}</strong>
+                                        <small class="text-muted table-subtext">
+                                            {{ formation.description ? formation.description|slice(0, 90) ~ '...' : 'Pas de description' }}
+                                        </small>
+                                    </div>
+                                </td>
+
+                                <td>
+                                    <div class="d-flex flex-wrap gap-1">
+                                        {% for tag in formation.categorie ? formation.categorie|split(',') : [] %}
+                                            {% if tag|trim != '' %}
+                                                <span class="table-chip">{{ tag|trim }}</span>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </div>
+                                </td>
+
+                                <td>
+                                    <span class="badge table-level-badge">{{ formation.niveau }}</span>
+                                </td>
+
+                                <td>
+                                    {% if formation.isPublished %}
+                                        <span class="badge table-status-badge published">Oui</span>
+                                    {% else %}
+                                        <span class="badge table-status-badge draft">Non</span>
+                                    {% endif %}
+                                </td>
+
+                                <td>
+                                    {% if formation.imageUrl %}
+                                        <img
+                                            src="{{ asset('uploads/formations/' ~ formation.imageUrl) }}"
+                                            alt="{{ formation.titre }}"
+                                            class="table-thumb"
+                                        >
+                                    {% else %}
+                                        <div class="table-thumb table-thumb-placeholder">
+                                            FINORA
+                                        </div>
+                                    {% endif %}
+                                </td>
+
+                                <td class="text-end">
+                                    <div class="d-flex flex-wrap justify-content-end gap-2 align-items-center">
+                                        <a href="{{ path('admin_formation_edit', {'id': formation.id}) }}"
+                                           class="action-icon-btn action-edit"
+                                           data-bs-toggle="tooltip" data-bs-placement="top" title="Modifier">
+                                            <i class="bi bi-pencil-fill"></i>
+                                        </a>
+
+                                        {% if lessonCounts[formation.id] is defined and lessonCounts[formation.id] > 0 %}
+                                            <a href="{{ path('app_lesson_index', {'formation': formation.id}) }}"
+                                               class="action-icon-btn action-lessons"
+                                               data-bs-toggle="tooltip" data-bs-placement="top" title="Voir les leçons">
+                                                <i class="bi bi-collection-play-fill"></i>
+                                            </a>
+                                        {% else %}
+                                            <a href="{{ path('app_lesson_new') }}"
+                                               class="action-icon-btn action-add"
+                                               data-bs-toggle="tooltip" data-bs-placement="top" title="Ajouter une leçon">
+                                                <i class="bi bi-plus-circle-fill"></i>
+                                            </a>
+                                        {% endif %}
+
+                                        <form method="post"
+                                              action="{{ path('admin_formation_delete', {'id': formation.id}) }}"
+                                              style="display:inline-block;"
+                                              onsubmit="return confirm('Supprimer cette formation ?');">
+                                            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ formation.id) }}">
+                                            <button type="submit"
+                                                    class="action-icon-btn action-delete"
+                                                    data-bs-toggle="tooltip" data-bs-placement="top" title="Supprimer">
+                                                <i class="bi bi-trash3-fill"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% else %}
+                            <tr>
+                                <td colspan="6">
+                                    <div class="empty-state text-center py-5">
+                                        <div class="empty-state-icon mb-3">📚</div>
+                                        <h5 class="mb-2">Aucune formation trouvée</h5>
+                                        <p class="text-muted mb-3">Essayez de modifier vos filtres ou ajoutez une nouvelle formation.</p>
+                                        <a href="{{ path('admin_formation_new') }}" class="btn admin-main-btn">
+                                            Ajouter une formation
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="d-flex justify-content-center mt-4">
+                {{ knp_pagination_render(formations) }}
+            </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.admin-page-header {
+    background: linear-gradient(135deg, rgba(124, 58, 237, 0.08), rgba(167, 139, 250, 0.12));
+    border: 1px solid rgba(124, 58, 237, 0.08);
+    border-radius: 22px;
+    padding: 22px 24px;
+}
+
+.admin-table-card {
+    background: rgba(255, 255, 255, 0.94);
+    border: 1px solid rgba(124, 58, 237, 0.08);
+    border-radius: 22px;
+    box-shadow: 0 10px 30px rgba(124, 58, 237, 0.05);
+}
+
+.admin-custom-table thead th {
+    background: #f6f0ff;
+    color: #5b21b6;
+    font-weight: 800;
+    font-size: 13px;
+    border: none;
+    padding: 16px 14px;
+    white-space: nowrap;
+}
+
+.admin-custom-table tbody td {
+    padding: 16px 14px;
+    border-color: #f1eaff;
+    vertical-align: middle;
+    background: rgba(255, 255, 255, 0.92);
+}
+
+.admin-custom-table tbody tr:hover td {
+    background: #fcfaff;
+}
+
+.table-main-title {
+    color: #1f1147;
+    font-weight: 800;
+    line-height: 1.35;
+}
+
+.table-subtext {
+    line-height: 1.5;
+    max-width: 260px;
+}
+
+.table-chip {
+    background: #f3e8ff;
+    color: #6d28d9;
+    padding: 5px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+    border: 1px solid rgba(124, 58, 237, 0.1);
+}
+
+.table-level-badge {
+    background: rgba(124, 58, 237, 0.12);
+    color: #6d28d9;
+    padding: 7px 11px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 800;
+}
+
+.table-status-badge {
+    padding: 7px 11px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.table-status-badge.published {
+    background: rgba(220, 252, 231, 0.95);
+    color: #166534;
+}
+
+.table-status-badge.draft {
+    background: rgba(254, 243, 199, 0.95);
+    color: #92400e;
+}
+
+.table-thumb {
+    width: 64px;
+    height: 64px;
+    object-fit: cover;
+    border-radius: 14px;
+    border: 1px solid rgba(124, 58, 237, 0.08);
+    box-shadow: 0 6px 18px rgba(124, 58, 237, 0.08);
+}
+
+.table-thumb-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #7c3aed, #a78bfa);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.4px;
+}
+
+.admin-success-btn {
+    background: linear-gradient(135deg, #16a34a 0%, #22c55e 100%);
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    font-weight: 700;
+    box-shadow: 0 8px 18px rgba(34, 197, 94, 0.18);
+}
+
+.admin-success-btn:hover {
+    color: #fff;
+    background: linear-gradient(135deg, #15803d 0%, #16a34a 100%);
+}
+
+.admin-danger-btn {
+    background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    font-weight: 700;
+    box-shadow: 0 8px 18px rgba(239, 68, 68, 0.16);
+}
+
+.admin-danger-btn:hover {
+    color: #fff;
+    background: linear-gradient(135deg, #b91c1c 0%, #dc2626 100%);
+}
+
+.empty-state-icon {
+    font-size: 34px;
+}
+
+/* Icon Action Buttons */
+.action-icon-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    border: none;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    background: transparent;
+    padding: 0;
+}
+
+.action-icon-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 14px rgba(0,0,0,0.12);
+}
+
+.action-edit {
+    background: rgba(124, 58, 237, 0.1);
+    color: #6d28d9;
+}
+.action-edit:hover {
+    background: rgba(124, 58, 237, 0.2);
+    color: #5b21b6;
+}
+
+.action-delete {
+    background: rgba(239, 68, 68, 0.1);
+    color: #dc2626;
+}
+.action-delete:hover {
+    background: rgba(239, 68, 68, 0.2);
+    color: #b91c1c;
+}
+
+.action-lessons {
+    background: rgba(99, 102, 241, 0.1);
+    color: #4f46e5;
+}
+.action-lessons:hover {
+    background: rgba(99, 102, 241, 0.2);
+    color: #3730a3;
+}
+
+.action-add {
+    background: rgba(22, 163, 74, 0.1);
+    color: #16a34a;
+}
+.action-add:hover {
+    background: rgba(22, 163, 74, 0.2);
+    color: #15803d;
+}
+
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const form = document.getElementById('formation-filter-form');
+    const titreInput = document.getElementById('titre-search');
+
+    let timeout = null;
+
+    if (form) {
+        form.addEventListener('submit', async function (e) {
+            e.preventDefault();
+            const container = document.getElementById('results-container');
+            const url = new URL(form.action || window.location.href);
+            const formData = new FormData(form);
+            const params = new URLSearchParams();
+            for (const [key, value] of formData.entries()) {
+                if (value) params.append(key, value);
+            }
+            url.search = params.toString();
+
+            window.history.pushState({}, '', url);
+
+            if (container) container.style.opacity = '0.5';
+            try {
+                const res = await fetch(url.toString(), {
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                });
+                const html = await res.text();
+                const doc = new DOMParser().parseFromString(html, "text/html");
+                const newContainer = doc.getElementById('results-container');
+                if (container && newContainer) {
+                    container.innerHTML = newContainer.innerHTML;
+                    
+                    // Reinitialize tooltips if you use bootstrap tooltips
+                    if (typeof bootstrap !== 'undefined') {
+                        const tooltipTriggerList = [].slice.call(container.querySelectorAll('[data-bs-toggle="tooltip"]'));
+                        tooltipTriggerList.map(function (tooltipTriggerEl) {
+                            return new bootstrap.Tooltip(tooltipTriggerEl);
+                        });
+                    }
+                }
+            } catch (err) {
+                console.error('AJAX search error:', err);
+                form.submit();
+            } finally {
+                if (container) container.style.opacity = '1';
+            }
+        });
+    }
+
+    if (titreInput) {
+        titreInput.addEventListener('input', function () {
+            clearTimeout(timeout);
+            timeout = setTimeout(() => {
+                if (form) form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+            }, 400);
+        });
+    }
+
+    document.querySelectorAll('#formation-filter-form select').forEach(select => {
+        select.addEventListener('change', function () {
+            if (form) form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+        });
+    });
+
+    document.addEventListener('click', async function(e) {
+        const link = e.target.closest('.pagination a');
+        if (link) {
+            e.preventDefault();
+            const container = document.getElementById('results-container');
+            const url = link.href;
+            
+            window.history.pushState({}, '', url);
+            if (container) container.style.opacity = '0.5';
+            try {
+                const res = await fetch(url);
+                const html = await res.text();
+                const doc = new DOMParser().parseFromString(html, "text/html");
+                if (container && doc.getElementById('results-container')) {
+                    container.innerHTML = doc.getElementById('results-container').innerHTML;
+                }
+            } catch (err) {
+                window.location.href = url;
+            } finally {
+                if (container) container.style.opacity = '1';
+            }
+        }
+    });
+
+});
+</script>
+{% endblock %}

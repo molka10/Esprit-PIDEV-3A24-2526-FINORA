@@ -1,0 +1,472 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}FINORA - Nos Centres de Formation{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <!-- Leaflet Awesome Markers to use generic FontAwesome icons (Optional but brings better look) -->
+    <style>
+        #public-map {
+            height: 600px;
+            width: 100%;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(124, 58, 237, 0.1);
+            z-index: 1;
+            border: 2px solid white;
+        }
+        
+        .header-section {
+            background: linear-gradient(135deg, #fcfaff 0%, #f3e8ff 100%);
+            padding: 60px 0;
+            border-bottom: 1px solid #eadcff;
+        }
+        
+        .nearest-btn {
+            background: white;
+            color: var(--finora-purple);
+            border: 1px solid var(--finora-border);
+            border-radius: 99px;
+            padding: 10px 24px;
+            font-weight: 700;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+        
+        .nearest-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(124, 58, 237, 0.15);
+            border-color: var(--finora-purple);
+        }
+
+        .leaflet-popup-content-wrapper {
+            border-radius: 16px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            padding: 4px;
+        }
+        .leaflet-popup-content {
+            margin: 12px 16px;
+        }
+        
+        .center-popup-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--finora-text);
+            margin-bottom: 8px;
+            border-bottom: 2px solid var(--finora-purple-soft);
+            padding-bottom: 4px;
+        }
+        
+        .center-popup-info {
+            font-size: 0.9rem;
+            color: #6c757d;
+            margin-bottom: 4px;
+        }
+        
+        .center-popup-info i {
+            color: var(--finora-purple);
+            width: 16px;
+            text-align: center;
+            margin-right: 4px;
+        }
+        
+        /* Custom map tooltips */
+        .custom-tooltip {
+            background: var(--finora-purple);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            box-shadow: 0 4px 10px rgba(124, 58, 237, 0.3);
+        }
+        .custom-tooltip::before {
+            border-top-color: var(--finora-purple) !important;
+        }
+
+        /* Premium Rectangle Cards for Sidebar */
+        .center-list-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border-left: 4px solid transparent !important;
+        }
+        
+        .center-list-card:hover {
+            transform: translateX(5px);
+            background: #fdfcff;
+            border-left-color: var(--finora-purple) !important;
+            box-shadow: 0 4px 15px rgba(124, 58, 237, 0.1) !important;
+        }
+
+        .center-list-card.active {
+            border-left-color: var(--finora-purple) !important;
+            background: #f5f3ff;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+<main>
+    <section class="header-section text-center position-relative overflow-hidden">
+        <!-- Background decorative elements -->
+        <div style="position: absolute; top: -50px; left: -50px; width: 200px; height: 200px; background: radial-gradient(circle, rgba(167, 139, 250, 0.2), transparent 70%); border-radius: 50%;"></div>
+        <div style="position: absolute; bottom: 0; right: 10%; width: 300px; height: 300px; background: radial-gradient(circle, rgba(139, 92, 246, 0.15), transparent 60%); border-radius: 50%;"></div>
+        
+        <div class="container position-relative z-index-9">
+            <span class="purple-chip mb-3 d-inline-block"><i class="fas fa-map-marked-alt me-2"></i>Carte Interactive</span>
+            <h1 class="finora-title fw-bold mb-3" style="font-size: 3rem;">Trouvez un <span class="text-primary">Centre de Formation</span></h1>
+            <p class="text-muted fs-5 mb-4 mx-auto" style="max-width: 600px;">
+                Découvrez nos centres partenaires à travers toute la Tunisie pour suivre vos formations en présentiel ou hybride.
+            </p>
+            
+            <button id="find-nearest-btn" class="nearest-btn">
+                <i class="fas fa-location-arrow me-2 text-primary"></i> Trouver le centre le plus proche
+            </button>
+        </div>
+    </section>
+
+    <section class="py-5" style="background-color: #faf5ff;">
+        <div class="container">
+            <div class="row g-4 align-items-stretch">
+                <!-- Map Column -->
+                <div class="col-lg-8">
+                    <div class="card p-3 border-0 bg-white shadow-sm h-100" style="border-radius: 20px;">
+                        <div id="loading-overlay" class="d-flex justify-content-center align-items-center position-absolute w-100 h-100 bg-white" style="z-index: 10; border-radius: 20px; display: none !important;">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Chargement...</span>
+                            </div>
+                        </div>
+                        <div id="public-map" style="height: 600px; border-radius: 12px;"></div>
+                    </div>
+                </div>
+
+                <!-- Sidebar List Column -->
+                <div class="col-lg-4">
+                    <div class="card border-0 shadow-sm overflow-hidden h-100" style="border-radius: 20px; background: #fff;">
+                        <div class="card-header bg-white border-0 p-4 pb-0">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h4 class="fw-bold mb-0">Nos Centres</h4>
+                                <span class="badge bg-primary px-3 py-2 rounded-pill" id="center-count-badge">Chargement...</span>
+                            </div>
+                            <div class="text-muted small mb-3">
+                                <i class="fas fa-location-arrow text-primary me-2"></i>Cliquez sur un centre pour le localiser.
+                            </div>
+                        </div>
+                        <div class="card-body p-4 pt-0" style="max-height: 520px; overflow-y: auto;" id="centers-grid">
+                            <!-- Populated via JS -->
+                            <div class="text-center py-5">
+                                <div class="spinner-border text-primary opacity-25" role="status"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row mt-4 mb-5 align-items-center">
+                <div class="col-md-6 text-md-start text-center">
+                    <p class="text-muted mb-0"><i class="fas fa-info-circle text-primary me-2"></i> La carte s'ajuste automatiquement pour montrer tous les centres actifs.</p>
+                </div>
+                <div class="col-md-6 text-md-end text-center mt-3 mt-md-0">
+                    <div id="nearest-result" class="d-inline-flex align-items-center p-2 px-3 rounded-pill" style="background: white; border: 1px solid rgba(139, 92, 246, 0.2); display: none !important;">
+                        <span class="badge bg-primary rounded-circle p-2 me-2"><i class="fas fa-check"></i></span>
+                        <span id="nearest-text" class="fw-bold text-dark small"></span>
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- Advantages Section -->
+            <div class="row g-4 mb-5 pt-5">
+                <div class="col-12 mb-4 text-center">
+                    <h2 class="fw-bold">Pourquoi apprendre dans nos centres ?</h2>
+                    <p class="text-muted">Des environnements optimisés pour votre réussite financière.</p>
+                </div>
+                <div class="col-md-4">
+                    <div class="card h-100 border-0 p-4 text-center shadow-sm hover-up">
+                        <div class="icon-lg bg-primary bg-opacity-10 text-primary rounded-circle mx-auto mb-3">
+                            <i class="fas fa-chalkboard-teacher fs-4"></i>
+                        </div>
+                        <h5 class="fw-bold">Encadrement Expert</h5>
+                        <p class="small text-muted mb-0">Bénéficiez du soutien de nos formateurs certifiés sur place pour répondre à toutes vos questions complexes.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card h-100 border-0 p-4 text-center shadow-sm hover-up">
+                        <div class="icon-lg bg-success bg-opacity-10 text-success rounded-circle mx-auto mb-3">
+                            <i class="fas fa-highlighter fs-4"></i>
+                        </div>
+                        <h5 class="fw-bold">Matériel de Pointe</h5>
+                        <p class="small text-muted mb-0">Accédez à des terminaux de trading et des connexions haute performance pour une expérience sans latence.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card h-100 border-0 p-4 text-center shadow-sm hover-up">
+                        <div class="icon-lg bg-warning bg-opacity-10 text-warning rounded-circle mx-auto mb-3">
+                            <i class="fas fa-users fs-4"></i>
+                        </div>
+                        <h5 class="fw-bold">Networking & Communauté</h5>
+                        <p class="small text-muted mb-0">Rencontrez d'autres passionnés de finance et développez votre réseau professionnel localement.</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+</main>
+
+<style>
+    .hover-up {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        border-radius: 16px;
+    }
+    .hover-up:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 15px 35px rgba(124, 58, 237, 0.1) !important;
+    }
+    .center-list-card {
+        border-radius: 16px;
+        transition: all 0.2s ease;
+        border: 1px solid transparent;
+    }
+    .center-list-card:hover {
+        border-color: #ddd6fe;
+        background: #fdfcff;
+    }
+    .icon-lg {
+        width: 56px;
+        height: 56px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+</style>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script>
+        // Global helper to focus map from grid - defined outside to be always available
+        window.focusCenter = function(id, lat, lng) {
+            if (!lat || !lng || isNaN(lat) || isNaN(lng)) return;
+            
+            const mapEl = document.getElementById('public-map');
+            if (!mapEl || !window.finoraMap) return;
+
+            window.finoraMap.flyTo([lat, lng], 14, { duration: 1.5 });
+            
+            if (window.markersLayer) {
+                window.markersLayer.eachLayer(function(marker) {
+                    if (marker.options.centerId === id) {
+                        marker.openPopup();
+                    }
+                });
+            }
+            
+            mapEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        };
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Map configuration for Tunisia centered map
+            const map = L.map('public-map').setView([34.0, 9.0], 6);
+            window.finoraMap = map; // Store globally for helper
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 18,
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(map);
+
+            const finoraIcon = L.icon({
+                iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-violet.png',
+                shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+                iconSize: [25, 41],
+                iconAnchor: [12, 41],
+                popupAnchor: [1, -34],
+                shadowSize: [41, 41]
+            });
+
+            const highlightIcon = L.icon({
+                iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-gold.png',
+                shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+                iconSize: [25, 41],
+                iconAnchor: [12, 41],
+                popupAnchor: [1, -34],
+                shadowSize: [41, 41]
+            });
+
+            let centersData = [];
+            const markersLayer = L.layerGroup().addTo(map);
+            window.markersLayer = markersLayer; // Store globally
+
+            // 1. Fetch active centers from API
+            const grid = document.getElementById('centers-grid');
+            const countBadge = document.getElementById('center-count-badge');
+
+            fetch('{{ path('api_centres_json') }}')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        throw new Error(data.error);
+                    }
+                    
+                    centersData = data;
+                    countBadge.innerText = `${data.length} Centres`;
+                    
+                    if (data.length > 0) {
+                        let bounds = L.latLngBounds();
+                        grid.innerHTML = '';
+                        
+                        data.forEach(center => {
+                            const lat = parseFloat(center.latitude);
+                            const lng = parseFloat(center.longitude);
+                            
+                            // Add to Grid as horizontal rectangle
+                            const cardWrapper = document.createElement('div');
+                            cardWrapper.className = 'mb-3';
+                            cardWrapper.innerHTML = `
+                                <div class="card border-0 shadow-sm center-list-card p-3" style="cursor: pointer;" onclick="window.focusCenter(${center.id}, ${lat}, ${lng})">
+                                    <div class="d-flex align-items-center">
+                                        <div class="flex-shrink-0 bg-primary bg-opacity-10 text-primary rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 45px; height: 45px;">
+                                            <i class="fas fa-building"></i>
+                                        </div>
+                                        <div class="flex-grow-1 overflow-hidden">
+                                            <h6 class="fw-bold mb-0 text-dark text-truncate">${center.nom}</h6>
+                                            <div class="text-muted small text-truncate"><i class="fas fa-map-marker-alt me-1 text-primary"></i> ${center.ville}</div>
+                                            <div class="d-flex gap-2 mt-1">
+                                                ${center.telephone ? `<span class="badge bg-light text-muted fw-normal" style="font-size: 0.65rem;"><i class="fas fa-phone me-1"></i> ${center.telephone}</span>` : ''}
+                                            </div>
+                                        </div>
+                                        <div class="ms-1">
+                                            <i class="fas fa-chevron-right text-muted small opacity-50"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                            grid.appendChild(cardWrapper);
+
+                            if (!isNaN(lat) && !isNaN(lng)) {
+                                const latLng = L.latLng(lat, lng);
+                                bounds.extend(latLng);
+                                
+                                let popupHtml = `
+                                    <div class="center-popup-title">${center.nom}</div>
+                                    ${(center.adresse || center.ville) ? `<div class="center-popup-info"><i class="fas fa-map-marker-alt"></i> ${center.adresse}, ${center.ville}</div>` : ''}
+                                    ${center.telephone ? `<div class="center-popup-info"><i class="fas fa-phone"></i> ${center.telephone}</div>` : ''}
+                                    ${center.email ? `<div class="center-popup-info"><i class="fas fa-envelope"></i> <a href="mailto:${center.email}">${center.email}</a></div>` : ''}
+                                    ${center.siteWeb ? `<div class="center-popup-info"><i class="fas fa-globe"></i> <a href="${center.siteWeb}" target="_blank">Visiter le site</a></div>` : ''}
+                                `;
+
+                                const marker = L.marker(latLng, {icon: finoraIcon, centerId: center.id})
+                                    .bindPopup(popupHtml, { minWidth: 200 })
+                                    .bindTooltip(center.nom, { className: 'custom-tooltip', direction: 'top', offset: [0, -35] });
+                                
+                                markersLayer.addLayer(marker);
+                            }
+                        });
+                        
+                        if (bounds.isValid()) {
+                            map.fitBounds(bounds, { padding: [50, 50] });
+                        }
+                    } else {
+                        grid.innerHTML = '<div class="col-12 text-center text-muted py-4">Aucun centre trouvé pour le moment.</div>';
+                    }
+                })
+                .catch(error => {
+                    console.error("Erreur centres:", error);
+                    grid.innerHTML = `<div class="col-12 text-center text-danger py-4">
+                        <i class="fas fa-exclamation-triangle mb-2 d-block fs-4"></i>
+                        Erreur de chargement : ${error.message}
+                    </div>`;
+                    countBadge.innerText = 'Erreur';
+                    countBadge.className = 'badge bg-danger';
+                });
+
+            // 2. Nearest center logic
+            const nearestBtn = document.getElementById('find-nearest-btn');
+            const nearestResult = document.getElementById('nearest-result');
+            const nearestText = document.getElementById('nearest-text');
+            
+            let userMarker = null;
+
+            nearestBtn.addEventListener('click', function() {
+                nearestBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Recherche...';
+                nearestBtn.disabled = true;
+
+                function handlePosition(userLat, userLng) {
+                    const userLatLng = L.latLng(userLat, userLng);
+                    nearestBtn.innerHTML = '<i class="fas fa-location-arrow me-2 text-primary"></i> Trouver le centre le plus proche';
+                    nearestBtn.disabled = false;
+
+                    if (userMarker) {
+                        userMarker.setLatLng(userLatLng);
+                    } else {
+                        userMarker = L.circleMarker(userLatLng, {
+                            radius: 8, fillColor: "#2563eb", color: "#ffffff", weight: 2, opacity: 1, fillOpacity: 1
+                        }).bindTooltip("Votre position").addTo(map);
+                    }
+
+                    if (centersData.length === 0) return;
+
+                    let nearestCenter = null;
+                    let minDistance = Infinity;
+
+                    centersData.forEach(center => {
+                        const lat = parseFloat(center.latitude);
+                        const lng = parseFloat(center.longitude);
+                        if (!isNaN(lat) && !isNaN(lng)) {
+                            const distance = userLatLng.distanceTo(L.latLng(lat, lng));
+                            if (distance < minDistance) {
+                                minDistance = distance;
+                                nearestCenter = center;
+                            }
+                        }
+                    });
+
+                    if (nearestCenter) {
+                        const nLat = parseFloat(nearestCenter.latitude);
+                        const nLng = parseFloat(nearestCenter.longitude);
+                        
+                        markersLayer.eachLayer(function(marker) {
+                            if (marker.options.centerId === nearestCenter.id) {
+                                marker.setIcon(highlightIcon);
+                                marker.openPopup();
+                            } else {
+                                marker.setIcon(finoraIcon);
+                            }
+                        });
+
+                        const distKm = (minDistance / 1000).toFixed(1);
+                        nearestResult.style.setProperty('display', 'inline-flex', 'important');
+                        nearestText.innerHTML = `Centre <strong>${nearestCenter.nom}</strong> à ${distKm} km.`;
+                        
+                        const bounds = L.latLngBounds([userLatLng, L.latLng(nLat, nLng)]);
+                        map.flyToBounds(bounds, { padding: [100, 100], duration: 1.5 });
+                    }
+                }
+
+                function fallbackToIpGeolocation() {
+                    fetch('https://ipapi.co/json/')
+                        .then(r => r.json())
+                        .then(data => {
+                            if (data.latitude && data.longitude) {
+                                handlePosition(data.latitude, data.longitude);
+                            } else {
+                                handlePosition(36.8065, 10.1815);
+                            }
+                        })
+                        .catch(() => handlePosition(36.8065, 10.1815));
+                }
+
+                if (navigator.geolocation && window.isSecureContext) {
+                    navigator.geolocation.getCurrentPosition(
+                        (pos) => handlePosition(pos.coords.latitude, pos.coords.longitude),
+                        () => fallbackToIpGeolocation(),
+                        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+                    );
+                } else {
+                    fallbackToIpGeolocation();
+                }
+            });
+        });
+    </script>
+{% endblock %}

@@ -1,0 +1,42 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block body %}
+<h1>User Details</h1>
+
+<table class="table bg-white">
+    <tr><th>ID</th><td>{{ user.id }}</td></tr>
+    <tr><th>Username</th><td>{{ user.username }}</td></tr>
+    <tr><th>Email</th><td>{{ user.email }}</td></tr>
+    <tr><th>Role</th><td>{{ user.role }}</td></tr>
+    <tr><th>Phone</th><td>{{ user.phone }}</td></tr>
+    <tr><th>Address</th><td>{{ user.address }}</td></tr>
+</table>
+
+<h4 class="mt-4">Risk Analysis (Trust Score: {{ risk.score }}/100)</h4>
+<div class="card mb-4 mt-2 border-0 shadow-sm">
+    <div class="card-body">
+        {% if risk.level == 'HIGH' %}
+            <h5 class="text-danger mb-0">Level: HIGH RISK</h5>
+        {% elseif risk.level == 'MEDIUM' %}
+            <h5 class="text-warning text-dark mb-0">Level: MEDIUM RISK</h5>
+        {% else %}
+            <h5 class="text-success mb-0">Level: LOW RISK</h5>
+        {% endif %}
+
+        {% if risk.reasons|length > 0 %}
+            <ul class="text-muted mt-2 mb-0">
+                {% for r in risk.reasons %}
+                    <li>{{ r }}</li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p class="text-muted mt-2 mb-0">No risk signals detected. Profile is in good standing.</p>
+        {% endif %}
+    </div>
+</div>
+
+<a href="{{ path('admin_user_index') }}" class="btn btn-secondary">⬅ Back</a>
+<a href="{{ path('admin_user_edit', {'id': user.id}) }}" class="btn btn-warning">Edit</a>
+
+{{ include('admin/user/_delete_form.html.twig') }}
+{% endblock %}

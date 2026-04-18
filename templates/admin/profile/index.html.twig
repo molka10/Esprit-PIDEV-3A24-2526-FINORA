@@ -1,0 +1,12 @@
+{% extends 'admin/base.html.twig' %}
+{% block body %}
+<h2>My Profile</h2>
+
+<p><strong>Username:</strong> {{ app.user.username }}</p>
+<p><strong>Email:</strong> {{ app.user.email }}</p>
+<p><strong>Phone:</strong> {{ app.user.phone }}</p>
+<p><strong>Address:</strong> {{ app.user.address }}</p>
+
+<a href="{{ path('app_profile_edit') }}" class="btn">Edit Profile</a>
+<a href="{{ path('app_dashboard') }}" class="btn btn-secondary">Back</a>
+{% endblock %}

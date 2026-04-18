@@ -1,0 +1,115 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block title %}Admin - Formations{% endblock %}
+
+{% block body %}
+<div class="row">
+    <div class="col-12 mb-4">
+        <div class="d-sm-flex justify-content-between align-items-center">
+            <h1 class="h3 mb-2 mb-sm-0">Gestion des Formations</h1>
+            <a href="{{ path('admin_formation_new') }}" class="btn btn-primary mb-0">Ajouter une formation</a>
+        </div>
+    </div>
+</div>
+
+<div class="card bg-transparent border">
+    <div class="card-header bg-light border-bottom">
+        <h5 class="mb-0">Filtres</h5>
+    </div>
+    <div class="card-body">
+        <form method="get" action="{{ path('admin_formation_index') }}" class="row g-3 px-0">
+            <div class="col-md-3">
+                <input type="text" name="titre" value="{{ titre }}" class="form-control" placeholder="Rechercher par titre">
+            </div>
+            <div class="col-md-3">
+                <select name="categorie" class="form-select">
+                    <option value="">Toutes catégories</option>
+                    {% for cat in categories %}
+                        <option value="{{ cat }}" {{ categorie == cat ? 'selected' : '' }}>{{ cat }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <select name="niveau" class="form-select">
+                    <option value="">Tous niveaux</option>
+                    <option value="Débutant" {{ niveau == 'Débutant' ? 'selected' : '' }}>Débutant</option>
+                    <option value="Intermédiaire" {{ niveau == 'Intermédiaire' ? 'selected' : '' }}>Intermédiaire</option>
+                    <option value="Avancé" {{ niveau == 'Avancé' ? 'selected' : '' }}>Avancé</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary w-100">Filtrer</button>
+            </div>
+            <div class="col-md-2">
+                <a href="{{ path('admin_formation_index') }}" class="btn btn-outline-secondary w-100">Réinitialiser</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card bg-transparent border mt-4">
+    <div class="card-body">
+        <div class="table-responsive border-0">
+            <table class="table table-dark-gradient align-middle p-4 mb-0 table-hover">
+                <thead>
+                    <tr>
+                        <th scope="col" class="border-0 rounded-start">Formation</th>
+                        <th scope="col" class="border-0">Catégorie</th>
+                        <th scope="col" class="border-0">Niveau</th>
+                        <th scope="col" class="border-0">Status</th>
+                        <th scope="col" class="border-0 rounded-end">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for formation in formations %}
+                    <tr>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="avatar avatar-lg me-2">
+                                    {% if formation.imageUrl %}
+                                        <img class="avatar-img rounded" src="{{ asset('uploads/formations/' ~ formation.imageUrl) }}" alt="">
+                                    {% else %}
+                                        <div class="avatar-img rounded bg-primary d-flex align-items-center justify-content-center text-white fw-bold">F</div>
+                                    {% endif %}
+                                </div>
+                                <div>
+                                    <h6 class="mb-0">{{ formation.titre }}</h6>
+                                    <p class="small mb-0">{{ lessonCounts[formation.id] }} leçons</p>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="badge bg-primary bg-opacity-10 text-primary">{{ formation.categorie }}</span>
+                        </td>
+                        <td>
+                            <span class="badge bg-info bg-opacity-10 text-info">{{ formation.niveau }}</span>
+                        </td>
+                        <td>
+                            {% if formation.isPublished %}
+                                <span class="badge bg-success">Publié</span>
+                            {% else %}
+                                <span class="badge bg-warning">Brouillon</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a href="{{ path('admin_formation_edit', {id: formation.id}) }}" class="btn btn-success-soft btn-round me-1 mb-0"><i class="bi bi-pencil-square"></i></a>
+                            <form method="post" action="{{ path('admin_formation_delete', {id: formation.id}) }}" class="d-inline-block" onsubmit="return confirm('Confirmer la suppression ?')">
+                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ formation.id) }}">
+                                <button class="btn btn-danger-soft btn-round mb-0"><i class="bi bi-trash"></i></button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="5" class="text-center py-4">Aucune formation trouvée.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="card-footer bg-transparent pt-0 d-flex justify-content-center">
+        {{ knp_pagination_render(formations) }}
+    </div>
+</div>
+{% endblock %}

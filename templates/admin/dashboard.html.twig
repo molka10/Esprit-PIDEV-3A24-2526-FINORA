@@ -1,0 +1,171 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block body %}
+		<!-- Title -->
+		<div class="row mt-4">
+			<div class="col-12 mb-3">
+				<h1 class="h3 mb-2 mb-sm-0">Dashboard Overview</h1>
+			</div>
+		</div>
+
+		<!-- Counter boxes START -->
+		<div class="row g-4 mb-4">
+			<!-- Counter item -->
+			<div class="col-md-4">
+				<div class="card card-body bg-warning bg-opacity-15 p-4 h-100">
+					<div class="d-flex justify-content-between align-items-center">
+						<!-- Digit -->
+						<div>
+							<h2 class="purecounter mb-0 fw-bold" data-purecounter-start="0" data-purecounter-end="{{ verified }}" data-purecounter-delay="200">0</h2>
+							<span class="mb-0 h6 fw-light">Verified Users</span>
+						</div>
+						<!-- Icon -->
+						<div class="icon-lg rounded-circle bg-warning text-white mb-0"><i class="fas fa-user-check fa-fw"></i></div>
+					</div>
+				</div>
+			</div>
+
+			<!-- Counter item -->
+			<div class="col-md-4">
+				<div class="card card-body bg-purple bg-opacity-10 p-4 h-100">
+					<div class="d-flex justify-content-between align-items-center">
+						<!-- Digit -->
+						<div>
+							<h2 class="purecounter mb-0 fw-bold" data-purecounter-start="0" data-purecounter-end="{{ totalUsers }}"	data-purecounter-delay="200">0</h2>
+							<span class="mb-0 h6 fw-light">Total Users</span>
+						</div>
+						<!-- Icon -->
+						<div class="icon-lg rounded-circle bg-purple text-white mb-0"><i class="fas fa-users fa-fw"></i></div>
+					</div>
+				</div>
+			</div>
+
+			<!-- Counter item -->
+			<div class="col-md-4">
+				<div class="card card-body bg-primary bg-opacity-10 p-4 h-100">
+					<div class="d-flex justify-content-between align-items-center">
+						<!-- Digit -->
+						<div>
+							<h2 class="purecounter mb-0 fw-bold" data-purecounter-start="0" data-purecounter-end="{{ notVerified }}"	data-purecounter-delay="200">0</h2>
+							<span class="mb-0 h6 fw-light">Unverified Users</span>
+						</div>
+						<!-- Icon -->
+						<div class="icon-lg rounded-circle bg-primary text-white mb-0"><i class="fas fa-user-clock fa-fw"></i></div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<!-- Counter boxes END -->
+
+		<!-- Chart and Ticket START -->
+		<div class="row g-4 mb-4">
+
+			<!-- Chart START -->
+			<div class="col-xxl-8">
+				<div class="card shadow h-100">
+
+					<!-- Card header -->
+					<div class="card-header p-4 border-bottom">
+						<h5 class="card-header-title">User Verification Status</h5>
+					</div>
+
+					<!-- Card body -->
+					<div class="card-body d-flex justify-content-center align-items-center">
+						<div class="w-100" style="max-width: 500px">
+                            <canvas id="userStatusPieChart"></canvas>
+                        </div>
+					</div>
+				</div>
+			</div>
+			<!-- Chart END -->
+
+			<!-- Ticket START -->
+			<div class="col-xxl-4">
+				<div class="card shadow h-100">
+					<!-- Card header -->
+					<div class="card-header border-bottom d-flex justify-content-between align-items-center p-4">
+						<h5 class="card-header-title">Support Requests</h5>
+						<a href="#" class="btn btn-link p-0 mb-0">View all</a>
+					</div>
+
+					<!-- Card body START -->
+					<div class="card-body p-4">
+
+						<!-- Ticket item START -->
+						<div class="d-flex justify-content-between position-relative">
+							<div class="d-sm-flex">
+								<!-- Avatar -->
+								<div class="avatar avatar-md flex-shrink-0">
+									<img class="avatar-img rounded-circle" src="{{ asset('assets/images/avatar/09.jpg') }}" alt="avatar">
+								</div>
+								<!-- Info -->
+								<div class="ms-0 ms-sm-2 mt-2 mt-sm-0">
+									<h6 class="mb-0"><a href="#" class="stretched-link">Lori Stevens</a></h6>
+									<p class="mb-0">New ticket #759 from Lori Stevens for General Enquiry</p>
+									<span class="small">8 hour ago</span>
+								</div>
+							</div>
+						</div>
+						<!-- Ticket item END -->
+
+						<hr><!-- Divider -->
+
+						<!-- Ticket item START -->
+						<div class="d-flex justify-content-between position-relative">
+							<div class="d-sm-flex">
+								<!-- Avatar -->
+								<div class="avatar avatar-md flex-shrink-0">
+									<div class="avatar-img rounded-circle bg-purple bg-opacity-10">
+										<span class="text-purple position-absolute top-50 start-50 translate-middle fw-bold">DB</span>
+									</div>
+								</div>
+								<!-- Info -->
+								<div class="ms-0 ms-sm-2 mt-2 mt-sm-0">
+									<h6 class="mb-0"><a href="#" class="stretched-link">Dennis Barrett</a></h6>
+									<p class="mb-0">Comment from Billy Vasquez on ticket #659</p>
+									<span class="small">8 hour ago</span>
+								</div>
+							</div>
+						</div>
+						<!-- Ticket item END -->
+						
+					</div>
+					<!-- Card body END -->
+				</div>
+			</div>
+			<!-- Ticket END -->
+		</div>
+		<!-- Chart and Ticket END -->
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const ctx = document.getElementById('userStatusPieChart').getContext('2d');
+        const userStatusPieChart = new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: ['Verified Users', 'Not Verified'],
+                datasets: [{
+                    label: 'User Verification Status',
+                    data: [{{ verified }}, {{ notVerified }}],
+                    backgroundColor: [
+                        '#0cbc87',
+                        '#d6293e'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                    }
+                }
+            }
+        });
+    });
+</script>
+
+{% endblock %}

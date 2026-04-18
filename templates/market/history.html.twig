@@ -1,0 +1,1185 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Historique — FINORA{% endblock %}
+
+{% block body %}
+<div class="container py-5">
+
+
+{% set filter = filter|default('tous') %}
+{% set itemsPerPage = itemsPerPage|default(10) %}
+{% set totalItems = totalItems|default(stats.nb_transactions) %}
+{% set currentPage = currentPage|default(1) %}
+{% set totalPages = totalPages|default(1) %}
+
+<style>
+    .stat-card {
+        border: none;
+        border-radius: 16px;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+        transition: transform 0.2s;
+    }
+    .stat-card:hover { transform: translateY(-3px); }
+    .stat-icon {
+        width: 52px; height: 52px;
+        border-radius: 14px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 20px; flex-shrink: 0;
+    }
+    .history-table-wrapper {
+        background: white;
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 4px 24px rgba(0,0,0,0.07);
+    }
+    .history-table-header {
+        background: #0f172a;
+        padding: 18px 24px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+    .history-table-header-left {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+    .history-table-header-right {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+    .history-table thead th {
+        background: #f8fafc;
+        color: #64748b;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        padding: 13px 18px;
+        border: none;
+        border-bottom: 2px solid #f1f5f9;
+        cursor: pointer;
+        user-select: none;
+        transition: 0.2s;
+        white-space: nowrap;
+    }
+    .history-table thead th:hover { color: #0f172a; background: #f1f5f9; }
+    .history-table thead th.no-sort { cursor: default; }
+    .history-table thead th.no-sort:hover { color: #64748b; background: #f8fafc; }
+    .history-table thead th .sort-icon {
+        margin-left: 4px;
+        font-size: 10px;
+        opacity: 0.3;
+        transition: opacity 0.2s;
+    }
+    .history-table thead th.sort-active .sort-icon { opacity: 1; color: #6366f1; }
+    .history-table tbody td {
+        padding: 16px 18px;
+        vertical-align: middle;
+        border-color: #f8fafc;
+        font-size: 14px;
+    }
+    .history-table tbody tr { transition: background 0.15s; }
+    .history-table tbody tr:hover { background: #f8faff; cursor: pointer; }
+    .history-table tbody tr.hidden-row { display: none; }
+    .type-achat {
+        background: #dcfce7; color: #16a34a;
+        padding: 5px 12px; border-radius: 20px;
+        font-size: 12px; font-weight: 700;
+        display: inline-flex; align-items: center; gap: 5px;
+    }
+    .type-vente {
+        background: #fee2e2; color: #dc2626;
+        padding: 5px 12px; border-radius: 20px;
+        font-size: 12px; font-weight: 700;
+        display: inline-flex; align-items: center; gap: 5px;
+    }
+    .symbol-tag {
+        background: #0f172a; color: white;
+        padding: 4px 10px; border-radius: 6px;
+        font-weight: 700; font-size: 12px;
+        font-family: monospace; letter-spacing: 1px;
+    }
+    .btn-detail {
+        background: #f1f5f9; color: #475569;
+        border: none; padding: 6px 14px;
+        border-radius: 8px; font-size: 12px;
+        font-weight: 600; transition: 0.2s;
+        display: inline-flex; align-items: center; gap: 5px;
+    }
+    .btn-detail:hover { background: #e2e8f0; }
+    .btn-pdf {
+        background: linear-gradient(135deg, #ef4444, #dc2626);
+        color: white; border: none; padding: 6px 14px;
+        border-radius: 8px; font-size: 12px;
+        font-weight: 600; transition: 0.2s;
+        display: inline-flex; align-items: center; gap: 5px;
+    }
+    .btn-pdf:hover { opacity: 0.9; color: white; }
+
+    /* FILTRES */
+    .filter-bar { display: flex; gap: 8px; align-items: center; }
+    .filter-btn {
+        background: rgba(255,255,255,0.1);
+        border: 1px solid rgba(255,255,255,0.15);
+        color: #94a3b8;
+        padding: 7px 18px;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+    .filter-btn:hover { background: rgba(255,255,255,0.15); color: white; }
+    .filter-btn.active {
+        background: white; color: #0f172a;
+        border-color: white;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+    }
+    .filter-count {
+        background: rgba(255,255,255,0.2);
+        padding: 2px 8px; border-radius: 6px; font-size: 11px;
+    }
+    .filter-btn.active .filter-count { background: #e2e8f0; color: #475569; }
+
+    /* SEARCH */
+    .search-wrap {
+        position: relative;
+    }
+    .search-wrap i {
+        position: absolute; left: 12px; top: 50%;
+        transform: translateY(-50%); color: #94a3b8; font-size: 13px;
+    }
+    .search-input {
+        background: rgba(255,255,255,0.08);
+        border: 1px solid rgba(255,255,255,0.15);
+        color: white;
+        padding: 7px 14px 7px 34px;
+        border-radius: 8px;
+        font-size: 13px;
+        width: 230px;
+        outline: none;
+        transition: 0.2s;
+    }
+    .search-input::placeholder { color: #64748b; }
+    .search-input:focus { border-color: #6366f1; background: rgba(99,102,241,0.1); }
+    .date-input {
+        background: rgba(255,255,255,0.08);
+        border: 1px solid rgba(255,255,255,0.15);
+        color: white;
+        padding: 7px 12px;
+        border-radius: 8px;
+        font-size: 13px;
+        outline: none;
+        transition: 0.2s;
+    }
+    .date-input:focus { border-color: #6366f1; }
+    .date-input::-webkit-calendar-picker-indicator { filter: invert(0.7); cursor: pointer; }
+    .btn-clear-filter {
+        background: rgba(239,68,68,0.15);
+        border: 1px solid rgba(239,68,68,0.3);
+        color: #fca5a5;
+        padding: 7px 14px;
+        border-radius: 8px;
+        font-size: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: 0.2s;
+    }
+    .btn-clear-filter:hover { background: rgba(239,68,68,0.25); color: white; }
+    .no-results-row td { background: #faf5ff !important; }
+    .results-count-badge {
+        background: rgba(99,102,241,0.15);
+        border: 1px solid rgba(99,102,241,0.3);
+        color: #a5b4fc;
+        padding: 4px 12px;
+        border-radius: 8px;
+        font-size: 11px;
+        font-weight: 700;
+        display: none;
+    }
+    .results-count-badge.visible { display: inline-flex; align-items: center; gap: 5px; }
+
+    /* MODAL DETAIL */
+    .detail-header {
+        background: linear-gradient(135deg, #0f172a, #1e3a5f);
+        color: white; padding: 22px 24px;
+    }
+    .detail-row {
+        display: flex; justify-content: space-between;
+        padding: 10px 0; border-bottom: 1px solid #f1f5f9;
+        font-size: 14px;
+    }
+    .detail-row:last-child { border-bottom: none; }
+    .detail-row .key { color: #64748b; }
+    .detail-row .val { font-weight: 600; color: #1e293b; }
+    .commission-box {
+        background: #fffbeb; border: 1px solid #fde68a;
+        border-radius: 12px; padding: 14px 16px; margin-top: 12px;
+    }
+    .total-box {
+        background: #f0fdf4; border: 1px solid #bbf7d0;
+        border-radius: 12px; padding: 14px 16px; margin-top: 8px; text-align: center;
+    }
+    .total-box .amount { font-size: 26px; font-weight: 800; color: #16a34a; }
+
+    /* PAGINATION */
+    .pagination-wrapper {
+        background: #f8fafc;
+        border-top: 1px solid #f1f5f9;
+        padding: 18px 24px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+    .pagination-info { font-size: 13px; color: #64748b; }
+    .pagination-info strong { color: #1e293b; }
+    .pagination-controls { display: flex; align-items: center; gap: 6px; }
+    .page-btn {
+        min-width: 40px; height: 40px;
+        border: 1px solid #e2e8f0; background: white; color: #475569;
+        border-radius: 10px; font-size: 14px; font-weight: 600;
+        cursor: pointer; transition: all 0.2s ease;
+        display: inline-flex; align-items: center; justify-content: center;
+        padding: 0 6px; text-decoration: none;
+    }
+    .page-btn:hover:not(.active):not(:disabled) {
+        background: #f1f5f9; border-color: #cbd5e1;
+        color: #1e293b; transform: translateY(-1px);
+    }
+    .page-btn.active {
+        background: linear-gradient(135deg, #0f172a, #1e3a5f);
+        color: white; border-color: #0f172a;
+        box-shadow: 0 4px 12px rgba(15,23,42,0.3);
+    }
+    .page-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .page-btn.nav-arrow { padding: 0 14px; gap: 6px; font-size: 13px; }
+    .page-ellipsis {
+        min-width: 40px; height: 40px;
+        display: inline-flex; align-items: center; justify-content: center;
+        color: #94a3b8; font-size: 14px; letter-spacing: 2px;
+    }
+
+    /* PNL CHART */
+    .pnl-card {
+        border: none; border-radius: 16px;
+        overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+    }
+    .pnl-header {
+        background: #0f172a; padding: 16px 24px;
+        display: flex; justify-content: space-between; align-items: center;
+    }
+    .pnl-header h6 { color: white; margin: 0; font-size: 14px; font-weight: 700; }
+    .chart-periods { display: flex; gap: 3px; background: rgba(0,0,0,0.3); padding: 3px; border-radius: 8px; }
+    .chart-period-btn {
+        background: transparent; border: 1px solid transparent;
+        color: #94a3b8; padding: 5px 14px; border-radius: 6px;
+        font-size: 11px; font-weight: 700; cursor: pointer; transition: 0.2s;
+    }
+    .chart-period-btn:hover { color: white; }
+    .chart-period-btn.active { background: #22c55e; color: white; border-color: #22c55e; }
+
+    /* BEST/WORST */
+    .highlight-card {
+        border: none; border-radius: 16px;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+        transition: transform 0.2s;
+    }
+    .highlight-card:hover { transform: translateY(-3px); }
+    .highlight-card.best { border-left: 4px solid #22c55e; }
+    .highlight-card.worst { border-left: 4px solid #ef4444; }
+
+    /* PDF TOAST */
+    .pdf-toast {
+        position: fixed; bottom: 24px; right: 24px;
+        background: #0f172a; color: white;
+        padding: 14px 24px; border-radius: 14px;
+        font-size: 13px; font-weight: 600;
+        display: flex; align-items: center; gap: 10px;
+        box-shadow: 0 12px 40px rgba(0,0,0,0.3);
+        transform: translateY(100px); opacity: 0;
+        transition: all 0.4s cubic-bezier(.4,0,.2,1);
+        z-index: 10000;
+        max-width: 340px;
+    }
+    .pdf-toast.show { transform: translateY(0); opacity: 1; }
+    .pdf-toast .toast-spinner {
+        width: 18px; height: 18px;
+        border: 2px solid rgba(255,255,255,0.2);
+        border-top-color: #22c55e;
+        border-radius: 50%;
+        animation: toastspin 0.7s linear infinite;
+        flex-shrink: 0;
+    }
+    .pdf-toast .toast-check {
+        width: 20px; height: 20px;
+        background: #22c55e; border-radius: 50%;
+        display: none; align-items: center; justify-content: center;
+        font-size: 12px; flex-shrink: 0;
+    }
+    .pdf-toast.done .toast-spinner { display: none; }
+    .pdf-toast.done .toast-check { display: flex; }
+    @keyframes toastspin { to { transform: rotate(360deg); } }
+
+    /* SHORTCUT HINT */
+    .shortcut-hints {
+        display: flex; gap: 16px; align-items: center;
+        font-size: 11px; color: #64748b;
+    }
+    .shortcut-hints kbd {
+        background: #f1f5f9; border: 1px solid #e2e8f0;
+        padding: 2px 7px; border-radius: 5px;
+        font-size: 10px; font-weight: 700; color: #475569;
+        font-family: monospace;
+    }
+
+    @media (max-width: 768px) {
+        .history-table-header { flex-direction: column; align-items: flex-start; }
+        .history-table-header-right { width: 100%; }
+        .search-input { width: 100% !important; }
+        .filter-bar { flex-wrap: wrap; }
+        .shortcut-hints { display: none; }
+        .pnl-header { flex-direction: column; gap: 10px; align-items: flex-start; }
+    }
+</style>
+
+<div class="card border-0 shadow-sm mb-4" style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); border-radius: 20px;">
+    <div class="card-body p-4">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+            <div>
+                <h2 class="text-white fw-bold mb-1">📜 Historique des Transactions</h2>
+                <p class="mb-0 text-white-50 small">Toutes vos opérations d'achat et de vente</p>
+            </div>
+            <div class="d-flex gap-2 flex-wrap">
+                <button onclick="exportCSV()" class="btn btn-outline-light btn-sm fw-bold px-3">
+                    <i class="bi bi-filetype-csv me-2"></i> CSV
+                </button>
+                <button onclick="exportAllPDF()" class="btn btn-danger btn-sm fw-bold px-3">
+                    <i class="bi bi-file-earmark-pdf me-2"></i> Exporter PDF
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="row g-3 mb-4">
+        <div class="col-sm-6 col-xl-3">
+            <div class="card stat-card p-4">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="stat-icon" style="background:#dcfce7;">
+                        <i class="bi bi-arrow-down-circle text-success"></i>
+                    </div>
+                    <div>
+                        <div class="text-muted" style="font-size:12px;">Total Investi</div>
+                        <div class="fw-bold fs-5 text-success counter" data-target="{{ stats.total_investi|number_format(2, '.', '') }}" data-suffix=" TND">0 TND</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-xl-3">
+            <div class="card stat-card p-4">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="stat-icon" style="background:#fee2e2;">
+                        <i class="bi bi-arrow-up-circle text-danger"></i>
+                    </div>
+                    <div>
+                        <div class="text-muted" style="font-size:12px;">Total Vendu</div>
+                        <div class="fw-bold fs-5 text-danger counter" data-target="{{ stats.total_vendu|number_format(2, '.', '') }}" data-suffix=" TND">0 TND</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-xl-3">
+            <div class="card stat-card p-4">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="stat-icon" style="background:#fffbeb;">
+                        <i class="bi bi-percent text-warning"></i>
+                    </div>
+                    <div>
+                        <div class="text-muted" style="font-size:12px;">Commissions (1%)</div>
+                        <div class="fw-bold fs-5 text-warning counter" data-target="{{ stats.commissions|number_format(2, '.', '') }}" data-suffix=" TND">0 TND</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-xl-3">
+            <div class="card stat-card p-4">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="stat-icon" style="background:#e0f2fe;">
+                        <i class="bi bi-list-ul text-info"></i>
+                    </div>
+                    <div>
+                        <div class="text-muted" style="font-size:12px;">Transactions</div>
+                        <div class="fw-bold fs-5 counter" data-target="{{ stats.nb_transactions }}" data-suffix="">0</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# ═══ BEST / WORST ═══ #}
+    <div class="row g-3 mb-4">
+        <div class="col-md-6">
+            <div class="card highlight-card best p-4">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="stat-icon" style="background:#dcfce7;">
+                        <i class="bi bi-trophy-fill text-success"></i>
+                    </div>
+                    <div class="flex-grow-1">
+                        <div class="text-muted" style="font-size:12px;">Meilleure transaction (vente)</div>
+                        <div class="fw-bold fs-6 text-success" id="bestTrade">—</div>
+                        <div style="font-size:11px;color:#94a3b8;" id="bestTradeInfo">Aucune vente enregistrée</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card highlight-card worst p-4">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="stat-icon" style="background:#fee2e2;">
+                        <i class="bi bi-exclamation-triangle-fill text-danger"></i>
+                    </div>
+                    <div class="flex-grow-1">
+                        <div class="text-muted" style="font-size:12px;">Plus gros achat (investissement)</div>
+                        <div class="fw-bold fs-6 text-danger" id="worstTrade">—</div>
+                        <div style="font-size:11px;color:#94a3b8;" id="worstTradeInfo">Aucun achat enregistré</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# ═══ PNL CHART ═══ #}
+    <div class="card pnl-card mb-4">
+        <div class="pnl-header">
+            <h6><i class="bi bi-graph-up me-2" style="color:#22c55e;"></i>Évolution du Portefeuille</h6>
+            <div class="chart-periods">
+                <button class="chart-period-btn" onclick="switchChartPeriod(7, this)">7J</button>
+                <button class="chart-period-btn active" onclick="switchChartPeriod(30, this)">30J</button>
+                <button class="chart-period-btn" onclick="switchChartPeriod(90, this)">90J</button>
+            </div>
+        </div>
+        <div id="pnlChart" style="padding:16px 20px;"></div>
+    </div>
+
+    {# ═══ TABLE + PAGINATION ═══ #}
+    <div class="history-table-wrapper">
+        <div class="history-table-header">
+            <div class="history-table-header-left">
+                <h5 class="text-white mb-0 fw-semibold" style="white-space:nowrap;">
+                    <i class="bi bi-clock-history me-2 text-primary"></i> Transactions
+                </h5>
+                <span class="results-count-badge" id="resultsCountBadge">
+                    <i class="bi bi-funnel"></i> <span id="resultsCountText">0</span> résultat(s)
+                </span>
+            </div>
+            <div class="history-table-header-right">
+                <div class="search-wrap">
+                    <i class="bi bi-search"></i>
+                    <input type="text" id="searchInput" class="search-input" placeholder="Rechercher..." oninput="filterTable()">
+                </div>
+                <input type="date" id="dateFrom" class="date-input" onchange="filterTable()">
+                <input type="date" id="dateTo" class="date-input" onchange="filterTable()">
+                <button class="btn-clear-filter" onclick="clearFilters()" title="Réinitialiser les filtres">
+                    <i class="bi bi-x-circle me-1"></i> Reset
+                </button>
+                <div class="filter-bar">
+                    <a href="{{ path('app_history', {filter: 'tous'}) }}"
+                       class="filter-btn {{ filter == 'tous' ? 'active' : '' }}">
+                        <i class="bi bi-grid-3x3-gap"></i> Tous
+                        <span class="filter-count">{{ stats.nb_transactions }}</span>
+                    </a>
+                    <a href="{{ path('app_history', {filter: 'achats'}) }}"
+                       class="filter-btn {{ filter == 'achats' ? 'active' : '' }}">
+                        <i class="bi bi-arrow-down-circle"></i> Achats
+                    </a>
+                    <a href="{{ path('app_history', {filter: 'ventes'}) }}"
+                       class="filter-btn {{ filter == 'ventes' ? 'active' : '' }}">
+                        <i class="bi bi-arrow-up-circle"></i> Ventes
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="shortcut-hints" style="padding:8px 24px; background:#faf5ff; border-bottom:1px solid #f1f5f9;">
+            <span><kbd>Ctrl</kbd>+<kbd>F</kbd> Rechercher</span>
+            <span><kbd>Ctrl</kbd>+<kbd>P</kbd> Exporter PDF</span>
+            <span><kbd>Ctrl</kbd>+<kbd>E</kbd> Exporter CSV</span>
+            <span><kbd>Esc</kbd> Fermer modal</span>
+        </div>
+
+        <table class="table history-table mb-0">
+            <thead>
+                <tr>
+                    <th onclick="sortTable(0, 'num')"># <i class="bi bi-chevron-expand sort-icon"></i></th>
+                    <th onclick="sortTable(1, 'str')">Type <i class="bi bi-chevron-expand sort-icon"></i></th>
+                    <th onclick="sortTable(2, 'str')">Symbole <i class="bi bi-chevron-expand sort-icon"></i></th>
+                    <th onclick="sortTable(3, 'str')">Entreprise <i class="bi bi-chevron-expand sort-icon"></i></th>
+                    <th onclick="sortTable(4, 'num')">Qté <i class="bi bi-chevron-expand sort-icon"></i></th>
+                    <th onclick="sortTable(5, 'num')">Prix unit. <i class="bi bi-chevron-expand sort-icon"></i></th>
+                    <th onclick="sortTable(6, 'num')">Montant <i class="bi bi-chevron-expand sort-icon"></i></th>
+                    <th onclick="sortTable(7, 'num')">Commission <i class="bi bi-chevron-expand sort-icon"></i></th>
+                    <th onclick="sortTable(8, 'date')">Date <i class="bi bi-chevron-expand sort-icon"></i></th>
+                    <th class="no-sort text-center">Actions</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody">
+                {% for t in transactions %}
+                <tr data-type="{{ t.typeTransaction }}">
+                    <td style="color:#94a3b8;">
+                        {{ (currentPage - 1) * itemsPerPage + loop.index }}
+                    </td>
+                    <td>
+                        {% if t.typeTransaction == 'ACHAT' %}
+                            <span class="type-achat"><i class="bi bi-arrow-down"></i> ACHAT</span>
+                        {% else %}
+                            <span class="type-vente"><i class="bi bi-arrow-up"></i> VENTE</span>
+                        {% endif %}
+                    </td>
+                    <td><span class="symbol-tag">{{ t.action ? t.action.symbole : 'N/A' }}</span></td>
+                    <td class="fw-semibold">{{ t.action ? t.action.nomEntreprise : 'N/A' }}</td>
+                    <td>{{ t.quantite }}</td>
+                    <td>{{ t.prixUnitaire }} TND</td>
+                    <td>
+                        {% if t.typeTransaction == 'ACHAT' %}
+                            <span class="fw-bold text-success">+{{ t.montantTotal }} TND</span>
+                        {% else %}
+                            <span class="fw-bold text-danger">-{{ t.montantTotal }} TND</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <span class="text-warning fw-semibold">
+                            {{ (t.montantTotal * 0.01)|number_format(2) }} TND
+                        </span>
+                    </td>
+                    <td style="color:#64748b; font-size:13px;">
+                        {{ t.dateTransaction|date('d/m/Y H:i') }}
+                    </td>
+                    <td class="text-center">
+                        <button class="btn-detail me-1"
+                                data-bs-toggle="modal"
+                                data-bs-target="#detailModal{{ t.id }}">
+                            <i class="bi bi-eye"></i> Détail
+                        </button>
+                        <button class="btn-pdf"
+                                onclick="exportPDF({{ t.id }})">
+                            <i class="bi bi-file-pdf"></i> PDF
+                        </button>
+                    </td>
+                </tr>
+                {% else %}
+                <tr id="emptyRow">
+                    <td colspan="10" class="text-center py-5 text-muted">
+                        <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                        Aucune transaction trouvée
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        {# ═══ PAGINATION ═══ #}
+        {% if totalPages > 1 %}
+        <div class="pagination-wrapper">
+            <div class="pagination-info">
+                Page <strong>{{ currentPage }}</strong> sur <strong>{{ totalPages }}</strong>
+                — Affichage de <strong>{{ (currentPage - 1) * itemsPerPage + 1 }}</strong>
+                à <strong>{{ min(currentPage * itemsPerPage, totalItems) }}</strong>
+                sur <strong>{{ stats.nb_transactions }}</strong> transactions
+            </div>
+            <div class="pagination-controls">
+                {% if currentPage > 1 %}
+                    <a href="{{ path('app_history', {page: currentPage - 1, filter: filter}) }}"
+                       class="page-btn nav-arrow">
+                        <i class="bi bi-chevron-left"></i> Précédent
+                    </a>
+                {% else %}
+                    <span class="page-btn nav-arrow" disabled>
+                        <i class="bi bi-chevron-left"></i> Précédent
+                    </span>
+                {% endif %}
+
+                {% if totalPages > 7 and currentPage > 4 %}
+                    <a href="{{ path('app_history', {page: 1, filter: filter}) }}" class="page-btn">1</a>
+                    {% if currentPage > 5 %}
+                        <span class="page-ellipsis">…</span>
+                    {% endif %}
+                {% endif %}
+
+                {% for i in range(1, totalPages) %}
+                    {% if totalPages <= 7
+                       or (i >= currentPage - 2 and i <= currentPage + 2)
+                       or i == 1
+                       or i == totalPages %}
+                        <a href="{{ path('app_history', {page: i, filter: filter}) }}"
+                           class="page-btn {{ i == currentPage ? 'active' : '' }}">
+                            {{ i }}
+                        </a>
+                    {% endif %}
+                {% endfor %}
+
+                {% if totalPages > 7 and currentPage < totalPages - 3 %}
+                    {% if currentPage < totalPages - 4 %}
+                        <span class="page-ellipsis">…</span>
+                    {% endif %}
+                    <a href="{{ path('app_history', {page: totalPages, filter: filter}) }}" class="page-btn">{{ totalPages }}</a>
+                {% endif %}
+
+                {% if currentPage < totalPages %}
+                    <a href="{{ path('app_history', {page: currentPage + 1, filter: filter}) }}"
+                       class="page-btn nav-arrow">
+                        Suivant <i class="bi bi-chevron-right"></i>
+                    </a>
+                {% else %}
+                    <span class="page-btn nav-arrow" disabled>
+                        Suivant <i class="bi bi-chevron-right"></i>
+                    </span>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+
+
+{# ═══ DETAIL MODALS ═══ #}
+{% for t in transactions %}
+<div class="modal fade" id="detailModal{{ t.id }}" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius:16px; overflow:hidden;">
+            <div class="detail-header">
+                <div class="d-flex align-items-center gap-3">
+                    <div style="background:rgba(99,102,241,0.2); width:46px; height:46px; border-radius:12px; display:flex; align-items:center; justify-content:center;">
+                        <i class="bi bi-receipt text-primary fs-5"></i>
+                    </div>
+                    <div>
+                        <h5 class="mb-0">Détail de la Transaction</h5>
+                        <span style="color:#94a3b8; font-size:13px;">#TXN-{{ t.id }}</span>
+                    </div>
+                    <button type="button" class="btn-close btn-close-white ms-auto" data-bs-dismiss="modal"></button>
+                </div>
+            </div>
+            <div class="modal-body p-4" id="pdfContent{{ t.id }}">
+                <div class="text-center mb-3">
+                    <span class="fw-bold fs-5" style="color:#0f172a;">💰 <span style="color:#f59e0b;">FINORA</span></span>
+                    <div style="font-size:12px; color:#94a3b8;">Reçu de Transaction</div>
+                </div>
+                <div class="detail-row">
+                    <span class="key">Référence</span>
+                    <span class="val">#TXN-{{ t.id }}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="key">Type</span>
+                    <span class="val">
+                        {% if t.typeTransaction == 'ACHAT' %}
+                            <span class="type-achat"><i class="bi bi-arrow-down"></i> ACHAT</span>
+                        {% else %}
+                            <span class="type-vente"><i class="bi bi-arrow-up"></i> VENTE</span>
+                        {% endif %}
+                    </span>
+                </div>
+                <div class="detail-row">
+                    <span class="key">Action</span>
+                    <span class="val">{{ t.action.nomEntreprise }} ({{ t.action.symbole }})</span>
+                </div>
+                <div class="detail-row">
+                    <span class="key">Quantité</span>
+                    <span class="val">{{ t.quantite }} unités</span>
+                </div>
+                <div class="detail-row">
+                    <span class="key">Prix unitaire</span>
+                    <span class="val">{{ t.prixUnitaire }} TND</span>
+                </div>
+                <div class="detail-row">
+                    <span class="key">Sous-total</span>
+                    <span class="val">{{ t.montantTotal }} TND</span>
+                </div>
+                <div class="detail-row">
+                    <span class="key">Date</span>
+                    <span class="val">{{ t.dateTransaction|date('d/m/Y à H:i') }}</span>
+                </div>
+                <div class="commission-box">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="fw-semibold" style="font-size:14px;">
+                                <i class="bi bi-percent me-1 text-warning"></i> Commission FINORA (1%)
+                            </div>
+                            <div style="font-size:12px; color:#92400e;">Frais de courtage appliqués sur le montant brut</div>
+                        </div>
+                        <div class="fw-bold text-warning fs-5">
+                            {{ (t.montantTotal * 0.01)|number_format(2) }} TND
+                        </div>
+                    </div>
+                </div>
+                <div class="total-box">
+                    <div style="font-size:12px; color:#64748b; margin-bottom:4px;">Montant total net</div>
+                    <div class="amount">
+                        {{ (t.montantTotal + t.montantTotal * 0.01)|number_format(2) }} TND
+                    </div>
+                    <div style="font-size:11px; color:#94a3b8;">Sous-total + Commission</div>
+                </div>
+            </div>
+            <div class="modal-footer border-0 pt-0 pb-4 px-4">
+                <button type="button" class="btn btn-light px-4" data-bs-dismiss="modal">Fermer</button>
+                <button class="btn btn-danger px-4 fw-bold" onclick="exportPDF({{ t.id }})">
+                    <i class="bi bi-file-earmark-pdf me-1"></i> Télécharger PDF
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+{# ═══ PDF TOAST ═══ #}
+<div class="pdf-toast" id="pdfToast">
+    <div class="toast-spinner"></div>
+    <div class="toast-check"><i class="bi bi-check"></i></div>
+    <span id="pdfToastMsg">Génération du PDF en cours...</span>
+</div>
+
+{% block javascripts %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+<script>
+/* ═══ ANIMATED COUNTERS ═══ */
+function animateCounters() {
+    document.querySelectorAll('.counter').forEach(function(el) {
+        var target = parseFloat(el.dataset.target);
+        var suffix = el.dataset.suffix || '';
+        if (isNaN(target)) return;
+        var hasDecimals = el.dataset.target.indexOf('.') > -1;
+        var decimals = hasDecimals ? 2 : 0;
+        var duration = 1200;
+        var startTime = null;
+
+        function step(timestamp) {
+            if (!startTime) startTime = timestamp;
+            var progress = Math.min((timestamp - startTime) / duration, 1);
+            var eased = 1 - Math.pow(1 - progress, 3);
+            var current = target * eased;
+            el.textContent = current.toLocaleString('fr-FR', {
+                minimumFractionDigits: decimals,
+                maximumFractionDigits: decimals
+            }) + suffix;
+            if (progress < 1) requestAnimationFrame(step);
+        }
+        requestAnimationFrame(step);
+    });
+}
+
+/* ═══ BEST / WORST TRADE ═══ */
+function detectBestWorst() {
+    var rows = document.querySelectorAll('#tableBody tr[data-type]');
+    var bestAmount = 0, worstAmount = 0;
+    var bestInfo = '', worstInfo = '';
+
+    rows.forEach(function(row) {
+        var cells = row.querySelectorAll('td');
+        if (cells.length < 10) return;
+        var type = row.dataset.type;
+        var amountText = cells[6] ? cells[6].textContent.trim() : '0';
+        var amount = parseFloat(amountText.replace(/[^\d.-]/g, '')) || 0;
+        var symbole = cells[2] ? cells[2].textContent.trim() : '';
+        var date = cells[8] ? cells[8].textContent.trim() : '';
+
+        if (type === 'VENTE' && amount > bestAmount) {
+            bestAmount = amount;
+            bestInfo = symbole + ' — ' + date;
+        }
+        if (type === 'ACHAT' && amount > worstAmount) {
+            worstAmount = amount;
+            worstInfo = symbole + ' — ' + date;
+        }
+    });
+
+    if (bestAmount > 0) {
+        document.getElementById('bestTrade').textContent = '+' + bestAmount.toLocaleString('fr-FR', { minimumFractionDigits: 2 }) + ' TND';
+        document.getElementById('bestTradeInfo').textContent = bestInfo;
+    }
+    if (worstAmount > 0) {
+        document.getElementById('worstTrade').textContent = '-' + worstAmount.toLocaleString('fr-FR', { minimumFractionDigits: 2 }) + ' TND';
+        document.getElementById('worstTradeInfo').textContent = worstInfo;
+    }
+}
+
+/* ═══ PNL CHART ═══ */
+var pnlChartInstance = null;
+
+function seededRand(seed) {
+    var x = Math.sin(seed) * 10000;
+    return x - Math.floor(x);
+}
+
+function generatePnlData(days) {
+    var data = [], val = 0;
+    var baseInvesti = {{ stats.total_investi|default(0) }};
+    var baseVendu = {{ stats.total_vendu|default(0) }};
+    var net = baseVendu - baseInvesti;
+
+    for (var i = 0; i < days; i++) {
+        val += (seededRand(i * 137 + 42) - 0.45) * (Math.abs(net) / days * 2 + 20);
+        data.push(parseFloat(val.toFixed(2)));
+    }
+    return data;
+}
+
+function generateDates(days) {
+    var dates = [];
+    for (var i = days - 1; i >= 0; i--) {
+        var d = new Date();
+        d.setDate(d.getDate() - i);
+        dates.push(d.getDate() + '/' + (d.getMonth() + 1));
+    }
+    return dates;
+}
+
+function initPnlChart(days) {
+    days = days || 30;
+    var isPositive = {{ stats.total_vendu|default(0) }} >= {{ stats.total_investi|default(0) }};
+    var color = isPositive ? '#22c55e' : '#ef4444';
+
+    var options = {
+        chart: {
+            type: 'area', height: 220,
+            background: 'transparent',
+            toolbar: { show: false },
+            fontFamily: 'Inter, sans-serif'
+        },
+        series: [{ name: 'P&L Cumulé', data: generatePnlData(days) }],
+        colors: [color],
+        fill: {
+            type: 'gradient',
+            gradient: {
+                shadeIntensity: 1,
+                opacityFrom: 0.35,
+                opacityTo: 0.02,
+                stops: [0, 100]
+            }
+        },
+        stroke: { width: 2.5, curve: 'smooth' },
+        grid: { borderColor: '#f1f5f9', strokeDashArray: 4, yaxis: { lines: { show: true } }, xaxis: { lines: { show: false } } },
+        xaxis: {
+            categories: generateDates(days),
+            labels: { style: { colors: '#94a3b8', fontSize: '11px' }, rotate: 0 },
+            axisBorder: { show: false },
+            axisTicks: { show: false }
+        },
+        yaxis: {
+            labels: {
+                style: { colors: '#94a3b8', fontSize: '11px' },
+                formatter: function(v) { return (v >= 0 ? '+' : '') + v.toFixed(0) + ' TND'; }
+            }
+        },
+        tooltip: {
+            theme: 'light',
+            y: { formatter: function(v) { return (v >= 0 ? '+' : '') + v.toFixed(2) + ' TND'; } }
+        },
+        dataLabels: { enabled: false }
+    };
+
+    if (pnlChartInstance) {
+        pnlChartInstance.destroy();
+    }
+    pnlChartInstance = new ApexCharts(document.getElementById('pnlChart'), options);
+    pnlChartInstance.render();
+}
+
+function switchChartPeriod(days, btn) {
+    document.querySelectorAll('.chart-period-btn').forEach(function(b) { b.classList.remove('active'); });
+    btn.classList.add('active');
+    initPnlChart(days);
+}
+
+/* ═══ SEARCH + DATE FILTER ═══ */
+function filterTable() {
+    var search = document.getElementById('searchInput').value.toLowerCase();
+    var from = document.getElementById('dateFrom').value;
+    var to = document.getElementById('dateTo').value;
+    var visibleCount = 0;
+    var totalCount = 0;
+
+    document.querySelectorAll('#tableBody tr[data-type]').forEach(function(row) {
+        totalCount++;
+        var cells = row.querySelectorAll('td');
+        if (cells.length < 10) return;
+
+        var text = row.textContent.toLowerCase();
+        var dateCell = cells[8] ? cells[8].textContent.trim() : '';
+        var dateParts = dateCell.split(/[\/\s:]/);
+        var rowDate = '';
+        if (dateParts.length >= 3) {
+            rowDate = dateParts[2] + '-' + dateParts[1].padStart(2, '0') + '-' + dateParts[0].padStart(2, '0');
+        }
+
+        var matchSearch = !search || text.includes(search);
+        var matchFrom = !from || rowDate >= from;
+        var matchTo = !to || rowDate <= to;
+
+        if (matchSearch && matchFrom && matchTo) {
+            row.classList.remove('hidden-row');
+            visibleCount++;
+        } else {
+            row.classList.add('hidden-row');
+        }
+    });
+
+    var badge = document.getElementById('resultsCountBadge');
+    var text = document.getElementById('resultsCountText');
+    if (search || from || to) {
+        badge.classList.add('visible');
+        text.textContent = visibleCount;
+    } else {
+        badge.classList.remove('visible');
+    }
+
+    var emptyRow = document.getElementById('emptyRow');
+    if (emptyRow) {
+        emptyRow.style.display = (totalCount > 0 && visibleCount === 0) ? '' : 'none';
+    }
+}
+
+function clearFilters() {
+    document.getElementById('searchInput').value = '';
+    document.getElementById('dateFrom').value = '';
+    document.getElementById('dateTo').value = '';
+    filterTable();
+}
+
+/* ═══ SORT TABLE ═══ */
+var sortState = {};
+
+function sortTable(colIdx, type) {
+    var key = colIdx + '-' + type;
+    sortState[key] = !sortState[key];
+    var asc = sortState[key];
+
+    document.querySelectorAll('.history-table thead th').forEach(function(th, i) {
+        th.classList.toggle('sort-active', i === colIdx);
+        var icon = th.querySelector('.sort-icon');
+        if (icon) {
+            icon.className = 'bi sort-icon ' + (i === colIdx
+                ? (asc ? 'bi-chevron-up' : 'bi-chevron-down')
+                : 'bi-chevron-expand');
+        }
+    });
+
+    var tbody = document.getElementById('tableBody');
+    var rows = Array.from(tbody.querySelectorAll('tr[data-type]'));
+
+    rows.sort(function(a, b) {
+        var aVal = a.cells[colIdx] ? a.cells[colIdx].textContent.trim() : '';
+        var bVal = b.cells[colIdx] ? b.cells[colIdx].textContent.trim() : '';
+
+        if (type === 'num') {
+            aVal = parseFloat(aVal.replace(/[^\d.-]/g, '')) || 0;
+            bVal = parseFloat(bVal.replace(/[^\d.-]/g, '')) || 0;
+            return asc ? aVal - bVal : bVal - aVal;
+        }
+        if (type === 'date') {
+            var pA = aVal.split(/[\s/]+/), pB = bVal.split(/[\s/]+/);
+            if (pA.length >= 3 && pB.length >= 3) {
+                aVal = new Date(pA[2], pA[1] - 1, pA[0]);
+                bVal = new Date(pB[2], pB[1] - 1, pB[0]);
+                return asc ? aVal - bVal : bVal - aVal;
+            }
+        }
+        return asc ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
+    });
+
+    rows.forEach(function(row) { tbody.appendChild(row); });
+}
+
+/* ═══ PDF TOAST ═══ */
+var pdfToastTimeout = null;
+
+function showPdfToast(msg, done) {
+    var toast = document.getElementById('pdfToast');
+    document.getElementById('pdfToastMsg').textContent = msg;
+    toast.classList.remove('done');
+    toast.classList.add('show');
+    if (pdfToastTimeout) clearTimeout(pdfToastTimeout);
+    if (done) {
+        toast.classList.add('done');
+        pdfToastTimeout = setTimeout(function() { toast.classList.remove('show'); }, 3000);
+    }
+}
+
+function hidePdfToast() {
+    document.getElementById('pdfToast').classList.remove('show', 'done');
+}
+
+/* ═══ EXPORT PDF ═══ */
+function exportPDF(id) {
+    showPdfToast('Génération du PDF en cours...', false);
+    var el = document.getElementById('pdfContent' + id);
+    html2pdf().set({
+        margin: 10,
+        filename: 'FINORA-Transaction-' + id + '.pdf',
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2 },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    }).from(el).save().then(function() {
+        showPdfToast('✅ PDF téléchargé avec succès !', true);
+    }).catch(function() {
+        showPdfToast('❌ Erreur lors de la génération du PDF', true);
+    });
+}
+
+function exportAllPDF() {
+    showPdfToast('Préparation du document premium...', false);
+    var rows = document.querySelectorAll('.history-table tbody tr:not(.hidden-row):not(#emptyRow)');
+    var html = `
+    <div style="font-family:'Segoe UI',Roboto,Helvetica,Arial,sans-serif; padding:40px; color:#1e293b; background:white;">
+        <div style="border-bottom:2px solid #6366f1; padding-bottom:20px; margin-bottom:30px; display:flex; justify-content:space-between; align-items:flex-end;">
+            <div>
+                <h1 style="margin:0; color:#6366f1; font-size:32px; letter-spacing:-1px;">FINORA <span style="font-weight:400; color:#94a3b8;">Bourse</span></h1>
+                <p style="margin:5px 0 0; color:#64748b; font-size:14px;">Relevé officiel des transactions boursières</p>
+            </div>
+            <div style="text-align:right;">
+                <p style="margin:0; font-weight:700; font-size:12px; text-transform:uppercase; color:#94a3b8;">Généré le</p>
+                <p style="margin:0; font-weight:700; color:#1e293b;">${new Date().toLocaleDateString('fr-FR')} à ${new Date().toLocaleTimeString('fr-FR')}</p>
+            </div>
+        </div>
+
+        <div style="margin-bottom:30px; display:grid; grid-template-columns:repeat(3, 1fr); gap:20px;">
+            <div style="background:#f8fafc; padding:20px; border-radius:12px; border:1px solid #e2e8f0;">
+                <p style="margin:0 0 5px; font-size:11px; text-transform:uppercase; color:#64748b; font-weight:700;">Total Investi</p>
+                <p style="margin:0; font-size:20px; font-weight:800; color:#16a34a;">{{ stats.total_investi|number_format(2) }} <small style="font-size:12px;">TND</small></p>
+            </div>
+            <div style="background:#f8fafc; padding:20px; border-radius:12px; border:1px solid #e2e8f0;">
+                <p style="margin:0 0 5px; font-size:11px; text-transform:uppercase; color:#64748b; font-weight:700;">Total Vendu</p>
+                <p style="margin:0; font-size:20px; font-weight:800; color:#ef4444;">{{ stats.total_vendu|number_format(2) }} <small style="font-size:12px;">TND</small></p>
+            </div>
+            <div style="background:#f8fafc; padding:20px; border-radius:12px; border:1px solid #e2e8f0;">
+                <p style="margin:0 0 5px; font-size:11px; text-transform:uppercase; color:#64748b; font-weight:700;">Commissions (1%)</p>
+                <p style="margin:0; font-size:20px; font-weight:800; color:#f59e0b;">{{ stats.commissions|number_format(2) }} <small style="font-size:12px;">TND</small></p>
+            </div>
+        </div>
+
+        <table style="width:100%; border-collapse:collapse; margin-bottom:40px;">
+            <thead>
+                <tr style="background:#f1f5f9;">
+                    <th style="padding:12px 10px; text-align:left; font-size:10px; text-transform:uppercase; color:#64748b; border-bottom:2px solid #e2e8f0;">Type</th>
+                    <th style="padding:12px 10px; text-align:left; font-size:10px; text-transform:uppercase; color:#64748b; border-bottom:2px solid #e2e8f0;">Symbole</th>
+                    <th style="padding:12px 10px; text-align:left; font-size:10px; text-transform:uppercase; color:#64748b; border-bottom:2px solid #e2e8f0;">Entreprise</th>
+                    <th style="padding:12px 10px; text-align:right; font-size:10px; text-transform:uppercase; color:#64748b; border-bottom:2px solid #e2e8f0;">Qté</th>
+                    <th style="padding:12px 10px; text-align:right; font-size:10px; text-transform:uppercase; color:#64748b; border-bottom:2px solid #e2e8f0;">Prix Unit.</th>
+                    <th style="padding:12px 10px; text-align:right; font-size:10px; text-transform:uppercase; color:#64748b; border-bottom:2px solid #e2e8f0;">TOTAL</th>
+                    <th style="padding:12px 10px; text-align:right; font-size:10px; text-transform:uppercase; color:#64748b; border-bottom:2px solid #e2e8f0;">Date</th>
+                </tr>
+            </thead>
+            <tbody>`;
+
+    rows.forEach(function(row) {
+        var cells = row.querySelectorAll('td');
+        var type = cells[1].innerText.trim();
+        var typeColor = type.includes('ACHAT') ? '#16a34a' : '#ef4444';
+        
+        html += `
+        <tr style="border-bottom:1px solid #f1f5f9;">
+            <td style="padding:12px 10px; font-weight:700; color:${typeColor}; font-size:12px;">${type}</td>
+            <td style="padding:12px 10px; font-weight:800; color:#1e293b; font-family:monospace;">${cells[2].innerText.trim()}</td>
+            <td style="padding:12px 10px; color:#475569; font-size:12px;">${cells[3].innerText.trim()}</td>
+            <td style="padding:12px 10px; text-align:right; font-weight:600;">${cells[4].innerText.trim()}</td>
+            <td style="padding:12px 10px; text-align:right; color:#64748b;">${cells[5].innerText.trim()}</td>
+            <td style="padding:12px 10px; text-align:right; font-weight:800; color:#1e293b;">${cells[6].innerText.trim()}</td>
+            <td style="padding:12px 10px; text-align:right; color:#94a3b8; font-size:11px;">${cells[8].innerText.trim()}</td>
+        </tr>`;
+    });
+
+    html += `
+            </tbody>
+        </table>
+
+        <div style="border-top:1px solid #e2e8f0; padding-top:20px; text-align:center; color:#94a3b8; font-size:11px;">
+            <p style="margin:0;">Ce document est généré automatiquement par la plateforme FINORA. Il fait office de justificatif de transaction.</p>
+            <p style="margin:5px 0 0;">Finora Bourse &copy; ${new Date().getFullYear()} - Bourse de Tunis (BVMT)</p>
+        </div>
+    </div>`;
+
+    html2pdf().set({
+        margin: [10, 10],
+        filename: 'FINORA-Releve-Transactions-' + new Date().toISOString().split('T')[0] + '.pdf',
+        image: { type: 'jpeg', quality: 1 },
+        html2canvas: { scale: 3, useCORS: true },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    }).from(html).save().then(function() {
+        showPdfToast('✅ Relevé premium généré !', true);
+    }).catch(function(err) {
+        console.error(err);
+        showPdfToast('❌ Erreur de génération', true);
+    });
+}
+
+/* ═══ EXPORT CSV ═══ */
+function exportCSV() {
+    var rows = document.querySelectorAll('.history-table tbody tr:not(.hidden-row)');
+    var csv = 'N°,Type,Symbole,Entreprise,Quantité,Prix Unit.,Montant,Commission,Date\n';
+    rows.forEach(function(row) {
+        var cells = row.querySelectorAll('td');
+        if (cells.length > 1) {
+            var line = [];
+            for (var i = 0; i < 9; i++) {
+                var val = cells[i] ? cells[i].innerText.trim().replace(/"/g, '""') : '';
+                line.push('"' + val + '"');
+            }
+            csv += line.join(',') + '\n';
+        }
+    });
+    var blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
+    var link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = 'FINORA-Historique-' + new Date().toISOString().split('T')[0] + '.csv';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
+/* ═══ KEYBOARD SHORTCUTS ═══ */
+document.addEventListener('keydown', function(e) {
+    if (e.ctrlKey && e.key === 'f') {
+        e.preventDefault();
+        document.getElementById('searchInput').focus();
+    }
+    if (e.ctrlKey && e.key === 'p') {
+        e.preventDefault();
+        exportAllPDF();
+    }
+    if (e.ctrlKey && e.key === 'e') {
+        e.preventDefault();
+        exportCSV();
+    }
+    if (e.key === 'Escape') {
+        var openModal = document.querySelector('.modal.show');
+        if (openModal) {
+            var modalInstance = bootstrap.Modal.getInstance(openModal);
+            if (modalInstance) modalInstance.hide();
+        }
+        hidePdfToast();
+    }
+});
+
+/* ═══ INIT ═══ */
+document.addEventListener('DOMContentLoaded', function() {
+    animateCounters();
+    detectBestWorst();
+    initPnlChart(30);
+});
+</script>
+    </div>
+{% endblock %}
+{% endblock %}
+
+
+

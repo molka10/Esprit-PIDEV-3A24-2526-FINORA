@@ -1,0 +1,136 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}S'inscrire — Finora Platform{% endblock %}
+
+{% block body %}
+<section class="p-0 overflow-hidden d-flex align-items-center bg-light" style="min-height: 100vh;">
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-md-10 col-lg-7 col-xl-6">
+                <!-- Card START -->
+                <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
+                    <div class="row g-0">
+                        <div class="col-12 p-4 p-sm-5 bg-white">
+                            <!-- Logo & Title -->
+                            <div class="text-center mb-4">
+                                <h1 class="h2 fw-bold text-dark mb-1">Créer un compte 🚀</h1>
+                                <p class="text-muted mb-0">Rejoignez Finora et gérez vos finances intelligemment.</p>
+                            </div>
+
+                            {# 🔴 Errors #}
+                            {% if form_errors(registrationForm) %}
+                                <div class="alert alert-danger px-3 py-2 text-center small mb-4" style="border-radius: 12px;">
+                                    {{ form_errors(registrationForm) }}
+                                </div>
+                            {% endif %}
+
+                            {{ form_start(registrationForm, { 'attr': {'novalidate': 'novalidate', 'class': 'row g-3'} }) }}
+                                
+                                <!-- Pseudo & Email -->
+                                <div class="col-md-6 mb-1">
+                                    <label class="form-label fw-bold small text-uppercase opacity-70">Nom d'utilisateur</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light border-0"><i class="bi bi-person text-primary"></i></span>
+                                        {{ form_widget(registrationForm.username, {'attr': {'class': 'form-control bg-light border-0', 'placeholder': 'Ex: JeanD'}}) }}
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-1">
+                                    <label class="form-label fw-bold small text-uppercase opacity-70">Adresse Email</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light border-0"><i class="bi bi-envelope text-primary"></i></span>
+                                        {{ form_widget(registrationForm.email, {'attr': {'class': 'form-control bg-light border-0', 'placeholder': 'jean@email.com'}}) }}
+                                    </div>
+                                </div>
+
+                                <!-- Password -->
+                                <div class="col-12 mb-1">
+                                    <label class="form-label fw-bold small text-uppercase opacity-70">Mot de Passe</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light border-0"><i class="bi bi-lock text-primary"></i></span>
+                                        {{ form_widget(registrationForm.plainPassword, {'attr': {'class': 'form-control bg-light border-0', 'placeholder': '••••••••'}}) }}
+                                    </div>
+                                    <div class="form-text small" style="font-size: 11px;">Min. 6 caractères pour votre sécurité.</div>
+                                </div>
+
+                                <!-- Role Selection -->
+                                <div class="col-12 mb-2">
+                                    <label class="form-label fw-bold small text-uppercase opacity-70 d-block">Type de compte</label>
+                                    <div class="d-flex gap-3 mt-1">
+                                        {% for child in registrationForm.role %}
+                                            <div class="form-check custom-option w-100">
+                                                {{ form_widget(child, {'attr': {'class': 'btn-check'}}) }}
+                                                <label class="btn btn-outline-light text-dark w-100 py-3 border-dashed" for="{{ child.vars.id }}">
+                                                    <i class="bi bi-{{ child.vars.label == 'User' ? 'person-badge' : 'building' }} mb-2 d-block fs-4"></i>
+                                                    {{ child.vars.label }}
+                                                </label>
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+
+                                <!-- Phone & Birth -->
+                                <div class="col-md-6 mb-1">
+                                    <label class="form-label fw-bold small text-uppercase opacity-70">Téléphone</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light border-0"><i class="bi bi-phone text-primary"></i></span>
+                                        {{ form_widget(registrationForm.phone, {'attr': {'class': 'form-control bg-light border-0', 'placeholder': '+216 --'}}) }}
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-1">
+                                    <label class="form-label fw-bold small text-uppercase opacity-70">Date de naissance</label>
+                                    {{ form_widget(registrationForm.date_of_birth, {'attr': {'class': 'form-control bg-light border-0'}}) }}
+                                </div>
+
+                                <!-- Address -->
+                                <div class="col-12 mb-2">
+                                    <label class="form-label fw-bold small text-uppercase opacity-70">Adresse de résidence</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light border-0"><i class="bi bi-geo-alt text-primary"></i></span>
+                                        {{ form_widget(registrationForm.address, {'attr': {'class': 'form-control bg-light border-0', 'placeholder': 'Ville, Pays'}}) }}
+                                    </div>
+                                </div>
+
+                                <!-- Terms -->
+                                <div class="col-12 mb-3">
+                                    <div class="form-check small">
+                                        {{ form_widget(registrationForm.agreeTerms, {'attr': {'class': 'form-check-input'}}) }}
+                                        <label class="form-check-label text-muted" for="{{ registrationForm.agreeTerms.vars.id }}">
+                                            J'accepte les <a href="#" class="text-primary text-decoration-none fw-bold">conditions d'utilisation</a> de Finora.
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <!-- Submit -->
+                                <div class="col-12">
+                                    <button type="submit" class="btn btn-primary btn-lg w-100 py-3 shadow" style="border-radius: 12px; font-weight: 700; background: linear-gradient(135deg, #7c3aed 0%, #3b1278 100%); border: none;">
+                                        S'INSCRIRE MAINTENANT
+                                    </button>
+                                </div>
+
+                                <div class="col-12 text-center mt-3">
+                                    <p class="mb-0 small text-muted">Déjà un compte ? <a href="{{ path('app_login') }}" class="text-primary fw-bold text-decoration-none">Se connecter</a></p>
+                                </div>
+
+                            {{ form_end(registrationForm) }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+    .rounded-4 { border-radius: 1.5rem !important; }
+    .input-group-text { border-radius: 12px 0 0 12px !important; }
+    .form-control { border-radius: 0 12px 12px 0 !important; }
+    #registration_form_date_of_birth { border-radius: 12px !important; }
+    
+    .btn-check:checked + .btn-outline-light {
+        background-color: rgba(124, 58, 237, 0.05);
+        border-color: #7c3aed !important;
+        color: #7c3aed !important;
+    }
+    .border-dashed { border: 2px dashed #dee2e6 !important; border-radius: 12px; }
+</style>
+{% endblock %}

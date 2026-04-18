@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        @page { margin: 0; }
+        body {
+            font-family: 'Helvetica', 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            color: #1f1147;
+            background-color: #f8fafc;
+        }
+        .container {
+            width: 100%;
+            height: 100%;
+            padding: 60px;
+            box-sizing: border-box;
+            border: 20px solid #7c3aed;
+            position: relative;
+            background-color: #fff;
+        }
+        .border-inner {
+            border: 2px solid #ddd6fe;
+            height: 100%;
+            padding: 40px;
+            box-sizing: border-box;
+            position: relative;
+            text-align: center;
+        }
+        .logo {
+            font-size: 32px;
+            font-weight: 800;
+            color: #7c3aed;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        .title {
+            font-size: 54px;
+            font-weight: 900;
+            margin-bottom: 10px;
+            color: #1e1b4b;
+            text-transform: uppercase;
+        }
+        .subtitle {
+            font-size: 24px;
+            color: #6d28d9;
+            margin-bottom: 40px;
+            font-weight: 600;
+        }
+        .recipient-label {
+            font-size: 18px;
+            color: #64748b;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .recipient-name {
+            font-size: 38px;
+            font-weight: 800;
+            color: #1e1b4b;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #e2e8f0;
+            display: inline-block;
+            padding-bottom: 5px;
+            min-width: 400px;
+        }
+        .description {
+            font-size: 18px;
+            line-height: 1.6;
+            margin-bottom: 40px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            color: #475569;
+        }
+        .formation-name {
+            font-weight: 800;
+            color: #7c3aed;
+        }
+        .footer {
+            margin-top: 60px;
+            display: table;
+            width: 100%;
+        }
+        .footer-cell {
+            display: table-cell;
+            width: 33%;
+            vertical-align: bottom;
+        }
+        .signature-line {
+            border-top: 1px solid #94a3b8;
+            margin: 0 20px 10px 20px;
+        }
+        .footer-label {
+            font-size: 14px;
+            color: #64748b;
+        }
+        .stamp {
+            position: absolute;
+            bottom: 40px;
+            right: 40px;
+            width: 120px;
+            height: 120px;
+            border: 4px double #7c3aed;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #7c3aed;
+            font-weight: 900;
+            transform: rotate(-15deg);
+            opacity: 0.2;
+            font-size: 12px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="border-inner">
+            <div class="logo">FINORA EDUCATION</div>
+            
+            <div class="title">MASTER CERTIFICATE</div>
+            <div class="subtitle">DE RÉUSSITE ET D'EXCELLENCE</div>
+            
+            <div class="recipient-label">CE CERTIFICAT EST DÉCERNÉ À</div>
+            <div class="recipient-name">{{ user.username|upper }}</div>
+            
+            <div class="description">
+                Pour avoir complété avec succès l'intégralité du parcours de formation 
+                <br>
+                <span class="formation-name">"{{ formation.titre }}"</span>
+                <br>
+                comprenant l'ensemble des <strong>{{ totalLessons }} leçons</strong> et ayant validé 
+                tous les examens de compétence correspondants.
+            </div>
+            
+            <p style="font-size: 14px; color: #94a3b8;">Délivré le {{ date|date('d/m/Y') }} par la plateforme FINORA</p>
+
+            <div class="footer">
+                <div class="footer-cell">
+                    <div class="signature-line"></div>
+                    <div class="footer-label">DIRECTION PÉDAGOGIQUE</div>
+                </div>
+                <div class="footer-cell">
+                    <!-- Space for dynamic logo or seal -->
+                </div>
+                <div class="footer-cell">
+                    <div class="signature-line"></div>
+                    <div class="footer-label">SECRÉTARIAT GÉNÉRAL</div>
+                </div>
+            </div>
+
+            <div class="stamp">
+                FINORA VALIDATED<br>OFFICIAL SEAL
+            </div>
+        </div>
+    </div>
+</body>
+</html>

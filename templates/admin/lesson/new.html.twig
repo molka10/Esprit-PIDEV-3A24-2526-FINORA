@@ -1,0 +1,65 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block title %}Admin - Nouvelle Leçon{% endblock %}
+
+{% block body %}
+<div class="row">
+    <div class="col-12 mb-4">
+        <div class="d-sm-flex justify-content-between align-items-center">
+            <h1 class="h3 mb-2 mb-sm-0">Ajouter une Leçon</h1>
+            <a href="{{ path('app_lesson_index') }}" class="btn btn-outline-secondary mb-0">Retour à la liste</a>
+        </div>
+    </div>
+</div>
+
+<div class="card bg-transparent border">
+    <div class="card-body">
+        {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+            <div class="row g-4">
+                <div class="col-md-8">
+                    <div class="mb-3">
+                        {{ form_label(form.titre, null, {'label_attr': {'class': 'form-label'}}) }}
+                        {{ form_widget(form.titre, {'attr': {'class': 'form-control'}}) }}
+                        {{ form_errors(form.titre) }}
+                    </div>
+                    <div class="mb-3">
+                        {{ form_label(form.contenu, null, {'label_attr': {'class': 'form-label'}}) }}
+                        {{ form_widget(form.contenu, {'attr': {'class': 'form-control', 'rows': '12'}}) }}
+                        <div class="form-text">Note : Le contenu sera automatiquement paginé toutes les ~1200 caractères pour une lecture fluide en mode "Livre".</div>
+                        {{ form_errors(form.contenu) }}
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        {{ form_label(form.formation, null, {'label_attr': {'class': 'form-label'}}) }}
+                        {{ form_widget(form.formation, {'attr': {'class': 'form-select'}}) }}
+                        {{ form_errors(form.formation) }}
+                    </div>
+                    <div class="mb-3">
+                        {{ form_label(form.ordre, null, {'label_attr': {'class': 'form-label'}}) }}
+                        {{ form_widget(form.ordre, {'attr': {'class': 'form-control', 'placeholder': 'Ex: 1'}}) }}
+                        {{ form_errors(form.ordre) }}
+                    </div>
+                    <div class="mb-3">
+                        {{ form_label(form.dureeMinutes, null, {'label_attr': {'class': 'form-label'}}) }}
+                        <div class="input-group">
+                            {{ form_widget(form.dureeMinutes, {'attr': {'class': 'form-control'}}) }}
+                            <span class="input-group-text">min</span>
+                        </div>
+                        {{ form_errors(form.dureeMinutes) }}
+                    </div>
+                    <div class="mb-3">
+                        {{ form_label(form.videoFile, null, {'label_attr': {'class': 'form-label'}}) }}
+                        {{ form_widget(form.videoFile, {'attr': {'class': 'form-control'}}) }}
+                        <div class="form-text">MP4, WEBM (Max 50MB). Vous pouvez aussi lier une vidéo YouTube après la création.</div>
+                        {{ form_errors(form.videoFile) }}
+                    </div>
+                </div>
+                <div class="col-12">
+                    <button type="submit" class="btn btn-primary">Créer la leçon</button>
+                </div>
+            </div>
+        {{ form_end(form) }}
+    </div>
+</div>
+{% endblock %}

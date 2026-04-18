@@ -1,0 +1,512 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block title %}FINORA - Lessons{% endblock %}
+
+{% block body %}
+<div class="container-fluid px-4 py-4">
+
+    {% for label, messages in app.flashes %}
+        {% for message in messages %}
+            <div class="alert admin-alert {{ label }}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endfor %}
+
+    <div class="admin-page-header d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-1 admin-purple-title">Lessons</h1>
+            <p class="text-muted mb-0">Gérez les lessons et leurs contenus</p>
+        </div>
+
+        <a href="{{ path('app_lesson_new') }}" class="btn admin-main-btn">
+            + Ajouter une lesson
+        </a>
+    </div>
+
+    <div class="card admin-filter-card mb-4">
+        <div class="card-body">
+            <form method="get" action="{{ path('app_lesson_index') }}" id="filter-form">
+                <div class="row g-3 align-items-end">
+
+                    <div class="col-md-3">
+                        <label class="small text-muted">Recherche</label>
+                        <input
+                            type="text"
+                            name="titre"
+                            value="{{ titre }}"
+                            class="form-control"
+                            placeholder="Titre ou contenu"
+                            id="titre-search"
+                        >
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="small text-muted">Formation</label>
+                        <select name="formation" class="form-select">
+                            <option value="">Toutes</option>
+                            {% for formation in formations %}
+                                <option value="{{ formation.id }}" {{ formationSelected == formation.id ? 'selected' : '' }}>
+                                    {{ formation.titre }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="col-md-2">
+                        <label class="small text-muted">Trier</label>
+                        <select name="tri" class="form-select">
+                            <option value="ordre" {{ tri == 'ordre' ? 'selected' : '' }}>Ordre</option>
+                            <option value="id" {{ tri == 'id' ? 'selected' : '' }}>ID</option>
+                            <option value="titre" {{ tri == 'titre' ? 'selected' : '' }}>Titre</option>
+                            <option value="dureeMinutes" {{ tri == 'dureeMinutes' ? 'selected' : '' }}>Durée</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-2">
+                        <label class="small text-muted">Ordre</label>
+                        <select name="ordre" class="form-select">
+                            <option value="asc" {{ ordre == 'asc' ? 'selected' : '' }}>ASC</option>
+                            <option value="desc" {{ ordre == 'desc' ? 'selected' : '' }}>DESC</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-2 d-flex gap-2">
+                        <button class="btn admin-main-btn w-100" type="submit">Filtrer</button>
+                        <a href="{{ path('app_lesson_index') }}" class="btn admin-outline-btn w-100">Reset</a>
+                    </div>
+
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="results-container" style="transition: opacity 0.2s ease;">
+        {% if lessons is empty %}
+            <div class="empty-state text-center py-5">
+                <div class="empty-icon">📚</div>
+                <h5>Aucune lesson trouvée</h5>
+                <p class="text-muted mb-0">Essayez de modifier les filtres ou ajoutez une nouvelle lesson.</p>
+            </div>
+        {% else %}
+
+        <div class="row g-4">
+            {% for lesson in lessons %}
+                <div class="col-md-6 col-xl-4">
+
+                    <div class="lesson-card">
+
+                        <div class="lesson-card-header">
+                            <span class="lesson-order">
+                                LEÇON {{ '%02d'|format(lesson.ordre) }}
+                            </span>
+
+                            {% if lesson.videoUrl %}
+                                <span class="lesson-video-badge">🎬 Vidéo liée</span>
+                            {% endif %}
+                        </div>
+
+                        <div class="lesson-card-body">
+                            <h5 class="lesson-title">{{ lesson.titre }}</h5>
+
+                            <div class="lesson-tags">
+                                <span class="tag formation">
+                                    📌 {{ lesson.formation ? lesson.formation.titre : 'Formation inconnue' }}
+                                </span>
+
+                                <span class="tag duration">
+                                    ⏱ {{ lesson.dureeMinutes }} min
+                                </span>
+                            </div>
+
+                            <p class="lesson-text">
+                                {{ lesson.contenu ? lesson.contenu|slice(0, 100) ~ '...' : 'Pas de contenu' }}
+                            </p>
+
+                            <div class="lesson-actions justify-content-end align-items-center">
+                                <a href="{{ path('app_lesson_show', {'id': lesson.id}) }}"
+                                   class="action-icon-btn action-view"
+                                   data-bs-toggle="tooltip" data-bs-placement="top" title="Voir la leçon">
+                                    <i class="bi bi-eye-fill"></i>
+                                </a>
+
+                                <a href="{{ path('app_lesson_edit', {'id': lesson.id}) }}"
+                                   class="action-icon-btn action-edit"
+                                   data-bs-toggle="tooltip" data-bs-placement="top" title="Modifier">
+                                    <i class="bi bi-pencil-fill"></i>
+                                </a>
+
+                                <a href="{{ path('app_lesson_youtube_manage', {'id': lesson.id}) }}"
+                                   class="action-icon-btn action-youtube"
+                                   data-bs-toggle="tooltip" data-bs-placement="top" title="Gérer YouTube">
+                                    <i class="bi bi-youtube"></i>
+                                </a>
+
+                                <form method="post"
+                                      action="{{ path('app_lesson_delete', {'id': lesson.id}) }}"
+                                      onsubmit="return confirm('Supprimer cette lesson ?');"
+                                      style="display:inline-block;">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ lesson.id) }}">
+                                    <button type="submit"
+                                            class="action-icon-btn action-delete"
+                                            data-bs-toggle="tooltip" data-bs-placement="top" title="Supprimer">
+                                        <i class="bi bi-trash3-fill"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+            {% endfor %}
+        </div>
+
+        {% endif %}
+    </div>
+</div>
+
+<style>
+.admin-alert {
+    padding: 12px 16px;
+    border-radius: 12px;
+    margin-bottom: 12px;
+    border: none;
+}
+
+.admin-alert.success {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.admin-alert.danger {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.admin-alert.info {
+    background: #dbeafe;
+    color: #1d4ed8;
+}
+
+.admin-page-header {
+    background: linear-gradient(135deg, rgba(124, 58, 237, 0.08), rgba(167, 139, 250, 0.12));
+    border: 1px solid rgba(124, 58, 237, 0.08);
+    border-radius: 22px;
+    padding: 22px 24px;
+}
+
+.admin-filter-card {
+    background: rgba(255, 255, 255, 0.94);
+    border: 1px solid rgba(124, 58, 237, 0.08);
+    border-radius: 22px;
+    box-shadow: 0 10px 30px rgba(124, 58, 237, 0.05);
+}
+
+.lesson-card {
+    background: white;
+    border-radius: 18px;
+    border: 1px solid rgba(124, 58, 237, 0.08);
+    box-shadow: 0 10px 30px rgba(124, 58, 237, 0.06);
+    overflow: hidden;
+    transition: 0.3s;
+    height: 100%;
+}
+
+.lesson-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 18px 40px rgba(124, 58, 237, 0.18);
+}
+
+.lesson-card-header {
+    background: linear-gradient(135deg, #ede9fe, #ddd6fe);
+    padding: 14px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    min-height: 72px;
+}
+
+.lesson-order {
+    background: white;
+    color: #6d28d9;
+    padding: 6px 11px;
+    border-radius: 999px;
+    font-weight: 800;
+    font-size: 12px;
+    box-shadow: 0 6px 16px rgba(124, 58, 237, 0.08);
+}
+
+.lesson-video-badge {
+    background: #fde68a;
+    color: #92400e;
+    padding: 6px 11px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.lesson-card-body {
+    padding: 18px;
+}
+
+.lesson-title {
+    font-weight: 800;
+    color: #1f1147;
+    margin-bottom: 12px;
+    line-height: 1.35;
+}
+
+.lesson-text {
+    color: #6b7280;
+    line-height: 1.7;
+    min-height: 72px;
+    margin-bottom: 0;
+}
+
+.lesson-tags {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+}
+
+.tag {
+    padding: 6px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.tag.formation {
+    background: #dbeafe;
+    color: #1d4ed8;
+}
+
+.tag.duration {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.lesson-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 16px;
+}
+
+.lesson-actions .btn {
+    padding: 6px 12px;
+    font-size: 13px;
+    font-weight: 700;
+    border-radius: 10px;
+}
+
+/* MAIN PURPLE */
+.admin-main-btn {
+    background: linear-gradient(135deg, #7c3aed 0%, #8b5cf6 100%);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-weight: 700;
+    transition: 0.25s;
+    box-shadow: 0 10px 22px rgba(124, 58, 237, 0.2);
+}
+
+.admin-main-btn:hover {
+    color: white;
+    background: linear-gradient(135deg, #6d28d9 0%, #7c3aed 100%);
+    transform: translateY(-1px);
+}
+
+/* VIEW */
+.admin-success-btn {
+    background: linear-gradient(135deg, #16a34a, #22c55e);
+    color: white;
+    border: none;
+    transition: 0.25s;
+}
+
+.admin-success-btn:hover {
+    color: white;
+    background: linear-gradient(135deg, #15803d, #16a34a);
+    transform: translateY(-1px);
+}
+
+/* EDIT */
+.admin-outline-btn {
+    background: #faf5ff;
+    color: #6d28d9;
+    border: 1px solid rgba(124, 58, 237, 0.3);
+    transition: 0.25s;
+}
+
+.admin-outline-btn:hover {
+    background: #f3e8ff;
+    color: #5b21b6;
+    border-color: rgba(124, 58, 237, 0.35);
+}
+
+/* YOUTUBE */
+.admin-warning-btn {
+    background: linear-gradient(135deg, #f59e0b, #fbbf24);
+    color: white;
+    border: none;
+    transition: 0.25s;
+}
+
+.admin-warning-btn:hover {
+    color: white;
+    background: linear-gradient(135deg, #d97706, #f59e0b);
+    transform: translateY(-1px);
+}
+
+/* DELETE */
+.admin-danger-btn {
+    background: linear-gradient(135deg, #dc2626, #ef4444);
+    color: white;
+    border: none;
+    transition: 0.25s;
+}
+
+.admin-danger-btn:hover {
+    color: white;
+    background: linear-gradient(135deg, #b91c1c, #dc2626);
+    transform: translateY(-1px);
+}
+
+.empty-state {
+    background: rgba(255, 255, 255, 0.94);
+    border: 1px solid rgba(124, 58, 237, 0.08);
+    border-radius: 22px;
+    box-shadow: 0 10px 30px rgba(124, 58, 237, 0.05);
+}
+
+.empty-icon {
+    font-size: 34px;
+}
+
+/* Icon Action Buttons */
+.action-icon-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    border: none;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    background: transparent;
+    padding: 0;
+}
+
+.action-icon-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+.action-view {
+    background: rgba(22, 163, 74, 0.1);
+    color: #16a34a;
+}
+.action-view:hover {
+    background: rgba(22, 163, 74, 0.2);
+    color: #15803d;
+}
+
+.action-edit {
+    background: rgba(124, 58, 237, 0.1);
+    color: #6d28d9;
+}
+.action-edit:hover {
+    background: rgba(124, 58, 237, 0.2);
+    color: #5b21b6;
+}
+
+.action-youtube {
+    background: rgba(245, 158, 11, 0.1);
+    color: #d97706;
+}
+.action-youtube:hover {
+    background: rgba(245, 158, 11, 0.2);
+    color: #b45309;
+}
+
+.action-delete {
+    background: rgba(239, 68, 68, 0.1);
+    color: #dc2626;
+}
+.action-delete:hover {
+    background: rgba(239, 68, 68, 0.2);
+    color: #b91c1c;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const form = document.getElementById('filter-form');
+    const titreInput = document.getElementById('titre-search');
+
+    let timeout = null;
+
+    if (form) {
+        form.addEventListener('submit', async function (e) {
+            e.preventDefault();
+            const container = document.getElementById('results-container');
+            const url = new URL(form.action || window.location.href);
+            const formData = new FormData(form);
+            const params = new URLSearchParams();
+            for (const [key, value] of formData.entries()) {
+                if (value) params.append(key, value);
+            }
+            url.search = params.toString();
+
+            window.history.pushState({}, '', url);
+
+            if (container) container.style.opacity = '0.5';
+            try {
+                const res = await fetch(url.toString(), {
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                });
+                const html = await res.text();
+                const doc = new DOMParser().parseFromString(html, "text/html");
+                const newContainer = doc.getElementById('results-container');
+                if (container && newContainer) {
+                    container.innerHTML = newContainer.innerHTML;
+                    
+                    if (typeof bootstrap !== 'undefined') {
+                        const tooltipTriggerList = [].slice.call(container.querySelectorAll('[data-bs-toggle="tooltip"]'));
+                        tooltipTriggerList.map(function (tooltipTriggerEl) {
+                            return new bootstrap.Tooltip(tooltipTriggerEl);
+                        });
+                    }
+                }
+            } catch (err) {
+                console.error('AJAX search error:', err);
+                form.submit();
+            } finally {
+                if (container) container.style.opacity = '1';
+            }
+        });
+    }
+
+    if (titreInput) {
+        titreInput.addEventListener('input', function () {
+            clearTimeout(timeout);
+            timeout = setTimeout(() => {
+                if (form) form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+            }, 400);
+        });
+    }
+
+    document.querySelectorAll('#filter-form select').forEach(select => {
+        select.addEventListener('change', function () {
+            if (form) form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+        });
+    });
+});
+</script>
+{% endblock %}

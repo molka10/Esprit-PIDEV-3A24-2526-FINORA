@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>{% block title %}FINORA - Bourse{% endblock %}</title>
+
+    <script>
+        const storedTheme = localStorage.getItem('theme')
+        const getPreferredTheme = () => {
+            if (storedTheme) { return storedTheme }
+            return window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'light'
+        }
+        const setTheme = function (theme) {
+            if (theme === 'auto' && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                document.documentElement.setAttribute('data-bs-theme', 'dark')
+            } else {
+                document.documentElement.setAttribute('data-bs-theme', theme)
+            }
+        }
+        setTheme(getPreferredTheme())
+        window.addEventListener('DOMContentLoaded', () => {
+            var el = document.querySelector('.theme-icon-active');
+            if (el != 'undefined' && el != null) {
+                const showActiveTheme = theme => {
+                    const activeThemeIcon = document.querySelector('.theme-icon-active use')
+                    const btnToActive = document.querySelector(`[data-bs-theme-value="${theme}"]`)
+                    const svgOfActiveBtn = btnToActive.querySelector('.mode-switch use').getAttribute('href')
+                    document.querySelectorAll('[data-bs-theme-value]').forEach(element => { element.classList.remove('active') })
+                    btnToActive.classList.add('active')
+                    activeThemeIcon.setAttribute('href', svgOfActiveBtn)
+                }
+                window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+                    if (storedTheme !== 'light' || storedTheme !== 'dark') { setTheme(getPreferredTheme()) }
+                })
+                showActiveTheme(getPreferredTheme())
+                document.querySelectorAll('[data-bs-theme-value]').forEach(toggle => {
+                    toggle.addEventListener('click', () => {
+                        const theme = toggle.getAttribute('data-bs-theme-value')
+                        localStorage.setItem('theme', theme)
+                        setTheme(theme)
+                        showActiveTheme(theme)
+                    })
+                })
+            }
+        })
+    </script>
+
+    <link rel="shortcut icon" href="{{ asset('assets/images/favicon.ico') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com/">
+    <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700&family=Roboto:wght@400;500;700&display=swap">
+    <link rel="stylesheet" href="{{ asset('assets/vendor/font-awesome/css/all.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/vendor/bootstrap-icons/bootstrap-icons.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/vendor/tiny-slider/tiny-slider.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/vendor/glightbox/css/glightbox.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/vendor/aos/aos.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/css/style.css') }}">
+
+    <style>
+        :root {
+            --finora-dark:    #1e0a3c;
+            --finora-mid:     #2d1155;
+            --finora-accent:  #3b1278;
+            --finora-purple:  #7c3aed;
+            --finora-light:   #a855f7;
+            --finora-pale:    #f5f3ff;
+        }
+    </style>
+
+    {% block stylesheets %}{% endblock %}
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="navbar-light navbar-sticky">
+    <nav class="navbar navbar-expand-xl z-index-9">
+        <div class="container">
+
+            <a class="navbar-brand" href="{{ path('app_home') }}">
+                <img class="light-mode-item navbar-brand-item" src="{{ asset('assets/images/logo.svg') }}" alt="logo" style="height:40px;">
+                <img class="dark-mode-item navbar-brand-item" src="{{ asset('assets/images/logo-light.svg') }}" alt="logo" style="height:40px;">
+            </a>
+
+            <button class="navbar-toggler ms-auto" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse">
+                <span class="navbar-toggler-animation"><span></span><span></span><span></span></span>
+            </button>
+
+            <div class="navbar-collapse collapse" id="navbarCollapse">
+                <div class="col-xxl-6">
+                    <div class="nav my-3 my-xl-0 px-4 flex-nowrap align-items-center">
+                        <div class="nav-item w-100">
+                            <form class="rounded position-relative">
+                                <input class="form-control pe-5 bg-secondary bg-opacity-10 border-0" type="search" placeholder="Rechercher...">
+                                <button class="btn btn-link bg-transparent px-2 py-0 position-absolute top-50 end-0 translate-middle-y" type="submit">
+                                    <i class="fas fa-search fs-6" style="color:var(--finora-purple);"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <ul class="navbar-nav navbar-nav-scroll ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link {{ app.request.get('_route') == 'app_home' ? 'active' : '' }}" href="{{ path('app_home') }}">Accueil</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ app.request.get('_route') starts with 'app_market' ? 'active' : '' }}"
+                           href="{{ path('app_market') }}">📊 Marché</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ app.request.get('_route') starts with 'app_history' ? 'active' : '' }}"
+                           href="{{ path('app_history') }}">📜 Historique</a>
+                    </li>
+                </ul>
+            </div>
+
+            <ul class="nav flex-row align-items-center list-unstyled ms-xl-auto">
+
+                {% if app.user %}
+                <!-- Notifications -->
+                <li class="nav-item ms-2 ms-sm-3 dropdown">
+                    <a class="btn btn-light btn-round mb-0" href="#" role="button" data-bs-toggle="dropdown" data-bs-auto-close="outside">
+                        <i class="bi bi-bell fa-fw"></i>
+                    </a>
+                    <span class="notif-badge animation-blink"></span>
+                    <div class="dropdown-menu dropdown-animation dropdown-menu-end dropdown-menu-size-md p-0 shadow-lg border-0">
+                        <div class="card bg-transparent">
+                            <div class="card-header bg-transparent border-bottom py-4 d-flex justify-content-between align-items-center">
+                                <h6 class="m-0">Notifications</h6>
+                                <a class="small" href="#">Tout effacer</a>
+                            </div>
+                            <div class="card-body p-0">
+                                <ul class="list-group list-unstyled list-group-flush">
+                                    <li>
+                                        <a href="#" class="list-group-item-action border-0 border-bottom d-flex p-3">
+                                            <div class="me-3">
+                                                <div class="avatar avatar-md">
+                                                    <img class="avatar-img rounded-circle" src="{{ asset('assets/images/avatar/03.jpg') }}" alt="avatar">
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <h6 class="mb-1">Bienvenue sur FINORA</h6>
+                                                <p class="small text-body m-0">Votre compte est actif</p>
+                                                <small class="text-body">À l'instant</small>
+                                            </div>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="card-footer bg-transparent border-0 py-3 text-center position-relative">
+                                <a href="#" class="stretched-link">Voir toutes les activités</a>
+                            </div>
+                        </div>
+                    </div>
+                </li>
+
+                <!-- Profile -->
+                <li class="nav-item ms-3 dropdown">
+                    <a class="avatar avatar-sm p-0" href="#" id="profileDropdown" role="button" data-bs-auto-close="outside" data-bs-display="static" data-bs-toggle="dropdown">
+                        {% if app.user.image %}
+                            <img class="avatar-img rounded-circle" src="{{ asset('uploads/' ~ app.user.image) }}" alt="avatar">
+                        {% else %}
+                            <img class="avatar-img rounded-circle" src="https://ui-avatars.com/api/?name={{ app.user.username }}" alt="avatar">
+                        {% endif %}
+                    </a>
+                    <ul class="dropdown-menu dropdown-animation dropdown-menu-end shadow pt-3" aria-labelledby="profileDropdown">
+                        <li class="px-3 mb-3">
+                            <div class="d-flex align-items-center">
+                                <div class="avatar me-3">
+                                    {% if app.user.image %}
+                                        <img class="avatar-img rounded-circle shadow" src="{{ asset('uploads/' ~ app.user.image) }}" alt="avatar">
+                                    {% else %}
+                                        <img class="avatar-img rounded-circle shadow" src="https://ui-avatars.com/api/?name={{ app.user.username }}" alt="avatar">
+                                    {% endif %}
+                                </div>
+                                <div>
+                                    <a class="h6" href="#">{{ app.user.username }}</a>
+                                    <p class="small m-0">{{ app.user.email }}</p>
+                                </div>
+                            </div>
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="{{ path('app_profile') }}"><i class="bi bi-person fa-fw me-2"></i>Mon Profil</a></li>
+                        <li>
+                            <a class="dropdown-item bg-danger-soft-hover" href="{{ path('app_logout') }}">
+                                <i class="bi bi-power fa-fw me-2"></i>Déconnexion
+                            </a>
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
+                        <!-- Dark mode switch skipped for brevity, same as base.html.twig if needed -->
+                    </ul>
+                </li>
+                {% else %}
+                    <li class="nav-item ms-3">
+                        <a href="{{ path('app_login') }}" class="btn btn-sm btn-light mb-0">Connexion</a>
+                        <a href="{{ path('app_register') }}" class="btn btn-sm btn-primary mb-0">S'inscrire</a>
+                    </li>
+                {% endif %}
+
+            </ul>
+        </div>
+    </nav>
+
+    <hr class="my-0">
+</header>
+
+{% for label, messages in app.flashes %}
+    {% for message in messages %}
+        <div class="alert alert-{{ label }} alert-dismissible fade show m-3">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    {% endfor %}
+{% endfor %}
+
+<main class="mt-4">
+    <div class="container">
+        {% block body %}{% endblock %}
+    </div>
+</main>
+
+<!-- FOOTER -->
+<footer class="bg-dark pt-5 mt-5">
+    <div class="container">
+        <div class="row g-4">
+            <div class="col-lg-3">
+                <a class="me-0 text-decoration-none" href="{{ path('app_home') }}">
+                    <img class="h-40px" src="{{ asset('assets/images/logo-light.svg') }}" alt="logo">
+                </a>
+                <p class="my-3 text-body-secondary">Plateforme de trading et d'investissement dédiée aux marchés financiers tunisiens.</p>
+                <ul class="list-inline mb-0 mt-3">
+                    <li class="list-inline-item"><a class="btn btn-white btn-sm shadow px-2 text-facebook" href="#"><i class="fab fa-fw fa-facebook-f"></i></a></li>
+                    <li class="list-inline-item"><a class="btn btn-white btn-sm shadow px-2 text-instagram" href="#"><i class="fab fa-fw fa-instagram"></i></a></li>
+                    <li class="list-inline-item"><a class="btn btn-white btn-sm shadow px-2 text-twitter" href="#"><i class="fab fa-fw fa-twitter"></i></a></li>
+                    <li class="list-inline-item"><a class="btn btn-white btn-sm shadow px-2 text-linkedin" href="#"><i class="fab fa-fw fa-linkedin-in"></i></a></li>
+                </ul>
+            </div>
+            <div class="col-lg-6">
+                <div class="row g-4">
+                    <div class="col-6 col-md-4">
+                        <h5 class="mb-2 mb-md-4 text-white">FINORA</h5>
+                        <ul class="nav flex-column text-primary-hover">
+                            <li class="nav-item"><a class="nav-link" href="{{ path('app_market') }}">Marché</a></li>
+                            <li class="nav-item"><a class="nav-link" href="{{ path('app_history') }}">Historique</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3">
+                <h5 class="mb-2 mb-md-4 text-white">Contact</h5>
+                <p class="mb-2 text-body-secondary">Email:<span class="h6 fw-light text-white ms-2">contact@finora.tn</span></p>
+                <p class="mb-0 text-body-secondary">Tél:<span class="h6 fw-light text-white ms-2">+216 XX XXX XXX</span></p>
+            </div>
+        </div>
+        <hr class="mt-4 mb-0">
+        <div class="py-3">
+            <div class="d-lg-flex justify-content-between align-items-center py-3 text-center">
+                <div class="text-body-secondary">© {{ "now"|date("Y") }} FINORA. Tous droits réservés.</div>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<div class="back-top"><i class="bi bi-arrow-up-short position-absolute top-50 start-50 translate-middle"></i></div>
+
+<script src="{{ asset('assets/vendor/bootstrap/dist/js/bootstrap.bundle.min.js') }}"></script>
+<script src="{{ asset('assets/vendor/tiny-slider/tiny-slider.js') }}"></script>
+<script src="{{ asset('assets/vendor/glightbox/js/glightbox.js') }}"></script>
+<script src="{{ asset('assets/vendor/purecounterjs/dist/purecounter_vanilla.js') }}"></script>
+<script src="{{ asset('assets/vendor/aos/aos.js') }}"></script>
+<script src="{{ asset('assets/js/functions.js') }}"></script>
+{% block javascripts %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,1937 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ lesson.titre }} - FINORA{% endblock %}
+
+{% block body %}
+
+<style>
+/* =========================================
+   LESSON BOOK STYLES
+   ========================================= */
+
+.lesson-hero {
+    background: linear-gradient(135deg, #ede9fe 0%, #f5f3ff 55%, #ffffff 100%);
+    border-radius: 20px;
+    padding: 2.5rem;
+    margin-bottom: 1.5rem;
+    border: 1px solid rgba(124,58,237,0.08);
+}
+
+/* --- Book Container --- */
+.book-container {
+    background: #fffcf5;
+    border-radius: 16px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.06), inset 0 0 0 1px rgba(0,0,0,0.04);
+    overflow: hidden;
+    margin-bottom: 1.5rem;
+    position: relative;
+}
+
+.book-top-bar {
+    background: linear-gradient(90deg, #7c3aed, #8b5cf6);
+    padding: 0.75rem 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.book-title-bar {
+    color: white;
+    font-size: 0.85rem;
+    font-weight: 600;
+    opacity: 0.9;
+    letter-spacing: 0.02em;
+}
+
+.book-progress-wrap {
+    flex: 1;
+    max-width: 260px;
+}
+
+.book-progress-bar {
+    height: 6px;
+    background: rgba(255,255,255,0.25);
+    border-radius: 99px;
+    overflow: hidden;
+}
+
+.book-progress-fill {
+    height: 100%;
+    background: #fff;
+    border-radius: 99px;
+    transition: width 0.3s ease;
+}
+
+.book-page-label {
+    color: white;
+    font-size: 0.78rem;
+    font-weight: 700;
+    white-space: nowrap;
+    opacity: 0.9;
+}
+
+/* --- Page Content --- */
+.book-page {
+    padding: 2.5rem 3rem;
+    min-height: 380px;
+    font-family: 'Georgia', 'Times New Roman', serif;
+    font-size: 1.05rem;
+    line-height: 1.95;
+    color: #2d2d2d;
+}
+
+@media (max-width: 768px) {
+    .book-page { padding: 1.5rem; }
+}
+
+.book-page p {
+    margin-bottom: 1.4rem;
+    text-align: justify;
+    hyphens: auto;
+}
+
+.book-page p:first-child::first-letter {
+    font-size: 3rem;
+    font-weight: 700;
+    float: left;
+    line-height: 0.85;
+    margin-right: 0.1em;
+    margin-top: 0.08em;
+    color: #7c3aed;
+    font-family: 'Georgia', serif;
+}
+
+.book-page .translation-badge {
+    display: inline-block;
+    font-size: 0.72rem;
+    background: #ede9fe;
+    color: #6d28d9;
+    border-radius: 999px;
+    padding: 0.1rem 0.6rem;
+    font-family: 'Inter', sans-serif;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+}
+
+/* --- Book Nav --- */
+.book-nav {
+    padding: 1rem 1.5rem;
+    border-top: 1px solid #f0ebe0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    background: #faf7f0;
+}
+
+.book-nav-btn {
+    background: white;
+    border: 1.5px solid #e0d6f5;
+    color: #6d28d9;
+    border-radius: 10px;
+    padding: 0.4rem 1.2rem;
+    font-size: 0.88rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.18s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.book-nav-btn:hover:not(:disabled) {
+    background: #7c3aed;
+    color: white;
+    border-color: #7c3aed;
+}
+
+.book-nav-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+/* --- Translation Panel --- */
+.translation-panel {
+    background: white;
+    border-radius: 14px;
+    border: 1.5px solid #ede9fe;
+    overflow: hidden;
+    margin-bottom: 1rem;
+}
+
+.translation-panel-header {
+    background: linear-gradient(90deg, #ede9fe, #f5f3ff);
+    padding: 0.85rem 1.2rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    border-bottom: 1px solid #e9e1fb;
+}
+
+.translation-panel-header h3 {
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: #5b21b6;
+    margin: 0;
+}
+
+.translation-panel-body {
+    padding: 1rem 1.2rem;
+}
+
+.translation-panel select {
+    border: 1.5px solid #e0d6f5;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    color: #374151;
+    padding: 0.4rem 0.6rem;
+    width: 100%;
+    margin-bottom: 0.75rem;
+    background: #faf5ff;
+}
+
+.btn-translate {
+    width: 100%;
+    background: linear-gradient(135deg, #7c3aed, #8b5cf6);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.2s;
+    margin-bottom: 0.5rem;
+}
+
+.btn-translate:hover { opacity: 0.9; }
+.btn-translate:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.btn-toggle-lang {
+    width: 100%;
+    background: transparent;
+    border: 1.5px solid #c4b5fd;
+    color: #7c3aed;
+    border-radius: 8px;
+    padding: 0.45rem 1rem;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.18s;
+}
+
+.btn-toggle-lang:hover {
+    background: #ede9fe;
+}
+
+/* --- TTS Player Premium --- */
+.tts-player {
+    background: linear-gradient(135deg, #1e1033 0%, #2d1b4e 100%);
+    border-radius: 16px;
+    padding: 1.2rem 1.5rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 8px 30px rgba(124, 58, 237, 0.2);
+    position: relative;
+    overflow: hidden;
+}
+.tts-player::before {
+    content: '';
+    position: absolute;
+    top: -40%; right: -20%;
+    width: 200px; height: 200px;
+    background: radial-gradient(circle, rgba(139, 92, 246, 0.3), transparent 60%);
+    border-radius: 50%;
+    pointer-events: none;
+}
+.tts-player-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 1rem;
+    position: relative;
+    z-index: 1;
+}
+.tts-player-icon {
+    width: 42px; height: 42px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #7c3aed, #a78bfa);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.2rem;
+    box-shadow: 0 4px 12px rgba(124, 58, 237, 0.4);
+}
+.tts-player-title {
+    color: white;
+    font-size: 0.9rem;
+    font-weight: 700;
+}
+.tts-player-subtitle {
+    color: rgba(255,255,255,0.5);
+    font-size: 0.72rem;
+}
+
+/* Waveform visualization mock */
+.tts-waveform {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    height: 32px;
+    margin-bottom: 0.8rem;
+    position: relative;
+    z-index: 1;
+}
+.tts-waveform-bar {
+    flex: 1;
+    background: rgba(167, 139, 250, 0.3);
+    border-radius: 99px;
+    min-width: 3px;
+    transition: height 0.15s ease, background 0.2s ease;
+}
+.tts-waveform-bar.active {
+    background: #a78bfa;
+}
+.tts-waveform-bar.played {
+    background: linear-gradient(180deg, #c4b5fd, #7c3aed);
+}
+
+.tts-controls-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    position: relative;
+    z-index: 1;
+}
+.tts-ctrl-btn {
+    width: 38px; height: 38px;
+    border-radius: 50%;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    color: white;
+    background: rgba(255,255,255,0.1);
+}
+.tts-ctrl-btn:hover { background: rgba(255,255,255,0.2); transform: scale(1.08); }
+.tts-ctrl-btn.tts-play-main {
+    width: 48px; height: 48px;
+    background: linear-gradient(135deg, #7c3aed, #a78bfa);
+    font-size: 1.1rem;
+    box-shadow: 0 4px 15px rgba(124, 58, 237, 0.5);
+}
+.tts-ctrl-btn.tts-play-main:hover {
+    box-shadow: 0 6px 20px rgba(124, 58, 237, 0.6);
+    transform: scale(1.1);
+}
+.tts-ctrl-btn:disabled { opacity: 0.3; cursor: not-allowed; transform: none; }
+
+.tts-time {
+    color: rgba(255,255,255,0.6);
+    font-size: 0.75rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    min-width: 45px;
+}
+
+.tts-progress-bar {
+    flex: 1;
+    height: 4px;
+    background: rgba(255,255,255,0.15);
+    border-radius: 99px;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+}
+.tts-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #a78bfa, #c4b5fd);
+    border-radius: 99px;
+    width: 0%;
+    transition: width 0.1s linear;
+}
+
+.tts-speed-btn {
+    background: rgba(255,255,255,0.1);
+    color: rgba(255,255,255,0.7);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 8px;
+    padding: 3px 10px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.tts-speed-btn:hover { background: rgba(255,255,255,0.2); color: white; }
+
+.tts-status-text {
+    color: rgba(255,255,255,0.5);
+    font-size: 0.72rem;
+    text-align: center;
+    margin-top: 0.5rem;
+    position: relative;
+    z-index: 1;
+}
+
+/* Text highlight effect */
+.book-page .tts-word {
+    transition: background 0.15s ease, color 0.15s ease;
+    border-radius: 3px;
+    padding: 0 1px;
+}
+.book-page .tts-word.tts-active {
+    background: linear-gradient(135deg, #c4b5fd, #ddd6fe);
+    color: #5b21b6;
+    font-weight: 700;
+    box-shadow: 0 1px 4px rgba(124, 58, 237, 0.2);
+}
+.book-page .tts-sentence {
+    transition: background 0.2s ease;
+    border-radius: 4px;
+}
+.book-page .tts-sentence.tts-active {
+    background: rgba(196, 181, 253, 0.18);
+}
+
+/* --- Continue Learning Card --- */
+.continue-card {
+    background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+    border-radius: 20px;
+    padding: 2rem;
+    color: white;
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 1.5rem;
+}
+.continue-card::before {
+    content: '';
+    position: absolute;
+    top: -30%; right: -10%;
+    width: 250px; height: 250px;
+    background: radial-gradient(circle, rgba(255,255,255,0.1), transparent 50%);
+    border-radius: 50%;
+}
+.continue-card-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255,255,255,0.15);
+    backdrop-filter: blur(4px);
+    border-radius: 99px;
+    padding: 5px 14px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+}
+.continue-card h3 {
+    font-size: 1.3rem;
+    font-weight: 800;
+    margin-bottom: 0.5rem;
+}
+.continue-card p {
+    color: rgba(255,255,255,0.75);
+    font-size: 0.9rem;
+    margin-bottom: 1.2rem;
+}
+.continue-card-btn {
+    background: white;
+    color: #6d28d9;
+    border: none;
+    border-radius: 12px;
+    padding: 10px 24px;
+    font-weight: 700;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+}
+.continue-card-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+    color: #5b21b6;
+}
+.continue-card-meta {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 1rem;
+}
+.continue-card-meta span {
+    font-size: 0.8rem;
+    color: rgba(255,255,255,0.7);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* --- Sidebar card shared --- */
+.sidebar-card {
+    background: white;
+    border: 1px solid rgba(124,58,237,0.1);
+    border-radius: 14px;
+    overflow: hidden;
+    margin-bottom: 1rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+
+.sidebar-card-header {
+    background: #faf5ff;
+    border-bottom: 1px solid #ede9fe;
+    padding: 0.8rem 1.2rem;
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: #5b21b6;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+.sidebar-card-body {
+    padding: 1rem 1.2rem;
+}
+
+.meta-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #f3f4f6;
+    font-size: 0.85rem;
+}
+.meta-row:last-child { border-bottom: none; }
+.meta-row .label { color: #9ca3af; }
+.meta-row .value { font-weight: 600; color: #111; text-align: right; max-width: 60%; }
+
+.spinner {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    border: 2px solid rgba(255,255,255,0.5);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+    vertical-align: middle;
+    margin-right: 4px;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+</style>
+
+<main>
+    <section class="py-5" style="background: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);">
+        <div class="container">
+            <div class="mx-auto" style="max-width: 1240px;">
+
+                {# ====== HERO HEADER ====== #}
+                <div class="lesson-hero mb-4">
+                    <div class="d-flex justify-content-between align-items-start flex-wrap gap-4">
+                        <div style="max-width: 720px;">
+                            <div class="d-flex gap-2 flex-wrap mb-3">
+                                <span class="badge rounded-pill px-3 py-2" style="background:#fff; color:#6d28d9; font-weight:700; border:1.5px solid #c4b5fd;">
+                                    Leçon {{ '%02d'|format(lesson.ordre) }}
+                                </span>
+                                <span class="badge rounded-pill px-3 py-2 bg-primary bg-opacity-10 text-primary">
+                                    {{ lesson.formation ? lesson.formation.titre : 'Formation inconnue' }}
+                                </span>
+                                <span class="badge rounded-pill px-3 py-2 bg-success bg-opacity-10 text-success">
+                                    {{ lesson.dureeMinutes }} min
+                                </span>
+                                {% if lesson.videoUrl %}
+                                    <span class="badge rounded-pill px-3 py-2 bg-warning bg-opacity-10 text-warning">
+                                        Vidéo disponible
+                                    </span>
+                                {% endif %}
+                            </div>
+                            <h1 class="display-6 fw-bold mb-2 text-dark">{{ lesson.titre }}</h1>
+                            <p class="text-muted mb-0" style="line-height:1.7;">
+                                Lisez le contenu de cette leçon à votre rythme, page par page.
+                                Utilisez le panneau de traduction pour lire dans votre langue.
+                            </p>
+                        </div>
+                        <div class="d-flex flex-column gap-2" style="min-width: 200px;">
+                            <a href="{{ path('app_lessons') }}" class="btn btn-light border">
+                                ← Toutes les leçons
+                            </a>
+                            <a href="{{ path('app_lesson_pdf', {'id': lesson.id}) }}" class="btn btn-outline-primary">
+                                Exporter en PDF
+                            </a>
+                            <a href="{{ path('app_lesson_related_videos', {'id': lesson.id}) }}" class="btn btn-warning">
+                                🎥 Vidéos recommandées
+                            </a>
+                            {% if fraudCount >= 3 %}
+                                <button class="btn btn-secondary disabled w-100" style="cursor: not-allowed;">
+                                    🚫 Vous êtes interdit de passer ce quiz
+                                </button>
+                            {% else %}
+                                <a href="{{ path('app_quiz_take', {'id': lesson.id}) }}" class="btn btn-primary">
+                                    🧠 Passer le quiz
+                                </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        {% include 'home/_badges.html.twig' %}
+                    </div>
+                </div>
+
+                <div class="row g-4">
+
+                    {# ====== MAIN COLUMN ====== #}
+                    <div class="col-lg-8">
+
+                        {# --- Video --- #}
+                        {% if lesson.videoUrl %}
+                            <div class="sidebar-card mb-4">
+                                <div class="sidebar-card-header">🎬 Vidéo de la leçon</div>
+                                <div class="sidebar-card-body">
+                                    {% set isYoutube = lesson.youTubeVideoId is not null %}
+                                    {% if isYoutube %}
+                                        <div class="ratio ratio-16x9 rounded-3 overflow-hidden shadow-sm">
+                                            <iframe
+                                                src="https://www.youtube.com/embed/{{ lesson.youTubeVideoId }}"
+                                                title="YouTube video player"
+                                                frameborder="0"
+                                                allowfullscreen>
+                                            </iframe>
+                                        </div>
+                                    {% elseif lesson.isUploadedVideo %}
+                                        <div class="rounded-3 overflow-hidden shadow-sm">
+                                            <video controls style="width:100%; display:block;">
+                                                <source src="{{ asset('uploads/lessons/videos/' ~ lesson.videoUrl) }}">
+                                                Votre navigateur ne supporte pas la lecture vidéo.
+                                            </video>
+                                        </div>
+                                    {% else %}
+                                        <div class="p-3 rounded-3" style="background:#fff7ed; border:1px solid #fed7aa;">
+                                            <p class="mb-2 text-dark">Cette leçon contient une vidéo externe.</p>
+                                            <a href="{{ lesson.videoUrl }}" target="_blank" class="btn btn-warning btn-sm">Ouvrir la vidéo</a>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        {% endif %}
+
+                        {# --- BOOK CONTENT AREA --- #}
+                        <div class="book-container" id="book-wrapper">
+
+                            <div class="book-top-bar">
+                                <span class="book-title-bar">📖 {{ lesson.titre|length > 40 ? lesson.titre|slice(0, 40) ~ '…' : lesson.titre }}</span>
+                                <div class="book-progress-wrap">
+                                    <div class="book-progress-bar">
+                                        <div class="book-progress-fill" id="progress-fill" style="width: 0%"></div>
+                                    </div>
+                                </div>
+                                <span class="book-page-label" id="page-label">Page 1 / 1</span>
+                            </div>
+
+                            <div class="book-page" id="book-page-content">
+                                {# Content injected by JS #}
+                                <p class="text-muted">Chargement du contenu…</p>
+                            </div>
+
+                            <div class="book-nav">
+                                <button class="book-nav-btn" id="btn-prev-page" disabled>
+                                    ← Précédent
+                                </button>
+                                <span id="book-lang-indicator" class="badge bg-light text-muted fw-normal px-3 py-2 border" style="font-size:0.75rem;"></span>
+                                <button class="book-nav-btn" id="btn-next-page" disabled>
+                                    Suivant →
+                                </button>
+                            </div>
+                        </div>
+
+                        {# --- TTS Premium Player --- #}
+                        <div class="tts-player" id="tts-player">
+                            <div class="tts-player-header">
+                                <div class="tts-player-icon">🎧</div>
+                                <div>
+                                    <div class="tts-player-title">Écouter la leçon</div>
+                                    <div class="tts-player-subtitle">Lecture audio avec suivi du texte</div>
+                                </div>
+                            </div>
+                            <div class="tts-waveform" id="tts-waveform"></div>
+                            <div class="tts-controls-row">
+                                <button class="tts-ctrl-btn" id="stop-btn" title="Stop">⏹</button>
+                                <button class="tts-ctrl-btn tts-play-main" id="play-btn" title="Lecture">▶</button>
+                                <button class="tts-ctrl-btn" id="pause-btn" title="Pause">⏸</button>
+                                <span class="tts-time" id="tts-current">0:00</span>
+                                <div class="tts-progress-bar" id="tts-progress-bar">
+                                    <div class="tts-progress-fill" id="tts-progress-fill"></div>
+                                </div>
+                                <span class="tts-time" id="tts-duration">0:00</span>
+                                <button class="tts-speed-btn" id="tts-speed-btn" title="Vitesse">1x</button>
+                            </div>
+                            <audio id="audio-player" preload="none"></audio>
+                            <div class="tts-status-text" id="tts-status">Appuyez sur ▶ pour écouter</div>
+                        </div>
+
+                        {# --- Prev / Next lesson --- #}
+                        <div class="sidebar-card mb-4">
+                            <div class="sidebar-card-body d-flex justify-content-between align-items-center flex-wrap gap-2">
+                                <div>
+                                    {% if previousLesson %}
+                                        <a href="{{ path('app_lesson_show', {'id': previousLesson.id}) }}" class="btn btn-outline-secondary btn-sm">
+                                            ⬅️ {{ previousLesson.titre|length > 28 ? previousLesson.titre|slice(0, 28) ~ '...' : previousLesson.titre }}
+                                        </a>
+                                    {% else %}
+                                        <span class="text-muted small">Première leçon</span>
+                                    {% endif %}
+                                </div>
+                                <div>
+                                    {% if nextLesson %}
+                                        <a href="{{ path('app_lesson_show', {'id': nextLesson.id}) }}" class="btn btn-primary btn-sm">
+                                            {{ nextLesson.titre|length > 28 ? nextLesson.titre|slice(0, 28) ~ '...' : nextLesson.titre }} ➡️
+                                        </a>
+                                    {% else %}
+                                        <span class="text-muted small">Dernière leçon</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        {# --- Continue Learning Card --- #}
+                        {% if nextLesson %}
+                        <div class="continue-card" id="continue-learning-card">
+                            <div class="continue-card-badge">🎓 Continuez votre progression</div>
+                            <h3>Prochaine leçon recommandée</h3>
+                            <p>Poursuivez avec la leçon suivante de la formation <strong>{{ lesson.formation ? lesson.formation.titre : '' }}</strong>.</p>
+                            <div class="continue-card-meta">
+                                <span><i class="fas fa-book-open"></i> {{ nextLesson.titre }}</span>
+                                <span><i class="fas fa-clock"></i> {{ nextLesson.dureeMinutes }} min</span>
+                                <span><i class="fas fa-list-ol"></i> Leçon {{ '%02d'|format(nextLesson.ordre) }}</span>
+                                {% if lesson.formation %}
+                                    <span><i class="fas fa-layer-group"></i> {{ lesson.formation.niveau }}</span>
+                                    <span><i class="fas fa-tag"></i> {{ lesson.formation.categorie }}</span>
+                                {% endif %}
+                            </div>
+                            <a href="{{ path('app_lesson_show', {'id': nextLesson.id}) }}" class="continue-card-btn">
+                                Continuer la formation <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
+                        {% elseif lesson.formation %}
+                        <div class="continue-card" style="background: linear-gradient(135deg, #059669 0%, #047857 100%);">
+                            <div class="continue-card-badge">🏆 Félicitations !</div>
+                            <h3>Formation terminée</h3>
+                            <p>Vous avez terminé toutes les leçons de <strong>{{ lesson.formation.titre }}</strong>. Bravo !</p>
+                            <div class="d-flex gap-2 flex-wrap">
+                                <a href="{{ path('app_quiz_take', {'id': lesson.id}) }}" class="continue-card-btn">
+                                    🧠 Passer le quiz final <i class="fas fa-arrow-right"></i>
+                                </a>
+                                <a href="{{ path('app_formations') }}" class="continue-card-btn" style="background: rgba(255,255,255,0.2); color: white;">
+                                    Explorer d'autres formations
+                                </a>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                    </div>{# end col-lg-8 #}
+
+                    {# ====== SIDEBAR ====== #}
+                    <div class="col-lg-4">
+                        <div style="position: sticky; top: 90px;">
+
+                            {# --- Translation Panel --- #}
+                            <div class="translation-panel mb-3">
+                                <div class="translation-panel-header">
+                                    <span style="font-size:1.1rem;">🌐</span>
+                                    <h3>Traduction</h3>
+                                </div>
+                                <div class="translation-panel-body">
+                                    <label class="form-label" style="font-size:0.8rem; font-weight:600; color:#6b7280; margin-bottom:0.4rem;">Langue cible</label>
+                                    <select id="lang-select">
+                                        <option value="">— Choisir une langue —</option>
+                                        <option value="en">🇬🇧 Anglais</option>
+                                        <option value="ar">🇸🇦 Arabe</option>
+                                        <option value="es">🇪🇸 Espagnol</option>
+                                        <option value="de">🇩🇪 Allemand</option>
+                                        <option value="it">🇮🇹 Italien</option>
+                                        <option value="zh">🇨🇳 Chinois</option>
+                                        <option value="tr">🇹🇷 Turc</option>
+                                        <option value="pt">🇵🇹 Portugais</option>
+                                        <option value="ru">🇷🇺 Russe</option>
+                                        <option value="ja">🇯🇵 Japonais</option>
+                                    </select>
+                                    <button class="btn-translate" id="btn-translate">
+                                        Traduire cette page
+                                    </button>
+                                    <button class="btn-toggle-lang d-none" id="btn-toggle-lang">
+                                        Voir l'original
+                                    </button>
+                                    <div id="translate-status" class="small text-muted mt-2" style="min-height:18px;"></div>
+                                </div>
+                            </div>
+
+                            {# --- Quick Actions --- #}
+                            <div class="sidebar-card">
+                                <div class="sidebar-card-header">⚡ Actions rapides</div>
+                                <div class="sidebar-card-body d-grid gap-2">
+                                    {% if lesson.formation %}
+                                        <a href="{{ path('app_lessons', {'formation': lesson.formation.id}) }}" class="btn btn-primary btn-sm">
+                                            Voir cette formation
+                                        </a>
+                                    {% endif %}
+                                    <a href="{{ path('app_lesson_pdf', {'id': lesson.id}) }}" class="btn btn-outline-primary btn-sm">
+                                        Exporter en PDF
+                                    </a>
+                                    <a href="{{ path('app_lesson_related_videos', {'id': lesson.id}) }}" class="btn btn-warning btn-sm">
+                                        🎥 Vidéos liées
+                                    </a>
+                                    <a href="{{ path('app_quiz_take', {'id': lesson.id}) }}" class="btn btn-primary btn-sm">
+                                        🧠 Quiz
+                                    </a>
+                                </div>
+                            </div>
+
+                            {# --- Meta sidebar --- #}
+                            <div class="sidebar-card mt-3">
+                                <div class="sidebar-card-header">📋 Informations</div>
+                                <div class="sidebar-card-body">
+                                    <div class="meta-row">
+                                        <span class="label">Formation</span>
+                                        <span class="value">{{ lesson.formation ? lesson.formation.titre : '—' }}</span>
+                                    </div>
+                                    <div class="meta-row">
+                                        <span class="label">Ordre</span>
+                                        <span class="value">Leçon {{ '%02d'|format(lesson.ordre) }}</span>
+                                    </div>
+                                    <div class="meta-row">
+                                        <span class="label">Durée estimée</span>
+                                        <span class="value">{{ lesson.dureeMinutes }} min</span>
+                                    </div>
+                                    <div class="meta-row">
+                                        <span class="label">Vidéo</span>
+                                        <span class="value">{{ lesson.videoUrl ? '✅ Disponible' : '❌ Non disponible' }}</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {# --- Tip card --- #}
+                            <div class="sidebar-card mt-3" style="background: linear-gradient(135deg,#ede9fe,#f5f3ff);">
+                                <div class="sidebar-card-body">
+                                    <p class="mb-0 text-muted small" style="line-height:1.7;">
+                                        💡 <strong>Conseil :</strong> Lisez page par page, regardez la vidéo, puis explorez les
+                                        vidéos recommandées pour renforcer votre compréhension.
+                                    </p>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>{# end col-lg-4 #}
+
+                </div>{# end row #}
+            </div>
+        </div>
+    </section>
+</main>
+
+<script>
+(function() {
+    /* ================================================================
+       FINORA Lesson Book Engine
+       Auth-agnostic: keyed by lessonId only.
+       Future: store currentPage & activeLang server-side per userId.
+    ================================================================ */
+
+    const LESSON_ID = {{ lesson.id }};
+    const RAW_CONTENT = {{ lesson.contenu is not null ? lesson.contenu|json_encode|raw : '""' }};
+    const STORAGE_PAGE_KEY = 'finora_lesson_' + LESSON_ID + '_page';
+    const STORAGE_LANG_KEY = 'finora_lesson_' + LESSON_ID + '_lang';
+
+    // --- Split content into pages (by double newline or ~600 char chunks) ---
+    function splitIntoPages(text) {
+        if (!text || text.trim() === '') return ['Aucun contenu disponible pour cette leçon.'];
+
+        // Split by double newlines first
+        let blocks = text.split(/\n\s*\n/).map(b => b.trim()).filter(b => b.length > 0);
+
+        // If no double newlines found, split by single newlines
+        if (blocks.length <= 1) {
+            blocks = text.split(/\n/).map(b => b.trim()).filter(b => b.length > 0);
+        }
+
+        // Group into pages of ~3 blocks each (to avoid 1 paragraph per page on dense content)
+        const BLOCKS_PER_PAGE = 3;
+        const pages = [];
+        for (let i = 0; i < blocks.length; i += BLOCKS_PER_PAGE) {
+            pages.push(blocks.slice(i, i + BLOCKS_PER_PAGE).join('\n\n'));
+        }
+        return pages.length > 0 ? pages : [text];
+    }
+
+    const originalPages = splitIntoPages(RAW_CONTENT);
+    // Cache: { 'en': ['page1 translated', 'page2 translated', ...], 'ar': [...] }
+    const translationCache = {};
+
+    let currentPage = 0;
+    let activeLang = null; // null = original French
+    let isShowingTranslation = false;
+
+    // Restore saved state
+    const savedPage = parseInt(sessionStorage.getItem(STORAGE_PAGE_KEY) || '0', 10);
+    const savedLang = localStorage.getItem(STORAGE_LANG_KEY);
+    if (!isNaN(savedPage) && savedPage < originalPages.length) currentPage = savedPage;
+
+    // DOM refs
+    const pageContent  = document.getElementById('book-page-content');
+    const pageLabel    = document.getElementById('page-label');
+    const progressFill = document.getElementById('progress-fill');
+    const btnPrev      = document.getElementById('btn-prev-page');
+    const btnNext      = document.getElementById('btn-next-page');
+    const langIndicator= document.getElementById('book-lang-indicator');
+    const langSelect   = document.getElementById('lang-select');
+    const btnTranslate = document.getElementById('btn-translate');
+    const btnToggle    = document.getElementById('btn-toggle-lang');
+    const translateStatus = document.getElementById('translate-status');
+
+    // Restore saved language in select
+    if (savedLang) {
+        langSelect.value = savedLang;
+    }
+
+    const LANG_NAMES = {
+        en: 'Anglais', ar: 'Arabe', es: 'Espagnol', de: 'Allemand',
+        it: 'Italien', zh: 'Chinois', tr: 'Turc', pt: 'Portugais',
+        ru: 'Russe', ja: 'Japonais'
+    };
+
+    /* ----------- RENDER PAGE ----------- */
+    function renderPage() {
+        const totalPages = originalPages.length;
+        const pct = totalPages > 1 ? ((currentPage + 1) / totalPages * 100) : 100;
+        progressFill.style.width = pct + '%';
+        pageLabel.textContent = 'Page ' + (currentPage + 1) + ' / ' + totalPages;
+        btnPrev.disabled = currentPage === 0;
+        btnNext.disabled = currentPage === totalPages - 1;
+
+        // Pick which content to show
+        let textToShow = originalPages[currentPage];
+        let isTranslated = false;
+
+        if (isShowingTranslation && activeLang && translationCache[activeLang] && translationCache[activeLang][currentPage]) {
+            textToShow = translationCache[activeLang][currentPage];
+            isTranslated = true;
+        }
+
+        // Build HTML
+        const paragraphs = textToShow.split('\n\n').map(p => p.trim()).filter(p => p);
+        let html = '';
+        if (isTranslated) {
+            html += '<div class="translation-badge">🌐 Traduction — ' + (LANG_NAMES[activeLang] || activeLang) + '</div>';
+        }
+        paragraphs.forEach(p => {
+            html += '<p>' + escapeHtml(p).replace(/\n/g, '<br>') + '</p>';
+        });
+
+        pageContent.innerHTML = html || '<p class="text-muted">Aucun contenu.</p>';
+
+        // Update lang indicator
+        if (isTranslated) {
+            langIndicator.textContent = '🌐 ' + (LANG_NAMES[activeLang] || activeLang);
+            langIndicator.className = 'badge bg-purple text-white px-3 py-2 border';
+            langIndicator.style.background = '#7c3aed';
+            langIndicator.style.color = 'white';
+        } else {
+            langIndicator.textContent = '🇫🇷 Français (original)';
+            langIndicator.className = 'badge bg-light text-muted px-3 py-2 border';
+            langIndicator.style.background = '';
+            langIndicator.style.color = '';
+        }
+
+        // Save progress
+        sessionStorage.setItem(STORAGE_PAGE_KEY, currentPage);
+    }
+
+    function escapeHtml(str) {
+        return str
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;');
+    }
+
+    /* ----------- TRANSLATE CURRENT PAGE ----------- */
+    async function translateCurrentPage(lang) {
+        const text = originalPages[currentPage];
+        if (!text) return;
+
+        // Already cached
+        if (translationCache[lang] && translationCache[lang][currentPage] !== undefined) {
+            return;
+        }
+
+        translateStatus.innerHTML = '<span class="spinner"></span> Traduction en cours…';
+        btnTranslate.disabled = true;
+
+        try {
+            const encoded = encodeURIComponent(text);
+            const url = `https://api.mymemory.translated.net/get?q=${encoded}&langpair=fr|${lang}`;
+            const res = await fetch(url);
+            const data = await res.json();
+
+            if (data.responseStatus === 200 && data.responseData && data.responseData.translatedText) {
+                if (!translationCache[lang]) translationCache[lang] = {};
+                translationCache[lang][currentPage] = data.responseData.translatedText;
+                translateStatus.textContent = '✅ Traduction terminée.';
+            } else {
+                translateStatus.textContent = '⚠️ Traduction non disponible pour cette page.';
+            }
+        } catch (err) {
+            translateStatus.textContent = '❌ Erreur réseau. Vérifiez votre connexion.';
+            console.error('Translation error:', err);
+        } finally {
+            btnTranslate.disabled = false;
+        }
+    }
+
+    /* ----------- EVENTS ----------- */
+    btnPrev.addEventListener('click', () => {
+        if (currentPage > 0) {
+            currentPage--;
+            renderPage();
+            // Auto-translate if we were in translation mode
+            if (isShowingTranslation && activeLang) {
+                autoTranslatePage();
+            }
+            window.scrollTo({ top: document.getElementById('book-wrapper').offsetTop - 80, behavior: 'smooth' });
+        }
+    });
+
+    btnNext.addEventListener('click', () => {
+        if (currentPage < originalPages.length - 1) {
+            currentPage++;
+            renderPage();
+            if (isShowingTranslation && activeLang) {
+                autoTranslatePage();
+            }
+            window.scrollTo({ top: document.getElementById('book-wrapper').offsetTop - 80, behavior: 'smooth' });
+        }
+    });
+
+    async function autoTranslatePage() {
+        await translateCurrentPage(activeLang);
+        renderPage();
+    }
+
+    btnTranslate.addEventListener('click', async () => {
+        const lang = langSelect.value;
+        if (!lang) {
+            translateStatus.textContent = '⚠️ Veuillez choisir une langue.';
+            return;
+        }
+        activeLang = lang;
+        localStorage.setItem(STORAGE_LANG_KEY, lang);
+        await translateCurrentPage(lang);
+        isShowingTranslation = true;
+        btnToggle.classList.remove('d-none');
+        btnToggle.textContent = 'Voir l\'original';
+        renderPage();
+    });
+
+    btnToggle.addEventListener('click', () => {
+        isShowingTranslation = !isShowingTranslation;
+        btnToggle.textContent = isShowingTranslation ? 'Voir l\'original' : 'Voir la traduction';
+        renderPage();
+    });
+
+    // Initial render
+    renderPage();
+
+    /* =========================================
+       TTS PREMIUM PLAYER + TEXT HIGHLIGHTING
+    ========================================= */
+    const audio      = document.getElementById('audio-player');
+    const playBtn    = document.getElementById('play-btn');
+    const pauseBtn   = document.getElementById('pause-btn');
+    const stopBtn    = document.getElementById('stop-btn');
+    const ttsStatus  = document.getElementById('tts-status');
+    const progressBar  = document.getElementById('tts-progress-bar');
+    const progressFillTts = document.getElementById('tts-progress-fill');
+    const currentTimeEl = document.getElementById('tts-current');
+    const durationEl = document.getElementById('tts-duration');
+    const speedBtn   = document.getElementById('tts-speed-btn');
+    const waveformEl = document.getElementById('tts-waveform');
+    const baseTtsUrl = "{{ path('app_tts', {'id': lesson.id}) }}";
+
+    let isStopped = true;
+    let playbackRate = 1;
+    const speeds = [0.75, 1, 1.25, 1.5, 2];
+    let speedIndex = 1;
+
+    // Generate waveform bars
+    const BAR_COUNT = 60;
+    for (let i = 0; i < BAR_COUNT; i++) {
+        const bar = document.createElement('div');
+        bar.className = 'tts-waveform-bar';
+        bar.style.height = (Math.random() * 22 + 6) + 'px';
+        waveformEl.appendChild(bar);
+    }
+    const waveformBars = waveformEl.querySelectorAll('.tts-waveform-bar');
+
+    function formatTime(sec) {
+        if (isNaN(sec)) return '0:00';
+        const m = Math.floor(sec / 60);
+        const s = Math.floor(sec % 60);
+        return m + ':' + (s < 10 ? '0' : '') + s;
+    }
+
+    // Update progress bar and waveform
+    audio.addEventListener('timeupdate', function() {
+        if (!audio.duration) return;
+        const pct = (audio.currentTime / audio.duration) * 100;
+        progressFillTts.style.width = pct + '%';
+        currentTimeEl.textContent = formatTime(audio.currentTime);
+
+        // Update waveform bars
+        const activeIdx = Math.floor((audio.currentTime / audio.duration) * BAR_COUNT);
+        waveformBars.forEach((bar, i) => {
+            bar.classList.toggle('played', i < activeIdx);
+            bar.classList.toggle('active', i === activeIdx);
+        });
+
+        // Text highlighting: estimate sentence position
+        highlightTextAtProgress(audio.currentTime / audio.duration);
+    });
+
+    audio.addEventListener('loadedmetadata', function() {
+        durationEl.textContent = formatTime(audio.duration);
+    });
+
+    // Click on progress bar to seek
+    progressBar.addEventListener('click', function(e) {
+        if (!audio.duration) return;
+        const rect = progressBar.getBoundingClientRect();
+        const pct = (e.clientX - rect.left) / rect.width;
+        audio.currentTime = pct * audio.duration;
+    });
+
+    // Speed control
+    speedBtn.addEventListener('click', function() {
+        speedIndex = (speedIndex + 1) % speeds.length;
+        playbackRate = speeds[speedIndex];
+        audio.playbackRate = playbackRate;
+        speedBtn.textContent = playbackRate + 'x';
+    });
+
+    // Play
+    playBtn.addEventListener('click', async function () {
+        try {
+            if (audio.paused && audio.src && !isStopped) {
+                await audio.play();
+                playBtn.textContent = '⏸';
+                ttsStatus.textContent = '🎵 Lecture en cours...';
+                return;
+            }
+            isStopped = false;
+            audio.pause();
+            audio.currentTime = 0;
+            audio.src = baseTtsUrl + '?v=' + Date.now();
+            audio.playbackRate = playbackRate;
+            ttsStatus.textContent = '⏳ Chargement de l\'audio...';
+            playBtn.textContent = '⌛';
+            playBtn.disabled = true;
+            const onCanPlay = async () => {
+                audio.removeEventListener('canplaythrough', onCanPlay);
+                if (isStopped) return;
+                try {
+                    await audio.play();
+                    playBtn.textContent = '⏸';
+                    playBtn.disabled = false;
+                    ttsStatus.textContent = '🎵 Lecture en cours...';
+                } catch (e) {
+                    playBtn.textContent = '▶';
+                    playBtn.disabled = false;
+                    ttsStatus.textContent = '❌ Impossible de lancer la lecture.';
+                }
+            };
+            audio.addEventListener('canplaythrough', onCanPlay, { once: true });
+            audio.load();
+        } catch (error) {
+            playBtn.textContent = '▶';
+            playBtn.disabled = false;
+            ttsStatus.textContent = '❌ Erreur de chargement.';
+        }
+    });
+
+    // Pause
+    pauseBtn.addEventListener('click', function () {
+        if (!audio.src) return;
+        if (audio.paused) {
+            audio.play();
+            playBtn.textContent = '⏸';
+            ttsStatus.textContent = '🎵 Lecture en cours...';
+        } else {
+            audio.pause();
+            isStopped = false;
+            playBtn.textContent = '▶';
+            ttsStatus.textContent = '⏸ En pause';
+        }
+    });
+
+    // Stop
+    stopBtn.addEventListener('click', function () {
+        isStopped = true;
+        audio.pause();
+        audio.currentTime = 0;
+        audio.removeAttribute('src');
+        audio.load();
+        playBtn.textContent = '▶';
+        playBtn.disabled = false;
+        progressFillTts.style.width = '0%';
+        currentTimeEl.textContent = '0:00';
+        durationEl.textContent = '0:00';
+        ttsStatus.textContent = 'Appuyez sur ▶ pour écouter';
+        waveformBars.forEach(bar => { bar.classList.remove('played', 'active'); });
+        clearHighlight();
+    });
+
+    audio.addEventListener('ended', () => {
+        isStopped = true;
+        playBtn.textContent = '▶';
+        ttsStatus.textContent = '✅ Lecture terminée.';
+        clearHighlight();
+    });
+    audio.addEventListener('error', () => {
+        isStopped = true;
+        playBtn.textContent = '▶';
+        playBtn.disabled = false;
+        ttsStatus.textContent = '❌ Erreur de chargement audio.';
+    });
+
+    /* =========================================
+       TEXT HIGHLIGHTING (subtitle-style)
+       - Character-count weighted timing
+       - Page-aware: only highlights when audio
+         position matches the current page
+    ========================================= */
+    let sentenceSpans = [];
+    let sentenceCharRanges = []; // [{startPct, endPct}] relative to CURRENT PAGE portion of audio
+
+    // Precompute character offsets for each page within the full content
+    const totalChars = originalPages.reduce((sum, p) => sum + p.length, 0);
+    function getPageCharOffset(pageIdx) {
+        let offset = 0;
+        for (let i = 0; i < pageIdx; i++) {
+            offset += originalPages[i].length;
+        }
+        return offset;
+    }
+
+    // Override renderPage to wrap sentences in spans
+    const _origRenderPage = renderPage;
+    renderPage = function() {
+        _origRenderPage();
+        wrapSentencesForHighlight();
+    };
+    // Re-render to apply wrapping
+    renderPage();
+
+    function wrapSentencesForHighlight() {
+        const container = document.getElementById('book-page-content');
+        const paragraphs = container.querySelectorAll('p');
+        sentenceSpans = [];
+        sentenceCharRanges = [];
+
+        // Gather all sentences with their text
+        const allSentences = [];
+        paragraphs.forEach(p => {
+            const text = p.textContent;
+            // Split by sentence-ending punctuation (keep the punctuation with the sentence)
+            const sentences = text.split(/(?<=[.!?;:।。！？]\s)|(?<=\n)/).filter(s => s.trim().length > 0);
+
+            p.textContent = '';
+            sentences.forEach(sentence => {
+                if (sentence.trim() === '') return;
+                const span = document.createElement('span');
+                span.className = 'tts-sentence';
+                span.textContent = sentence;
+                p.appendChild(span);
+                sentenceSpans.push(span);
+                allSentences.push(sentence);
+            });
+        });
+
+        if (allSentences.length === 0 || totalChars === 0) return;
+
+        // Compute this page's time window in the full audio (by char proportion)
+        const pageOffset = getPageCharOffset(currentPage);
+        const pageLen = originalPages[currentPage].length;
+        const pageStartPct = pageOffset / totalChars;
+        const pageEndPct = (pageOffset + pageLen) / totalChars;
+
+        // Within this page, weight each sentence by its character count
+        const pageTotalSentenceChars = allSentences.reduce((sum, s) => sum + s.length, 0);
+        let runningCharSum = 0;
+
+        for (let i = 0; i < allSentences.length; i++) {
+            const sentenceLen = allSentences[i].length;
+            const sentStartPct = pageStartPct + (runningCharSum / pageTotalSentenceChars) * (pageEndPct - pageStartPct);
+            runningCharSum += sentenceLen;
+            const sentEndPct = pageStartPct + (runningCharSum / pageTotalSentenceChars) * (pageEndPct - pageStartPct);
+            sentenceCharRanges.push({ startPct: sentStartPct, endPct: sentEndPct });
+        }
+    }
+
+    function highlightTextAtProgress(pct) {
+        if (sentenceSpans.length === 0 || sentenceCharRanges.length === 0) return;
+
+        // Find which sentence this progress % falls into
+        let activeIdx = -1;
+        for (let i = 0; i < sentenceCharRanges.length; i++) {
+            if (pct >= sentenceCharRanges[i].startPct && pct < sentenceCharRanges[i].endPct) {
+                activeIdx = i;
+                break;
+            }
+        }
+
+        // Update highlight
+        sentenceSpans.forEach((span, i) => {
+            const isActive = i === activeIdx;
+            const isPast = activeIdx >= 0 && i < activeIdx;
+            span.classList.toggle('tts-active', isActive);
+            span.style.opacity = isPast ? '0.6' : '1';
+        });
+
+        // Auto-scroll to keep active sentence visible
+        if (activeIdx >= 0 && sentenceSpans[activeIdx]) {
+            const span = sentenceSpans[activeIdx];
+            const container = document.getElementById('book-page-content');
+            const rect = span.getBoundingClientRect();
+            const containerRect = container.getBoundingClientRect();
+            if (rect.bottom > containerRect.bottom - 20 || rect.top < containerRect.top + 20) {
+                span.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+
+        // Auto-navigate to correct page if audio has moved past current page's range
+        if (pct > 0 && totalChars > 0 && !isStopped) {
+            const pageOffset = getPageCharOffset(currentPage);
+            const pageLen = originalPages[currentPage].length;
+            const pageEndPct = (pageOffset + pageLen) / totalChars;
+            const pageStartPct = pageOffset / totalChars;
+
+            if (pct >= pageEndPct && currentPage < originalPages.length - 1) {
+                currentPage++;
+                renderPage();
+                window.scrollTo({ top: document.getElementById('book-wrapper').offsetTop - 80, behavior: 'smooth' });
+            } else if (pct < pageStartPct && currentPage > 0) {
+                currentPage--;
+                renderPage();
+            }
+        }
+    }
+
+    function clearHighlight() {
+        sentenceSpans.forEach(span => span.classList.remove('tts-active'));
+    }
+
+})();
+</script>
+
+{# ====== CHATBOT WIDGET ====== #}
+<style>
+/* ── Chatbot Floating Widget ── */
+.chatbot-fab {
+    position: fixed;
+    bottom: 28px;
+    right: 28px;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #7c3aed 0%, #9333ea 100%);
+    color: white;
+    border: none;
+    box-shadow: 0 8px 25px rgba(124, 58, 237, 0.4);
+    cursor: pointer;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+.chatbot-fab:hover {
+    transform: scale(1.1);
+    box-shadow: 0 12px 35px rgba(124, 58, 237, 0.5);
+}
+.chatbot-fab.active {
+    transform: rotate(90deg) scale(1.05);
+}
+.chatbot-fab .fab-badge {
+    position: absolute;
+    top: -2px;
+    right: -2px;
+    width: 18px;
+    height: 18px;
+    background: #f43f5e;
+    border-radius: 50%;
+    font-size: 0.6rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    border: 2px solid white;
+    animation: fabPulse 2s ease-in-out infinite;
+}
+@keyframes fabPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.15); }
+}
+
+/* ── Chat Panel ── */
+.chatbot-panel {
+    position: fixed;
+    bottom: 100px;
+    right: 28px;
+    width: 400px;
+    max-height: 560px;
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(124, 58, 237, 0.08);
+    z-index: 9998;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    opacity: 0;
+    transform: translateY(30px) scale(0.9);
+    pointer-events: none;
+    transition: all 0.35s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+.chatbot-panel.open {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    pointer-events: all;
+}
+
+@media (max-width: 480px) {
+    .chatbot-panel {
+        width: calc(100vw - 24px);
+        right: 12px;
+        bottom: 90px;
+        max-height: 70vh;
+    }
+}
+
+/* ── Panel Header ── */
+.chatbot-header {
+    background: linear-gradient(135deg, #7c3aed 0%, #8b5cf6 100%);
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-shrink: 0;
+}
+.chatbot-avatar {
+    width: 40px;
+    height: 40px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    backdrop-filter: blur(4px);
+}
+.chatbot-header-text h4 {
+    color: white;
+    font-size: 0.95rem;
+    font-weight: 700;
+    margin: 0;
+}
+.chatbot-header-text p {
+    color: rgba(255,255,255,0.7);
+    font-size: 0.72rem;
+    margin: 0;
+}
+.chatbot-header-dot {
+    width: 8px;
+    height: 8px;
+    background: #34d399;
+    border-radius: 50%;
+    margin-left: auto;
+    box-shadow: 0 0 6px rgba(52, 211, 153, 0.6);
+}
+
+/* ── Messages Area ── */
+.chatbot-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    background: #faf8ff;
+    min-height: 200px;
+    max-height: 320px;
+}
+
+.chat-msg {
+    display: flex;
+    gap: 8px;
+    max-width: 88%;
+    animation: msgSlideIn 0.3s ease;
+}
+@keyframes msgSlideIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.chat-msg.user {
+    align-self: flex-end;
+    flex-direction: row-reverse;
+}
+.chat-msg-bubble {
+    padding: 10px 14px;
+    border-radius: 16px;
+    font-size: 0.88rem;
+    line-height: 1.5;
+    word-break: break-word;
+}
+.chat-msg.assistant .chat-msg-bubble {
+    background: white;
+    color: #1f2937;
+    border: 1px solid #ede9fe;
+    border-bottom-left-radius: 4px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+.chat-msg.user .chat-msg-bubble {
+    background: linear-gradient(135deg, #7c3aed, #8b5cf6);
+    color: white;
+    border-bottom-right-radius: 4px;
+}
+.chat-msg-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+.chat-msg.assistant .chat-msg-icon {
+    background: #ede9fe;
+    color: #7c3aed;
+}
+.chat-msg.user .chat-msg-icon {
+    background: #ddd6fe;
+    color: #5b21b6;
+}
+
+/* Typing indicator */
+.chat-typing {
+    display: flex;
+    gap: 4px;
+    padding: 10px 14px;
+}
+.chat-typing span {
+    width: 8px;
+    height: 8px;
+    background: #c4b5fd;
+    border-radius: 50%;
+    animation: typingBounce 1.4s ease-in-out infinite;
+}
+.chat-typing span:nth-child(2) { animation-delay: 0.2s; }
+.chat-typing span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes typingBounce {
+    0%, 60%, 100% { transform: translateY(0); }
+    30% { transform: translateY(-6px); }
+}
+
+/* ── Quick Actions ── */
+.chatbot-quick-actions {
+    padding: 8px 16px;
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    border-top: 1px solid #f3e8ff;
+    background: white;
+}
+.quick-action-btn {
+    background: #f5f3ff;
+    border: 1px solid #e9e1fb;
+    color: #6d28d9;
+    border-radius: 99px;
+    padding: 5px 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+}
+.quick-action-btn:hover {
+    background: #ede9fe;
+    border-color: #c4b5fd;
+    transform: translateY(-1px);
+}
+
+/* ── Input Area ── */
+.chatbot-input-area {
+    padding: 12px 16px;
+    border-top: 1px solid #f0e6ff;
+    display: flex;
+    gap: 8px;
+    background: white;
+    flex-shrink: 0;
+}
+.chatbot-input {
+    flex: 1;
+    border: 1.5px solid #e0d6f5;
+    border-radius: 12px;
+    padding: 10px 14px;
+    font-size: 0.88rem;
+    outline: none;
+    transition: border-color 0.2s;
+    background: #faf8ff;
+    font-family: inherit;
+}
+.chatbot-input:focus {
+    border-color: #8b5cf6;
+    box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+}
+.chatbot-send-btn {
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #7c3aed, #8b5cf6);
+    color: white;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    transition: all 0.2s;
+    flex-shrink: 0;
+}
+.chatbot-send-btn:hover { transform: scale(1.05); }
+.chatbot-send-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+/* ── Language Selector ── */
+.chatbot-lang-bar {
+    padding: 6px 16px;
+    background: linear-gradient(135deg, #6d28d9, #7c3aed);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+}
+.chatbot-lang-bar label {
+    color: rgba(255,255,255,0.8);
+    font-size: 0.72rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+.chatbot-lang-select {
+    flex: 1;
+    background: rgba(255,255,255,0.15);
+    color: white;
+    border: 1px solid rgba(255,255,255,0.25);
+    border-radius: 8px;
+    padding: 4px 8px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    outline: none;
+    cursor: pointer;
+}
+.chatbot-lang-select option {
+    background: #1f2937;
+    color: white;
+}
+</style>
+
+<!-- Floating Action Button -->
+<button class="chatbot-fab" id="chatbot-fab" aria-label="Ouvrir le chatbot">
+    <span id="fab-icon">🤖</span>
+    <span class="fab-badge" id="fab-badge">IA</span>
+</button>
+
+<!-- Chat Panel -->
+<div class="chatbot-panel" id="chatbot-panel">
+    <div class="chatbot-header">
+        <div class="chatbot-avatar">🤖</div>
+        <div class="chatbot-header-text">
+            <h4>Finora Assistant</h4>
+            <p>IA spécialisée sur cette leçon</p>
+        </div>
+        <span class="chatbot-header-dot"></span>
+    </div>
+
+    <div class="chatbot-lang-bar">
+        <label for="chatbot-lang">🌐 Langue :</label>
+        <select class="chatbot-lang-select" id="chatbot-lang">
+            <option value="fr">🇫🇷 Français</option>
+            <option value="en">🇬🇧 English</option>
+            <option value="ar">🇸🇦 العربية</option>
+            <option value="es">🇪🇸 Español</option>
+            <option value="de">🇩🇪 Deutsch</option>
+            <option value="it">🇮🇹 Italiano</option>
+            <option value="tr">🇹🇷 Türkçe</option>
+            <option value="pt">🇵🇹 Português</option>
+            <option value="ru">🇷🇺 Русский</option>
+            <option value="zh">🇨🇳 中文</option>
+            <option value="ja">🇯🇵 日本語</option>
+        </select>
+    </div>
+
+    <div class="chatbot-messages" id="chatbot-messages">
+        <div class="chat-msg assistant">
+            <div class="chat-msg-icon">🤖</div>
+            <div class="chat-msg-bubble" id="chatbot-welcome">
+                Bonjour ! 👋 Je suis votre assistant IA pour la leçon <strong>{{ lesson.titre }}</strong>. Posez-moi vos questions ou utilisez les boutons ci-dessous !
+            </div>
+        </div>
+    </div>
+
+    <div class="chatbot-quick-actions" id="chatbot-quick-actions">
+        <!-- Quick actions populated by JS based on language -->
+    </div>
+
+    <div class="chatbot-input-area">
+        <input type="text" class="chatbot-input" id="chatbot-input" placeholder="Posez votre question..." autocomplete="off">
+        <button class="chatbot-send-btn" id="chatbot-send" aria-label="Envoyer">
+            <i class="fas fa-paper-plane"></i>
+        </button>
+    </div>
+</div>
+
+<script>
+(function() {
+    const LESSON_ID = {{ lesson.id }};
+    const API_URL = '/api/chatbot/lesson/' + LESSON_ID;
+
+    const fab = document.getElementById('chatbot-fab');
+    const fabIcon = document.getElementById('fab-icon');
+    const fabBadge = document.getElementById('fab-badge');
+    const panel = document.getElementById('chatbot-panel');
+    const messagesEl = document.getElementById('chatbot-messages');
+    const inputEl = document.getElementById('chatbot-input');
+    const sendBtn = document.getElementById('chatbot-send');
+    const quickActions = document.getElementById('chatbot-quick-actions');
+    const langSelect = document.getElementById('chatbot-lang');
+    const welcomeEl = document.getElementById('chatbot-welcome');
+
+    let isOpen = false;
+    let isLoading = false;
+    let conversationHistory = [];
+    let currentLang = localStorage.getItem('finora_chatbot_lang') || 'fr';
+
+    // Multilingual quick actions & UI strings
+    const i18n = {
+        fr: {
+            welcome: 'Bonjour ! 👋 Je suis votre assistant IA pour la leçon <strong>{{ lesson.titre }}</strong>. Posez-moi vos questions !',
+            placeholder: 'Posez votre question...',
+            actions: [
+                { icon: '📝', label: 'Résumer', prompt: 'Résume cette leçon en quelques points clés.' },
+                { icon: '💡', label: 'Concepts clés', prompt: 'Explique-moi les concepts les plus importants de cette leçon.' },
+                { icon: '❓', label: 'Quiz moi', prompt: 'Donne-moi 3 questions de révision sur cette leçon.' },
+                { icon: '🔍', label: 'Exemple', prompt: 'Donne-moi un exemple pratique lié au contenu de cette leçon.' },
+                { icon: '⚠️', label: 'Difficultés', prompt: 'Quels sont les points difficiles de cette leçon ?' }
+            ]
+        },
+        en: {
+            welcome: 'Hello! 👋 I\'m your AI assistant for the lesson <strong>{{ lesson.titre }}</strong>. Ask me anything!',
+            placeholder: 'Ask your question...',
+            actions: [
+                { icon: '📝', label: 'Summarize', prompt: 'Summarize this lesson in key points.' },
+                { icon: '💡', label: 'Key concepts', prompt: 'Explain the most important concepts of this lesson.' },
+                { icon: '❓', label: 'Quiz me', prompt: 'Give me 3 review questions about this lesson.' },
+                { icon: '🔍', label: 'Example', prompt: 'Give me a practical example related to this lesson.' },
+                { icon: '⚠️', label: 'Difficulties', prompt: 'What are the difficult points of this lesson?' }
+            ]
+        },
+        ar: {
+            welcome: 'مرحباً! 👋 أنا مساعدك الذكي لدرس <strong>{{ lesson.titre }}</strong>. اسألني ما تريد!',
+            placeholder: 'اكتب سؤالك...',
+            actions: [
+                { icon: '📝', label: 'تلخيص', prompt: 'لخّص هذا الدرس في نقاط رئيسية.' },
+                { icon: '💡', label: 'مفاهيم', prompt: 'اشرح لي أهم مفاهيم هذا الدرس.' },
+                { icon: '❓', label: 'اختبرني', prompt: 'أعطني 3 أسئلة مراجعة حول هذا الدرس.' },
+                { icon: '🔍', label: 'مثال', prompt: 'أعطني مثالاً عملياً مرتبطاً بهذا الدرس.' },
+                { icon: '⚠️', label: 'صعوبات', prompt: 'ما هي النقاط الصعبة في هذا الدرس؟' }
+            ]
+        },
+        es: {
+            welcome: '¡Hola! 👋 Soy tu asistente IA para la lección <strong>{{ lesson.titre }}</strong>. ¡Pregúntame lo que quieras!',
+            placeholder: 'Haz tu pregunta...',
+            actions: [
+                { icon: '📝', label: 'Resumir', prompt: 'Resume esta lección en puntos clave.' },
+                { icon: '💡', label: 'Conceptos', prompt: 'Explica los conceptos más importantes de esta lección.' },
+                { icon: '❓', label: 'Quiz', prompt: 'Dame 3 preguntas de revisión sobre esta lección.' },
+                { icon: '🔍', label: 'Ejemplo', prompt: 'Dame un ejemplo práctico relacionado con esta lección.' },
+                { icon: '⚠️', label: 'Dificultades', prompt: '¿Cuáles son los puntos difíciles de esta lección?' }
+            ]
+        },
+        de: {
+            welcome: 'Hallo! 👋 Ich bin dein KI-Assistent für die Lektion <strong>{{ lesson.titre }}</strong>. Stell mir deine Fragen!',
+            placeholder: 'Stelle deine Frage...',
+            actions: [
+                { icon: '📝', label: 'Zusammenfassen', prompt: 'Fasse diese Lektion in wichtigen Punkten zusammen.' },
+                { icon: '💡', label: 'Konzepte', prompt: 'Erkläre die wichtigsten Konzepte dieser Lektion.' },
+                { icon: '❓', label: 'Quiz', prompt: 'Gib mir 3 Wiederholungsfragen zu dieser Lektion.' },
+                { icon: '🔍', label: 'Beispiel', prompt: 'Gib mir ein praktisches Beispiel zu dieser Lektion.' },
+                { icon: '⚠️', label: 'Schwierigkeiten', prompt: 'Was sind die schwierigen Punkte dieser Lektion?' }
+            ]
+        }
+    };
+
+    // Fallback for languages without full translations
+    function getStrings(lang) {
+        return i18n[lang] || i18n['en'];
+    }
+
+    // Set initial language
+    langSelect.value = currentLang;
+    updateUIForLang(currentLang);
+
+    function updateUIForLang(lang) {
+        const strings = getStrings(lang);
+        inputEl.placeholder = strings.placeholder;
+        welcomeEl.innerHTML = strings.welcome;
+
+        // Rebuild quick actions
+        quickActions.innerHTML = '';
+        strings.actions.forEach(a => {
+            const btn = document.createElement('button');
+            btn.className = 'quick-action-btn';
+            btn.setAttribute('data-prompt', a.prompt);
+            btn.textContent = a.icon + ' ' + a.label;
+            quickActions.appendChild(btn);
+        });
+    }
+
+    // Language change
+    langSelect.addEventListener('change', function() {
+        currentLang = this.value;
+        localStorage.setItem('finora_chatbot_lang', currentLang);
+        updateUIForLang(currentLang);
+    });
+
+    // Toggle panel
+    fab.addEventListener('click', function() {
+        isOpen = !isOpen;
+        panel.classList.toggle('open', isOpen);
+        fab.classList.toggle('active', isOpen);
+        fabIcon.textContent = isOpen ? '✕' : '🤖';
+        fabBadge.style.display = isOpen ? 'none' : 'flex';
+        if (isOpen) {
+            setTimeout(() => inputEl.focus(), 400);
+        }
+    });
+
+    // Send message
+    async function sendMessage(text) {
+        if (!text || isLoading) return;
+
+        // Add user message to UI
+        appendMessage('user', text);
+        conversationHistory.push({ role: 'user', content: text });
+        inputEl.value = '';
+
+        // Show typing indicator
+        isLoading = true;
+        sendBtn.disabled = true;
+        const typingEl = showTyping();
+
+        try {
+            const res = await fetch(API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    message: text,
+                    history: conversationHistory.slice(0, -1),
+                    lang: currentLang
+                })
+            });
+
+            const data = await res.json();
+            removeTyping(typingEl);
+
+            if (data.reply) {
+                appendMessage('assistant', data.reply);
+                conversationHistory.push({ role: 'assistant', content: data.reply });
+            } else if (data.error) {
+                appendMessage('assistant', '⚠️ ' + data.error);
+            }
+        } catch (err) {
+            removeTyping(typingEl);
+            appendMessage('assistant', '❌ Erreur de connexion. Vérifiez votre réseau.');
+            console.error('Chatbot error:', err);
+        } finally {
+            isLoading = false;
+            sendBtn.disabled = false;
+        }
+    }
+
+    function appendMessage(role, content) {
+        const msgDiv = document.createElement('div');
+        msgDiv.className = 'chat-msg ' + role;
+
+        const icon = role === 'assistant' ? '🤖' : '👤';
+
+        // Simple markdown-like formatting: **bold**, newlines
+        let formatted = escapeHtml(content)
+            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+            .replace(/\n/g, '<br>');
+
+        msgDiv.innerHTML =
+            '<div class="chat-msg-icon">' + icon + '</div>' +
+            '<div class="chat-msg-bubble">' + formatted + '</div>';
+
+        messagesEl.appendChild(msgDiv);
+        scrollToBottom();
+    }
+
+    function showTyping() {
+        const el = document.createElement('div');
+        el.className = 'chat-msg assistant';
+        el.id = 'typing-indicator';
+        el.innerHTML =
+            '<div class="chat-msg-icon">🤖</div>' +
+            '<div class="chat-msg-bubble"><div class="chat-typing"><span></span><span></span><span></span></div></div>';
+        messagesEl.appendChild(el);
+        scrollToBottom();
+        return el;
+    }
+
+    function removeTyping(el) {
+        if (el && el.parentNode) el.parentNode.removeChild(el);
+    }
+
+    function scrollToBottom() {
+        messagesEl.scrollTop = messagesEl.scrollHeight;
+    }
+
+    function escapeHtml(str) {
+        const div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
+    }
+
+    // Send button click
+    sendBtn.addEventListener('click', () => sendMessage(inputEl.value.trim()));
+
+    // Enter key
+    inputEl.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            sendMessage(inputEl.value.trim());
+        }
+    });
+
+    // Quick action buttons
+    quickActions.addEventListener('click', (e) => {
+        const btn = e.target.closest('.quick-action-btn');
+        if (!btn) return;
+        const prompt = btn.getAttribute('data-prompt');
+        if (prompt) sendMessage(prompt);
+    });
+})();
+</script>
+
+{% endblock %}

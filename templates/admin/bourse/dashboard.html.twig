@@ -1,0 +1,242 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block title %}Dashboard Bourse — Finora Admin{% endblock %}
+
+{% block body %}
+<div class="row g-4 mb-4">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center">
+            <h1 class="h3 mb-0 text-gray-800">📊 Dashboard Bourse</h1>
+            <div class="d-flex gap-2">
+                <a href="{{ path('app_bourse_new') }}" class="btn btn-primary shadow-sm rounded-3"><i class="bi bi-plus-lg me-2"></i>Nouvelle Bourse</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    {# Metrics Bar #}
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm rounded-4 p-4 h-100 overflow-hidden position-relative">
+            <div class="position-absolute top-0 start-0 w-100 h-1px bg-warning"></div>
+            <div class="d-flex align-items-center mb-3">
+                <div class="flex-grow-1">
+                    <h6 class="text-muted text-uppercase small fw-bold mb-0">Bourses Actives</h6>
+                </div>
+                <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-3 py-1 small">↑ Actif</span>
+            </div>
+            <div class="h2 fw-bold mb-1">{{ totalBourses }}</div>
+            <div class="text-muted small">Marchés boursiers suivis</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm rounded-4 p-4 h-100 overflow-hidden position-relative">
+            <div class="position-absolute top-0 start-0 w-100 h-1px bg-purple" style="background-color: #7c3aed;"></div>
+            <div class="d-flex align-items-center mb-3">
+                <div class="flex-grow-1">
+                    <h6 class="text-muted text-uppercase small fw-bold mb-0">Actions en cours</h6>
+                </div>
+                <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-3 py-1 small"><i class="bi bi-lightning-fill me-1"></i>Live</span>
+            </div>
+            <div class="h2 fw-bold mb-1">{{ totalActions }}</div>
+            <div class="text-muted small">Titres cotés disponibles</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm rounded-4 p-4 h-100 overflow-hidden position-relative">
+            <div class="position-absolute top-0 start-0 w-100 h-1px bg-success"></div>
+            <div class="d-flex align-items-center mb-3">
+                <div class="flex-grow-1">
+                    <h6 class="text-muted text-uppercase small fw-bold mb-0">Transactions Totales</h6>
+                </div>
+                <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-3 py-1 small">✓ OK</span>
+            </div>
+            <div class="h2 fw-bold mb-1">{{ totalTransactions }}</div>
+            <div class="text-muted small">Opérations validées</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm rounded-4 p-4 h-100 overflow-hidden position-relative">
+            <div class="position-absolute top-0 start-0 w-100 h-1px bg-danger"></div>
+            <div class="d-flex align-items-center mb-3">
+                <div class="flex-grow-1">
+                    <h6 class="text-muted text-uppercase small fw-bold mb-0">Revenu Total</h6>
+                </div>
+                <span class="badge bg-danger bg-opacity-10 text-danger rounded-pill px-3 py-1 small">TND</span>
+            </div>
+            <div class="h2 fw-bold mb-1 text-{{ gainPerte.gain_perte >= 0 ? 'success' : 'danger' }}">{{ gainPerte.gain_perte }}</div>
+            <div class="text-muted small">Gains / Pertes nets</div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mt-1">
+    {# Chart Column #}
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-sm rounded-4 h-100">
+            <div class="card-header bg-white py-3 border-0 d-flex justify-content-between align-items-center">
+                <h6 class="m-0 fw-bold text-dark"><i class="bi bi-graph-up-arrow me-2 text-primary"></i>Volume des Transactions</h6>
+                <div class="btn-group btn-group-sm">
+                    <button class="btn btn-light active">7J</button>
+                    <button class="btn btn-light">30J</button>
+                    <button class="btn btn-light">90J</button>
+                </div>
+            </div>
+            <div class="card-body">
+                <div id="volumeChart" style="min-height: 350px;">
+                     <!-- Si le graphique ne s'affiche pas, ce texte sera visible -->
+                     <div class="text-center py-5 text-muted small chart-placeholder">Chargement du graphique...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# Sidebar Column #}
+    <div class="col-lg-4">
+        {# Allocation Card #}
+        <div class="card border-0 shadow-sm rounded-4 mb-4">
+            <div class="card-header bg-white py-3 border-0">
+                <h6 class="m-0 fw-bold text-dark"><i class="bi bi-pie-chart-fill me-2 text-warning"></i>Allocation</h6>
+            </div>
+            <div class="card-body">
+                <div id="allocationChart" style="min-height: 180px;"></div>
+                
+                <div class="list-group list-group-flush small mt-3">
+                    <div class="list-group-item d-flex justify-content-between align-items-center bg-transparent px-0 py-2 border-0">
+                        <span><i class="bi bi-circle-fill me-2" style="color: #7c3aed;"></i>Achats</span>
+                        <span class="fw-bold text-dark">{{ gainPerte.total_achats }} TND</span>
+                    </div>
+                    <div class="list-group-item d-flex justify-content-between align-items-center bg-transparent px-0 py-2 border-0">
+                        <span><i class="bi bi-circle-fill me-2" style="color: #10b981;"></i>Ventes</span>
+                        <span class="fw-bold text-dark">{{ gainPerte.total_ventes }} TND</span>
+                    </div>
+                    <div class="list-group-item d-flex justify-content-between align-items-center bg-transparent px-0 py-2 border-0">
+                        <span><i class="bi bi-circle-fill me-2" style="color: #f59e0b;"></i>Commissions</span>
+                        <span class="fw-bold text-dark">1%</span>
+                    </div>
+                    <hr class="my-2 opacity-10">
+                    <div class="list-group-item d-flex justify-content-between align-items-center bg-transparent px-0 py-2 border-0">
+                        <span class="fw-bold"><i class="bi bi-circle-fill me-2 text-primary"></i>Disponible</span>
+                        <span class="fw-bold h6 mb-0 text-primary">{{ (gainPerte.total_ventes - gainPerte.total_achats)|number_format(2) }} TND</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {# Recent Activity Card #}
+        <div class="card border-0 shadow-sm rounded-4">
+            <div class="card-header bg-white py-3 border-0 d-flex justify-content-between align-items-center">
+                <h6 class="m-0 fw-bold text-dark"><i class="bi bi-clock-history me-2 text-info"></i>Activité Récente</h6>
+                <a href="{{ path('app_admin_bourse_transactions') }}" class="small text-decoration-none">Tout voir <i class="bi bi-arrow-right"></i></a>
+            </div>
+            <div class="card-body p-0">
+                <div class="list-group list-group-flush">
+                    {% for t in recentTransactions %}
+                    <div class="list-group-item bg-transparent py-3 px-4">
+                        <div class="d-flex align-items-center">
+                            <div class="flex-shrink-0">
+                                <div class="avatar avatar-sm rounded-circle bg-opacity-10 bg-{{ t.typeTransaction == 'ACHAT' ? 'success' : 'danger' }} text-{{ t.typeTransaction == 'ACHAT' ? 'success' : 'danger' }} d-flex align-items-center justify-content-center" style="width: 38px; height: 38px;">
+                                    <i class="bi bi-arrow-{{ t.typeTransaction == 'ACHAT' ? 'down' : 'up' }}-right-circle"></i>
+                                </div>
+                            </div>
+                            <div class="flex-grow-1 ms-3">
+                                <div class="d-flex justify-content-between">
+                                    <h6 class="mb-0 small fw-bold">{{ t.user ? t.user.username : 'Market Maker' }}</h6>
+                                    <span class="text-{{ t.typeTransaction == 'ACHAT' ? 'success' : 'danger' }} small fw-bold">{{ t.typeTransaction == 'ACHAT' ? '-' : '+' }}{{ t.montantTotal }}</span>
+                                </div>
+                                <div class="text-muted small" style="font-size: 11px;">{{ t.action ? t.action.symbole : 'TUNINDEX' }} • {{ t.dateTransaction|date('H:i') }}</div>
+                            </div>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-5">
+                        <img src="https://illustrations.popsy.co/purple/empty-state.svg" style="max-height: 100px;" alt="empty" class="mb-3 opacity-50">
+                        <p class="text-muted small">Aucune activité récente</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .h-1px { height: 3px; position: absolute; top: 0; left: 0; }
+    .bg-purple { background-color: #7c3aed !important; }
+    .avatar-sm { width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; }
+</style>
+{% endblock %}
+
+{% block javascripts %}
+{# On utilise une seule source fiable pour ApexCharts #}
+<script src="https://cdn.jsdelivr.net/npm/apexcharts" id="apexcharts-cdn"></script>
+
+<script>
+    (function() {
+        function initCharts() {
+            if (typeof ApexCharts === 'undefined') {
+                console.error("ApexCharts toujours pas chargé");
+                return;
+            }
+
+            console.log("Dashboard Bourse: Initialisation des graphiques...");
+
+            try {
+                // 1. Graphique d'Évolution (Volume)
+                const volumeOptions = {
+                    series: [{
+                        name: 'Volume',
+                        data: {{ chart_evolution_data|json_encode|raw }}
+                    }],
+                    chart: {
+                        height: 350,
+                        type: 'area',
+                        toolbar: { show: false },
+                        fontFamily: 'Heebo, sans-serif'
+                    },
+                    colors: ['#4e73df'],
+                    dataLabels: { enabled: false },
+                    stroke: { curve: 'smooth', width: 3 },
+                    xaxis: {
+                        categories: {{ chart_evolution_labels|json_encode|raw }},
+                        axisBorder: { show: false }
+                    },
+                    grid: { borderColor: '#f1f1f1' }
+                };
+                const volumeChart = new ApexCharts(document.querySelector("#volumeChart"), volumeOptions);
+                volumeChart.render().then(() => {
+                    const placeholder = document.querySelector("#volumeChart .chart-placeholder");
+                    if (placeholder) placeholder.remove();
+                });
+
+                // 2. Graphique d'Allocation
+                const allocOptions = {
+                    series: [{{ gainPerte.total_achats }}, {{ gainPerte.total_ventes }}],
+                    chart: {
+                        type: 'donut',
+                        height: 220
+                    },
+                    labels: ['Achats', 'Ventes'],
+                    colors: ['#7c3aed', '#10b981'],
+                    dataLabels: { enabled: false },
+                    legend: { position: 'bottom' }
+                };
+                const allocChart = new ApexCharts(document.querySelector("#allocationChart"), allocOptions);
+                allocChart.render();
+
+            } catch (e) {
+                console.error("Erreur lors du rendu du graphique:", e);
+                const placeholder = document.querySelector("#volumeChart .chart-placeholder");
+                if (placeholder) placeholder.innerHTML = '<span class="text-danger">Erreur de rendu graphique</span>';
+            }
+        }
+
+        const script = document.getElementById('apexcharts-cdn');
+        if (script) {
+            script.onload = initCharts;
+            // Si déjà chargé par miracle avant ce script
+            if (window.ApexCharts) initCharts();
+        }
+    })();
+</script>
+{% endblock %}

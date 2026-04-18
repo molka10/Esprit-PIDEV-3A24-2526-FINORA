@@ -1,0 +1,72 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block title %}Admin - Modifier Formation{% endblock %}
+
+{% block body %}
+<div class="row">
+    <div class="col-12 mb-4">
+        <div class="d-sm-flex justify-content-between align-items-center">
+            <h1 class="h3 mb-2 mb-sm-0">Modifier: {{ formation.titre }}</h1>
+            <a href="{{ path('admin_formation_index') }}" class="btn btn-outline-secondary mb-0">Retour à la liste</a>
+        </div>
+    </div>
+</div>
+
+<div class="card bg-transparent border">
+    <div class="card-body">
+        {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+            <div class="row g-4">
+                <div class="col-md-8">
+                    <div class="mb-3">
+                        {{ form_label(form.titre, null, {'label_attr': {'class': 'form-label'}}) }}
+                        {{ form_widget(form.titre, {'attr': {'class': 'form-control'}}) }}
+                        {{ form_errors(form.titre) }}
+                    </div>
+                    <div class="mb-3">
+                        {{ form_label(form.description, null, {'label_attr': {'class': 'form-label'}}) }}
+                        {{ form_widget(form.description, {'attr': {'class': 'form-control', 'rows': '5'}}) }}
+                        {{ form_errors(form.description) }}
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        {{ form_label(form.categorie, null, {'label_attr': {'class': 'form-label'}}) }}
+                        {{ form_widget(form.categorie, {'attr': {'class': 'form-select'}}) }}
+                        {{ form_errors(form.categorie) }}
+                    </div>
+                    <div class="mb-3">
+                        {{ form_label(form.niveau, null, {'label_attr': {'class': 'form-label'}}) }}
+                        {{ form_widget(form.niveau, {'attr': {'class': 'form-select'}}) }}
+                        {{ form_errors(form.niveau) }}
+                    </div>
+                    <div class="mb-3">
+                        {{ form_label(form.prix, null, {'label_attr': {'class': 'form-label'}}) }}
+                        <div class="input-group">
+                            {{ form_widget(form.prix, {'attr': {'class': 'form-control'}}) }}
+                            <span class="input-group-text">TND</span>
+                        </div>
+                        {{ form_errors(form.prix) }}
+                    </div>
+                    <div class="mb-3">
+                        {{ form_label(form.is_published, null, {'label_attr': {'class': 'form-label'}}) }}
+                        {{ form_widget(form.is_published, {'attr': {'class': 'form-select'}}) }}
+                        {{ form_errors(form.is_published) }}
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Image actuelle</label>
+                        {% if formation.imageUrl %}
+                            <img src="{{ asset('uploads/formations/' ~ formation.imageUrl) }}" class="img-fluid rounded mb-2 d-block" style="max-height: 150px">
+                        {% endif %}
+                        {{ form_label(form.imageFile, "Remplacer l'image", {'label_attr': {'class': 'form-label small'}}) }}
+                        {{ form_widget(form.imageFile, {'attr': {'class': 'form-control'}}) }}
+                    </div>
+                </div>
+                <div class="col-12">
+                    <button type="submit" class="btn btn-primary">Enregistrer les modifications</button>
+                </div>
+            </div>
+        {{ form_end(form) }}
+    </div>
+</div>
+{% endblock %}

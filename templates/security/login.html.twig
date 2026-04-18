@@ -1,0 +1,203 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+<section class="p-0 overflow-hidden" style="min-height: 100vh;">
+    <div class="row g-0 align-items-center h-100">
+        <!-- Left side: Illustration/Branding (Desktop Only) -->
+        <div class="col-lg-6 d-none d-lg-block vh-100 position-relative p-0" style="background: linear-gradient(135deg, #1e1b4b 0%, #3b1278 100%);">
+            <div class="position-absolute top-50 start-50 translate-middle text-center w-75">
+                <div class="mb-5">
+                    <img src="{{ asset('assets/images/logo-light.svg')|default('https://illustrations.popsy.co/purple/success.svg') }}" class="h-100px mb-4" alt="logo" style="max-height: 80px;">
+                    <h1 class="text-white fw-bold mb-3 display-5">Façonnez votre avenir financier.</h1>
+                    <p class="text-white opacity-75 fs-5">Rejoignez des milliers d'utilisateurs qui font confiance à FINORA pour gérer leurs investissements et appels d'offres.</p>
+                </div>
+                <!-- Illustration -->
+                <img src="https://illustrations.popsy.co/purple/business-analysis.svg" class="w-100 px-5" alt="illustration">
+            </div>
+            <!-- Decorative circle -->
+            <div class="position-absolute bottom-0 end-0 mb-n5 me-n5 opacity-1">
+                <div class="bg-white rounded-circle" style="width: 400px; height: 400px;"></div>
+            </div>
+        </div>
+
+        <!-- Right side: Form -->
+        <div class="col-lg-6 vh-100 d-flex align-items-center justify-content-center bg-white p-4 p-sm-5">
+            <div class="w-100" style="max-width: 450px;">
+                <div class="text-center mb-5 d-lg-none">
+                     <img src="https://illustrations.popsy.co/purple/success.svg" class="h-50px mb-4" alt="logo" style="max-height: 50px;">
+                </div>
+                
+                <h1 class="h2 fw-bold text-dark mb-1">Bon retour ! 👋</h1>
+                <p class="text-muted mb-4">Connectez-vous pour accéder à votre espace FINORA</p>
+
+                {# 🔴 Errors #}
+                {% if error %}
+                    <div class="alert alert-danger px-3 py-2 text-center small mb-4" style="border-radius: 12px;">
+                        {{ error.messageKey|trans(error.messageData, 'security') }}
+                    </div>
+                {% endif %}
+
+                {% for err in formErrors %}
+                    <div class="alert alert-danger px-3 py-2 text-center small mb-4" style="border-radius: 12px;">
+                        {{ err }}
+                    </div>
+                {% endfor %}
+
+                <form method="post" novalidate id="loginForm">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small text-uppercase opacity-70">Adresse Email</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-0 py-3"><i class="bi bi-envelope text-primary"></i></span>
+                            <input type="email" name="_username" value="{{ last_username }}" placeholder="votre@email.com" class="form-control bg-light border-0 py-3" style="border-radius: 0 12px 12px 0;">
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-bold small text-uppercase opacity-70">Mot de Passe</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-0 py-3"><i class="bi bi-lock text-primary"></i></span>
+                            <input type="password" name="_password" placeholder="••••••••" class="form-control bg-light border-0 py-3" style="border-radius: 0 12px 12px 0;">
+                        </div>
+                    </div>
+
+                    <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+
+                    {# 🔥 CAPTCHA #}
+                    <div class="mb-4 d-flex justify-content-center">
+                        <div class="g-recaptcha" data-sitekey="{{ recaptcha_site_key }}"></div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-lg w-100 py-3 mb-3 shadow" style="border-radius: 16px; font-weight: 700; background: linear-gradient(135deg, #7c3aed 0%, #3b1278 100%); border: none;">
+                        SE CONNECTER
+                    </button>
+
+                    <div class="position-relative my-4">
+                        <hr class="opacity-10">
+                        <span class="position-absolute top-50 start-50 translate-middle bg-white px-3 fw-bold small text-uppercase opacity-50">OU</span>
+                    </div>
+
+                    <button type="button" id="faceLoginBtn" class="btn btn-outline-primary btn-lg w-100 py-3 d-flex align-items-center justify-content-center" style="border-radius: 16px; border-width: 2px; font-weight: 600;">
+                        <i class="bi bi-person-bounding-box me-3 fs-4"></i> CONNEXION FACIALE
+                    </button>
+                    
+                    <p class="text-center mt-4 mb-0 small text-muted">
+                        Pas encore de compte ? <a href="#" class="text-primary fw-bold">S'inscrire</a>
+                    </p>
+                </form>
+
+                {# Webcam UI #}
+                <div id="webcamContainer" style="display:none;" class="text-center mt-3 scale-up">
+                    <div class="bg-dark rounded-4 overflow-hidden mb-3 position-relative shadow-lg">
+                        <video id="webcam" width="100%" autoplay playsinline style="transform: scaleX(-1); min-height: 250px;"></video>
+                        <div class="position-absolute top-50 start-50 translate-middle pointer-events-none mb-3">
+                            <i class="bi bi-viewfinder text-white opacity-20" style="font-size: 8rem;"></i>
+                        </div>
+                    </div>
+                    <div class="d-grid gap-2">
+                        <button id="captureBtn" class="btn btn-primary btn-lg py-3 rounded-pill shadow-lg">Scanner le visage</button>
+                        <button id="cancelBtn" class="btn btn-link text-muted">Annuler & Retour</button>
+                    </div>
+                    <canvas id="canvas" style="display:none;"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+    .scale-up { animation: scaleUp 0.3s ease-out; }
+    @keyframes scaleUp { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+</style>
+
+
+
+<script src="https://www.google.com/recaptcha/api.js" async defer></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const faceLoginBtn = document.getElementById('faceLoginBtn');
+    const webcamContainer = document.getElementById('webcamContainer');
+    const video = document.getElementById('webcam');
+    const canvas = document.getElementById('canvas');
+    const captureBtn = document.getElementById('captureBtn');
+    const cancelBtn = document.getElementById('cancelBtn');
+
+    let stream = null;
+
+    faceLoginBtn.addEventListener('click', async () => {
+        const emailInput = document.querySelector('input[name="_username"]').value;
+        if (!emailInput) {
+            alert('Please enter your email first to use Face ID.');
+            return;
+        }
+
+        document.querySelector('form').style.display = 'none';
+        webcamContainer.style.display = 'block';
+
+        try {
+            stream = await navigator.mediaDevices.getUserMedia({ video: true });
+            video.srcObject = stream;
+        } catch (err) {
+            alert('Cannot access webcam: ' + err.message);
+            document.querySelector('form').style.display = 'block';
+            webcamContainer.style.display = 'none';
+        }
+    });
+
+    cancelBtn.addEventListener('click', () => {
+        stopWebcam();
+        document.querySelector('form').style.display = 'block';
+    });
+
+    captureBtn.addEventListener('click', async () => {
+        // Draw video frame to canvas
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+        // Get base64 image
+        const base64Image = canvas.toDataURL('image/jpeg', 0.8);
+        const emailInput = document.querySelector('input[name="_username"]').value;
+        
+        captureBtn.innerText = 'Scanning...';
+        captureBtn.disabled = true;
+
+        try {
+            const response = await fetch('{{ path("app_login_face") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ image: base64Image, email: emailInput })
+            });
+
+            const result = await response.json();
+            
+            if (result.success) {
+                // Success! Redirect to profile or home
+                window.location.href = '{{ path("app_profile") }}';
+            } else {
+                alert('Authentication Failed: ' + result.message);
+                captureBtn.innerText = 'Scan Face';
+                captureBtn.disabled = false;
+            }
+        } catch(e) {
+            alert('An error occurred while connecting to the server.');
+            captureBtn.innerText = 'Scan Face';
+            captureBtn.disabled = false;
+        }
+    });
+
+    function stopWebcam() {
+        if (stream) {
+            stream.getTracks().forEach(track => track.stop());
+        }
+        webcamContainer.style.display = 'none';
+        captureBtn.innerText = 'Scan Face';
+        captureBtn.disabled = false;
+    }
+});
+</script>
+
+{% endblock %}

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body { font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; margin: 0; padding: 0; background-color: #f5f3ff; color: #1e1b4b; }
+        .wrapper { width: 100%; table-layout: fixed; background-color: #f5f3ff; padding-bottom: 40px; }
+        .main { background-color: #ffffff; margin: 40px auto; width: 600px; border-radius: 20px; border: 1px solid #ddd6fe; overflow: hidden; box-shadow: 0 10px 30px rgba(124, 58, 237, 0.08); }
+        .header { background: linear-gradient(135deg, #7c3aed 0%, #3b1278 100%); padding: 40px 20px; text-align: center; }
+        .header h1 { color: #ffffff; margin: 0; font-size: 28px; font-weight: 800; letter-spacing: -0.5px; }
+        .content { padding: 40px; line-height: 1.6; }
+        .content h2 { color: #7c3aed; font-size: 24px; margin-top: 0; }
+        .formation-pill { display: inline-block; background-color: #ede9fe; color: #6d28d9; padding: 5px 15px; border-radius: 999px; font-weight: 700; font-size: 13px; margin-bottom: 20px; }
+        .lesson-card { background-color: #f8fafc; border-left: 4px solid #7c3aed; padding: 20px; border-radius: 0 12px 12px 0; margin: 30px 0; }
+        .lesson-title { font-size: 18px; font-weight: 700; color: #1e1b4b; margin: 0 0 10px 0; }
+        .lesson-desc { font-size: 15px; color: #64748b; margin: 0; }
+        .btn-container { text-align: center; margin: 40px 0 20px 0; }
+        .btn { background: #7c3aed; color: #ffffff !important; padding: 16px 36px; text-decoration: none; border-radius: 12px; font-weight: 700; font-size: 16px; transition: background-color 0.2s; box-shadow: 0 4px 14px rgba(124, 58, 237, 0.39); }
+        .footer { text-align: center; padding: 20px; font-size: 13px; color: #94a3b8; }
+        .encouragement { font-style: italic; color: #4b5563; border-top: 1px solid #f1f5f9; padding-top: 20px; margin-top: 40px; }
+    </style>
+</head>
+<body>
+    <div class="wrapper">
+        <div class="main">
+            <div class="header">
+                <h1>FINORA Education</h1>
+            </div>
+            <div class="content">
+                <div class="formation-pill">{{ formation.titre }}</div>
+                <h2>Bonjour {{ user.username }} ! 👋</h2>
+                <p>Nous avons une excellente nouvelle pour vous ! Une nouvelle étape vient d'être ajoutée à votre parcours d'apprentissage.</p>
+                
+                <div class="lesson-card">
+                    <p class="lesson-title">{{ lesson.titre }}</p>
+                    <p class="lesson-desc">{{ lesson.description|u.truncate(150, '...') }}</p>
+                </div>
+
+                <p>Chaque nouvelle leçon est une opportunité de grandir et de maîtriser de nouvelles compétences. Votre assiduité est la clé de votre réussite future !</p>
+
+                <div class="btn-container">
+                    <a href="{{ lessonUrl }}" class="btn">Commencer la Leçon</a>
+                </div>
+
+                <div class="encouragement">
+                    "L'éducation n'est pas le remplissage d'un seau, mais l'allumage d'un feu." — Continuez à brûler de curiosité ! 🔥
+                </div>
+            </div>
+            <div class="footer">
+                &copy; {{ "now"|date("Y") }} FINORA Platform. Tous droits réservés.<br>
+                Vous recevez cet email car vous êtes inscrit à la formation <strong>{{ formation.titre }}</strong>.
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,148 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block title %}Admin - Nouvelle Formation{% endblock %}
+
+{% block body %}
+<div class="row">
+    <div class="col-12 mb-4">
+        <div class="d-sm-flex justify-content-between align-items-center">
+            <h1 class="h3 mb-2 mb-sm-0">Ajouter une Formation</h1>
+            <a href="{{ path('admin_formation_index') }}" class="btn btn-outline-secondary mb-0">Retour à la liste</a>
+        </div>
+    </div>
+</div>
+
+<div class="card bg-transparent border">
+    <div class="card-body">
+        {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+            <div class="row g-4">
+                <div class="col-md-8">
+                    <div class="mb-3">
+                        {{ form_label(form.titre, null, {'label_attr': {'class': 'form-label'}}) }}
+                        {{ form_widget(form.titre, {'attr': {'class': 'form-control', 'placeholder': 'Ex: Introduction au Trading'}}) }}
+                        {{ form_errors(form.titre) }}
+                    </div>
+                    <div class="mb-3">
+                        {{ form_label(form.description, null, {'label_attr': {'class': 'form-label'}}) }}
+                        {{ form_widget(form.description, {'attr': {'class': 'form-control', 'rows': '5'}}) }}
+                        {{ form_errors(form.description) }}
+                    </div>
+                    <div class="mb-3">
+                        {{ form_label(form.pourquoiAcheter, null, {'label_attr': {'class': 'form-label'}}) }}
+                        {{ form_widget(form.pourquoiAcheter, {'attr': {'class': 'form-control', 'rows': '3'}}) }}
+                        {{ form_errors(form.pourquoiAcheter) }}
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        {{ form_label(form.categorie, null, {'label_attr': {'class': 'form-label'}}) }}
+                        {{ form_widget(form.categorie, {'attr': {'class': 'form-select'}}) }}
+                        {{ form_errors(form.categorie) }}
+                    </div>
+                    <div class="mb-3">
+                        {{ form_label(form.niveau, null, {'label_attr': {'class': 'form-label'}}) }}
+                        {{ form_widget(form.niveau, {'attr': {'class': 'form-select'}}) }}
+                        {{ form_errors(form.niveau) }}
+                    </div>
+                    <div class="mb-3">
+                        {{ form_label(form.prix, null, {'label_attr': {'class': 'form-label'}}) }}
+                        <div class="input-group">
+                            {{ form_widget(form.prix, {'attr': {'class': 'form-control'}}) }}
+                            <span class="input-group-text">TND</span>
+                        </div>
+                        {{ form_errors(form.prix) }}
+                    </div>
+                    <div class="mb-3">
+                        {{ form_label(form.is_published, null, {'label_attr': {'class': 'form-label'}}) }}
+                        {{ form_widget(form.is_published, {'attr': {'class': 'form-select'}}) }}
+                        {{ form_errors(form.is_published) }}
+                    </div>
+                    <div class="mb-3">
+                        {{ form_label(form.imageFile, null, {'label_attr': {'class': 'form-label'}}) }}
+                        <div class="d-flex flex-column gap-2">
+                            {{ form_widget(form.imageFile, {'attr': {'class': 'form-control', 'id': 'local-upload-field'}}) }}
+                            <div class="text-center text-muted small">OU</div>
+                            <button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#pexelsModal">
+                                <i class="bi bi-search me-1"></i>Chercher sur Pexels
+                            </button>
+                        </div>
+                        <input type="hidden" name="remoteImageFilename" id="remoteImageFilename">
+                        <div id="remoteImagePreviewContainer" class="d-none mt-2">
+                             <img id="remoteImagePreview" src="" alt="Aperçu" class="img-fluid rounded border">
+                             <button type="button" class="btn btn-sm btn-link text-danger" onclick="clearRemoteImage()">Annuler</button>
+                        </div>
+                        {{ form_errors(form.imageFile) }}
+                    </div>
+                </div>
+                <div class="col-12">
+                    <button type="submit" class="btn btn-primary">Créer la formation</button>
+                </div>
+            </div>
+        {{ form_end(form) }}
+    </div>
+</div>
+
+<!-- Modal Pexels -->
+<div class="modal fade" id="pexelsModal" tabindex="-1">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Pexels Image Library</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="input-group mb-4">
+                    <input type="text" id="pexelsQuery" class="form-control" placeholder="Mots-clés..." value="investing">
+                    <button class="btn btn-primary" id="btnSearchPexels">Rechercher</button>
+                </div>
+                <div id="pexelsResults" class="row g-3"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block javascripts %}
+<script>
+    document.getElementById('btnSearchPexels')?.addEventListener('click', async function() {
+        const query = document.getElementById('pexelsQuery').value;
+        const results = document.getElementById('pexelsResults');
+        results.innerHTML = '<div class="text-center p-5"><div class="spinner-border text-primary"></div></div>';
+        
+        const fd = new FormData(); fd.append('query', query);
+        const res = await fetch('{{ path("api_formation_search_images") }}', { method: 'POST', body: fd });
+        const data = await res.json();
+        
+        results.innerHTML = '';
+        data.photos?.forEach(p => {
+            const d = document.createElement('div');
+            d.className = 'col-md-3';
+            d.innerHTML = `
+                <div class="card h-100 shadow-sm" style="cursor:pointer" onclick="selectImg('${p.src.large}')">
+                    <img src="${p.src.medium}" class="card-img-top" style="height:120px; object-fit:cover">
+                    <div class="card-body p-2 small">By ${p.photographer}</div>
+                </div>
+            `;
+            results.appendChild(d);
+        });
+    });
+
+    async function selectImg(url) {
+        document.getElementById('pexelsResults').innerHTML = '<div class="text-center p-5">Téléchargement...</div>';
+        const fd = new FormData(); fd.append('url', url);
+        const res = await fetch('{{ path("api_formation_download_image") }}', { method: 'POST', body: fd });
+        const data = await res.json();
+        if(data.success) {
+            document.getElementById('remoteImageFilename').value = data.filename;
+            document.getElementById('remoteImagePreview').src = data.url;
+            document.getElementById('remoteImagePreviewContainer').classList.remove('d-none');
+            bootstrap.Modal.getInstance(document.getElementById('pexelsModal')).hide();
+        }
+    }
+    function clearRemoteImage() {
+        document.getElementById('remoteImageFilename').value = '';
+        document.getElementById('remoteImagePreviewContainer').classList.add('d-none');
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,120 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block title %}{{ action.symbole }} - FINORA{% endblock %}
+
+{% block page_title %}Détails de l’Action{% endblock %}
+{% block subtitle %}Informations complètes{% endblock %}
+
+{% block actions %}
+<a href="{{ path('app_action_index') }}" class="btn-annuler">
+    ⬅ Retour
+</a>
+
+<a href="{{ path('app_action_edit', {id: action.id}) }}" class="btn-action btn-editer">
+    ✏️ Modifier
+</a>
+
+<button class="btn-action btn-supprimer" data-bs-toggle="modal" data-bs-target="#deleteModal">
+    🗑 Supprimer
+</button>
+{% endblock %}
+
+{% block body %}
+
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+
+        <div class="card shadow-sm p-4">
+
+            <h2 class="text-center mb-4">
+                {{ action.symbole }} - {{ action.nomEntreprise }}
+            </h2>
+
+            <div class="row g-3">
+
+                <div class="col-md-6">
+                    <strong>ID :</strong>
+                    <p class="text-muted">{{ action.id }}</p>
+                </div>
+
+                <div class="col-md-6">
+                    <strong>Secteur :</strong>
+                    <p class="text-muted">{{ action.secteur }}</p>
+                </div>
+
+                <div class="col-md-6">
+                    <strong>Bourse :</strong>
+                    <p>
+                        <a href="{{ path('app_bourse_show', {id: action.bourse.id}) }}">
+                            {{ action.bourse.nomBourse }}
+                        </a>
+                    </p>
+                </div>
+
+                <div class="col-md-6">
+                    <strong>Prix :</strong><br>
+                    <span class="badge-status badge-devise">
+                        {{ action.prixUnitaire|number_format(2) }} {{ action.bourse.devise }}
+                    </span>
+                </div>
+
+                <div class="col-md-6">
+                    <strong>Quantité :</strong>
+                    <p class="text-muted">{{ action.quantiteDisponible }}</p>
+                </div>
+
+                <div class="col-md-6">
+                    <strong>Statut :</strong><br>
+                    {% if action.statut == 'DISPONIBLE' %}
+                        <span class="badge-status badge-disponible">Disponible</span>
+                    {% else %}
+                        <span class="badge-status badge-indisponible">Indisponible</span>
+                    {% endif %}
+                </div>
+
+                <div class="col-md-12">
+                    <strong>Date :</strong>
+                    <p class="text-muted">{{ action.dateAjout|date('d/m/Y H:i') }}</p>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+<!-- MODAL DELETE -->
+<div class="modal fade" id="deleteModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h5 class="modal-title">Confirmer la suppression</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+                Supprimer <strong>{{ action.symbole }}</strong> ?
+            </div>
+
+            <div class="modal-footer">
+
+                <button class="btn-annuler" data-bs-dismiss="modal">
+                    Annuler
+                </button>
+
+                <form method="POST" action="{{ path('app_action_delete', {id: action.id}) }}">
+                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ action.id) }}">
+                    <button class="btn-supprimer">
+                        Supprimer
+                    </button>
+                </form>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
+{% endblock %}

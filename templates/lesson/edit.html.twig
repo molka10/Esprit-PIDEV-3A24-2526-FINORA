@@ -1,0 +1,126 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block title %}Modifier une lesson{% endblock %}
+
+{% block body %}
+<div class="container py-4">
+    {% for label, messages in app.flashes %}
+        {% for message in messages %}
+            <div class="alert {% if label == 'success' %}alert-success{% elseif label == 'danger' %}alert-danger{% else %}alert-info{% endif %}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endfor %}
+
+    <div class="card shadow-sm border-0">
+        <div class="card-body p-4">
+            <h1 class="h3 mb-4">Modifier une lesson</h1>
+
+            {{ form_start(form, {'attr': {'novalidate': 'novalidate', 'enctype': 'multipart/form-data'}}) }}
+
+                {% if not form.vars.valid %}
+                    <div class="alert alert-danger">
+                        {{ form_errors(form) }}
+                    </div>
+                {% endif %}
+
+                <div class="mb-3">
+                    {{ form_label(form.formation) }}
+                    {{ form_widget(form.formation, {'attr': {'class': 'form-select'}}) }}
+                    <div class="text-danger small mt-1">{{ form_errors(form.formation) }}</div>
+                </div>
+
+                <div class="mb-3">
+                    {{ form_label(form.titre) }}
+                    {{ form_widget(form.titre, {'attr': {'class': 'form-control'}}) }}
+                    <div class="text-danger small mt-1">{{ form_errors(form.titre) }}</div>
+                </div>
+
+                <div class="mb-3">
+                    {{ form_label(form.contenu) }}
+                    {{ form_widget(form.contenu, {'attr': {'class': 'form-control', 'rows': 5}}) }}
+                    <div class="text-danger small mt-1">{{ form_errors(form.contenu) }}</div>
+                </div>
+
+                {% if lesson.videoUrl %}
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">Vidéo actuelle</label><br>
+
+                        {% if lesson.youTubeVideoId %}
+                            <div class="mb-3">
+                                <iframe
+                                    width="100%"
+                                    height="360"
+                                    src="https://www.youtube.com/embed/{{ lesson.youTubeVideoId }}"
+                                    title="Vidéo YouTube"
+                                    frameborder="0"
+                                    allowfullscreen
+                                    style="border-radius:12px; max-width:720px;">
+                                </iframe>
+                            </div>
+                        {% elseif lesson.isUploadedVideo %}
+                            <video controls style="max-width: 420px; width:100%; border-radius: 12px;">
+                                <source src="{{ asset('uploads/lessons/videos/' ~ lesson.videoUrl) }}">
+                                Votre navigateur ne supporte pas la lecture vidéo.
+                            </video>
+                        {% else %}
+                            <a href="{{ lesson.videoUrl }}" target="_blank" class="btn btn-outline-primary btn-sm">
+                                Ouvrir la vidéo actuelle
+                            </a>
+                        {% endif %}
+
+                        <div class="d-flex gap-2 flex-wrap mt-3">
+                            <a href="{{ path('app_lesson_youtube_manage', {'id': lesson.id}) }}" class="btn btn-warning btn-sm">
+                                Choisir une vidéo YouTube
+                            </a>
+
+                            {% if lesson.youTubeVideoId %}
+                                <form method="post" action="{{ path('app_lesson_youtube_remove', {'id': lesson.id}) }}">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('remove_youtube_' ~ lesson.id) }}">
+                                    <button type="submit" class="btn btn-outline-danger btn-sm">
+                                        Supprimer la vidéo YouTube
+                                    </button>
+                                </form>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">Vidéo actuelle</label>
+                        <p class="text-muted mb-3">Aucune vidéo liée à cette lesson.</p>
+
+                        <a href="{{ path('app_lesson_youtube_manage', {'id': lesson.id}) }}" class="btn btn-warning btn-sm">
+                            Rechercher une vidéo YouTube
+                        </a>
+                    </div>
+                {% endif %}
+
+                <div class="mb-3">
+                    {{ form_label(form.videoFile) }}
+                    {{ form_widget(form.videoFile, {'attr': {'class': 'form-control'}}) }}
+                    <div class="form-text">Vous pouvez uploader une vidéo locale à la place d'une vidéo YouTube.</div>
+                    <div class="text-danger small mt-1">{{ form_errors(form.videoFile) }}</div>
+                </div>
+
+                <div class="mb-3">
+                    {{ form_label(form.ordre) }}
+                    {{ form_widget(form.ordre, {'attr': {'class': 'form-control'}}) }}
+                    <div class="text-danger small mt-1">{{ form_errors(form.ordre) }}</div>
+                </div>
+
+                <div class="mb-3">
+                    {{ form_label(form.dureeMinutes) }}
+                    {{ form_widget(form.dureeMinutes, {'attr': {'class': 'form-control'}}) }}
+                    <div class="text-danger small mt-1">{{ form_errors(form.dureeMinutes) }}</div>
+                </div>
+
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">Mettre à jour</button>
+                    <a href="{{ path('app_lesson_index') }}" class="btn btn-outline-secondary">Annuler / Retour à la liste</a>
+                </div>
+
+            {{ form_end(form) }}
+        </div>
+    </div>
+</div>
+{% endblock %}

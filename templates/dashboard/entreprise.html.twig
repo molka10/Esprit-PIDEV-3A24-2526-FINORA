@@ -1,0 +1,131 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Espace Entreprise — FINORA{% endblock %}
+
+{% block body %}
+<div class="container py-5">
+<div class="row g-4 mb-4">
+
+    <!-- Welcome Section -->
+    <div class="col-12">
+        <div class="card border-0 shadow-sm p-4 text-white" style="background: linear-gradient(135deg, #1e1b4b 0%, #3b1278 100%); border-radius: 20px;">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h2 class="text-white mb-1">Espace Entreprise : {{ app.user.username }} ! 🏢</h2>
+                    <p class="mb-0 opacity-80">Gérez vos appels d'offres, vos investissements et suivez vos performances financières.</p>
+                </div>
+                <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                    <a href="{{ path('app_profile') }}" class="btn btn-white btn-sm text-primary px-4 py-2" style="border-radius: 10px; font-weight: 600;">Profil Entreprise</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <!-- Stats Widgets for Entreprise -->
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm p-4 h-100" style="border-radius: 16px;">
+            <div class="d-flex align-items-center mb-3">
+                <div class="icon-md bg-primary-soft text-primary rounded-3 me-3">
+                    <i class="bi bi-briefcase fs-4"></i>
+                </div>
+                <h6 class="mb-0">Appels d'offres</h6>
+            </div>
+            <h3 class="mb-1">12</h3>
+            <p class="text-success mb-0 small"><i class="bi bi-plus-circle me-1"></i>3 nouveaux cette semaine</p>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm p-4 h-100" style="border-radius: 16px;">
+            <div class="d-flex align-items-center mb-3">
+                <div class="icon-md bg-success-soft text-success rounded-3 me-3">
+                    <i class="bi bi-cash-stack fs-4"></i>
+                </div>
+                <h6 class="mb-0">Budget Engagé</h6>
+            </div>
+            <h3 class="mb-1">45,000 <span class="fs-6 text-muted">TND</span></h3>
+            <p class="text-muted mb-0 small">Sur les projets actifs</p>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm p-4 h-100" style="border-radius: 16px;">
+            <div class="d-flex align-items-center mb-3">
+                <div class="icon-md bg-info-soft text-info rounded-3 me-3">
+                    <i class="bi bi-people fs-4"></i>
+                </div>
+                <h6 class="mb-0">Candidatures</h6>
+            </div>
+            <h3 class="mb-1">28</h3>
+            <p class="text-muted mb-0 small">Reçues au total</p>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm p-4 h-100" style="border-radius: 16px;">
+            <div class="d-flex align-items-center mb-3">
+                <div class="icon-md bg-warning-soft text-warning rounded-3 me-3">
+                    <i class="bi bi-graph-up fs-4"></i>
+                </div>
+                <h6 class="mb-0">Score Crédit</h6>
+            </div>
+            <h3 class="mb-1">A+</h3>
+            <p class="text-success mb-0 small">Excellent</p>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Main Content Grid -->
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-sm" style="border-radius: 16px;">
+            <div class="card-header bg-transparent border-0 p-4 pb-0">
+                <h5 class="mb-0">Activités Récentes</h5>
+            </div>
+            <div class="card-body p-4">
+                <div class="text-center py-5">
+                    <img src="https://illustrations.popsy.co/purple/business-analysis.svg" alt="Illustration" style="height: 150px;" class="mb-3">
+                    <p class="text-muted">Vos statistiques de marché et appels d'offres apparaîtront ici.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="col-lg-4">
+        <div class="card border-0 shadow-sm h-100" style="border-radius: 16px;">
+            <div class="card-header bg-transparent border-0 p-4 pb-0">
+                <h5 class="mb-0">Actions Entreprise</h5>
+            </div>
+            <div class="card-body p-4">
+                <div class="d-grid gap-3">
+                    <a href="#" class="btn btn-primary-soft w-100 p-3 text-start d-flex align-items-center">
+                        <i class="bi bi-plus-square fs-4 me-3"></i>
+                        <div>
+                            <div class="fw-bold">Créer un Appel d'Offre</div>
+                            <div class="small opacity-70">Lancer un nouveau projet</div>
+                        </div>
+                    </a>
+                    <a href="{{ path('app_market') }}" class="btn btn-info-soft w-100 p-3 text-start d-flex align-items-center">
+                        <i class="bi bi-graph-up-arrow fs-4 me-3"></i>
+                        <div>
+                            <div class="fw-bold">Investir en Bourse</div>
+                            <div class="small opacity-70">Gérer l'excédent de trésorerie</div>
+                        </div>
+                    </a>
+                    <a href="#" class="btn btn-success-soft w-100 p-3 text-start d-flex align-items-center">
+                        <i class="bi bi-file-earmark-bar-graph fs-4 me-3"></i>
+                        <div>
+                            <div class="fw-bold">Rapports Financiers</div>
+                            <div class="small opacity-70">Export PDF & Excel</div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+{% endblock %}

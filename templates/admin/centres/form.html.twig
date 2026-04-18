@@ -1,0 +1,200 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block title %}FINORA - {{ edit ? 'Modifier un centre' : 'Nouveau centre' }}{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <style>
+        #map-picker {
+            height: 400px;
+            width: 100%;
+            border-radius: 16px;
+            border: 2px solid #eadcff;
+            z-index: 1;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+<div class="container-fluid p-4">
+    <div class="mb-4 d-flex align-items-center gap-3">
+        <a href="{{ path('admin_centres_index') }}" class="btn btn-light rounded-circle text-primary" style="width: 40px; height: 40px; padding: 0; display: flex; align-items: center; justify-content: center;">
+            <i class="fas fa-arrow-left"></i>
+        </a>
+        <div>
+            <h2 class="mb-0">{{ edit ? 'Modifier le centre' : 'Ajouter un nouveau centre' }}</h2>
+            <p class="text-muted mb-0">Localisez le centre sur la carte</p>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm rounded-4">
+        <div class="card-body p-4 p-md-5">
+            {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+            
+            <div class="row g-4">
+                <div class="col-lg-6">
+                    <h5 class="mb-3 text-primary"><i class="fas fa-info-circle me-2"></i>Informations générales</h5>
+                    
+                    <div class="mb-3">
+                        {{ form_label(form.nom, null, {'label_attr': {'class': 'form-label fw-bold'}}) }}
+                        {{ form_widget(form.nom, {'attr': {'class': 'form-control form-control-lg' ~ (form_errors(form.nom) ? ' is-invalid' : '')}}) }}
+                        <div class="invalid-feedback">{{ form_errors(form.nom) }}</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        {{ form_label(form.ville, null, {'label_attr': {'class': 'form-label fw-bold'}}) }}
+                        {{ form_widget(form.ville, {'attr': {'class': 'form-select form-select-lg' ~ (form_errors(form.ville) ? ' is-invalid' : '')}}) }}
+                        <div class="invalid-feedback">{{ form_errors(form.ville) }}</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        {{ form_label(form.adresse, null, {'label_attr': {'class': 'form-label fw-bold'}}) }}
+                        {{ form_widget(form.adresse, {'attr': {'class': 'form-control' ~ (form_errors(form.adresse) ? ' is-invalid' : '')}}) }}
+                        <div class="invalid-feedback">{{ form_errors(form.adresse) }}</div>
+                    </div>
+
+                    <div class="mb-3">
+                        {{ form_label(form.description, null, {'label_attr': {'class': 'form-label fw-bold'}}) }}
+                        {{ form_widget(form.description, {'attr': {'class': 'form-control'}}) }}
+                    </div>
+                    
+                    <h5 class="mb-3 mt-4 text-primary"><i class="fas fa-phone-alt me-2"></i>Contact & Web</h5>
+                    <div class="row g-3">
+                        <div class="col-md-6 mb-3">
+                            {{ form_label(form.telephone, null, {'label_attr': {'class': 'form-label fw-bold'}}) }}
+                            {{ form_widget(form.telephone, {'attr': {'class': 'form-control'}}) }}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            {{ form_label(form.email, null, {'label_attr': {'class': 'form-label fw-bold'}}) }}
+                            {{ form_widget(form.email, {'attr': {'class': 'form-control'}}) }}
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        {{ form_label(form.siteWeb, null, {'label_attr': {'class': 'form-label fw-bold'}}) }}
+                        {{ form_widget(form.siteWeb, {'attr': {'class': 'form-control'}}) }}
+                    </div>
+                    
+                    <div class="form-check form-switch mt-4 p-4 rounded-3" style="background:#faf5ff;">
+                        {{ form_widget(form.isActive, {'attr': {'class': 'form-check-input', 'role': 'switch'}}) }}
+                        {{ form_label(form.isActive, null, {'label_attr': {'class': 'form-check-label fw-bold ms-2'}}) }}
+                        <small class="d-block text-muted ms-5">Si désactivé, ce centre n'apparaîtra pas sur la carte publique.</small>
+                    </div>
+                </div>
+                
+                <div class="col-lg-6">
+                    <h5 class="mb-3 text-primary"><i class="fas fa-map-marked-alt me-2"></i>Localisation sur la carte</h5>
+                    <p class="text-muted small">Cliquez sur la carte pour placer ou déplacer le marqueur.</p>
+                    
+                    <div id="map-picker" class="mb-3 shadow-sm"></div>
+                    
+                    <div class="row g-3">
+                        <div class="col-6">
+                            <label class="form-label text-muted small fw-bold">Latitude</label>
+                            <input type="text" id="lat-display" class="form-control bg-light" readonly value="{{ form.vars.value.latitude ?? '' }}">
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label text-muted small fw-bold">Longitude</label>
+                            <input type="text" id="lng-display" class="form-control bg-light" readonly value="{{ form.vars.value.longitude ?? '' }}">
+                        </div>
+                    </div>
+
+                    {{ form_widget(form.latitude, {'id': 'centre_latitude'}) }}
+                    {{ form_widget(form.longitude, {'id': 'centre_longitude'}) }}
+                    
+                    {% if form_errors(form.latitude) or form_errors(form.longitude) %}
+                        <div class="alert alert-danger mt-3">
+                            <i class="fas fa-exclamation-triangle me-2"></i> Vous devez placer un repère sur la carte (en Tunisie).
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <hr class="my-4">
+            
+            <div class="d-flex justify-content-end gap-2">
+                <a href="{{ path('admin_centres_index') }}" class="btn btn-light px-4 rounded-pill">Annuler</a>
+                <button type="submit" class="btn btn-primary px-5 rounded-pill shadow-sm">
+                    <i class="fas fa-save me-2"></i> {{ edit ? 'Mettre à jour' : 'Enregistrer le centre' }}
+                </button>
+            </div>
+            
+            {{ form_end(form) }}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Default center: Tunis
+            let defaultLat = 36.8065;
+            let defaultLng = 10.1815;
+            let zoomLevel = 6;
+            
+            const latInput = document.getElementById('centre_latitude');
+            const lngInput = document.getElementById('centre_longitude');
+            const latDisplay = document.getElementById('lat-display');
+            const lngDisplay = document.getElementById('lng-display');
+            
+            // If we have an existing coordinate, use it
+            if (latInput.value && lngInput.value) {
+                defaultLat = parseFloat(latInput.value);
+                defaultLng = parseFloat(lngInput.value);
+                zoomLevel = 13;
+            }
+
+            const map = L.map('map-picker').setView([defaultLat, defaultLng], zoomLevel);
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 19,
+                attribution: '© OpenStreetMap'
+            }).addTo(map);
+
+            let marker = null;
+            
+            // If editing, place initial marker
+            if (latInput.value && lngInput.value) {
+                marker = L.marker([defaultLat, defaultLng]).addTo(map);
+            }
+
+            // Map click listener
+            map.on('click', function(e) {
+                const lat = e.latlng.lat;
+                const lng = e.latlng.lng;
+                
+                // Validate if it's roughly in Tunisia bounds (Optional but helpful for UI)
+                // Range ~ Lat: 30.2 to 37.5, Lng: 7.5 to 11.6
+                
+                updateMarkerAndInputs(lat, lng);
+            });
+
+            function updateMarkerAndInputs(lat, lng) {
+                const formattedLat = lat.toFixed(7);
+                const formattedLng = lng.toFixed(7);
+                
+                if (marker) {
+                    marker.setLatLng([lat, lng]);
+                } else {
+                    marker = L.marker([lat, lng]).addTo(map);
+                }
+                
+                latInput.value = formattedLat;
+                lngInput.value = formattedLng;
+                latDisplay.value = formattedLat;
+                lngDisplay.value = formattedLng;
+                
+                // Fly to the new point smoothly
+                map.flyTo([lat, lng], 14, {
+                    animate: true,
+                    duration: 0.5
+                });
+            }
+        });
+    </script>
+{% endblock %}
