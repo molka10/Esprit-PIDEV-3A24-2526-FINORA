@@ -262,6 +262,11 @@
                                 </a>
                             </li>
                             <li class="nav-item">
+                                <a href="{{ path('admin_cards') }}" class="nav-link {{ app.request.get('_route') == 'admin_cards' ? 'active' : '' }}">
+                                    <i class="bi bi-credit-card-2-front fa-fw me-2"></i>Cartes Bancaires
+                                </a>
+                            </li>
+                            <li class="nav-item">
                                 <a href="{{ path('admin_fraud_audit') }}" class="nav-link {{ app.request.get('_route') == 'admin_fraud_audit' ? 'active' : '' }}">
                                     <i class="bi bi-shield-exclamation fa-fw me-2"></i>Fraudes
                                 </a>

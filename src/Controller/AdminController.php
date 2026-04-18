@@ -365,4 +365,13 @@ public function searchUsers(Request $request, TransactionWalletRepository $repo,
             'users' => $users
         ]);
     }
+    #[Route('/admin/cards', name: 'admin_cards')]
+    public function adminCards(EntityManagerInterface $em): Response
+    {
+        $cards = $em->getRepository(\App\Entity\Card::class)->findAll();
+        
+        return $this->render('admin/cards.html.twig', [
+            'cards' => $cards
+        ]);
+    }
 }

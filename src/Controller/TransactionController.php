@@ -162,14 +162,11 @@ return $this->render('wallet/list.html.twig', [
 }
 
     #[Route('/walletuser', name: 'dashboard')]
-    public function dashboard(Request $req, EntityManagerInterface $em, WalletBalanceService $balanceService, CurrencyConverterService $currencyConverter, RecommendationService $recService): Response
+    public function dashboard(Request $req, EntityManagerInterface $em, WalletBalanceService $balanceService, CurrencyConverterService $currencyConverter): Response
     {
         $transactions = $em->getRepository(TransactionWallet::class)->findAll();
         
-        // Fetch recommendations for the user (simulating User ID 1 for now)
-        $recommendations = $recService->getRecommendations(1);
-
-    $income  = 0;
+        $income  = 0;
     $outcome = 0;
     $incomeData  = [];
     $outcomeData = [];
@@ -294,7 +291,6 @@ return $this->render('wallet/list.html.twig', [
         'bestSaving'     => number_format(max(0, $bestSaving), 2, '.', ''),
         'biggestTx'      => $biggestTransaction,
         'biggestAmt'     => number_format($biggestAmount, 2, '.', ''),
-        'recommendations' => $recommendations,
     ]);
 }
 

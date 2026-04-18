@@ -1,0 +1,129 @@
+{% extends 'admin/baseA.html.twig' %}
+
+{% block title %}FINORA - Gestion des Cartes{% endblock %}
+
+{% block stylesheets %}
+<style>
+    .admin-dashboard {
+        padding: 30px;
+        background: #f8f5ff;
+        min-height: 100vh;
+    }
+    .admin-hero {
+        background: linear-gradient(135deg, #1e1b4b 0%, #4338ca 100%);
+        border-radius: 24px;
+        padding: 32px 36px;
+        margin-bottom: 32px;
+        box-shadow: 0 20px 50px rgba(30, 27, 75, 0.3);
+        color: white;
+    }
+    .card-list-table {
+        background: white;
+        border-radius: 24px;
+        border: 1px solid rgba(124, 58, 237, 0.08);
+        box-shadow: 0 10px 30px -5px rgba(124, 58, 237, 0.12);
+        overflow: hidden;
+    }
+    .table-header {
+        padding: 24px 28px;
+        border-bottom: 1px solid #f3f4f6;
+    }
+    .custom-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    .custom-table thead th {
+        background: #fafbff;
+        padding: 16px 24px;
+        font-size: 11px;
+        font-weight: 700;
+        color: #64748b;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border-bottom: 1.5px solid #f1f5f9;
+    }
+    .custom-table tbody td {
+        padding: 18px 24px;
+        border-bottom: 1px solid #f8fafc;
+        vertical-align: middle;
+    }
+    .card-badge {
+        background: #ede9fe;
+        color: #7c3aed;
+        padding: 4px 12px;
+        border-radius: 8px;
+        font-weight: 700;
+        font-size: 12px;
+    }
+    .bank-chip {
+        width: 35px;
+        height: 25px;
+        background: #fde047;
+        border-radius: 4px;
+        display: inline-block;
+        margin-right: 10px;
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="admin-dashboard">
+    <div class="admin-hero">
+        <h1 class="fw-black mb-1">Gestion des Cartes Bancaires</h1>
+        <p class="opacity-75">Liste de toutes les cartes liées par les utilisateurs du système.</p>
+    </div>
+
+    <div class="card-list-table">
+        <div class="table-header">
+            <h5 class="m-0 fw-bold"><i class="bi bi-credit-card-2-front text-primary me-2"></i>Cartes Utilisateurs</h5>
+        </div>
+        <div class="table-responsive">
+            <table class="custom-table">
+                <thead>
+                    <tr>
+                        <th>Utilisateur</th>
+                        <th>Titulaire</th>
+                        <th>Numéro de Carte</th>
+                        <th>Expiration</th>
+                        <th>Statut</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for card in cards %}
+                        <tr>
+                            <td>
+                                <span class="badge bg-dark">User {{ card.userId }}</span>
+                            </td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="bank-chip"></div>
+                                    <span class="fw-bold">{{ card.cardHolderName }}</span>
+                                </div>
+                            </td>
+                            <td>
+                                <code class="text-primary fw-bold">{{ card.cardNumber|slice(0,4) }} **** **** {{ card.cardNumber|slice(-4) }}</code>
+                            </td>
+                            <td>
+                                <span class="text-muted fw-semibold">{{ card.expiryDate }}</span>
+                            </td>
+                            <td>
+                                {% if card.isDefault %}
+                                    <span class="card-badge"><i class="bi bi-check-circle-fill me-1"></i> Principale</span>
+                                {% else %}
+                                    <span class="badge bg-light text-muted">Secondaire</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="5" class="text-center py-5 text-muted">
+                                <i class="bi bi-info-circle me-1"></i> Aucune carte n'a été liée pour le moment.
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
