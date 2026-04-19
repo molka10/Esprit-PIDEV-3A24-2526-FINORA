@@ -1,4 +1,4 @@
-{% extends 'base.html.twig' %}
+{% extends app.request.query.get('role') == 'admin' ? 'admin_base.html.twig' : 'base.html.twig' %}
 
 {% block title %}Hello RatingController!{% endblock %}
 
@@ -9,7 +9,7 @@
 </style>
 
 <div class="example-wrapper">
-    <h1>Hello {{ controller_name }}! ✅</h1>
+    <h1><i class="fas fa-check-circle text-success me-2"></i>Hello {{ controller_name }}!</h1>
 
     This friendly message is coming from:
     <ul>

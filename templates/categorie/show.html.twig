@@ -1,4 +1,4 @@
-{% extends 'base.html.twig' %}
+{% extends app.request.query.get('role') == 'admin' ? 'admin_base.html.twig' : 'base.html.twig' %}
 
 {% block title %}{{ categorie.nom }}{% endblock %}
 
@@ -7,7 +7,7 @@
 <div class="py-3 mb-4" style="background: linear-gradient(135deg, #1a1a2e, #16213e); border-radius: 10px;">
     <div class="container text-white text-center py-2">
         <h2 class="font-weight-bold"><i class="fas fa-tag"></i> {{ categorie.nom }}</h2>
-        <span class="badge badge-warning">{{ categorie.appelOffres|length }} appel(s) d'offre</span>
+        <span class="badge bg-warning text-dark">{{ categorie.appelOffres|length }} appel(s) d'offre</span>
     </div>
 </div>
 
@@ -33,19 +33,19 @@
                     {% for appel in categorie.appelOffres %}
                         <tr>
                             <td><strong>{{ appel.titre }}</strong></td>
-                            <td><span class="badge badge-info">{{ appel.type }}</span></td>
+                            <td><span class="badge bg-info text-dark">{{ appel.type }}</span></td>
                             <td>
                                 {% if appel.statut == 'published' %}
-                                    <span class="badge badge-success">Publié</span>
+                                    <span class="badge bg-success text-white">Publié</span>
                                 {% elseif appel.statut == 'draft' %}
-                                    <span class="badge badge-secondary">Brouillon</span>
+                                    <span class="badge bg-secondary text-white">Brouillon</span>
                                 {% else %}
-                                    <span class="badge badge-danger">Clôturé</span>
+                                    <span class="badge bg-danger text-white">Clôturé</span>
                                 {% endif %}
                             </td>
                             <td>{{ appel.dateLimite ? appel.dateLimite|date('d/m/Y') : 'N/A' }}</td>
                             <td>
-                                <a href="{{ path('app_appel_offre_show', {'id': appel.id}) }}"
+                                <a href="{{ path('app_appel_offre_show', {'id': appel.id, 'role': app.request.query.get('role')}) }}"
                                    class="btn btn-sm btn-outline-primary">
                                     <i class="fas fa-eye"></i>
                                 </a>
@@ -70,11 +70,11 @@
                 <h5 class="mb-0"><i class="fas fa-cogs"></i> Actions</h5>
             </div>
             <div class="card-body">
-                <a href="{{ path('app_categorie_edit', {'id': categorie.id}) }}"
+                <a href="{{ path('app_categorie_edit', {'id': categorie.id, 'role': app.request.query.get('role')}) }}"
                    class="btn btn-warning btn-block mb-2">
                     <i class="fas fa-edit"></i> Modifier
                 </a>
-                <a href="{{ path('app_categorie_index') }}"
+                <a href="{{ path('app_categorie_index', {'role': app.request.query.get('role')}) }}"
                    class="btn btn-secondary btn-block mb-2">
                     <i class="fas fa-arrow-left"></i> Retour
                 </a>

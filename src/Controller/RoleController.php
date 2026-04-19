@@ -17,4 +17,11 @@ class RoleController extends AbstractController
 
         return $this->redirect($request->headers->get('referer', '/'));
     }
+
+    #[Route('/reset-role', name: 'app_reset_role')]
+    public function resetRole(Request $request): Response
+    {
+        $request->getSession()->set('role', 'visiteur');
+        return $this->redirectToRoute('app_dashboard');
+    }
 }

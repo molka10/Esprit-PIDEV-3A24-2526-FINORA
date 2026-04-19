@@ -15,8 +15,17 @@ use Symfony\Component\Routing\Attribute\Route;
 final class CategorieController extends AbstractController
 {
     #[Route(name: 'app_categorie_index', methods: ['GET'])]
-    public function index(CategorieRepository $categorieRepository): Response
+    public function index(CategorieRepository $categorieRepository, Request $request): Response
     {
+        $role = $request->query->get('role');
+        if ($role) {
+            $request->getSession()->set('role', $role);
+        } else {
+            $role = $request->getSession()->get('role', 'visiteur');
+            if ($role === 'admin') {
+                $role = 'visiteur';
+            }
+        }
         return $this->render('categorie/index.html.twig', [
             'categories' => $categorieRepository->findAll(),
         ]);
@@ -33,7 +42,7 @@ final class CategorieController extends AbstractController
             $entityManager->persist($categorie);
             $entityManager->flush();
 
-            return $this->redirectToRoute('app_categorie_index', [], Response::HTTP_SEE_OTHER);
+            return $this->redirectToRoute('app_categorie_index', ['role' => $request->query->get('role')], Response::HTTP_SEE_OTHER);
         }
 
         return $this->render('categorie/new.html.twig', [
@@ -64,7 +73,7 @@ public function edit(Request $request, Categorie $categorie, EntityManagerInterf
 
     if ($form->isSubmitted() && $form->isValid()) {
         $entityManager->flush();
-        return $this->redirectToRoute('app_categorie_index', [], Response::HTTP_SEE_OTHER);
+        return $this->redirectToRoute('app_categorie_index', ['role' => $request->query->get('role')], Response::HTTP_SEE_OTHER);
     }
 
     $deleteForm = $this->createFormBuilder()
@@ -96,6 +105,6 @@ public function delete(Request $request, Categorie $categorie, EntityManagerInte
         $this->addFlash('success', 'Catégorie supprimée avec succès !');
     }
 
-    return $this->redirectToRoute('app_categorie_index', [], Response::HTTP_SEE_OTHER);
+    return $this->redirectToRoute('app_categorie_index', ['role' => $request->query->get('role')], Response::HTTP_SEE_OTHER);
 }
 }

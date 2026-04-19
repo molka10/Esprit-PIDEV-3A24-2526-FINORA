@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Candidature;
+use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -16,28 +17,41 @@ class CandidatureRepository extends ServiceEntityRepository
         parent::__construct($registry, Candidature::class);
     }
 
-    //    /**
-    //     * @return Candidature[] Returns an array of Candidature objects
-    //     */
-    //    public function findByExampleField($value): array
-    //    {
-    //        return $this->createQueryBuilder('c')
-    //            ->andWhere('c.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->orderBy('c.id', 'ASC')
-    //            ->setMaxResults(10)
-    //            ->getQuery()
-    //            ->getResult()
-    //        ;
-    //    }
+    public function findByUserRole(?User $user, string $role, int $limit = null, int $offset = null): array
+    {
+        $qb = $this->getQueryBuilderByRole($user, $role);
+        
+        if ($limit) {
+            $qb->setMaxResults($limit);
+        }
+        if ($offset) {
+            $qb->setFirstResult($offset);
+        }
 
-    //    public function findOneBySomeField($value): ?Candidature
-    //    {
-    //        return $this->createQueryBuilder('c')
-    //            ->andWhere('c.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->getQuery()
-    //            ->getOneOrNullResult()
-    //        ;
-    //    }
+        return $qb->orderBy('c.createdAt', 'DESC')
+                  ->getQuery()
+                  ->getResult();
+    }
+
+    public function countByUserRole(?User $user, string $role): int
+    {
+        $qb = $this->getQueryBuilderByRole($user, $role);
+        $qb->select('COUNT(c.id)');
+        
+        return (int) $qb->getQuery()->getSingleScalarResult();
+    }
+
+    private function getQueryBuilderByRole(?User $user, string $role)
+    {
+        $qb = $this->createQueryBuilder('c')
+            ->leftJoin('c.appelOffre', 'a')
+            ->addSelect('a');
+
+        if ($role === 'entreprise' && $user) {
+            $qb->andWhere('c.user = :user')
+               ->setParameter('user', $user);
+        }
+
+        return $qb;
+    }
 }

@@ -27,6 +27,12 @@ class CandidatureType extends AbstractType
                 'choice_label' => 'titre',
                 'placeholder' => "-- Choisir un appel d'offre --",
                 'attr' => ['class' => 'form-control'],
+                'query_builder' => function (\Doctrine\ORM\EntityRepository $er) {
+                    return $er->createQueryBuilder('a')
+                        ->where('a.statut = :statut')
+                        ->setParameter('statut', 'published')
+                        ->orderBy('a.titre', 'ASC');
+                },
                 'constraints' => [
                     new NotBlank(['message' => "L'appel d'offre est obligatoire"]),
                 ],
@@ -61,18 +67,6 @@ class CandidatureType extends AbstractType
                         'min' => 20,
                         'minMessage' => 'Le message doit contenir au moins {{ limit }} caractères',
                     ]),
-                ],
-            ])
-            ->add('statut', ChoiceType::class, [
-                'label' => 'Statut *',
-                'choices' => [
-                    'En attente' => 'submitted',
-                    'Acceptée' => 'accepted',
-                    'Rejetée' => 'rejected',
-                ],
-                'attr' => ['class' => 'form-control'],
-                'constraints' => [
-                    new NotBlank(['message' => 'Le statut est obligatoire']),
                 ],
             ])
         ;

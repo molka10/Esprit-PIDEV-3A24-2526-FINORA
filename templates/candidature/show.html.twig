@@ -1,4 +1,4 @@
-{% extends 'base.html.twig' %}
+{% extends app.request.query.get('role') == 'admin' ? 'admin_base.html.twig' : 'base.html.twig' %}
 
 {% block title %}Détail Candidature{% endblock %}
 
@@ -10,13 +10,27 @@
         <h2 class="font-weight-bold"><i class="fas fa-file-alt"></i> Détail de la Candidature</h2>
         <p class="mb-0">
             {% if candidature.statut == 'accepted' %}
-                <span class="badge badge-success">Acceptée</span>
+                <span class="badge bg-success text-white">Acceptée</span>
             {% elseif candidature.statut == 'rejected' %}
-                <span class="badge badge-danger">Rejetée</span>
+                <span class="badge bg-danger text-white">Rejetée</span>
             {% else %}
-                <span class="badge badge-warning">En attente</span>
+                <span class="badge bg-warning text-dark">En attente</span>
             {% endif %}
-        </p>
+        <div class="mt-3">
+            <h6 class="text-white mb-2"><i class="fas fa-brain"></i> Score de Matching AI</h6>
+            <div class="progress" style="height: 25px; border-radius: 12px; background: rgba(255,255,255,0.2);">
+                <div class="progress-bar progress-bar-striped progress-bar-animated 
+                    {% if matchingScore > 80 %}bg-success{% elseif matchingScore > 50 %}bg-warning{% else %}bg-danger{% endif %}" 
+                    role="progressbar" 
+                    style="width: {{ matchingScore }}%;" 
+                    aria-valuenow="{{ matchingScore }}" 
+                    aria-valuemin="0" 
+                    aria-valuemax="100">
+                    <span class="fw-bold">{{ matchingScore }}%</span>
+                </div>
+            </div>
+            <small class="text-white-50">Analyse automatisée basée sur les critères de l'offre</small>
+        </div>
     </div>
 </div>
 
@@ -25,8 +39,8 @@
     {# COLONNE GAUCHE #}
     <div class="col-md-8">
         <div class="card shadow-sm mb-4">
-            <div class="card-header" style="background:#1a1a2e; color:white;">
-                <h5 class="mb-0"><i class="fas fa-info-circle"></i> Informations</h5>
+            <div class="card-header" style="background:#1a1a2e;">
+                <h5 class="mb-0 text-white"><i class="fas fa-info-circle text-white"></i> Informations</h5>
             </div>
             <div class="card-body">
                 <table class="table table-borderless">
@@ -34,7 +48,7 @@
                         <th width="35%"><i class="fas fa-file-contract text-muted"></i> Appel d'Offre</th>
                         <td>
                             {% if candidature.appelOffre %}
-                                <a href="{{ path('app_appel_offre_show', {'id': candidature.appelOffre.id}) }}">
+                                <a href="{{ path('app_appel_offre_show', {'id': candidature.appelOffre.id, 'role': app.request.query.get('role')}) }}">
                                     {{ candidature.appelOffre.titre }}
                                 </a>
                             {% else %}
@@ -64,11 +78,11 @@
                         <th><i class="fas fa-info-circle text-muted"></i> Statut</th>
                         <td>
                             {% if candidature.statut == 'accepted' %}
-                                <span class="badge badge-success">Acceptée</span>
+                                <span class="badge bg-success text-white">Acceptée</span>
                             {% elseif candidature.statut == 'rejected' %}
-                                <span class="badge badge-danger">Rejetée</span>
+                                <span class="badge bg-danger text-white">Rejetée</span>
                             {% else %}
-                                <span class="badge badge-warning">En attente</span>
+                                <span class="badge bg-warning text-dark">En attente</span>
                             {% endif %}
                         </td>
                     </tr>
@@ -100,25 +114,29 @@
             </div>
             <div class="card-body">
                 {% if app.session.get('role') == 'admin' %}
-                    <a href="{{ path('app_candidature_edit', {'id': candidature.id}) }}"
+                    <a href="{{ path('app_candidature_edit', {'id': candidature.id, 'role': app.request.query.get('role')}) }}"
                        class="btn btn-warning btn-block mb-2">
                         <i class="fas fa-edit"></i> Modifier
                     </a>
                 {% endif %}
 
-                <a href="{{ path('app_candidature_index') }}"
+                <a href="{{ path('app_candidature_index', {'role': app.request.query.get('role')}) }}"
                    class="btn btn-secondary btn-block mb-2">
                     <i class="fas fa-arrow-left"></i> Retour à la liste
                 </a>
 
                 {% if candidature.appelOffre %}
-                    <a href="{{ path('app_appel_offre_show', {'id': candidature.appelOffre.id}) }}"
+                    <a href="{{ path('app_appel_offre_show', {'id': candidature.appelOffre.id, 'role': app.request.query.get('role')}) }}"
                        class="btn btn-outline-primary btn-block mb-2">
                         <i class="fas fa-file-contract"></i> Voir l'Appel d'Offre
                     </a>
                 {% endif %}
 
-                {% if app.session.get('role') == 'admin' %}
+                    <a href="{{ path('app_candidature_export', {'id': candidature.id}) }}" target="_blank" class="btn btn-outline-danger btn-block mb-3">
+                        <i class="fas fa-file-pdf"></i> Exporter en PDF
+                    </a>
+
+                    {% if app.session.get('role') == 'admin' %}
                     <hr>
                     {{ include('candidature/_delete_form.html.twig') }}
                 {% endif %}
@@ -134,7 +152,7 @@
             <div class="card-body">
 
                 {# Bouton Accepter #}
-                <form method="post" action="{{ path('app_candidature_accepter', {'id': candidature.id}) }}">
+                <form method="post" action="{{ path('app_candidature_accepter', {'id': candidature.id, 'role': app.request.query.get('role')}) }}">
                     <input type="hidden" name="_token" value="{{ csrf_token('accepter' ~ candidature.id) }}">
                     <button type="submit" class="btn btn-success btn-block mb-2"
                         {% if candidature.statut == 'accepted' %}disabled{% endif %}
@@ -144,7 +162,7 @@
                 </form>
 
                 {# Bouton Rejeter #}
-                <form method="post" action="{{ path('app_candidature_rejeter', {'id': candidature.id}) }}">
+                <form method="post" action="{{ path('app_candidature_rejeter', {'id': candidature.id, 'role': app.request.query.get('role')}) }}">
                     <input type="hidden" name="_token" value="{{ csrf_token('rejeter' ~ candidature.id) }}">
                     <button type="submit" class="btn btn-danger btn-block"
                         {% if candidature.statut == 'rejected' %}disabled{% endif %}

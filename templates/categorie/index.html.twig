@@ -1,4 +1,4 @@
-{% extends 'base.html.twig' %}
+{% extends app.request.query.get('role') == 'admin' ? 'admin_base.html.twig' : 'base.html.twig' %}
 
 {% block title %}Catégories{% endblock %}
 
@@ -6,10 +6,12 @@
 
 {# HERO #}
 <div class="py-4 mb-4" style="background: linear-gradient(135deg, #1a1a2e, #16213e); border-radius: 10px;">
-    <div class="container text-white text-center py-3">
-        <h1 class="display-5 font-weight-bold">🏷️ Catégories</h1>
-        <p class="lead">Gérez les catégories des appels d'offre</p>
-        <a href="{{ path('app_categorie_new') }}" class="btn btn-warning btn-lg mt-2">
+    <div class="container text-center py-3">
+        <h1 class="display-5 font-weight-bold" style="color: #ffffff !important;">
+            <i class="fas fa-tags mr-2" style="color: #f0a500;"></i>Catégories
+        </h1>
+        <p class="lead" style="color: #d0d8e8 !important;">Gérez les catégories des appels d'offre</p>
+        <a href="{{ path('app_categorie_new', {'role': app.request.query.get('role')}) }}" class="btn btn-warning btn-lg mt-2">
             <i class="fas fa-plus"></i> Nouvelle Catégorie
         </a>
     </div>
@@ -20,11 +22,11 @@
     {% for categorie in categories %}
     <div class="col-md-4 mb-4">
         <div class="card shadow-sm h-100">
-            <div class="card-header d-flex justify-content-between align-items-center" style="background:#1a1a2e; color:white;">
-                <h5 class="mb-0">
-                    <i class="fas fa-tag"></i> {{ categorie.nom }}
+            <div class="card-header d-flex justify-content-between align-items-center" style="background:#1a1a2e;">
+                <h5 class="mb-0 text-white">
+                    <i class="fas fa-tag text-white"></i> {{ categorie.nom }}
                 </h5>
-                <span class="badge badge-warning">
+                <span class="badge bg-warning text-dark">
                     {{ categorie.appelOffres|length }} offre(s)
                 </span>
             </div>
@@ -34,11 +36,11 @@
                         {% for appel in categorie.appelOffres|slice(0, 3) %}
                             <li class="mb-1">
                                 <i class="fas fa-file-contract text-muted"></i>
-                                <a href="{{ path('app_appel_offre_show', {'id': appel.id}) }}">
+                                <a href="{{ path('app_appel_offre_show', {'id': appel.id, 'role': app.request.query.get('role')}) }}">
                                     {{ appel.titre }}
                                 </a>
                                 {% if appel.statut == 'published' %}
-                                    <span class="badge badge-success float-right">Publié</span>
+                                    <span class="badge bg-success text-white float-right">Publié</span>
                                 {% endif %}
                             </li>
                         {% endfor %}
@@ -55,11 +57,11 @@
                 {% endif %}
             </div>
             <div class="card-footer bg-white d-flex justify-content-between">
-                <a href="{{ path('app_categorie_show', {'id': categorie.id}) }}"
+                <a href="{{ path('app_categorie_show', {'id': categorie.id, 'role': app.request.query.get('role')}) }}"
                    class="btn btn-sm btn-outline-primary">
                     <i class="fas fa-eye"></i> Voir
                 </a>
-                <a href="{{ path('app_categorie_edit', {'id': categorie.id}) }}"
+                <a href="{{ path('app_categorie_edit', {'id': categorie.id, 'role': app.request.query.get('role')}) }}"
                    class="btn btn-sm btn-outline-warning">
                     <i class="fas fa-edit"></i> Modifier
                 </a>

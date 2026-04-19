@@ -86,13 +86,10 @@ class AppelOffre
     #[ORM\ManyToOne(inversedBy: 'appelOffres')]
     private ?User $createdBy = null;
 
-    #[ORM\OneToMany(targetEntity: Candidature::class, mappedBy: 'appelOffre')]
+    #[ORM\OneToMany(targetEntity: Candidature::class, mappedBy: 'appelOffre', cascade: ['remove'], orphanRemoval: true)]
     private Collection $candidatures;
 
-    /**
-     * @var Collection<int, Rating>
-     */
-    #[ORM\OneToMany(targetEntity: Rating::class, mappedBy: 'appelOffre')]
+    #[ORM\OneToMany(targetEntity: Rating::class, mappedBy: 'appelOffre', cascade: ['remove'], orphanRemoval: true)]
     private Collection $ratings;
 
     public function __construct()

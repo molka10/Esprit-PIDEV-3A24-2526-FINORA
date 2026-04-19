@@ -1,6 +1,46 @@
-{% extends 'base.html.twig' %}
+{% extends app.request.query.get('role') == 'admin' ? 'admin_base.html.twig' : 'base.html.twig' %}
 
 {% block title %}Nouvel Appel d'Offre{% endblock %}
+
+{% block stylesheets %}
+<style>
+/* === LIVE VALIDATION STYLES === */
+.form-control.is-valid, .form-select.is-valid {
+    border-color: #28a745 !important;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3E%3Cpath fill='%2328a745' d='M2.3 6.73L.6 4.53c-.4-1.04.46-1.4 1.1-.8l1.1 1.4 3.4-3.8c.6-.63 1.6-.27 1.2.7l-4 4.6c-.43.5-.8.4-1.1.1z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right calc(0.375em + 0.1875rem) center;
+    background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+    box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.15) !important;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+.form-control.is-invalid, .form-select.is-invalid {
+    border-color: #dc3545 !important;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' width='12' height='12' fill='none' stroke='%23dc3545'%3E%3Ccircle cx='6' cy='6' r='4.5'/%3E%3Cpath stroke-linejoin='round' d='M5.8 3.6h.4L6 6.5z'/%3E%3Ccircle cx='6' cy='8.2' r='.6' fill='%23dc3545' stroke='none'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right calc(0.375em + 0.1875rem) center;
+    background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+    box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.15) !important;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+.validation-feedback {
+    font-size: 0.8rem;
+    margin-top: 4px;
+    min-height: 18px;
+    transition: all 0.2s ease;
+}
+.validation-feedback.valid { color: #28a745; }
+.validation-feedback.invalid { color: #dc3545; }
+.char-counter {
+    font-size: 0.75rem;
+    color: #aaa;
+    text-align: right;
+    margin-top: 2px;
+}
+.char-counter.warning { color: #ffc107; }
+.char-counter.ok { color: #28a745; }
+</style>
+{% endblock %}
 
 {% block body %}
 
@@ -34,7 +74,15 @@
 
                 <div class="row">
                     <div class="col-md-12 mb-3">
-                        {{ form_label(form.description) }}
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            {{ form_label(form.description) }}
+                            <button type="button" id="ai-generate-btn" class="btn btn-sm btn-info text-white">
+                                <i class="fas fa-magic"></i> Générer avec AI
+                            </button>
+                        </div>
+                        <div id="ai-loader" class="text-info small mb-1 d-none">
+                            <i class="fas fa-spinner fa-spin"></i> L'intelligence artificielle rédige votre offre...
+                        </div>
                         {{ form_widget(form.description) }}
                         {% if form_errors(form.description) %}
                             <div class="text-danger small mt-1">
@@ -69,6 +117,17 @@
                 </div>
 
                 <div class="row">
+                    <div class="col-md-12 mb-1">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <label class="fw-bold"><i class="fas fa-money-bill text-muted me-1"></i> Budget</label>
+                            <button type="button" id="ai-budget-btn" class="btn btn-sm btn-success text-white">
+                                <i class="fas fa-lightbulb"></i> Suggérer un Budget AI
+                            </button>
+                        </div>
+                        <div id="ai-budget-loader" class="text-success small mb-1 d-none">
+                            <i class="fas fa-spinner fa-spin"></i> L'IA calcule un budget réaliste...
+                        </div>
+                    </div>
                     <div class="col-md-4 mb-3">
                         {{ form_label(form.budgetMin) }}
                         {{ form_widget(form.budgetMin) }}
@@ -125,7 +184,7 @@
                 </div>
 
                 <div class="d-flex justify-content-between mt-3">
-                    <a href="{{ path('app_appel_offre_index') }}" class="btn btn-secondary">
+                    <a href="{{ path('app_appel_offre_index', {'role': app.request.query.get('role')}) }}" class="btn btn-secondary">
                         <i class="fas fa-arrow-left"></i> Retour
                     </a>
                     <button type="submit" class="btn btn-warning">
@@ -140,3 +199,223 @@
 </div>
 
 {% endblock %}
+
+{% block javascripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const btn = document.getElementById('ai-generate-btn');
+    const loader = document.getElementById('ai-loader');
+    
+    // Selectors for form fields - adjusted for Symfony naming convention
+    const titleField = document.querySelector('[name*="[titre]"]');
+    const descriptionField = document.querySelector('[name*="[description]"]');
+    const typeField = document.querySelector('[name*="[type]"]');
+    const categoryField = document.querySelector('[name*="[categorie]"]');
+
+    btn.addEventListener('click', async function() {
+        const title = titleField.value;
+        const type = typeField.value;
+        const categoryText = categoryField.options[categoryField.selectedIndex]?.text || '';
+
+        if (!title) {
+            alert('Veuillez d\'abord saisir un titre pour orienter l\'IA.');
+            return;
+        }
+
+        btn.disabled = true;
+        loader.classList.remove('d-none');
+
+        try {
+            const response = await fetch('{{ path('app_appel_offre_ai_generate') }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify({
+                    title: title,
+                    type: type,
+                    category: categoryText
+                })
+            });
+
+            const data = await response.json();
+            
+            if (data.description) {
+                descriptionField.value = data.description;
+            } else if (data.error) {
+                alert(data.error);
+            }
+        } catch (error) {
+            console.error('AI Error:', error);
+            alert('Une erreur est survenue lors de la communication avec l\'IA.');
+        } finally {
+            btn.disabled = false;
+            loader.classList.add('d-none');
+        }
+    });
+
+    // --- AI BUDGET SUGGESTION ---
+    const budgetBtn = document.getElementById('ai-budget-btn');
+    const budgetLoader = document.getElementById('ai-budget-loader');
+    const budgetMinField = document.querySelector('[name*="[budgetMin]"]');
+    const budgetMaxField = document.querySelector('[name*="[budgetMax]"]');
+
+    budgetBtn.addEventListener('click', async function() {
+        const title = titleField.value;
+        const type = typeField.value;
+        const categoryText = categoryField.options[categoryField.selectedIndex]?.text || '';
+
+        if (!title) {
+            alert('Veuillez d\'abord saisir un titre pour que l\'IA puisse suggérer un budget.');
+            return;
+        }
+
+        budgetBtn.disabled = true;
+        budgetLoader.classList.remove('d-none');
+
+        try {
+            const response = await fetch('{{ path('app_appel_offre_ai_budget') }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify({ title, type, category: categoryText })
+            });
+
+            const data = await response.json();
+
+            if (data.min && data.max) {
+                budgetMinField.value = data.min;
+                budgetMaxField.value = data.max;
+                budgetBtn.innerHTML = '<i class="fas fa-check"></i> Budget suggéré !';
+                budgetBtn.classList.replace('btn-success', 'btn-secondary');
+            } else if (data.error) {
+                alert('Erreur AI: ' + data.error);
+            }
+        } catch (error) {
+            alert('Une erreur est survenue.');
+        } finally {
+            budgetBtn.disabled = false;
+            budgetLoader.classList.add('d-none');
+        }
+    });
+
+    // =============================================
+    // === LIVE VALIDATION ENGINE ==================
+    // =============================================
+
+    function setValid(el, msg) {
+        el.classList.remove('is-invalid');
+        el.classList.add('is-valid');
+        let fb = el.parentElement.querySelector('.validation-feedback');
+        if (!fb) { fb = document.createElement('div'); fb.className='validation-feedback'; el.parentElement.appendChild(fb); }
+        fb.className = 'validation-feedback valid';
+        fb.innerHTML = '<i class="fas fa-check-circle"></i> ' + msg;
+    }
+
+    function setInvalid(el, msg) {
+        el.classList.remove('is-valid');
+        el.classList.add('is-invalid');
+        let fb = el.parentElement.querySelector('.validation-feedback');
+        if (!fb) { fb = document.createElement('div'); fb.className='validation-feedback'; el.parentElement.appendChild(fb); }
+        fb.className = 'validation-feedback invalid';
+        fb.innerHTML = '<i class="fas fa-exclamation-circle"></i> ' + msg;
+    }
+
+    function clearState(el) {
+        el.classList.remove('is-valid', 'is-invalid');
+        const fb = el.parentElement.querySelector('.validation-feedback');
+        if (fb) { fb.className = 'validation-feedback'; fb.innerHTML = ''; }
+    }
+
+    // Titre: min 3 chars
+    titleField.addEventListener('input', function() {
+        if (!this.value.trim()) clearState(this);
+        else if (this.value.trim().length < 3) setInvalid(this, 'Au moins 3 caractères requis.');
+        else setValid(this, 'Titre valide !');
+    });
+
+    // Description: min 5 chars + live char counter
+    const descField = document.querySelector('[name*="[description]"]');
+    if (descField) {
+        const counterDiv = document.createElement('div');
+        counterDiv.className = 'char-counter';
+        descField.parentElement.appendChild(counterDiv);
+        descField.addEventListener('input', function() {
+            const len = this.value.trim().length;
+            counterDiv.textContent = len + ' caractères';
+            counterDiv.className = 'char-counter ' + (len >= 10 ? 'ok' : 'warning');
+            if (!this.value.trim()) clearState(this);
+            else if (len < 5) setInvalid(this, 'Au moins 5 caractères requis.');
+            else setValid(this, 'Description valide !');
+        });
+    }
+
+    // Type & Statut selects
+    ['[name*="[type]"]', '[name*="[statut]"]', '[name*="[categorie]"]'].forEach(selector => {
+        const el = document.querySelector(selector);
+        if (!el) return;
+        el.addEventListener('change', function() {
+            if (this.value) setValid(this, 'Sélection valide !');
+            else setInvalid(this, 'Veuillez faire une sélection.');
+        });
+    });
+
+    // Budget Min & Max cross-validation
+    const bMin = document.querySelector('[name*="[budgetMin]"]');
+    const bMax = document.querySelector('[name*="[budgetMax]"]');
+    if (bMin) {
+        bMin.addEventListener('input', function() {
+            const val = parseFloat(this.value);
+            if (!this.value) clearState(this);
+            else if (isNaN(val) || val <= 0) setInvalid(this, 'Doit être un nombre positif.');
+            else setValid(this, val.toLocaleString() + ' TND');
+        });
+    }
+    if (bMax) {
+        bMax.addEventListener('input', function() {
+            const val = parseFloat(this.value);
+            const min = parseFloat(bMin ? bMin.value : 0);
+            if (!this.value) clearState(this);
+            else if (isNaN(val) || val <= 0) setInvalid(this, 'Doit être un nombre positif.');
+            else if (!isNaN(min) && min > 0 && val < min) setInvalid(this, 'Doit être supérieur au budget minimum.');
+            else setValid(this, val.toLocaleString() + ' TND');
+        });
+    }
+
+    // Date Limite: must be future
+    const dateField = document.querySelector('[name*="[dateLimite]"]');
+    if (dateField) {
+        dateField.addEventListener('change', function() {
+            if (!this.value) { clearState(this); return; }
+            const selected = new Date(this.value);
+            const today = new Date(); today.setHours(0,0,0,0);
+            if (selected <= today) setInvalid(this, 'La date doit être dans le futur.');
+            else setValid(this, 'Date limite valide !');
+        });
+    }
+
+    // Block submit if any invalid field & scroll to first error
+    document.querySelector('form').addEventListener('submit', function(e) {
+        // Trigger all validations before submitting
+        titleField.dispatchEvent(new Event('input'));
+        if (descField) descField.dispatchEvent(new Event('input'));
+        if (dateField) dateField.dispatchEvent(new Event('change'));
+        ['[name*="[type]"]', '[name*="[statut]"]', '[name*="[categorie]"]'].forEach(s => {
+            const el = document.querySelector(s);
+            if (el) el.dispatchEvent(new Event('change'));
+        });
+
+        const invalid = document.querySelector('.is-invalid');
+        if (invalid) {
+            e.preventDefault();
+            invalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            invalid.focus();
+        }
+    });
+
+});
+</script>
+{% endblock %}

@@ -1,6 +1,38 @@
-{% extends 'base.html.twig' %}
+{% extends app.request.query.get('role') == 'admin' ? 'admin_base.html.twig' : 'base.html.twig' %}
 
 {% block title %}Nouvelle Candidature{% endblock %}
+
+{% block stylesheets %}
+<style>
+.form-control.is-valid, .form-select.is-valid {
+    border-color: #28a745 !important;
+    box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.15) !important;
+    transition: all 0.3s ease;
+}
+.form-control.is-invalid, .form-select.is-invalid {
+    border-color: #dc3545 !important;
+    box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.15) !important;
+    transition: all 0.3s ease;
+}
+.validation-feedback {
+    font-size: 0.8rem;
+    margin-top: 4px;
+    min-height: 18px;
+}
+.validation-feedback.valid { color: #28a745; }
+.validation-feedback.invalid { color: #dc3545; }
+.char-counter {
+    font-size: 0.75rem;
+    color: #aaa;
+    text-align: right;
+    margin-top: 2px;
+    transition: color 0.3s;
+}
+.char-counter.ok { color: #28a745; }
+.char-counter.warning { color: #ffc107; }
+.char-counter.error { color: #dc3545; }
+</style>
+{% endblock %}
 
 {% block body %}
 
@@ -57,16 +89,6 @@
                             </div>
                         {% endif %}
                     </div>
-                    <div class="col-md-6 mb-3">
-                        {{ form_label(form.statut) }}
-                        {{ form_widget(form.statut) }}
-                        {% if form_errors(form.statut) %}
-                            <div class="text-danger small mt-1">
-                                <i class="fas fa-exclamation-circle"></i>
-                                {{ form_errors(form.statut) }}
-                            </div>
-                        {% endif %}
-                    </div>
                 </div>
 
                 <div class="row">
@@ -83,7 +105,7 @@
                 </div>
 
                 <div class="d-flex justify-content-between mt-3">
-                    <a href="{{ path('app_candidature_index') }}" class="btn btn-secondary">
+                    <a href="{{ path('app_candidature_index', {'role': app.request.query.get('role')}) }}" class="btn btn-secondary">
                         <i class="fas fa-arrow-left"></i> Retour
                     </a>
                     <button type="submit" class="btn btn-warning">
@@ -98,3 +120,102 @@
 </div>
 
 {% endblock %}
+
+{% block javascripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+
+    function setValid(el, msg) {
+        el.classList.remove('is-invalid'); el.classList.add('is-valid');
+        let fb = el.parentElement.querySelector('.validation-feedback');
+        if (!fb) { fb = document.createElement('div'); el.parentElement.appendChild(fb); }
+        fb.className = 'validation-feedback valid';
+        fb.innerHTML = '<i class="fas fa-check-circle"></i> ' + msg;
+    }
+
+    function setInvalid(el, msg) {
+        el.classList.remove('is-valid'); el.classList.add('is-invalid');
+        let fb = el.parentElement.querySelector('.validation-feedback');
+        if (!fb) { fb = document.createElement('div'); el.parentElement.appendChild(fb); }
+        fb.className = 'validation-feedback invalid';
+        fb.innerHTML = '<i class="fas fa-exclamation-circle"></i> ' + msg;
+    }
+
+    function clearState(el) {
+        el.classList.remove('is-valid', 'is-invalid');
+        const fb = el.parentElement.querySelector('.validation-feedback');
+        if (fb) { fb.innerHTML = ''; }
+    }
+
+    // Appel d'Offre select
+    const appelField = document.querySelector('[name*="[appelOffre]"]');
+    if (appelField) {
+        appelField.addEventListener('change', function() {
+            if (this.value) setValid(this, 'Appel d\'offre sélectionné !');
+            else setInvalid(this, 'Veuillez choisir un appel d\'offre.');
+        });
+    }
+
+    // Candidat select
+    const userField = document.querySelector('[name*="[user]"]');
+    if (userField) {
+        userField.addEventListener('change', function() {
+            if (this.value) setValid(this, 'Candidat sélectionné !');
+            else setInvalid(this, 'Veuillez choisir un candidat.');
+        });
+    }
+
+    // Montant Proposé
+    const montantField = document.querySelector('[name*="[montantPropose]"]');
+    if (montantField) {
+        montantField.addEventListener('input', function() {
+            const val = parseFloat(this.value);
+            if (!this.value) clearState(this);
+            else if (isNaN(val) || val <= 0) setInvalid(this, 'Le montant doit être un nombre positif.');
+            else setValid(this, val.toLocaleString('fr-TN') + ' TND');
+        });
+    }
+
+    // Message: min 20 chars + live counter
+    const msgField = document.querySelector('[name*="[message]"]');
+    if (msgField) {
+        const counter = document.createElement('div');
+        counter.className = 'char-counter';
+        msgField.parentElement.appendChild(counter);
+
+        msgField.addEventListener('input', function() {
+            const len = this.value.trim().length;
+            const needed = Math.max(0, 20 - len);
+            if (len === 0) {
+                counter.textContent = '0 / 20 caractères minimum';
+                counter.className = 'char-counter error';
+                clearState(this);
+            } else if (len < 20) {
+                counter.textContent = len + ' / 20 — encore ' + needed + ' caractère(s)';
+                counter.className = 'char-counter warning';
+                setInvalid(this, 'Le message doit contenir au moins 20 caractères.');
+            } else {
+                counter.textContent = len + ' caractères — valide';
+                counter.className = 'char-counter ok';
+                setValid(this, 'Message valide !');
+            }
+        });
+    }
+
+    // Block submit & scroll to first error
+    document.querySelector('form').addEventListener('submit', function(e) {
+        if (appelField) appelField.dispatchEvent(new Event('change'));
+        if (userField) userField.dispatchEvent(new Event('change'));
+        if (montantField) montantField.dispatchEvent(new Event('input'));
+        if (msgField) msgField.dispatchEvent(new Event('input'));
+
+        const firstInvalid = document.querySelector('.is-invalid');
+        if (firstInvalid) {
+            e.preventDefault();
+            firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            firstInvalid.focus();
+        }
+    });
+});
+</script>
+{% endblock %}

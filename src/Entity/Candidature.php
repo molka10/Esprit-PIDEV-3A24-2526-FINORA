@@ -15,6 +15,11 @@ class Candidature
     #[ORM\GeneratedValue]
     #[ORM\Column]
     private ?int $id = null;
+    
+    public function __construct()
+    {
+        $this->statut = 'submitted';
+    }
 
     #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2, nullable: true)]
     #[Assert\Positive(message: 'Le montant proposé doit être positif')]

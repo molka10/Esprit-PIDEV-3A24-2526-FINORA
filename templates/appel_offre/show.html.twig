@@ -1,4 +1,4 @@
-{% extends 'base.html.twig' %}
+{% extends app.request.query.get('role') == 'admin' ? 'admin_base.html.twig' : 'base.html.twig' %}
 
 {% block title %}{{ appel_offre.titre }}{% endblock %}
 
@@ -10,13 +10,13 @@
         <h2 class="font-weight-bold"><i class="fas fa-file-contract"></i> {{ appel_offre.titre }}</h2>
         <p class="mb-0">
             {% if appel_offre.statut == 'published' %}
-                <span class="badge badge-success">Publié</span>
+                <span class="badge bg-success text-white">Publié</span>
             {% elseif appel_offre.statut == 'draft' %}
-                <span class="badge badge-secondary">Brouillon</span>
+                <span class="badge bg-secondary text-white">Brouillon</span>
             {% else %}
-                <span class="badge badge-danger">Clôturé</span>
+                <span class="badge bg-danger text-white">Clôturé</span>
             {% endif %}
-            <span class="badge badge-info ml-2">{{ appel_offre.type }}</span>
+            <span class="badge bg-info text-dark ml-2">{{ appel_offre.type }}</span>
         </p>
     </div>
 </div>
@@ -26,22 +26,26 @@
     {# COLONNE GAUCHE - Détails #}
     <div class="col-md-8">
         <div class="card shadow-sm mb-4">
-            <div class="card-header" style="background:#1a1a2e; color:white;">
-                <h5 class="mb-0"><i class="fas fa-info-circle"></i> Détails de l'Appel d'Offre</h5>
+            <div class="card-header" style="background:#1a1a2e;">
+                <h5 class="mb-0 text-white"><i class="fas fa-info-circle text-white"></i> Détails de l'Appel d'Offre</h5>
             </div>
             <div class="card-body">
+                {# DESCRIPTION BLOCK #}
+                <div class="mb-4 p-3" style="background: #f8f9fa; border-left: 5px solid #1a1a2e; border-radius: 5px;">
+                    <h6 class="font-weight-bold text-muted mb-2"><i class="fas fa-align-left"></i> Description de l'offre</h6>
+                    <p class="mb-0" style="font-size: 1.1rem; color: #333; line-height: 1.6;">
+                        {{ appel_offre.description ?? 'Aucune description disponible pour cet appel d\'offre.' }}
+                    </p>
+                </div>
+
                 <table class="table table-borderless">
                     <tr>
                         <th width="35%"><i class="fas fa-heading text-muted"></i> Titre</th>
                         <td>{{ appel_offre.titre }}</td>
                     </tr>
                     <tr>
-                        <th><i class="fas fa-align-left text-muted"></i> Description</th>
-                        <td>{{ appel_offre.description ?? 'Aucune description' }}</td>
-                    </tr>
-                    <tr>
                         <th><i class="fas fa-tag text-muted"></i> Type</th>
-                        <td><span class="badge badge-info">{{ appel_offre.type }}</span></td>
+                        <td><span class="badge bg-info text-dark">{{ appel_offre.type }}</span></td>
                     </tr>
                     <tr>
                         <th><i class="fas fa-folder text-muted"></i> Catégorie</th>
@@ -51,8 +55,15 @@
                         <th><i class="fas fa-money-bill text-muted"></i> Budget</th>
                         <td>
                             {% if appel_offre.budgetMin and appel_offre.budgetMax %}
-                                <strong>{{ appel_offre.budgetMin }} - {{ appel_offre.budgetMax }}</strong>
-                                {{ appel_offre.devise ?? 'TND' }}
+                                <div class="fw-bold text-primary">{{ appel_offre.budgetMin|number_format(0, '.', ' ') }} - {{ appel_offre.budgetMax|number_format(0, '.', ' ') }} TND</div>
+                                <div class="small text-muted">
+                                    {% if budgetEur %}
+                                        <i class="fas fa-euro-sign"></i> {{ budgetEur.min|number_format(0, '.', ' ') }} - {{ budgetEur.max|number_format(0, '.', ' ') }} EUR
+                                    {% endif %}
+                                    {% if budgetUsd %}
+                                        <br><i class="fas fa-dollar-sign"></i> {{ budgetUsd.min|number_format(0, '.', ' ') }} - {{ budgetUsd.max|number_format(0, '.', ' ') }} USD
+                                    {% endif %}
+                                </div>
                             {% else %}
                                 <span class="text-muted">Non défini</span>
                             {% endif %}
@@ -89,10 +100,10 @@
         {# CANDIDATURES - ADMIN seulement #}
         {% if app.session.get('role') == 'admin' %}
         <div class="card shadow-sm">
-            <div class="card-header d-flex justify-content-between align-items-center" style="background:#1a1a2e; color:white;">
-                <h5 class="mb-0">
-                    <i class="fas fa-users"></i> Candidatures
-                    <span class="badge badge-warning ml-2">{{ appel_offre.candidatures|length }}</span>
+            <div class="card-header d-flex justify-content-between align-items-center" style="background:#1a1a2e;">
+                <h5 class="mb-0 text-white">
+                    <i class="fas fa-users text-white"></i> Candidatures
+                    <span class="badge bg-warning text-dark ml-2">{{ appel_offre.candidatures|length }}</span>
                 </h5>
             </div>
             <div class="card-body p-0">
@@ -123,20 +134,20 @@
                                 </td>
                                 <td>
                                     {% if candidature.statut == 'accepted' %}
-                                        <span class="badge badge-success">Acceptée</span>
+                                        <span class="badge bg-success text-white">Acceptée</span>
                                     {% elseif candidature.statut == 'rejected' %}
-                                        <span class="badge badge-danger">Rejetée</span>
+                                        <span class="badge bg-danger text-white">Rejetée</span>
                                     {% else %}
-                                        <span class="badge badge-warning">En attente</span>
+                                        <span class="badge bg-warning text-dark">En attente</span>
                                     {% endif %}
                                 </td>
                                 <td>{{ candidature.createdAt|date('d/m/Y') }}</td>
                                 <td>
-                                    <a href="{{ path('app_candidature_show', {'id': candidature.id}) }}"
+                                    <a href="{{ path('app_candidature_show', {'id': candidature.id, 'role': app.request.query.get('role')}) }}"
                                        class="btn btn-sm btn-outline-primary">
                                         <i class="fas fa-eye"></i>
                                     </a>
-                                    <a href="{{ path('app_candidature_edit', {'id': candidature.id}) }}"
+                                    <a href="{{ path('app_candidature_edit', {'id': candidature.id, 'role': app.request.query.get('role')}) }}"
                                        class="btn btn-sm btn-outline-warning">
                                         <i class="fas fa-edit"></i>
                                     </a>
@@ -182,7 +193,7 @@
             <div class="card-body">
                 {# ADMIN #}
                 {% if app.session.get('role') == 'admin' %}
-                    <a href="{{ path('app_appel_offre_edit', {'id': appel_offre.id}) }}"
+                    <a href="{{ path('app_appel_offre_edit', {'id': appel_offre.id, 'role': app.request.query.get('role')}) }}"
                        class="btn btn-warning btn-block mb-2">
                         <i class="fas fa-edit"></i> Modifier
                     </a>
@@ -198,7 +209,7 @@
                     </div>
                 {% endif %}
 
-                <a href="{{ path('app_appel_offre_index') }}"
+                <a href="{{ path('app_appel_offre_index', {'role': app.request.query.get('role')}) }}"
                    class="btn btn-secondary btn-block mt-2">
                     <i class="fas fa-arrow-left"></i> Retour à la liste
                 </a>
