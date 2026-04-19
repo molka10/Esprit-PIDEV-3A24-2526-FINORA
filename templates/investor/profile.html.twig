@@ -1,0 +1,229 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mon Profil Investisseur - FINORA{% endblock %}
+
+{% block body %}
+
+<section class="py-5 bg-primary text-white" style="background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%) !important;">
+    <div class="container py-4">
+        <div class="row align-items-center">
+            <div class="col-auto">
+                <div class="avatar avatar-xxl border border-4 border-white rounded-circle shadow">
+                    <img class="avatar-img rounded-circle" src="{{ asset('assets/images/avatar/01.jpg') }}" alt="avatar" style="width:100px; height:100px; object-fit: cover;">
+                </div>
+            </div>
+            <div class="col">
+                <h1 class="text-white fw-bold mb-1">Mon Profil Investisseur</h1>
+                <p class="text-white text-opacity-75 mb-0">
+                    <i class="bi bi-person-badge me-2"></i>{{ app.user.username }}
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="py-5">
+    <div class="container">
+        
+        <!-- Stats Grid -->
+        <div class="row g-4 mb-5 mt-n5">
+            <div class="col-sm-6 col-lg-3">
+                <div class="card shadow-sm border-0 p-4 h-100" style="border-radius: 15px;">
+                    <div class="d-flex align-items-center">
+                        <div class="bg-primary bg-opacity-10 text-primary rounded-circle p-3 me-3">
+                            <i class="bi bi-wallet2 fs-4"></i>
+                        </div>
+                        <div>
+                            <span class="text-muted small d-block">Total Investi</span>
+                            <h4 class="fw-bold mb-0 text-dark">{{ totalInvested|format_currency }}</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6 col-lg-3">
+                <div class="card shadow-sm border-0 p-4 h-100" style="border-radius: 15px;">
+                    <div class="d-flex align-items-center">
+                        <div class="bg-success bg-opacity-10 text-success rounded-circle p-3 me-3">
+                            <i class="bi bi-graph-up fs-4"></i>
+                        </div>
+                        <div>
+                            <span class="text-muted small d-block">Projets Actifs</span>
+                            <h4 class="fw-bold mb-0 text-dark">{{ activeCount }}</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6 col-lg-3">
+                <div class="card shadow-sm border-0 p-4 h-100" style="border-radius: 15px;">
+                    <div class="d-flex align-items-center">
+                        <div class="bg-info bg-opacity-10 text-info rounded-circle p-3 me-3">
+                            <i class="bi bi-briefcase fs-4"></i>
+                        </div>
+                        <div>
+                            <span class="text-muted small d-block">Participations</span>
+                            <h4 class="fw-bold mb-0 text-dark">{{ totalMgmt }}</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6 col-lg-3">
+                <div class="card shadow-sm border-0 p-4 h-100" style="border-radius: 15px;">
+                    <div class="d-flex align-items-center">
+                        <div class="bg-warning bg-opacity-10 text-warning rounded-circle p-3 me-3">
+                            <i class="bi bi-clock-history fs-4"></i>
+                        </div>
+                        <div>
+                            <span class="text-muted small d-block">Projets Clôturés</span>
+                            <h4 class="fw-bold mb-0 text-dark">{{ closedCount }}</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Performance Summary Card -->
+        <div class="card border-0 shadow-sm mb-5 p-4" style="border-radius: 20px; background: #f8faff;">
+            <div class="row align-items-center">
+                <div class="col-md-7">
+                    <h5 class="fw-bold mb-1">Résumé de performance</h5>
+                    <p class="text-muted small mb-0">Rendement estimé basé sur votre portefeuille actuel de 9.5% annuel moyen.</p>
+                </div>
+                <div class="col-md-5 text-md-end mt-3 mt-md-0">
+                    <div class="d-inline-block text-center me-4">
+                        <span class="text-muted small d-block">Gain annuel estimé</span>
+                        <h3 class="fw-bold text-success mb-0">+{{ (totalInvested * 0.095)|format_currency }}</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-12">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h3 class="fw-bold mb-0">Mes Participations</h3>
+                    <a href="{{ path('app_management_index') }}" class="btn btn-outline-primary rounded-pill btn-sm shadow-sm">
+                        <i class="bi bi-speedometer2 me-2"></i>Suivi Avancé & Dashboard IA
+                    </a>
+                </div>
+                
+                <div class="row g-4">
+                    {% for m in managements %}
+                    <div class="col-md-6 col-lg-4">
+                        <div class="card h-100 shadow-sm border-0 overflow-hidden" style="border-radius: 15px; border: 1px solid #f0f0f0 !important;">
+                            <div class="card-body p-4">
+                                <div class="d-flex justify-content-between mb-3">
+                                    <span class="badge bg-primary bg-opacity-10 text-primary px-3 rounded-pill">{{ m.investmentType }}</span>
+                                    {% if m.status == 'ACTIVE' %}
+                                        <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-3">Actif</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary bg-opacity-10 text-secondary rounded-pill px-3">Clôturé</span>
+                                    {% endif %}
+                                </div>
+                                <h5 class="fw-bold mb-3">{{ m.investment.name }}</h5>
+                                
+                                <div class="p-3 bg-light rounded-3 mb-3">
+                                    <div class="d-flex justify-content-between mb-2">
+                                        <span class="text-muted small">Montant Investi</span>
+                                        <span class="fw-bold text-dark">{{ m.amountInvested|format_currency }}</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between mb-2">
+                                        <span class="text-muted small">Part Détenue</span>
+                                        <span class="fw-bold text-dark">{{ m.ownershipPercentage }}%</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between">
+                                        <span class="text-muted small">Date Début</span>
+                                        <span class="fw-bold text-dark">{{ m.startDate|date('d/m/Y') }}</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="d-grid gap-2">
+                                    <a href="{{ path('app_management_show', {id: m.id}) }}" class="btn btn-primary rounded-pill btn-sm">
+                                        Suivi détaillé <i class="bi bi-arrow-right ms-1"></i>
+                                    </a>
+                                    <a href="{{ path('app_investment_show', {id: m.investment.id}) }}" class="btn btn-outline-secondary rounded-pill btn-sm">
+                                        Voir le projet
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="col-12 text-center py-5">
+                        <div class="mb-3 text-muted"><i class="bi bi-inbox display-1"></i></div>
+                        <h5 class="text-muted">Vous n'avez pas encore d'investissements enregistrés.</h5>
+                        <a href="{{ path('app_investment_index') }}" class="btn btn-primary mt-3 rounded-pill">Explorer le catalogue</a>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% if investments|length > 0 %}
+                <div class="row mt-5">
+                    <div class="col-12">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h3 class="fw-bold mb-0">Mes Projets Publiés</h3>
+                            <a href="{{ path('app_investment_new') }}" class="btn btn-sm btn-success rounded-pill px-3">
+                                <i class="bi bi-plus-lg me-1"></i>Publier un nouveau projet
+                            </a>
+                        </div>
+                        
+                        <div class="card border-0 shadow-sm" style="border-radius: 20px; overflow: hidden;">
+                            <div class="card-body p-0">
+                                <div class="table-responsive">
+                                    <table class="table align-middle mb-0 table-hover">
+                                        <thead style="background: #fdf2f2;">
+                                            <tr>
+                                                <th scope="col" class="border-0 p-4">Nom du Projet</th>
+                                                <th scope="col" class="border-0">Catégorie</th>
+                                                <th scope="col" class="border-0 text-center">Objectif (TND)</th>
+                                                <th scope="col" class="border-0 text-center">Collecté (%)</th>
+                                                <th scope="col" class="border-0 text-center">Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for i in investments %}
+                                            <tr>
+                                                <td class="p-4">
+                                                    <div class="d-flex align-items-center">
+                                                        <div class="icon-md bg-light rounded-3 me-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                                            <i class="bi bi-rocket-takeoff text-success"></i>
+                                                        </div>
+                                                        <h6 class="mb-0 fw-bold">{{ i.name }}</h6>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-3">{{ investment_category_label(i.category) }}</span>
+                                                </td>
+                                                <td class="text-center">
+                                                    <div class="fw-bold text-dark">{{ i.estimatedValue|format_currency }}</div>
+                                                </td>
+                                                <td class="text-center">
+                                                    <div class="progress" style="height: 6px; width: 100px; margin: 0 auto;">
+                                                        <div class="progress-bar bg-success" style="width: {{ i.fundingPercentage|default(0) }}%"></div>
+                                                    </div>
+                                                    <small class="text-muted">{{ i.fundingPercentage|default(0) }}%</small>
+                                                </td>
+                                                <td class="text-center">
+                                                    <a href="{{ path('app_investment_show', {id: i.id}) }}" class="btn btn-sm btn-light border rounded-pill px-3 mb-1">
+                                                        <i class="bi bi-eye"></i>
+                                                    </a>
+                                                    <a href="{{ path('app_investment_edit', {id: i.id}) }}" class="btn btn-sm btn-warning text-white rounded-pill px-3 mb-1">
+                                                        <i class="bi bi-pencil"></i>
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+            </div>
+        </div>
+
+    </div>
+</section>
+
+{% endblock %}

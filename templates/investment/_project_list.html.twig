@@ -1,0 +1,92 @@
+<div class="row" id="project-list-container" data-total-count="{{ investments.getTotalItemCount() }}">
+    {% for investment in investments %}
+    <div class="col-12">
+        <div class="investment-card" style="animation-delay: {{ loop.index0 * 100 }}ms;">
+            <div class="row g-0 align-items-center">
+                <!-- Image Section -->
+                <div class="col-md-4 position-relative">
+                    <img src="{{ investment_image_src(investment) ?: asset('assets/images/courses/4by3/06.jpg') }}" 
+                         class="img-fluid w-100" style="height: 240px; object-fit: cover; border-top-left-radius: 0.5rem; border-bottom-left-radius: 0.5rem;" alt="">
+                    <div class="position-absolute top-0 start-0 p-3 d-flex gap-2">
+                        <span class="badge-en-cours">En cours</span>
+                        <span class="badge-risk">Risque {{ investment.riskLevel|lower|capitalize }}</span>
+                    </div>
+                    {% if app.user and investment.status == 'ACTIVE' %}
+                        <div class="position-absolute top-0 end-0 p-2">
+                            <button class="wishlist-toggle-btn d-flex align-items-center justify-content-center shadow"
+                                    data-investment-id="{{ investment.id }}"
+                                    style="border-radius:50%;width:38px;height:38px;background:white;border:none;cursor:pointer;z-index:10;transition:transform 0.2s ease;"
+                                    onmouseover="this.style.transform='scale(1.15)'"
+                                    onmouseout="this.style.transform='scale(1)'">
+                                <i class="bi bi-heart heart-icon" id="heart-icon-{{ investment.id }}" style="color:#e53e3e;font-size:1.1rem;transition:all 0.2s ease;"></i>
+                            </button>
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Content Section -->
+                <div class="col-md-8 p-4">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div>
+                            <div class="mb-2">
+                                <span class="badge bg-primary bg-opacity-10 text-primary px-3 py-2 rounded-pill me-2">{{ investment_category_label(investment.category) }}</span>
+                                <span class="text-secondary small"><i class="bi bi-geo-alt me-1"></i>{{ investment.location }}</span>
+                            </div>
+                            <h3 class="fw-bold text-dark mb-1">{{ investment.name }}</h3>
+                            <p class="text-secondary small mb-0">{{ investment.description|slice(0, 80) }}...</p>
+                        </div>
+                        <div class="text-end">
+                            <div class="d-flex gap-2 mb-2 justify-content-end">
+                                <span class="metric-badge metric-yield">{{ investment.annualReturn }}% / an</span>
+                                <span class="metric-badge metric-duration">24 mois</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Progress Section -->
+                    <div class="mb-4">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-secondary small">Collecte en cours</span>
+                            <span class="fw-bold small text-dark">{{ investment.fundingPercentage|default(0) }}%</span>
+                        </div>
+                        <div class="progress">
+                            <div class="progress-bar" style="width: {{ investment.fundingPercentage|default(0) }}%"></div>
+                        </div>
+                        <div class="d-flex justify-content-between mt-2">
+                            <span class="fw-bold text-primary">{{ investment.estimatedValue|format_currency }}</span>
+                            <span class="text-secondary small">0 investisseur(s)</span>
+                        </div>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="d-flex justify-content-between align-items-center pt-3 border-top">
+                        <div class="d-flex align-items-center">
+                            <img src="{{ asset('assets/images/avatar/01.jpg') }}" class="rounded-circle me-2" width="30" height="30" alt="">
+                            <span class="small fw-bold text-dark">FINORA Analyst</span>
+                        </div>
+                        <div class="d-flex gap-2">
+                            {% if not is_granted('ROLE_ADMIN') %}
+                                <a href="{{ path('app_investment_show', {id: investment.id}) }}" class="btn invest-btn rounded-pill px-4 text-white">
+                                    <i class="bi bi-wallet2 me-2"></i>Investir
+                                </a>
+                            {% endif %}
+                            <a href="{{ path('app_investment_show', {id: investment.id}) }}" class="btn invest-btn btn-sm rounded-circle d-flex align-items-center justify-content-center text-white" style="width: 35px; height: 35px;">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="col-12 text-center py-5">
+        <i class="bi bi-search display-1 text-muted"></i>
+        <h5 class="mt-3">Aucun investissement trouvé pour ces critères.</h5>
+    </div>
+    {% endfor %}
+
+    <div class="col-12 d-flex justify-content-center mt-4">
+        {{ knp_pagination_render(investments) }}
+    </div>
+</div>

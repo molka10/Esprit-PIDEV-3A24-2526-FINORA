@@ -1,0 +1,383 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Suivi participation - {{ item.investment.name|default('Détails') }}{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        :root {
+            --finora-purple-light: #ede9fe;
+            --finora-purple: #7c3aed;
+            --finora-purple-dark: #4c1d95;
+            --finora-indigo: #4338ca;
+            --glass-bg: rgba(255, 255, 255, 0.9);
+            --card-shadow: 0 10px 25px -5px rgba(124, 58, 237, 0.1), 0 8px 10px -6px rgba(124, 58, 237, 0.05);
+        }
+
+        body {
+            background-color: #f8fafc;
+            color: #1e293b;
+        }
+
+        .premium-header {
+            background: linear-gradient(135deg, #8b5cf6 0%, #a855f7 50%, #c084fc 100%);
+            padding: 80px 0 140px;
+            position: relative;
+            overflow: hidden;
+            border-radius: 0 0 50px 50px;
+        }
+
+        .premium-header::before {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2v-4h4v-2h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2v-4h4v-2H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            opacity: 0.5;
+        }
+
+        .main-content-wrapper {
+            margin-top: -80px;
+            position: relative;
+            z-index: 5;
+        }
+
+        .glass-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(124, 58, 237, 0.15);
+            border-radius: 24px;
+            box-shadow: var(--card-shadow);
+            transition: transform 0.3s ease;
+            animation: fadeInUp 0.6s ease forwards;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        .metric-card {
+            padding: 24px;
+            border-radius: 20px;
+            background: white;
+            border: 1px solid rgba(124, 58, 237, 0.1);
+            height: 100%;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            animation: fadeInUp 0.5s ease forwards;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        
+        .metric-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(124, 58, 237, 0.15);
+            border-color: rgba(124, 58, 237, 0.3);
+        }
+
+        .icon-circle {
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            font-size: 1.25rem;
+            margin-bottom: 16px;
+        }
+
+        .repayment-table-wrapper {
+            max-height: 500px;
+            overflow-y: auto;
+            scrollbar-width: thin;
+        }
+
+        .status-paid {
+            background: var(--finora-purple-light);
+            color: var(--finora-purple-dark);
+            padding: 4px 12px;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 0.75rem;
+        }
+
+        .status-pending {
+            background: #f1f5f9;
+            color: #475569;
+            padding: 4px 12px;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 0.75rem;
+        }
+
+        .sidebar-btn {
+            border-radius: 12px;
+            padding: 12px 20px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.2s;
+        }
+        
+        .sidebar-btn.btn-primary {
+            background: linear-gradient(135deg, var(--finora-purple) 0%, var(--finora-indigo) 100%);
+            border: none;
+        }
+
+        .sidebar-btn:hover {
+            transform: translateX(5px);
+            box-shadow: 0 5px 15px rgba(124, 58, 237, 0.2);
+        }
+
+        .progress-slim {
+            height: 6px;
+            border-radius: 10px;
+            background: var(--finora-purple-light);
+        }
+        
+        .progress-bar-gradient {
+            background: linear-gradient(90deg, var(--finora-indigo) 0%, var(--finora-purple) 100%);
+            border-radius: 10px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .progress-bar-gradient::after {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; bottom: 0; right: 0;
+            background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.4) 50%, rgba(255,255,255,0) 100%);
+            animation: shimmer 2s infinite;
+        }
+        
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+        
+        /* Stagger setup */
+        .glass-card:nth-child(1) { animation-delay: 0.1s; }
+        .row.g-4.mb-4 > div:nth-child(1) .metric-card { animation-delay: 0.2s; }
+        .row.g-4.mb-4 > div:nth-child(2) .metric-card { animation-delay: 0.3s; }
+        .row.g-4.mb-4 > div:nth-child(3) .metric-card { animation-delay: 0.4s; }
+        .glass-card:nth-of-type(2) { animation-delay: 0.5s; }
+    </style>
+{% endblock %}
+
+{% block body %}
+<!-- 🏔️ Header Premium -->
+<section class="premium-header text-white">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-8">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb mb-3">
+                        <li class="breadcrumb-item"><a href="{{ path('app_home') }}" class="text-white text-opacity-50 text-decoration-none">Accueil</a></li>
+                        <li class="breadcrumb-item"><a href="{{ path('app_management_index') }}" class="text-white text-opacity-50 text-decoration-none">Portefeuille</a></li>
+                        <li class="breadcrumb-item active text-white" aria-current="page">Fiche Actif</li>
+                    </ol>
+                </nav>
+                <h6 class="text-white text-opacity-75 text-uppercase fw-bold mb-2" style="letter-spacing: 2px;">Détails de l'investissement</h6>
+                <h1 class="display-4 fw-bold mb-0">Suivi participation</h1>
+            </div>
+            <div class="col-lg-4 text-lg-end mt-4 mt-lg-0">
+                <div class="d-inline-flex align-items-center bg-white bg-opacity-10 p-3 rounded-4 backdrop-blur">
+                    <div class="text-start me-3">
+                        <p class="small text-white text-opacity-50 mb-0">Rendement Annuel</p>
+                        <h3 class="fw-bold mb-0 text-white">{{ item.investment.annualReturn }}%</h3>
+                    </div>
+                    <div class="icon-circle bg-white bg-opacity-20 text-white mb-0">
+                        <i class="bi bi-graph-up-arrow"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ⚡ Main Content -->
+<div class="container main-content-wrapper pb-5">
+    <div class="row g-4">
+        <div class="col-xl-8">
+            <!-- 🏢 Project Identity -->
+            <div class="glass-card p-4 mb-4">
+                <div class="row align-items-center">
+                    <div class="col-md-4 mb-3 mb-md-0">
+                        <img src="{{ investment_image_src(item.investment) ?: asset('assets/images/courses/4by3/06.jpg') }}" 
+                             alt="{{ item.investment.name }}" class="img-fluid rounded-4 shadow-sm w-100" style="height: 180px; object-fit: cover;">
+                    </div>
+                    <div class="col-md-8 ps-md-4">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <span class="badge bg-primary bg-opacity-10 text-primary mb-2 px-3 py-2 rounded-pill">{{ investment_category_label(item.investmentType) }}</span>
+                                <h2 class="fw-bold text-dark mb-1">{{ item.investment.name }}</h2>
+                                <p class="text-muted mb-3"><i class="bi bi-geo-alt-fill text-danger me-2"></i>{{ item.investment.location }}</p>
+                            </div>
+                            <div class="text-end">
+                                {% if item.status == 'ACTIVE' %}
+                                    <span class="badge bg-success rounded-pill px-3 py-2"><i class="bi bi-check-circle me-1"></i>Actif</span>
+                                {% elseif item.status == 'CRITICAL' %}
+                                    <span class="badge bg-warning text-dark rounded-pill px-3 py-2"><i class="bi bi-exclamation-triangle-fill me-1"></i>Critique</span>
+                                {% else %}
+                                    <span class="badge bg-secondary rounded-pill px-3 py-2"><i class="bi bi-lock-fill me-1"></i>Clôturé</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center mt-2 p-3 bg-light rounded-3">
+                            <i class="bi bi-calendar-event text-primary me-3 fs-4"></i>
+                            <div>
+                                <p class="small text-muted mb-0">Date de souscription</p>
+                                <p class="fw-bold mb-0">{{ item.startDate|date('d F Y') }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 📊 Financial Metrics Grid -->
+            <div class="row g-4 mb-4">
+                <div class="col-md-4">
+                    <div class="metric-card shadow-sm border-0">
+                        <div class="icon-circle bg-primary bg-opacity-10 text-primary">
+                            <i class="bi bi-currency-exchange"></i>
+                        </div>
+                        <p class="text-muted small mb-1">Total Investi</p>
+                        <h4 class="fw-bold mb-0 text-dark">{{ item.amountInvested|format_currency }}</h4>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="metric-card shadow-sm border-0">
+                        <div class="icon-circle bg-success bg-opacity-10 text-success">
+                            <i class="bi bi-piggy-bank"></i>
+                        </div>
+                        <p class="text-muted small mb-1">Gains estimés (ROI)</p>
+                        <h4 class="fw-bold mb-0 text-success">+{{ item.estimatedTotalReturn|format_currency }}</h4>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="metric-card shadow-sm border-0">
+                        <div class="icon-circle bg-info bg-opacity-10 text-info">
+                            <i class="bi bi-pie-chart-fill"></i>
+                        </div>
+                        <p class="text-muted small mb-1">Part du capital</p>
+                        <h4 class="fw-bold mb-0 text-info">{{ item.ownershipPercentage }}%</h4>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 🗓️ Functional Repayment Calendar -->
+            <div class="glass-card p-4">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h5 class="fw-bold mb-1">Calendrier de remboursement</h5>
+                        <p class="text-muted small mb-0">Échéancier prévisionnel de vos revenus</p>
+                    </div>
+                    <div class="text-end">
+                        <span class="badge bg-dark rounded-pill px-3 py-2">Durée: {{ item.investment.durationMonths }} mois</span>
+                    </div>
+                </div>
+
+                <div class="repayment-table-wrapper">
+                    <table class="table table-hover align-middle border-0">
+                        <thead class="bg-light sticky-top">
+                            <tr>
+                                <th class="border-0 small text-muted text-uppercase py-3">Mois</th>
+                                <th class="border-0 small text-muted text-uppercase py-3">Date prévue</th>
+                                <th class="border-0 small text-muted text-uppercase py-3">Dividende (Int.)</th>
+                                <th class="border-0 small text-muted text-uppercase py-3">Principal</th>
+                                <th class="border-0 small text-muted text-uppercase py-3">Total</th>
+                                <th class="border-0 small text-muted text-uppercase py-3 text-end">Statut</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for row in item.repaymentSchedule %}
+                                <tr>
+                                    <td class="fw-bold text-dark">#{{ row.month }}</td>
+                                    <td>{{ row.date|date('d/m/Y') }}</td>
+                                    <td class="text-success fw-medium">+{{ row.interest|number_format(2, ',', ' ') }}</td>
+                                    <td class="text-primary">{{ row.capital|number_format(2, ',', ' ') }}</td>
+                                    <td class="fw-bold">{{ row.total|format_currency }}</td>
+                                    <td class="text-end">
+                                        <span class="{{ row.status == 'PAID' ? 'status-paid' : 'status-pending' }}">
+                                            {{ row.status == 'PAID' ? 'Payé' : 'En attente' }}
+                                        </span>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="mt-4 pt-3 border-top">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="small text-muted">Progression du remboursement du capital</span>
+                        <span class="small fw-bold">Amortissement mensuel actif</span>
+                    </div>
+                    <div class="progress progress-slim">
+                        {% set schedule = item.repaymentSchedule %}
+                        {% set scheduleLength = schedule|length %}
+                        {% set paidMonths = 0 %}
+                        {% for row in schedule %}
+                            {% if row.status == 'PAID' %}{% set paidMonths = paidMonths + 1 %}{% endif %}
+                        {% endfor %}
+                        {% set progress = scheduleLength > 0 ? (paidMonths / scheduleLength * 100) : 0 %}
+                        <div class="progress-bar progress-bar-gradient" style="width: {{ progress }}%"></div>
+                    </div>
+                    <p class="text-center small text-muted mt-2">{{ progress|round }}% complété</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 🛠️ Sidebar Actions -->
+        <div class="col-xl-4">
+            <div class="sticky-top" style="top: 2rem;">
+                <!-- ROI PROJECTION -->
+                <div class="glass-card p-4 mb-4 text-center">
+                    <div class="bg-primary bg-opacity-10 text-primary p-4 rounded-4 mb-3">
+                        <p class="small text-uppercase fw-bold mb-2">Retour sur investissement estimé</p>
+                        <h2 class="fw-bold mb-0">{{ (item.amountInvested + item.estimatedTotalReturn)|format_currency }}</h2>
+                        <p class="text-muted small mt-2 mb-0">Capital + Intérêts cumulés</p>
+                    </div>
+                    <p class="text-muted small">Ce projet offre un rendement de haut niveau avec une fréquence de remboursement mensuelle garantie.</p>
+                </div>
+
+                <!-- ACTIONS -->
+                <div class="glass-card p-4 mb-4">
+                    <h6 class="fw-bold mb-4 border-bottom pb-3"><i class="bi bi-gear-wide-connected me-2"></i>Actions disponibles</h6>
+                    <div class="d-grid gap-3">
+                        <a href="{{ path('app_management_export_single', {id: item.id}) }}" class="btn btn-primary sidebar-btn shadow-sm">
+                            <i class="bi bi-file-earmark-pdf fs-5"></i>Télécharger le reçu (PDF)
+                        </a>
+                        <a href="{{ path('app_management_edit', {id: item.id}) }}" class="btn btn-outline-warning sidebar-btn">
+                            <i class="bi bi-pencil-square fs-5"></i>Modifier la ligne
+                        </a>
+                        <a href="{{ path('app_management_index') }}" class="btn btn-light sidebar-btn">
+                            <i class="bi bi-grid-fill fs-5"></i>Retour au portefeuille
+                        </a>
+
+                        <hr class="my-2 opacity-50">
+
+                        <form method="post" action="{{ path('app_management_delete', {id: item.id}) }}" onsubmit="return confirm('Attention ! Supprimer cet actif est une action irréversible. Confirmer ?');">
+                            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ item.id) }}">
+                            <button type="submit" class="btn btn-link text-danger w-100 text-decoration-none small">
+                                <i class="bi bi-trash3 me-2"></i>Supprimer définitivement
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- TRUST BADGE -->
+                <div class="bg-white p-4 rounded-4 shadow-sm text-center">
+                    <img src="{{ asset('assets/images/element/04.svg') }}" class="mb-3" style="width: 50px;" alt="">
+                    <h6 class="fw-bold mb-2">Paiements sécurisés</h6>
+                    <p class="small text-muted mb-0">Tous vos rendements sont versés directement sur votre Wallet Finora le premier jour ouvré du mois.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

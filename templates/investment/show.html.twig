@@ -1,0 +1,530 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ investment.name }} - FINORA{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        :root {
+            --finora-purple-light: #ede9fe;
+            --finora-purple: #7c3aed;
+            --finora-purple-dark: #4c1d95;
+            --finora-indigo: #4338ca;
+        }
+        .nav-tabs-premium .nav-link {
+            border: none;
+            color: #6b7280;
+            font-weight: 500;
+            padding: 1rem 1.5rem;
+            position: relative;
+            background: transparent;
+            transition: color 0.3s ease;
+        }
+        .nav-tabs-premium .nav-link:hover {
+            color: var(--finora-purple-dark);
+        }
+        .nav-tabs-premium .nav-link.active {
+            color: var(--finora-purple);
+            background: transparent;
+        }
+        .nav-tabs-premium .nav-link.active::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: var(--finora-purple);
+            border-radius: 3px 3px 0 0;
+        }
+        .project-hero-container {
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(124, 58, 237, 0.15);
+            margin-bottom: 30px;
+            animation: fadeInUp 0.8s ease forwards;
+        }
+        .hero-img {
+            width: 100%;
+            height: 400px;
+            object-fit: cover;
+        }
+        .stat-card {
+            background: #fff;
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid rgba(124, 58, 237, 0.15);
+            height: 100%;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            animation: fadeInUp 0.5s ease forwards;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(124, 58, 237, 0.1);
+        }
+        .info-card {
+            background: #fff;
+            padding: 25px;
+            border-radius: 16px;
+            border: 1px solid rgba(124, 58, 237, 0.15);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+            height: 100%;
+            display: flex;
+            align-items: flex-start;
+            transition: all 0.3s ease;
+            animation: fadeInUp 0.6s ease forwards;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        .info-card:hover {
+            box-shadow: 0 10px 25px rgba(124, 58, 237, 0.1);
+            border-color: rgba(124, 58, 237, 0.3);
+        }
+        .icon-box {
+            width: 45px;
+            height: 45px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            flex-shrink: 0;
+        }
+        .sidebar-card {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(124, 58, 237, 0.08);
+            border: 1px solid rgba(124, 58, 237, 0.15);
+            animation: fadeInUp 0.8s ease forwards;
+        }
+        .progress-premium {
+            height: 8px;
+            background-color: var(--finora-purple-light);
+            border-radius: 10px;
+        }
+        .progress-bar-premium {
+            background: linear-gradient(90deg, var(--finora-indigo) 0%, var(--finora-purple) 100%);
+            border-radius: 10px;
+            position: relative;
+            overflow: hidden;
+        }
+        .progress-bar-premium::after {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; bottom: 0; right: 0;
+            background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.4) 50%, rgba(255,255,255,0) 100%);
+            animation: shimmer 2s infinite;
+        }
+        .finance-card {
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            border: 1px solid rgba(124, 58, 237, 0.1);
+            transition: transform 0.3s ease;
+        }
+        .finance-card:hover {
+            transform: scale(1.02);
+        }
+        
+        .btn-invest-purple {
+            background: linear-gradient(135deg, var(--finora-purple) 0%, var(--finora-indigo) 100%);
+            border: none;
+            transition: all 0.3s ease;
+            color: white;
+            box-shadow: 0 5px 15px rgba(124, 58, 237, 0.3);
+        }
+        
+        .btn-invest-purple:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(124, 58, 237, 0.4);
+            color: white;
+        }
+
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+        
+        /* Stagger setup for cards */
+        .g-3 > div:nth-child(1) .stat-card { animation-delay: 0.1s; }
+        .g-3 > div:nth-child(2) .stat-card { animation-delay: 0.2s; }
+        .g-3 > div:nth-child(3) .stat-card { animation-delay: 0.3s; }
+        
+        .g-4 > div:nth-child(1) .info-card { animation-delay: 0.3s; }
+        .g-4 > div:nth-child(2) .info-card { animation-delay: 0.4s; }
+        .g-4 > div:nth-child(3) .info-card { animation-delay: 0.5s; }
+        .g-4 > div:nth-child(4) .info-card { animation-delay: 0.6s; }
+    </style>
+{% endblock %}
+
+{% block body %}
+
+<section class="py-4 bg-white border-bottom shadow-sm mb-4">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1 class="fw-bold text-dark mb-1">{{ investment.name }}</h1>
+                <p class="text-muted small mb-0"><i class="bi bi-geo-alt me-1"></i>{{ investment.location }}</p>
+            </div>
+            <div class="d-flex align-items-center">
+                <nav aria-label="breadcrumb" class="me-4 d-none d-md-block">
+                    <ol class="breadcrumb mb-0">
+                        <li class="breadcrumb-item"><a href="{{ path('app_home') }}">Accueil</a></li>
+                        <li class="breadcrumb-item"><a href="{{ path('app_investment_index') }}">Opportunités</a></li>
+                        <li class="breadcrumb-item active">Suivi</li>
+                    </ol>
+                </nav>
+                <img src="{{ asset('assets/images/avatar/01.jpg') }}" class="rounded-circle shadow-sm" width="40" height="40" alt="">
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="container py-4">
+    <div class="row g-4">
+        <!-- Main Content (Left) -->
+        <div class="col-lg-8">
+            
+            <!-- Hero Image -->
+            <div class="project-hero-container position-relative">
+                <img src="{{ investment_image_src(investment) ?: asset('assets/images/courses/4by3/06.jpg') }}" 
+                     class="hero-img" alt="{{ investment.name }}">
+                {% if app.user and investment.status == 'ACTIVE' %}
+                    <div class="position-absolute top-0 end-0 p-3 mt-2 me-2">
+                        <button class="btn btn-white btn-round shadow btn-lg wishlist-toggle-btn" data-investment-id="{{ investment.id }}" style="border-radius: 50%; width: 50px; height: 50px; z-index: 10;">
+                            <i class="bi bi-heart text-danger fs-4 heart-icon" id="heart-icon-{{ investment.id }}"></i>
+                        </button>
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Header Metrics -->
+            <div class="row g-3 mb-5">
+                <div class="col-md-4">
+                    <div class="stat-card">
+                        <h2 class="fw-bold text-dark mb-0">{{ investment.annualReturn }} %</h2>
+                        <p class="text-muted small mb-0">Renta. fixe /an <i class="bi bi-info-circle ms-1"></i></p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="stat-card">
+                        <h2 class="fw-bold text-dark mb-0">2 ans</h2>
+                        <p class="text-muted small mb-0">Horizon <i class="bi bi-info-circle ms-1"></i></p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="stat-card">
+                        <h2 class="fw-bold text-dark mb-0">{{ investment.estimatedValue|format_currency }}</h2>
+                        <p class="text-muted small mb-0">Montant à financer</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabs Navigation -->
+            <ul class="nav nav-tabs nav-tabs-premium mb-4 border-bottom" id="projectTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="general-tab" data-bs-toggle="tab" data-bs-target="#general" type="button" role="tab">Général</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="finance-tab" data-bs-toggle="tab" data-bs-target="#finance" type="button" role="tab">Finance</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="location-tab" data-bs-toggle="tab" data-bs-target="#location" type="button" role="tab">Lieu</button>
+                </li>
+            </ul>
+
+            <!-- Tabs Content -->
+            <div class="tab-content" id="projectTabsContent">
+                <!-- Tab: Général -->
+                <div class="tab-pane fade show active" id="general" role="tabpanel">
+                    <div class="row g-4 mb-4">
+                        <div class="col-md-6">
+                            <div class="info-card">
+                                <div class="icon-box bg-primary bg-opacity-10 text-primary"><i class="bi bi-building"></i></div>
+                                <div>
+                                    <h6 class="fw-bold mb-1">{{ investment.category }}</h6>
+                                    <p class="text-muted small mb-0">Type de bien proposé dans cette opportunité d'investissement immobilier.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="info-card">
+                                <div class="icon-box bg-success bg-opacity-10 text-success"><i class="bi bi-shield-check"></i></div>
+                                <div>
+                                    <h6 class="fw-bold mb-1">Garanties</h6>
+                                    <p class="text-muted small mb-0">Hypothèque de premier rang, apport initial, séquestre travaux et caution solidaire personnelle.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="info-card">
+                                <div class="icon-box bg-info bg-opacity-10 text-info"><i class="bi bi-geo-alt"></i></div>
+                                <div>
+                                    <h6 class="fw-bold mb-1">Localisation : {{ investment.location }}</h6>
+                                    <p class="text-muted small mb-0">Situé dans un bassin résidentiel à forte demande et offre insuffisante.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="info-card">
+                                <div class="icon-box bg-warning bg-opacity-10 text-warning"><i class="bi bi-gear"></i></div>
+                                <div>
+                                    <h6 class="fw-bold mb-1">Statut du projet</h6>
+                                    <p class="text-muted small mb-0">Collecte en cours — Le projet est ouvert aux investisseurs.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <h5 class="fw-bold mb-3">Présentation</h5>
+                        <p class="text-muted" style="line-height: 1.8;">{{ investment.description|nl2br }}</p>
+                    </div>
+                </div>
+
+                <!-- Tab: Finance -->
+                <div class="tab-pane fade" id="finance" role="tabpanel">
+                    <h5 class="fw-bold mb-4">Données financières</h5>
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <div class="finance-card" style="background: #fdf2ff;">
+                                <span class="text-muted small d-block">Valeur totale du bien</span>
+                                <h4 class="fw-bold text-dark mb-0">{{ investment.estimatedValue|format_currency }}</h4>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="finance-card" style="background: #f0fdf4;">
+                                <span class="text-muted small d-block">Rendement annuel</span>
+                                <h4 class="fw-bold text-success mb-0">{{ investment.annualReturn }}%</h4>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="finance-card" style="background: #f0f9ff;">
+                                <span class="text-muted small d-block">Objectif de collecte</span>
+                                <h4 class="fw-bold text-primary mb-0">{{ (investment.estimatedValue)|format_currency }}</h4>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="finance-card" style="background: #fffbeb;">
+                                <span class="text-muted small d-block">Montant collecté</span>
+                                <h4 class="fw-bold text-warning mb-0">{{ 0|format_currency }}</h4>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card border-0 shadow-sm p-4 bg-light rounded-4">
+                        <h5 class="fw-bold mb-4">Simulateur de rendement</h5>
+                        <div class="row align-items-end g-4">
+                            <div class="col-md-7">
+                                <label class="form-label small text-muted">Montant à investir (TND)</label>
+                                <input type="number" id="simAmount" class="form-control form-control-lg rounded-3 border-0 shadow-none ps-3" value="1000" style="background: #fff;">
+                            </div>
+                            <div class="col-md-5">
+                                <div class="p-4 rounded-4 text-center" style="background: #f0fdf4; border: 1px solid #dcfce7;">
+                                    <span class="text-muted small d-block mb-1">Rendement annuel estimé</span>
+                                    <h2 class="fw-bold text-success mb-0" id="simResult">{{ (investment.annualReturn * 10)|format_currency }}</h2>
+                                    <span class="text-muted smaller d-block mt-1" id="simMonthly">≈ {{ (investment.annualReturn * 10 / 12)|format_currency }} / mois</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab: Lieu -->
+                <div class="tab-pane fade" id="location" role="tabpanel">
+                    <h5 class="fw-bold mb-4">Localisation du projet</h5>
+                    <div class="p-4 bg-light rounded-4 mb-4 d-flex align-items-center">
+                        <div class="icon-md bg-primary bg-opacity-10 text-primary rounded-circle me-3">
+                            <i class="bi bi-geo-alt-fill"></i>
+                        </div>
+                        <div>
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <h6 class="fw-bold mb-0">{{ investment.location }}</h6>
+                                <a href="https://www.google.com/maps/search/{{ investment.location|url_encode }}" target="_blank" class="btn btn-sm btn-outline-primary rounded-pill px-3">
+                                    <i class="bi bi-box-arrow-up-right me-1"></i> Ouvrir dans Maps
+                                </a>
+                            </div>
+                            <p class="text-muted small mb-0">L'emplacement exact est partagé avec les investisseurs après confirmation de la participation.</p>
+                        </div>
+                    </div>
+                    <div class="rounded-4 overflow-hidden shadow-sm" style="height: 400px;">
+                        <iframe width="100%" height="100%" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" 
+                            src="https://maps.google.com/maps?q={{ investment.location|url_encode }}&t=&z=13&ie=UTF8&iwloc=&output=embed">
+                        </iframe>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar (Right) -->
+        <div class="col-lg-4">
+            <div class="sidebar-card sticky-top" style="top: 100px;">
+                <h2 class="fw-bold text-dark mb-2">{{ (investment.estimatedValue)|format_currency }}</h2>
+                <p class="text-muted small mb-4">Montant à financer</p>
+
+                <div class="d-flex justify-content-between mb-2">
+                    <span class="small fw-bold">{{ 0|format_currency }} financés</span>
+                    <span class="small fw-bold">0%</span>
+                </div>
+                <div class="progress progress-premium mb-5">
+                    <div class="progress-bar progress-bar-premium" style="width: 0%"></div>
+                </div>
+
+                <div class="d-grid gap-3 mb-4">
+                    {% if not is_granted('ROLE_ADMIN') %}
+                        <a href="{{ path('app_management_new', {inv_id: investment.id}) }}" class="btn btn-invest-purple btn-lg rounded-pill fw-bold py-3">
+                            Investir
+                        </a>
+                    {% else %}
+                        <div class="alert alert-info small py-2 rounded-pill text-center mb-0">
+                            <i class="bi bi-info-circle me-1"></i> Mode consultation (Admin)
+                        </div>
+                    {% endif %}
+                    
+                    <a href="{{ path('app_investment_export_factsheet', {id: investment.id}) }}" class="btn btn-outline-secondary border-primary text-primary rounded-pill py-2">
+                        <i class="bi bi-download me-2"></i>Télécharger Factsheet PDF
+                    </a>
+                </div>
+
+                <div class="d-flex align-items-center justify-content-center gap-2 mb-4">
+                    <div class="d-flex">
+                        <div class="avatar-group me-2">
+                            <span class="badge rounded-pill bg-primary px-3">F</span>
+                            <span class="badge rounded-pill bg-info px-3 mx-n2">I</span>
+                            <span class="badge rounded-pill bg-secondary px-3">N</span>
+                        </div>
+                    </div>
+                    <span class="small text-muted">0 investisseurs ont participé</span>
+                </div>
+
+                <div class="text-center py-2 px-3 bg-light rounded-pill mb-4">
+                    <a href="#" class="text-decoration-none text-dark small fw-bold">
+                        <i class="bi bi-calculator me-2"></i>Simuler mon investissement
+                    </a>
+                </div>
+
+                <div class="text-center mb-4">
+                    <div class="text-warning mb-1">
+                        <i class="bi bi-star-fill"></i>
+                        <i class="bi bi-star-fill"></i>
+                        <i class="bi bi-star-fill"></i>
+                        <i class="bi bi-star-fill"></i>
+                        <i class="bi bi-star-half"></i>
+                    </div>
+                    <a href="#" class="text-primary smaller text-decoration-none">4.5/5 Voir les avis de la communauté</a>
+                </div>
+
+                <div class="border-top pt-4">
+                    <p class="text-muted smaller mb-3 d-flex align-items-center mx-2">
+                        <i class="bi bi-calendar-event me-2"></i> Collecte ouverte depuis le 17/04/2026
+                    </p>
+                    <p class="text-muted smaller mb-0 d-flex align-items-start mx-2">
+                        <i class="bi bi-shield-check me-2 text-primary fs-5 mt-n1"></i>
+                        <span>Toute somme investie sera intégralement remboursée en cas de collecte non-aboutie.</span>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const input = document.getElementById('simAmount');
+            const result = document.getElementById('simResult');
+            const rate = {{ investment.annualReturn }};
+
+            const currency = "{{ app.session.get('currency', 'TND') }}";
+            const symbol = "{{ 1|format_currency|replace({'1': '', '1,00': '', '0': ''})|trim }}";
+
+            function calculate() {
+                const amount = parseFloat(input.value) || 0;
+                const gain = (amount * rate / 100);
+                const decimals = currency === 'TND' ? 0 : 2;
+                result.textContent = gain.toLocaleString('fr-FR', {minimumFractionDigits: decimals, maximumFractionDigits: decimals}) + ' ' + symbol;
+                
+                const monthly = gain / 12;
+                const monthlyEl = document.getElementById('simMonthly');
+                if (monthlyEl) {
+                    monthlyEl.textContent = '≈ ' + monthly.toLocaleString('fr-FR', {minimumFractionDigits: decimals, maximumFractionDigits: decimals}) + ' ' + symbol + ' / mois';
+                }
+            }
+
+            if(input) {
+                input.addEventListener('input', calculate);
+                calculate();
+            }
+
+            // ==========================================
+            // WISHLIST LOGIC (Heart Toggle)
+            // ==========================================
+            {% if app.user and investment.status == 'ACTIVE' %}
+                const invId = {{ investment.id }};
+                const icon = document.getElementById('heart-icon-' + invId);
+
+                // Initial Check
+                if(icon) {
+                    fetch(`/api/investment-wishlist/check/${invId}`)
+                        .then(res => res.json())
+                        .then(data => {
+                            if(data.in_wishlist) {
+                                icon.classList.remove('bi-heart');
+                                icon.classList.add('bi-heart-fill');
+                            }
+                        })
+                        .catch(err => console.error("Wishlist sync error:", err));
+                }
+
+                // Click action
+                document.body.addEventListener('click', function(e) {
+                    const btn = e.target.closest('.wishlist-toggle-btn');
+                    if (btn && icon) {
+                        e.preventDefault();
+                        
+                        // Optimistic UI toggle
+                        const isFilled = icon.classList.contains('bi-heart-fill');
+                        if (isFilled) {
+                            icon.classList.remove('bi-heart-fill');
+                            icon.classList.add('bi-heart');
+                        } else {
+                            icon.classList.remove('bi-heart');
+                            icon.classList.add('bi-heart-fill');
+                        }
+
+                        // Notify user logic (Simple Toast emulation)
+                        let toastDiv = document.createElement('div');
+                        toastDiv.className = `position-fixed bottom-0 end-0 p-3 m-3 z-3 text-white fw-bold rounded shadow-sm ${!isFilled ? 'bg-success' : 'bg-secondary'}`;
+                        toastDiv.style.transition = 'opacity 0.3s';
+                        toastDiv.innerText = !isFilled ? '❤️ Ajouté à votre wishlist' : '💔 Retiré de la wishlist';
+                        document.body.appendChild(toastDiv);
+                        setTimeout(() => { toastDiv.style.opacity = '0'; setTimeout(() => toastDiv.remove(), 300); }, 3000);
+
+                        // Async API Request
+                        fetch(`/api/investment-wishlist/toggle/${invId}`, { method: 'POST' })
+                            .then(res => res.json())
+                            .then(data => {
+                                if (data.status === 'error') {
+                                    console.error(data.message);
+                                }
+                            })
+                            .catch(err => console.error(err));
+                    }
+                });
+            {% endif %}
+        });
+    </script>
+{% endblock %}

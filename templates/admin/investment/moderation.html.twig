@@ -1,0 +1,256 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block title %}Centre de Modération - FINORA{% endblock %}
+
+{% block stylesheets %}
+<style>
+    :root {
+        --finora-purple: #7c3aed;
+        --finora-purple-light: #a78bfa;
+        --finora-purple-dark: #5b21b6;
+        --finora-purple-soft: rgba(124, 58, 237, 0.05);
+    }
+    .moderation-header {
+        background: linear-gradient(135deg, var(--finora-purple-dark) 0%, var(--finora-purple) 100%);
+        border-radius: 30px;
+        padding: 60px 50px;
+        color: white;
+        margin-bottom: 50px;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 15px 40px rgba(124, 58, 237, 0.25);
+    }
+    .moderation-header::before {
+        content: "";
+        position: absolute;
+        top: -50px;
+        right: -50px;
+        width: 300px;
+        height: 300px;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 50%;
+    }
+    .moderation-header::after {
+        content: "";
+        position: absolute;
+        bottom: -30px;
+        left: 10%;
+        width: 150px;
+        height: 150px;
+        background: rgba(255, 255, 255, 0.03);
+        border-radius: 50%;
+    }
+    .moderation-header-content {
+        position: relative;
+        z-index: 10;
+    }
+    .pending-count-box {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 24px;
+        padding: 25px 35px;
+        text-align: center;
+        min-width: 180px;
+    }
+    .status-badge-premium {
+        background: rgba(255, 255, 255, 0.15);
+        backdrop-filter: blur(5px);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        color: white;
+        font-weight: 600;
+        padding: 8px 16px;
+        border-radius: 50px;
+        font-size: 0.75rem;
+        letter-spacing: 0.5px;
+    }
+    .moderation-card {
+        border-radius: 24px;
+        border: 1px solid rgba(124, 58, 237, 0.1);
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        background: white;
+    }
+    .moderation-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 20px 40px rgba(124, 58, 237, 0.15) !important;
+        border-color: var(--finora-purple-light);
+    }
+    .status-badge-pending {
+        background: rgba(251, 191, 36, 0.1);
+        color: #b45309;
+        font-weight: 700;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        font-size: 0.7rem;
+    }
+    .btn-approve {
+        background: var(--finora-purple);
+        border: none;
+        color: white;
+        transition: all 0.3s ease;
+    }
+    .btn-approve:hover {
+        background: var(--finora-purple-dark);
+        transform: scale(1.02);
+        box-shadow: 0 5px 15px rgba(124, 58, 237, 0.4);
+    }
+    .btn-reject-pill {
+        border: 2px solid #ef4444;
+        color: #ef4444;
+        background: transparent;
+        transition: all 0.3s ease;
+    }
+    .btn-reject-pill:hover {
+        background: #ef4444;
+        color: white;
+    }
+    .project-image-wrapper {
+        border-radius: 20px;
+        margin: 15px;
+        overflow: hidden;
+        position: relative;
+    }
+    .metric-item {
+        background: var(--finora-purple-soft);
+        border-radius: 16px;
+        padding: 12px;
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="row">
+    <div class="col-12">
+        <div class="moderation-header">
+            <div class="moderation-header-content d-lg-flex align-items-center justify-content-between">
+                <div class="mb-4 mb-lg-0">
+                    <span class="status-badge-premium d-inline-flex align-items-center mb-3">
+                        <i class="bi bi-shield-check-fill me-2"></i>ESPACE DE CONTRÔLE ADMINISTRATIF
+                    </span>
+                    <h1 class="display-5 fw-bold text-white mb-2">Modération des Projets</h1>
+                    <p class="mb-0 fs-5 text-white text-opacity-75" style="max-width: 600px;">
+                        Garantissez la qualité et la sécurité de l'écosystème FINORA en validant chaque nouvelle opportunité d'investissement.
+                    </p>
+                </div>
+                
+                <div class="pending-count-box shadow-lg">
+                    <div class="display-3 fw-bold mb-0 text-white">{{ investments|length }}</div>
+                    <div class="text-white text-opacity-50 text-uppercase fw-bold small" style="letter-spacing: 2px;">À Traiter</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% for message in app.flashes('success') %}
+    <div class="alert alert-success border-0 shadow-sm rounded-4 p-3 mb-4 d-flex align-items-center">
+        <i class="bi bi-check-circle-fill fs-4 me-3"></i>
+        <div>{{ message }}</div>
+        <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert"></button>
+    </div>
+{% endfor %}
+
+{% if investments|length > 0 %}
+    <div class="row g-4">
+        {% for investment in investments %}
+            <div class="col-md-6 col-xxl-4">
+                <div class="card h-100 border-0 shadow-sm moderation-card p-2">
+                    <div class="project-image-wrapper">
+                        {% if investment.imageUrl %}
+                            <img src="{{ asset('uploads/investments/' ~ investment.imageUrl) }}" class="img-fluid" style="height: 220px; width: 100%; object-fit: cover;" alt="">
+                        {% else %}
+                            <div class="bg-light d-flex align-items-center justify-content-center" style="height: 220px;">
+                                <i class="bi bi-image display-4 text-muted"></i>
+                            </div>
+                        {% endif %}
+                        <div class="position-absolute bottom-0 start-0 m-3">
+                            <span class="badge bg-white text-dark shadow-sm px-3 py-2 rounded-pill status-badge-pending">
+                                <i class="bi bi-clock-history me-1"></i>VÉRIFICATION REQUISE
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="card-body p-4 pt-1">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <div>
+                                <h4 class="fw-bold mb-1 text-dark">{{ investment.name }}</h4>
+                                <span class="text-secondary small"><i class="bi bi-geo-alt-fill me-1 text-primary"></i>{{ investment.location }}</span>
+                            </div>
+                            <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-3 py-2">{{ investment.category }}</span>
+                        </div>
+                        
+                        <div class="row g-3 mb-4">
+                            <div class="col-6">
+                                <div class="metric-item">
+                                    <small class="text-muted d-block mb-1">Cible</small>
+                                    <span class="h5 mb-0 fw-bold">{{ investment.estimatedValue|number_format(0, ',', ' ') }} <small>TND</small></span>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="metric-item">
+                                    <small class="text-muted d-block mb-1">Risque</small>
+                                    <span class="h5 mb-0 fw-bold 
+                                        {% if investment.riskLevel == 'LOW' %}text-success
+                                        {% elseif investment.riskLevel == 'MEDIUM' %}text-warning
+                                        {% else %}text-danger{% endif %} text-uppercase" style="font-size: 0.9rem;">
+                                        {{ investment.riskLevel }}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <form method="post" action="{{ path('admin_investment_approve', {id: investment.id}) }}">
+                                <input type="hidden" name="_token" value="{{ csrf_token('approve' ~ investment.id) }}">
+                                <button class="btn btn-approve w-100 rounded-pill py-3 fw-bold">
+                                    <i class="bi bi-check2-circle me-2"></i>APPROUVER LE PROJET
+                                </button>
+                            </form>
+                            <form method="post" action="{{ path('admin_investment_reject', {id: investment.id}) }}">
+                                <input type="hidden" name="_token" value="{{ csrf_token('reject' ~ investment.id) }}">
+                                <button class="btn btn-reject-pill w-100 rounded-pill py-3 fw-bold">
+                                    <i class="bi bi-slash-circle me-2"></i>REJETER LA DEMANDE
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                    
+                    <div class="card-footer bg-transparent border-0 px-4 pb-4 pt-0">
+                        <div class="d-flex align-items-center p-3 bg-light rounded-4">
+                            <div class="avatar avatar-xs me-3">
+                                <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 35px; height: 35px; font-weight: bold;">
+                                    {{ investment.user.username|first|upper|default('?') }}
+                                </div>
+                            </div>
+                            <div class="small">
+                                <span class="text-muted d-block">Soumis par</span>
+                                <span class="fw-bold text-dark">{{ investment.user.username|default('Propriétaire inconnu') }}</span>
+                            </div>
+                            <div class="ms-auto text-end small">
+                                <span class="text-muted d-block">Le</span>
+                                <span class="fw-bold text-dark">{{ investment.createdAt|date('d/m/Y') }}</span>
+                            </div>
+                        </div>
+                        <div class="mt-3 text-center">
+                            <a href="{{ path('app_investment_show', {id: investment.id}) }}" class="btn btn-link text-primary btn-sm p-0">
+                                <i class="bi bi-zoom-in me-1"></i>Inspecter les détails
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="py-5 text-center">
+        <div class="bg-primary bg-opacity-10 text-primary rounded-circle mx-auto mb-4 d-flex align-items-center justify-content-center" style="width: 120px; height: 120px;">
+            <i class="bi bi-shield-check display-1"></i>
+        </div>
+        <h2 class="fw-bold text-dark">File d'attente vide</h2>
+        <p class="text-muted mb-4 fs-5">Tous les projets ont été traités. Votre catalogue est à jour !</p>
+        <a href="{{ path('admin_investment_index') }}" class="btn btn-primary rounded-pill px-5 py-3 shadow">
+            Retour au Tableau de Bord
+        </a>
+    </div>
+{% endif %}
+{% endblock %}

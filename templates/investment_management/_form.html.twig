@@ -1,0 +1,66 @@
+<style>
+    .investment-form-wrapper .form-control:focus, 
+    .investment-form-wrapper .form-select:focus {
+        border-color: #7c3aed !important;
+        box-shadow: 0 0 0 0.25rem rgba(124, 58, 237, 0.25) !important;
+    }
+    .btn-purple {
+        background: linear-gradient(135deg, #7c3aed 0%, #4338ca 100%);
+        border: none;
+        color: white;
+        transition: all 0.3s ease;
+        box-shadow: 0 5px 15px rgba(124, 58, 237, 0.3);
+    }
+    .btn-purple:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(124, 58, 237, 0.4);
+        color: white;
+    }
+</style>
+
+{{ form_start(form) }}
+    <div class="row g-3 investment-form-wrapper">
+        <div class="col-12">
+            <label class="form-label fw-bold small">Investissement lié</label>
+            {{ form_widget(form.investment) }}
+            <div class="form-text small">Sélectionnez le projet concerné par ce suivi.</div>
+            {{ form_errors(form.investment) }}
+        </div>
+
+        <div class="col-md-6">
+            <label class="form-label fw-bold small">Type d'investissement</label>
+            {{ form_widget(form.investmentType) }}
+            {{ form_errors(form.investmentType) }}
+        </div>
+
+        <div class="col-md-6">
+            <label class="form-label fw-bold small">Montant investi (TND)</label>
+            {{ form_widget(form.amountInvested) }}
+            {{ form_errors(form.amountInvested) }}
+        </div>
+
+        <div class="col-md-6">
+            <label class="form-label fw-bold small">Pourcentage de détention (%)</label>
+            {{ form_widget(form.ownershipPercentage) }}
+            {{ form_errors(form.ownershipPercentage) }}
+        </div>
+
+        <div class="col-md-6">
+            <label class="form-label fw-bold small">Date de début</label>
+            {{ form_widget(form.startDate) }}
+            {{ form_errors(form.startDate) }}
+        </div>
+
+        <div class="col-12">
+            <label class="form-label fw-bold small">Statut du suivi</label>
+            {{ form_widget(form.status) }}
+            {{ form_errors(form.status) }}
+        </div>
+
+        <div class="col-12 mt-4 text-end">
+            <button class="btn btn-purple px-5 rounded-pill shadow-sm">
+                {{ button_label|default('Enregistrer') }}
+            </button>
+        </div>
+    </div>
+{{ form_end(form) }}

@@ -1,0 +1,220 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block title %}Gestion des Investissements - Admin{% endblock %}
+
+{% block stylesheets %}
+<style>
+    .card-hover:hover {
+        transform: translateY(-5px);
+        transition: all 0.3s ease;
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
+    }
+    .icon-lg {
+        width: 50px;
+        height: 50px;
+        line-height: 50px;
+        text-align: center;
+        font-size: 1.5rem;
+    }
+    .bg-warning-soft { background-color: rgba(245, 158, 11, 0.1) !important; }
+    .bg-success-soft { background-color: rgba(16, 185, 129, 0.1) !important; }
+    .bg-danger-soft { background-color: rgba(239, 68, 68, 0.1) !important; }
+    .bg-secondary-soft { background-color: rgba(107, 114, 128, 0.1) !important; }
+</style>
+{% endblock %}
+
+{% block body %}
+<!-- Page title -->
+<div class="row mt-4 mb-4">
+    <div class="col-12 d-sm-flex justify-content-between align-items-center">
+        <h1 class="h3 mb-2 mb-sm-0">
+            <i class="bi bi-wallet2 text-primary me-2"></i>Tableau de Bord des Investissements
+        </h1>
+        <div class="d-flex align-items-center gap-3">
+            <div class="bg-light border px-3 py-2 rounded-pill fw-bold text-dark d-flex align-items-center shadow-sm">
+                <i class="bi bi-clock text-primary me-2"></i>
+                <span id="live-clock">--:--:--</span>
+            </div>
+            <a href="{{ path('admin_investment_management_list') }}" class="btn btn-outline-primary mb-0">Voir les participations</a>
+            <a href="{{ path('app_investment_new') }}" class="btn btn-primary mb-0">
+                <i class="bi bi-plus-lg me-1"></i>Ajouter un projet
+            </a>
+        </div>
+    </div>
+</div>
+
+{% if stats is defined %}
+<!-- Premium Stats Grid -->
+<div class="row g-4 mb-5">
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm p-4 h-100 card-hover" style="border-radius: 20px; background: linear-gradient(135deg, #f0f7ff 0%, #ffffff 100%);">
+            <div class="d-flex justify-content-between align-items-start mb-3">
+                <div class="icon-lg rounded-3 bg-primary bg-opacity-10 text-primary">
+                    <i class="bi bi-building"></i>
+                </div>
+                <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill">Catalogue</span>
+            </div>
+            <h6 class="text-muted mb-1 fw-normal">Projets Totaux</h6>
+            <h3 class="mb-0 fw-bold">{{ stats.totalProjects }}</h3>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm p-4 h-100 card-hover" style="border-radius: 20px; background: linear-gradient(135deg, #f0fff4 0%, #ffffff 100%);">
+            <div class="d-flex justify-content-between align-items-start mb-3">
+                <div class="icon-lg rounded-3 bg-success bg-opacity-10 text-success">
+                    <i class="bi bi-cash-stack"></i>
+                </div>
+                <span class="badge bg-success bg-opacity-10 text-success rounded-pill">Total Investi</span>
+            </div>
+            <h6 class="text-muted mb-1 fw-normal">Valeur Portefeuille</h6>
+            <h3 class="mb-0 fw-bold">{{ stats.totalPortfolioValue|format_currency }}</h3>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm p-4 h-100 card-hover" style="border-radius: 20px; background: linear-gradient(135deg, #fffbeb 0%, #ffffff 100%);">
+            <div class="d-flex justify-content-between align-items-start mb-3">
+                <div class="icon-lg rounded-3 bg-warning bg-opacity-10 text-warning">
+                    <i class="bi bi-shield-check"></i>
+                </div>
+                <span class="badge bg-warning bg-opacity-10 text-warning rounded-pill">Moyenne</span>
+            </div>
+            <h6 class="text-muted mb-1 fw-normal">Score de Risque</h6>
+            <h3 class="mb-0 fw-bold">{{ stats.overallRiskScore }}%</h3>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm p-4 h-100 card-hover" style="border-radius: 20px; background: linear-gradient(135deg, #fef2f2 0%, #ffffff 100%);">
+            <div class="d-flex justify-content-between align-items-start mb-3">
+                <div class="icon-lg rounded-3 bg-danger bg-opacity-10 text-danger">
+                    <i class="bi bi-people"></i>
+                </div>
+                <span class="badge bg-danger bg-opacity-10 text-danger rounded-pill">Actifs</span>
+            </div>
+            <h6 class="text-muted mb-1 fw-normal">Participations</h6>
+            <h3 class="mb-0 fw-bold">{{ stats.activeManagement }}</h3>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Table Section -->
+<div class="card border-0 shadow-sm mb-4" style="border-radius: 20px; overflow: hidden;">
+    <div class="card-header border-bottom p-4 bg-white">
+        <div class="d-sm-flex justify-content-between align-items-center">
+            <h5 class="mb-2 mb-sm-0">Gestion des projets</h5>
+            <div class="input-group input-group-sm w-auto">
+                <input class="form-control bg-light border-0" type="search" placeholder="Rechercher..." aria-label="Search">
+                <button class="btn btn-primary-soft border-0" type="button"><i class="bi bi-search"></i></button>
+            </div>
+        </div>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table align-middle p-4 mb-0 table-hover">
+                <thead class="bg-light">
+                    <tr>
+                        <th scope="col" class="border-0 p-4">ID</th>
+                        <th scope="col" class="border-0">Projet</th>
+                        <th scope="col" class="border-0">Catégorie</th>
+                        <th scope="col" class="border-0">Valeur</th>
+                        <th scope="col" class="border-0">Risque</th>
+                        <th scope="col" class="border-0">Statut</th>
+                        <th scope="col" class="border-0 text-end rounded-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for investment in investments %}
+                    <tr>
+                        <td class="p-4">#{{ investment.investmentId }}</td>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="avatar avatar-sm me-3">
+                                    <img class="avatar-img rounded-circle" src="{{ investment_image_src(investment) ?: asset('assets/images/courses/4by3/01.jpg') }}" alt="" style="width: 40px; height: 40px; object-fit: cover;">
+                                </div>
+                                <div>
+                                    <h6 class="mb-0 fw-bold"><a href="{{ path('app_investment_show', {id: investment.id}) }}" class="text-dark">{{ investment.name }}</a></h6>
+                                    <span class="small text-muted"><i class="bi bi-geo-alt me-1"></i>{{ investment.location }}</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="badge bg-primary bg-opacity-10 text-primary">{{ investment_category_label(investment.category) }}</span>
+                        </td>
+                        <td>{{ investment.estimatedValue|number_format(0, ',', ' ') }} TND</td>
+                        <td>
+                            {% if investment.riskLevel == 'LOW' %}
+                                <span class="badge bg-success-soft text-success">Faible</span>
+                            {% elseif investment.riskLevel == 'MEDIUM' %}
+                                <span class="badge bg-warning-soft text-warning">Modéré</span>
+                            {% else %}
+                                <span class="badge bg-danger-soft text-danger">Élevé</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if investment.status == 'PENDING' %}
+                                <span class="badge bg-warning-soft text-warning rounded-pill px-3">En attente</span>
+                            {% elseif investment.status == 'ACTIVE' %}
+                                <span class="badge bg-success-soft text-success rounded-pill px-3">Actif</span>
+                            {% elseif investment.status == 'REJECTED' %}
+                                <span class="badge bg-danger-soft text-danger rounded-pill px-3">Rejeté</span>
+                            {% else %}
+                                <span class="badge bg-secondary-soft text-secondary rounded-pill px-3">{{ investment.status }}</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-end px-4">
+                            <div class="d-flex justify-content-end gap-2">
+                                {% if investment.status == 'PENDING' %}
+                                    <form method="post" action="{{ path('admin_investment_approve', {id: investment.id}) }}" class="d-inline">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('approve' ~ investment.id) }}">
+                                        <button class="btn btn-sm btn-success rounded-pill px-3" title="Approuver">
+                                            <i class="bi bi-check-lg"></i>
+                                        </button>
+                                    </form>
+                                    <form method="post" action="{{ path('admin_investment_reject', {id: investment.id}) }}" class="d-inline">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('reject' ~ investment.id) }}">
+                                        <button class="btn btn-sm btn-outline-danger rounded-pill px-3" title="Rejeter">
+                                            <i class="bi bi-x-lg"></i>
+                                        </button>
+                                    </form>
+                                {% endif %}
+                                <a href="{{ path('app_investment_show', {id: investment.id}) }}" class="btn btn-sm btn-light border rounded-pill px-3" title="Voir">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                                <a href="{{ path('app_investment_edit', {id: investment.investmentId}) }}" class="btn btn-sm btn-info text-white rounded-pill px-3">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="7" class="text-center py-5">
+                            <div class="mb-3"><i class="bi bi-inbox display-3 text-muted"></i></div>
+                            <p class="text-muted">Aucun projet trouvé</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+{% block javascripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        function updateLiveClock() {
+            const clockElement = document.getElementById('live-clock');
+            if (clockElement) {
+                const now = new Date();
+                clockElement.textContent = now.toLocaleTimeString('fr-FR', {
+                    hour: '2-digit', minute: '2-digit', second: '2-digit'
+                });
+            }
+        }
+        setInterval(updateLiveClock, 1000);
+        updateLiveClock(); // initial call
+    });
+</script>
+{% endblock %}
+{% endblock %}

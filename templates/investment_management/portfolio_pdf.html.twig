@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Rapport d'Investissement - FINORA</title>
+    <style>
+        @page {
+            margin: 0cm 0cm;
+        }
+        body {
+            font-family: 'Helvetica', 'Arial', sans-serif;
+            font-size: 11pt;
+            color: #334155;
+            margin-top: 3cm;
+            margin-bottom: 2cm;
+            margin-left: 1.5cm;
+            margin-right: 1.5cm;
+            line-height: 1.5;
+        }
+        header {
+            position: fixed;
+            top: 0cm;
+            left: 0cm;
+            right: 0cm;
+            height: 2.5cm;
+            background-color: #7c3aed;
+            color: white;
+            text-align: center;
+            line-height: 2.5cm;
+        }
+        footer {
+            position: fixed;
+            bottom: 0cm;
+            left: 0cm;
+            right: 0cm;
+            height: 1.5cm;
+            background-color: #f8fafc;
+            color: #64748b;
+            text-align: center;
+            font-size: 9pt;
+            line-height: 1.5cm;
+            border-top: 1px solid #e2e8f0;
+        }
+        .logo {
+            font-size: 24pt;
+            font-weight: bold;
+            letter-spacing: 2px;
+        }
+        .report-title {
+            margin-bottom: 30px;
+            border-bottom: 2px solid #7c3aed;
+            padding-bottom: 10px;
+        }
+        .report-title h1 {
+            color: #1e1b4b;
+            margin: 0;
+            font-size: 22pt;
+        }
+        .report-title span {
+            color: #64748b;
+            font-size: 10pt;
+        }
+        .summary-box {
+            background-color: #f5f3ff;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+        .summary-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .summary-table td {
+            padding: 10px;
+            vertical-align: top;
+        }
+        .metric-label {
+            font-size: 9pt;
+            color: #64748b;
+            text-transform: uppercase;
+            display: block;
+            margin-bottom: 5px;
+        }
+        .metric-value {
+            font-size: 14pt;
+            font-weight: bold;
+            color: #7c3aed;
+        }
+        .section-header {
+            font-size: 12pt;
+            font-weight: bold;
+            color: #1e1b4b;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 30px;
+        }
+        .data-table th {
+            background-color: #f1f5f9;
+            color: #475569;
+            text-align: left;
+            padding: 12px 10px;
+            font-size: 9pt;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        .data-table td {
+            padding: 12px 10px;
+            border-bottom: 1px solid #f1f5f9;
+            font-size: 10pt;
+        }
+        .badge {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 8pt;
+            font-weight: bold;
+        }
+        .badge-success { background-color: #dcfce7; color: #166534; }
+        .badge-primary { background-color: #ede9fe; color: #5b21b6; }
+        .footer-page-number:after {
+            content: counter(page);
+        }
+        .text-right { text-align: right; }
+        .text-center { text-align: center; }
+        .text-primary { color: #7c3aed; }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">FINORA</div>
+    </header>
+
+    <footer>
+        FINORA - Plateforme d'Investissement Intelligente | Page <span class="footer-page-number"></span>
+    </footer>
+
+    <main>
+        <div class="report-title">
+            <table style="width: 100%;">
+                <tr>
+                    <td>
+                        <h1>{{ title|default('Relevé d\'Investissement') }}</h1>
+                        <span>Document généré le {{ "now"|date("d/m/Y H:i") }}</span>
+                    </td>
+                    <td class="text-right" style="vertical-align: bottom;">
+                        <span style="font-weight: bold; color: #1e1b4b;">Client: {{ user.username }}</span><br>
+                        <span>ID Investisseur: #{{ user.id|default('000') }}</span>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="summary-box">
+            <table class="summary-table">
+                <tr>
+                    <td>
+                        <span class="metric-label">Objectif / Valeur</span>
+                        <span class="metric-value">{{ stats.totalInvested|format_currency }}</span>
+                    </td>
+                    <td>
+                        <span class="metric-label">{% if items is not empty %}Nombre d'actifs{% else %}Rendement{% endif %}</span>
+                        <span class="metric-value">
+                            {% if items is not empty %}
+                                {{ items|length }} Projets
+                            {% else %}
+                                {{ investment.annualReturn }}%
+                            {% endif %}
+                        </span>
+                    </td>
+                    <td>
+                        <span class="metric-label">{% if items is not empty %}Portefeuille{% else %}Risque{% endif %}</span>
+                        <span class="metric-value text-primary">
+                            {% if items is not empty %}
+                                Diversifié
+                            {% else %}
+                                {{ investment.riskLevel }}
+                            {% endif %}
+                        </span>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        {% if items is not empty %}
+            <div class="section-header">Détails des Participations</div>
+            
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th style="width: 30%;">PROJET</th>
+                        <th style="width: 15%;">RISQUE</th>
+                        <th style="width: 15%;">RENDEMENT</th>
+                        <th style="width: 20%;">INVESTI</th>
+                        <th style="width: 10%;">PART</th>
+                        <th style="width: 10%;">STATUT</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in items %}
+                        <tr>
+                            <td>
+                                <div style="font-weight: bold; color: #1e1b4b;">{{ item.investment ? item.investment.name : 'N/A' }}</div>
+                                <div style="font-size: 8pt; color: #64748b;">{{ item.investment ? item.investment.location : '-' }}</div>
+                            </td>
+                            <td>
+                                <span class="badge {% if item.investment and item.investment.riskLevel == 'LOW' %}badge-success{% else %}badge-primary{% endif %}">
+                                    {{ item.investment ? item.investment.riskLevel : '-' }}
+                                </span>
+                            </td>
+                            <td>
+                                <span style="font-weight: bold; color: #10b981;">+{{ item.investment ? item.investment.annualReturn : '0' }}%</span>
+                            </td>
+                            <td>{{ item.amountInvested|format_currency }}</td>
+                            <td>{{ item.ownershipPercentage }}%</td>
+                            <td>
+                                <span class="badge badge-success">{{ item.status|default('ACTIVE') }}</span>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <div class="section-header">Résumé Technique du Projet</div>
+            <div style="background-color: white; border: 1px solid #e2e8f0; border-radius: 10px; padding: 25px;">
+                <table style="width: 100%;">
+                    <tr>
+                        <td style="width: 50%; padding-bottom: 15px;">
+                            <span class="metric-label">Nom du Projet</span>
+                            <span style="font-size: 14pt; font-weight: bold; color: #1e1b4b;">{{ investment.name }}</span>
+                        </td>
+                        <td style="width: 50%; padding-bottom: 15px;">
+                            <span class="metric-label">Emplacement</span>
+                            <span style="font-size: 14pt; font-weight: bold; color: #1e1b4b;">{{ investment.location }}</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="padding-bottom: 15px;">
+                            <span class="metric-label">Financement Actuel</span>
+                            <span style="font-size: 14pt; font-weight: bold; color: #7c3aed;">{{ stats.fundingCurrent|format_currency }} / {{ stats.fundingPercentage }}%</span>
+                        </td>
+                        <td>
+                            <span class="metric-label">Statut Administratif</span>
+                            <span style="font-size: 14pt; font-weight: bold; color: #1e1b4b;">Certifié FINORA</span>
+                        </td>
+                    </tr>
+                </table>
+                <div style="margin-top: 20px;">
+                    <span class="metric-label">Description De l'Opportunité</span>
+                    <p style="font-size: 10pt; color: #475569; margin-top: 5px;">{{ investment.description|nl2br }}</p>
+                </div>
+            </div>
+        {% endif %}
+
+        <div style="margin-top: 50px; padding: 20px; border: 1px dashed #cbd5e1; border-radius: 10px;">
+            <h4 style="margin-top: 0; color: #1e1b4b;">Note de Conformité</h4>
+            <p style="font-size: 9pt; color: #64748b; margin-bottom: 0;">
+                Ce document constitue un relevé informatif de vos positions actuelles sur la plateforme FINORA. 
+                Toutes les transactions figurant sur ce rapport sont enregistrées dans notre système sécurisé. 
+                Pour toute question, veuillez contacter notre équipe support.
+            </p>
+        </div>
+
+        <div class="text-center" style="margin-top: 30px;">
+            <div style="font-style: italic; color: #94a3b8; font-size: 8pt;">
+                Scellé numériquement par l'IA de FINORA
+            </div>
+        </div>
+    </main>
+</body>
+</html>

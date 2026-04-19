@@ -8,7 +8,8 @@
 # https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters:
     images_directory: '%kernel.project_dir%/public/uploads'
-    ai_api_key: '%env(CHATBOT_API_KEY)%'
+    investment_images_directory: '%kernel.project_dir%/public/uploads/investments'
+    ai_api_key: '%env(GEMINI_API_KEY)%'
     groq_api_key: '%env(GROQ_API_KEY)%'
     tts_api_key: '%env(DEEPGRAM_API_KEY)%'
 
@@ -53,3 +54,7 @@ services:
     App\Service\YouTubeSearchService:
         arguments:
             $apiKey: '%env(YOUTUBE_API_KEY)%'
+
+    App\Service\InvestmentImageUploader:
+        arguments:
+            $targetDirectory: '%investment_images_directory%'

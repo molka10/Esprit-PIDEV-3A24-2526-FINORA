@@ -211,7 +211,7 @@
                     {% set currentCurr = app.session.get('app_currency', 'TND') %}
                     <div class="d-flex gap-1" id="currency-switcher-list">
                         {% for curr in ['TND', 'USD', 'EUR'] %}
-                            <a href="{{ path('app_currency_switch', {'code': curr}) }}" 
+                            <a href="{{ path('app_switch_currency', {'currency': curr}) }}" 
                                class="btn btn-xs curr-pill rounded-pill px-4 py-2 fw-bold transition-all {{ currentCurr == curr ? 'active-curr' : 'text-muted' }}"
                                style="font-size: 0.75rem; border: none; letter-spacing: 0.5px; transition: all 0.3s ease;">
                                 {{ curr }}

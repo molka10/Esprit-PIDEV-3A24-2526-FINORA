@@ -1,0 +1,31 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Publier un projet - FINORA{% endblock %}
+
+{% block body %}
+<section class="py-5 bg-light">
+    <div class="container py-4">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="card border-0 shadow-sm p-4 p-md-5" style="border-radius: 20px;">
+                    <div class="text-center mb-5">
+                        <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
+                            <i class="bi bi-rocket-takeoff fs-1"></i>
+                        </div>
+                        <h2 class="fw-bold">Lancer un nouvel investissement</h2>
+                        <p class="text-muted">Proposez votre projet à la communauté des investisseurs Finora</p>
+                    </div>
+
+                    {{ include('investment/_form.html.twig', {'button_label': 'Publier le projet'}) }}
+                    
+                    <div class="text-center mt-4">
+                        <a href="{{ path('app_investment_index') }}" class="text-muted text-decoration-none small">
+                            <i class="bi bi-arrow-left me-1"></i>Retour au catalogue
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

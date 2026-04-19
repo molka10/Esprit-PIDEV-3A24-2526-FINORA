@@ -19,11 +19,14 @@ class AdminController extends AbstractController
         $verified = $em->getRepository(User::class)->count(['isVerified' => true]);
         $notVerified = $em->getRepository(User::class)->count(['isVerified' => false]);
         $totalUsers = $em->getRepository(User::class)->count([]);
+        
+        $pendingInvestments = $em->getRepository(\App\Entity\Investment::class)->count(['status' => 'PENDING']);
 
         return $this->render('admin/dashboard.html.twig', [
             'verified' => $verified,
             'notVerified' => $notVerified,
             'totalUsers' => $totalUsers,
+            'pendingInvestments' => $pendingInvestments,
         ]);
     }
 }

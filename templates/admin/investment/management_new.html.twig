@@ -1,0 +1,60 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block title %}Lier Investissement - Admin{% endblock %}
+
+{% block body %}
+<div class="row mt-4">
+    <div class="col-12">
+        <h1 class="h3 mb-4">Lier un investisseur à un projet</h1>
+        
+        <div class="card shadow p-4 p-md-5">
+            {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+            
+            <div class="row g-4">
+                <div class="col-12">
+                    {{ form_label(form.investment, null, {'label_attr': {'class': 'form-label fw-bold'}}) }}
+                    {{ form_widget(form.investment) }}
+                    {{ form_errors(form.investment) }}
+                </div>
+                
+                <div class="col-md-6">
+                    {{ form_label(form.investmentType, null, {'label_attr': {'class': 'form-label fw-bold'}}) }}
+                    {{ form_widget(form.investmentType) }}
+                    {{ form_errors(form.investmentType) }}
+                </div>
+                
+                <div class="col-md-6">
+                    {{ form_label(form.amountInvested, null, {'label_attr': {'class': 'form-label fw-bold'}}) }}
+                    {{ form_widget(form.amountInvested) }}
+                    {{ form_errors(form.amountInvested) }}
+                </div>
+                
+                <div class="col-md-6">
+                    {{ form_label(form.ownershipPercentage, null, {'label_attr': {'class': 'form-label fw-bold'}}) }}
+                    {{ form_widget(form.ownershipPercentage) }}
+                    {{ form_errors(form.ownershipPercentage) }}
+                </div>
+                
+                <div class="col-md-6">
+                    {{ form_label(form.startDate, null, {'label_attr': {'class': 'form-label fw-bold'}}) }}
+                    {{ form_widget(form.startDate) }}
+                    {{ form_errors(form.startDate) }}
+                </div>
+                
+                <div class="col-md-6">
+                    {{ form_label(form.status, null, {'label_attr': {'class': 'form-label fw-bold'}}) }}
+                    {{ form_widget(form.status) }}
+                    {{ form_errors(form.status) }}
+                </div>
+                
+                <div class="col-12 mt-4 text-center">
+                    <button type="submit" class="btn btn-primary btn-lg rounded-pill px-5">Confirmer le lien</button>
+                    <a href="{{ path('admin_investment_management_list') }}" class="btn btn-link text-muted">Annuler</a>
+                </div>
+            </div>
+            
+            {{ form_end(form) }}
+        </div>
+    </div>
+</div>
+{% endblock %}

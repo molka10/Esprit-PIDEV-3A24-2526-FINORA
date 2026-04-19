@@ -1,13 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-	<title>{% block title %}Finora - LMS & Course Theme{% endblock %}</title>
+	<title>{% block title %}FINORA - Gestion Financière & Investissement{% endblock %}</title>
 
 	<!-- Meta Tags -->
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 	<meta name="author" content="Finora">
-	<meta name="description" content="Finora- LMS, Education and Course Theme">
+	<meta name="description" content="FINORA - Plateforme unifiée de gestion d'investissements et de formations financières.">
 
 	<!-- Dark mode -->
 	<script>
@@ -126,8 +126,8 @@
 		<div class="container">
 			<!-- Logo START -->
 			<a class="navbar-brand" href="{{ path('app_home') }}">
-				<img class="light-mode-item navbar-brand-item" src="{{ asset('assets/images/logo.svg') }}" alt="logo">
-				<img class="dark-mode-item navbar-brand-item" src="{{ asset('assets/images/logo-light.svg') }}" alt="logo">
+				<img class="light-mode-item navbar-brand-item" src="{{ asset('assets/images/logo-finora.webp') }}" alt="FINORA" style="height:45px;">
+				<img class="dark-mode-item navbar-brand-item" src="{{ asset('assets/images/logo-finora.webp') }}" alt="FINORA" style="height:45px; filter: brightness(0) invert(1);">
 			</a>
 			<!-- Logo END -->
 	
@@ -186,6 +186,20 @@
 							<li><a class="dropdown-item py-2 fw-semibold" href="{{ path('app_history') }}"><i class="fas fa-history me-2" style="color:var(--finora-purple, #7c3aed);"></i>Mon Historique</a></li>
 						</ul>
 					</li>
+
+					<li class="nav-item dropdown">
+						<a class="nav-link fw-bold dropdown-toggle" href="#" id="investMainDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" style="font-size: 0.95rem;">
+							Investir
+						</a>
+						<ul class="dropdown-menu dropdown-menu-end border-0 shadow-sm" aria-labelledby="investMainDropdown" style="border-radius: 12px; min-width: 200px;">
+							<li><a class="dropdown-item py-2 fw-semibold" href="{{ path('app_investment_index') }}"><i class="fas fa-project-diagram me-2" style="color:var(--finora-purple, #7c3aed);"></i>MarketPlace</a></li>
+							<li><a class="dropdown-item py-2 fw-semibold" href="{{ path('app_investor_profile') }}"><i class="fas fa-user-tie me-2" style="color:var(--finora-purple, #7c3aed);"></i>My Portfolio</a></li>
+							<li><a class="dropdown-item py-2 fw-semibold" href="{{ path('app_management_index') }}"><i class="fas fa-tasks me-2" style="color:var(--finora-purple, #7c3aed);"></i>Suivi management</a></li>
+							<li><hr class="dropdown-divider"></li>
+							<li><a class="dropdown-item py-2 fw-semibold text-danger" href="{{ path('app_investment_wishlist_list') }}"><i class="fas fa-heart me-2"></i>Ma Wishlist</a></li>
+						</ul>
+					</li>
+
 				</ul>
 				<!-- Nav Main menu END -->
 
@@ -193,14 +207,38 @@
 			<!-- Main navbar END -->
 
 			<!-- Profile and notification START -->
-			<ul class="nav flex-row align-items-center list-unstyled ms-xl-auto">
+            <ul class="nav flex-row align-items-center list-unstyled ms-xl-auto">
+                    </ul>
+                </li>
+                <!-- Currency dropdown END -->
 
                 {% if app.user %}
-                    <!-- Wishlist START -->
-                    <li class="nav-item ms-0 ms-sm-2 d-none d-sm-block">
-                        <a class="btn btn-light btn-round mb-0" href="{{ path('app_wishlist_index') }}" title="Ma Wishlist"> <i class="bi bi-heart fa-fw"></i></a>
+                    <!-- Wishlist Dropdown START -->
+                    <li class="nav-item ms-0 ms-sm-2 d-none d-sm-block dropdown">
+                        <a class="btn btn-light btn-round mb-0" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" title="Mes Wishlists">
+                            <i class="bi bi-heart fa-fw"></i>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end border-0 shadow-sm mt-2" style="border-radius: 14px; min-width: 220px;">
+                            <li>
+                                <h6 class="dropdown-header text-muted small">
+                                    <i class="bi bi-heart-fill text-danger me-1"></i> Mes Favoris
+                                </h6>
+                            </li>
+                            <li>
+                                <a class="dropdown-item py-2 fw-semibold d-flex align-items-center gap-2" href="{{ path('app_wishlist_index') }}">
+                                    <span class="badge rounded-pill" style="background:#ede9fe; color:#7c3aed;">📚</span>
+                                    Wishlist Formations
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item py-2 fw-semibold d-flex align-items-center gap-2" href="{{ path('app_investment_wishlist_list') }}">
+                                    <span class="badge rounded-pill" style="background:#ede9fe; color:#7c3aed;">💼</span>
+                                    Wishlist Investissements
+                                </a>
+                            </li>
+                        </ul>
                     </li>
-                    <!-- Wishlist END -->
+                    <!-- Wishlist Dropdown END -->
 
                     <!-- Notification dropdown START -->
                     <li class="nav-item ms-2 ms-sm-3 dropdown">
@@ -263,8 +301,6 @@
                         </div>
                         <!-- Notification dropdown menu END -->
                     </li>
-                    <!-- Notification dropdown END -->
-
                     <!-- Profile dropdown START -->
                     <li class="nav-item ms-3 dropdown">
                         <!-- Avatar -->
@@ -355,6 +391,11 @@
 			<div class="navbar-collapse w-100 collapse justify-content-center" id="navbarCollapse2">
 				<!-- Nav Main menu START -->
 				<ul class="navbar-nav navbar-nav-scroll mx-auto">
+					<li class="nav-item">
+						<a class="nav-link fw-bold text-secondary mx-3" href="{{ path('app_investment_home') }}" style="font-size: 0.9rem;">
+							<i class="bi bi-house-door me-2"></i>ACCUEIL
+						</a>
+					</li>
 					<li class="nav-item dropdown">
 						<a class="nav-link dropdown-toggle fw-bold text-primary" href="#" id="bourseDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" style="font-size: 0.9rem;">
                             <i class="bi bi-graph-up-arrow me-2"></i>BOURSE
@@ -366,6 +407,7 @@
 					</li>
 
 					<li class="nav-item"><a class="nav-link fw-bold text-secondary mx-3" href="#" style="font-size: 0.9rem;"><i class="bi bi-wallet2 me-2"></i>WALLET</a></li>
+					<li class="nav-item"><a class="nav-link fw-bold text-secondary mx-3" href="{{ path('app_management_index') }}" style="font-size: 0.9rem;"><i class="bi bi-briefcase me-2"></i>PORTFEUILLE</a></li>
 					<li class="nav-item"><a class="nav-link fw-bold text-secondary mx-3" href="#" style="font-size: 0.9rem;"><i class="bi bi-megaphone me-2"></i>APPEL D'OFFRE</a></li>
 					<li class="nav-item dropdown">
 						<a class="nav-link dropdown-toggle fw-bold text-secondary mx-3" href="#" id="formationPagesDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" style="font-size: 0.9rem;">
@@ -380,7 +422,22 @@
 							<li><a class="dropdown-item py-2 fw-semibold text-primary" href="{{ path('public_centres_map') }}"><i class="fas fa-map-marker-alt me-2"></i>Centres de Formations</a></li>
 						</ul>
 					</li>
-					<li class="nav-item"><a class="nav-link fw-bold text-secondary mx-3" href="#" style="font-size: 0.9rem;"><i class="bi bi-cash-stack me-2"></i>INVESTISSEMENT</a></li>
+					<li class="nav-item dropdown">
+						<a class="nav-link dropdown-toggle fw-bold text-secondary mx-3" href="#" id="investmentDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" style="font-size: 0.9rem;">
+							<i class="bi bi-cash-stack me-2"></i>INVESTISSEMENT
+						</a>
+						<ul class="dropdown-menu shadow border-0" aria-labelledby="investmentDropdown" style="border-radius: 12px; min-width: 200px;">
+							<li><a class="dropdown-item py-2 fw-semibold" href="{{ path('app_investment_index') }}"><i class="bi bi-grid-fill me-2" style="color:var(--finora-purple, #7c3aed);"></i>MarketPlace</a></li>
+							<li><a class="dropdown-item py-2 fw-semibold" href="{{ path('app_management_index') }}"><i class="bi bi-briefcase-fill me-2" style="color:var(--finora-purple, #7c3aed);"></i>Suivi management</a></li>
+							{% if not is_granted('ROLE_ADMIN') %}
+								<li><a class="dropdown-item py-2 fw-semibold" href="{{ path('app_investor_profile') }}"><i class="bi bi-person-fill me-2" style="color:var(--finora-purple, #7c3aed);"></i>Profil Investisseur</a></li>
+							{% endif %}
+							{% if is_granted('ROLE_ENTREPRISE') or is_granted('ROLE_ADMIN') %}
+								<li><hr class="dropdown-divider"></li>
+								<li><a class="dropdown-item py-2 fw-semibold text-primary" href="{{ path('app_investment_new') }}"><i class="bi bi-plus-circle-fill me-2"></i>Publier un Projet</a></li>
+							{% endif %}
+						</ul>
+					</li>
 				</ul>
 			</div>
 			<!-- Main navbar END -->
@@ -410,9 +467,9 @@ Footer START -->
 			<div class="col-lg-3">
 				<!-- logo -->
 				<a class="me-0" href="{{ path('app_home') }}">
-					<img class="h-40px" src="{{ asset('assets/images/logo-light.svg') }}" alt="logo">
+					<img class="h-40px" src="{{ asset('assets/images/logo-finora.webp') }}" alt="logo" style="filter: brightness(0) invert(1);">
 				</a>
-				<p class="my-3 text-body-secondary">Finora education theme, built specifically for the education centers which is dedicated to teaching and involving learners. </p>
+				<p class="my-3 text-body-secondary">FINORA — Votre plateforme de gestion financière intelligente, combinant éducation, bourse et investissements. </p>
 				<!-- Social media icon -->
 				<ul class="list-inline mb-0 mt-3">
 					<li class="list-inline-item"> <a class="btn btn-white btn-sm shadow px-2 text-facebook" href="#"><i class="fab fa-fw fa-facebook-f"></i></a> </li>
@@ -539,5 +596,30 @@ Footer END -->
 <!-- Template Functions -->
 <script src="{{ asset('assets/js/functions.js') }}"></script>
 
-{% block javascripts %}{% endblock %}</body>
+{% block javascripts %}{% endblock %}
+
+    <!-- Floating Currency Switcher START -->
+    <div class="position-fixed bottom-0 start-0 m-4" style="z-index: 9999;">
+        <div class="dropdown dropup">
+            <button class="btn btn-primary shadow-lg rounded-pill px-4 py-3 dropdown-toggle d-flex align-items-center" type="button" id="floatingCurrencyBtn" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="fas fa-coins me-2"></i>
+                <span class="fw-bold">{{ app.session.get('currency', 'TND') }}</span>
+            </button>
+            <ul class="dropdown-menu shadow-lg border-0 mb-3" aria-labelledby="floatingCurrencyBtn" style="border-radius: 15px; min-width: 200px;">
+                <li><span class="dropdown-item-text small text-muted text-uppercase fw-bold pb-2 border-bottom mb-2 text-center d-block">Devise de la plateforme</span></li>
+                <li><a class="dropdown-item py-2 d-flex align-items-center {{ app.session.get('currency', 'TND') == 'TND' ? 'bg-light fw-bold' : '' }}" href="{{ path('app_switch_currency', {currency: 'TND'}) }}">
+                    <span class="me-2">🇹🇳</span> TND (Dinar Tunisien)
+                </a></li>
+                <li><a class="dropdown-item py-2 d-flex align-items-center {{ app.session.get('currency') == 'EUR' ? 'bg-light fw-bold' : '' }}" href="{{ path('app_switch_currency', {currency: 'EUR'}) }}">
+                    <span class="me-2">🇪🇺</span> EUR (Euro)
+                </a></li>
+                <li><a class="dropdown-item py-2 d-flex align-items-center {{ app.session.get('currency') == 'USD' ? 'bg-light fw-bold' : '' }}" href="{{ path('app_switch_currency', {currency: 'USD'}) }}">
+                    <span class="me-2">🇺🇸</span> USD (Dollar US)
+                </a></li>
+            </ul>
+        </div>
+    </div>
+    <!-- Floating Currency Switcher END -->
+
+</body>
 </html>

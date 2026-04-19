@@ -1,0 +1,15 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block title %}Modifier Projet - Admin{% endblock %}
+
+{% block body %}
+<div class="row mt-4">
+    <div class="col-12">
+        <h1 class="h3 mb-4">Modifier : {{ investment.name }}</h1>
+        
+        <div class="card shadow p-4">
+            {{ include('investment/_form.html.twig', {'button_label': 'Enregistrer les modifications'}) }}
+        </div>
+    </div>
+</div>
+{% endblock %}

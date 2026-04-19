@@ -1,0 +1,115 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ project.name }} - Opportunité Partenaire{% endblock %}
+
+{% block stylesheets %}
+{{ parent() }}
+<style>
+    .project-header-premium {
+        background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+        padding: 80px 0;
+        color: white;
+        border-radius: 0 0 40px 40px;
+    }
+    .detail-card {
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.05);
+        padding: 40px;
+        margin-top: -60px;
+    }
+    .partner-label {
+        background: rgba(124, 58, 237, 0.1);
+        color: #7c3aed;
+        padding: 8px 20px;
+        border-radius: 50px;
+        font-weight: 700;
+        font-size: 0.8rem;
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="project-header-premium">
+    <div class="container text-center">
+        <span class="partner-label mb-3 d-inline-block">OFFRE PARTENAIRE CERTIFIÉE</span>
+        <h1 class="display-4 fw-bold">{{ project.name }}</h1>
+        <p class="fs-5 opacity-75"><i class="bi bi-geo-alt me-2"></i>{{ project.location }}</p>
+    </div>
+</div>
+
+<div class="container pb-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="detail-card">
+                <div class="row g-5">
+                    <div class="col-md-7">
+                        <div class="mb-4 rounded-4 overflow-hidden" style="height: 350px;">
+                            {% if project.image_url %}
+                                {% set imgPath = (project.image_url starts with 'http') ? project.image_url : asset((project.image_url starts with 'assets/') ? project.image_url : 'uploads/investments/' ~ project.image_url) %}
+                                <img src="{{ imgPath }}" class="w-100 h-100 object-fit-cover" alt="">
+                            {% else %}
+                                <div class="bg-light w-100 h-100 d-flex align-items-center justify-content-center">
+                                    <i class="bi bi-building display-1 text-muted"></i>
+                                </div>
+                            {% endif %}
+                        </div>
+                        <h3 class="fw-bold mb-4">À propos de ce projet</h3>
+                        <p class="text-muted fs-5 leading-relaxed">
+                            Cette opportunité d'investissement provient de notre réseau de partenaires certifiés : <strong>{{ project.published_by }}</strong>. 
+                            Le projet <strong>{{ project.name }}</strong> situé à {{ project.location }} présente un potentiel de croissance significatif dans le secteur {{ project.category }}.
+                        </p>
+                        <p class="text-muted">
+                            Publié le <strong>{{ project.published_at }}</strong>. En investissant dans ce projet via FINORA, vous bénéficiez de notre interface de suivi en temps réel et de la garantie de conformité de nos analystes.
+                        </p>
+                        
+                        <div class="alert alert-info border-0 bg-info bg-opacity-10 rounded-4 p-4 mt-4">
+                            <h6 class="fw-bold"><i class="bi bi-info-circle me-2"></i>Note de l'analyste</h6>
+                            <p class="mb-0 small">Ce projet externe a été audité selon nos standards de risque {{ project.risk_level }}. Les rendements sont estimés à 9.4% par an.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-5">
+                        <div class="p-4 bg-light rounded-4">
+                            <h5 class="fw-bold mb-4">Récapitulatif</h5>
+                            <ul class="list-unstyled mb-4">
+                                <li class="d-flex justify-content-between mb-3 pb-3 border-bottom">
+                                    <span class="text-muted">Valeur estimée</span>
+                                    <span class="fw-bold">{{ project.estimated_value|number_format(0, ',', ' ') }} TND</span>
+                                </li>
+                                <li class="d-flex justify-content-between mb-3 pb-3 border-bottom">
+                                    <span class="text-muted">Niveau de risque</span>
+                                    <span class="fw-bold text-uppercase {% if project.risk_level == 'LOW' %}text-success{% elseif project.risk_level == 'MEDIUM' %}text-warning{% else %}text-danger{% endif %}">
+                                        {{ project.risk_level }}
+                                    </span>
+                                </li>
+                                <li class="d-flex justify-content-between mb-3 pb-3 border-bottom">
+                                    <span class="text-muted">Partenaire</span>
+                                    <span class="fw-bold text-primary">{{ project.published_by }}</span>
+                                </li>
+                                <li class="d-flex justify-content-between mb-3 pb-3 border-bottom">
+                                    <span class="text-muted">Date de publication</span>
+                                    <span class="fw-bold">{{ project.published_at }}</span>
+                                </li>
+                                <li class="d-flex justify-content-between mb-3">
+                                    <span class="text-muted">Catégorie</span>
+                                    <span class="badge bg-primary bg-opacity-10 text-primary">{{ project.category }}</span>
+                                </li>
+                            </ul>
+                            
+                            <div class="d-grid gap-3">
+                                <a href="{{ path('app_investment_external_invest', {id: project.id}) }}" class="btn btn-primary btn-lg rounded-pill shadow">
+                                    Investir maintenant
+                                </a>
+                                <a href="{{ path('app_investment_home') }}" class="btn btn-outline-secondary btn-lg rounded-pill">
+                                    Retour
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

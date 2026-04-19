@@ -1,0 +1,119 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Détails de Participation - FINORA{% endblock %}
+
+{% block body %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Header -->
+            <div class="mb-4 d-flex align-items-center justify-content-between">
+                <div>
+                    <a href="{{ path('app_investor_profile') }}" class="btn btn-link text-muted p-0 mb-2">
+                        <i class="bi bi-arrow-left me-1"></i>Retour à mon profil
+                    </a>
+                    <h2 class="fw-bold mb-0">Détails de la Participation</h2>
+                </div>
+                <div class="text-end">
+                    {% if management.status == 'ACTIVE' %}
+                        <span class="badge bg-success bg-opacity-10 text-success p-2 px-3 rounded-pill h6">
+                            <i class="bi bi-check-circle-fill me-1"></i>Participation Active
+                        </span>
+                    {% else %}
+                        <span class="badge bg-secondary bg-opacity-10 text-secondary p-2 px-3 rounded-pill h6">
+                            <i class="bi bi-x-circle-fill me-1"></i>Participation Clôturée
+                        </span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Main Info Card -->
+            <div class="card border-0 shadow-sm mb-4" style="border-radius: 20px; overflow: hidden;">
+                <div class="row g-0">
+                    <div class="col-md-4">
+                        <img src="{{ investment_image_src(management.investment) ?: asset('assets/images/courses/4by3/01.jpg') }}" 
+                             class="img-fluid h-100 w-100" 
+                             style="object-fit: cover;" 
+                             alt="{{ management.investment.name }}">
+                    </div>
+                    <div class="col-md-8">
+                        <div class="card-body p-4">
+                            <div class="badge bg-primary bg-opacity-10 text-primary mb-2">
+                                {{ investment_category_label(management.investment.category) }}
+                            </div>
+                            <h4 class="fw-bold mb-3">{{ management.investment.name }}</h4>
+                            <p class="text-muted small mb-4">
+                                <i class="bi bi-geo-alt me-1"></i>{{ management.investment.location }}
+                            </p>
+
+                            <div class="row g-3">
+                                <div class="col-6">
+                                    <div class="p-3 bg-light rounded-3">
+                                        <span class="text-muted small d-block">Montant Investi</span>
+                                        <span class="h5 fw-bold text-dark mb-0">{{ management.amountInvested|format_currency }}</span>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="p-3 bg-light rounded-3">
+                                        <span class="text-muted small d-block">Part du Projet</span>
+                                        <span class="h5 fw-bold text-dark mb-0">{{ management.ownershipPercentage }}%</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Timeline / Status Details -->
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <div class="card border-0 shadow-sm p-4 h-100" style="border-radius: 20px;">
+                        <h6 class="fw-bold mb-3">Informations Temporelles</h6>
+                        <ul class="list-unstyled mb-0">
+                            <li class="d-flex justify-content-between mb-3 pb-3 border-bottom">
+                                <span class="text-muted">Date de Début</span>
+                                <span class="fw-bold">{{ management.startDate|date('d F Y') }}</span>
+                            </li>
+                            <li class="d-flex justify-content-between mb-0">
+                                <span class="text-muted">Date d'Enregistrement</span>
+                                <span class="fw-bold small">{{ management.createdAt ? management.createdAt|date('d/m/Y H:i') : 'N/A' }}</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card border-0 shadow-sm p-4 h-100" style="border-radius: 20px;">
+                        <h6 class="fw-bold mb-3">Prévisions de Gain</h6>
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="icon-md bg-info bg-opacity-10 text-info rounded-circle me-3">
+                                <i class="bi bi-graph-up-arrow"></i>
+                            </div>
+                            <div>
+                                <span class="text-muted small d-block">Rendement Annuel Estimé</span>
+                                <span class="fw-bold">+9.5%</span>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <div class="icon-md bg-success bg-opacity-10 text-success rounded-circle me-3">
+                                <i class="bi bi-currency-exchange"></i>
+                            </div>
+                            <div>
+                                <span class="text-muted small d-block">Gain Estimé (12 mois)</span>
+                                <span class="fw-bold text-success">{{ (management.amountInvested * 0.095)|format_currency }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="mt-5 text-center">
+                <a href="{{ path('app_investment_show', {id: management.investment.id}) }}" class="btn btn-primary px-5 rounded-pill shadow-sm">
+                    Revisiter le Projet Complet
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

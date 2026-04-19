@@ -1,0 +1,373 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Suivi de Portefeuille - FINORA{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        :root {
+            --finora-purple-light: #ede9fe;
+            --finora-purple: #7c3aed;
+            --finora-purple-dark: #4c1d95;
+            --finora-indigo: #4338ca;
+            --glass-bg: rgba(255, 255, 255, 0.9);
+            --glass-border: rgba(124, 58, 237, 0.15);
+        }
+
+        .card {
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.4s ease;
+        }
+        
+        .animated-card {
+            animation: fadeInUp 0.6s ease forwards;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        
+        /* Apply delays to list elements */
+        #management-list-container > * {
+            animation: fadeInUp 0.5s ease forwards;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        
+        #management-list-container > *:nth-child(1) { animation-delay: 0.1s; }
+        #management-list-container > *:nth-child(2) { animation-delay: 0.2s; }
+        #management-list-container > *:nth-child(3) { animation-delay: 0.3s; }
+        #management-list-container > *:nth-child(4) { animation-delay: 0.4s; }
+        
+        .card:hover {
+            box-shadow: 0 15px 35px rgba(124, 58, 237, 0.12) !important;
+        }
+
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .btn-outline-primary {
+            color: var(--finora-purple);
+            border-color: var(--finora-purple);
+        }
+        
+        .btn-outline-primary:hover {
+            background-color: var(--finora-purple);
+            color: white;
+            box-shadow: 0 5px 15px rgba(124, 58, 237, 0.4);
+            transform: translateY(-2px);
+        }
+        
+        .form-control:focus, .form-select:focus {
+            border-color: var(--finora-purple) !important;
+            box-shadow: 0 0 0 0.25rem rgba(124, 58, 237, 0.25) !important;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+    <!-- ======================= PAGE BANNER START ======================= -->
+    <section class="align-items-center d-flex position-relative overflow-hidden"
+             style="background: linear-gradient(135deg, #8b5cf6 0%, #a855f7 50%, #c084fc 100%); min-height: 180px; border-radius: 0 0 30px 30px;">
+        <div class="container position-relative z-index-1">
+            <div class="row align-items-center py-5">
+                <div class="col-lg-8">
+                    <h6 class="text-white text-opacity-75 text-uppercase fw-bold mb-2" style="letter-spacing: 2px; font-size: 0.75rem;">Mon espace investisseur</h6>
+                    <h1 class="text-white fw-bold mb-2">Suivi de Portefeuille</h1>
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb breadcrumb-dark breadcrumb-dots mb-0">
+                            <li class="breadcrumb-item"><a href="{{ path('app_home') }}" class="text-white-50">Accueil</a></li>
+                            <li class="breadcrumb-item active text-white" aria-current="page">Suivi</li>
+                        </ol>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- ======================= PAGE BANNER END ======================= -->
+
+    <section class="py-5">
+        <div class="container">
+            <div class="row">
+                <!-- ======================= MAIN LIST START ======================= -->
+                <div class="col-xl-9">
+
+                    <!-- AI ROBO ADVISOR -->
+                    <div class="card border-0 mb-5 overflow-hidden shadow-sm" style="background: linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%); border-radius: 20px;">
+                        <div class="card-body p-4 p-md-5 position-relative">
+                            <div class="position-absolute opacity-10" style="top: -20px; right: -20px;">
+                                <i class="bi bi-robot" style="font-size: 8rem; color: #7c3aed;"></i>
+                            </div>
+                            
+                            <div class="row align-items-center position-relative z-index-1">
+                                <div class="col-lg-12">
+                                    <div class="d-flex align-items-center mb-3">
+                                        <div class="icon-md bg-primary bg-opacity-10 text-primary rounded-circle me-3">
+                                            <i class="bi bi-cpu-fill fs-5"></i>
+                                        </div>
+                                        <h4 class="fw-bold mb-0" style="color: #4338ca;">Copilote IA : Analyse Stratégique</h4>
+                                    </div>
+                                    <p class="mb-4 text-secondary">Notre Robo-Advisor analyse votre diversification et votre exposition au risque en temps réel pour optimiser vos décisions.</p>
+                                    <button id="btnAiAnalyze" class="btn btn-primary px-4 py-2 rounded-pill shadow-sm" style="background: #6366f1; border: none; font-weight: 600;">
+                                        <i class="bi bi-magic me-2"></i>Lancer le Diagnostic IA
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div id="aiReportContainer" class="mt-4" style="display: none;">
+                                <div id="aiLoader" class="text-center py-5">
+                                    <div class="spinner-border text-primary mb-3" style="width: 3rem; height: 3rem;" role="status">
+                                        <span class="visually-hidden">Loading...</span>
+                                    </div>
+                                    <p class="mb-0 text-primary h5 fw-bold">🧠 Finora Analyst AI analyse votre portefeuille...</p>
+                                    <p class="text-muted small">Évaluation de la diversification et des vecteurs de risque en cours.</p>
+                                </div>
+                                <div id="aiReportContent" class="overflow-hidden" style="border-radius: 15px;">
+                                    <div class="row g-4 mb-4">
+                                        <!-- CHART 1: RISK -->
+                                        <div class="col-md-6">
+                                            <div class="card border-0 shadow-sm h-100 p-3 bg-white">
+                                                <h6 class="fw-bold mb-3"><i class="bi bi-shield-shaded me-2 text-primary"></i>Exposition au Risque</h6>
+                                                <div style="height: 250px;">
+                                                    <canvas id="chartRisk"></canvas>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!-- CHART 2: CATEGORY -->
+                                        <div class="col-md-6">
+                                            <div class="card border-0 shadow-sm h-100 p-3 bg-white">
+                                                <h6 class="fw-bold mb-3"><i class="bi bi-pie-chart-fill me-2 text-success"></i>Allocation Sectorielle</h6>
+                                                <div style="height: 250px;">
+                                                    <canvas id="chartCategory"></canvas>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- TEXT REPORT -->
+                                    <div class="card border-0 shadow-sm p-4 bg-white">
+                                        <h6 class="fw-bold mb-3 text-secondary text-uppercase small" style="letter-spacing: 1px;">Expertise Stratégique</h6>
+                                        <div id="aiTextBody" class="lh-lg"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <div>
+                            <h4 class="mb-0 fw-bold">{{ managements.getTotalItemCount }} investissement(s)</h4>
+                            <p class="text-muted small">Suivi détaillé de vos participations</p>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <a href="{{ path('app_management_export_portfolio') }}" class="btn btn-outline-primary rounded-pill px-4">
+                                <i class="bi bi-file-earmark-bar-graph me-1"></i>Rapport PDF
+                            </a>
+                            <a href="{{ path('app_investment_index') }}" class="btn btn-dark rounded-pill px-4">
+                                <i class="bi bi-plus-lg me-1"></i>Nouvel Investissement
+                            </a>
+                        </div>
+                    </div>
+
+                    <div id="management-list-container">
+                        {% include 'investment_management/_management_list.html.twig' %}
+                    </div>
+                </div>
+
+                <!-- ======================= SIDEBAR START ======================= -->
+                <div class="col-xl-3">
+                    <div class="sticky-top" style="top: 2rem;">
+                        <div class="card border-0 shadow-sm rounded-4 p-3 mb-4">
+                            <h5 class="card-title fw-bold mb-3 px-2">Filtres</h5>
+                            <form id="portfolio-filter-form" method="get" action="{{ path('app_management_index') }}">
+                                <div class="mb-3">
+                                    <label class="form-label small text-muted">Recherche</label>
+                                    <input type="text" name="search" class="form-control rounded-3" placeholder="Projet..." value="{{ search }}">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label small text-muted">Statut</label>
+                                    <select name="status" class="form-select rounded-3">
+                                        <option value="">Tous</option>
+                                        <option value="ACTIVE" {{ status == 'ACTIVE' ? 'selected' : '' }}>Actif</option>
+                                        <option value="CRITICAL" {{ status == 'CRITICAL' ? 'selected' : '' }}>Critique</option>
+                                        <option value="CLOSED" {{ status == 'CLOSED' ? 'selected' : '' }}>Clôturé</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label small text-muted">Trier par</label>
+                                    <select name="tri" class="form-select rounded-3 mb-2">
+                                        <option value="managementId" {{ tri == 'managementId' ? 'selected' : '' }}>Récent</option>
+                                        <option value="amountInvested" {{ tri == 'amountInvested' ? 'selected' : '' }}>Montant</option>
+                                        <option value="ownershipPercentage" {{ tri == 'ownershipPercentage' ? 'selected' : '' }}>% Part</option>
+                                    </select>
+                                    <select name="ordre" class="form-select rounded-3">
+                                        <option value="desc" {{ ordre == 'desc' ? 'selected' : '' }}>Décroissant</option>
+                                        <option value="asc" {{ ordre == 'asc' ? 'selected' : '' }}>Croissant</option>
+                                    </select>
+                                </div>
+                                <button type="submit" class="btn btn-primary w-100 rounded-pill">Appliquer</button>
+                                <a href="{{ path('app_management_index') }}" class="btn btn-link w-100 btn-sm text-secondary mt-2">Réinitialiser</a>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        let riskChart = null;
+        let categoryChart = null;
+
+        // AI Analyze logic
+        const btnAnalyze = document.getElementById('btnAiAnalyze');
+        const reportContainer = document.getElementById('aiReportContainer');
+        const loader = document.getElementById('aiLoader');
+        const reportBody = document.getElementById('aiReportContent');
+        const aiTextBody = document.getElementById('aiTextBody');
+ 
+        if(btnAnalyze) {
+            btnAnalyze.addEventListener('click', function() {
+                btnAnalyze.style.display = 'none';
+                reportContainer.style.display = 'block';
+                loader.style.display = 'block';
+                reportBody.style.display = 'none';
+
+                fetch('{{ path('app_management_ai_report') }}', {
+                    method: 'POST',
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                })
+                .then(res => res.json())
+                .then(data => {
+                    loader.style.display = 'none';
+                    reportBody.style.display = 'block';
+                    
+                    if(data.html) {
+                        aiTextBody.innerHTML = data.html;
+                        if(data.stats) {
+                            renderAiCharts(data.stats);
+                        }
+                    } else if(data.error) {
+                        aiTextBody.innerHTML = '<div class="alert alert-danger">' + data.error + '</div>';
+                        btnAnalyze.style.display = 'inline-block';
+                    }
+                })
+                .catch(err => {
+                    loader.style.display = 'none';
+                    btnAnalyze.style.display = 'inline-block';
+                    reportContainer.style.display = 'none';
+                    alert('Erreur lors du diagnostic IA.');
+                });
+            });
+        }
+
+        function renderAiCharts(stats) {
+            // 1. RISK CHART
+            const ctxRisk = document.getElementById('chartRisk').getContext('2d');
+            if (riskChart) riskChart.destroy();
+            riskChart = new Chart(ctxRisk, {
+                type: 'doughnut',
+                data: {
+                    labels: ['FAIBLE', 'MOYEN', 'ÉLEVÉ'],
+                    datasets: [{
+                        data: stats.riskDistribution,
+                        backgroundColor: ['#10b981', '#f59e0b', '#ef4444'],
+                        borderWidth: 0,
+                        hoverOffset: 15
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { usePointStyle: true, padding: 20, font: { weight: '600' } } }
+                    },
+                    cutout: '70%'
+                }
+            });
+
+            // 2. CATEGORY CHART
+            const ctxCat = document.getElementById('chartCategory').getContext('2d');
+            if (categoryChart) categoryChart.destroy();
+            categoryChart = new Chart(ctxCat, {
+                type: 'pie',
+                data: {
+                    labels: stats.categoryDistribution.labels,
+                    datasets: [{
+                        data: stats.categoryDistribution.data,
+                        backgroundColor: ['#6366f1', '#8b5cf6', '#ec4899', '#f43f5e', '#3b82f6', '#14b8a6'],
+                        borderWidth: 2,
+                        borderColor: '#fff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { usePointStyle: true, padding: 20, font: { weight: '600' } } }
+                    }
+                }
+            });
+        }
+
+        // AJAX Filtering logic
+        const filterForm = document.getElementById('portfolio-filter-form');
+        const container = document.getElementById('management-list-container');
+
+        if (filterForm) {
+            filterForm.querySelectorAll('input, select').forEach(el => {
+                el.addEventListener('change', () => updateResults());
+            });
+
+            filterForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                updateResults();
+            });
+        }
+
+        function updateResults() {
+            container.style.opacity = '0.5';
+            const formData = new FormData(filterForm);
+            const params = new URLSearchParams(formData);
+            const url = `{{ path('app_management_index') }}?${params.toString()}`;
+
+            fetch(url, {
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            })
+            .then(res => res.text())
+            .then(html => {
+                container.innerHTML = html;
+                container.style.opacity = '1';
+                window.history.pushState({}, '', url);
+            })
+            .catch(err => {
+                console.error(err);
+                container.style.opacity = '1';
+            });
+        }
+
+        // AJAX Pagination
+        container.addEventListener('click', (e) => {
+            const link = e.target.closest('.pagination a');
+            if (link) {
+                e.preventDefault();
+                container.style.opacity = '0.5';
+                fetch(link.href, {
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                })
+                .then(res => res.text())
+                .then(html => {
+                    container.innerHTML = html;
+                    container.style.opacity = '1';
+                    window.history.pushState({}, '', link.href);
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                });
+            }
+        });
+    });
+    </script>
+{% endblock %}

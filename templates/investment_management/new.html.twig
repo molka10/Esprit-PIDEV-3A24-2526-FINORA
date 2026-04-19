@@ -1,0 +1,41 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Nouveau Suivi - FINORA{% endblock %}
+
+{% block body %}
+    <section class="py-5" style="background: #f8fafc;">
+        <div class="container py-5">
+            <div class="row justify-content-center">
+                <div class="col-lg-7">
+                    <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
+                        <div class="card-header bg-primary text-white p-4">
+                            <h4 class="mb-0 fw-bold"><i class="bi bi-plus-circle me-2"></i>Nouveau Suivi d'Investissement</h4>
+                            <p class="mb-0 small text-white-50">Enregistrez une nouvelle participation dans votre portefeuille.</p>
+                        </div>
+                        <div class="card-body p-4 p-md-5 bg-white">
+                            {% if investment %}
+                                <div class="alert alert-info border-0 rounded-3 mb-4 d-flex align-items-center">
+                                    <i class="bi bi-info-circle-fill fs-4 me-3"></i>
+                                    <div>
+                                        <span class="small d-block">Projet sélectionné</span>
+                                        <strong class="h6 mb-0">{{ investment.name }}</strong>
+                                    </div>
+                                </div>
+                            {% endif %}
+
+                            {{ include('investment_management/_form.html.twig') }}
+                            
+                            <hr class="my-4">
+                            
+                            <div class="text-center">
+                                <a href="{{ path('app_management_index') }}" class="text-muted text-decoration-none small">
+                                    <i class="bi bi-arrow-left me-1"></i>Retour au tableau de bord
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}

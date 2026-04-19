@@ -1,0 +1,15 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block title %}Nouveau Projet - Admin{% endblock %}
+
+{% block body %}
+<div class="row mt-4">
+    <div class="col-12">
+        <h1 class="h3 mb-4">Créer un nouveau projet d'investissement</h1>
+        
+        <div class="card shadow p-4">
+            {{ include('investment/_form.html.twig', {'button_label': 'Créer le projet'}) }}
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,710 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Opportunités d'Investissement - FINORA{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        :root {
+            --finora-purple-light: #ede9fe;
+            --finora-purple: #7c3aed;
+            --finora-purple-dark: #4c1d95;
+            --finora-indigo: #4338ca;
+            --glass-bg: rgba(255, 255, 255, 0.9);
+            --glass-border: rgba(124, 58, 237, 0.15);
+        }
+        
+        .filter-sidebar {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 10px 40px rgba(124, 58, 237, 0.08);
+            border: 1px solid var(--glass-border);
+        }
+
+        .investment-card {
+            background: #fff;
+            border-radius: 20px;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border: 1px solid var(--glass-border);
+            overflow: hidden;
+            margin-bottom: 25px;
+            animation: fadeInUp 0.6s ease forwards;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        .investment-card:hover {
+            transform: translateY(-8px) scale(1.01);
+            box-shadow: 0 20px 40px rgba(124, 58, 237, 0.15);
+            border-color: rgba(124, 58, 237, 0.4);
+        }
+
+        .invest-btn, .btn-primary {
+            background: linear-gradient(135deg, var(--finora-purple) 0%, var(--finora-indigo) 100%);
+            border: none;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        
+        .invest-btn:hover, .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(124, 58, 237, 0.3);
+        }
+
+        .badge-en-cours {
+            background: linear-gradient(135deg, var(--finora-purple) 0%, var(--finora-indigo) 100%);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            box-shadow: 0 4px 10px rgba(124, 58, 237, 0.3);
+        }
+
+        .badge-risk {
+            background: var(--finora-purple-light);
+            color: var(--finora-purple-dark);
+            padding: 5px 15px;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            border: 1px solid rgba(124, 58, 237, 0.2);
+        }
+        
+        .risk-pill.active {
+            background: linear-gradient(135deg, var(--finora-purple) 0%, var(--finora-indigo) 100%) !important;
+            border: none !important;
+            color: white !important;
+            box-shadow: 0 4px 15px rgba(124, 58, 237, 0.3);
+        }
+
+        .metric-badge {
+            padding: 5px 12px;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        /* Overriding green/blue generic colors with purple tones */
+        .metric-yield { background: var(--finora-purple-light); color: var(--finora-purple-dark); }
+        .metric-duration { background: #f1f5f9; color: #475569; }
+
+        .progress {
+            height: 8px;
+            background-color: var(--finora-purple-light);
+            border-radius: 10px;
+        }
+        
+        .progress-bar {
+            background: linear-gradient(90deg, var(--finora-indigo) 0%, var(--finora-purple) 100%);
+            border-radius: 10px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .progress-bar::after {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; bottom: 0; right: 0;
+            background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.4) 50%, rgba(255,255,255,0) 100%);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+        
+        /* Form controls focus & interaction */
+        .form-control:focus, .form-select:focus, .form-check-input:checked {
+            border-color: var(--finora-purple) !important;
+            box-shadow: 0 0 0 0.25rem rgba(124, 58, 237, 0.25) !important;
+        }
+        
+        .form-check-input:checked {
+            background-color: var(--finora-purple) !important;
+        }
+
+        .text-primary, .text-decoration-none:hover {
+            color: var(--finora-purple) !important;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+
+<div class="container py-5">
+    <div class="row g-4">
+        <!-- Sidebar Filters -->
+        <div class="col-lg-3">
+            <div class="filter-sidebar shadow-sm">
+                <form id="investment-filter-form" method="get" action="{{ path('app_investment_index') }}">
+                    <!-- RECHERCHE -->
+                    <h6 class="fw-bold mb-3 text-uppercase small text-primary" style="letter-spacing: 1px;">Recherche</h6>
+                    <div class="input-group mb-4">
+                        <span class="input-group-text bg-light border-0"><i class="bi bi-search"></i></span>
+                        <input type="text" name="search" class="form-control bg-light border-0" placeholder="Nom, lieu..." value="{{ app.request.query.get('search') }}">
+                    </div>
+
+                    <!-- TRI -->
+                    <h6 class="fw-bold mb-3 text-uppercase small text-primary" style="letter-spacing: 1px;">Trier par</h6>
+                    <select name="sortBy" class="form-select bg-light border-0 mb-4 rounded-3">
+                        <option value="new">Plus récents</option>
+                        <option value="asc">Prix croissant</option>
+                        <option value="desc">Prix décroissant</option>
+                    </select>
+
+                    <!-- CATÉGORIES -->
+                    <h6 class="fw-bold mb-3 text-uppercase small text-primary" style="letter-spacing: 1px;">Catégories</h6>
+                    <div class="mb-4">
+                        {% for cat in ['MAISON', 'STARTUP', 'AGRICULTURE', 'ENERGIE', 'HOTEL'] %}
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" name="category[]" value="{{ cat }}" id="cat_{{ loop.index }}" 
+                                       {{ cat in (app.request.query.all('category')|default([])) ? 'checked' : '' }}>
+                                <label class="form-check-label small" for="cat_{{ loop.index }}">
+                                    {{ investment_category_label(cat) }}
+                                </label>
+                            </div>
+                        {% endfor %}
+                    </div>
+
+                    <!-- PRIX -->
+                    <h6 class="fw-bold mb-3 text-uppercase small text-primary" style="letter-spacing: 1px;">Tranche de Prix</h6>
+                    <select name="price" class="form-select bg-light border-0 mb-4 rounded-3">
+                        <option value="">Tous les prix</option>
+                        <option value="<10k">Moins de 10k TND</option>
+                        <option value="10k-50k">10k - 50k TND</option>
+                        <option value="50k-200k">50k - 200k TND</option>
+                        <option value=">200k">Plus de 200k TND</option>
+                    </select>
+
+                    <!-- NIVEAU DE RISQUE -->
+                    <h6 class="fw-bold mb-3 text-uppercase small text-primary" style="letter-spacing: 1px;">Niveau de risque</h6>
+                    <input type="hidden" name="risk" id="risk-filter-value" value="{{ app.request.query.get('risk', '') }}">
+                    <div class="d-flex flex-wrap gap-2 mb-4" id="risk-pills">
+                        <button type="button" data-risk="" class="btn btn-sm btn-light rounded-pill px-3 risk-pill {{ app.request.query.get('risk') == '' ? 'active bg-primary text-white' : '' }}">Tous</button>
+                        <button type="button" data-risk="LOW" class="btn btn-sm btn-light rounded-pill px-3 risk-pill {{ app.request.query.get('risk') == 'LOW' ? 'active bg-primary text-white' : '' }}">Faible</button>
+                        <button type="button" data-risk="MEDIUM" class="btn btn-sm btn-light rounded-pill px-3 risk-pill {{ app.request.query.get('risk') == 'MEDIUM' ? 'active bg-primary text-white' : '' }}">Moyen</button>
+                        <button type="button" data-risk="HIGH" class="btn btn-sm btn-light rounded-pill px-3 risk-pill {{ app.request.query.get('risk') == 'HIGH' ? 'active bg-primary text-white' : '' }}">Élevé</button>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100 rounded-pill shadow-sm">
+                        <i class="bi bi-filter me-2"></i>Réinitialiser
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-lg-9">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h4 class="fw-bold mb-0" id="project-count-title">
+                        <span id="project-count-number">{{ investments.getTotalItemCount() }}</span> investissement(s) trouvé(s)
+                    </h4>
+                    <p class="text-muted small mb-0">Découvrez les meilleures opportunités du moment</p>
+                </div>
+                {% if is_granted('ROLE_ENTREPRISE') %}
+                    <a href="{{ path('app_investment_new') }}" class="btn btn-success rounded-pill px-4 shadow-sm">
+                        <i class="bi bi-plus-circle me-2"></i>Publier un projet
+                    </a>
+                {% endif %}
+            </div>
+
+            <div id="project-list-container" class="position-relative">
+                <div id="project-loader" class="position-absolute top-50 start-50 translate-middle" style="display: none; z-index: 10;">
+                    <div class="spinner-border text-primary" role="status"></div>
+                </div>
+                <div id="project-list-content">
+                    {% include 'investment/_project_list.html.twig' %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ======================= FLOATING AI CHATBOT ======================= -->
+<div id="ai-chat-widget">
+    <button id="ai-chat-toggle" class="btn btn-primary rounded-circle shadow-lg d-flex align-items-center justify-content-center" style="width: 65px; height: 65px; position: fixed; bottom: 40px; right: 40px; z-index: 1050; background: linear-gradient(135deg, var(--finora-purple) 0%, var(--finora-indigo) 100%); border: none;">
+        <i class="bi bi-robot fs-3 text-white"></i>
+        <span class="position-absolute top-0 start-100 translate-middle p-2 bg-danger border border-light rounded-circle">
+            <span class="visually-hidden">Nouveau message</span>
+        </span>
+    </button>
+    
+    <div id="ai-chat-window" class="card shadow-lg border-0 d-none" style="position: fixed; bottom: 120px; right: 40px; width: 380px; max-height: 550px; z-index: 1050; border-radius: 20px; overflow: hidden; display: flex; flex-direction: column;">
+        <div class="card-header text-white p-3 d-flex justify-content-between align-items-center" style="background: linear-gradient(135deg, var(--finora-purple) 0%, var(--finora-indigo) 100%);">
+            <div class="d-flex align-items-center">
+                <div class="bg-white bg-opacity-20 rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 35px; height: 35px;">
+                    <i class="bi bi-stars text-white"></i>
+                </div>
+                <h6 class="mb-0 fw-bold me-auto">Finora Analyst AI</h6>
+                <div class="dropdown me-2">
+                    <button class="btn btn-sm btn-light bg-white bg-opacity-25 text-white border-0 dropdown-toggle rounded-pill d-flex align-items-center" type="button" id="aiLangDropdown" data-bs-toggle="dropdown" aria-expanded="false" style="font-size: 0.75rem; font-weight: 600; padding: 0.3rem 0.8rem;">
+                        <i class="bi bi-globe me-1"></i> <span id="current-lang-text">FR</span>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0" aria-labelledby="aiLangDropdown" style="font-size: 0.85rem; border-radius: 12px; min-width: 120px;">
+                        <li><a class="dropdown-item fw-bold ai-lang-option" href="#" data-lang="fr">🇫🇷 Français</a></li>
+                        <li><a class="dropdown-item ai-lang-option" href="#" data-lang="en">🇬🇧 English</a></li>
+                        <li><a class="dropdown-item ai-lang-option" href="#" data-lang="ar">🇸🇦 العربية</a></li>
+                        <li><a class="dropdown-item ai-lang-option" href="#" data-lang="es">🇪🇸 Español</a></li>
+                        <li><a class="dropdown-item ai-lang-option" href="#" data-lang="de">🇩🇪 Deutsch</a></li>
+                        <li><a class="dropdown-item ai-lang-option" href="#" data-lang="it">🇮🇹 Italiano</a></li>
+                    </ul>
+                </div>
+                <input type="hidden" id="ai-language-selector" value="fr">
+            </div>
+            <button id="ai-chat-close" class="btn-close btn-close-white" aria-label="Close"></button>
+        </div>
+        <div id="ai-chat-messages" class="card-body bg-light overflow-auto" style="height: 400px; font-size: 0.9rem;">
+            <!-- Message de bienvenue interactif -->
+            <div class="mb-3 d-flex justify-content-start" id="ai-welcome-message-container">
+                <div class="d-inline-block p-3 rounded-4 bg-white shadow-sm" style="border-bottom-left-radius: 0;">
+                    <div class='text-muted small fw-bold mb-1'><i class='bi bi-robot me-1'></i> Finora AI</div>
+                    <span id="ai-welcome-text">Bonjour ! 👋 <br>Je suis votre conseiller financier. Racontez-moi votre projet d'investissement.</span>
+                    <br><br><i id="ai-welcome-example">Ex : "Je cherche à investir 15000 TND dans l'immobilier..."</i>
+                </div>
+            </div>
+        </div>
+        <div class="card-footer bg-white border-top p-3">
+            <form id="ai-chat-form" class="d-flex align-items-center">
+                <input type="text" id="ai-chat-input" class="form-control rounded-pill me-2 bg-light border-0 shadow-none px-3" placeholder="Écrivez votre message..." required autocomplete="off">
+                <button type="submit" class="btn rounded-circle d-flex align-items-center justify-content-center shadow-sm" style="width: 45px; height: 45px; background: linear-gradient(135deg, var(--finora-purple) 0%, var(--finora-indigo) 100%); border: none;">
+                    <i class="bi bi-send-fill text-white ms-1"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+<!-- ======================= END FLOATING CHATBOT ======================= -->
+
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const filterForm = document.getElementById('investment-filter-form');
+            const containerContent = document.getElementById('project-list-content');
+            const countNumber = document.getElementById('project-count-number');
+            const loader = document.getElementById('project-loader');
+            const riskValueInput = document.getElementById('risk-filter-value');
+            const riskPills = document.querySelectorAll('.risk-pill');
+            
+            let debounceTimer;
+
+            if (filterForm) {
+                // Change event for selects and checkboxes
+                filterForm.querySelectorAll('select, input[type="checkbox"]').forEach(input => {
+                    input.addEventListener('change', () => updateResults());
+                });
+
+                // Input event for search (with debounce)
+                const searchInput = filterForm.querySelector('input[name="search"]');
+                if (searchInput) {
+                    searchInput.addEventListener('input', () => {
+                        clearTimeout(debounceTimer);
+                        debounceTimer = setTimeout(() => updateResults(), 500);
+                    });
+                }
+
+                // Risk pills handling
+                riskPills.forEach(pill => {
+                    pill.addEventListener('click', function() {
+                        riskPills.forEach(p => p.classList.remove('active', 'bg-primary', 'text-white'));
+                        this.classList.add('active', 'bg-primary', 'text-white');
+                        
+                        riskValueInput.value = this.getAttribute('data-risk');
+                        updateResults();
+                    });
+                });
+
+                // Reset handling (if needed, but here simple submit)
+                filterForm.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    filterForm.reset();
+                    // Need to manually clear checkboxes and risk pills
+                    riskPills.forEach(p => p.classList.remove('active', 'bg-primary', 'text-white'));
+                    riskPills[0].classList.add('active', 'bg-primary', 'text-white');
+                    riskValueInput.value = "";
+                    updateResults();
+                });
+            }
+
+            function updateResults() {
+                loader.style.display = 'block';
+                containerContent.style.opacity = '0.4';
+                
+                const formData = new FormData(filterForm);
+                const params = new URLSearchParams(formData);
+                
+                // Clean empty params
+                const cleanParams = new URLSearchParams();
+                for (const [key, value] of params) {
+                    if (value !== "") cleanParams.append(key, value);
+                }
+
+                const url = `{{ path('app_investment_index') }}?${cleanParams.toString()}`;
+
+                fetch(url, {
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                })
+                .then(res => res.text())
+                .then(html => {
+                    // Create a dummy element to parse HTML and extract the count if we want,
+                    // but it's easier to just update the content.
+                    containerContent.innerHTML = html;
+                    
+                    // Update count: We can find it in the HTML if we add a data-attribute to the list container
+                    const newCount = containerContent.querySelector('[data-total-count]')?.getAttribute('data-total-count');
+                    if(newCount) countNumber.innerText = newCount;
+
+                    containerContent.style.opacity = '1';
+                    loader.style.display = 'none';
+                    window.history.pushState({}, '', url);
+                })
+                .catch(err => {
+                    console.error(err);
+                    containerContent.style.opacity = '1';
+                    loader.style.display = 'none';
+                });
+            }
+
+            // AJAX Pagination
+            containerContent.addEventListener('click', (e) => {
+                const link = e.target.closest('.pagination a');
+                if (link) {
+                    e.preventDefault();
+                    loader.style.display = 'block';
+                    containerContent.style.opacity = '0.4';
+                    
+                    fetch(link.href, {
+                        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                    })
+                    .then(res => res.text())
+                    .then(html => {
+                        containerContent.innerHTML = html;
+                        containerContent.style.opacity = '1';
+                        loader.style.display = 'none';
+                        window.history.pushState({}, '', link.href);
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                    });
+                }
+            });
+
+            // ============================================
+            // AI CHAT WIDGET LOGIC
+            // ============================================
+            const chatToggle = document.getElementById('ai-chat-toggle');
+            const chatWindow = document.getElementById('ai-chat-window');
+            const chatClose = document.getElementById('ai-chat-close');
+            const chatForm = document.getElementById('ai-chat-form');
+            const chatInput = document.getElementById('ai-chat-input');
+            const chatMessages = document.getElementById('ai-chat-messages');
+            const langSelector = document.getElementById('ai-language-selector');
+
+            if(chatToggle && chatWindow && chatForm) {
+                // Handle Language Switch translations
+                function updateWelcomeMessage(lang) {
+                    const welcomeText = document.getElementById('ai-welcome-text');
+                    const welcomeEx = document.getElementById('ai-welcome-example');
+                    
+                    chatInput.dir = "ltr"; 
+                    if (lang === 'en') {
+                        welcomeText.innerHTML = "Hello! 👋 <br>I am your financial advisor. Tell me about your investment project.";
+                        welcomeEx.innerHTML = 'Ex : "I want to invest 15000 TND in low-risk real estate..."';
+                        chatInput.placeholder = "Write your message...";
+                    } else if (lang === 'ar') {
+                        welcomeText.innerHTML = "مرحباً! 👋 <br>أنا مستشارك المالي. أخبرني عن مشروعك الاستثماري.";
+                        welcomeEx.innerHTML = 'مثال: "أريد استثمار 15000 دينار في العقارات..."';
+                        chatInput.placeholder = "اكتب رسالتك...";
+                        chatInput.dir = "rtl";
+                    } else if (lang === 'es') {
+                        welcomeText.innerHTML = "¡Hola! 👋 <br>Soy su asesor financiero. Cuénteme su proyecto de inversión.";
+                        welcomeEx.innerHTML = 'Ej : "Quiero invertir 15000 TND en bienes raíces..."';
+                        chatInput.placeholder = "Escribe tu mensaje...";
+                    } else if (lang === 'de') {
+                        welcomeText.innerHTML = "Hallo! 👋 <br>Ich bin Ihr Finanzberater. Erzählen Sie mir von Ihrem Projekt.";
+                        welcomeEx.innerHTML = 'Bsp. : "Ich möchte 15000 TND in Immobilien investieren..."';
+                        chatInput.placeholder = "Schreibe deine Nachricht...";
+                    } else if (lang === 'it') {
+                        welcomeText.innerHTML = "Ciao! 👋 <br>Sono il tuo consulente finanziario. Parlami del tuo progetto.";
+                        welcomeEx.innerHTML = 'Es : "Voglio investire 15000 TND nel settore immobiliare..."';
+                        chatInput.placeholder = "Scrivi il tuo messaggio...";
+                    } else {
+                        welcomeText.innerHTML = "Bonjour ! 👋 <br>Je suis votre conseiller financier. Racontez-moi votre projet d'investissement.";
+                        welcomeEx.innerHTML = 'Ex : "Je cherche à investir 15000 TND dans l\'immobilier..."';
+                        chatInput.placeholder = "Écrivez votre message...";
+                    }
+                }
+                
+                // Lang Dropdown click events
+                document.querySelectorAll('.ai-lang-option').forEach(item => {
+                    item.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        const langCode = this.getAttribute('data-lang');
+                        const langText = langCode.toUpperCase();
+                        
+                        // Update UI
+                        document.getElementById('current-lang-text').innerText = langText;
+                        langSelector.value = langCode;
+                        
+                        // Update active state in dropdown
+                        document.querySelectorAll('.ai-lang-option').forEach(el => el.classList.remove('fw-bold'));
+                        this.classList.add('fw-bold');
+                        
+                        updateWelcomeMessage(langCode);
+                    });
+                });
+                chatToggle.addEventListener('click', () => {
+                    chatWindow.classList.toggle('d-none');
+                    if(!chatWindow.classList.contains('d-none')) {
+                        chatInput.focus();
+                        // Hide notification dot when opened
+                        const notif = chatToggle.querySelector('.bg-danger');
+                        if (notif) notif.style.display = 'none';
+                    }
+                });
+
+                chatClose.addEventListener('click', () => {
+                    chatWindow.classList.add('d-none');
+                });
+
+                chatForm.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    const msg = chatInput.value.trim();
+                    const selectedLang = langSelector.value;
+                    if(!msg) return;
+
+                    // Add User message
+                    appendMessage(msg, 'user');
+                    chatInput.value = '';
+                    
+                    // Show loading
+                    const loadingId = 'loading-' + Date.now();
+                    const loadingTexts = {
+                        'fr': 'Analyse en cours...', 
+                        'en': 'Analyzing...', 
+                        'ar': 'جاري التحليل...',
+                        'es': 'Analizando...',
+                        'de': 'Analysieren...',
+                        'it': 'Analizzando...'
+                    };
+                    const spinnerText = loadingTexts[selectedLang] || 'Analyse en cours...';
+                    appendMessage('<div class="spinner-border spinner-border-sm text-primary" role="status"></div> ' + spinnerText, 'bot', loadingId);
+
+                    chatMessages.scrollTop = chatMessages.scrollHeight;
+
+                    fetch('{{ path("app_investment_ai_chat") }}', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+                        body: JSON.stringify({ message: msg, language: selectedLang })
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        document.getElementById(loadingId)?.remove();
+                        
+                        if(data.error) {
+                            appendMessage('<span class="text-danger"><i class="bi bi-exclamation-triangle"></i> Erreur: ' + data.error + '</span>', 'bot');
+                            return;
+                        }
+
+                        // Render Bot Text Response
+                        if (data.text) {
+                            appendMessage(data.text, 'bot');
+                        }
+
+                        // Render Identified Investment Cards
+                        if(data.investments && data.investments.length > 0) {
+                            let cardsHtml = '<div class="mt-2 d-flex flex-column gap-2 w-100">';
+                            data.investments.forEach(inv => {
+                                // Default path is internal show page (using '0' as valid \d+ placeholder)
+                                let internalUrl = '{{ path("app_investment_show", {"id": 0}) }}';
+                                let externalUrl = '{{ path("app_investment_external_show", {"id": 0}) }}';
+                                
+                                let link = internalUrl.replace('/0', '/' + inv.id);
+                                if (inv.is_external) {
+                                    link = externalUrl.replace('/0', '/' + inv.id);
+                                }
+                                
+                                let imagePath = inv.image_url ? (inv.image_url.startsWith('http') ? inv.image_url : '/uploads/investments/' + inv.image_url) : '';
+                                let imageBlock = imagePath 
+                                    ? `<img src="${imagePath}" class="rounded-2" style="width: 50px; height: 50px; object-fit: cover; flex-shrink: 0;">`
+                                    : `<div class="bg-primary bg-opacity-10 rounded-2 d-flex align-items-center justify-content-center" style="width: 50px; height: 50px; flex-shrink: 0;"><i class="bi bi-building text-primary fs-5"></i></div>`;
+
+                                cardsHtml += `
+                                    <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-2" style="border-left: 3px solid var(--finora-purple) !important;">
+                                        <div class="card-body p-2 d-flex align-items-center gap-2">
+                                            ${imageBlock}
+                                            <div style="min-width:0;"> <!-- min-width:0 allows text-truncate inside flex child -->
+                                                <h6 class="mb-0 fw-bold small text-truncate text-dark">${inv.name}</h6>
+                                                <small class="text-muted d-block" style="font-size: 0.75rem;">
+                                                    <span class="fw-bold text-success">${Number(inv.estimated_value).toLocaleString()} TND</span> • ${inv.category}
+                                                </small>
+                                            </div>
+                                            <div class="ms-auto pe-1">
+                                                <a href="${link}" class="btn btn-sm btn-light rounded-circle shadow-sm" style="width: 30px; height: 30px; padding:0; line-height:30px;"><i class="bi bi-arrow-right text-primary"></i></a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                `;
+                            });
+                            cardsHtml += '</div>';
+                            appendMessage(cardsHtml, 'bot-html');
+                        }
+                    })
+                    .catch(err => {
+                        console.error(err);
+                        document.getElementById(loadingId)?.remove();
+                        appendMessage('<span class="text-danger"><i class="bi bi-bug"></i> Les serveurs d\'IA sont occupés. Réessayez.</span>', 'bot');
+                    });
+                });
+
+                function appendMessage(text, sender, id = null) {
+                    const msgDiv = document.createElement('div');
+                    msgDiv.className = 'mb-3 d-flex w-100 ' + (sender === 'user' ? 'justify-content-end' : 'justify-content-start');
+                    if(id) msgDiv.id = id;
+
+                    let innerHtml = '';
+                    if(sender === 'user') {
+                        innerHtml = `<div class="d-inline-block p-2 px-3 rounded-4 shadow-sm text-white" style="background: var(--finora-purple); border-bottom-right-radius: 0; max-width: 85%; word-wrap: break-word;">${text}</div>`;
+                    } else if(sender === 'bot') {
+                        innerHtml = `<div class="d-inline-block p-2 px-3 rounded-4 shadow-sm bg-white border border-light" style="border-bottom-left-radius: 0; max-width: 90%; word-wrap: break-word;">${text}</div>`;
+                    } else if(sender === 'bot-html') {
+                        innerHtml = `<div class="d-inline-block w-100">${text}</div>`;
+                    }
+
+                    // Adjust direction for Arabic based on selector
+                    if (langSelector.value === 'ar') {
+                        msgDiv.classList.add('text-end');
+                        msgDiv.setAttribute('dir', 'rtl');
+                    } else {
+                        msgDiv.classList.add('text-start');
+                        msgDiv.setAttribute('dir', 'ltr');
+                    }
+
+                    msgDiv.innerHTML = innerHtml;
+                    chatMessages.appendChild(msgDiv);
+                    chatMessages.scrollTop = chatMessages.scrollHeight; // Auto-scroll
+                }
+                }
+            }
+        });
+    </script>
+
+{% if app.user %}
+<script>
+(function() {
+    'use strict';
+    var wishlistIds = new Set();
+
+    function initWishlistHeartStates() {
+        fetch('{{ path("app_investment_wishlist_my_ids") }}')
+            .then(function(res) { return res.json(); })
+            .then(function(data) {
+                wishlistIds = new Set(data.ids || []);
+                syncHeartIcons();
+            })
+            .catch(function(err) { console.error('Wishlist init error:', err); });
+    }
+
+    function syncHeartIcons() {
+        document.querySelectorAll('.heart-icon').forEach(function(icon) {
+            var btn = icon.closest('.wishlist-toggle-btn');
+            if (!btn) return;
+            var id = parseInt(btn.getAttribute('data-investment-id'));
+            if (wishlistIds.has(id)) {
+                icon.classList.remove('bi-heart');
+                icon.classList.add('bi-heart-fill');
+            } else {
+                icon.classList.remove('bi-heart-fill');
+                icon.classList.add('bi-heart');
+            }
+        });
+    }
+
+    function showToast(msg, color) {
+        var t = document.createElement('div');
+        t.style.cssText = 'position:fixed;bottom:20px;right:20px;z-index:99999;padding:12px 20px;border-radius:12px;font-weight:600;color:white;box-shadow:0 4px 20px rgba(0,0,0,0.25);transition:opacity 0.4s ease;font-family:sans-serif;font-size:14px;';
+        t.style.background = color;
+        t.innerHTML = msg;
+        document.body.appendChild(t);
+        setTimeout(function() {
+            t.style.opacity = '0';
+            setTimeout(function() { t.remove(); }, 400);
+        }, 2600);
+    }
+
+    // Clic délégué (fonctionne même après rechargement AJAX)
+    document.addEventListener('click', function(e) {
+        var btn = e.target.closest('.wishlist-toggle-btn');
+        if (!btn) return;
+        e.preventDefault();
+        e.stopPropagation();
+
+        var id = parseInt(btn.getAttribute('data-investment-id'));
+        var icon = document.getElementById('heart-icon-' + id);
+        if (!icon) return;
+
+        var isFavorite = wishlistIds.has(id);
+
+        // Mise à jour optimiste immédiate
+        if (isFavorite) {
+            wishlistIds.delete(id);
+            icon.classList.remove('bi-heart-fill');
+            icon.classList.add('bi-heart');
+            showToast('♥ Retiré de la wishlist', '#6b7280');
+        } else {
+            wishlistIds.add(id);
+            icon.classList.remove('bi-heart');
+            icon.classList.add('bi-heart-fill');
+            showToast('♥ Ajouté à votre wishlist !', '#10b981');
+        }
+
+        // Animation pulse
+        icon.style.transform = 'scale(1.5)';
+        icon.style.transition = 'transform 0.15s ease';
+        setTimeout(function() { icon.style.transform = 'scale(1)'; }, 150);
+
+        // Appel API
+        fetch('/api/investment-wishlist/toggle/' + id, { method: 'POST' })
+            .then(function(res) { return res.json(); })
+            .then(function(data) {
+                if (data.status === 'error') {
+                    // Revert si erreur serveur
+                    if (isFavorite) { wishlistIds.add(id); } else { wishlistIds.delete(id); }
+                    syncHeartIcons();
+                    showToast('⚠️ ' + (data.message || 'Erreur'), '#ef4444');
+                }
+            })
+            .catch(function() {
+                showToast('⚠️ Connexion impossible', '#ef4444');
+                initWishlistHeartStates();
+            });
+    });
+
+    // Synchronise après chaque rechargement AJAX
+    var catalogContainer = document.getElementById('project-list-content');
+    if (catalogContainer) {
+        new MutationObserver(function() { syncHeartIcons(); })
+            .observe(catalogContainer, { childList: true, subtree: true });
+    }
+
+    // Lancement initial
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initWishlistHeartStates);
+    } else {
+        initWishlistHeartStates();
+    }
+})();
+</script>
+{% endif %}
+{% endblock %}

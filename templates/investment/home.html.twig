@@ -1,0 +1,275 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Accueil Investissement - FINORA{% endblock %}
+
+{% block stylesheets %}
+{{ parent() }}
+<style>
+    :root {
+        --finora-purple: #7c3aed;
+        --finora-purple-dark: #5b21b6;
+        --finora-purple-light: #a78bfa;
+        --finora-glass: rgba(255, 255, 255, 0.7);
+    }
+    .hero-section {
+        background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+        padding: 100px 0;
+        border-radius: 0 0 60px 60px;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    /* 🌊 Horizontal Scroll Styling */
+    .horizontal-scroll-wrapper {
+        display: flex;
+        overflow-x: auto;
+        overflow-y: hidden;
+        scroll-snap-type: x mandatory;
+        padding: 20px 0 40px 0;
+        gap: 25px;
+        scrollbar-width: none; /* Hide scrollbar Firefox */
+        -ms-overflow-style: none; /* Hide scrollbar IE/Edge */
+    }
+    .horizontal-scroll-wrapper::-webkit-scrollbar {
+        display: none; /* Hide scrollbar Chrome/Safari */
+    }
+    
+    .scroll-item {
+        flex: 0 0 calc(33.333% - 20px);
+        min-width: 350px;
+        scroll-snap-align: start;
+        opacity: 0;
+        transform: translateY(30px);
+        transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+    }
+    .scroll-item.visible {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    .recommendation-card {
+        background: white;
+        border-radius: 30px;
+        border: 1px solid rgba(124, 58, 237, 0.08);
+        transition: all 0.4s ease;
+        overflow: hidden;
+        height: 100%;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.02);
+    }
+    .recommendation-card:hover {
+        transform: scale(1.02);
+        box-shadow: 0 30px 60px rgba(124, 58, 237, 0.15) !important;
+        border-color: var(--finora-purple-light);
+    }
+    
+    .source-badge {
+        position: absolute;
+        top: 25px;
+        right: 25px;
+        padding: 8px 18px;
+        border-radius: 50px;
+        font-size: 0.75rem;
+        font-weight: 800;
+        z-index: 10;
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(255,255,255,0.3);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    .badge-internal { background: rgba(16, 185, 129, 0.85); color: white; }
+    .badge-external { background: rgba(124, 58, 237, 0.85); color: white; }
+    
+    .card-img-wrapper {
+        height: 230px;
+        overflow: hidden;
+        position: relative;
+    }
+    .card-img-wrapper img {
+        transition: transform 0.8s ease;
+    }
+    .recommendation-card:hover .card-img-wrapper img {
+        transform: scale(1.1);
+    }
+
+    .btn-invest {
+        background: linear-gradient(135deg, var(--finora-purple) 0%, var(--finora-purple-dark) 100%);
+        color: white;
+        border: none;
+        padding: 14px 28px;
+        border-radius: 18px;
+        font-weight: 700;
+        transition: all 0.3s ease;
+    }
+    .btn-invest:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 20px rgba(124, 58, 237, 0.3);
+        color: white;
+    }
+    
+    .metric-pill {
+        background: var(--finora-purple-soft);
+        border-radius: 20px;
+        padding: 15px;
+        border: 1px solid rgba(124, 58, 237, 0.05);
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<!-- 🚀 Hero Section -->
+<section class="hero-section text-white mb-5">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-7">
+                <div class="d-inline-flex align-items-center badge bg-primary bg-opacity-20 text-primary mb-3 px-3 py-2 rounded-pill">
+                    <i class="bi bi-stars me-2"></i>RECOMMANDATIONS IA
+                </div>
+                <h1 class="display-3 fw-bold mb-4">Propulsez votre <span class="text-primary">Avenir</span></h1>
+                <p class="fs-4 text-white text-opacity-75 mb-5">
+                    Le moteur de recommandation FINORA scanne des milliers d'opportunités pour vous proposer les plus rentables.
+                </p>
+                <div class="d-flex gap-3">
+                    <a href="{{ path('app_investment_index') }}" class="btn btn-primary btn-lg rounded-pill px-5 py-3 shadow-lg fw-bold">
+                        Explorer le marché
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="container py-4">
+    <!-- 🏆 Section 1: Internal Recommendations -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="h1 fw-bold mb-1">Nos Projets <span class="text-primary">Finora</span></h2>
+            <p class="text-muted fs-5">Les meilleures opportunités sélectionnées par nos analystes locaux.</p>
+        </div>
+        <div class="d-flex gap-2">
+            <button class="btn btn-light rounded-circle shadow-sm" onclick="document.querySelector('#internal-scroll').scrollBy({left: -400, behavior: 'smooth'})">
+                <i class="bi bi-chevron-left"></i>
+            </button>
+            <button class="btn btn-light rounded-circle shadow-sm" onclick="document.querySelector('#internal-scroll').scrollBy({left: 400, behavior: 'smooth'})">
+                <i class="bi bi-chevron-right"></i>
+            </button>
+        </div>
+    </div>
+
+    <div class="horizontal-scroll-wrapper mb-5" id="internal-scroll">
+        {% for inv in internal_recs %}
+            <div class="scroll-item">
+                <div class="recommendation-card shadow-sm position-relative">
+                    <span class="source-badge badge-internal">CERTIFIÉ FINORA</span>
+                    <div class="card-img-wrapper">
+                        {% if inv.image_url %}
+                            {% set imgPath = (inv.image_url starts with 'http') ? inv.image_url : asset((inv.image_url starts with 'assets/') ? inv.image_url : 'uploads/investments/' ~ inv.image_url) %}
+                            <img src="{{ imgPath }}" class="w-100 h-100 object-fit-cover" alt="">
+                        {% else %}
+                            <div class="bg-light w-100 h-100 d-flex align-items-center justify-content-center">
+                                <i class="bi bi-building display-3 text-muted"></i>
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="card-body p-4 pb-5">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-3 py-1">{{ inv.category }}</span>
+                            <h5 class="fw-bold mb-0 text-dark">{{ inv.estimated_value|format_currency }}</h5>
+                        </div>
+                        <h3 class="fw-bold mb-1 text-dark">{{ inv.name }}</h3>
+                        <p class="text-muted small mb-4"><i class="bi bi-geo-alt-fill text-primary me-1"></i>{{ inv.location }}</p>
+                        <div class="row g-3 mb-5">
+                            <div class="col-6"><div class="metric-pill"><small class="text-muted d-block small mb-1">Risque</small><span class="fw-bold text-success">{{ inv.risk_level }}</span></div></div>
+                            <div class="col-6"><div class="metric-pill text-end"><small class="text-muted d-block small mb-1">Objectif</small><span class="fw-bold text-dark">+14.2%</span></div></div>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <a href="{{ path('app_investment_show', {id: inv.id}) }}" class="btn btn-light w-100 rounded-pill py-3 fw-bold">Détails</a>
+                            <a href="{{ path('app_management_new', {inv_id: inv.id}) }}" class="btn btn-invest w-100 rounded-pill py-3">Investir</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+    <!-- 🏆 Section 2: External Recommendations -->
+    <div class="d-flex justify-content-between align-items-center mb-4 mt-5">
+        <div>
+            <h2 class="h1 fw-bold mb-1">Opportunités <span class="text-primary">Partenaires</span></h2>
+            <p class="text-muted fs-5">Accédez à des investissements exclusifs via notre réseau mondial.</p>
+        </div>
+        <div class="d-flex gap-2">
+            <button class="btn btn-light rounded-circle shadow-sm" onclick="document.querySelector('#external-scroll').scrollBy({left: -400, behavior: 'smooth'})">
+                <i class="bi bi-chevron-left"></i>
+            </button>
+            <button class="btn btn-light rounded-circle shadow-sm" onclick="document.querySelector('#external-scroll').scrollBy({left: 400, behavior: 'smooth'})">
+                <i class="bi bi-chevron-right"></i>
+            </button>
+        </div>
+    </div>
+
+    <div class="horizontal-scroll-wrapper mb-5" id="external-scroll">
+        {% for inv in external_recs %}
+            <div class="scroll-item">
+                <div class="recommendation-card shadow-sm position-relative">
+                    <span class="source-badge badge-external">PARTENAIRE EXTERNE</span>
+                    <div class="card-img-wrapper">
+                        {% if inv.image_url %}
+                            {% set imgPath = (inv.image_url starts with 'http') ? inv.image_url : asset((inv.image_url starts with 'assets/') ? inv.image_url : 'uploads/investments/' ~ inv.image_url) %}
+                            <img src="{{ imgPath }}" class="w-100 h-100 object-fit-cover" alt="">
+                        {% else %}
+                            <div class="bg-light w-100 h-100 d-flex align-items-center justify-content-center">
+                                <i class="bi bi-building display-3 text-muted"></i>
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="card-body p-4 pb-5">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-3 py-1">{{ inv.category }}</span>
+                            <h5 class="fw-bold mb-0 text-dark">{{ inv.estimated_value|format_currency }}</h5>
+                        </div>
+                        <h3 class="fw-bold mb-1 text-dark">{{ inv.name }}</h3>
+                        <p class="text-muted small mb-4"><i class="bi bi-geo-alt-fill text-primary me-1"></i>{{ inv.location }}</p>
+                        <div class="row g-3 mb-5">
+                            <div class="col-6"><div class="metric-pill"><small class="text-muted d-block small mb-1">Risque</small><span class="fw-bold text-warning">{{ inv.risk_level }}</span></div></div>
+                            <div class="col-6"><div class="metric-pill text-end"><small class="text-muted d-block small mb-1">Cible</small><span class="fw-bold text-dark">+9.8%</span></div></div>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <a href="{{ path('app_investment_external_show', {id: inv.id}) }}" class="btn btn-light w-100 rounded-pill py-3 fw-bold">Détails</a>
+                            <a href="{{ path('app_investment_external_invest', {id: inv.id}) }}" class="btn btn-invest w-100 rounded-pill py-3">Investir</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+
+{% block javascripts %}
+{{ parent() }}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const observerOptions = {
+            threshold: 0.1
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach((entry, index) => {
+                if (entry.isIntersecting) {
+                    // staggered animation
+                    setTimeout(() => {
+                        entry.target.classList.add('visible');
+                    }, index * 100);
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.scroll-item').forEach(item => {
+            observer.observe(item);
+        });
+    });
+</script>
+{% endblock %}
+
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,216 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block title %}Gestion des Participations - Admin{% endblock %}
+
+{% block body %}
+<!-- Page title -->
+<div class="row mt-4 mb-4">
+    <div class="col-12 d-sm-flex justify-content-between align-items-center">
+        <h1 class="h3 mb-2 mb-sm-0">
+            <i class="bi bi-people-fill text-primary me-2"></i>Participations des Investisseurs
+        </h1>
+        <a href="{{ path('admin_investment_management_new') }}" class="btn btn-primary mb-0">
+            <i class="bi bi-plus-lg me-1"></i>Lier un investissement
+        </a>
+    </div>
+</div>
+
+<!-- Table Section -->
+<div class="card border-0 shadow-sm mb-4" style="border-radius: 20px; overflow: hidden;">
+    <div class="card-header border-bottom p-4 bg-white">
+        <div class="d-sm-flex justify-content-between align-items-center">
+            <h5 class="mb-2 mb-sm-0">Toutes les participations enregistrées</h5>
+            <div class="input-group input-group-sm w-auto">
+                <input class="form-control bg-light border-0" type="search" placeholder="Filtrer..." aria-label="Search">
+                <button class="btn btn-primary-soft border-0" type="button"><i class="bi bi-funnel"></i></button>
+            </div>
+        </div>
+    </div>
+    <div class="card-body p-0" id="management-table-container">
+        {% include 'admin/investment/_management_table.html.twig' %}
+    </div>
+</div>
+
+<!-- Modal Lifecycle -->
+<div class="modal fade" id="lifecycleModal" tabindex="-1" aria-labelledby="lifecycleModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content border-0 rounded-4 shadow">
+      <div class="modal-header border-0 bg-light p-4 rounded-top-4">
+        <h5 class="modal-title fw-bold" id="lifecycleModalLabel">
+            <i class="bi bi-diagram-3-fill text-primary me-2"></i> Cycle de Vie de l'Investissement
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body p-4 position-relative" style="min-height: 250px;">
+          <!-- Loader -->
+          <div id="lifecycleLoader" class="text-center py-5">
+              <div class="spinner-border text-primary" role="status"></div>
+              <p class="text-muted mt-2 small">Chargement de la chronologie...</p>
+          </div>
+          
+          <!-- Content -->
+          <div id="lifecycleContent" class="d-none">
+              <div class="row mb-4">
+                  <div class="col-md-6 mb-3 mb-md-0">
+                      <div class="p-3 bg-light rounded-3 h-100">
+                          <p class="font-weight-bold text-muted small mb-1 text-uppercase">Phase courante</p>
+                          <h4 id="lc-phase" class="fw-bold text-primary mb-1">--</h4>
+                          <span id="lc-duration" class="badge bg-secondary">--</span>
+                      </div>
+                  </div>
+                  <div class="col-md-6">
+                      <div class="p-3 bg-light rounded-3 h-100">
+                          <p class="font-weight-bold text-muted small mb-2 text-uppercase">Progression</p>
+                          <div class="progress" style="height: 10px; border-radius: 10px;">
+                              <div id="lc-progress-bar" class="progress-bar bg-success" role="progressbar" style="width: 0%;"></div>
+                          </div>
+                          <p id="lc-progress-text" class="text-end small mt-1 mb-0 fw-bold">0%</p>
+                      </div>
+                  </div>
+              </div>
+
+              <!-- Insights -->
+              <div id="lc-insights" class="mb-4"></div>
+
+              <!-- Timeline -->
+              <h6 class="fw-bold mb-3 border-bottom pb-2">Chronologie (Timeline)</h6>
+              <div class="position-relative">
+                  <div class="position-absolute h-100" style="left: 14px; top: 0; width: 2px; background: #e5e7eb;"></div>
+                  <ul id="lc-timeline-list" class="list-unstyled mb-0"></ul>
+              </div>
+          </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.querySelector('input[type="search"]');
+            const container = document.getElementById('management-table-container');
+            
+            if (searchInput) {
+                let timeout = null;
+                searchInput.addEventListener('input', function() {
+                    clearTimeout(timeout);
+                    timeout = setTimeout(() => {
+                        updateTable(this.value);
+                    }, 300); // Debounce
+                });
+            }
+
+            function updateTable(searchValue) {
+                container.style.opacity = '0.5';
+                const url = new URL(window.location.href);
+                url.searchParams.set('search', searchValue);
+                url.searchParams.set('page', 1);
+
+                fetch(url.toString(), {
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                })
+                .then(res => res.text())
+                .then(html => {
+                    container.innerHTML = html;
+                    container.style.opacity = '1';
+                    window.history.pushState({}, '', url.toString());
+                })
+                .catch(err => {
+                    console.error(err);
+                    container.style.opacity = '1';
+                });
+            }
+
+            // AJAX Pagination for table
+            container.addEventListener('click', (e) => {
+                const link = e.target.closest('.pagination a');
+                if (link) {
+                    e.preventDefault();
+                    container.style.opacity = '0.5';
+                    fetch(link.href, {
+                        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                    })
+                    .then(res => res.text())
+                    .then(html => {
+                        container.innerHTML = html;
+                        container.style.opacity = '1';
+                        window.history.pushState({}, '', link.href);
+                    });
+                }
+            });
+
+            // Lifecycle Modal Logic
+            const lifecycleModal = document.getElementById('lifecycleModal');
+            if(lifecycleModal) {
+                lifecycleModal.addEventListener('show.bs.modal', function (event) {
+                    const button = event.relatedTarget;
+                    const id = button.getAttribute('data-id');
+                    
+                    const loader = document.getElementById('lifecycleLoader');
+                    const content = document.getElementById('lifecycleContent');
+                    
+                    loader.classList.remove('d-none');
+                    content.classList.add('d-none');
+                    
+                    document.getElementById('lc-insights').innerHTML = '';
+                    document.getElementById('lc-timeline-list').innerHTML = '';
+
+                    fetch('/api/admin/investments/' + id + '/lifecycle', {
+                        headers: { 'Accept': 'application/json' }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        document.getElementById('lc-phase').innerText = data.currentPhase;
+                        document.getElementById('lc-duration').innerText = "Depuis " + data.durationInCurrentPhase;
+                        
+                        document.getElementById('lc-progress-bar').style.width = data.progression + '%';
+                        document.getElementById('lc-progress-text').innerText = data.progression + '% calculé';
+
+                        // Insights
+                        let insightsHtml = '';
+                        if(data.insights && data.insights.length > 0) {
+                            data.insights.forEach(insight => {
+                                insightsHtml += `<div class="alert alert-${insight.type} py-2 small mb-2"><i class="bi bi-info-circle me-1"></i>${insight.message}</div>`;
+                            });
+                        }
+                        document.getElementById('lc-insights').innerHTML = insightsHtml;
+
+                        // Timeline
+                        let timelineHtml = '';
+                        if(data.timeline && data.timeline.length > 0) {
+                            data.timeline.forEach((item, index) => {
+                                const isLast = index === data.timeline.length - 1;
+                                const isCurrentPhase = item.phase === data.currentPhase;
+                                const dotColor = isCurrentPhase ? "bg-primary" : "bg-secondary bg-opacity-50";
+                                const textColor = isCurrentPhase ? "text-primary fw-bold" : "text-dark";
+                                
+                                const dateObj = new Date(item.date);
+                                const dateStr = dateObj.toLocaleDateString('fr-FR') + " " + dateObj.toLocaleTimeString('fr-FR', {hour: '2-digit', minute:'2-digit'});
+
+                                timelineHtml += `
+                                <li class="position-relative mb-4 ps-4">
+                                    <div class="position-absolute rounded-circle ${dotColor}" style="width: 12px; height: 12px; left: 9px; top: 5px; border: 2px solid white; z-index: 2;"></div>
+                                    <h6 class="${textColor} mb-1">${item.phase}</h6>
+                                    <p class="small text-muted mb-1"><i class="bi bi-calendar3 me-1"></i>${dateStr}</p>
+                                    <p class="small mb-0 text-secondary">${item.description}</p>
+                                </li>`;
+                            });
+                        }
+                        document.getElementById('lc-timeline-list').innerHTML = timelineHtml;
+
+                        loader.classList.add('d-none');
+                        content.classList.remove('d-none');
+                    })
+                    .catch(err => {
+                        loader.innerHTML = '<div class="alert alert-danger">Erreur lors de la récupération des données Lifecycle.</div>';
+                        console.error(err);
+                    });
+                });
+            }
+        });
+    </script>
+{% endblock %}
+

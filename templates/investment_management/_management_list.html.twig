@@ -1,0 +1,71 @@
+<div class="row g-4" id="management-list-container">
+    {% for item in managements %}
+        <div class="col-md-6">
+            <div class="card animated-card shadow-sm h-100 border-0 rounded-4 overflow-hidden transition-all hover-shadow-lg" style="animation-delay: {{ loop.index0 * 100 }}ms;">
+                <div class="position-relative">
+                    <img src="{{ investment_image_src(item.investment) ?: asset('assets/images/courses/4by3/06.jpg') }}" 
+                         alt="{{ item.investment.name|default('Inconnu') }}"
+                         class="card-img-top" style="height: 200px; object-fit: cover;">
+                    
+                    <div class="position-absolute top-0 end-0 p-3">
+                        {% if item.status == 'ACTIVE' %}
+                            <span class="badge rounded-pill px-3 py-2 shadow-sm" style="background: linear-gradient(135deg, var(--finora-purple) 0%, var(--finora-indigo) 100%); color: white;"><i class="bi bi-check-circle me-1"></i>Actif</span>
+                        {% elseif item.status == 'CRITICAL' %}
+                            <span class="badge bg-warning text-dark rounded-pill px-3 py-2 shadow-sm"><i class="bi bi-exclamation-triangle-fill me-1"></i>Critique</span>
+                        {% else %}
+                            <span class="badge bg-secondary rounded-pill px-3 py-2 shadow-sm"><i class="bi bi-lock-fill me-1"></i>Clôturé</span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="card-body p-4">
+                    <small class="text-primary fw-bold text-uppercase mb-2 d-block" style="font-size: 0.7rem; letter-spacing: 1px;">
+                        {{ investment_category_label(item.investmentType) }}
+                    </small>
+                    <h5 class="card-title fw-bold mb-3">
+                        <a href="{{ path('app_management_show', {'id': item.id}) }}" class="text-dark text-decoration-none">
+                            {{ item.investment.name|default('Investissement sans nom') }}
+                        </a>
+                    </h5>
+                    
+                    <div class="bg-light p-3 rounded-3 mb-4">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted small">Investi</span>
+                            <span class="fw-bold">{{ (item.amountInvested ?? 0)|format_currency }}</span>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <span class="text-muted small">Part détenue</span>
+                            <span class="fw-bold text-primary">{{ item.ownershipPercentage ?? 0 }}%</span>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between align-items-center">
+                        <a href="{{ path('app_management_show', {'id': item.id}) }}" class="btn btn-outline-primary btn-sm rounded-pill px-3">
+                            Voir Détails <i class="bi bi-arrow-right ms-1"></i>
+                        </a>
+                        <div class="btn-group">
+                            <a href="{{ path('app_management_edit', {'id': item.id}) }}" class="btn btn-light btn-sm text-warning" title="Modifier">
+                                <i class="bi bi-pencil-square"></i>
+                            </a>
+                            <form method="post" action="{{ path('app_management_delete', {'id': item.id}) }}" onsubmit="return confirm('Supprimer ce suivi ?');" style="display:inline;">
+                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ item.id) }}">
+                                <button class="btn btn-light btn-sm text-danger"><i class="bi bi-trash"></i></button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% else %}
+        <div class="col-12 text-center py-5 bg-light rounded-4">
+            <i class="bi bi-inbox fs-1 text-muted mb-3 d-block"></i>
+            <h5 class="text-muted">Aucun investissement trouvé</h5>
+            <p class="text-muted small">Commencez par explorer nos opportunités d'investissement.</p>
+            <a href="{{ path('app_investment_index') }}" class="btn btn-primary mt-3 px-4">Explorer</a>
+        </div>
+    {% endfor %}
+
+    <div class="col-12 d-flex justify-content-center mt-4">
+        {{ knp_pagination_render(managements) }}
+    </div>
+</div>

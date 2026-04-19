@@ -2,7 +2,6 @@
 
 namespace App\Controller;
 
-use App\Service\CurrencyService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -10,20 +9,17 @@ use Symfony\Component\Routing\Attribute\Route;
 
 class CurrencyController extends AbstractController
 {
-    #[Route('/currency/switch/{code}', name: 'app_currency_switch')]
-    public function switch(string $code, CurrencyService $currencyService, Request $request): Response
+    #[Route('/switch-currency/{currency}', name: 'app_switch_currency', methods: ['GET'])]
+    public function switchCurrency(string $currency, Request $request): Response
     {
-        $currencyService->setSelectedCurrency($code);
+        $allowed = ['TND', 'EUR', 'USD'];
+        $currency = strtoupper($currency);
         
-        if ($request->isXmlHttpRequest()) {
-            return $this->json(['success' => true, 'currency' => $code]);
+        if (in_array($currency, $allowed)) {
+            $request->getSession()->set('currency', $currency);
         }
 
         $referer = $request->headers->get('referer');
-        if ($referer) {
-            return $this->redirect($referer);
-        }
-
-        return $this->redirectToRoute('app_formations');
+        return $this->redirect($referer ?: $this->generateUrl('app_home'));
     }
 }
