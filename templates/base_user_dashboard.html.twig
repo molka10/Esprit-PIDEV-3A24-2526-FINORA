@@ -88,6 +88,9 @@
     
     {% block stylesheets %}{% endblock %}
 
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <style>
         :root {
             --finora-purple: #7c3aed;
@@ -110,6 +113,14 @@
         .sidebar.navbar-dark .navbar-nav .nav-link:hover {
             color: #fff;
             background-color: rgba(255, 255, 255, 0.05);
+        }
+        /* SweetAlert Custom Styles */
+        .swal2-popup {
+            border-radius: 15px !important;
+            font-family: 'Heebo', sans-serif !important;
+        }
+        .swal2-styled.swal2-confirm {
+            background-color: var(--finora-purple) !important;
         }
     </style>
 </head>
@@ -160,8 +171,35 @@
                 </li>
 
                 <li class="nav-item"> 
-                    <a class="nav-link" href="#">
-                        <i class="bi bi-wallet2 fa-fw me-2"></i>💼 Mon Portefeuille
+                    <a class="nav-link" href="{{ path('app_management_index') }}">
+                        <i class="bi bi-briefcase fa-fw me-2"></i>💼 Mon Portefeuille
+                    </a>
+                </li>
+
+                <!-- Wallet Section -->
+				<li class="nav-item"> 
+                    <a class="nav-link {% if app.request.attributes.get('_route') == 'dashboard' %}active{% endif %}" href="{{ path('dashboard') }}">
+                        <i class="bi bi-wallet2 fa-fw me-2"></i>💰 Mon Wallet
+                    </a>
+                </li>
+				<li class="nav-item"> 
+                    <a class="nav-link {% if app.request.attributes.get('_route') == 'transactions' %}active{% endif %}" href="{{ path('transactions') }}">
+                        <i class="bi bi-card-list fa-fw me-2"></i>📊 Mes Transactions
+                    </a>
+                </li>
+				<li class="nav-item"> 
+                    <a class="nav-link {% if app.request.attributes.get('_route') == 'category_list' %}active{% endif %}" href="{{ path('category_list') }}">
+                        <i class="bi bi-tags fa-fw me-2"></i>🏷️ Mes Catégories
+                    </a>
+                </li>
+				<li class="nav-item"> 
+                    <a class="nav-link {% if app.request.attributes.get('_route') == 'app_wallet_system' %}active{% endif %}" href="{{ path('app_wallet_system') }}">
+                        <i class="bi bi-robot fa-fw me-2"></i>🤖 AI Insights
+                    </a>
+                </li>
+				<li class="nav-item"> 
+                    <a class="nav-link {% if app.request.attributes.get('_route') == 'user_calendar' %}active{% endif %}" href="{{ path('user_calendar') }}">
+                        <i class="bi bi-calendar3 fa-fw me-2"></i>📅 Mon Calendrier
                     </a>
                 </li>
 
@@ -325,6 +363,16 @@
 
 	<!-- Page main content START -->
 	<div class="page-content-wrapper p-3 p-md-4">
+        {% for label, messages in app.flashes %}
+            {% if label != 'fraud_alert' %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ label }} alert-dismissible fade show">
+                        {{ message|raw }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endfor %}
         {% block body %}{% endblock %}
 	</div>
 	<!-- Page main content END -->
@@ -349,6 +397,64 @@
 <script src="{{ asset('assets/js/functions.js') }}"></script>
 
 {% block javascripts %}{% endblock %}
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Hidden flash messages to be processed by SweetAlert
+    {% for label, messages in app.flashes %}
+        {% for message in messages %}
+            (function() {
+                const msg = `{{ message|raw }}`;
+                const label = `{{ label }}`;
+                
+                // Logic for "Solde insuffisant" Popup
+                if (msg.includes('Solde insuffisant') || msg.includes('portefeuille')) {
+                    Swal.fire({
+                        title: '<strong>Solde Insuffisant</strong>',
+                        icon: 'warning',
+                        html: msg,
+                        showCloseButton: true,
+                        showCancelButton: true,
+                        focusConfirm: false,
+                        confirmButtonText: '<i class="bi bi-wallet2"></i> Recharger mon Wallet',
+                        confirmButtonColor: '#7c3aed',
+                        cancelButtonText: 'Fermer',
+                        background: '#fff',
+                        customClass: {
+                            popup: 'animated fadeInDown'
+                        }
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            window.location.href = "{{ path('dashboard') }}";
+                        }
+                    });
+                } 
+                // Success popups
+                else if (label === 'success') {
+                    Swal.fire({
+                        title: 'Succès !',
+                        text: msg.replace(/<[^>]*>?/gm, ''), // strip html for text
+                        icon: 'success',
+                        timer: 3000,
+                        showConfirmButton: false,
+                        toast: true,
+                        position: 'top-end'
+                    });
+                }
+                // General Danger popups (if not balance error)
+                else if (label === 'danger' || label === 'error') {
+                   Swal.fire({
+                        title: 'Erreur',
+                        text: msg.replace(/<[^>]*>?/gm, ''),
+                        icon: 'error',
+                        confirmButtonColor: '#dc3545'
+                    });
+                }
+            })();
+        {% endfor %}
+    {% endfor %}
+});
+</script>
 
 </body>
 </html>

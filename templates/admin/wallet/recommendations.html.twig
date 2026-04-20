@@ -1,0 +1,143 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block title %}Audit Recommandations â€” Finora{% endblock %}
+
+{% block stylesheets %}
+<style>
+    .rec-card {
+        background: #fff; border-radius: 20px; padding: 30px;
+        box-shadow: 0 10px 40px -10px rgba(124, 58, 237, 0.12);
+        border: 1px solid rgba(124,58,237,0.08); animation: fadeIn 0.4s ease both;
+    }
+    @keyframes fadeIn { from{opacity:0;transform:translateY(10px);} to{opacity:1;transform:translateY(0);} }
+    
+    .user-pill {
+        display: inline-flex; align-items: center; gap: 10px;
+        padding: 6px 18px; border-radius: 50px; background: #ede9fe;
+        color: #7c3aed; font-weight: 700; font-size: 13px; margin-bottom: 20px;
+    }
+
+    .rec-list { display: flex; flex-direction: column; gap: 12px; margin-top: 20px; }
+    .rec-item {
+        display: flex; align-items: center; justify-content: space-between;
+        padding: 16px 20px; border-radius: 16px; background: #fafafa;
+        border: 1px solid #f1f5f9; transition: all 0.2s;
+    }
+    .rec-item:hover { transform: scale(1.01); background: #fff; box-shadow: 0 4px 20px rgba(0,0,0,0.05); border-color: #7c3aed; }
+
+    .category-badge {
+        padding: 4px 12px; border-radius: 30px; font-size: 11px; font-weight: 700;
+        text-transform: uppercase; background: #e0e7ff; color: #4338ca;
+    }
+    
+    .api-snippet {
+        background: #1e1b4b; color: #e2e8f0; padding: 20px; border-radius: 12px;
+        font-family: 'Fira Code', monospace; font-size: 13px; position: relative;
+    }
+    .copy-btn {
+        position: absolute; right: 10px; top: 10px; background: rgba(255,255,255,0.1);
+        border: none; color: #fff; padding: 4px 8px; border-radius: 6px; font-size: 11px; cursor: pointer;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="p-4">
+    {# Header #}
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold" style="color: #1e1b4b;">Audit du Moteur de Rec.</h2>
+            <p class="text-muted">Visualisez les recommandations gÃ©nÃ©rÃ©es par l'IA pour chaque utilisateur</p>
+        </div>
+        <div class="user-pill"><i class="bi bi-shield-check"></i> API v1.0 Active</div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-7">
+            <div class="rec-card">
+                <div class="d-flex align-items-center justify-content-between mb-4">
+                    <h5 class="m-0 fw-bold">Simulation de Recommandations</h5>
+                    <div class="d-flex gap-2">
+                        <input type="number" id="sim-user-id" class="form-control form-control-sm" placeholder="ID Utilisateur" style="width: 120px;">
+                        <button class="btn btn-sm btn-primary" onclick="loadRecommendations()" style="background: #7c3aed; border: none;">
+                            GÃ©nÃ©rer <i class="bi bi-magic ms-1"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div id="rec-container">
+                    <div style="text-align: center; padding: 60px; color: #94a3b8;">
+                        <i class="bi bi-cpu" style="font-size: 3rem; display: block; opacity: 0.2; margin-bottom: 10px;"></i>
+                        Entrez un ID utilisateur pour tester l'algorithme
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-5">
+            <div class="rec-card h-100">
+                <h5 class="fw-bold mb-3"><i class="bi bi-code-slash text-primary me-2"></i>IntÃ©gration API</h5>
+                <p class="small text-muted mb-3">Utilisez le header <code>x-api-key</code> pour authentifier vos requÃªtes.</p>
+                
+                <div class="api-snippet">
+                    <button class="copy-btn">Copier</button>
+                    <pre class="m-0"><code>curl -X GET "https://finora.io/api/recommendations?user_id=1" \
+     -H "x-api-key: finora_secret_key_2026" \
+     -H "Content-Type: application/json"</code></pre>
+                </div>
+
+                <div class="mt-4 p-3 border-start border-4 border-warning bg-light" style="border-radius: 0 12px 12px 0;">
+                    <h6 class="fw-bold"><i class="bi bi-lightning-charge-fill text-warning"></i> Fallback Logic</h6>
+                    <p class="mb-0 small text-muted">Si l'utilisateur n'a pas d'historique, le systÃ¨me renvoie automatiquement les articles les plus populaires.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+async function loadRecommendations() {
+    const userId = document.getElementById('sim-user-id').value;
+    if (!userId) return alert("Veuillez entrer un ID");
+
+    const container = document.getElementById('rec-container');
+    container.innerHTML = '<div class="text-center p-5"><div class="spinner-border text-primary" role="status"></div></div>';
+
+    try {
+        const response = await fetch(`/api/recommendations?user_id=${userId}`, {
+            headers: { 'x-api-key': 'finora_secret_key_2026' }
+        });
+        const data = await response.json();
+
+        if (data.status === 'error') {
+            container.innerHTML = `<div class="alert alert-danger">${data.message}</div>`;
+            return;
+        }
+
+        let html = '<div class="rec-list">';
+        data.recommendations.forEach(item => {
+            html += `
+                <div class="rec-item">
+                    <div class="d-flex align-items-center gap-3">
+                        <div style="width:40px;height:40px;border-radius:10px;background:#f3f0ff;display:flex;align-items:center;justify-content:center;color:#7c3aed;">
+                            <i class="bi bi-box-seam"></i>
+                        </div>
+                        <div>
+                            <div class="fw-bold" style="color:#1e1b4b;">${item.name}</div>
+                            <div class="small text-muted">ID: ${item.id}</div>
+                        </div>
+                    </div>
+                    <span class="category-badge">${item.category}</span>
+                </div>
+            `;
+        });
+        html += '</div>';
+        container.innerHTML = html;
+
+    } catch (e) {
+        container.innerHTML = '<div class="alert alert-danger">Erreur lors de la connexion Ã  l\'API</div>';
+    }
+}
+</script>
+{% endblock %}
+

@@ -80,9 +80,12 @@
                         </div>
                         
                         <form action="{{ path('app_formation_inscription', {id: formation.id}) }}" method="post">
-                            <button type="submit" class="btn btn-primary w-100 py-3 fw-bold rounded-3 mb-3">S'inscrire Maintenant</button>
+                            <button type="submit" class="btn btn-primary w-100 py-3 fw-bold rounded-3 mb-2">S'inscrire Maintenant</button>
+                            <div class="text-center">
+                                <span class="small text-muted"><i class="bi bi-wallet2 me-1"></i> Paiement via Wallet</span>
+                            </div>
                         </form>
-                        <p class="text-center small text-muted mb-0">Satisfait ou remboursé sous 15 jours</p>
+                        <p class="text-center small text-muted mb-0 mt-3">Accès instantané après validation</p>
                     {% else %}
                         <div class="text-center py-4">
                             <i class="bi bi-check-circle-fill text-success display-4 mb-3"></i>

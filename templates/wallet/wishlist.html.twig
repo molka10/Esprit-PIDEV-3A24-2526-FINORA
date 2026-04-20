@@ -1,0 +1,382 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Wishlist — Finora{% endblock %}
+
+{% block stylesheets %}
+<style>
+/* ===== DESIGN TOKENS ===== */
+:root {
+    --p: #7c3aed;
+    --p-light: #f5f3ff;
+    --text-dark: #1e1b4b;
+    --text-muted: #64748b;
+    --card-shadow: 0 10px 30px -5px rgba(124, 58, 237, 0.12);
+}
+
+.wishlist-page {
+    padding: 30px;
+    background: #f8f5ff;
+    min-height: 100vh;
+    font-family: 'Inter', sans-serif;
+}
+
+/* ===== HERO BANNER ===== */
+.wl-hero {
+    background: linear-gradient(135deg, #7c3aed 0%, #4338ca 100%);
+    border-radius: 24px;
+    padding: 32px 36px;
+    margin-bottom: 32px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 20px;
+    box-shadow: 0 20px 50px rgba(124, 58, 237, 0.3);
+    position: relative;
+    overflow: hidden;
+    animation: dashIn 0.45s ease both;
+}
+@keyframes dashIn { from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);} }
+
+.wl-hero-content h1 { color:#fff!important; font-size:26px!important; font-weight:900!important; margin:0!important; }
+.wl-hero-content p { color:rgba(255,255,255,0.7); margin:5px 0 0; font-size:14px; }
+
+.btn-back {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 10px 20px; border-radius: 12px;
+    background: rgba(255,255,255,0.15); backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.2);
+    color: #fff; font-weight: 700; font-size: 13px; text-decoration: none;
+    transition: all 0.2s;
+}
+.btn-back:hover { background: rgba(255,255,255,0.25); color: #fff; transform: translateX(-3px); }
+
+/* ===== LAYOUT ===== */
+.wl-grid {
+    display: grid;
+    grid-template-columns: 400px 1fr;
+    gap: 28px;
+    align-items: start;
+}
+@media (max-width: 992px) { .wl-grid { grid-template-columns: 1fr; } }
+
+/* ===== CARDS ===== */
+.wl-card {
+    background: #fff;
+    border-radius: 24px;
+    padding: 28px;
+    box-shadow: var(--card-shadow);
+    border: 1px solid rgba(124, 58, 237, 0.08);
+    margin-bottom: 24px;
+}
+.wl-card-title {
+    font-size: 17px;
+    font-weight: 800;
+    color: var(--text-dark);
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+.wl-icon {
+    width: 44px; height: 44px; border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; color: #fff;
+}
+.bg-purple { background: linear-gradient(135deg, #7c3aed, #8b5cf6); }
+.bg-indigo { background: linear-gradient(135deg, #4338ca, #6366f1); }
+.bg-teal   { background: linear-gradient(135deg, #10b981, #34d399); }
+
+/* ===== FORMS ===== */
+.input-group-custom {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 22px;
+}
+.input-custom {
+    padding: 12px 18px;
+    border: 1.5px solid #ede9fe;
+    border-radius: 14px;
+    outline: none;
+    transition: all 0.2s;
+    background: #fafafa;
+}
+.input-custom:focus {
+    border-color: var(--p);
+    background: #fff;
+    box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.1);
+}
+.btn-primary-custom {
+    background: linear-gradient(135deg, #7c3aed, #8b5cf6);
+    color: #fff; border: none; padding: 14px;
+    border-radius: 14px; font-weight: 700; font-size: 15px;
+    cursor: pointer; transition: all 0.2s;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+.btn-primary-custom:hover { opacity: 0.9; transform: translateY(-1px); box-shadow: 0 8px 20px rgba(124, 58, 237, 0.25); }
+
+/* ===== LIST ITEMS ===== */
+.wl-item {
+    display: flex; align-items: center; gap: 15px;
+    padding: 16px 20px; background: #fafbff;
+    border: 1px solid #f1f0ff; border-radius: 18px;
+    margin-bottom: 12px; transition: all 0.2s;
+}
+.wl-item:hover { transform: translateX(4px); background: #f5f3ff; border-color: #ede9fe; }
+
+.wl-item-info { flex: 1; }
+.wl-item-name { display: block; font-weight: 700; color: var(--text-dark); margin-bottom: 2px; }
+.wl-item-price { font-weight: 800; color: var(--p); font-size: 14px; }
+
+.wl-del-btn {
+    width: 34px; height: 34px; border-radius: 10px;
+    background: #fee2e2; color: #ef4444; border: none;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s; cursor: pointer; text-decoration: none;
+}
+.wl-del-btn:hover { background: #ef4444; color: #fff; }
+
+/* ===== PROGRESS ===== */
+.progress-box {
+    padding: 20px; background: #fcfaff; border-radius: 18px;
+    border: 1px solid #f3f0ff; margin-bottom: 20px;
+}
+.progress-header { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 13px; font-weight: 700; color: var(--text-muted); }
+.progress-bar-wrap { height: 10px; background: #f1eeff; border-radius: 40px; overflow: hidden; }
+.progress-bar-fill { height: 100%; background: linear-gradient(90deg, #7c3aed, #8b5cf6); border-radius: 40px; transition: width 0.8s ease; }
+
+/* ===== STATS ROW ===== */
+.stat-mini-row { display: flex; justify-content: space-between; padding: 14px 0; border-bottom: 1px solid #f3f4f6; }
+.stat-mini-row:last-child { border-bottom: none; }
+.stat-mini-label { font-size: 13px; font-weight: 600; color: var(--text-muted); }
+.stat-mini-val { font-size: 14px; font-weight: 800; color: var(--text-dark); }
+
+</style>
+{% endblock %}
+
+{% block body %}
+
+{# Twig logic #}
+{% set pct     = (goal > 0 and balance > 0) ? min((balance / goal) * 100, 100) : 0 %}
+{% set remain  = (goal > 0) ? max(goal - balance, 0) : null %}
+{% set sorted  = wishlist %}
+{% set maxPrice = sorted is not empty ? sorted[0].getPrice() : 1 %}
+{% set need    = max(total - balance, 0) %}
+
+<div class="wishlist-page">
+
+    <!-- Hero -->
+    <div class="wl-hero">
+        <div class="wl-hero-content">
+            <h1><i class="bi bi-magic me-2"></i>Ma Wishlist</h1>
+            <p>Planifiez vos achats et gérez vos objectifs d'épargne avec précision.</p>
+        </div>
+        <a href="{{ path('dashboard') }}" class="btn-back">
+            <i class="bi bi-arrow-left"></i> Retour au Dashboard
+        </a>
+    </div>
+
+    <div class="wl-grid">
+        
+        <!-- LEFT COL: ADD & LIST -->
+        <div class="wl-left">
+            
+            <div class="wl-card">
+                <div class="wl-card-title">
+                    <div class="wl-icon bg-purple"><i class="bi bi-cart-plus"></i></div>
+                    Ajouter un Article
+                </div>
+                <form method="post" action="{{ path('wishlist') }}">
+                    <div class="input-group-custom">
+                        <input type="text" name="name" class="input-custom" placeholder="Qu'est-ce qui vous fait envie ?" required>
+                        <input type="number" name="price" class="input-custom" placeholder="Prix estimé (DT)" required>
+                        <button type="submit" class="btn-primary-custom">
+                            <i class="bi bi-plus-lg"></i> Ajouter à la liste
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="wl-card">
+                <div class="wl-card-title">
+                    <div class="wl-icon bg-indigo"><i class="bi bi-stars"></i></div>
+                    Mes Envies ({{ wishlist|length }})
+                </div>
+                
+                <div style="max-height: 400px; overflow-y: auto; padding-right: 5px;">
+                    {% for item in wishlist %}
+                        {% set pred = predictions[item.getId()] %}
+                        <div class="wl-item">
+                            <div class="wl-item-info">
+                                <span class="wl-item-name">{{ item.getName() }}</span>
+                                <span class="wl-item-price">{{ item.getPrice()|number_format(2) }} DT</span>
+                                
+                                <div style="margin-top: 5px;">
+                                    {% if pred.can_afford %}
+                                        <span style="font-size: 10px; font-weight: 800; color: #10b981; text-transform: uppercase;">
+                                            <i class="bi bi-check-circle-fill me-1"></i>Achetable
+                                        </span>
+                                    {% else %}
+                                        <span style="font-size: 10px; font-weight: 800; color: #d97706; text-transform: uppercase;">
+                                            <i class="bi bi-hourglass-split me-1"></i>Manque {{ pred.remaining_needed|number_format(0) }} DT
+                                        </span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <a href="{{ path('wishlist_delete', {id: item.getId()}) }}" class="wl-del-btn">
+                                <i class="bi bi-trash"></i>
+                            </a>
+                        </div>
+                    {% else %}
+                        <div style="text-align: center; padding: 40px; opacity: 0.5;">
+                            <i class="bi bi-bag-x" style="font-size: 3rem; display: block; margin-bottom: 10px;"></i>
+                            <p>Votre wishlist est vide.</p>
+                        </div>
+                    {% endfor %}
+                </div>
+
+                <div style="margin-top: 25px; padding: 20px; background: #1e1b4b; border-radius: 18px; color: #fff; display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-size: 13px; font-weight: 600; opacity: 0.8;">Total Wishlist</span>
+                    <strong style="font-size: 20px; font-weight: 900;">{{ total|number_format(2) }} DT</strong>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- RIGHT COL: GOALS & ANALYTICS -->
+        <div class="wl-right">
+
+            <div class="wl-card">
+                <div class="wl-card-title">
+                    <div class="wl-icon bg-teal"><i class="bi bi-bullseye"></i></div>
+                    Objectif d'Épargne
+                </div>
+
+                <div class="progress-box">
+                    <div class="progress-header">
+                        <span>Progression</span>
+                        <span>{{ pct|round }}%</span>
+                    </div>
+                    <div class="progress-bar-wrap">
+                        <div class="progress-bar-fill" style="width: {{ pct }}%;"></div>
+                    </div>
+                </div>
+
+                <div class="stat-mini-row">
+                    <span class="stat-mini-label">Solde Actuel</span>
+                    <span class="stat-mini-val">{{ balance|number_format(2) }} DT</span>
+                </div>
+                <div class="stat-mini-row">
+                    <span class="stat-mini-label">Objectif Ciblé</span>
+                    <span class="stat-mini-val" style="color: var(--p);">{{ goal > 0 ? (goal|number_format(2) ~ ' DT') : '—' }}</span>
+                </div>
+                <div class="stat-mini-row">
+                    <span class="stat-mini-label">Reste à Épargner</span>
+                    <span class="stat-mini-val" style="color: #ef4444;">{{ remain is not null ? (remain|number_format(2) ~ ' DT') : '—' }}</span>
+                </div>
+
+                <form method="post" action="{{ path('wishlist') }}" style="margin-top: 24px;">
+                    <input type="hidden" name="_action" value="set_goal">
+                    <div style="display: flex; gap: 10px;">
+                        <input type="number" name="goal" class="input-custom" style="flex: 1;" placeholder="Nouvel objectif (DT)">
+                        <button type="submit" class="btn-primary-custom" style="padding: 0 20px;">Définir</button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="wl-card">
+                        <div class="wl-card-title" style="font-size: 15px;">
+                            <i class="bi bi-calendar3 text-primary"></i> Plan Mensuel
+                        </div>
+                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 20px;">
+                            {% for m in [3, 6, 12, 18, 24, 36] %}
+                                <button type="button" 
+                                        style="padding: 8px 4px; border: 1.5px solid #ede9fe; background: #fff; border-radius: 10px; font-size: 11px; font-weight: 700; cursor: pointer; transition: all 0.2s;"
+                                        onmouseover="this.style.borderColor='#7c3aed'; this.style.color='#7c3aed'"
+                                        onmouseout="this.style.borderColor='#ede9fe'; this.style.color='inherit'"
+                                        onclick="calc({{ m }}, {{ need }})">
+                                    {{ m }}m
+                                </button>
+                            {% endfor %}
+                        </div>
+                        <div id="monthly" style="text-align: center; padding: 15px; background: #f5f3ff; border-radius: 14px; font-weight: 800; color: var(--p); font-size: 18px;">
+                            {% if need > 0 %}
+                                {{ (need / 3)|round }} DT/m
+                            {% else %}
+                                Prêt ! ✅
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="wl-card">
+                        <div class="wl-card-title" style="font-size: 15px;">
+                            <i class="bi bi-pie-chart text-primary"></i> Répartition
+                        </div>
+                        <div style="height: 140px;">
+                            <canvas id="chart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="wl-card">
+                <div class="wl-card-title" style="font-size: 15px;">
+                    <i class="bi bi-bar-chart-steps text-primary"></i> Analyse de Priorité
+                </div>
+                <div style="padding-top: 10px;">
+                    {% for item in sorted %}
+                        {% set w = (item.getPrice() / maxPrice) * 100 %}
+                        <div style="margin-bottom: 16px;">
+                            <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 5px;">
+                                <span style="font-weight: 700; color: var(--text-dark);">#{{ loop.index }} {{ item.getName() }}</span>
+                                <span style="font-weight: 800; color: var(--p);">{{ item.getPrice()|number_format(0) }} DT</span>
+                            </div>
+                            <div style="height: 6px; background: #f3f0ff; border-radius: 10px; overflow: hidden;">
+                                <div style="height: 100%; background: linear-gradient(90deg, #7c3aed, {{ loop.index == 1 ? '#4338ca' : '#a78bfa' }}); width: {{ w }}%; border-radius: 10px;"></div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+{% endblock %}
+
+{% block javascripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+function calc(months, need) {
+    let val = Math.round(need / months);
+    document.getElementById('monthly').innerText = val + " DT/m";
+}
+
+new Chart(document.getElementById('chart'), {
+    type: 'doughnut',
+    data: {
+        labels: ['Épargne', 'Besoin'],
+        datasets: [{
+            data: [{{ balance }}, {{ goal > balance ? goal - balance : 0 }}],
+            backgroundColor: ['#7c3aed', '#f1f0ff'],
+            borderWidth: 0,
+            hoverOffset: 10
+        }]
+    },
+    options: {
+        cutout: '75%',
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: { display: false }
+        }
+    }
+});
+</script>
+{% endblock %}

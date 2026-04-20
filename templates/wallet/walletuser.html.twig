@@ -1,0 +1,583 @@
+{% extends 'base.html.twig' %}
+
+{% block stylesheets %}
+<style>
+    :root {
+        --p: #7c3aed;
+        --p-light: #f5f3ff;
+        --p-dark: #6d28d9;
+        --text-main: #1e1b4b;
+        --text-muted: #64748b;
+        --glass-bg: rgba(255, 255, 255, 0.75);
+    }
+
+    .clean-dashboard {
+        padding: 40px;
+        background: #fdfcff;
+        min-height: 100vh;
+        font-family: 'Outfit', 'Inter', sans-serif;
+    }
+
+    /* ── Premium Hero ── */
+    .dash-hero {
+        background: linear-gradient(135deg, #1e1b4b 0%, #4338ca 100%);
+        box-shadow: 0 20px 50px rgba(30,27,75,0.2);
+        position: relative;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        border-radius: 24px;
+    }
+    .dash-hero-bg {
+        position: absolute;
+        top: 0; left: 0; right: 0; bottom: 0;
+        border-radius: 24px;
+        overflow: hidden;
+        z-index: 0;
+        pointer-events: none;
+    }
+    .dash-hero-bg::after {
+        content: '';
+        position: absolute;
+        top: -50px;
+        right: -50px;
+        width: 150px;
+        height: 150px;
+        background: rgba(255,255,255,0.05);
+        border-radius: 50%;
+    }
+    .dash-hero-content h1 { color: #fff !important; font-weight: 800; margin: 0; font-size: 28px; }
+    .dash-hero-content p { color: rgba(255,255,255,0.6) !important; margin: 5px 0 0; font-size: 15px; }
+
+    .btn-outline {
+        background: rgba(255,255,255,0.1);
+        backdrop-filter: blur(8px);
+        border: 1px solid rgba(255,255,255,0.2);
+        color: #fff;
+        padding: 10px 20px;
+        border-radius: 12px;
+        font-weight: 700;
+        font-size: 13px;
+        text-decoration: none;
+        transition: all 0.3s;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .btn-outline:hover { background: #fff; color: var(--p); transform: translateY(-2px); }
+
+    /* ── Stats ── */
+    .clean-stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 25px;
+        margin-bottom: 35px;
+    }
+    .stat-card {
+        background: #fff;
+        padding: 28px;
+        border-radius: 24px;
+        box-shadow: 0 10px 30px rgba(124, 58, 237, 0.05);
+        border: 1px solid rgba(124, 58, 237, 0.05);
+        transition: all 0.3s;
+    }
+    .stat-card:hover { transform: translateY(-5px); box-shadow: 0 20px 40px rgba(124, 58, 237, 0.1); }
+    .stat-icon {
+        width: 54px; height: 54px;
+        border-radius: 16px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 24px; flex-shrink: 0;
+    }
+    .stat-card span { font-size: 11px; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; }
+    .stat-card h2 { font-size: 24px; font-weight: 800; margin: 2px 0 0; }
+
+    /* ── Charts Row ── */
+    .dashboard-main-row {
+        display: grid;
+        grid-template-columns: 2.2fr 1fr;
+        gap: 25px;
+        margin-bottom: 30px;
+    }
+    .chart-container-card {
+        background: #fff;
+        padding: 30px;
+        border-radius: 28px;
+        box-shadow: 0 10px 30px rgba(124, 58, 237, 0.05);
+        border: 1px solid rgba(124, 58, 237, 0.05);
+    }
+    .chart-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+    .chart-header h3 { font-size: 17px; font-weight: 800; color: var(--text-main); margin: 0; }
+
+    @media (max-width: 1200px) { .dashboard-main-row { grid-template-columns: 1fr; } }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="clean-dashboard">
+
+    {# ── Slim Premium Header ── #}
+    <div class="dash-hero" style="padding: 35px 40px; margin-bottom: 30px;">
+        <div class="dash-hero-bg"></div>
+        <div class="dash-hero-content" style="z-index: 2; position: relative;">
+            <h1><i class="bi bi-wallet2 me-3"></i>Tableau de Bord Wallet</h1>
+            <p>Suivez vos flux financiers en temps réel avec une précision intelligente.</p>
+        </div>
+        
+        <div class="dash-actions" style="display:flex; align-items:center; gap:12px; z-index:2;">
+             <div class="currency-group" style="background: rgba(255,255,255,0.1); padding: 5px; border-radius: 100px; border: 1px solid rgba(255,255,255,0.2); display:flex; gap:4px; margin-right: 15px;">
+                {% for c in ['DT', 'EUR', 'USD'] %}
+                    <a href="?currency={{ c }}" 
+                       style="padding: 6px 16px; border-radius: 100px; font-size: 12px; font-weight: 800; text-decoration: none; transition: all 0.3s;
+                              {{ currencySymbol == c ? 'background:#fff; color:#7c3aed;' : 'color:#fff;' }}">
+                        {{ c }}
+                    </a>
+                {% endfor %}
+            </div>
+
+            <a href="{{ path('app_wallet_system') }}" class="btn-outline">
+                <i class="bi bi-grid-fill"></i> Système
+            </a>
+            <a href="{{ path('transactions_pdf') }}" class="btn-outline"><i class="bi bi-file-earmark-pdf"></i> PDF</a>
+            <a href="{{ path('transactions_excel') }}" class="btn-outline"><i class="bi bi-file-earmark-excel"></i> Excel</a>
+            
+            <div class="dropdown">
+                <a class="btn-outline position-relative" href="#" role="button" data-bs-toggle="dropdown">
+                    <i class="bi bi-bell"></i>
+                    <span id="notif-badge" class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle d-none"></span>
+                </a>
+                <div class="dropdown-menu dropdown-menu-end shadow-lg border-0" style="min-width:320px; border-radius:20px; margin-top: 15px;">
+                    <div class="card bg-transparent border-0">
+                        <div class="card-header bg-transparent border-bottom p-3">
+                            <h6 class="m-0 fw-bold">Notifications <span id="notif-count" class="badge bg-danger ms-1">0</span></h6>
+                        </div>
+                        <div class="card-body p-0" style="max-height:300px; overflow-y:auto;">
+                            <ul class="list-group list-group-flush" id="notif-list">
+                                <li class="list-group-item p-3 text-center text-muted small">Chargement...</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Key Stats Grid -->
+    <div class="clean-stats">
+        <div class="stat-card">
+            <div class="stat-inner" style="display:flex;align-items:center;gap:18px;">
+                <div class="stat-icon" style="background:#e0e7ff; color:#4338ca;"><i class="bi bi-wallet2"></i></div>
+                <div>
+                    <span>Solde Actuel</span>
+                    <h2 style="color:#4338ca;">{{ balance|number_format(2, '.', ',') }} {{ currencySymbol }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-inner" style="display:flex;align-items:center;gap:18px;">
+                <div class="stat-icon" style="background:#dcfce7; color:#16a34a;"><i class="bi bi-graph-up"></i></div>
+                <div>
+                    <span>Total Revenus</span>
+                    <h2 style="color:#16a34a;">+{{ income|number_format(2, '.', ',') }} {{ currencySymbol }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-inner" style="display:flex;align-items:center;gap:18px;">
+                <div class="stat-icon" style="background:#fee2e2; color:#dc2626;"><i class="bi bi-graph-down"></i></div>
+                <div>
+                    <span>Total Dépenses</span>
+                    <h2 style="color:#dc2626;">-{{ outcome|number_format(2, '.', ',') }} {{ currencySymbol }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-inner" style="display:flex;align-items:center;gap:18px;">
+                <div class="stat-icon" style="background:#faf5ff; color:#7c3aed;"><i class="bi bi-lightning-charge"></i></div>
+                <div>
+                    <span>Transactions</span>
+                    <h2 style="color:var(--text-dark);">{{ transactions|length }}</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Charts Layout -->
+    <div class="dashboard-main-row">
+        <!-- Timeline Chart -->
+        <div class="chart-container-card">
+            <div class="chart-header">
+                <h3><i class="bi bi-activity text-primary me-2"></i>Évolution des Flux</h3>
+                <div class="badge bg-light text-muted border px-3">Journalier</div>
+            </div>
+            <div style="height: 380px;">
+                <canvas id="mainFlowChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Donut & Top Tx -->
+        <div class="chart-container-card">
+            <div class="chart-header">
+                <h3><i class="bi bi-pie-chart-fill text-primary me-2"></i>Répartition</h3>
+            </div>
+            <div style="height: 250px;">
+                <canvas id="globalDonut"></canvas>
+            </div>
+            
+            <div style="margin-top:25px; padding:20px; border-radius:20px; background:#fcfbff; border:1px solid #f1f0ff;">
+                <span style="font-size:11px; font-weight:800; color:#94a3b8; text-transform:uppercase; display:block; margin-bottom:10px;">Plus Grosse Dépense</span>
+                {% if biggestTx %}
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <span style="font-weight:700; color:var(--text-dark);">{{ biggestTx.nomTransaction }}</span>
+                        <strong style="color:#ef4444; font-size:16px;">-{{ biggestAmt }} {{ currencySymbol }}</strong>
+                    </div>
+                {% else %}
+                    <span style="color:#cbd5e1; font-style:italic;">Aucune donnée</span>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Secondary Charts Row -->
+    <div class="dashboard-main-row" style="grid-template-columns: 1fr 1fr;">
+        <div class="chart-container-card">
+            <div class="chart-header">
+                <h3>Dépenses par Catégorie</h3>
+            </div>
+            <div style="height: 300px;">
+                <canvas id="categoryOutcomeChart"></canvas>
+            </div>
+        </div>
+        <div class="chart-container-card">
+            <div class="chart-header">
+                <h3>Revenus par Catégorie</h3>
+            </div>
+            <div style="height: 300px;">
+                <canvas id="categoryIncomeChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Premium AI Insight Call-to-Action -->
+    <div class="mt-5 mb-5 px-1">
+        <a href="{{ path('ai_analyse') }}" class="ai-premium-card">
+            <div class="ai-card-content">
+                <div class="ai-robot-wrapper">
+                    <div class="ai-glow-orbit"></div>
+                    <span class="ai-robot-icon">🤖</span>
+                </div>
+                <div class="ai-text-group">
+                    <div class="ai-badge">FUTURISTE</div>
+                    <h3 class="ai-title">Analyse Financière Prédictive</h3>
+                    <p class="ai-description">Laissez notre intelligence artificielle scanner vos transactions pour identifier des opportunités d'épargne cachées et optimiser votre budget.</p>
+                </div>
+            </div>
+            <div class="ai-action-area">
+                <div class="ai-link-btn">
+                    <span>Explorer l'IA</span>
+                    <i class="bi bi-stars"></i>
+                </div>
+            </div>
+        </a>
+    </div>
+
+<style>
+    .ai-premium-card {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background: linear-gradient(135deg, #1e1b4b 0%, #4338ca 100%);
+        padding: 30px 40px;
+        border-radius: 28px;
+        color: white;
+        text-decoration: none;
+        position: relative;
+        overflow: hidden;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        box-shadow: 0 25px 50px -12px rgba(67, 56, 202, 0.4);
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .ai-premium-card::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(255,255,255,0.05) 0%, transparent 60%);
+        pointer-events: none;
+    }
+
+    .ai-premium-card:hover {
+        transform: translateY(-8px) scale(1.01);
+        box-shadow: 0 35px 60px -12px rgba(99, 102, 241, 0.5);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .ai-card-content {
+        display: flex;
+        align-items: center;
+        gap: 30px;
+        z-index: 2;
+    }
+
+    .ai-robot-wrapper {
+        position: relative;
+        width: 80px;
+        height: 80px;
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        border-radius: 22px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 34px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .ai-glow-orbit {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        border-radius: 22px;
+        border: 2px solid #818cf8;
+        opacity: 0.5;
+        animation: ai-pulse 2s infinite ease-out;
+    }
+
+    @keyframes ai-pulse {
+        0% { transform: scale(1); opacity: 0.6; }
+        100% { transform: scale(1.4); opacity: 0; }
+    }
+
+    .ai-text-group {
+        max-width: 500px;
+    }
+
+    .ai-badge {
+        display: inline-block;
+        background: rgba(129, 140, 248, 0.2);
+        color: #c7d2fe;
+        font-size: 10px;
+        font-weight: 800;
+        letter-spacing: 1.5px;
+        padding: 4px 10px;
+        border-radius: 6px;
+        margin-bottom: 10px;
+        border: 1px solid rgba(129, 140, 248, 0.3);
+    }
+
+    .ai-title {
+        font-size: 24px;
+        font-weight: 800;
+        margin: 0 0 8px;
+        background: linear-gradient(to right, #fff, #c7d2fe);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .ai-description {
+        margin: 0;
+        font-size: 14px;
+        color: rgba(255, 255, 255, 0.7);
+        line-height: 1.5;
+    }
+
+    .ai-action-area {
+        z-index: 2;
+    }
+
+    .ai-link-btn {
+        background: white;
+        color: #4338ca;
+        padding: 14px 28px;
+        border-radius: 100px;
+        font-weight: 800;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        transition: all 0.3s;
+    }
+
+    .ai-premium-card:hover .ai-link-btn {
+        background: #818cf8;
+        color: white;
+        box-shadow: 0 15px 25px rgba(0,0,0,0.2);
+    }
+
+    @media (max-width: 768px) {
+        .ai-premium-card {
+            flex-direction: column;
+            text-align: center;
+            padding: 40px 20px;
+        }
+        .ai-card-content {
+            flex-direction: column;
+            gap: 20px;
+        }
+        .ai-action-area {
+            margin-top: 30px;
+        }
+    }
+</style>
+</div>
+
+{% block javascripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // General Config
+    Chart.defaults.font.family = "'Inter', sans-serif";
+    Chart.defaults.color = '#64748b';
+
+    // Data from Backend
+    const mainLabels = {{ chartLabels|json_encode|raw }};
+    const incomeSeries = {{ incomeData|json_encode|raw }};
+    const outcomeSeries = {{ outcomeData|json_encode|raw }};
+    
+    const catLabelsOut = {{ outcomeChartLabels|json_encode|raw }};
+    const catDataOut = {{ outcomeChartData|json_encode|raw }};
+    
+    const catLabelsInc = {{ incomeChartLabels|json_encode|raw }};
+    const catDataInc = {{ incomeChartData|json_encode|raw }};
+
+    // 1. Main Flow Chart (Premium Area Chart)
+    const ctxFlow = document.getElementById('mainFlowChart').getContext('2d');
+    const gradInc = ctxFlow.createLinearGradient(0, 0, 0, 400);
+    gradInc.addColorStop(0, 'rgba(34, 197, 94, 0.2)');
+    gradInc.addColorStop(1, 'rgba(34, 197, 94, 0)');
+
+    const gradOut = ctxFlow.createLinearGradient(0, 0, 0, 400);
+    gradOut.addColorStop(0, 'rgba(239, 68, 68, 0.2)');
+    gradOut.addColorStop(1, 'rgba(239, 68, 68, 0)');
+
+    new Chart(ctxFlow, {
+        type: 'line',
+        data: {
+            labels: mainLabels,
+            datasets: [
+                {
+                    label: 'Revenus',
+                    data: incomeSeries,
+                    borderColor: '#22c55e',
+                    backgroundColor: gradInc,
+                    fill: true,
+                    tension: 0.4,
+                    borderWidth: 3,
+                    pointBackgroundColor: '#fff',
+                    pointBorderColor: '#22c55e',
+                    pointBorderWidth: 2,
+                    pointRadius: 5,
+                    pointHoverRadius: 7
+                },
+                {
+                    label: 'Dépenses',
+                    data: outcomeSeries,
+                    borderColor: '#ef4444',
+                    backgroundColor: gradOut,
+                    fill: true,
+                    tension: 0.4,
+                    borderWidth: 3,
+                    pointBackgroundColor: '#fff',
+                    pointBorderColor: '#ef4444',
+                    pointBorderWidth: 2,
+                    pointRadius: 5,
+                    pointHoverRadius: 7
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: { intersect: false, mode: 'index' },
+            plugins: {
+                legend: { position: 'top', align: 'end', labels: { usePointStyle: true, padding: 25, font: { weight: 600 } } },
+                tooltip: { backgroundColor: '#1e1b4b', padding: 12, borderRadius: 10, titleFont: { size: 14 } }
+            },
+            scales: {
+                y: { 
+                    beginAtZero: true,
+                    grid: { color: 'rgba(0,0,0,0.03)', drawBorder: false },
+                    ticks: { callback: value => value + ' {{ currencySymbol|raw }}', font: { weight: 500 } }
+                },
+                x: { grid: { display: false } }
+            }
+        }
+    });
+
+    // 2. Global Donut (Premium Style)
+    new Chart(document.getElementById('globalDonut'), {
+        type: 'doughnut',
+        data: {
+            labels: ['Revenus', 'Dépenses'],
+            datasets: [{
+                data: [{{ income }}, {{ outcome }}],
+                backgroundColor: ['#22c55e', '#ef4444'],
+                hoverOffset: 12,
+                borderRadius: 5,
+                borderWidth: 0
+            }]
+        },
+        options: {
+            cutout: '78%',
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: 'bottom', labels: { padding: 20, usePointStyle: true, font: { weight: 600 } } }
+            }
+        }
+    });
+
+    // 3. Category Outcome Chart
+    new Chart(document.getElementById('categoryOutcomeChart'), {
+        type: 'bar',
+        data: {
+            labels: catLabelsOut,
+            datasets: [{
+                label: 'Dépenses',
+                data: catDataOut,
+                backgroundColor: '#7c3aed',
+                borderRadius: 10,
+                barThickness: 20
+            }]
+        },
+        options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                x: { grid: { color: 'rgba(0,0,0,0.03)' } },
+                y: { grid: { display: false } }
+            }
+        }
+    });
+
+    // 4. Category Income Chart
+    new Chart(document.getElementById('categoryIncomeChart'), {
+        type: 'bar',
+        data: {
+            labels: catLabelsInc,
+            datasets: [{
+                label: 'Revenus',
+                data: catDataInc,
+                backgroundColor: '#22c55e',
+                borderRadius: 10,
+                barThickness: 20
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                y: { grid: { color: 'rgba(0,0,0,0.03)' } },
+                x: { grid: { display: false } }
+            }
+        }
+    });
+
+</script>
+{% endblock %}
+{% endblock %}

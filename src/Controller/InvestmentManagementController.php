@@ -125,7 +125,11 @@ class InvestmentManagementController extends AbstractController
      * ➕ New Participation
      */
     #[Route('/new', name: 'app_management_new', methods: ['GET', 'POST'])]
-    public function new(Request $request, EntityManagerInterface $em): Response
+    public function new(
+        Request $request, 
+        EntityManagerInterface $em,
+        \App\Service\WalletBalanceService $walletBalanceService
+    ): Response
     {
         $invId = $request->query->get('inv_id');
         $item = new InvestmentManagement();
@@ -142,7 +146,56 @@ class InvestmentManagementController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $item->setUser($this->getUser());
+            /** @var \App\Entity\User $user */
+            $user = $this->getUser();
+            $amountInvested = $item->getAmountInvested() ?? 0.0;
+            
+            if ($amountInvested > 0) {
+                $balance = $walletBalanceService->calculateUserBalance($user->getId());
+                
+                if ($balance < $amountInvested) {
+                    $redirectUrl = $this->generateUrl('dashboard');
+                    $this->addFlash('danger', sprintf(
+                        'Solde insuffisant dans votre portefeuille. (Requis: %.2f DT, Actuel: %.2f DT). <a href="%s" class="btn btn-sm btn-light ms-2 text-dark fw-bold">Recharger mon portefeuille</a>', 
+                        $amountInvested, 
+                        $balance,
+                        $redirectUrl
+                    ));
+                    
+                    return $this->render('investment_management/new.html.twig', [
+                        'form' => $form->createView(),
+                        'investment' => $item->getInvestment()
+                    ]);
+                }
+                
+                // Fetch or Create Category "Investissement Projet"
+                $categoryRepo = $em->getRepository(\App\Entity\Category::class);
+                $categoryName = "Investissement Projet";
+                $category = $categoryRepo->findOneBy(['nom' => $categoryName]);
+                if (!$category) {
+                    $category = new \App\Entity\Category();
+                    $category->setNom($categoryName);
+                    $category->setType('OUTCOME');
+                    $category->setPriorite('HAUTE');
+                    $category->setUserId($user->getId());
+                    $em->persist($category);
+                    $em->flush();
+                }
+                
+                $walletTx = new \App\Entity\TransactionWallet();
+                $walletTx->setMontant(-abs($amountInvested)); // Negative = expense
+                $walletTx->setType('OUTCOME');
+                $walletTx->setDateTransaction(new \DateTime());
+                $walletTx->setCategory($category);
+                $walletTx->setUserId($user->getId());
+                
+                $investmentName = $item->getInvestment() ? $item->getInvestment()->getName() : 'Projet (' . $item->getInvestmentType() . ')';
+                $walletTx->setNomTransaction('Investissement: ' . $investmentName);
+                
+                $em->persist($walletTx);
+            }
+
+            $item->setUser($user);
             $item->setCreatedAt(new \DateTime());
             
             $em->persist($item);

@@ -127,8 +127,12 @@ final class CentreFormationController extends AbstractController
     //  PUBLIC — Map page (user-facing)
     // ────────────────────────────────────────────────────────────────
     #[Route('/carte', name: 'public_centres_map', methods: ['GET'])]
-    public function publicMap(): Response
+    public function publicMap(EntityManagerInterface $entityManager): Response
     {
-        return $this->render('centres/map.html.twig');
+        $centres = $entityManager->getRepository(CentreFormation::class)->findAll();
+        
+        return $this->render('centres/map.html.twig', [
+            'centres' => $centres
+        ]);
     }
 }

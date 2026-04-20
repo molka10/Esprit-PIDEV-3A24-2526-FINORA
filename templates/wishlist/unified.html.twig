@@ -1,0 +1,509 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mon Dashboard de Favoris — Finora Premium{% endblock %}
+
+{% block stylesheets %}
+<style>
+    :root {
+        --glass-bg: rgba(255, 255, 255, 0.7);
+        --glass-border: rgba(255, 255, 255, 0.4);
+        --premium-shadow: 0 20px 40px rgba(0, 0, 0, 0.05);
+        --accent-purple: #7c3aed;
+        --accent-blue: #3b82f6;
+    }
+
+    body {
+        background: #f8fafc;
+        background-image: 
+            radial-gradient(at 0% 0%, rgba(124, 58, 237, 0.05) 0px, transparent 50%),
+            radial-gradient(at 100% 0%, rgba(59, 130, 246, 0.05) 0px, transparent 50%);
+        min-height: 100vh;
+    }
+
+    .premium-hero {
+        background: linear-gradient(145deg, #1e1b4b 0%, #7c3aed 100%);
+        padding: 120px 0 160px;
+        color: white;
+        border-radius: 0 0 80px 80px;
+        box-shadow: 0 30px 60px rgba(124, 58, 237, 0.2);
+        margin-bottom: 60px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    /* Creative Floating Shapes */
+    .hero-shape {
+        position: absolute; border-radius: 50%;
+        background: rgba(255,255,255,0.05);
+        backdrop-filter: blur(5px);
+        animation: float 20s infinite linear;
+    }
+    .shape-1 { width: 300px; height: 300px; top: -100px; right: -50px; }
+    .shape-2 { width: 150px; height: 150px; bottom: 50px; left: -30px; animation-duration: 15s; }
+    .shape-3 { width: 100px; height: 100px; top: 100px; left: 20%; animation-duration: 25s; }
+
+    @keyframes float {
+        0% { transform: translateY(0) rotate(0deg); }
+        50% { transform: translateY(-40px) rotate(180deg); }
+        100% { transform: translateY(0) rotate(360deg); }
+    }
+
+    .glass-title-card {
+        background: rgba(255,255,255,0.1);
+        backdrop-filter: blur(15px);
+        border: 1px solid rgba(255,255,255,0.2);
+        padding: 30px 50px;
+        border-radius: 35px;
+        display: inline-block;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+    }
+
+    .wish-nav-container {
+        position: sticky;
+        top: 20px;
+        z-index: 100;
+        margin-top: -40px;
+        width: fit-content;
+        margin-left: auto; margin-right: auto;
+    }
+
+    .wish-nav {
+        background: rgba(255, 255, 255, 0.8);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid var(--glass-border);
+        border-radius: 24px;
+        padding: 8px;
+        box-shadow: var(--premium-shadow);
+        display: flex; gap: 8px;
+    }
+
+    .wish-nav-link {
+        padding: 12px 24px;
+        border-radius: 18px;
+        color: #64748b;
+        font-weight: 700;
+        text-decoration: none;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        display: flex; align-items: center; gap: 10px;
+    }
+
+    .wish-nav-link:hover {
+        background: rgba(255, 255, 255, 0.5);
+        color: var(--accent-purple);
+        transform: translateY(-2px);
+    }
+
+    .wish-nav-link.active {
+        background: white;
+        color: var(--accent-purple);
+        box-shadow: 0 10px 20px rgba(124, 58, 237, 0.1);
+    }
+
+    .section-container {
+        padding-top: 80px;
+        margin-top: -40px;
+    }
+
+    .section-header {
+        margin-bottom: 40px;
+        display: flex; align-items: center; gap: 20px;
+    }
+
+    .section-icon {
+        width: 60px; height: 60px;
+        border-radius: 20px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 28px;
+        box-shadow: 0 15px 30px rgba(0,0,0,0.05);
+    }
+
+    .premium-card {
+        background: var(--glass-bg);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border: 1px solid var(--glass-border);
+        border-radius: 30px;
+        overflow: hidden;
+        transition: all 0.4s ease;
+        height: 100%;
+        display: flex; flex-direction: column;
+    }
+
+    .premium-card:hover {
+        transform: translateY(-10px) scale(1.02);
+        box-shadow: 0 30px 60px rgba(0,0,0,0.1);
+        border-color: rgba(124, 58, 237, 0.3);
+        background: white;
+    }
+
+    .card-label {
+        position: absolute; top: 20px; left: 20px;
+        background: rgba(255,255,255,0.9);
+        padding: 6px 12px; border-radius: 10px;
+        font-weight: 800; font-size: 10px;
+        text-transform: uppercase; letter-spacing: 1px;
+    }
+
+    .card-visual {
+        height: 180px; width: 100%; background: #f1f5f9;
+        position: relative; overflow: hidden;
+    }
+
+    .card-content { padding: 25px; flex-grow: 1; display: flex; flex-direction: column; }
+    
+    .card-title {
+        font-size: 18px; font-weight: 800; color: #1e293b;
+        margin-bottom: 12px; line-height: 1.4;
+    }
+
+    .price-tag {
+        font-size: 20px; font-weight: 900;
+        background: linear-gradient(135deg, #7c3aed, #4f46e5);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .meta-badge {
+        font-size: 11px; font-weight: 700;
+        padding: 4px 10px; border-radius: 8px;
+        display: inline-flex; align-items: center; gap: 5px;
+        margin-bottom: 8px;
+    }
+    .badge-purple { background: rgba(124, 58, 237, 0.1); color: #7c3aed; }
+    .badge-blue { background: rgba(59, 130, 246, 0.1); color: #3b82f6; }
+    .badge-green { background: rgba(16, 185, 129, 0.1); color: #10b981; }
+    .badge-orange { background: rgba(245, 158, 11, 0.1); color: #f59e0b; }
+
+    .card-action-bar {
+        padding: 20px 25px;
+        background: rgba(255,255,255,0.3);
+        border-top: 1px solid rgba(255,255,255,0.5);
+        display: flex; gap: 12px;
+    }
+
+    .action-btn {
+        flex: 1; padding: 12px; border-radius: 15px;
+        font-size: 14px; font-weight: 700; text-align: center;
+        text-decoration: none; transition: 0.3s;
+        display: flex; align-items: center; justify-content: center; gap: 8px;
+    }
+
+    .btn-primary-glass {
+        background: var(--accent-purple); color: white;
+        box-shadow: 0 10px 20px rgba(124, 58, 237, 0.2);
+    }
+    .btn-primary-glass:hover { transform: scale(1.05); background: #6d28d9; color: white; }
+
+    .btn-delete-glass {
+        width: 48px; border: 1px solid #fee2e2;
+        background: rgba(254, 226, 226, 0.5); color: #ef4444;
+    }
+    .btn-delete-glass:hover { background: #ef4444; color: white; transform: rotate(10deg); }
+
+    .empty-state {
+        text-align: center; padding: 80px 40px;
+        background: white; border-radius: 40px;
+        border: 2px dashed #e2e8f0; color: #94a3b8;
+    }
+
+    /* Animations */
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(30px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-up { animation: fadeInUp 0.8s cubic-bezier(0.23, 1, 0.32, 1) forwards; }
+</style>
+{% endblock %}
+
+{% block body %}
+<!-- Hero Section -->
+<div class="premium-hero">
+    <div class="hero-shape shape-1"></div>
+    <div class="hero-shape shape-2"></div>
+    <div class="hero-shape shape-3"></div>
+    
+    <div class="container text-center animate-up">
+        <div class="glass-title-card">
+            <h1 class="display-4 fw-bold mb-3 text-white">Mon Hub de Favoris</h1>
+            <p class="fs-5 opacity-75 mx-auto mb-0" style="max-width: 600px;">
+                Optimisez vos futurs succès avec une vue consolidée de vos intérêts financiers.
+            </p>
+        </div>
+    </div>
+</div>
+
+<div class="container mb-5 pb-5">
+    <!-- Smart Navigation -->
+    <div class="wish-nav-container animate-up" style="animation-delay: 0.2s;">
+        <div class="wish-nav">
+            <a href="#bourse" class="wish-nav-link active"><i class="bi bi-graph-up-arrow"></i> Bourse</a>
+            <a href="#formations" class="wish-nav-link"><i class="bi bi-mortarboard"></i> Formations</a>
+            <a href="#investments" class="wish-nav-link"><i class="bi bi-gem"></i> Investir</a>
+            <a href="#wallet" class="wish-nav-link"><i class="bi bi-wallet2"></i> Objectifs</a>
+        </div>
+    </div>
+
+    <!-- 1. Bourse Section -->
+    <div id="bourse" class="section-container animate-up" style="animation-delay: 3s;">
+        <div class="section-header">
+            <div class="section-icon" style="background: rgba(124, 58, 237, 0.1); color: #7c3aed;">
+                <i class="bi bi-graph-up-arrow"></i>
+            </div>
+            <div>
+                <h2 class="mb-0 fw-bold">Valeurs Boursières</h2>
+                <p class="text-muted small mb-0">Suivez la performance de vos actions favorites en direct.</p>
+            </div>
+        </div>
+
+        {% if bourseItems|length > 0 %}
+            <div class="row g-4">
+                {% for item in bourseItems %}
+                    <div class="col-md-4 col-lg-3">
+                        <div class="premium-card">
+                            <div class="card-visual">
+                                <span class="card-label" style="color: #7c3aed;">Marché Tunisien</span>
+                                <div class="w-100 h-100 d-flex align-items-center justify-content-center" style="background: linear-gradient(45deg, #f8fafc, #ede9fe);">
+                                    <span class="display-6 fw-bold opacity-10">{{ item.action.symbole }}</span>
+                                    <i class="bi bi-graph-up-arrow position-absolute opacity-10" style="font-size: 80px;"></i>
+                                </div>
+                            </div>
+                            <div class="card-content">
+                                <div class="meta-badge badge-purple">
+                                    <i class="bi bi-tag"></i> Secteur Boursier
+                                </div>
+                                <h3 class="card-title">{{ item.action.nomEntreprise }}</h3>
+                                <div class="mt-auto d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <div class="price-tag">{{ item.action.prixUnitaire }} <small>TND</small></div>
+                                        <div class="small text-muted fw-bold">{{ item.action.symbole }}</div>
+                                    </div>
+                                    <span class="badge bg-success bg-opacity-75 text-white p-2 px-3 rounded-pill small">Live</span>
+                                </div>
+                            </div>
+                            <div class="card-action-bar">
+                                <a href="{{ path('app_market') }}" class="action-btn btn-primary-glass">Trading</a>
+                                <form action="{{ path('app_bourse_wishlist_toggle', {id: item.action.id}) }}" method="POST">
+                                    <button type="submit" class="action-btn btn-delete-glass"><i class="bi bi-trash"></i></button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <i class="bi bi-search display-3 mb-3 d-block opacity-25"></i>
+                <h4>Aucune action suivie</h4>
+                <a href="{{ path('app_market') }}" class="btn btn-outline-primary rounded-pill mt-3">Trouver des opportunités</a>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- 2. Formations Section -->
+    <div id="formations" class="section-container animate-up" style="animation-delay: 0.4s;">
+        <div class="section-header">
+            <div class="section-icon" style="background: rgba(16, 185, 129, 0.1); color: #10b981;">
+                <i class="bi bi-mortarboard"></i>
+            </div>
+            <div>
+                <h2 class="mb-0 fw-bold">Centre de Formation</h2>
+                <p class="text-muted small mb-0">Listez les compétences que vous souhaitez acquérir.</p>
+            </div>
+        </div>
+
+        {% if formations|length > 0 %}
+            <div class="row g-4">
+                {% for formation in formations %}
+                    <div class="col-md-4 col-lg-3">
+                        <div class="premium-card">
+                            <div class="card-visual">
+                                <span class="card-label" style="color: #10b981;">E-Learning</span>
+                                {% if formation.imageUrl %}
+                                    <img src="{{ asset('uploads/formations/' ~ formation.imageUrl) }}" class="w-100 h-100 object-fit-cover" alt="">
+                                {% else %}
+                                    <div class="w-100 h-100 bg-light d-flex align-items-center justify-content-center">
+                                        <i class="bi bi-book fa-3x opacity-10"></i>
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="card-content">
+                                <div class="d-flex justify-content-between mb-2">
+                                    <div class="meta-badge badge-green">
+                                        <i class="bi bi-book"></i> {{ formation.categorie|default('Cours') }}
+                                    </div>
+                                    <div class="meta-badge badge-blue">
+                                        <i class="bi bi-bar-chart"></i> Medium
+                                    </div>
+                                </div>
+                                <h3 class="card-title">{{ formation.titre }}</h3>
+                                <div class="mt-auto">
+                                    <div class="d-flex align-items-center gap-1 text-warning mb-2" style="font-size: 12px;">
+                                        <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-half"></i>
+                                        <span class="text-muted ms-1">(4.5)</span>
+                                    </div>
+                                    <div class="price-tag">{{ formation.prix }} TND</div>
+                                </div>
+                            </div>
+                            <div class="card-action-bar">
+                                <a href="{{ path('app_formations') }}" class="action-btn btn-primary-glass">Rejoindre</a>
+                                <form action="{{ path('app_wishlist_toggle', {id: formation.id}) }}" method="POST">
+                                    <button type="submit" class="action-btn btn-delete-glass"><i class="bi bi-trash"></i></button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <i class="bi bi-mortarboard display-3 mb-3 d-block opacity-25"></i>
+                <a href="{{ path('app_formations') }}" class="btn btn-outline-success rounded-pill mt-3">Découvrir le catalogue</a>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- 3. Investment Section -->
+    <div id="investments" class="section-container animate-up" style="animation-delay: 0.5s;">
+        <div class="section-header">
+            <div class="section-icon" style="background: rgba(245, 158, 11, 0.1); color: #f59e0b;">
+                <i class="bi bi-gem"></i>
+            </div>
+            <div>
+                <h2 class="mb-0 fw-bold">Réserve d'Investissements</h2>
+                <p class="text-muted small mb-0">Gardez un œil sur les meilleures opportunités du marché.</p>
+            </div>
+        </div>
+
+        {% if investmentItems|length > 0 %}
+            <div class="row g-4">
+                {% for item in investmentItems %}
+                    <div class="col-md-4 col-lg-3">
+                        <div class="premium-card">
+                            <div class="card-visual">
+                                <span class="card-label" style="color: #f59e0b;">{{ item.investment.category|default('Projet') }}</span>
+                                {% if item.investment.imageUrl %}
+                                    <img src="{{ asset('uploads/investments/' ~ item.investment.imageUrl) }}" class="w-100 h-100 object-fit-cover" alt="">
+                                {% else %}
+                                    <div class="w-100 h-100 d-flex align-items-center justify-content-center" style="background: #fffbeb;">
+                                        <i class="bi bi-building fa-3x opacity-25"></i>
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="card-content">
+                                <div class="d-flex flex-wrap gap-1 mb-2">
+                                    <div class="meta-badge badge-orange">
+                                        <i class="bi bi-shield-check"></i> Risque: {{ item.investment.riskLevel }}
+                                    </div>
+                                    <div class="meta-badge badge-blue">
+                                        <i class="bi bi-geo-alt"></i> {{ item.investment.location|default('Tunisie') }}
+                                    </div>
+                                </div>
+                                <h3 class="card-title">{{ item.investment.name }}</h3>
+                                <div class="mt-auto">
+                                    <div class="price-tag">{{ item.investment.estimatedValue }} TND</div>
+                                    <div class="progress mt-2" style="height: 6px;">
+                                        <div class="progress-bar bg-warning" style="width: 75%"></div>
+                                    </div>
+                                    <div class="small text-muted mt-1">Objectif financement: 75%</div>
+                                </div>
+                            </div>
+                            <div class="card-action-bar">
+                                <a href="{{ path('app_investment_index') }}" class="action-btn btn-primary-glass">Détails</a>
+                                <form action="{{ path('app_investment_wishlist_toggle', {id: item.investment.id}) }}" method="POST">
+                                    <button type="submit" class="action-btn btn-delete-glass"><i class="bi bi-trash"></i></button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <i class="bi bi-briefcase display-3 mb-3 d-block opacity-25"></i>
+                <a href="{{ path('app_investment_index') }}" class="btn btn-outline-warning rounded-pill mt-3">MarketPlace</a>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- 4. Wallet Section -->
+    <div id="wallet" class="section-container animate-up" style="animation-delay: 0.6s;">
+        <div class="section-header">
+            <div class="section-icon" style="background: rgba(219, 39, 119, 0.1); color: #db2777;">
+                <i class="bi bi-bullseye"></i>
+            </div>
+            <div>
+                <h2 class="mb-0 fw-bold">Objectifs de Vie</h2>
+                <p class="text-muted small mb-0">Gérez vos ambitions d'épargne et vos projets personnels.</p>
+            </div>
+        </div>
+
+        {% if walletItems|length > 0 %}
+            <div class="row g-4">
+                {% for item in walletItems %}
+                    <div class="col-md-4 col-lg-3">
+                        <div class="premium-card">
+                            <div class="card-visual">
+                                <span class="card-label" style="color: #db2777;">Goal</span>
+                                <div class="w-100 h-100 d-flex align-items-center justify-content-center" style="background: #fdf2f8;">
+                                    <i class="bi bi-gift fa-3x opacity-25"></i>
+                                </div>
+                            </div>
+                            <div class="card-content">
+                                <h3 class="card-title">{{ item.name }}</h3>
+                                <div class="mt-auto">
+                                    <div class="price-tag text-danger">{{ item.price }} TND</div>
+                                </div>
+                            </div>
+                            <div class="card-action-bar">
+                                <a href="{{ path('wishlist') }}" class="action-btn btn-primary-glass">Simuler</a>
+                                <a href="{{ path('wishlist_delete', {id: item.id}) }}" class="action-btn btn-delete-glass"><i class="bi bi-trash"></i></a>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <i class="bi bi-piggy-bank display-3 mb-3 d-block opacity-25"></i>
+                <a href="{{ path('wishlist') }}" class="btn btn-outline-danger rounded-pill mt-3">Fixer un objectif</a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+    // Smooth Scrolling with Anchor Highlighting
+    const navLinks = document.querySelectorAll('.wish-nav-link');
+    const sections = document.querySelectorAll('.section-container');
+
+    window.addEventListener('scroll', () => {
+        let current = "";
+        sections.forEach(section => {
+            const sectionTop = section.offsetTop;
+            const sectionHeight = section.clientHeight;
+            if (pageYOffset >= (sectionTop - 150)) {
+                current = section.getAttribute('id');
+            }
+        });
+
+        navLinks.forEach(link => {
+            link.classList.remove('active');
+            if (link.getAttribute('href').includes(current)) {
+                link.classList.add('active');
+            }
+        });
+    });
+
+    navLinks.forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const target = document.querySelector(this.getAttribute('href'));
+            window.scrollTo({
+                top: target.offsetTop - 120,
+                behavior: 'smooth'
+            });
+        });
+    });
+</script>
+{% endblock %}

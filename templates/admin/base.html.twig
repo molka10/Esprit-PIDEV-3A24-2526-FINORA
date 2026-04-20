@@ -85,7 +85,6 @@
 
 	<!-- Theme CSS -->
 	<link rel="stylesheet" type="text/css" href="{{ asset('assets/css/style.css') }}">
-	<link rel="stylesheet" type="text/css" href="{{ asset('assets/css/app.css') }}">
 
 	{% block stylesheets %}{% endblock %}
 </head>
@@ -235,6 +234,41 @@
                     </div>
                 </li>
 				{% endif %}
+
+				<!-- Title -->
+				<li class="nav-item ms-2 my-2">Wallet</li>
+
+                <!-- Collapsible Wallet Menu -->
+                <li class="nav-item">
+                    <a class="nav-link d-flex align-items-center {% if app.request.attributes.get('_route') starts with 'app_admin_wallet' or app.request.attributes.get('_route') starts with 'wallet_' %}active{% endif %}" data-bs-toggle="collapse" href="#collapseWallet" role="button" aria-expanded="false" aria-controls="collapseWallet">
+                        <i class="bi bi-wallet2 fa-fw me-2"></i>Espace Wallet
+                        <i class="fas fa-chevron-down ms-auto" style="font-size: 0.8em;"></i>
+                    </a>
+                    <div class="collapse {% if app.request.attributes.get('_route') starts with 'app_admin_wallet' or app.request.attributes.get('_route') starts with 'wallet_' %}show{% endif %}" id="collapseWallet">
+                        <ul class="nav flex-column ms-4 border-start border-secondary">
+                            <li class="nav-item">
+                                <a class="nav-link py-1 {% if app.request.attributes.get('_route') == 'app_admin_wallet' %}active{% endif %}" href="{{ path('app_admin_wallet') }}">
+                                    <i class="bi bi-grid-fill fa-fw me-2" style="font-size: 0.9em;"></i>Dashboard Wallet
+                                </a>
+                            </li>
+                            <li class="nav-item mt-1">
+                                <a class="nav-link py-1 {% if app.request.attributes.get('_route') == 'wallet_admin_fraud_audit' %}active{% endif %}" href="{{ path('wallet_admin_fraud_audit') }}">
+                                    <i class="bi bi-shield-exclamation fa-fw me-2 text-warning" style="font-size: 0.9em;"></i>Audit Fraudes
+                                </a>
+                            </li>
+                            <li class="nav-item mt-1">
+                                <a class="nav-link py-1 {% if app.request.attributes.get('_route') == 'wallet_admin_categories' %}active{% endif %}" href="{{ path('wallet_admin_categories') }}">
+                                    <i class="bi bi-tags fa-fw me-2" style="font-size: 0.9em;"></i>Gestions Catégories
+                                </a>
+                            </li>
+                            <li class="nav-item mt-1 mb-2">
+                                <a class="nav-link py-1 {% if app.request.attributes.get('_route') == 'wallet_admin_cards' %}active{% endif %}" href="{{ path('wallet_admin_cards') }}">
+                                    <i class="bi bi-credit-card fa-fw me-2" style="font-size: 0.9em;"></i>Cartes Bancaires
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </li>
 
 			</ul>
 			<!-- Sidebar menu end -->

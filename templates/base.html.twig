@@ -86,7 +86,6 @@
 
 	<!-- Theme CSS -->
 	<link rel="stylesheet" type="text/css" href="{{ asset('assets/css/style.css') }}">
-	<link rel="stylesheet" type="text/css" href="{{ asset('assets/css/app.css') }}">
 
     <style>
         :root {
@@ -108,19 +107,100 @@
                 animation: fadeDown 0.2s ease-out forwards;
             }
         }
-        @keyframes fadeDown {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
+        .glass-header {
+            background: rgba(255, 255, 255, 0.95) !important; /* Made more solid to avoid bleed-through */
+            backdrop-filter: blur(12px) saturate(180%);
+            -webkit-backdrop-filter: blur(12px) saturate(180%);
+            border-bottom: 2px solid rgba(124, 58, 237, 0.1) !important;
+            transition: all 0.3s ease;
+            z-index: 1050; /* Ensure it stays above everything */
         }
-    </style>
+        body {
+            padding-top: {% if app.user %}160px{% else %}80px{% endif %};
+            background: #f8fafc;
+        }
 
-{% block stylesheets %}{% endblock %}</head>
+        /* --- Premium Redesign Tokens --- */
+        .text-gradient {
+            background: linear-gradient(135deg, #7c3aed 0%, #3b1278 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .pro-hero {
+            background: linear-gradient(rgba(30, 27, 75, 0.85), rgba(30, 27, 75, 0.75)), url('{{ asset('assets/images/finora_hero_bg.png') }}');
+            background-size: cover;
+            background-position: center;
+            min-height: 85vh;
+            display: flex;
+            align-items: center;
+            position: relative;
+            z-index: 1;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .glass-card:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-10px);
+            border-color: rgba(124, 58, 237, 0.4);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+        }
+        .explore-icon {
+            width: 70px;
+            height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 20px;
+            margin-bottom: 1.5rem;
+            font-size: 2rem;
+            background: rgba(124, 58, 237, 0.15);
+            color: #a78bfa;
+        }
+        .animate-float {
+            animation: float 6s ease-in-out infinite;
+        }
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+            100% { transform: translateY(0px); }
+        }
+        .btn-premium {
+            background: white;
+            color: var(--finora-purple);
+            border: none;
+            padding: 1rem 2.5rem;
+            font-weight: 700;
+            border-radius: 50px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+        .btn-premium:hover {
+            transform: scale(1.05) translateY(-2px);
+            background: #f3f4f6;
+            box-shadow: 0 15px 30px rgba(124, 58, 237, 0.3);
+        }
+    	/* Global Anchor Fix for Sticky Navbars */
+	[id] {
+		scroll-margin-top: 160px; /* Offset for dual navbars */
+	}
+</style>
+
+{% block stylesheets %}{% endblock %}
+	<!-- SweetAlert2 -->
+	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
 
 
 <body>
 
 <!-- Header START -->
-<header class="navbar-light navbar-sticky">
+{% block header %}
+<header class="navbar-light fixed-top glass-header">
 	<!-- Nav START -->
 	<nav class="navbar navbar-expand-xl z-index-9">
 		<div class="container">
@@ -132,6 +212,7 @@
 			<!-- Logo END -->
 	
 			<!-- Responsive navbar toggler -->
+            {% if app.request.attributes.get('_route') not in ['app_login', 'app_register'] %}
 			<button class="navbar-toggler ms-auto" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
 				<span class="navbar-toggler-animation">
 					<span></span>
@@ -139,8 +220,13 @@
 					<span></span>
 				</span>
 			</button>
+            {% else %}
+            <!-- Spacer for alignment when toggler is hidden -->
+            <div class="ms-auto d-xl-none"></div>
+            {% endif %}
 	
 			<!-- Main navbar START -->
+            {% if app.request.attributes.get('_route') not in ['app_login', 'app_register'] %}
 			<div class="navbar-collapse collapse" id="navbarCollapse">
 				<!-- Nav Search START -->
 				<div class="col-xxl-6">
@@ -170,7 +256,7 @@
 							<li><a class="dropdown-item py-2 fw-semibold" href="{{ path('app_formations') }}"><i class="fas fa-layer-group me-2" style="color:var(--finora-purple, #7c3aed);"></i>Toutes les Formations</a></li>
 							<li><a class="dropdown-item py-2 fw-semibold" href="{{ path('app_lessons') }}"><i class="fas fa-book-open me-2" style="color:var(--finora-purple, #7c3aed);"></i>Toutes les Leçons</a></li>
 							<li><a class="dropdown-item py-2 fw-semibold" href="{{ path('app_my_certificates') }}"><i class="fas fa-certificate me-2" style="color:var(--finora-purple, #7c3aed);"></i>Mes Certificats</a></li>
-							<li><a class="dropdown-item py-2 fw-semibold" href="{{ path('app_wishlist_index') }}"><i class="fas fa-heart me-2" style="color:var(--finora-purple, #7c3aed);"></i>Ma Wishlist</a></li>
+							<li><a class="dropdown-item py-2 fw-semibold" href="{{ path('app_unified_wishlist') }}#formations"><i class="fas fa-heart me-2" style="color:var(--finora-purple, #7c3aed);"></i>Ma Wishlist</a></li>
 							<li><hr class="dropdown-divider"></li>
 							<li><a class="dropdown-item py-2 fw-semibold text-primary" href="{{ path('public_centres_map') }}"><i class="fas fa-map-marker-alt me-2"></i>Centres de Formations</a></li>
 						</ul>
@@ -196,7 +282,7 @@
 							<li><a class="dropdown-item py-2 fw-semibold" href="{{ path('app_investor_profile') }}"><i class="fas fa-user-tie me-2" style="color:var(--finora-purple, #7c3aed);"></i>My Portfolio</a></li>
 							<li><a class="dropdown-item py-2 fw-semibold" href="{{ path('app_management_index') }}"><i class="fas fa-tasks me-2" style="color:var(--finora-purple, #7c3aed);"></i>Suivi management</a></li>
 							<li><hr class="dropdown-divider"></li>
-							<li><a class="dropdown-item py-2 fw-semibold text-danger" href="{{ path('app_investment_wishlist_list') }}"><i class="fas fa-heart me-2"></i>Ma Wishlist</a></li>
+							<li><a class="dropdown-item py-2 fw-semibold" href="{{ path('app_unified_wishlist') }}#investments"><i class="fas fa-heart me-2" style="color:#7c3aed;"></i>Ma Wishlist</a></li>
 						</ul>
 					</li>
 
@@ -204,41 +290,25 @@
 				<!-- Nav Main menu END -->
 
 			</div>
+            {% else %}
+            <!-- Spacer to push auth buttons to the right -->
+            <div class="me-auto"></div>
+            {% endif %}
 			<!-- Main navbar END -->
 
 			<!-- Profile and notification START -->
-            <ul class="nav flex-row align-items-center list-unstyled ms-xl-auto">
-                    </ul>
-                </li>
-                <!-- Currency dropdown END -->
-
+			<ul class="nav flex-row align-items-center list-unstyled ms-xl-auto">
                 {% if app.user %}
-                    <!-- Wishlist Dropdown START -->
-                    <li class="nav-item ms-0 ms-sm-2 d-none d-sm-block dropdown">
-                        <a class="btn btn-light btn-round mb-0" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" title="Mes Wishlists">
-                            <i class="bi bi-heart fa-fw"></i>
+
+
+
+                    <!-- Wishlist Link START -->
+                    <li class="nav-item ms-0 ms-sm-2 d-none d-sm-block">
+                        <a class="btn btn-light btn-round mb-0" href="{{ path('app_unified_wishlist') }}" title="Ma Wishlist Unifiée">
+                            <i class="fas fa-heart" style="color:#7c3aed;"></i>
                         </a>
-                        <ul class="dropdown-menu dropdown-menu-end border-0 shadow-sm mt-2" style="border-radius: 14px; min-width: 220px;">
-                            <li>
-                                <h6 class="dropdown-header text-muted small">
-                                    <i class="bi bi-heart-fill text-danger me-1"></i> Mes Favoris
-                                </h6>
-                            </li>
-                            <li>
-                                <a class="dropdown-item py-2 fw-semibold d-flex align-items-center gap-2" href="{{ path('app_wishlist_index') }}">
-                                    <span class="badge rounded-pill" style="background:#ede9fe; color:#7c3aed;">📚</span>
-                                    Wishlist Formations
-                                </a>
-                            </li>
-                            <li>
-                                <a class="dropdown-item py-2 fw-semibold d-flex align-items-center gap-2" href="{{ path('app_investment_wishlist_list') }}">
-                                    <span class="badge rounded-pill" style="background:#ede9fe; color:#7c3aed;">💼</span>
-                                    Wishlist Investissements
-                                </a>
-                            </li>
-                        </ul>
                     </li>
-                    <!-- Wishlist Dropdown END -->
+                    <!-- Wishlist Link END -->
 
                     <!-- Notification dropdown START -->
                     <li class="nav-item ms-2 ms-sm-3 dropdown">
@@ -391,22 +461,30 @@
 			<div class="navbar-collapse w-100 collapse justify-content-center" id="navbarCollapse2">
 				<!-- Nav Main menu START -->
 				<ul class="navbar-nav navbar-nav-scroll mx-auto">
-					<li class="nav-item">
-						<a class="nav-link fw-bold text-secondary mx-3" href="{{ path('app_investment_home') }}" style="font-size: 0.9rem;">
-							<i class="bi bi-house-door me-2"></i>ACCUEIL
-						</a>
-					</li>
+
 					<li class="nav-item dropdown">
 						<a class="nav-link dropdown-toggle fw-bold text-primary" href="#" id="bourseDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" style="font-size: 0.9rem;">
                             <i class="bi bi-graph-up-arrow me-2"></i>BOURSE
                         </a>
 						<ul class="dropdown-menu shadow border-0" aria-labelledby="bourseDropdown" style="border-radius: 12px; min-width: 180px;">
 							<li><a class="dropdown-item py-2 fw-semibold" href="{{ path('app_market') }}"><i class="bi bi-shop me-2 text-primary"></i>Marché Live</a></li>
+							<li><a class="dropdown-item py-2 fw-semibold" href="{{ path('app_unified_wishlist') }}#bourse"><i class="fas fa-heart me-2" style="color:#7c3aed;"></i>Ma Wishlist Bourse</a></li>
 							<li><a class="dropdown-item py-2 fw-semibold" href="{{ path('app_history') }}"><i class="bi bi-clock-history me-2 text-primary"></i>Historique</a></li>
 						</ul>
 					</li>
 
-					<li class="nav-item"><a class="nav-link fw-bold text-secondary mx-3" href="#" style="font-size: 0.9rem;"><i class="bi bi-wallet2 me-2"></i>WALLET</a></li>
+					<li class="nav-item dropdown">
+						<a class="nav-link dropdown-toggle fw-bold text-secondary mx-3" href="#" id="walletDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" style="font-size: 0.9rem;">
+							<i class="bi bi-wallet2 me-2"></i>WALLET
+						</a>
+						<ul class="dropdown-menu shadow border-0" aria-labelledby="walletDropdown" style="border-radius: 12px; min-width: 200px;">
+							<li><a class="dropdown-item py-2 fw-semibold" href="{{ path('dashboard') }}"><i class="bi bi-ui-checks-grid me-2 text-primary"></i>Mon Wallet (Dashboard)</a></li>
+							<li><a class="dropdown-item py-2 fw-semibold" href="{{ path('category_list') }}"><i class="bi bi-tags me-2 text-primary"></i>Mes Catégories</a></li>
+							<li><a class="dropdown-item py-2 fw-semibold" href="{{ path('transactions') }}"><i class="bi bi-card-list me-2 text-primary"></i>Historique Transactions</a></li>
+							<li><a class="dropdown-item py-2 fw-semibold" href="{{ path('wishlist') }}"><i class="bi bi-heart me-2 text-primary"></i>Objectifs Wishlist</a></li>
+							<li><a class="dropdown-item py-2 fw-semibold" href="{{ path('ai_analyse') }}"><i class="bi bi-robot me-2 text-warning"></i>Finora AI Analysis</a></li>
+						</ul>
+					</li>
 					<li class="nav-item"><a class="nav-link fw-bold text-secondary mx-3" href="{{ path('app_management_index') }}" style="font-size: 0.9rem;"><i class="bi bi-briefcase me-2"></i>PORTFEUILLE</a></li>
 					<li class="nav-item"><a class="nav-link fw-bold text-secondary mx-3" href="#" style="font-size: 0.9rem;"><i class="bi bi-megaphone me-2"></i>APPEL D'OFFRE</a></li>
 					<li class="nav-item dropdown">
@@ -417,18 +495,20 @@
 							<li><a class="dropdown-item py-2 fw-semibold" href="{{ path('app_formations') }}"><i class="fas fa-layer-group me-2" style="color:var(--finora-purple, #7c3aed);"></i>Toutes les Formations</a></li>
 							<li><a class="dropdown-item py-2 fw-semibold" href="{{ path('app_lessons') }}"><i class="fas fa-book-open me-2" style="color:var(--finora-purple, #7c3aed);"></i>Toutes les Leçons</a></li>
 							<li><a class="dropdown-item py-2 fw-semibold" href="{{ path('app_my_certificates') }}"><i class="fas fa-certificate me-2" style="color:var(--finora-purple, #7c3aed);"></i>Mes Certificats</a></li>
-							<li><a class="dropdown-item py-2 fw-semibold" href="{{ path('app_wishlist_index') }}"><i class="fas fa-heart me-2" style="color:var(--finora-purple, #7c3aed);"></i>Ma Wishlist</a></li>
+							<li><a class="dropdown-item py-2 fw-semibold" href="{{ path('app_unified_wishlist') }}#formations"><i class="fas fa-heart me-2" style="color:var(--finora-purple, #7c3aed);"></i>Ma Wishlist</a></li>
 							<li><hr class="dropdown-divider"></li>
 							<li><a class="dropdown-item py-2 fw-semibold text-primary" href="{{ path('public_centres_map') }}"><i class="fas fa-map-marker-alt me-2"></i>Centres de Formations</a></li>
 						</ul>
 					</li>
 					<li class="nav-item dropdown">
 						<a class="nav-link dropdown-toggle fw-bold text-secondary mx-3" href="#" id="investmentDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" style="font-size: 0.9rem;">
-							<i class="bi bi-cash-stack me-2"></i>INVESTISSEMENT
+							<i class="bi bi-cash-stack me-2"></i>INVESTIR
 						</a>
 						<ul class="dropdown-menu shadow border-0" aria-labelledby="investmentDropdown" style="border-radius: 12px; min-width: 200px;">
+							<li><a class="dropdown-item py-2 fw-semibold" href="{{ path('app_investment_home') }}"><i class="bi bi-star-fill me-2" style="color:var(--finora-purple, #7c3aed);"></i>Recommandation</a></li>
 							<li><a class="dropdown-item py-2 fw-semibold" href="{{ path('app_investment_index') }}"><i class="bi bi-grid-fill me-2" style="color:var(--finora-purple, #7c3aed);"></i>MarketPlace</a></li>
 							<li><a class="dropdown-item py-2 fw-semibold" href="{{ path('app_management_index') }}"><i class="bi bi-briefcase-fill me-2" style="color:var(--finora-purple, #7c3aed);"></i>Suivi management</a></li>
+							<li><a class="dropdown-item py-2 fw-semibold" href="{{ path('app_unified_wishlist') }}#investments"><i class="fas fa-heart me-2" style="color:#7c3aed;"></i>Ma Wishlist Investissements</a></li>
 							{% if not is_granted('ROLE_ADMIN') %}
 								<li><a class="dropdown-item py-2 fw-semibold" href="{{ path('app_investor_profile') }}"><i class="bi bi-person-fill me-2" style="color:var(--finora-purple, #7c3aed);"></i>Profil Investisseur</a></li>
 							{% endif %}
@@ -447,10 +527,23 @@
     {% endif %}
 
 </header>
+{% endblock %}
 <!-- Header END -->
 
 <!-- **************** MAIN CONTENT START **************** -->
 <main>
+    <div class="container mt-4">
+        {% for label, messages in app.flashes %}
+            {% if label != 'fraud_alert' %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ label }} alert-dismissible fade show">
+                        {{ message|raw }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endfor %}
+    </div>
     {% block body %}{% endblock %}
 </main>
 <!-- **************** MAIN CONTENT END **************** -->
@@ -458,6 +551,7 @@
 
 <!-- =======================
 Footer START -->
+{% block footer %}
 <footer class="bg-dark pt-5">
 	<div class="container">
 		<!-- Row START -->
@@ -485,34 +579,35 @@ Footer START -->
 				<div class="row g-4">
 					<!-- Link block -->
 					<div class="col-6 col-md-4">
-						<h5 class="mb-2 mb-md-4 text-white">Company</h5>
+						<h5 class="mb-2 mb-md-4 text-white">Finora</h5>
 						<ul class="nav flex-column text-primary-hover">
-							<li class="nav-item"><a class="nav-link" href="#">About us</a></li>
-							<li class="nav-item"><a class="nav-link" href="#">Contact us</a></li>
-							<li class="nav-item"><a class="nav-link" href="#">News and Blogs</a></li>
-							<li class="nav-item"><a class="nav-link" href="#">Library</a></li>
-							<li class="nav-item"><a class="nav-link" href="#">Career</a></li>
+							<li class="nav-item"><a class="nav-link" href="{{ path('app_home') }}">À propos</a></li>
+							<li class="nav-item"><a class="nav-link" href="#">Contactez-nous</a></li>
+							<li class="nav-item"><a class="nav-link" href="#">Blog & Actus</a></li>
+							<li class="nav-item"><a class="nav-link" href="#">Nos Partenaires</a></li>
+							<li class="nav-item"><a class="nav-link" href="#">Carrières</a></li>
 						</ul>
 					</div>
 									
 					<!-- Link block -->
 					<div class="col-6 col-md-4">
-						<h5 class="mb-2 mb-md-4 text-white">Community</h5>
+						<h5 class="mb-2 mb-md-4 text-white">Modules</h5>
 						<ul class="nav flex-column text-primary-hover">
-							<li class="nav-item"><a class="nav-link" href="#">Documentation</a></li>
-							<li class="nav-item"><a class="nav-link" href="#">Faq</a></li>
-							<li class="nav-item"><a class="nav-link" href="#">Forum</a></li>
-							<li class="nav-item"><a class="nav-link" href="#">Sitemap</a></li>
+							<li class="nav-item"><a class="nav-link" href="{{ path('app_market') }}">Marché Boursier</a></li>
+							<li class="nav-item"><a class="nav-link" href="{{ path('app_investment_index') }}">Investissements</a></li>
+							<li class="nav-item"><a class="nav-link" href="{{ path('app_formations') }}">Formations AI</a></li>
+							<li class="nav-item"><a class="nav-link" href="{{ path('app_home') }}">Trading Simulator</a></li>
 						</ul>
 					</div>
 
 					<!-- Link block -->
 					<div class="col-6 col-md-4">
-						<h5 class="mb-2 mb-md-4 text-white">Teaching</h5>
+						<h5 class="mb-2 mb-md-4 text-white">Aide</h5>
 						<ul class="nav flex-column text-primary-hover">
-							<li class="nav-item"><a class="nav-link" href="#">Become a teacher</a></li>
-							<li class="nav-item"><a class="nav-link" href="#">How to guide</a></li>
-							<li class="nav-item"><a class="nav-link" href="#">Terms &amp; Conditions</a></li>
+							<li class="nav-item"><a class="nav-link" href="#">FAQ</a></li>
+							<li class="nav-item"><a class="nav-link" href="#">Documentation</a></li>
+							<li class="nav-item"><a class="nav-link" href="#">Support Technique</a></li>
+							<li class="nav-item"><a class="nav-link" href="#">Plan du site</a></li>
 						</ul>
 					</div>
 				</div>
@@ -524,20 +619,20 @@ Footer START -->
 				<h5 class="mb-2 mb-md-4 text-white">Contact</h5>
 				<!-- Time -->
 				<p class="mb-2 text-body-secondary">
-					Toll free:<span class="h6 fw-light text-white ms-2">+1234 568 963</span>
-					<span class="d-block small">(9:AM to 8:PM IST)</span>
+					Téléphone :<span class="h6 fw-light text-white ms-2">+216 71 123 456</span>
+					<span class="d-block small">(Lun - Ven / 09:00 - 18:00)</span>
 				</p>
 
-				<p class="mb-0 text-body-secondary">Email:<span class="h6 fw-light text-white ms-2">example@gmail.com</span></p>
+				<p class="mb-0 text-body-secondary">Email :<span class="h6 fw-light text-white ms-2">contact@finora.tn</span></p>
 
 				<div class="row g-2 mt-2">
 					<!-- Google play store button -->
 					<div class="col-6 col-sm-4 col-md-3 col-lg-6">
-						<a href="#"> <img src="{{ asset('assets/images/client/google-play.svg') }}" alt=""> </a>
+						<a href="#"> <img src="{{ asset('assets/images/client/google-play.svg') }}" alt="Google Play Finora"> </a>
 					</div>
 					<!-- App store button -->
 					<div class="col-6 col-sm-4 col-md-3 col-lg-6">
-						<a href="#"> <img src="{{ asset('assets/images/client/app-store.svg') }}" alt="app-store"> </a>
+						<a href="#"> <img src="{{ asset('assets/images/client/app-store.svg') }}" alt="App Store Finora"> </a>
 					</div>
 				</div> <!-- Row END -->
 			</div> 
@@ -552,7 +647,7 @@ Footer START -->
 			<div class="container px-0">
 				<div class="d-lg-flex justify-content-between align-items-center py-3 text-center text-md-left">
 					<!-- copyright text -->
-					<div class="text-body-secondary"> Copyrights Â©{{ 'now'|date('Y') }} Finora. Build by <a href="#" class="text-body-secondary text-primary-hover">Finora</a>. </div>
+					<div class="text-body-secondary"> Copyrights ©{{ 'now'|date('Y') }} Finora. Build by <a href="#" class="text-body-secondary text-primary-hover">Finora</a>. </div>
 					<!-- copyright links-->
 					<div class="nav justify-content-center mt-3 mt-lg-0">
 						<ul class="list-inline mb-0">
@@ -578,6 +673,7 @@ Footer START -->
 		</div>
 	</div>
 </footer>
+{% endblock %}
 <!-- =======================
 Footer END -->
 
@@ -598,7 +694,70 @@ Footer END -->
 
 {% block javascripts %}{% endblock %}
 
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    {% for label, messages in app.flashes %}
+        {% for message in messages %}
+            (function() {
+                const msg = `{{ message|raw }}`;
+                const label = `{{ label }}`;
+                
+                if (msg.includes('Solde insuffisant') || msg.includes('portefeuille')) {
+                    Swal.fire({
+                        title: '<strong>Solde Insuffisant</strong>',
+                        icon: 'warning',
+                        html: msg,
+                        showCloseButton: true,
+                        showCancelButton: true,
+                        focusConfirm: false,
+                        confirmButtonText: '<i class="bi bi-wallet2"></i> Recharger mon Wallet',
+                        confirmButtonColor: '#7c3aed',
+                        cancelButtonText: 'Fermer',
+                        background: '#fff',
+                        customClass: {
+                            popup: 'animated fadeInDown'
+                        }
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            window.location.href = "{{ path('dashboard') }}";
+                        }
+                    });
+                } 
+                else if (label === 'success') {
+                    Swal.fire({
+                        title: 'Succès !',
+                        text: msg.replace(/<[^>]*>?/gm, ''),
+                        icon: 'success',
+                        timer: 3000,
+                        showConfirmButton: false,
+                        toast: true,
+                        position: 'top-end'
+                    });
+                }
+                else if (label === 'danger' || label === 'error') {
+                   Swal.fire({
+                        title: 'Attention',
+                        html: msg,
+                        icon: 'error',
+                        confirmButtonColor: '#7c3aed'
+                    });
+                }
+                else if (label === 'success') {
+                   Swal.fire({
+                        title: 'Succès',
+                        html: msg,
+                        icon: 'success',
+                        confirmButtonColor: '#7c3aed'
+                    });
+                }
+            })();
+        {% endfor %}
+    {% endfor %}
+});
+</script>
+
     <!-- Floating Currency Switcher START -->
+    {% if app.request.attributes.get('_route') != 'dashboard' %}
     <div class="position-fixed bottom-0 start-0 m-4" style="z-index: 9999;">
         <div class="dropdown dropup">
             <button class="btn btn-primary shadow-lg rounded-pill px-4 py-3 dropdown-toggle d-flex align-items-center" type="button" id="floatingCurrencyBtn" data-bs-toggle="dropdown" aria-expanded="false">
@@ -619,6 +778,7 @@ Footer END -->
             </ul>
         </div>
     </div>
+    {% endif %}
     <!-- Floating Currency Switcher END -->
 
 </body>

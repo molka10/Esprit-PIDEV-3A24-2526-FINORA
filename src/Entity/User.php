@@ -257,6 +257,20 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
+    #[ORM\Column(type: "float", options: ["default" => 0.0])]
+    private ?float $balance = 0.0;
+
+    public function getBalance(): ?float
+    {
+        return $this->balance;
+    }
+
+    public function setBalance(?float $balance): static
+    {
+        $this->balance = $balance;
+        return $this;
+    }
+
     public function getUserBiometrics(): ?UserBiometrics
     {
         return $this->userBiometrics;

@@ -20,7 +20,8 @@ class TransactionService
         private TransactionBourseRepository $transactionRepo,
         private ActionRepository $actionRepo,
         private CommissionService $commissionService,
-        private ActionService $actionService
+        private ActionService $actionService,
+        private \App\Service\WalletBalanceService $walletBalanceService
     ) {}
 
     /**
@@ -71,6 +72,52 @@ class TransactionService
         $montantTotal = $typeTransaction === 'ACHAT' 
             ? $montant + $commission 
             : $montant - $commission;
+
+        if ($user) {
+            // WALLET SYNCHRONISATION
+            $categoryRepo = $this->em->getRepository(\App\Entity\Category::class);
+            $categoryName = "Trading Bourse";
+            $category = $categoryRepo->findOneBy(['nom' => $categoryName]);
+            if (!$category) {
+                $category = new \App\Entity\Category();
+                $category->setNom($categoryName);
+                $category->setType('SERVICES');
+                $category->setPriorite('MOYENNE');
+                $category->setUserId($user->getId());
+                $this->em->persist($category);
+                $this->em->flush();
+            }
+
+            if ($typeTransaction === 'ACHAT') {
+                $balance = $this->walletBalanceService->calculateUserBalance($user->getId());
+                if ($balance < $montantTotal) {
+                    throw new \Exception(sprintf(
+                        "Solde insuffisant dans votre portefeuille. Requis: %.2f DT, Actuel: %.2f DT",
+                        $montantTotal,
+                        $balance
+                    ));
+                }
+                
+                $walletTx = new \App\Entity\TransactionWallet();
+                $walletTx->setMontant(-abs($montantTotal)); // Negative = expense/outcome
+                $walletTx->setType('OUTCOME');
+                $walletTx->setDateTransaction(new \DateTime());
+                $walletTx->setCategory($category);
+                $walletTx->setUserId($user->getId());
+                $walletTx->setNomTransaction('Achat de ' . $quantite . ' actions ' . $action->getSymbole());
+                $this->em->persist($walletTx);
+
+            } else { // VENTE
+                $walletTx = new \App\Entity\TransactionWallet();
+                $walletTx->setMontant(abs($montantTotal)); // Positive = income
+                $walletTx->setType('INCOME');
+                $walletTx->setDateTransaction(new \DateTime());
+                $walletTx->setCategory($category);
+                $walletTx->setUserId($user->getId());
+                $walletTx->setNomTransaction('Vente de ' . $quantite . ' actions ' . $action->getSymbole());
+                $this->em->persist($walletTx);
+            }
+        }
 
         // 6. Créer la transaction
         $transaction = new TransactionBourse();

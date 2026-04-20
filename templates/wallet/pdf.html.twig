@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <style>
+        body { font-family: 'Helvetica', 'Arial', sans-serif; color: #1e1b4b; margin: 0; padding: 20px; }
+        .header { text-align: center; margin-bottom: 20px; border-bottom: 2px solid #7c3aed; padding-bottom: 15px; }
+        .logo { font-size: 26px; font-weight: bold; color: #7c3aed; }
+        .title { font-size: 16px; font-weight: bold; color: #1e1b4b; margin-top: 5px; }
+        
+        .summary-table { width: 100%; margin-bottom: 20px; }
+        .summary-cell { background-color: #f8fafc; padding: 15px; text-align: center; border: 5px solid #fff; }
+        .summary-label { font-size: 9px; color: #64748b; font-weight: bold; text-transform: uppercase; }
+        .summary-value { display: block; font-size: 16px; font-weight: bold; color: #7c3aed; }
+
+        table.data-table { width: 100%; border-collapse: collapse; }
+        th { background-color: #7c3aed; color: #ffffff; padding: 10px; text-align: left; font-size: 10px; }
+        td { padding: 10px; border-bottom: 1px solid #e2e8f0; font-size: 11px; }
+        .footer { margin-top: 30px; text-align: center; font-size: 9px; color: #94a3b8; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo">FINORA</div>
+        <div class="title">RAPPORT D'ACTIVITÉ PERSONNEL</div>
+        <div style="font-size: 10px; color: #64748b;">Généré le {{ "now"|date("d/m/Y H:i") }}</div>
+    </div>
+
+    {% set total_inc = 0 %}
+    {% set total_out = 0 %}
+    {% for t in transactions %}
+        {% if t.type == 'INCOME' %}
+            {% set total_inc = total_inc + t.montant %}
+        {% else %}
+            {% set total_out = total_out + (t.montant|abs) %}
+        {% endif %}
+    {% endfor %}
+
+    <table class="summary-table">
+        <tr>
+            <td class="summary-cell">
+                <span class="summary-label">Total Revenus</span>
+                <span class="summary-value">+{{ total_inc|number_format(2, '.', ',') }} DT</span>
+            </td>
+            <td class="summary-cell">
+                <span class="summary-label">Total Dépenses</span>
+                <span class="summary-value">-{{ total_out|number_format(2, '.', ',') }} DT</span>
+            </td>
+        </tr>
+    </table>
+
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Libellé</th>
+                <th>Type</th>
+                <th>Catégorie</th>
+                <th>Montant</th>
+                <th>Date</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for t in transactions %}
+            <tr>
+                <td style="font-weight: bold;">{{ t.nomTransaction }}</td>
+                <td>{{ t.type }}</td>
+                <td>{{ t.category ? t.category.nom : 'Divers' }}</td>
+                <td style="font-weight: bold; color: {{ t.type == 'INCOME' ? '#16a34a' : '#dc2626' }};">
+                    {{ t.type == 'INCOME' ? '+' : '-' }}{{ t.montant|abs|number_format(2, '.', ',') }} DT
+                </td>
+                <td style="color: #64748b;">{{ t.dateTransaction|date('d/m/Y') }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+        <tfoot>
+            <tr style="background-color: #f1f5f9;">
+                <td colspan="3" style="text-align: right; padding: 10px; font-weight: bold;">Solde Net:</td>
+                <td colspan="2" style="padding: 10px; font-weight: bold; color: {{ (total_inc - total_out) >= 0 ? '#16a34a' : '#dc2626' }};">
+                    {{ (total_inc - total_out)|number_format(2, '.', ',') }} DT
+                </td>
+            </tr>
+        </tfoot>
+    </table>
+
+    <div class="footer">Finora Smart Finance Analytics</div>
+</body>
+</html>

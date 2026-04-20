@@ -4,61 +4,104 @@
 
 {% block body %}
 <main>
-    <section class="pt-5 pb-5">
+    <section class="py-5">
         <div class="container">
-            <div class="row align-items-center g-4 purple-section p-4 p-lg-5 rounded-4 overflow-hidden mb-5">
-                <div class="col-lg-7">
-                    <span class="badge bg-primary bg-opacity-10 text-primary mb-3">Tableau de bord</span>
-                    <h1 class="display-5 mb-3 finora-title">Félicitations, {{ studentName ?: 'Apprenant' }} !</h1>
-                    <p class="mb-0">
-                        Vous trouverez ici tous vos certificats durement gagnés. Chaque certificat témoigne de votre engagement et de vos compétences acquises sur Finora.
-                    </p>
-                </div>
-                <div class="col-lg-5 text-center">
-                    <div class="icon-xxl bg-white bg-opacity-25 rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 120px; height: 120px; font-size: 60px;">
-                        🏆
+            <!-- 📊 Achievements Dashboard -->
+            <div class="row g-4 mb-5">
+                <div class="col-lg-12">
+                    <div class="card border-0 shadow-lg overflow-hidden" style="border-radius: 24px; background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%);">
+                        <div class="card-body p-4 p-md-5 position-relative">
+                            <!-- Background Decoration -->
+                            <div class="position-absolute top-0 end-0 p-5 opacity-10">
+                                <i class="fas fa-award display-1 text-white"></i>
+                            </div>
+                            
+                            <div class="row align-items-center position-relative z-index-2">
+                                <div class="col-lg-7 text-white">
+                                    <span class="badge bg-primary bg-opacity-20 text-primary-light mb-3 px-3 py-2 rounded-pill">Tableau de Bord Premium</span>
+                                    <h1 class="display-5 fw-bold mb-3">Félicitations, {{ studentName ?: 'Apprenant' }} !</h1>
+                                    <p class="lead opacity-75 mb-0">Vous avez franchi des étapes importantes dans votre parcours financier. Voici vos accréditations officielles.</p>
+                                </div>
+                                <div class="col-lg-5 mt-4 mt-lg-0">
+                                    <div class="row g-3">
+                                        <div class="col-6 col-md-4">
+                                            <div class="bg-white bg-opacity-10 backdrop-blur rounded-4 p-3 text-center border border-white border-opacity-10">
+                                                <h3 class="fw-bold text-white mb-0">{{ certificates|length }}</h3>
+                                                <small class="text-white opacity-50 text-uppercase" style="font-size: 0.6rem; letter-spacing: 1px;">Certificats</small>
+                                            </div>
+                                        </div>
+                                        <div class="col-6 col-md-4">
+                                            <div class="bg-white bg-opacity-10 backdrop-blur rounded-4 p-3 text-center border border-white border-opacity-10">
+                                                <h3 class="fw-bold text-white mb-0">{{ averageAccuracy|default('92') }}%</h3>
+                                                <small class="text-white opacity-50 text-uppercase" style="font-size: 0.6rem; letter-spacing: 1px;">Précision</small>
+                                            </div>
+                                        </div>
+                                        <div class="col-12 col-md-4">
+                                            <div class="bg-primary rounded-4 p-3 text-center border border-primary-light border-opacity-20">
+                                                <h3 class="fw-bold text-white mb-0">PRO</h3>
+                                                <small class="text-white opacity-50 text-uppercase" style="font-size: 0.6rem; letter-spacing: 1px;">Rang Actuel</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <div class="row g-4 mb-5">
-                <div class="col-12">
-                    <h3 class="fw-bold mb-4 d-flex align-items-center">
-                        <i class="fas fa-award text-primary me-2"></i>Mes Certificats Obtenus
-                    </h3>
+            <!-- 🔍 Search & Filter bar -->
+            <div class="row mb-4">
+                <div class="col-md-8 mx-auto">
+                    <div class="input-group input-group-lg shadow-sm search-glass overflow-hidden" style="border-radius: 16px; border: 1px solid rgba(0,0,0,0.05); background: white;">
+                        <span class="input-group-text bg-white border-0 ps-4"><i class="fas fa-search text-muted"></i></span>
+                        <input type="text" id="certSearch" class="form-control border-0 py-3 ps-2" placeholder="Rechercher par titre ou formation..." aria-label="Search certificates">
+                    </div>
                 </div>
-                {% if certificates|length > 0 %}
+            </div>
+
+            <!-- 📜 User Certificates Grid -->
+            <div class="row g-4" id="certificatesGrid">
+                {% if certificates is defined and certificates|length > 0 %}
                     {% for cert in certificates %}
-                        <div class="col-md-6 col-lg-4">
-                            <div class="card h-100 border-0 diploma-card">
-                                <div class="diploma-border"></div>
+                        <div class="col-md-6 col-lg-4 cert-item" data-title="{{ cert.quizTitle|lower }}" data-formation="{{ cert.formationTitle|lower }}">
+                            <div class="diploma-card-pro h-100">
+                                <div class="holofoil-effect"></div>
+                                
                                 <div class="card-body p-4 text-center">
-                                    <div class="diploma-seal mb-3">
-                                        <i class="fas fa-certificate"></i>
-                                    </div>
-                                    
-                                    <div class="small text-muted text-uppercase fw-bold mb-2" style="letter-spacing: 2px;">Certificat de Réussite</div>
-                                    
-                                    <h5 class="fw-bold mb-1" style="font-family: 'Playfair Display', serif;">{{ cert.lessonTitle }}</h5>
-                                    <p class="text-muted small mb-3 fst-italic">Formation: {{ cert.formationTitle }}</p>
-                                    
-                                    <div class="divider-gold mb-3 mx-auto"></div>
-
-                                    <div class="d-flex justify-content-center align-items-center gap-4 mb-4">
-                                        <div>
-                                            <div class="fw-bold text-dark h4 mb-0">{{ cert.score }}%</div>
-                                            <div class="small text-muted fw-bold" style="font-size: 0.65rem; text-transform: uppercase;">Score Final</div>
-                                        </div>
-                                        <div class="vr" style="height: 30px;"></div>
-                                        <div>
-                                            <div class="fw-bold text-dark h5 mb-0" style="font-size: 0.9rem;">{{ cert.takenAt|date('d/m/Y') }}</div>
-                                            <div class="small text-muted fw-bold" style="font-size: 0.65rem; text-transform: uppercase;">Délivré le</div>
+                                    <div class="d-flex justify-content-between align-items-start mb-4">
+                                        <span class="badge-premium">FINORA OFFICIAL</span>
+                                        <div class="dropdown">
+                                            <a href="#" class="btn-share-linkedin" title="Partager sur LinkedIn" onclick="alert('Partage LinkedIn activé pour {{ cert.quizTitle }}')">
+                                                <i class="fab fa-linkedin-in"></i>
+                                            </a>
                                         </div>
                                     </div>
 
-                                    <div class="d-grid">
-                                        <a href="{{ path('app_quiz_certificate', {id: cert.id}) }}" class="btn btn-gold" target="_blank">
-                                            <i class="fas fa-file-pdf me-2"></i>Voir le Diplôme
+                                    <div class="diploma-seal-pro mb-3">
+                                        <img src="{{ asset('assets/images/logo-finora.webp') }}" class="seal-logo" alt="Seal">
+                                    </div>
+
+                                    <div class="cert-type">CERTIFICAT D'EXCELLENCE</div>
+                                    <h4 class="cert-title mb-2">{{ cert.quizTitle }}</h4>
+                                    <p class="cert-subtitle mb-4">Délivré pour la formation <strong>{{ cert.formationTitle }}</strong></p>
+
+                                    <div class="cert-divider mx-auto mb-4"></div>
+
+                                    <div class="row g-2 mb-4">
+                                        <div class="col-6 border-end">
+                                            <span class="data-label">SCORE</span>
+                                            <span class="data-value text-success">{{ cert.score }}%</span>
+                                        </div>
+                                        <div class="col-6">
+                                            <span class="data-label">DATE</span>
+                                            <span class="data-value">{{ cert.takenAt|date('d M Y') }}</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="d-grid mt-4">
+                                        <a href="{{ path('app_quiz_certificate', {id: cert.id}) }}" class="btn btn-pro-action" target="_blank">
+                                            <i class="fas fa-file-download me-2"></i>Télécharger le PDF
                                         </a>
                                     </div>
                                 </div>
@@ -120,55 +163,207 @@
         </div>
     </section>
 </main>
+{% endblock %}
 
+{% block javascripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('certSearch');
+    const certItems = document.querySelectorAll('.cert-item');
+
+    if (searchInput) {
+        searchInput.addEventListener('input', function(e) {
+            const term = e.target.value.toLowerCase();
+            certItems.forEach(item => {
+                const title = item.getAttribute('data-title');
+                const formation = item.getAttribute('data-formation');
+                if (title.includes(term) || formation.includes(term)) {
+                    item.style.display = 'block';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        });
+    }
+});
+</script>
+{% endblock %}
+
+{% block stylesheets %}
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&display=swap');
+    :root {
+        --finora-pro-blue: #1e1b4b;
+        --finora-pro-gold: #d4af37;
+        --finora-pro-accent: #6366f1;
+    }
 
-    .diploma-card {
-        background: #fff;
+    .backdrop-blur {
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+    }
+
+    .text-primary-light {
+        color: #a5b4fc !important;
+    }
+
+    /* Professional Diploma Card */
+    .diploma-card-pro {
+        background: #ffffff;
+        border-radius: 20px !important;
+        overflow: hidden;
         position: relative;
-        padding: 4px;
-        transition: all 0.3s ease;
-        border-radius: 4px !important;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        border: 1px solid rgba(0,0,0,0.05) !important;
     }
-    .diploma-border {
+
+    .diploma-card-pro:hover {
+        transform: translateY(-10px) scale(1.02);
+        box-shadow: 0 25px 50px rgba(30, 27, 75, 0.15);
+    }
+
+    /* Holofoil Effect */
+    .holofoil-effect {
         position: absolute;
-        top: 10px; left: 10px; right: 10px; bottom: 10px;
-        border: 2px solid #d4af37;
+        inset: 0;
+        background: linear-gradient(125deg, 
+            transparent 0%, 
+            rgba(255,255,255,0) 40%, 
+            rgba(255,255,255,0.2) 50%, 
+            rgba(255,255,255,0) 60%, 
+            transparent 100%);
+        background-size: 200% 200%;
+        transition: 0.5s;
         pointer-events: none;
+        z-index: 1;
     }
-    .diploma-card:hover {
-        transform: scale(1.02);
-        box-shadow: 0 20px 40px rgba(124, 58, 237, 0.15);
+
+    .diploma-card-pro:hover .holofoil-effect {
+        animation: holofoil 1.5s ease infinite;
     }
-    .diploma-seal {
-        color: #d4af37;
-        font-size: 40px;
+
+    @keyframes holofoil {
+        0% { background-position: 200% 0%; }
+        100% { background-position: -200% 0%; }
     }
-    .divider-gold {
-        width: 60%;
-        height: 1px;
-        background: linear-gradient(90deg, transparent, #d4af37, transparent);
+
+    .badge-premium {
+        font-size: 0.65rem;
+        font-weight: 800;
+        letter-spacing: 1px;
+        color: #64748b;
+        background: #f8fafc;
+        padding: 5px 12px;
+        border-radius: 99px;
+        border: 1px solid #e2e8f0;
     }
-    .btn-gold {
-        background: #d4af37;
+
+    .btn-share-linkedin {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: #0077b5;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.9rem;
+        transition: all 0.2s;
+        text-decoration: none;
+    }
+
+    .btn-share-linkedin:hover {
+        transform: scale(1.1);
+        color: white;
+        background: #005582;
+    }
+
+    .diploma-seal-pro {
+        width: 60px;
+        height: 60px;
+        margin: 0 auto;
+        padding: 10px;
+        background: #f8fafc;
+        border-radius: 50%;
+        border: 2px solid var(--finora-pro-gold);
+    }
+
+    .seal-logo {
+        width: 100%;
+        height: auto;
+        object-fit: contain;
+    }
+
+    .cert-type {
+        font-size: 0.7rem;
+        font-weight: 800;
+        color: var(--finora-pro-gold);
+        letter-spacing: 3px;
+        margin-bottom: 8px;
+    }
+
+    .cert-title {
+        font-size: 1.25rem;
+        font-weight: 800;
+        color: var(--finora-pro-blue);
+        line-height: 1.2;
+    }
+
+    .cert-subtitle {
+        font-size: 0.85rem;
+        color: #64748b;
+        font-weight: 500;
+    }
+
+    .cert-divider {
+        width: 80px;
+        height: 3px;
+        background: linear-gradient(90deg, transparent, var(--finora-pro-gold), transparent);
+    }
+
+    .data-label {
+        display: block;
+        font-size: 0.6rem;
+        font-weight: 800;
+        color: #94a3b8;
+        letter-spacing: 1px;
+    }
+
+    .data-value {
+        font-weight: 800;
+        color: var(--finora-pro-blue);
+        font-size: 0.9rem;
+    }
+
+    .btn-pro-action {
+        background: var(--finora-pro-blue);
         color: white;
         border: none;
+        border-radius: 12px;
+        padding: 12px;
         font-weight: 700;
-        transition: all 0.2s;
+        transition: all 0.3s;
     }
-    .btn-gold:hover {
-        background: #b8962e;
+
+    .btn-pro-action:hover {
+        background: #312e81;
         color: white;
-        box-shadow: 0 4px 15px rgba(212, 175, 55, 0.4);
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(30, 27, 75, 0.2);
     }
-    .hover-elevate {
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+    .search-glass {
+        transition: all 0.3s;
     }
+
+    .search-glass:focus-within {
+        border-color: var(--finora-pro-accent) !important;
+        box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1) !important;
+    }
+
     .hover-elevate:hover {
         transform: translateY(-5px);
-        box-shadow: 0 10px 25px rgba(0,0,0,0.08) !important;
+        box-shadow: 0 15px 35px rgba(0,0,0,0.1) !important;
     }
 </style>
 {% endblock %}

@@ -51,6 +51,8 @@ final class FrontFormationController extends AbstractController
         }
 
         $qb = $entityManager->getRepository(Formation::class)->createQueryBuilder('f')
+            ->leftJoin('f.lessons', 'l')
+            ->addSelect('l')
             ->where('f.is_published = 1');
 
         if ($titre !== '') {
@@ -122,10 +124,13 @@ final class FrontFormationController extends AbstractController
             $passedLessonIds = array_map(fn($r) => $r->getLessonId(), $quizResults);
 
             foreach ($formations as $formation) {
-                $totalLessons = count($formation->getLessons());
+                // Now using eager-loaded lessons
+                $lessons = $formation->getLessons();
+                $totalLessons = count($lessons);
+                
                 if ($totalLessons > 0) {
                     $passedCount = 0;
-                    foreach ($formation->getLessons() as $lesson) {
+                    foreach ($lessons as $lesson) {
                         if (in_array($lesson->getId(), $passedLessonIds)) {
                             $passedCount++;
                         }
@@ -141,7 +146,7 @@ final class FrontFormationController extends AbstractController
             }
         }
 
-        return $this->render('home/formations.html.twig', [
+        $viewData = [
             'formations' => $formations,
             'titre' => $titre,
             'categorie' => $categorie,
@@ -154,7 +159,13 @@ final class FrontFormationController extends AbstractController
             'bestsellers' => $bestsellers,
             'progressMap' => $progressMap,
             'userBadges' => $this->getUserBadges($entityManager),
-        ]);
+        ];
+
+        if ($request->isXmlHttpRequest() || $request->headers->get('X-Requested-With') === 'XMLHttpRequest') {
+            return $this->render('home/_formations_grid.html.twig', $viewData);
+        }
+
+        return $this->render('home/formations.html.twig', $viewData);
     }
 
     #[Route('/formations/{id}', name: 'app_formation_show')]
@@ -219,7 +230,12 @@ final class FrontFormationController extends AbstractController
     }
 
     #[Route('/formations/{id}/inscription', name: 'app_formation_inscription')]
-    public function formationInscription(int $id, EntityManagerInterface $entityManager, Request $request): Response
+    public function formationInscription(
+        int $id, 
+        EntityManagerInterface $entityManager, 
+        Request $request,
+        \App\Service\WalletBalanceService $walletBalanceService
+    ): Response
     {
         $formation = $entityManager->getRepository(Formation::class)->find($id);
 
@@ -235,6 +251,50 @@ final class FrontFormationController extends AbstractController
         }
         
         if (!$user->getPurchasedFormations()->contains($formation)) {
+            $price = $formation->getPrix() ?? 0.0;
+            
+            // Check Wallet Balance if there's a price
+            if ($price > 0) {
+                $balance = $walletBalanceService->calculateUserBalance($user->getId());
+                
+                if ($balance < $price) {
+                    $redirectUrl = $this->generateUrl('dashboard');
+                    $this->addFlash('danger', sprintf(
+                        'Solde insuffisant dans votre portefeuille. (Requis: %.2f DT, Actuel: %.2f DT). <a href="%s" class="btn btn-sm btn-light ms-2 text-dark fw-bold">Recharger mon portefeuille</a>', 
+                        $price, 
+                        $balance,
+                        $redirectUrl
+                    ));
+                    return $this->redirectToRoute('app_formation_show', ['id' => $id]);
+                }
+                
+                // Funds are sufficient. Deduct from wallet.
+                // Find or create "Paiement Formation" Category
+                $categoryRepo = $entityManager->getRepository(\App\Entity\Category::class);
+                $categoryName = "Paiement Formation";
+                // Optionally query by user or globally. We'll search across all to find one or create one.
+                $category = $categoryRepo->findOneBy(['nom' => $categoryName]);
+                if (!$category) {
+                    $category = new \App\Entity\Category();
+                    $category->setNom($categoryName);
+                    $category->setType('OUTCOME');
+                    $category->setPriorite('HAUTE');
+                    $category->setUserId($user->getId());
+                    $entityManager->persist($category);
+                    $entityManager->flush();
+                }
+                
+                $transaction = new \App\Entity\TransactionWallet();
+                $transaction->setMontant(-abs($price)); // Negative = expense
+                $transaction->setType('OUTCOME');
+                $transaction->setDateTransaction(new \DateTime());
+                $transaction->setCategory($category);
+                $transaction->setUserId($user->getId());
+                $transaction->setNomTransaction('Achat Formation: ' . $formation->getTitre());
+                
+                $entityManager->persist($transaction);
+            }
+
             $user->addPurchasedFormation($formation);
             $entityManager->flush();
         }

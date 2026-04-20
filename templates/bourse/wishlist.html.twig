@@ -1,0 +1,54 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Ma Wishlist Bourse — Finora{% endblock %}
+
+{% block body %}
+<div class="container py-5">
+    <div class="row mb-4 text-center">
+        <div class="col-12">
+            <h1 class="display-6 fw-bold mb-2">Ma Wishlist Bourse</h1>
+            <p class="text-muted">Suivez l'évolution de vos actions favorites en temps réel.</p>
+        </div>
+    </div>
+
+    {% if wishlist|length > 0 %}
+        <div class="row g-4">
+            {% for item in wishlist %}
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100 shadow-sm border-0" style="border-radius:15px; overflow:hidden;">
+                        <div class="card-header bg-dark text-white py-3 px-4 d-flex justify-content-between align-items-center">
+                            <span class="badge bg-primary">{{ item.action.symbole }}</span>
+                            <small class="opacity-75">Bourse de Tunis</small>
+                        </div>
+                        <div class="card-body p-4">
+                            <h5 class="fw-bold mb-1">{{ item.action.nomEntreprise }}</h5>
+                            <div class="display-6 fw-bold text-primary my-3">{{ item.action.prixUnitaire }} <small style="font-size:1rem;">TND</small></div>
+                            
+                            <div class="d-flex justify-content-between align-items-center small text-muted mb-4">
+                                <span>Quantité dispo: <strong>{{ item.action.quantiteDisponible }}</strong></span>
+                                <span class="text-success"><i class="bi bi-graph-up me-1"></i> Live</span>
+                            </div>
+
+                            <div class="d-grid gap-2">
+                                <a href="{{ path('app_market') }}" class="btn btn-primary rounded-pill">Acheter maintenant</a>
+                                <form action="{{ path('app_bourse_wishlist_toggle', {id: item.action.id}) }}" method="POST" class="d-grid">
+                                    <button type="submit" class="btn btn-outline-danger btn-sm rounded-pill mt-2">Retirer des favoris</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="text-center py-5">
+            <div class="mb-4">
+                <i class="bi bi-star text-muted" style="font-size: 4rem; opacity:0.3;"></i>
+            </div>
+            <h4 class="fw-bold">Aucune action suivie</h4>
+            <p class="text-muted">Parcourez le marché et cliquez sur l'étoile pour suivre une action.</p>
+            <a href="{{ path('app_market') }}" class="btn btn-primary rounded-pill px-4 mt-2">Explorer le marché</a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

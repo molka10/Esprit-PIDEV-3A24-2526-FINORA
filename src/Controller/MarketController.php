@@ -15,6 +15,9 @@ use Symfony\Component\Routing\Attribute\Route;
 
 class MarketController extends AbstractController
 {
+    public function __construct(
+        private \App\Service\TransactionService $transactionService
+    ) {}
     // =========================
     // 🔥 MARKET
     // =========================
@@ -31,42 +34,21 @@ class MarketController extends AbstractController
     // 🔥 ACHAT
     // =========================
     #[Route('/buy/{id}', name: 'app_buy')]
-    public function buy(Action $action, Request $request, EntityManagerInterface $em): Response
+    public function buy(Action $action, Request $request): Response
     {
         if ($request->isMethod('POST')) {
-
             $quantite = (int) $request->request->get('quantite');
 
-            if ($quantite <= 0) {
-                $this->addFlash('error', 'Quantité invalide');
+            try {
+                $this->transactionService->executerTrade('ACHAT', $action->getId(), $quantite, $this->getUser());
+                $this->addFlash('success', '✅ Achat effectué avec succès !');
+                return $this->redirectToRoute('app_market');
+
+            } catch (\Exception $e) {
+                // Flash message for the SweetAlert popup
+                $this->addFlash('danger', '❌ ' . $e->getMessage());
                 return $this->redirectToRoute('app_market');
             }
-
-            if ($quantite > $action->getQuantiteDisponible()) {
-                $this->addFlash('error', 'Stock insuffisant');
-                return $this->redirectToRoute('app_market');
-            }
-
-            $montant = $quantite * $action->getPrixUnitaire();
-
-            $transaction = new TransactionBourse();
-            $transaction->setAction($action);
-            $transaction->setQuantite($quantite);
-            $transaction->setTypeTransaction('ACHAT');
-            $transaction->setPrixUnitaire($action->getPrixUnitaire());
-            $transaction->setMontantTotal($montant);
-            $transaction->setDateTransaction(new \DateTime());
-            $transaction->setUser($this->getUser()); // ✅ Link to current user
-
-            $action->setQuantiteDisponible(
-                $action->getQuantiteDisponible() - $quantite
-            );
-
-            $em->persist($transaction);
-            $em->flush();
-
-            $this->addFlash('success', 'Achat effectué');
-            return $this->redirectToRoute('app_market');
         }
 
         return $this->render('market/buy.html.twig', [
@@ -78,68 +60,20 @@ class MarketController extends AbstractController
     // 🔥 VENTE (SÉCURISÉE)
     // =========================
     #[Route('/sell/{id}', name: 'app_sell')]
-    public function sell(Action $action, Request $request, EntityManagerInterface $em): Response
+    public function sell(Action $action, Request $request): Response
     {
         if ($request->isMethod('POST')) {
-
             $quantite = (int) $request->request->get('quantite');
 
-            if ($quantite <= 0) {
-                $this->addFlash('error', 'Quantité invalide');
+            try {
+                $this->transactionService->executerTrade('VENTE', $action->getId(), $quantite, $this->getUser());
+                $this->addFlash('success', '✅ Vente effectuée avec succès !');
+                return $this->redirectToRoute('app_market');
+
+            } catch (\Exception $e) {
+                $this->addFlash('danger', '❌ ' . $e->getMessage());
                 return $this->redirectToRoute('app_market');
             }
-
-            $repo = $em->getRepository(TransactionBourse::class);
-
-            $totalAchete = $repo->createQueryBuilder('t')
-                ->select('COALESCE(SUM(t.quantite),0)')
-                ->where('t.typeTransaction = :type')
-                ->andWhere('t.action = :action')
-                ->andWhere('t.user = :user') // ✅ Link to current user
-                ->setParameter('type', 'ACHAT')
-                ->setParameter('action', $action)
-                ->setParameter('user', $this->getUser())
-                ->getQuery()
-                ->getSingleScalarResult();
-
-            $totalVendu = $repo->createQueryBuilder('t')
-                ->select('COALESCE(SUM(t.quantite),0)')
-                ->where('t.typeTransaction = :type')
-                ->andWhere('t.action = :action')
-                ->andWhere('t.user = :user') // ✅ Link to current user
-                ->setParameter('type', 'VENTE')
-                ->setParameter('action', $action)
-                ->setParameter('user', $this->getUser())
-                ->getQuery()
-                ->getSingleScalarResult();
-
-            $stockUser = $totalAchete - $totalVendu;
-
-            if ($quantite > $stockUser) {
-                $this->addFlash('error', 'Stock insuffisant');
-                return $this->redirectToRoute('app_market');
-            }
-
-            $montant = $quantite * $action->getPrixUnitaire();
-
-            $transaction = new TransactionBourse();
-            $transaction->setAction($action);
-            $transaction->setQuantite($quantite);
-            $transaction->setTypeTransaction('VENTE');
-            $transaction->setPrixUnitaire($action->getPrixUnitaire());
-            $transaction->setMontantTotal($montant);
-            $transaction->setDateTransaction(new \DateTime());
-            $transaction->setUser($this->getUser()); // ✅ Link to current user
-
-            $action->setQuantiteDisponible(
-                $action->getQuantiteDisponible() + $quantite
-            );
-
-            $em->persist($transaction);
-            $em->flush();
-
-            $this->addFlash('success', 'Vente effectuée');
-            return $this->redirectToRoute('app_market');
         }
 
         return $this->render('market/sell.html.twig', [

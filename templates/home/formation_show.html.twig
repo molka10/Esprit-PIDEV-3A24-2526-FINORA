@@ -132,19 +132,14 @@
                                             </div>
 
                                             <form action="{{ path('app_formation_inscription', {'id': formation.id}) }}" method="post" id="purchaseFormShow" class="mt-4">
-                                                <div class="mb-3">
-                                                    <label class="form-label small fw-bold text-muted">Mode de paiement sécurisé</label>
-                                                    <div class="d-flex gap-2">
-                                                        <div class="flex-fill border rounded-3 p-2 text-center bg-white">
-                                                            <i class="fab fa-cc-visa text-primary fa-lg"></i>
+                                                <div class="mb-4 p-3 rounded-3" style="background: rgba(124, 58, 237, 0.05); border: 1px dashed rgba(124, 58, 237, 0.3);">
+                                                    <div class="d-flex align-items-center">
+                                                        <div class="icon-sm bg-primary text-white rounded-circle me-2 d-flex align-items-center justify-content-center" style="width: 24px; height: 24px;">
+                                                            <i class="bi bi-wallet2 small"></i>
                                                         </div>
-                                                        <div class="flex-fill border rounded-3 p-2 text-center bg-white">
-                                                            <i class="fab fa-cc-mastercard text-danger fa-lg"></i>
-                                                        </div>
-                                                        <div class="flex-fill border rounded-3 p-2 text-center bg-white">
-                                                            <i class="fab fa-paypal text-info fa-lg"></i>
-                                                        </div>
+                                                        <span class="small fw-bold text-primary">Paiement via Wallet</span>
                                                     </div>
+                                                    <p class="small text-muted mt-2 mb-0">Le montant sera débité directement de votre solde actuel.</p>
                                                 </div>
                                                 <div class="d-grid mt-4">
                                                     <button type="submit" class="btn btn-primary py-3 fw-bold shadow-lg" style="border-radius: 14px; background: linear-gradient(135deg, #7c3aed, #8b5cf6); border: none; transition: transform 0.2s;">

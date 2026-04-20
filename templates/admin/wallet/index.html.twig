@@ -1,0 +1,738 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block stylesheets %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.css">
+<style>
+/* â”€â”€ Page Layout & Typography â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+:root {
+    --p: #7c3aed;
+    --p-light: #f5f3ff;
+    --text-main: #1e1b4b;
+    --text-muted: #64748b;
+    --card-shadow: 0 10px 30px -5px rgba(124, 58, 237, 0.12);
+}
+
+.admin-dashboard {
+    padding: 30px;
+    background: #f8f5ff;
+    min-height: 100vh;
+}
+
+/* â”€â”€ Hero Header â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+.admin-hero {
+    background: linear-gradient(135deg, #1e1b4b 0%, #4338ca 100%);
+    border-radius: 24px;
+    padding: 32px 36px;
+    margin-bottom: 32px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 20px;
+    box-shadow: 0 20px 50px rgba(30, 27, 75, 0.3);
+    position: relative;
+    overflow: hidden;
+}
+.admin-hero::after {
+    content: '';
+    position: absolute;
+    top: -50px; right: -50px;
+    width: 250px; height: 250px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 0;
+}
+.admin-hero-content {
+    position: relative;
+    z-index: 5;
+}
+.admin-hero .d-flex {
+    position: relative;
+    z-index: 10;
+}
+.btn-export, .btn-glass {
+    cursor: pointer !important;
+    user-select: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+.admin-hero-content h1 {
+    color: #fff;
+    font-size: 28px;
+    font-weight: 900;
+    margin: 0;
+    letter-spacing: -0.5px;
+}
+.admin-hero-content p {
+    color: rgba(255,255,255,0.7);
+    margin: 5px 0 0;
+    font-size: 14px;
+}
+
+/* â”€â”€ Dashboard Buttons â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+.btn-glass {
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #fff;
+    padding: 10px 20px;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 13px;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+}
+.btn-glass:hover {
+    background: rgba(255, 255, 255, 0.25);
+    color: #fff;
+    transform: translateY(-2px);
+}
+.btn-export {
+    background: #ef4444;
+    color: #fff;
+    padding: 10px 22px;
+    border-radius: 12px;
+    font-weight: 800;
+    font-size: 13px;
+    border: none;
+    transition: all 0.2s;
+    box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
+}
+.btn-export:hover {
+    background: #dc2626;
+    color: #fff;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(239, 68, 68, 0.4);
+}
+
+/* â”€â”€ Stats Section â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+.stat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 24px;
+    margin-bottom: 32px;
+}
+.stat-card {
+    background: #fff;
+    padding: 24px 28px;
+    border-radius: 20px;
+    border: 1px solid rgba(124, 58, 237, 0.08);
+    box-shadow: var(--card-shadow);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.2s ease;
+}
+.stat-card:hover { transform: translateY(-5px); }
+.stat-icon-box {
+    width: 48px; height: 48px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+}
+.green-box  { background: #dcfce7; color: #16a34a; }
+.red-box    { background: #fee2e2; color: #dc2626; }
+.purple-box { background: linear-gradient(135deg, #7c3aed, #4f46e5); color: #fff; }
+
+.stat-info span {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+.stat-info h2 {
+    font-size: 26px;
+    font-weight: 900;
+    color: var(--text-main);
+    margin: 4px 0 0;
+}
+
+/* â”€â”€ Search & Table â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+.table-card {
+    background: #fff;
+    border-radius: 24px;
+    border: 1px solid rgba(124, 58, 237, 0.08);
+    box-shadow: var(--card-shadow);
+    overflow: hidden;
+    margin-top: 32px;
+}
+.table-header {
+    padding: 24px 28px;
+    border-bottom: 1px solid #f3f4f6;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+.table-header h5 {
+    font-size: 16px;
+    font-weight: 800;
+    color: var(--text-main);
+    margin: 0;
+}
+.search-wrapper {
+    position: relative;
+    max-width: 380px;
+    width: 100%;
+}
+.search-wrapper input {
+    width: 100%;
+    padding: 12px 20px 12px 48px;
+    border-radius: 14px;
+    border: 1.5px solid #ede9fe;
+    outline: none;
+    font-size: 14px;
+    transition: all 0.2s;
+    background: #fafafa;
+}
+.search-wrapper input:focus {
+    border-color: var(--p);
+    background: #fff;
+    box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.1);
+}
+.search-wrapper i {
+    position: absolute;
+    left: 18px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    font-size: 16px;
+}
+
+.custom-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+.custom-table thead th {
+    background: #fafbff;
+    padding: 16px 24px;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 1.5px solid #f1f5f9;
+}
+.custom-table tbody td {
+    padding: 18px 24px;
+    border-bottom: 1px solid #f8fafc;
+}
+
+/* â”€â”€ Charts Card â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+.chart-card {
+    background: #fff;
+    border-radius: 24px;
+    padding: 28px;
+    border: 1px solid rgba(124, 58, 237, 0.08);
+    box-shadow: var(--card-shadow);
+    margin-bottom: 32px;
+}
+.chart-card-header {
+    margin-bottom: 24px;
+}
+.chart-card-header h5 {
+    font-size: 17px;
+    font-weight: 800;
+    color: var(--text-main);
+    margin: 0;
+}
+
+/* â”€â”€ Admin Calendar Modal â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+.admin-cal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.55);
+    backdrop-filter: blur(6px);
+    z-index: 9500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s;
+}
+.admin-cal-overlay.open {
+    opacity: 1;
+    pointer-events: all;
+}
+.admin-cal-modal {
+    background: #fff;
+    border-radius: 24px;
+    width: min(900px, 95vw);
+    max-height: 88vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.25);
+    transform: translateY(30px) scale(0.97);
+    transition: transform 0.28s cubic-bezier(0.34,1.56,0.64,1);
+    overflow: hidden;
+}
+.admin-cal-overlay.open .admin-cal-modal {
+    transform: translateY(0) scale(1);
+}
+.admin-cal-header {
+    padding: 20px 28px 16px;
+    border-bottom: 1px solid rgba(124,58,237,0.10);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: linear-gradient(135deg, #faf5ff, #fff);
+}
+.admin-cal-title {
+    font-size: 17px;
+    font-weight: 800;
+    color: #1e1b4b;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.admin-cal-close {
+    width: 36px;
+    height: 36px;
+    border: none;
+    background: #f3f4f6;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 17px;
+    color: #6b7280;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s;
+}
+.admin-cal-close:hover { background: #e5e7eb; }
+.admin-cal-body {
+    padding: 20px 24px 24px;
+    overflow-y: auto;
+    flex: 1;
+}
+.admin-cal-stats {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 18px;
+}
+.admin-cal-stat {
+    flex: 1 1 120px;
+    background: #faf5ff;
+    border-radius: 12px;
+    padding: 12px 16px;
+    border: 1px solid rgba(124,58,237,0.10);
+}
+.admin-cal-stat span {
+    display: block;
+    font-size: 11px;
+    color: #94a3b8;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    margin-bottom: 3px;
+}
+.admin-cal-stat strong {
+    font-size: 18px;
+    font-weight: 800;
+    color: #1e1b4b;
+}
+
+/* FullCalendar tweaks */
+.fc .fc-toolbar-title {
+    font-size: 16px !important;
+    font-weight: 700 !important;
+    color: #1e1b4b !important;
+}
+.fc .fc-button-primary {
+    background: linear-gradient(135deg,#7c3aed,#8b5cf6) !important;
+    border: none !important;
+    border-radius: 9px !important;
+    font-weight: 600 !important;
+    font-size: 12px !important;
+    box-shadow: 0 2px 8px rgba(124,58,237,0.2) !important;
+    transition: opacity 0.2s !important;
+}
+.fc .fc-button-primary:hover { opacity: 0.85 !important; }
+.fc .fc-button-primary:not(:disabled):active,
+.fc .fc-button-primary:not(:disabled).fc-button-active {
+    background: #6d28d9 !important;
+}
+.fc-day-today { background: rgba(124,58,237,0.05) !important; }
+.fc-event {
+    border-radius: 5px !important;
+    font-size: 11px !important;
+    font-weight: 600 !important;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s;
+}
+.fc-event:hover {
+    transform: scale(1.04);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
+}
+.fc-col-header-cell-cushion,
+.fc-daygrid-day-number {
+    color: #4c1d95 !important;
+    font-weight: 600 !important;
+    text-decoration: none !important;
+}
+/* Skeleton */
+.cal-skel {
+    border-radius: 8px;
+    background: linear-gradient(90deg,#ede9fe 25%,#ddd6fe 50%,#ede9fe 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.4s infinite;
+    margin-bottom: 10px;
+}
+@keyframes shimmer {
+    0%   { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+/* Legend */
+.cal-legend-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: #6b7280;
+    font-weight: 500;
+    margin-right: 14px;
+}
+.cal-legend-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 3px;
+}
+</style>
+{% endblock %}
+
+{% block title %}FINORA - Admin Tableau de Bord{% endblock %}
+
+{% block body %}
+<div class="admin-dashboard">
+
+    <!-- Hero Header -->
+    <div class="admin-hero">
+        <div class="admin-hero-content">
+            <h1>Tableau de Bord Overview</h1>
+            <p>Vue d'ensemble de l'activité financière globale de la plateforme.</p>
+        </div>
+        <div class="d-flex align-items-center gap-3">
+            <!-- Currency Toggles -->
+            <div style="display: flex; gap: 8px;">
+                {% for c in ['DT', 'EUR', 'USD'] %}
+                    <a href="{{ path('app_admin_wallet', {'currency': c, 'search': app.request.query.get('search')}) }}" 
+                       class="btn-glass" 
+                       style="{{ currencySymbol == c ? 'background: #fff; color: var(--p);' : '' }}">
+                        {{ c }}
+                    </a>
+                {% endfor %}
+            </div>
+            
+            <a href="{{ path('wallet_download_pdf', {'search': app.request.query.get('search'), 'currency': app.request.query.get('currency', 'DT')}) }}" class="btn-export">
+                <i class="bi bi-file-earmark-pdf me-2"></i>Export PDF
+            </a>
+        </div>
+    </div>
+
+    <!-- Stats Section -->
+    <div class="stat-grid">
+        <!-- Revenue Stat -->
+        <div class="stat-card">
+            <div class="stat-icon-box green-box">
+                <i class="bi bi-arrow-down-left"></i>
+            </div>
+            <div class="stat-info">
+                <span>Total Revenus</span>
+                <h2>{{ totalIncome|number_format(2, '.', ',') }} <small style="font-size: 13px; color: var(--text-muted); font-weight: 600;">{{ currencySymbol }}</small></h2>
+            </div>
+            <div style="color: #10b981; font-size: 11px; font-weight: 600;">
+                <i class="bi bi-star-fill me-1"></i> Performance positive
+            </div>
+        </div>
+
+        <!-- Expense Stat -->
+        <div class="stat-card">
+            <div class="stat-icon-box red-box">
+                <i class="bi bi-arrow-up-right"></i>
+            </div>
+            <div class="stat-info">
+                <span>Total Dépenses</span>
+                <h2>{{ totalOutcome|number_format(2, '.', ',') }} <small style="font-size: 13px; color: var(--text-muted); font-weight: 600;">{{ currencySymbol }}</small></h2>
+            </div>
+            <div style="color: #f43f5e; font-size: 11px; font-weight: 600;">
+                <i class="bi bi-exclamation-triangle-fill me-1"></i> Flux de sortie
+            </div>
+        </div>
+
+        <!-- Net Balance Stat -->
+        <div class="stat-card" style="background: linear-gradient(135deg, #7c3aed, #4f46e5); border: none;">
+            <div class="stat-icon-box" style="background: rgba(255,255,255,0.2); color: #fff;">
+                <i class="bi bi-wallet2"></i>
+            </div>
+            <div class="stat-info">
+                <span style="color: rgba(255,255,255,0.7);">Net Solde Global</span>
+                <h2 style="color: #fff;">{{ totalBalance|number_format(2, '.', ',') }} <small style="font-size: 13px; color: rgba(255,255,255,0.6); font-weight: 600;">{{ currencySymbol }}</small></h2>
+            </div>
+            <div style="color: rgba(255,255,255,0.8); font-size: 11px; font-weight: 600;">
+                <i class="bi bi-shield-lock-fill me-1"></i> Sécurité maximale
+            </div>
+        </div>
+    </div>
+
+    <!-- Chart Card -->
+    <div class="chart-card">
+        <div class="chart-card-header">
+            <h5><i class="bi bi-graph-up-arrow text-primary me-2"></i>Évolution du Volume des Transactions</h5>
+        </div>
+        <div id="transactionsChart" style="height: 320px;"></div>
+    </div>
+
+    <!-- Table Card -->
+    <div class="table-card">
+        <div class="table-header">
+            <h5><i class="bi bi-people-fill text-primary me-2"></i>Résumé des Utilisateurs</h5>
+            <div class="search-wrapper">
+                <i class="bi bi-search"></i>
+                <input 
+                    id="searchInput"
+                    type="search"
+                    placeholder="Chercher par nom ou ID..."
+                    value="{{ app.request.query.get('search') }}"
+                >
+            </div>
+        </div>
+        <div style="overflow-x: auto;">
+            <table class="custom-table">
+                <thead>
+                    <tr>
+                        <th>Utilisateur</th>
+                        <th>Transactions</th>
+                        <th>Revenus ({{ currencySymbol }})</th>
+                        <th>Dépenses ({{ currencySymbol }})</th>
+                        <th>Solde ({{ currencySymbol }})</th>
+                        <th style="text-align: right;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="usersTableBody">
+                    {% include 'admin/wallet/_table_rows.html.twig' with { users: users } %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+{# â”€â”€ Admin Calendar Modal â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ #}
+<div class="admin-cal-overlay" id="adminCalOverlay">
+    <div class="admin-cal-modal">
+        <div class="admin-cal-header">
+            <div class="admin-cal-title">
+                <i class="bi bi-calendar3" style="color:#7c3aed;"></i>
+                <span id="adminCalTitle">Calendrier</span>
+            </div>
+            <button class="admin-cal-close" id="adminCalClose">&times;</button>
+        </div>
+        <div class="admin-cal-body">
+            <!-- Stats bar -->
+            <div class="admin-cal-stats" id="adminCalStats">
+                <div class="admin-cal-stat"><span>Événements</span><strong id="acStat-total">...</strong></div>
+                <div class="admin-cal-stat"><span>Revenus</span><strong id="acStat-income" style="color:#22c55e;">...</strong></div>
+                <div class="admin-cal-stat"><span>Dépenses</span><strong id="acStat-outcome" style="color:#ef4444;">...</strong></div>
+            </div>
+            <!-- Legend -->
+            <div style="margin-bottom:14px;">
+                <span class="cal-legend-pill"><span class="cal-legend-dot" style="background:#22c55e;"></span>Revenu</span>
+                <span class="cal-legend-pill"><span class="cal-legend-dot" style="background:#ef4444;"></span>Dépense</span>
+            </div>
+            <!-- Skeleton -->
+            <div id="adminCalSkeleton">
+                <div class="cal-skel" style="height:36px;"></div>
+                <div class="cal-skel" style="height:24px;width:55%;"></div>
+                <div class="cal-skel" style="height:220px;"></div>
+            </div>
+            <div id="adminCalContainer" style="display:none;"></div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block javascripts %}
+<script src="{{ asset('assets/vendor/apexcharts/js/apexcharts.min.js') }}"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        var options = {
+            series: [{
+                name: 'Transaction Volume',
+                data: {{ chartData|json_encode|raw }}
+            }],
+            chart: {
+                height: 320,
+                type: 'area',
+                fontFamily: 'Inter, sans-serif',
+                toolbar: { show: false }
+            },
+            dataLabels: { enabled: false },
+            colors: ['#7c3aed'],
+            stroke: { curve: 'smooth', width: 3 },
+            fill: {
+                type: 'gradient',
+                gradient: {
+                    shadeIntensity: 1,
+                    opacityFrom: 0.6,
+                    opacityTo: 0.1,
+                    stops: [0, 90, 100]
+                }
+            },
+            xaxis: {
+                categories: {{ chartLabels|json_encode|raw }},
+                axisBorder: { show: false },
+                axisTicks: { show: false },
+                labels: { style: { colors: '#94a3b8', fontSize: '11px', fontWeight: 600 } }
+            },
+            yaxis: {
+                labels: {
+                    style: { colors: '#94a3b8', fontSize: '11px', fontWeight: 600 },
+                    formatter: function (value) { return value.toFixed(0) + " {{ currencySymbol|raw }}"; }
+                }
+            },
+            grid: {
+                borderColor: '#f1f5f9',
+                strokeDashArray: 4
+            },
+            tooltip: {
+                theme: 'light',
+                y: { formatter: function (val) { return val.toFixed(2) + " {{ currencySymbol|raw }}" } }
+            }
+        };
+
+        var chart = new ApexCharts(document.querySelector("#transactionsChart"), options);
+        chart.render();
+    });
+
+    /* ── Local Search Filter ── */
+    document.getElementById("searchInput").addEventListener("input", function () {
+        const query = this.value.toLowerCase().trim();
+        const rows = document.querySelectorAll("#usersTableBody tr:not(.no-results)");
+        const noResultsRow = document.querySelector("#usersTableBody tr.no-results");
+        const exportBtn = document.querySelector(".btn-export");
+        let visibleCount = 0;
+
+        rows.forEach(row => {
+            const text = row.innerText.toLowerCase();
+            if (text.includes(query)) {
+                row.style.display = "";
+                visibleCount++;
+            } else {
+                row.style.display = "none";
+            }
+        });
+
+        if (noResultsRow) {
+            noResultsRow.style.display = (visibleCount === 0) ? "" : "none";
+        }
+
+        // Sync Export PDF link
+        if (exportBtn) {
+            let url = new URL(exportBtn.href, window.location.origin);
+            if (query) url.searchParams.set("search", query);
+            else        url.searchParams.delete("search");
+            exportBtn.href = url.pathname + url.search;
+        }
+    });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
+<script>
+/* â”€â”€ Admin Calendar Modal Logic â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+let adminCalInstance = null;
+let adminCalCurrentUser = null;
+
+async function openUserCalendarModal(userId, userName) {
+    const overlay = document.getElementById('adminCalOverlay');
+    const title   = document.getElementById('adminCalTitle');
+    const container = document.getElementById('adminCalContainer');
+    const skeleton  = document.getElementById('adminCalSkeleton');
+
+    title.textContent = `📅 Calendrier — ${userName}`;
+    container.style.display = 'none';
+    skeleton.style.display  = 'block';
+    document.getElementById('acStat-total').textContent   = '—';
+    document.getElementById('acStat-income').textContent  = '—';
+    document.getElementById('acStat-outcome').textContent = '—';
+
+    if (adminCalInstance && adminCalCurrentUser !== userId) {
+        adminCalInstance.destroy();
+        adminCalInstance = null;
+        container.innerHTML = '';
+    }
+    adminCalCurrentUser = userId;
+
+    overlay.classList.add('open');
+
+    let events = [];
+    try {
+        const res  = await fetch(`/api/user/calendar-events/by-user?userId=${userId}`);
+        const json = await res.json();
+        if (json.status === 'success') events = json.data;
+    } catch(e) { console.error('Calendar fetch error:', e); }
+
+    let totalIncome = 0, totalOutcome = 0;
+    events.forEach(ev => {
+        const ep = ev.extendedProps || {};
+        if (ep.isIncome) totalIncome  += ep.amount || 0;
+        else             totalOutcome += ep.amount || 0;
+    });
+    document.getElementById('acStat-total').textContent   = events.length;
+    document.getElementById('acStat-income').textContent  = '+' + totalIncome.toFixed(2)  + ' DT';
+    document.getElementById('acStat-outcome').textContent = '-' + totalOutcome.toFixed(2) + ' DT';
+
+    skeleton.style.display  = 'none';
+    container.style.display = 'block';
+
+    if (!adminCalInstance) {
+        adminCalInstance = new FullCalendar.Calendar(container, {
+            initialView: 'dayGridMonth',
+            locale: 'fr',
+            height: 'auto',
+            headerToolbar: {
+                left: 'prev,next today',
+                center: 'title',
+                right: 'dayGridMonth,timeGridWeek,listWeek'
+            },
+            buttonText: { today: "Aujourd'hui", month: 'Mois', week: 'Semaine', list: 'Liste' },
+            events: events,
+            dayMaxEvents: 3,
+            eventTimeFormat: { hour: '2-digit', minute: '2-digit', meridiem: false },
+            eventClick: function(info) {
+                const ep = info.event.extendedProps || {};
+                const name = (info.event.title ?? '').replace(/^[+\-][\d.]+ DT - /, '');
+                alert(`${ep.isIncome?'+':'-'}${ep.amount.toFixed(2)} DT — ${name}\nCatégorie : ${ep.category ?? '—'}`);
+            }
+        });
+        setTimeout(() => {
+            adminCalInstance.render();
+            adminCalInstance.updateSize();
+        }, 320);
+    } else {
+        adminCalInstance.removeAllEvents();
+        adminCalInstance.addEventSource(events);
+        setTimeout(() => adminCalInstance.updateSize(), 320);
+    }
+}
+
+document.getElementById('adminCalClose').addEventListener('click', closeAdminCal);
+document.getElementById('adminCalOverlay').addEventListener('click', function(e) { if (e.target === this) closeAdminCal(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeAdminCal(); });
+function closeAdminCal() { document.getElementById('adminCalOverlay').classList.remove('open'); }
+</script>
+{% endblock %}
+

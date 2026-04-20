@@ -446,14 +446,85 @@
         font-size: 18px; transition: all 0.2s; flex-shrink: 0;
     }
     .ai-chat-send:hover { transform: scale(1.05); box-shadow: 0 4px 14px rgba(124,58,237,0.4); }
-    .ai-floating-trigger {
-        position: fixed; bottom: 24px; right: 24px; width: 60px; height: 60px;
-        background: linear-gradient(135deg, #7c3aed, #a855f7); border: none;
-        border-radius: 18px; color: white; font-size: 26px; cursor: pointer;
-        box-shadow: 0 8px 30px rgba(124,58,237,0.5); z-index: 9999;
-        display: none; align-items: center; justify-content: center; transition: all 0.3s;
+    /* ═══ BOURSE ACTION DECK (SIDEBAR) ═══ */
+    .bourse-action-deck {
+        position: fixed;
+        right: 20px;
+        top: 50%;
+        transform: translateY(-50%);
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        z-index: 9999;
+        pointer-events: none;
     }
-    .ai-floating-trigger:hover { transform: scale(1.08); }
+    .action-deck-item {
+        pointer-events: all;
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        position: relative;
+    }
+    .deck-btn {
+        width: 54px;
+        height: 54px;
+        border-radius: 12px;
+        border: 1px solid rgba(255,255,255,0.15);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        color: white;
+        cursor: pointer;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        position: relative;
+        overflow: hidden;
+        backdrop-filter: blur(10px);
+        box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+    }
+    .deck-btn.ai {
+        background: linear-gradient(135deg, #7c3aed, #a855f7);
+        box-shadow: 0 8px 24px rgba(124,58,237,0.3);
+    }
+    .deck-btn.ex {
+        background: linear-gradient(135deg, #2563eb, #3b82f6);
+        box-shadow: 0 8px 24px rgba(37,99,235,0.3);
+    }
+    .deck-label {
+        position: absolute;
+        right: 64px;
+        background: #0f172a;
+        color: white;
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 600;
+        white-space: nowrap;
+        opacity: 0;
+        transform: translateX(10px);
+        transition: all 0.3s ease;
+        pointer-events: none;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+    .action-deck-item:hover .deck-label {
+        opacity: 1;
+        transform: translateX(0);
+    }
+    .action-deck-item:hover .deck-btn {
+        transform: scale(1.1);
+        border-radius: 50%;
+    }
+    .deck-btn .pulse-ring {
+        position: absolute; width: 100%; height: 100%;
+        border-radius: inherit;
+        border: 2px solid rgba(255,255,255,0.4);
+        animation: deck-pulse 2s infinite;
+    }
+    @keyframes deck-pulse {
+        0% { transform: scale(1); opacity: 0.8; }
+        100% { transform: scale(1.8); opacity: 0; }
+    }
+
 
     .exchange-api-btn {
         display: inline-flex; align-items: center; gap: 8px;
@@ -579,61 +650,17 @@
     @media (max-width: 768px) {
         .ai-chat-panel { width: calc(100vw - 32px); right: 16px; bottom: 16px; }
         .exchange-panel { width: calc(100vw - 32px); left: 16px; bottom: 16px; }
-        .ai-floating-trigger { display: flex; }
-        .exchange-floating-trigger { display: flex; }
-        .nav-ai-btn { padding: 6px 12px; font-size: 12px; }
-        .exchange-api-btn { padding: 6px 12px; font-size: 12px; }
+        .bourse-action-deck { 
+            top: auto; bottom: 80px; transform: none; 
+            flex-direction: row; right: 20px; 
+        }
+        .deck-label { display: none; }
         .candle-ohlc { grid-template-columns: repeat(2, 1fr) !important; }
     }
 </style>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const navLinks = document.querySelectorAll('.navbar-nav .nav-link, .nav-item, nav a');
-    let injected = false;
-    navLinks.forEach(function(link) {
-        if (!injected && (link.textContent.includes('Marché') || link.textContent.includes('Historique'))) {
-            const parent = link.closest('.nav-item') || link.parentElement;
-            if (parent) {
-                parent.parentElement.insertAdjacentHTML('beforeend', `
-                    <li class="nav-item ms-2">
-                        <button class="nav-ai-btn" onclick="toggleAiChat()">
-                            <span class="ai-sparkle"></span>
-                            <span class="ai-icon-wrap"><i class="bi bi-stars"></i></span>
-                            Assistant IA
-                        </button>
-                    </li>
-                    <li class="nav-item ms-1">
-                        <button class="exchange-api-btn" onclick="toggleExchangePanel()">
-                            <span class="ex-icon"><i class="bi bi-currency-exchange"></i></span>
-                            Exchange API
-                            <span class="conn-dot"></span>
-                        </button>
-                    </li>
-                `);
-                injected = true;
-            }
-        }
-    });
-    if (!injected) {
-        const navbar = document.querySelector('.navbar-collapse, .navbar-nav, nav');
-        if (navbar) {
-            navbar.insertAdjacentHTML('beforeend', `
-                <div class="ms-auto d-flex align-items-center gap-2">
-                    <button class="nav-ai-btn" onclick="toggleAiChat()">
-                        <span class="ai-sparkle"></span>
-                        <span class="ai-icon-wrap"><i class="bi bi-stars"></i></span>
-                        Assistant IA
-                    </button>
-                    <button class="exchange-api-btn" onclick="toggleExchangePanel()">
-                        <span class="ex-icon"><i class="bi bi-currency-exchange"></i></span>
-                        Exchange API
-                        <span class="conn-dot"></span>
-                    </button>
-                </div>
-            `);
-        }
-    }
     updateWatchlistUI();
 });
 </script>
@@ -752,9 +779,9 @@ document.addEventListener('DOMContentLoaded', function() {
                             {% else %}
                                 <span class="change-down"><i class="bi bi-caret-down-fill me-1"></i>0.00%</span>
                             {% endif %}
-                            <button class="watchlist-star" data-id="{{ action.id }}" onclick="toggleWatchlist({{ action.id }}, '{{ action.symbole }}')" title="Suivre cette action">
-                                <i class="bi bi-star"></i>
-                            </button>
+                             <button class="watchlist-star" data-id="{{ action.id|default(0) }}" onclick="toggleWatchlist({{ action.id|default(0) }}, '{{ action.symbole }}')" title="Suivre cette action">
+                                 <i class="bi bi-star"></i>
+                             </button>
                         </div>
                     </div>
                     <div class="sparkline-wrap" data-id="{{ action.id }}" data-price="{{ action.prixUnitaire }}"></div>
@@ -826,7 +853,22 @@ document.addEventListener('DOMContentLoaded', function() {
         <button class="ai-chat-send" onclick="sendAiMessage()"><i class="bi bi-send-fill"></i></button>
     </div>
 </div>
-<button class="ai-floating-trigger" id="aiFloatingTrigger" onclick="toggleAiChat()"><i class="bi bi-stars"></i></button>
+<!-- Bourse Action Deck (Floating Sidebar) -->
+<div class="bourse-action-deck" id="bourseActionDeck">
+    <div class="action-deck-item">
+        <span class="deck-label">Assistant IA Finora</span>
+        <button class="deck-btn ai" onclick="toggleAiChat()">
+            <div class="pulse-ring"></div>
+            <i class="bi bi-stars"></i>
+        </button>
+    </div>
+    <div class="action-deck-item">
+        <span class="deck-label">API Taux de Change</span>
+        <button class="deck-btn ex" onclick="toggleExchangePanel()">
+            <i class="bi bi-currency-exchange"></i>
+        </button>
+    </div>
+</div>
 
 <div class="exchange-panel" id="exchangePanel">
     <div class="exchange-panel-header">
@@ -985,9 +1027,16 @@ var aiChatOpen = false;
 function toggleAiChat() {
     aiChatOpen = !aiChatOpen;
     var p = document.getElementById('aiChatPanel');
-    var t = document.getElementById('aiFloatingTrigger');
-    if (aiChatOpen) { p.classList.add('open'); if (t) t.style.display = 'none'; document.getElementById('aiChatInput').focus(); }
-    else { p.classList.remove('open'); if (t && window.innerWidth <= 768) t.style.display = 'flex'; }
+    var deck = document.getElementById('bourseActionDeck');
+    if (aiChatOpen) { 
+        p.classList.add('open'); 
+        if (deck) deck.style.display = 'none'; 
+        document.getElementById('aiChatInput').focus(); 
+    }
+    else { 
+        p.classList.remove('open'); 
+        if (deck) deck.style.display = 'flex'; 
+    }
 }
 function sendQuickMsg(t) { document.getElementById('aiChatInput').value = t; sendAiMessage(); }
 function sendAiMessage() {
@@ -1053,14 +1102,21 @@ function sendAiMessage() {
     });
 }
 
-/* ═══ EXCHANGE API ═══ */
+/* ═══ EXCHANGE PANEL ═══ */
 var exchangePanelOpen = false;
 function toggleExchangePanel() {
     exchangePanelOpen = !exchangePanelOpen;
     var p = document.getElementById('exchangePanel');
-    var t = document.getElementById('exchangeFloatingTrigger');
-    if (exchangePanelOpen) { p.classList.add('open'); if (t) t.style.display = 'none'; loadExchangeData(); }
-    else { p.classList.remove('open'); if (t && window.innerWidth <= 768) t.style.display = 'flex'; }
+    var deck = document.getElementById('bourseActionDeck');
+    if (exchangePanelOpen) { 
+        p.classList.add('open'); 
+        if (deck) deck.style.display = 'none'; 
+        loadExchangeData(); 
+    }
+    else { 
+        p.classList.remove('open'); 
+        if (deck) deck.style.display = 'flex'; 
+    }
 }
 function loadExchangeData() {
     var now = new Date();
@@ -1192,34 +1248,56 @@ function saveWatchlist(list) {
     localStorage.setItem('finora_watchlist', JSON.stringify(list));
 }
 function toggleWatchlist(id, symbole) {
-    var list = getWatchlist();
-    var idx = list.indexOf(id);
-    if (idx > -1) {
-        list.splice(idx, 1);
-        showToast(symbole + ' retiré de vos suivis', 'remove');
-    } else {
-        list.push(id);
-        showToast(symbole + ' ajouté à vos suivis', 'add');
+    if (!id || id === 0) {
+        showToast('Erreur: Action non identifiée', 'remove');
+        return;
     }
-    saveWatchlist(list);
-    updateWatchlistUI();
+    console.log('Toggling watchlist for ID:', id);
+    var btn = document.querySelector(`.watchlist-star[data-id="${id}"]`);
+    if (btn) btn.disabled = true;
+
+    fetch(`{{ path('app_bourse_wishlist_toggle', {id: 0}) }}`.replace('0', id), {
+        method: 'POST',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(async res => {
+        const data = await res.json();
+        console.log('Toggle response:', data);
+        if (res.ok) {
+            showToast(data.message, data.status === 'added' ? 'add' : 'remove');
+            updateWatchlistUI();
+        } else {
+            showToast(data.message || 'Erreur lors de l\'ajout', 'remove');
+        }
+    })
+    .catch(err => {
+        console.error('Watchlist error:', err);
+        showToast('Erreur de connexion au serveur', 'remove');
+    })
+    .finally(() => {
+        if (btn) btn.disabled = false;
+    });
 }
 function updateWatchlistUI() {
-    var list = getWatchlist();
-    document.querySelectorAll('.watchlist-star').forEach(function(btn) {
-        var id = parseInt(btn.dataset.id);
-        if (list.indexOf(id) > -1) {
-            btn.classList.add('active');
-            btn.querySelector('i').className = 'bi bi-star-fill';
-        } else {
-            btn.classList.remove('active');
-            btn.querySelector('i').className = 'bi bi-star';
-        }
+    fetch('{{ path('app_bourse_wishlist_my_ids') }}')
+    .then(res => res.json())
+    .then(data => {
+        const list = data.ids || [];
+        document.querySelectorAll('.watchlist-star').forEach(function(btn) {
+            var id = parseInt(btn.dataset.id);
+            if (list.indexOf(id) > -1) {
+                btn.classList.add('active');
+                btn.querySelector('i').className = 'bi bi-star-fill';
+            } else {
+                btn.classList.remove('active');
+                btn.querySelector('i').className = 'bi bi-star';
+            }
+        });
+        var badge = document.getElementById('watchlistCount');
+        if (badge) badge.innerHTML = list.length;
     });
-    var badge = document.getElementById('watchlistCount');
-    if (badge) badge.innerHTML = list.length;
-    var stat = document.getElementById('watchlistStat');
-    if (stat) stat.style.display = list.length > 0 ? '' : 'none';
 }
 function showToast(msg, type) {
     var toast = document.getElementById('watchlistToast');

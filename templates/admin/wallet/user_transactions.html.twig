@@ -1,0 +1,617 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block stylesheets %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.css">
+<style>
+/* â”€â”€ Page tokens â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+:root {
+    --p:   #7c3aed;
+    --p2:  #8b5cf6;
+    --p3:  #ede9fe;
+    --g:   #22c55e;
+    --r:   #ef4444;
+    --ink: #1e1b4b;
+    --muted: #94a3b8;
+    --border: rgba(124,58,237,0.10);
+    --card-shadow: 0 10px 40px -10px rgba(124,58,237,0.13);
+}
+
+/* â”€â”€ Layout wrapper â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+.ut-page {
+    padding: 32px 28px 60px;
+    background: #f8f5ff;
+    min-height: 100vh;
+    font-family: 'Inter', 'Heebo', sans-serif;
+}
+
+/* â”€â”€ Hero header â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+.ut-hero {
+    background: linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%);
+    border-radius: 24px;
+    padding: 28px 32px;
+    margin-bottom: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+    box-shadow: 0 20px 50px rgba(124,58,237,0.3);
+    position: relative;
+    overflow: hidden;
+}
+.ut-hero::before {
+    content: '';
+    position: absolute;
+    top: -40px; right: -40px;
+    width: 200px; height: 200px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.06);
+}
+.ut-hero::after {
+    content: '';
+    position: absolute;
+    bottom: -60px; left: 30%;
+    width: 260px; height: 260px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.04);
+}
+.ut-hero-left { position: relative; z-index: 1; }
+.ut-hero-left h1 {
+    margin: 0 0 4px;
+    font-size: 28px;
+    font-weight: 900;
+    color: #fff;
+    letter-spacing: -0.3px;
+}
+.ut-hero-left p { margin: 0; color: rgba(255,255,255,0.65); font-size: 14px; }
+.ut-hero-right {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    position: relative;
+    z-index: 1;
+}
+.ut-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 10px 20px;
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: 700;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s;
+}
+.ut-btn:hover { transform: translateY(-2px); }
+.ut-btn-glass {
+    background: rgba(255,255,255,0.15);
+    backdrop-filter: blur(8px);
+    color: #fff;
+    border: 1px solid rgba(255,255,255,0.25);
+}
+.ut-btn-glass:hover { background: rgba(255,255,255,0.22); color:#fff; box-shadow: 0 6px 20px rgba(0,0,0,0.15); }
+.ut-btn-white {
+    background: #fff;
+    color: var(--p);
+    box-shadow: 0 4px 14px rgba(0,0,0,0.12);
+}
+.ut-btn-white:hover { box-shadow: 0 8px 24px rgba(0,0,0,0.16); color: var(--p); }
+.ut-btn-cal {
+    background: rgba(255,255,255,0.2);
+    color: #fff;
+    border: 1px solid rgba(255,255,255,0.3);
+}
+.ut-btn-cal.active { background: #fff; color: var(--p); }
+
+/* â”€â”€ Stat cards â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+.ut-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 16px;
+    margin-bottom: 28px;
+}
+.ut-stat {
+    background: #fff;
+    border-radius: 18px;
+    padding: 20px 22px;
+    box-shadow: var(--card-shadow);
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    animation: slideUp 0.4s ease both;
+}
+.ut-stat:nth-child(1) { animation-delay:.05s; }
+.ut-stat:nth-child(2) { animation-delay:.10s; }
+.ut-stat:nth-child(3) { animation-delay:.15s; }
+.ut-stat:nth-child(4) { animation-delay:.20s; }
+@keyframes slideUp {
+    from { opacity:0; transform:translateY(16px); }
+    to   { opacity:1; transform:translateY(0); }
+}
+.ut-stat-icon {
+    width: 46px; height: 46px;
+    border-radius: 13px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+}
+.icon-total   { background:#ede9fe; color:var(--p); }
+.icon-income  { background:#dcfce7; color:#16a34a; }
+.icon-outcome { background:#fee2e2; color:#dc2626; }
+.icon-balance { background:#dbeafe; color:#1d4ed8; }
+.ut-stat-info span { display:block; font-size:11px; color:var(--muted); font-weight:600; text-transform:uppercase; letter-spacing:.5px; }
+.ut-stat-info strong { font-size:20px; font-weight:900; color:var(--ink); }
+
+/* â”€â”€ Grid rows â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+.ut-grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+.ut-grid-3 {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+@media (max-width: 900px) {
+    .ut-grid-2, .ut-grid-3 { grid-template-columns: 1fr; }
+}
+
+/* â”€â”€ Generic card â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+.ut-card {
+    background: #fff;
+    border-radius: 20px;
+    box-shadow: var(--card-shadow);
+    border: 1px solid var(--border);
+    padding: 22px 24px;
+    animation: slideUp 0.45s ease both;
+}
+.ut-card-title {
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .6px;
+    color: var(--p);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+}
+
+/* â”€â”€ Table â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+.ut-table-wrap { overflow-x: auto; }
+.ut-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13.5px;
+}
+.ut-table thead th {
+    text-align: left;
+    padding: 10px 14px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    color: var(--muted);
+    border-bottom: 2px solid var(--p3);
+}
+.ut-table tbody tr {
+    border-bottom: 1px solid rgba(124,58,237,0.05);
+    transition: background 0.15s;
+}
+.ut-table tbody tr:hover { background: #faf5ff; }
+.ut-table tbody td { padding: 12px 14px; color: #374151; }
+.ut-table tbody td:first-child { font-weight: 600; color: var(--ink); }
+.badge-income {
+    display: inline-flex; align-items: center; gap:4px;
+    background: #dcfce7; color: #16a34a;
+    padding: 3px 10px; border-radius: 20px;
+    font-size: 11px; font-weight: 700;
+}
+.badge-outcome {
+    display: inline-flex; align-items: center; gap:4px;
+    background: #fee2e2; color: #dc2626;
+    padding: 3px 10px; border-radius: 20px;
+    font-size: 11px; font-weight: 700;
+}
+.amount-pos { color: #16a34a; font-weight: 700; }
+.amount-neg { color: #dc2626; font-weight: 700; }
+
+/* â”€â”€ Calendar section â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+#calendarSection {
+    display: none;
+    margin-bottom: 20px;
+    animation: slideUp 0.35s ease;
+}
+.ut-card-cal-header {
+    display: flex; align-items: center; gap: 8px;
+    margin-bottom: 14px;
+}
+.ut-card-cal-header h3 { margin:0; font-size:14px; font-weight:700; color:var(--ink); }
+.cal-legend-bar { display:flex; gap:14px; margin-bottom:12px; font-size:12px; color:#6b7280; font-weight:500; }
+.cal-legend-bar span { display:inline-flex; align-items:center; gap:6px; }
+.cl-dot { width:10px; height:10px; border-radius:3px; display:inline-block; }
+.uc-skel { border-radius:8px; background:linear-gradient(90deg,#ede9fe 25%,#ddd6fe 50%,#ede9fe 75%); background-size:200% 100%; animation:shimmer 1.4s infinite; margin-bottom:10px; }
+@keyframes shimmer { 0%{background-position:200% 0;} 100%{background-position:-200% 0;} }
+/* FC overrides */
+.fc .fc-toolbar-title { font-size:16px !important; font-weight:700 !important; color:var(--ink) !important; }
+.fc .fc-button-primary { background:linear-gradient(135deg,#7c3aed,#8b5cf6) !important; border:none !important; border-radius:9px !important; font-weight:600 !important; font-size:12px !important; }
+.fc .fc-button-primary:hover { opacity:.85 !important; }
+.fc .fc-button-primary:not(:disabled):active, .fc .fc-button-primary:not(:disabled).fc-button-active { background:#6d28d9 !important; }
+.fc-day-today { background:rgba(124,58,237,0.05) !important; }
+.fc-event { border-radius:5px !important; font-size:11px !important; font-weight:600 !important; cursor:pointer; }
+.fc-col-header-cell-cushion, .fc-daygrid-day-number { color:#4c1d95 !important; font-weight:600 !important; text-decoration:none !important; }
+
+/* â”€â”€ Empty state â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+.ut-empty {
+    text-align: center;
+    padding: 40px;
+    color: var(--muted);
+}
+.ut-empty i { font-size: 3rem; margin-bottom: 12px; opacity: .4; display:block; }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="ut-page">
+
+    {# â”€â”€ Hero header â”€â”€ #}
+    <div class="ut-hero">
+        <div class="ut-hero-left">
+            <h1><i class="bi bi-person-circle me-2"></i>User {{ userId }} — Transactions</h1>
+            <p>{{ transactions|length }} transaction{{ transactions|length != 1 ? 's' : '' }} · Vue détaillée & Analytics</p>
+        </div>
+        <div class="ut-hero-right">
+            <a href="{{ path('app_admin_wallet') }}" class="ut-btn ut-btn-glass">
+                <i class="bi bi-arrow-left"></i> Retour
+            </a>
+            <a href="{{ path('wallet_user_transactions_pdf', { id: userId }) }}" class="ut-btn ut-btn-glass">
+                <i class="bi bi-file-earmark-pdf"></i> PDF
+            </a>
+            <button id="toggleCalBtn" onclick="toggleInlineCalendar()" class="ut-btn ut-btn-white">
+                <i class="bi bi-calendar3"></i> Calendrier
+            </button>
+        </div>
+    </div>
+
+    {# â”€â”€ Stat cards â”€â”€ #}
+    <div class="ut-stats">
+        <div class="ut-stat">
+            <div class="ut-stat-icon icon-total"><i class="bi bi-list-ul"></i></div>
+            <div class="ut-stat-info"><span>Transactions</span><strong>{{ transactions|length }}</strong></div>
+        </div>
+        <div class="ut-stat">
+            <div class="ut-stat-icon icon-income"><i class="bi bi-arrow-down-circle"></i></div>
+            <div class="ut-stat-info"><span>Revenus</span><strong style="color:#16a34a;">+{{ income|number_format(2,'.','') }} DT</strong></div>
+        </div>
+        <div class="ut-stat">
+            <div class="ut-stat-icon icon-outcome"><i class="bi bi-arrow-up-circle"></i></div>
+            <div class="ut-stat-info"><span>Dépenses</span><strong style="color:#dc2626;">-{{ outcome|number_format(2,'.','') }} DT</strong></div>
+        </div>
+        <div class="ut-stat">
+            <div class="ut-stat-icon icon-balance"><i class="bi bi-wallet2"></i></div>
+            <div class="ut-stat-info">
+                <span>Solde Net</span>
+                <strong style="color:{{ (income - outcome) >= 0 ? '#1d4ed8' : '#dc2626' }};">
+                    {{ (income - outcome)|number_format(2,'.','') }} DT
+                </strong>
+            </div>
+        </div>
+    </div>
+
+    {# â”€â”€ Calendar (collapsible) â”€â”€ #}
+    <div id="calendarSection">
+        <div class="ut-card">
+            <div class="ut-card-cal-header">
+                <i class="bi bi-calendar3" style="color:var(--p);font-size:18px;"></i>
+                <h3>Calendrier des Transactions — User {{ userId }}</h3>
+            </div>
+            <div style="display:flex;gap:16px;margin-bottom:14px;flex-wrap:wrap;">
+                <div class="ut-stat" style="flex:1 1 130px;animation:none;">
+                    <div class="ut-stat-icon icon-total"><i class="bi bi-calendar-check"></i></div>
+                    <div class="ut-stat-info"><span>Événements</span><strong id="ucTotal">—</strong></div>
+                </div>
+                <div class="ut-stat" style="flex:1 1 130px;animation:none;">
+                    <div class="ut-stat-icon icon-income"><i class="bi bi-arrow-down-circle"></i></div>
+                    <div class="ut-stat-info"><span>Revenus</span><strong id="ucIncome" style="color:#16a34a;">—</strong></div>
+                </div>
+                <div class="ut-stat" style="flex:1 1 130px;animation:none;">
+                    <div class="ut-stat-icon icon-outcome"><i class="bi bi-arrow-up-circle"></i></div>
+                    <div class="ut-stat-info"><span>Dépenses</span><strong id="ucOutcome" style="color:#dc2626;">—</strong></div>
+                </div>
+            </div>
+            <div class="cal-legend-bar">
+                <span><span class="cl-dot" style="background:#22c55e;"></span>Revenu</span>
+                <span><span class="cl-dot" style="background:#ef4444;"></span>Dépense</span>
+            </div>
+            <div id="userCalSkel">
+                <div class="uc-skel" style="height:34px;"></div>
+                <div class="uc-skel" style="height:220px;"></div>
+            </div>
+            <div id="userInlineCal" style="display:none;"></div>
+        </div>
+    </div>
+
+    {# â”€â”€ Row 1: donut + line chart â”€â”€ #}
+    <div class="ut-grid-2">
+        <div class="ut-card">
+            <div class="ut-card-title"><i class="bi bi-pie-chart-fill"></i> Vue d'ensemble</div>
+            <div style="position:relative;height:240px;">
+                <canvas id="chartUser"></canvas>
+            </div>
+            <div style="display:flex;justify-content:center;gap:20px;margin-top:14px;font-size:12px;font-weight:600;">
+                <span style="display:flex;align-items:center;gap:5px;"><span style="width:10px;height:10px;border-radius:3px;background:#7c3aed;display:inline-block;"></span>Revenus</span>
+                <span style="display:flex;align-items:center;gap:5px;"><span style="width:10px;height:10px;border-radius:3px;background:#ede9fe;display:inline-block;"></span>Dépenses</span>
+            </div>
+        </div>
+
+        <div class="ut-card">
+            <div class="ut-card-title"><i class="bi bi-graph-up-arrow"></i> Évolution Quotidienne</div>
+            <div style="position:relative;height:260px;">
+                <canvas id="lineChartUser"></canvas>
+            </div>
+        </div>
+    </div>
+
+    {# â”€â”€ Row 2: monthly chart full-width â”€â”€ #}
+    <div class="ut-card" style="margin-bottom:20px;">
+        <div class="ut-card-title"><i class="bi bi-bar-chart-fill"></i> Bilan Mensuel</div>
+        <div style="position:relative;height:260px;">
+            <canvas id="monthlyChart"></canvas>
+        </div>
+    </div>
+
+    {# â”€â”€ Transactions table â”€â”€ #}
+    <div class="ut-card" style="animation-delay:.25s;">
+        <div class="ut-card-title"><i class="bi bi-table"></i> Toutes les Transactions</div>
+        <div class="ut-table-wrap">
+            <table class="ut-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Nom</th>
+                        <th>Type</th>
+                        <th>Catégorie</th>
+                        <th>Montant</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% set i = 1 %}
+                {% for t in transactions %}
+                    <tr>
+                        <td style="color:var(--muted);font-size:12px;">{{ i }}</td>
+                        <td>{{ t.nomTransaction }}</td>
+                        <td>
+                            {% if t.type == 'INCOME' %}
+                                <span class="badge-income"><i class="bi bi-arrow-down-circle-fill"></i> Revenu</span>
+                            {% else %}
+                                <span class="badge-outcome"><i class="bi bi-arrow-up-circle-fill"></i> Dépense</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span style="background:#f3f4f6;border-radius:8px;padding:2px 10px;font-size:12px;color:#4b5563;">
+                                {{ t.category ? t.category.nom : 'Sans catégorie' }}
+                            </span>
+                        </td>
+                        <td class="{{ t.type == 'INCOME' ? 'amount-pos' : 'amount-neg' }}">
+                            {{ t.type == 'INCOME' ? '+' : '-' }}{{ t.montant|abs|number_format(2,'.','') }} DT
+                        </td>
+                        <td style="color:var(--muted);">{{ t.dateTransaction|date('d/m/Y') }}</td>
+                    </tr>
+                    {% set i = i + 1 %}
+                {% else %}
+                    <tr>
+                        <td colspan="6">
+                            <div class="ut-empty">
+                                <i class="bi bi-inbox"></i>
+                                Aucune transaction trouvée.
+                            </div>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block javascripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
+<script>
+/* â”€â”€ Chart data from PHP â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+const C_INCOME   = {{ income }};
+const C_OUTCOME  = {{ outcome }};
+const C_LABELS   = {{ chartLabels|json_encode|raw }};
+const C_DATA     = {{ chartData|json_encode|raw }};
+const CAT_LABELS = {{ categoryLabels|json_encode|raw }};
+const CAT_INC    = {{ categoryIncome|json_encode|raw }};
+const CAT_OUT    = {{ categoryOutcome|json_encode|raw }};
+const MON_LABELS = {{ monthLabels|json_encode|raw }};
+const MON_INC    = {{ monthIncome|json_encode|raw }};
+const MON_OUT    = {{ monthOutcome|json_encode|raw }};
+
+/* ── 1. Donut – overview ─────────────────────────── */
+new Chart(document.getElementById('chartUser'), {
+    type: 'doughnut',
+    data: {
+        labels: ['Revenus', 'Dépenses'],
+        datasets: [{
+            data: [C_INCOME, C_OUTCOME],
+            backgroundColor: ['#7c3aed', '#ede9fe'],
+            borderWidth: 0,
+            hoverOffset: 8
+        }]
+    },
+    options: {
+        cutout: '72%',
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: { display: false },
+            tooltip: {
+                callbacks: {
+                    label: ctx => ` ${ctx.raw.toFixed(2)} DT`
+                }
+            }
+        }
+    }
+});
+
+/* ── 2. Line – daily net ─────────────────────────── */
+const lCtx = document.getElementById('lineChartUser').getContext('2d');
+const lGrad = lCtx.createLinearGradient(0, 0, 0, 260);
+lGrad.addColorStop(0,  'rgba(124,58,237,0.22)');
+lGrad.addColorStop(1,  'rgba(124,58,237,0.01)');
+
+new Chart(lCtx, {
+    type: 'line',
+    data: {
+        labels: C_LABELS,
+        datasets: [{
+            label: 'Solde net',
+            data: C_DATA,
+            borderColor: '#7c3aed',
+            borderWidth: 2.5,
+            tension: 0.4,
+            fill: true,
+            backgroundColor: lGrad,
+            pointBackgroundColor: '#7c3aed',
+            pointBorderColor: '#fff',
+            pointBorderWidth: 2,
+            pointRadius: 4
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+            x: { grid: { display: false }, ticks: { color: '#9ca3af', font:{size:11} } },
+            y: { grid: { color: '#f3f4f6' }, ticks: { color: '#9ca3af', font:{size:11},
+                callback: v => v.toFixed(0) + ' DT' } }
+        }
+    }
+});
+
+/* ── 3. Grouped bar – monthly income vs outcome ───── */
+new Chart(document.getElementById('monthlyChart'), {
+    type: 'bar',
+    data: {
+        labels: MON_LABELS,
+        datasets: [
+            {
+                label: 'Revenus',
+                data: MON_INC,
+                backgroundColor: 'rgba(34,197,94,0.75)',
+                borderRadius: 6,
+                borderSkipped: false
+            },
+            {
+                label: 'Dépenses',
+                data: MON_OUT,
+                backgroundColor: 'rgba(239,68,68,0.65)',
+                borderRadius: 6,
+                borderSkipped: false
+            }
+        ]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                position: 'top',
+                labels: { font:{size:11}, boxWidth:12, boxHeight:8, color:'#6b7280' }
+            }
+        },
+        scales: {
+            x: { grid:{ display:false }, ticks:{ color:'#9ca3af', font:{size:11} } },
+            y: { grid:{ color:'#f3f4f6' }, ticks:{ color:'#9ca3af', font:{size:11},
+                callback: v => v + ' DT' } }
+        }
+    }
+});
+
+/* â”€â”€ Calendar toggle + init â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+let userCalInit = false;
+const USER_ID   = {{ userId }};
+
+function toggleInlineCalendar() {
+    const sec = document.getElementById('calendarSection');
+    const btn = document.getElementById('toggleCalBtn');
+    const open = sec.style.display === 'block';
+    if (open) {
+        sec.style.display = 'none';
+        btn.innerHTML = '<i class="bi bi-calendar3"></i> Calendrier';
+        btn.classList.remove('active');
+    } else {
+        sec.style.display = 'block';
+        btn.innerHTML = '<i class="bi bi-x-lg"></i> Masquer Calendrier';
+        btn.classList.add('active');
+        if (!userCalInit) initUserCal();
+    }
+}
+
+async function initUserCal() {
+    userCalInit = true;
+    let events = [];
+    try {
+        const res  = await fetch(`/api/user/calendar-events/by-user?userId=${USER_ID}`);
+        const json = await res.json();
+        if (json.status === 'success') events = json.data;
+    } catch(e) { console.error('Calendar API error:', e); }
+
+    let income = 0, outcome = 0;
+    events.forEach(ev => {
+        const ep = ev.extendedProps || {};
+        if (ep.isIncome) income  += ep.amount || 0;
+        else             outcome += ep.amount || 0;
+    });
+    document.getElementById('ucTotal').textContent   = events.length;
+    document.getElementById('ucIncome').textContent  = '+' + income.toFixed(2)  + ' DT';
+    document.getElementById('ucOutcome').textContent = '-' + outcome.toFixed(2) + ' DT';
+
+    document.getElementById('userCalSkel').style.display = 'none';
+    const calEl = document.getElementById('userInlineCal');
+    calEl.style.display = 'block';
+
+    const cal = new FullCalendar.Calendar(calEl, {
+        initialView: 'dayGridMonth',
+        locale: 'fr',
+        height: 'auto',
+        headerToolbar: {
+            left:   'prev,next today',
+            center: 'title',
+            right:  'dayGridMonth,timeGridWeek,listWeek'
+        },
+        buttonText: { today:"Aujourd'hui", month:'Mois', week:'Semaine', list:'Liste' },
+        events: events,
+        dayMaxEvents: 4,
+        eventTimeFormat: { hour:'2-digit', minute:'2-digit', meridiem:false },
+        eventClick: function(info) {
+            const ep   = info.event.extendedProps || {};
+            const sign = ep.isIncome ? '+' : '-';
+            const amt  = (ep.amount ?? 0).toFixed(2);
+            const name = (info.event.title ?? '').replace(/^[+\-][\d.]+ DT - /, '');
+            const date = info.event.start
+                ? new Date(info.event.start).toLocaleDateString('fr-FR', {weekday:'short',year:'numeric',month:'short',day:'numeric'})
+                : '—';
+            alert(`${sign}${amt} DT — ${name}\nDate : ${date}\nCatégorie : ${ep.category ?? '—'}`);
+        }
+    });
+    // Defer render so the animation completes
+    setTimeout(() => { cal.render(); cal.updateSize(); }, 100);
+}
+</script>
+{% endblock %}

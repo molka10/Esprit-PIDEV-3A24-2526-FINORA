@@ -8,7 +8,7 @@
 <main>
     <section class="pt-5 pb-0">
         <div class="container">
-            <div class="row align-items-center g-4 purple-section p-4 p-lg-5">
+            <div class="row align-items-center g-4 purple-section p-4 p-lg-5 rounded-4 overflow-hidden hero-finora">
                 <div class="col-lg-6">
                     <span class="badge bg-primary bg-opacity-10 text-primary mb-3">Bienvenue sur FINORA</span>
                     <h1 class="display-5 mb-3 finora-title">Explorez les formations FINORA</h1>
@@ -302,262 +302,14 @@
             </div>
 
             <div id="results-container" style="transition: opacity 0.2s ease;">
-                {% if formations|length > 0 %}
-                    <div class="row g-4" id="formations-grid-row">
-                    {% for formation in formations %}
-                        <div class="col-md-6 col-xl-4">
-                            <div class="card formation-card border-0 h-100 overflow-hidden">
+                {% include 'home/_formations_grid.html.twig' %}
+            </div>
 
-                                <div class="formation-card-top">
-                                    {% if formation.imageUrl %}
-                                        <img
-                                            src="{{ asset('uploads/formations/' ~ formation.imageUrl) }}"
-                                            class="formation-card-media"
-                                            alt="{{ formation.titre }}"
-                                        >
-                                    {% else %}
-                                        <img
-                                            src="{{ asset('assets/images/courses/4by3/16.jpg') }}"
-                                            class="formation-card-media"
-                                            alt="{{ formation.titre }}"
-                                        >
-                                    {% endif %}
-
-                                    <div class="formation-card-overlay"></div>
-
-                                    <div class="formation-card-badges">
-                                        <div class="d-flex gap-2">
-                                            <span class="formation-level-badge">
-                                                {{ formation.niveau }}
-                                            </span>
-                                            {% if app.user and formation.id not in purchasedIds %}
-                                                {% set isFavorited = app.user.wishlist.contains(formation) %}
-                                                <button class="wishlist-toggle-btn p-0 border-0 bg-white rounded-circle d-flex align-items-center justify-content-center" 
-                                                        style="width: 32px; height: 32px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); cursor: pointer; transition: all 0.2s;"
-                                                        data-id="{{ formation.id }}"
-                                                        title="{{ isFavorited ? 'Retirer des favoris' : 'Ajouter aux favoris' }}">
-                                                    <i class="bi {{ isFavorited ? 'bi-heart-fill text-danger' : 'bi-heart text-secondary' }} fs-6"></i>
-                                                </button>
-                                            {% endif %}
-                                            {% if formation.id in purchasedIds %}
-                                                <span class="badge bg-success shadow-sm rounded-pill px-3 py-2">
-                                                    <i class="bi bi-patch-check-fill me-1"></i> Inscrit
-                                                </span>
-                                            {% endif %}
-                                            
-                                            {% if progressMap[formation.id] is defined and progressMap[formation.id].isCompleted %}
-                                                <span class="badge bg-warning text-dark shadow-sm rounded-pill px-3 py-2">
-                                                    <i class="bi bi-trophy-fill me-1"></i> Complétée
-                                                </span>
-                                            {% endif %}
-                                        </div>
-
-                                        <div class="d-flex flex-wrap gap-2">
-                                            <span class="formation-rating-badge text-dark">
-                                                <i class="bi bi-star-fill text-warning me-1"></i> 
-                                                <span id="rating-val-{{ formation.id }}">{{ formation.rating|default(0)|number_format(1) }}</span>
-                                                <small class="text-muted">(<span id="rating-count-{{ formation.id }}">{{ formation.ratingCount|default(0) }}</span>)</small>
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="card-body d-flex flex-column p-4">
-                                    <div class="d-flex flex-wrap gap-2 mb-3">
-                                        {% for tag in formation.categorie ? formation.categorie|split(',') : [] %}
-                                            {% if tag|trim != '' %}
-                                                <span class="purple-chip">{{ tag|trim }}</span>
-                                            {% endif %}
-                                        {% endfor %}
-                                    </div>
-
-                                    <h5 class="card-title formation-card-title">{{ formation.titre }}</h5>
-
-                                    {% if progressMap[formation.id] is defined %}
-                                        <div class="mb-3">
-                                            <div class="d-flex justify-content-between align-items-center mb-1">
-                                                <small class="text-muted fw-bold">{{ progressMap[formation.id].passed }}/{{ progressMap[formation.id].total }} Leçons</small>
-                                                <small class="text-primary fw-bold">{{ progressMap[formation.id].percent }}%</small>
-                                            </div>
-                                            <div class="progress" style="height: 6px; border-radius: 10px; background-color: #f1f5f9;">
-                                                <div class="progress-bar" role="progressbar" 
-                                                     style="width: {{ progressMap[formation.id].percent }}%; background: linear-gradient(90deg, #7c3aed, #8b5cf6); border-radius: 10px;" 
-                                                     aria-valuenow="{{ progressMap[formation.id].percent }}" aria-valuemin="0" aria-valuemax="100"></div>
-                                            </div>
-                                            
-                                            {% if progressMap[formation.id].percent == 100 %}
-                                                <a href="{{ path('app_master_certificate', {'id': formation.id}) }}" 
-                                                   class="btn btn-sm w-100 mt-3 d-flex align-items-center justify-content-center gap-2"
-                                                   style="background: linear-gradient(135deg, #059669, #10b981); color: white; border: none; border-radius: 10px; padding: 10px; font-weight: 700; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25); transition: transform 0.2s;">
-                                                    <i class="bi bi-award-fill fs-5 text-warning"></i>
-                                                    Master Certificate
-                                                </a>
-                                            {% endif %}
-                                        </div>
-                                    {% endif %}
-
-                                    <p class="card-text formation-card-text flex-grow-1 mb-2">
-                                        {{ formation.description ? formation.description|slice(0, 120) ~ '...' : 'Pas de description' }}
-                                    </p>
-
-                                    {% if formation.id not in purchasedIds %}
-                                        <div class="d-flex align-items-center mb-3">
-                                            <span class="fw-bold fs-5 text-dark me-2">{{ formation.prix|format_currency }}</span>
-                                            {% if formation.prix %}
-                                                <span class="text-muted text-decoration-line-through small">{{ (formation.prix * 1.4)|format_currency }}</span>
-                                            {% endif %}
-                                        </div>
-                                    {% else %}
-                                        <!-- Real Rating Interactive Stars -->
-                                        <div class="d-flex align-items-center mb-3 rating-stars-container" data-id="{{ formation.id }}">
-                                            <span class="small text-muted me-2">Votre note :</span>
-                                            {% for i in 1..5 %}
-                                                <i class="bi bi-star p-1 cursor-pointer star-rate" data-score="{{ i }}" style="cursor: pointer; color: #fbbf24; font-size: 1.2rem;"></i>
-                                            {% endfor %}
-                                        </div>
-                                    {% endif %}
-                                    
-                                    <div class="formation-card-footer d-flex gap-2 flex-wrap mt-auto">
-                                        {% if formation.id not in purchasedIds %}
-                                            <button type="button" class="btn btn-sm formation-outline-btn fw-bold px-3" data-bs-toggle="modal" data-bs-target="#purchaseModal{{ formation.id }}">
-                                                Acheter
-                                            </button>
-                                        {% endif %}
-                                        <a href="{{ path('app_formation_show', {'id': formation.id}) }}" class="btn btn-sm formation-main-btn flex-grow-1">
-                                            Voir formation
-                                        </a>
-
-                                        {% if progressMap[formation.id] is defined and progressMap[formation.id].isCompleted %}
-                                            <a href="{{ path('app_my_certificates') }}" class="btn btn-sm btn-outline-success border-2 fw-bold w-100 mt-2" style="border-radius: 12px;">
-                                                <i class="bi bi-award me-1"></i> Voir mes certificats
-                                            </a>
-                                        {% endif %}
-                                        <button type="button" class="btn btn-sm btn-light quick-view-btn text-primary border" 
-                                            style="border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);"
-                                            data-title="{{ formation.titre|escape('html_attr') }}"
-                                            data-desc="{{ formation.description|default('Pas de description')|escape('html_attr') }}"
-                                            data-level="{{ formation.niveau }}"
-                                            data-img="{{ formation.imageUrl ? asset('uploads/formations/' ~ formation.imageUrl) : asset('assets/images/courses/4by3/16.jpg') }}"
-                                            data-category="{{ formation.categorie }}"
-                                            data-price="{{ formation.prix|format_currency }}"
-                                            data-fakeprice="{{ formation.prix ? (formation.prix * 1.4)|format_currency : '' }}"
-                                            data-rating="{{ formation.rating|default(0)|number_format(1) }}"
-                                            data-reviews="{{ formation.ratingCount|default(0)|number_format(0, '', ' ') }}"
-                                            onclick="openQuickView(this)">
-                                            <i class="bi bi-eye fw-bold"></i>
-                                        </button>
-                                    </div>
-                                </div>
-
-                            </div>
-                        </div>
-
-                        <!-- Purchase Modal for Formation {{ formation.id }} -->
-                        <div class="modal fade" id="purchaseModal{{ formation.id }}" tabindex="-1" aria-labelledby="purchaseModalLabel{{ formation.id }}" aria-hidden="true">
-                            <div class="modal-dialog modal-dialog-centered modal-lg">
-                                <div class="modal-content border-0 overflow-hidden" style="border-radius: 20px; box-shadow: 0 25px 50px -12px rgba(124, 58, 237, 0.25);">
-                                    <div class="modal-header border-bottom-0 pb-0 pt-4 px-4">
-                                        <h5 class="modal-title fw-bold" id="purchaseModalLabel{{ formation.id }}" style="color: #4c1d95;">Confirmation d'inscription</h5>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
-                                    </div>
-                                    <div class="modal-body p-4">
-                                        <div class="row g-4">
-                                            <div class="col-md-6">
-                                                <div class="d-flex align-items-center mb-4">
-                                                    <div class="icon-md bg-primary bg-opacity-10 text-primary rounded-circle me-3 d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
-                                                        <i class="fas fa-user-circle fs-4"></i>
-                                                    </div>
-                                                    <div>
-                                                        <label class="small text-muted d-block">Identité de l'apprenant</label>
-                                                        <span class="fw-bold text-dark">{{ app.user ? app.user.username : 'Utilisateur Connecté' }}</span>
-                                                    </div>
-                                                </div>
-
-                                                <h6 class="fw-bold mb-3 text-dark">Détails de la formation</h6>
-                                                <div class="p-3 rounded-4 mb-4" style="background: #f8fafc; border: 1px solid #e2e8f0;">
-                                                    <h5 class="h6 fw-bold mb-2">{{ formation.titre }}</h5>
-                                                    <p class="small text-muted mb-0">
-                                                        {{ formation.description|slice(0, 150) }}{% if formation.description|length > 150 %}...{% endif %}
-                                                    </p>
-                                                </div>
-
-                                                <div class="bg-primary bg-opacity-10 p-3 rounded-4 mb-3">
-                                                    <p class="mb-2 fw-semibold text-primary small"><i class="fas fa-check-circle me-1"></i> Bénéfices inclus :</p>
-                                                    <ul class="list-unstyled small mb-0 text-dark">
-                                                        <li class="mb-1">✅ Accès illimité à toutes les leçons</li>
-                                                        <li class="mb-1">✅ Quiz d'évaluation et certification</li>
-                                                        <li>✅ Support et ressources pédagogiques</li>
-                                                    </ul>
-                                                </div>
-                                            </div>
-
-                                            <div class="col-md-6">
-                                                <div class="p-4 rounded-4 h-100" style="background: #faf5ff; border: 1px solid #ede9fe;">
-                                                    <label class="small fw-bold mb-3 d-block" style="color: #6d28d9;">
-                                                        <i class="fas fa-list-ul me-1"></i> Programme ({{ formation.lessons|length }} Leçons)
-                                                    </label>
-                                                    <div class="lesson-preview-list" style="max-height: 250px; overflow-y: auto; padding-right: 5px;">
-                                                        {% for lesson in formation.lessons %}
-                                                            <div class="d-flex align-items-center mb-2 p-2 rounded-3 bg-white border border-light transition-all hover-shadow-sm">
-                                                                <div class="small fw-bold text-primary me-2">{{ loop.index }}.</div>
-                                                                <div class="small text-dark text-truncate">{{ lesson.titre }}</div>
-                                                            </div>
-                                                        {% else %}
-                                                            <div class="text-muted small">Aucune leçon disponible.</div>
-                                                        {% endfor %}
-                                                    </div>
-
-                                                    <form action="{{ path('app_formation_inscription', {'id': formation.id}) }}" method="post" id="purchaseFormList{{ formation.id }}" class="mt-4">
-                                                        <div class="mb-4 text-center">
-                                                            <label class="form-label small fw-bold text-muted d-block">Total à payer</label>
-                                                            <div class="display-6 fw-bold text-dark">{{ formation.prix|format_currency }}</div>
-                                                        </div>
-                                                        <div class="mb-3">
-                                                            <label class="form-label small fw-bold text-muted">Mode de paiement sécurisé</label>
-                                                            <div class="d-flex gap-2">
-                                                                <div class="flex-fill border rounded-3 p-2 text-center bg-white">
-                                                                    <i class="fab fa-cc-visa text-primary fa-lg"></i>
-                                                                </div>
-                                                                <div class="flex-fill border rounded-3 p-2 text-center bg-white">
-                                                                    <i class="fab fa-cc-mastercard text-danger fa-lg"></i>
-                                                                </div>
-                                                                <div class="flex-fill border rounded-3 p-2 text-center bg-white">
-                                                                    <i class="fab fa-paypal text-info fa-lg"></i>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                        <div class="d-grid mt-4">
-                                                            <button type="submit" class="btn btn-primary py-3 fw-bold shadow-lg" style="border-radius: 14px; background: linear-gradient(135deg, #7c3aed, #8b5cf6); border: none; transition: transform 0.2s;">
-                                                                Débloquer l'accès maintenant
-                                                            </button>
-                                                        </div>
-                                                    </form>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                    {% endfor %}
-                    </div>
-
-                    <div class="d-flex justify-content-center mt-5 pagination-container">
-                        {{ knp_pagination_render(formations) }}
-                    </div>
-                </div><!-- end #main-formations-wrapper -->
-                
-                <div id="infinite-scroll-trigger" class="text-center mt-4 mb-4" style="display: none;">
-                        <div class="spinner-border text-primary" role="status">
-                            <span class="visually-hidden">Chargement...</span>
-                        </div>
-                    </div>
-                {% else %}
-                    <div class="alert alert-info">
-                        Aucune formation trouvée.
-                    </div>
-                {% endif %}
+            <div id="infinite-scroll-trigger" class="text-center mt-4 mb-4" style="display: none;">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Chargement...</span>
+                </div>
+            </div>
             </div>
         </div>
     </section>
@@ -608,9 +360,18 @@
             </div>
         </div>
     </div>
+    <div id="ajax-loader-overlay" class="position-fixed top-0 start-0 w-100 h-100 d-none flex-column align-items-center justify-content-center" style="z-index: 9999; background: rgba(255,255,255,0.7); backdrop-filter: blur(4px);">
+        <div class="spinner-grow text-primary" style="width: 3rem; height: 3rem;" role="status text-center"></div>
+        <div class="mt-2 fw-bold text-primary">Chargement...</div>
+    </div>
 </main>
 
 <style>
+.hero-finora {
+    background: linear-gradient(135deg, rgba(124, 58, 237, 0.08), rgba(167, 139, 250, 0.12));
+    border: 1px solid rgba(124, 58, 237, 0.08);
+}
+
 .formation-card {
     border-radius: 22px;
     background: #ffffff;
@@ -803,354 +564,326 @@
 </style>
 
 <script>
-// Quick View functionality
-function openQuickView(button) {
-    const title = button.getAttribute('data-title');
-    const desc = button.getAttribute('data-desc');
-    const img = button.getAttribute('data-img');
-    const level = button.getAttribute('data-level');
-    const categories = button.getAttribute('data-category');
-    const price = button.getAttribute('data-price');
-    const fakePrice = button.getAttribute('data-fakeprice');
-    const rating = button.getAttribute('data-rating');
-    const reviews = button.getAttribute('data-reviews');
-
-    document.getElementById('qv-title').textContent = title;
-    document.getElementById('qv-desc').textContent = desc;
-    document.getElementById('qv-img').src = img;
-    document.getElementById('qv-level').textContent = level;
-    document.getElementById('qv-price').textContent = price;
+document.addEventListener('DOMContentLoaded', function() {
+    // --- Elements ---
+    const filterForm = document.getElementById('fo-formation-filter-form');
+    const heroForm = document.getElementById('hero-search-form');
+    const filterSearchInput = document.getElementById('fo-titre-search');
+    const heroSearchInput = document.getElementById('voice-search-input');
+    const resultsContainer = document.getElementById('results-container') || document.getElementById('main-formations-wrapper');
+    const mainWrapper = document.getElementById('main-formations-wrapper');
+    const loaderOverlay = document.getElementById('ajax-loader-overlay');
     
-    const fakePriceEl = document.getElementById('qv-fakeprice');
-    if (fakePrice) {
-        fakePriceEl.textContent = fakePrice;
-        fakePriceEl.style.display = 'inline';
-    } else {
-        fakePriceEl.style.display = 'none';
-    }
-    
-    document.getElementById('qv-rating').textContent = rating;
-    document.getElementById('qv-reviews').textContent = reviews;
+    let ajaxController = null;
+    let searchTimeout = null;
 
-    const catContainer = document.getElementById('qv-category-container');
-    catContainer.innerHTML = '';
-    if (categories) {
-        categories.split(',').forEach(cat => {
-            if (cat.trim() !== '') {
-                const badge = document.createElement('span');
-                badge.className = 'badge bg-primary bg-opacity-10 text-primary border';
-                badge.textContent = cat.trim();
-                catContainer.appendChild(badge);
-            }
-        });
-    }
+    // --- Core AJAX Fetch ---
+    async function fetchFilteredResults(url) {
+        if (ajaxController) ajaxController.abort();
+        ajaxController = new AbortController();
 
-    const modalEl = document.getElementById('quickViewModal');
-    let modal = bootstrap.Modal.getInstance(modalEl);
-    if (!modal) modal = new bootstrap.Modal(modalEl);
-    modal.show();
-}
-
-    // Wishlist Toggle logic
-    document.addEventListener('click', async function(e) {
-        const btn = e.target.closest('.wishlist-toggle-btn');
-        if (!btn) return;
-
-        e.preventDefault();
-        e.stopPropagation();
-
-        const id = btn.getAttribute('data-id');
-        const icon = btn.querySelector('i');
+        if (mainWrapper) mainWrapper.style.opacity = '0.5';
+        if (loaderOverlay) {
+            loaderOverlay.classList.remove('d-none');
+            loaderOverlay.classList.add('d-flex');
+        }
+        
+        window.history.pushState({}, '', url);
 
         try {
-            btn.style.opacity = '0.5';
-            btn.disabled = true;
-
-            const response = await fetch(`/wishlist/toggle/${id}`, {
-                method: 'POST',
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest'
+            const res = await fetch(url, { 
+                signal: ajaxController.signal,
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+             });
+            const html = await res.text();
+            
+            if (resultsContainer) {
+                // Determine if we are replacing main Wrapper or just results container
+                if(resultsContainer.id === 'main-formations-wrapper') {
+                     // Need to extract the inner HTML or similar if replacing the wrapper itself
+                     // Assuming backend returns only the partial
+                     resultsContainer.innerHTML = html;
+                } else {
+                     resultsContainer.innerHTML = html;
                 }
-            });
 
-            const data = await response.json();
-
-            if (data.status === 'added') {
-                icon.classList.remove('bi-heart', 'text-secondary');
-                icon.classList.add('bi-heart-fill', 'text-danger');
-                btn.title = 'Retirer des favoris';
-            } else {
-                icon.classList.remove('bi-heart-fill', 'text-danger');
-                icon.classList.add('bi-heart', 'text-secondary');
-                btn.title = 'Ajouter aux favoris';
+                // Re-init non-delegated components
+                initInfiniteScroll();
+                initBestsellerCarousel();
+                initCategoryToggle();
             }
         } catch (err) {
-            console.error('Wishlist error:', err);
+            if (err.name === 'AbortError') return;
+            console.error('AJAX Error:', err);
         } finally {
-            btn.style.opacity = '1';
-            btn.disabled = false;
+            if (mainWrapper) mainWrapper.style.opacity = '1';
+            if (loaderOverlay) {
+                loaderOverlay.classList.remove('d-flex');
+                loaderOverlay.classList.add('d-none');
+            }
+        }
+    }
+
+    // --- Search Synchronization & Triggers ---
+    function triggerUnifiedSearch(sourceForm) {
+        if (!sourceForm) return;
+
+        // Synchronize search inputs across forms
+        if (sourceForm === heroForm && filterSearchInput && heroSearchInput) {
+            filterSearchInput.value = heroSearchInput.value;
+        } else if (sourceForm === filterForm && heroSearchInput && filterSearchInput) {
+            heroSearchInput.value = filterSearchInput.value;
+        }
+
+        // Use filterForm as primary data source for all filters if available
+        const activeForm = filterForm || sourceForm;
+        const formData = new FormData(activeForm);
+        const params = new URLSearchParams(formData);
+        const action = activeForm.getAttribute('action') || window.location.pathname;
+        
+        // Strip out existing query params from action if any
+        const baseUrl = action.split('?')[0];
+        fetchFilteredResults(baseUrl + '?' + params.toString());
+    }
+
+    // Dynamic Search (Debounced typing)
+    document.addEventListener('input', function(e) {
+        const form = e.target.closest('#fo-formation-filter-form, #hero-search-form');
+        if (form && e.target.tagName === 'INPUT') {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => triggerUnifiedSearch(form), 400); 
         }
     });
 
-document.addEventListener('DOMContentLoaded', function () {
-    const form = document.getElementById('fo-formation-filter-form');
-    const heroForm = document.getElementById('hero-search-form');
-    const titreInput = document.getElementById('fo-titre-search');
-    const voiceBtn = document.getElementById('voice-btn');
-    const voiceSearchInput = document.getElementById('voice-search-input');
-    const voiceStatus = document.getElementById('voice-status');
-
-    let timeout = null;
-    let mediaRecorder = null;
-    let audioChunks = [];
-
-    // AJAX Search logic
-    function setupAjaxForm(f) {
-        if (!f) return;
-        f.addEventListener('submit', async function (e) {
+    // Form Submit (Manual click or Enter)
+    document.addEventListener('submit', function(e) {
+        const form = e.target.closest('#fo-formation-filter-form, #hero-search-form');
+        if (form) {
             e.preventDefault();
-            const container = document.getElementById('results-container');
-            const url = new URL(f.action || window.location.href);
-            const formData = new FormData(f);
-            const params = new URLSearchParams();
-            for (const [key, value] of formData.entries()) {
-                if (value) params.append(key, value);
-            }
-            url.search = params.toString();
+            triggerUnifiedSearch(form);
+        }
+    });
 
-            // Update URL
-            window.history.pushState({}, '', url);
+    // Filter Change (Selects/Checkbox/Radio)
+    document.addEventListener('change', function(e) {
+        const form = e.target.closest('#fo-formation-filter-form');
+        if (form && (e.target.tagName === 'SELECT' || e.target.type === 'checkbox' || e.target.type === 'radio')) {
+            triggerUnifiedSearch(form);
+        }
+    });
 
-            if (container) container.style.opacity = '0.5';
+    // --- Global Click Action Delegation ---
+    document.addEventListener('click', async function(e) {
+        // 1. Wishlist Heart Toggle
+        const wishlistBtn = e.target.closest('.wishlist-toggle-btn');
+        if (wishlistBtn) {
+            e.preventDefault();
+            const id = wishlistBtn.dataset.id;
+            const icon = wishlistBtn.querySelector('i');
+            
+            wishlistBtn.style.opacity = '0.5';
             try {
-                const res = await fetch(url.toString(), {
-                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                const res = await fetch(`/wishlist/toggle/${id}`, { 
+                    method: 'POST', 
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' } 
                 });
-                const html = await res.text();
-                const doc = new DOMParser().parseFromString(html, "text/html");
-                const newContainer = doc.getElementById('results-container');
-                if (container && newContainer) {
-                    container.innerHTML = newContainer.innerHTML;
-                    
-                    // Reinitialize infinite scroll for the newly injected elements
-                    initInfiniteScroll();
+                const data = await res.json();
+                if (data.status === 'added') {
+                    icon.className = 'bi bi-heart-fill text-danger fs-6';
+                    wishlistBtn.title = 'Retirer des favoris';
+                } else {
+                    icon.className = 'bi bi-heart text-secondary fs-6';
+                    wishlistBtn.title = 'Ajouter aux favoris';
                 }
-            } catch (err) {
-                console.error('AJAX search error:', err);
-                // Fallback to normal submit
-                f.submit();
-            } finally {
-                if (container) container.style.opacity = '1';
-            }
-        });
-    }
-
-    setupAjaxForm(form);
-    setupAjaxForm(heroForm);
-
-    // Infinite Scroll Implementation
-    let globalObserver = null;
-
-    function initInfiniteScroll() {
-        const gridRow = document.getElementById('formations-grid-row');
-        const scrollTrigger = document.getElementById('infinite-scroll-trigger');
-        const paginationContainer = document.querySelector('.pagination-container');
-        
-        // Clean up old observer if it exists
-        if (globalObserver) {
-            globalObserver.disconnect();
-            globalObserver = null;
-        }
-
-        if (gridRow && scrollTrigger && paginationContainer) {
-            
-            // Extract the "next" page URL natively from the KnpPaginator generated HTML
-            const getNextUrl = () => {
-                const navLinks = Array.from(document.querySelectorAll('.pagination-container .page-link'));
-                const nextLink = navLinks.find(el => el.getAttribute('rel') === 'next');
-                return nextLink ? nextLink.href : null; // Handles Knp pagination correctly
-            };
-
-            const nextUrl = getNextUrl();
-            
-            if (nextUrl) {
-                // If there's a next page, hide normal pagination and show our loader trigger
-                paginationContainer.style.display = 'none';
-                scrollTrigger.style.display = 'block';
-            } else {
-                paginationContainer.style.display = 'none'; // hide pagination anyway for clean UX
-                scrollTrigger.style.display = 'none';
-                return; // Nothing to load
-            }
-
-            let isFetching = false;
-
-            globalObserver = new IntersectionObserver(async (entries) => {
-                if (entries[0].isIntersecting && !isFetching) {
-                    const currentNextUrl = getNextUrl();
-                    
-                    if (currentNextUrl) {
-                        isFetching = true;
-                        try {
-                            const res = await fetch(currentNextUrl, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
-                            const html = await res.text();
-                            const doc = new DOMParser().parseFromString(html, "text/html");
-                            
-                            // Extract just the new cards and KnpPagination box
-                            const newCards = doc.querySelectorAll('#formations-grid-row > div');
-                            const newPagination = doc.querySelector('.pagination-container');
-                            
-                            if (newCards.length > 0) {
-                                newCards.forEach(card => gridRow.appendChild(card));
-                            }
-                            
-                            if (newPagination) {
-                                paginationContainer.innerHTML = newPagination.innerHTML;
-                            }
-                            
-                            // Check if there are no more pages
-                            if (!getNextUrl()) {
-                                scrollTrigger.style.display = 'none';
-                                globalObserver.disconnect();
-                            }
-                        } catch (err) {
-                            console.error('Infinite scroll error:', err);
-                        } finally {
-                            isFetching = false;
-                        }
-                    } else {
-                        scrollTrigger.style.display = 'none';
-                        globalObserver.disconnect();
-                    }
-                }
-            }, { rootMargin: "0px 0px 500px 0px" });
-
-            globalObserver.observe(scrollTrigger);
-        }
-    }
-
-    // Call on load
-    initInfiniteScroll();
-
-    if (titreInput) {
-        titreInput.addEventListener('input', function () {
-            clearTimeout(timeout);
-            timeout = setTimeout(() => {
-                if (form) form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
-            }, 400);
-        });
-    }
-
-    if (voiceSearchInput && heroForm) {
-        voiceSearchInput.addEventListener('input', function () {
-            clearTimeout(timeout);
-            timeout = setTimeout(() => {
-                if (heroForm) heroForm.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
-            }, 400);
-        });
-    }
-
-    // --- GLOBAL EVENT DELEGATION FOR SEAMLESS BROWSING ---
-    document.addEventListener('click', function(e) {
-        // 1. Premium Currency Switcher
-        const currLink = e.target.closest('.curr-pill');
-        if (currLink && currLink.tagName === 'A') {
-            e.preventDefault();
-            const url = currLink.href;
-            fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
-                .then(res => res.json())
-                .then(data => {
-                    if (data.success) fetchFilteredResults(window.location.href);
-                });
+            } catch (err) { console.error('Wishlist error:', err); }
+            wishlistBtn.style.opacity = '1';
             return;
         }
 
-        // 2. Category Pills
+        // 2. Star Rating Component
+        const star = e.target.closest('.star-rate');
+        if (star) {
+            const container = star.closest('.rating-stars-container');
+            const id = container.dataset.id;
+            const score = star.dataset.score;
+            try {
+                const res = await fetch(`/formations/${id}/rate/${score}`, { 
+                    method: 'POST', 
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' } 
+                });
+                const data = await res.json();
+                if (data.newRating) {
+                    const val = document.getElementById(`rating-val-${id}`);
+                    const count = document.getElementById(`rating-count-${id}`);
+                    if (val) val.textContent = data.newRating;
+                    if (count) count.textContent = data.newCount;
+                    container.innerHTML = '<span class="text-success small fw-bold"><i class="bi bi-check-circle-fill"></i> Merci !</span>';
+                }
+            } catch (err) { console.error('Rating error:', err); }
+            return;
+        }
+
+        // 3. Quick View Trigger
+        const quickBtn = e.target.closest('.quick-view-btn');
+        if (quickBtn) {
+            window.openQuickView(quickBtn); 
+            return;
+        }
+
+        // 4. Currency Switcher
+        const currLink = e.target.closest('.curr-pill');
+        if (currLink && currLink.tagName === 'A') {
+            e.preventDefault();
+            try {
+                const res = await fetch(currLink.href, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+                const data = await res.json();
+                if (data.success) fetchFilteredResults(window.location.href);
+            } catch (err) { window.location.href = currLink.href; }
+            return;
+        }
+
+        // 5. Category Pills (Top section)
         const catLink = e.target.closest('.cat-pill');
-        if (catLink && catLink.tagName === 'A') {
+        if (catLink && catLink.tagName === 'A' && !catLink.id) {
             e.preventDefault();
             fetchFilteredResults(catLink.href);
             return;
         }
 
-        // 3. Pagination
+        // 6. Pagination Links
         const pagLink = e.target.closest('.pagination a');
         if (pagLink) {
             e.preventDefault();
             fetchFilteredResults(pagLink.href);
-            const wrapEl = document.getElementById('main-formations-wrapper');
-            if (wrapEl) window.scrollTo({ top: wrapEl.offsetTop - 150, behavior: 'smooth' });
+            if (mainWrapper) window.scrollTo({ top: mainWrapper.offsetTop - 150, behavior: 'smooth' });
             return;
         }
     });
 
-    // 4. Global Search & Filters
-    document.addEventListener('submit', function(e) {
-        const filterForm = e.target.closest('#fo-formation-filter-form') || e.target.closest('#hero-search-form');
-        if (filterForm) {
-            e.preventDefault();
-            const formData = new FormData(filterForm);
-            const params = new URLSearchParams(formData);
-            fetchFilteredResults(filterForm.action + '?' + params.toString());
+    // --- Rating Hover (Delegated) ---
+    document.addEventListener('mouseover', e => {
+        const star = e.target.closest('.star-rate');
+        if (star) {
+            const container = star.closest('.rating-stars-container');
+            const score = parseInt(star.dataset.score);
+            container.querySelectorAll('.star-rate').forEach(s => {
+                s.classList.toggle('bi-star-fill', parseInt(s.dataset.score) <= score);
+                s.classList.toggle('bi-star', parseInt(s.dataset.score) > score);
+            });
         }
     });
 
-    document.addEventListener('change', function(e) {
-        const select = e.target.closest('#fo-formation-filter-form select');
-        if (select) {
-            const f = select.closest('form');
-            if (f) {
-                const formData = new FormData(f);
-                const params = new URLSearchParams(formData);
-                fetchFilteredResults(f.action + '?' + params.toString());
-            }
+    // --- Quick View Logic ---
+    window.openQuickView = function(button) {
+        const data = button.dataset;
+        const qvTitle = document.getElementById('qv-title');
+        if(!qvTitle) return; // Quick view modal doesn't exist on this page
+        
+        qvTitle.textContent = data.title;
+        document.getElementById('qv-desc').textContent = data.desc;
+        document.getElementById('qv-img').src = data.img;
+        document.getElementById('qv-level').textContent = data.level;
+        document.getElementById('qv-price').textContent = data.price;
+        
+        const qvFake = document.getElementById('qv-fakeprice');
+        if (data.fakeprice) {
+            qvFake.textContent = data.fakeprice;
+            qvFake.style.display = 'inline';
+        } else {
+            qvFake.style.display = 'none';
         }
-    });
+        
+        document.getElementById('qv-rating').textContent = data.rating;
+        document.getElementById('qv-reviews').textContent = data.reviews;
 
-    // --- UTILITIES ---
-    async function fetchFilteredResults(url) {
-        const wrapper = document.getElementById('main-formations-wrapper');
-        if (wrapper) wrapper.style.opacity = '0.5';
-        window.history.pushState({}, '', url);
-
-        try {
-            const res = await fetch(url);
-            const html = await res.text();
-            const doc = new DOMParser().parseFromString(html, "text/html");
-            
-            const newWrapper = doc.getElementById('main-formations-wrapper');
-            const currentWrapper = document.getElementById('main-formations-wrapper');
-            if (currentWrapper && newWrapper) {
-                currentWrapper.innerHTML = newWrapper.innerHTML;
-            }
-            
-            if (typeof initInfiniteScroll === 'function') initInfiniteScroll();
-            initBestsellerCarousel();
-            initCategoryToggle();
-        } catch (err) {
-            console.error('AJAX Error:', err);
-            window.location.href = url;
-        } finally {
-            if (wrapper) wrapper.style.opacity = '1';
+        const catContainer = document.getElementById('qv-category-container');
+        catContainer.innerHTML = '';
+        if (data.category) {
+            data.category.split(',').forEach(cat => {
+                if (cat.trim()) {
+                    const badge = document.createElement('span');
+                    badge.className = 'badge bg-primary bg-opacity-10 text-primary border me-1';
+                    badge.textContent = cat.trim();
+                    catContainer.appendChild(badge);
+                }
+            });
         }
+
+        const modalEl = document.getElementById('quickViewModal');
+        if (modalEl && typeof bootstrap !== 'undefined') {
+            const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+            modal.show();
+        }
+    };
+
+    // --- Optimized Initialize Functions ---
+    let scrollObserver = null;
+    function initInfiniteScroll() {
+        const gridRow = document.getElementById('formations-grid-row');
+        const scrollTrigger = document.getElementById('infinite-scroll-trigger');
+        const pagContainer = document.querySelector('.pagination-container');
+        
+        if (scrollObserver) scrollObserver.disconnect();
+        if (!gridRow || !scrollTrigger || !pagContainer) return;
+
+        const getNextUrl = () => {
+            const nextLink = document.querySelector('.pagination-container .page-link[rel="next"]');
+            return nextLink ? nextLink.href : null;
+        };
+
+        if (getNextUrl()) {
+            pagContainer.style.display = 'none';
+            scrollTrigger.style.display = 'block';
+        } else {
+            pagContainer.style.display = 'none';
+            scrollTrigger.style.display = 'none';
+            return;
+        }
+
+        let isFetching = false;
+        scrollObserver = new IntersectionObserver(async (entries) => {
+            if (entries[0].isIntersecting && !isFetching) {
+                const nextUrl = getNextUrl();
+                if (nextUrl) {
+                    isFetching = true;
+                    try {
+                        const res = await fetch(nextUrl, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+                        const html = await res.text();
+                        const doc = new DOMParser().parseFromString(html, "text/html");
+                        
+                        const newCards = doc.querySelectorAll('#formations-grid-row > div');
+                        const newPag = doc.querySelector('.pagination-container');
+                        
+                        newCards.forEach(card => gridRow.appendChild(card));
+                        if (newPag) pagContainer.innerHTML = newPag.innerHTML;
+                        
+                        if (!getNextUrl()) {
+                            scrollTrigger.style.display = 'none';
+                            scrollObserver.disconnect();
+                        }
+                    } catch (err) { console.error('Scroll error:', err); }
+                    finally { isFetching = false; }
+                }
+            }
+        }, { rootMargin: "0px 0px 500px 0px" });
+
+        scrollObserver.observe(scrollTrigger);
     }
 
     function initCategoryToggle() {
         const toggleBtn = document.getElementById('toggle-categories-btn');
         if (toggleBtn) {
             let expanded = false;
-            // Remove old listener if any (though innerHTML handles this usually)
-            toggleBtn.onclick = function() {
+            // remove prev listeners by replacing clone
+            const newBtn = toggleBtn.cloneNode(true);
+            toggleBtn.parentNode.replaceChild(newBtn, toggleBtn);
+            
+            newBtn.onclick = function() {
                 expanded = !expanded;
-                const items = document.querySelectorAll('.category-item');
-                items.forEach((item, index) => {
-                    if (index > 4) { // keep first 5 visible
-                        item.style.display = expanded ? 'inline-block' : 'none';
-                    }
+                document.querySelectorAll('.category-item').forEach((item, index) => {
+                    if (index > 4) item.style.display = expanded ? 'inline-block' : 'none';
                 });
-                this.innerHTML = expanded 
-                    ? '<i class="bi bi-chevron-up"></i> Voir moins'
-                    : '<i class="bi bi-chevron-down"></i> Voir plus';
+                this.innerHTML = expanded ? '<i class="bi bi-chevron-up"></i> Voir moins' : '<i class="bi bi-chevron-down"></i> Voir plus';
             };
         }
     }
@@ -1158,203 +891,50 @@ document.addEventListener('DOMContentLoaded', function () {
     function initBestsellerCarousel() {
         const carouselEl = document.querySelector('#bestsellerCarousel');
         if (carouselEl && typeof bootstrap !== 'undefined') {
-            new bootstrap.Carousel(carouselEl, {
-                interval: 5000,
-                ride: 'carousel'
-            });
+            new bootstrap.Carousel(carouselEl, { interval: 5000, ride: 'carousel' });
         }
     }
 
-    initCategoryToggle(); // Initial call
-
-    if (voiceBtn && voiceSearchInput) {
-        voiceBtn.addEventListener('click', async () => {
+    // --- Voice Search ---
+    const voiceBtn = document.getElementById('voice-btn');
+    if (voiceBtn && heroSearchInput) {
+        let mediaRecorder = null;
+        let audioChunks = [];
+        const voiceStatus = document.getElementById('voice-status');
+        
+        voiceBtn.onclick = async () => {
+            if (mediaRecorder && mediaRecorder.state === 'recording') {
+                mediaRecorder.stop();
+                voiceBtn.innerText = '🎤';
+                return;
+            }
             try {
-                if (mediaRecorder && mediaRecorder.state === 'recording') {
-                    mediaRecorder.stop();
-                    voiceBtn.innerText = '🎤';
-                    if (voiceStatus) {
-                        voiceStatus.textContent = 'Analyse en cours...';
-                    }
-                    return;
-                }
-
-                if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-                    if (voiceStatus) {
-                        voiceStatus.textContent = 'Le microphone n’est pas supporté sur ce navigateur.';
-                    }
-                    return;
-                }
-
-                if (!window.MediaRecorder) {
-                    if (voiceStatus) {
-                        voiceStatus.textContent = 'MediaRecorder n’est pas disponible sur ce navigateur.';
-                    }
-                    return;
-                }
-
                 const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-
-                let mimeType = 'audio/webm';
-                if (MediaRecorder.isTypeSupported('audio/webm;codecs=opus')) {
-                    mimeType = 'audio/webm;codecs=opus';
-                } else if (MediaRecorder.isTypeSupported('audio/webm')) {
-                    mimeType = 'audio/webm';
-                } else if (MediaRecorder.isTypeSupported('audio/mp4')) {
-                    mimeType = 'audio/mp4';
-                }
-
-                mediaRecorder = new MediaRecorder(stream, { mimeType });
+                mediaRecorder = new MediaRecorder(stream);
                 audioChunks = [];
-
-                mediaRecorder.ondataavailable = event => {
-                    if (event.data && event.data.size > 0) {
-                        audioChunks.push(event.data);
-                    }
-                };
-
+                mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
                 mediaRecorder.onstop = async () => {
-                    try {
-                        const blob = new Blob(audioChunks, { type: mimeType });
-
-                        if (blob.size === 0) {
-                            if (voiceStatus) {
-                                voiceStatus.textContent = 'Aucun son détecté.';
-                            }
-                            return;
-                        }
-
-                        const response = await fetch('{{ path('api_stt') }}', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': mimeType,
-                                'Accept': 'application/json'
-                            },
-                            body: blob
-                        });
-
-                        const rawText = await response.text();
-                        let data = null;
-
-                        try {
-                            data = JSON.parse(rawText);
-                        } catch (jsonError) {
-                            if (voiceStatus) {
-                                voiceStatus.textContent = 'Réponse serveur invalide: ' + rawText.substring(0, 120);
-                            }
-                            return;
-                        }
-
-                        if (data.success && data.text) {
-                            voiceSearchInput.value = data.text;
-
-                            const filterSearch = document.getElementById('fo-titre-search');
-                            if (filterSearch) {
-                                filterSearch.value = data.text;
-                            }
-
-                            if (voiceStatus) {
-                                voiceStatus.textContent = 'Texte reconnu : ' + data.text;
-                            }
-
-                            document.getElementById('hero-search-form').submit();
-                        } else {
-                            if (voiceStatus) {
-                                voiceStatus.textContent = data.error
-                                    ? 'Erreur serveur: ' + data.error
-                                    : 'Aucun texte reconnu.';
-                            }
-                        }
-                    } catch (error) {
-                        console.error('Erreur STT:', error);
-                        if (voiceStatus) {
-                            voiceStatus.textContent = error.message
-                                ? 'Erreur: ' + error.message
-                                : 'Erreur lors de la transcription.';
-                        }
-                    } finally {
-                        voiceBtn.innerText = '🎤';
-                        stream.getTracks().forEach(track => track.stop());
+                    const blob = new Blob(audioChunks, { type: 'audio/webm' });
+                    const response = await fetch('{{ path('api_stt') }}', { method: 'POST', body: blob });
+                    const data = await response.json();
+                    if (data.success && data.text) {
+                        heroSearchInput.value = data.text;
+                        if (voiceStatus) voiceStatus.textContent = 'Reconnu : ' + data.text;
+                        triggerUnifiedSearch(heroForm);
                     }
+                    stream.getTracks().forEach(t => t.stop());
                 };
-
                 mediaRecorder.start();
                 voiceBtn.innerText = '⏹';
-                if (voiceStatus) {
-                    voiceStatus.textContent = 'Enregistrement... Parlez maintenant.';
-                }
-
-                setTimeout(() => {
-                    if (mediaRecorder && mediaRecorder.state === 'recording') {
-                        mediaRecorder.stop();
-                    }
-                }, 6000);
-
-            } catch (error) {
-                console.error('Erreur micro:', error);
-                if (voiceStatus) {
-                    voiceStatus.textContent = error.message
-                        ? 'Erreur micro: ' + error.message
-                        : 'Impossible d’accéder au microphone.';
-                }
-                voiceBtn.innerText = '🎤';
-            }
-        });
+                if(voiceStatus) voiceStatus.textContent = 'Écoute en cours...';
+            } catch (err) { console.error('Voice error:', err); }
+        };
     }
-    // --- Star Rating Logic ---
-    document.addEventListener('mouseover', function(e) {
-        if (e.target.classList.contains('star-rate')) {
-            const container = e.target.closest('.rating-stars-container');
-            const score = parseInt(e.target.dataset.score);
-            const stars = container.querySelectorAll('.star-rate');
-            stars.forEach(s => {
-                const sScore = parseInt(s.dataset.score);
-                if (sScore <= score) {
-                    s.classList.replace('bi-star', 'bi-star-fill');
-                } else {
-                    s.classList.replace('bi-star-fill', 'bi-star');
-                }
-            });
-        }
-    });
 
-    document.addEventListener('mouseleave', function(e) {
-        if (e.target.classList && e.target.classList.contains('rating-stars-container')) {
-            const stars = e.target.querySelectorAll('.star-rate');
-            stars.forEach(s => {
-                s.classList.replace('bi-star-fill', 'bi-star');
-            });
-        }
-    }, true);
-
-    document.addEventListener('click', async function(e) {
-        if (e.target.classList.contains('star-rate')) {
-            const container = e.target.closest('.rating-stars-container');
-            const formationId = container.dataset.id;
-            const score = e.target.dataset.score;
-            
-            try {
-                const response = await fetch(`/formations/${formationId}/rate/${score}`, {
-                    method: 'POST',
-                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
-                });
-                const data = await response.json();
-                
-                if (data.newRating) {
-                    // Update the badge in UI
-                    const valSpan = document.getElementById(`rating-val-${formationId}`);
-                    const countSpan = document.getElementById(`rating-count-${formationId}`);
-                    if (valSpan) valSpan.textContent = data.newRating;
-                    if (countSpan) countSpan.textContent = data.newCount;
-                    
-                    // Show success
-                    container.innerHTML = '<span class="text-success small animated bounceIn"><i class="bi bi-check-circle-fill me-1"></i> Merci pour votre note !</span>';
-                }
-            } catch (err) {
-                console.error('Rating error:', err);
-            }
-        }
-    });
+    // --- Initial Run ---
+    initCategoryToggle();
+    initInfiniteScroll();
+    initBestsellerCarousel();
 });
 </script>
 {% endblock %}

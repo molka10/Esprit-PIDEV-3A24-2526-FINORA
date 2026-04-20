@@ -1,0 +1,375 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Finora | Wallet System{% endblock %}
+
+{% block stylesheets %}
+<style>
+    :root {
+        --primary: #6366f1;
+        --primary-dark: #4f46e5;
+        --secondary: #ec4899;
+        --bg-glass: rgba(255, 255, 255, 0.1);
+        --bg-glass-heavy: rgba(255, 255, 255, 0.2);
+        --border-glass: rgba(255, 255, 255, 0.1);
+        --text-muted: #94a3b8;
+    }
+
+    body {
+        background: radial-gradient(circle at top right, #1e1b4b, #0f172a);
+        color: white;
+        min-height: 100vh;
+        font-family: 'Inter', sans-serif;
+    }
+
+    .glass-card {
+        background: var(--bg-glass);
+        backdrop-filter: blur(12px);
+        border: 1px solid var(--border-glass);
+        border-radius: 1.5rem;
+        padding: 2rem;
+        transition: all 0.3s ease;
+    }
+
+    .glass-card:hover {
+        background: var(--bg-glass-heavy);
+        transform: translateY(-5px);
+    }
+
+    .balance-display {
+        font-size: 3rem;
+        font-weight: 800;
+        background: linear-gradient(to right, #818cf8, #c084fc);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .card-visual {
+        width: 320px;
+        height: 200px;
+        border-radius: 1rem;
+        background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+        padding: 1.5rem;
+        position: relative;
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+        margin-bottom: 1.5rem;
+    }
+
+    .card-visual .chip {
+        width: 45px;
+        height: 35px;
+        background: #fde047;
+        border-radius: 0.25rem;
+        margin-bottom: 2rem;
+    }
+
+    .card-visual .number {
+        font-size: 1.25rem;
+        letter-spacing: 2px;
+        font-family: 'Courier New', monospace;
+    }
+
+    .btn-premium {
+        background: linear-gradient(to right, var(--primary), var(--secondary));
+        border: none;
+        color: white;
+        font-weight: 600;
+        padding: 0.75rem 1.5rem;
+        border-radius: 0.75rem;
+        transition: opacity 0.3s;
+    }
+
+    .btn-premium:hover {
+        opacity: 0.9;
+        color: white;
+    }
+
+    .nav-tabs {
+        border: none;
+        gap: 1rem;
+    }
+
+    .nav-link {
+        color: var(--text-muted) !important;
+        border: none !important;
+        border-radius: 0.75rem !important;
+        background: var(--bg-glass) !important;
+        padding: 0.75rem 1.25rem !important;
+    }
+
+    .nav-link.active {
+        background: var(--primary) !important;
+        color: white !important;
+    }
+
+    #apiResponse {
+        max-height: 200px;
+        overflow-y: auto;
+        font-family: monospace;
+        font-size: 0.8rem;
+    }
+
+    .loading-shimmer {
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent);
+        background-size: 200% 100%;
+        animation: shimmer 1.5s infinite;
+    }
+
+    @keyframes shimmer {
+        from { background-position: 200% 0; }
+        to { background-position: -200% 0; }
+    }
+</style>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+{% endblock %}
+
+{% block body %}
+<!-- Target User ID removed: Now correctly uses the logged-in User session on the backend -->
+
+<div class="container py-3">
+    <!-- Header Section -->
+    <div class="row mb-5 align-items-center">
+        <div class="col-md-8">
+            <h1 class="fw-bolder">Wallet System <span class="badge bg-indigo-600 fs-6">External API Beta</span></h1>
+        </div>
+        <div class="col-md-4 text-end">
+            <div id="authStatus" class="d-inline-flex align-items-center glass-card py-2 px-3">
+                <span class="status-indicator me-2 bg-success rounded-circle animate-pulse" style="width:10px; height:10px;"></span>
+                <span id="statusText">System Online</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content Grid -->
+    <div class="row g-4">
+        <!-- Dashboard Sidebar -->
+        <div class="col-lg-4">
+            <div class="glass-card mb-4 text-center">
+                <p class="text-muted mb-1 text-uppercase small ls-wide">Main Balance</p>
+                <div id="balance" class="balance-display mb-3">0.00 DT</div>
+                <button onclick="refreshBalance()" class="btn btn-sm btn-outline-light rounded-pill px-3">
+                    <i class="fas fa-sync-alt me-1"></i> Refresh
+                </button>
+            </div>
+
+            <div class="glass-card">
+                <h5 class="mb-4 fw-bold">Active Card</h5>
+                <div id="activeCardContainer">
+                    <div class="card-visual">
+                        <div class="d-flex justify-content-between">
+                            <div class="chip"></div>
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/5/5e/Visa_Inc._logo.svg" height="20" alt="Visa">
+                        </div>
+                        <div id="v_cardNumber" class="number mb-4">**** **** **** ****</div>
+                        <div class="d-flex justify-content-between align-items-end">
+                            <div>
+                                <div class="small text-white-50">Card Holder</div>
+                                <div id="v_cardHolder">--- ---</div>
+                            </div>
+                            <div>
+                                <div class="small text-white-50">Expires</div>
+                                <div id="v_expiry">--/--</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <button class="btn btn-premium w-100" data-bs-toggle="modal" data-bs-target="#addCardModal">
+                    <i class="fas fa-plus me-2"></i> Add New Card
+                </button>
+            </div>
+        </div>
+
+        <!-- System Controls -->
+        <div class="col-lg-8">
+            <ul class="nav nav-tabs mb-4" id="myTab" role="tablist">
+                <li class="nav-item">
+                    <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#recharge">Recharge (Stripe Gateway)</button>
+                </li>
+            </ul>
+
+            <div class="tab-content">
+                <!-- Recharge Tab -->
+                <div class="tab-pane fade show active" id="recharge">
+                    <div class="glass-card">
+                        <h4 class="fw-bold mb-4 text-center">Recharge Your Wallet</h4>
+                        
+                        <form id="rechargeForm">
+                            <div class="mb-3">
+                                <label class="text-muted small">Select Card</label>
+                                <select id="rechargeCardId" class="form-select bg-dark border-0 text-white"></select>
+                            </div>
+                            <div class="mb-4">
+                                <label class="text-muted small">Amount (DT)</label>
+                                <input type="number" id="rechargeAmount" class="form-control bg-dark border-0 text-white" placeholder="0.00">
+                            </div>
+                            <button type="submit" class="btn btn-premium w-100">Initiate Recharge</button>
+                        </form>
+
+                        <div id="otpSection" class="mt-4 d-none">
+                            <div class="p-3 bg-warning bg-opacity-10 border border-warning border-opacity-25 rounded">
+                                <h6 class="text-warning fw-bold">Verification Required</h6>
+                                <p class="text-muted small mb-3">A high amount recharge requires an OTP.</p>
+                                <div class="input-group">
+                                    <input type="text" id="otpCode" class="form-control bg-dark border-0 text-white" placeholder="Enter 6-digit OTP">
+                                    <button class="btn btn-warning" onclick="confirmRecharge()">Verify</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Card Modal -->
+<div class="modal fade" id="addCardModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content bg-dark text-white border-glass">
+            <div class="modal-header border-0">
+                <h5 class="fw-bold">Link New Card</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addCardForm">
+                    <div class="mb-3">
+                        <label class="text-muted small">Full Name</label>
+                        <input type="text" name="cardHolderName" class="form-control bg-dark text-white border-glass" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="text-muted small">Card Number</label>
+                        <input type="text" name="cardNumber" class="form-control bg-dark text-white border-glass" placeholder="16 digits" required>
+                    </div>
+                    <div class="row">
+                        <div class="col-6 mb-3">
+                            <label class="text-muted small">Expiry</label>
+                            <input type="text" name="expiryDate" class="form-control bg-dark text-white border-glass" placeholder="MM/YY" required>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <label class="text-muted small">CVV</label>
+                            <input type="text" name="cvv" class="form-control bg-dark text-white border-glass" placeholder="***" required>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-premium w-100 mt-3">Link System Card</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let currentRequestId = null;
+
+    document.addEventListener('DOMContentLoaded', () => {
+        initializeApp();
+    });
+
+    function log(message, type = 'info') {
+        // Console logging disabled for clean UI
+    }
+
+    async function apiFetch(endpoint, method = 'GET', body = null) {
+        const options = {
+            method,
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        };
+        if (body) options.body = JSON.stringify(body);
+
+        try {
+            const response = await fetch(endpoint, options);
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.message || 'API Error');
+            return data;
+        } catch (error) {
+            alert('Error: ' + error.message);
+            throw error;
+        }
+    }
+
+    async function initializeApp() {
+        refreshBalance();
+        loadCards();
+    }
+
+    async function refreshBalance() {
+        try {
+            const res = await apiFetch('/api/wallet/balance');
+            document.getElementById('balance').innerText = `${res.data.balance.toFixed(2)} DT`;
+        } catch (e) {}
+    }
+
+    async function loadCards() {
+        try {
+            const res = await apiFetch('/api/cards');
+            const select = document.getElementById('rechargeCardId');
+            select.innerHTML = '';
+            
+            if (res.data.length > 0) {
+                const card = res.data.find(c => c.isDefault) || res.data[0];
+                document.getElementById('v_cardNumber').innerText = card.maskedNumber;
+                document.getElementById('v_cardHolder').innerText = card.cardHolderName;
+                document.getElementById('v_expiry').innerText = card.expiryDate;
+
+                res.data.forEach(c => {
+                    const opt = document.createElement('option');
+                    opt.value = c.id;
+                    opt.innerText = `${c.maskedNumber} (${c.cardHolderName})`;
+                    select.appendChild(opt);
+                });
+            }
+        } catch (e) {}
+    }
+
+
+    document.getElementById('addCardForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+        const body = Object.fromEntries(formData);
+        
+        try {
+            await apiFetch('/api/cards/link', 'POST', body);
+            bootstrap.Modal.getInstance(document.getElementById('addCardModal')).hide();
+            loadCards();
+            e.target.reset();
+        } catch (e) {}
+    });
+
+    document.getElementById('rechargeForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const body = {
+            cardId: document.getElementById('rechargeCardId').value,
+            amount: document.getElementById('rechargeAmount').value
+        };
+
+        try {
+            const res = await apiFetch('/api/wallet/recharge', 'POST', body);
+            currentRequestId = res.data.requestId;
+            
+            if (res.data.requiresOtp) {
+                document.getElementById('otpSection').classList.remove('d-none');
+                if (res.data.demoOtp) {
+                    alert('SIMULATED SMS MESSAGE: Your OTP code is ' + res.data.demoOtp);
+                    document.getElementById('otpCode').value = res.data.demoOtp;
+                }
+            } else {
+                confirmRecharge(); // Auto confirm if no OTP
+            }
+        } catch (e) {}
+    });
+
+    async function confirmRecharge() {
+        const otp = document.getElementById('otpCode').value;
+        try {
+            const res = await apiFetch('/api/wallet/recharge/confirm', 'POST', {
+                requestId: currentRequestId,
+                otp: otp || null
+            });
+            document.getElementById('otpSection').classList.add('d-none');
+            refreshBalance();
+            alert('Wallet Successfully Recharged via Stripe Gateway!');
+        } catch (e) {}
+    }
+</script>
+{% endblock %}

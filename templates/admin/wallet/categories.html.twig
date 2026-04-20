@@ -1,0 +1,185 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block title %}Audit des Catégories — Admin{% endblock %}
+
+{% block stylesheets %}
+<style>
+/* â”€â”€ Hero â”€â”€ */
+.cat-admin-hero {
+    background: linear-gradient(135deg, #1e1b4b 0%, #4338ca 60%, #7c3aed 100%);
+    border-radius: 20px; padding: 24px 28px; margin-bottom: 26px;
+    display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px;
+    box-shadow: 0 16px 40px rgba(67,56,202,0.30);
+    position: relative; overflow: hidden;
+}
+.cat-admin-hero::before {
+    content:''; position:absolute; right:-50px; top:-50px;
+    width:200px; height:200px; border-radius:50%; background:rgba(255,255,255,0.05);
+}
+.cat-admin-hero h1 { color: #fff !important; font-size: 22px !important; font-weight: 800 !important; margin: 0 !important; position: relative; z-index: 1; }
+.cat-admin-hero p  { color: rgba(255,255,255,0.7) !important; font-size: 13px !important; margin: 4px 0 0; position: relative; z-index: 1; }
+
+/* â”€â”€ User block card â”€â”€ */
+.user-cat-card {
+    background: #fff; border-radius: 20px; margin-bottom: 22px; overflow: hidden;
+    border: 1px solid rgba(124,58,237,0.07);
+    box-shadow: 0 8px 32px -8px rgba(124,58,237,0.10);
+    animation: catIn 0.4s ease both;
+}
+@keyframes catIn { from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);} }
+
+.user-cat-header {
+    padding: 18px 22px; display: flex; align-items: center; justify-content: space-between;
+    background: linear-gradient(135deg, #faf5ff, #fff);
+    border-bottom: 1px solid rgba(124,58,237,0.07);
+}
+.user-cat-header-left { display: flex; align-items: center; gap: 12px; }
+.user-cat-avatar {
+    width: 42px; height: 42px; border-radius: 12px; flex-shrink: 0;
+    background: linear-gradient(135deg, #7c3aed, #8b5cf6); color: #fff;
+    font-size: 17px; font-weight: 800;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 4px 10px rgba(124,58,237,0.25);
+}
+.user-cat-name { font-size: 16px; font-weight: 800; color: #1e1b4b; margin: 0; }
+.user-cat-count {
+    display: inline-flex; align-items: center; gap: 4px;
+    background: #ede9fe; color: #7c3aed;
+    padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 700;
+}
+
+/* â”€â”€ Cat Table â”€â”€ */
+.cat-table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+.cat-table thead th {
+    padding: 11px 18px; font-size: 10.5px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.5px;
+    color: #6b7280; border-bottom: 2px solid #ede9fe; background: #faf5ff;
+}
+.cat-table tbody tr { border-bottom: 1px solid rgba(124,58,237,0.05); transition: background 0.15s; }
+.cat-table tbody tr:hover { background: #faf5ff; }
+.cat-table tbody td { padding: 13px 18px; vertical-align: middle; color: #374151; }
+
+/* â”€â”€ Priority badges â”€â”€ */
+.prio-high   { background:#fee2e2;color:#dc2626;padding:3px 11px;border-radius:20px;font-size:11px;font-weight:700;display:inline-block; }
+.prio-medium { background:#fef3c7;color:#d97706;padding:3px 11px;border-radius:20px;font-size:11px;font-weight:700;display:inline-block; }
+.prio-low    { background:#dbeafe;color:#2563eb;padding:3px 11px;border-radius:20px;font-size:11px;font-weight:700;display:inline-block; }
+
+/* â”€â”€ Type badges â”€â”€ */
+.type-income  { background:#dcfce7;color:#16a34a;padding:3px 11px;border-radius:20px;font-size:11px;font-weight:700;display:inline-flex;align-items:center;gap:4px; }
+.type-outcome { background:#fee2e2;color:#dc2626;padding:3px 11px;border-radius:20px;font-size:11px;font-weight:700;display:inline-flex;align-items:center;gap:4px; }
+
+/* â”€â”€ Progress mini â”€â”€ */
+.tx-mini-bar { display:flex;align-items:center;gap:8px; }
+.tx-mini-track { flex:1;height:6px;background:#f1f5f9;border-radius:20px;overflow:hidden;min-width:60px; }
+.tx-mini-fill  { height:100%;border-radius:20px;background:linear-gradient(135deg,#7c3aed,#8b5cf6); }
+.tx-mini-count { font-size:12px;font-weight:700;color:#7c3aed; }
+
+/* â”€â”€ Action btn â”€â”€ */
+.btn-view-tx {
+    display:inline-flex;align-items:center;gap:6px;
+    padding:7px 14px;border-radius:10px;font-size:12px;font-weight:700;
+    text-decoration:none;background:#ede9fe;color:#7c3aed;
+    border:none;transition:all 0.15s;
+}
+.btn-view-tx:hover { background:#7c3aed;color:#fff; }
+
+/* â”€â”€ Empty state â”€â”€ */
+.cat-empty { text-align:center;padding:60px 40px;color:#9ca3af; }
+.cat-empty i { font-size:3rem;display:block;margin-bottom:12px;opacity:.3; }
+</style>
+{% endblock %}
+
+{% block body %}
+
+<div class="cat-admin-hero">
+    <div style="position:relative;z-index:1;">
+        <h1><i class="bi bi-diagram-3-fill me-2"></i>Audit des Catégories Utilisateurs</h1>
+        <p>Contrôlez et analysez les structures de dépenses de chaque utilisateur.</p>
+    </div>
+    <div style="position:relative;z-index:1;">
+        <span style="background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.2);
+                     padding:7px 16px;border-radius:40px;font-size:13px;font-weight:600;color:#fff;">
+            <i class="bi bi-people-fill me-1"></i> {{ users|length }} utilisateur{{ users|length != 1 ? 's' : '' }}
+        </span>
+    </div>
+</div>
+
+{% for uId, data in users %}
+<div class="user-cat-card" style="animation-delay: {{ loop.index * 0.08 }}s;">
+    <div class="user-cat-header">
+        <div class="user-cat-header-left">
+            <div class="user-cat-avatar">{{ data.name|first|upper }}</div>
+            <div>
+                <p class="user-cat-name">{{ data.name }}</p>
+                <span class="user-cat-count">
+                    <i class="bi bi-tags-fill"></i>
+                    {{ data.categories|length }} catégorie{{ data.categories|length != 1 ? 's' : '' }}
+                </span>
+            </div>
+        </div>
+        <a href="{{ path('wallet_user_transactions', { id: uId }) }}" class="btn-view-tx">
+            <i class="bi bi-eye-fill"></i> Voir transactions
+        </a>
+    </div>
+
+    <div style="overflow-x:auto;">
+        <table class="cat-table">
+            <thead>
+                <tr>
+                    <th style="width:35%;">Nom de la Catégorie</th>
+                    <th style="width:22%;">Type</th>
+                    <th style="width:22%;">Priorité</th>
+                    <th style="width:21%;">Utilisation</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for cat in data.categories %}
+                <tr>
+                    <td style="font-weight:700;color:#1e1b4b;">
+                        <i class="bi bi-tag-fill me-2" style="color:#a78bfa;font-size:12px;"></i>
+                        {{ cat.entity.nom }}
+                    </td>
+                    <td>
+                        {% if cat.entity.type == 'INCOME' %}
+                            <span class="type-income"><i class="bi bi-plus-circle-fill"></i> Revenu</span>
+                        {% else %}
+                            <span class="type-outcome"><i class="bi bi-dash-circle-fill"></i> Dépense</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% set p = cat.entity.priorite|upper %}
+                        {% if p == 'HAUTE' %}
+                            <span class="prio-high">🔴 HAUTE</span>
+                        {% elseif p == 'MOYENNE' %}
+                            <span class="prio-medium">🟡 MOYENNE</span>
+                        {% else %}
+                            <span class="prio-low">🔵 BASSE</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div class="tx-mini-bar">
+                            <div class="tx-mini-track">
+                                <div class="tx-mini-fill" style="width: {{ cat.txCount * 10 > 100 ? 100 : cat.txCount * 10 }}%;"></div>
+                            </div>
+                            <span class="tx-mini-count">{{ cat.txCount }} tx</span>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% else %}
+<div class="user-cat-card">
+    <div class="cat-empty">
+        <i class="bi bi-folder-x"></i>
+        <strong style="display:block;font-size:16px;color:#374151;margin-bottom:6px;">Aucune catégorie trouvée</strong>
+        <span>Les utilisateurs n'ont pas encore créé de catégories.</span>
+    </div>
+</div>
+{% endfor %}
+
+{% endblock %}
+

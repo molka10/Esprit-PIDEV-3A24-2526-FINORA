@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <style>
+        body { font-family: 'Helvetica', 'Arial', sans-serif; color: #1e1b4b; margin: 0; padding: 20px; }
+        .header { text-align: center; margin-bottom: 20px; }
+        .logo { font-size: 22px; font-weight: bold; color: #7c3aed; }
+        .title { font-size: 14px; font-weight: bold; color: #1e1b4b; margin-top: 5px; }
+        
+        .info { margin-bottom: 15px; font-size: 12px; }
+        
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th { background-color: #7c3aed; color: #ffffff; padding: 8px; text-align: left; font-size: 10px; }
+        td { padding: 8px; border-bottom: 1px solid #e2e8f0; font-size: 11px; }
+        .footer { margin-top: 30px; text-align: right; font-size: 9px; color: #94a3b8; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo">FINORA</div>
+        <div class="title">HISTORIQUE DES TRANSACTIONS</div>
+        <div style="font-size: 10px; color: #64748b;">Généré le {{ "now"|date("d/m/Y H:i") }}</div>
+    </div>
+    <div class="info">
+        Utilisateur ID: <strong>{{ userId }}</strong> | Total: {{ transactions|length }} transactions
+    </div>
+    <table>
+        <thead>
+            <tr>
+                <th>Libellé</th>
+                <th>Type</th>
+                <th>Montant</th>
+                <th>Date</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for t in transactions %}
+            <tr>
+                <td style="font-weight: bold;">{{ t.nomTransaction }}</td>
+                <td>{{ t.type }}</td>
+                <td style="font-weight: bold; color: {{ t.type == 'INCOME' ? '#16a34a' : '#dc2626' }};">
+                    {{ t.type == 'INCOME' ? '+' : '-' }}{{ t.montant|abs|number_format(2, '.', ',') }} DT
+                </td>
+                <td style="color: #64748b;">{{ t.dateTransaction|date('d/m/Y') }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    <div class="footer">Finora Smart Finance System</div>
+</body>
+</html>

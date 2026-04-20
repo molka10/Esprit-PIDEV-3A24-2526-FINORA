@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <title>Rapport Wallet</title>
+    <style>
+        body { font-family: Helvetica, Arial, sans-serif; color: #1e1b4b; font-size: 11px; margin: 0; padding: 15px; }
+
+        .header { text-align: center; padding-bottom: 12px; border-bottom: 3px solid #7c3aed; margin-bottom: 16px; }
+        .logo   { font-size: 26px; font-weight: bold; color: #7c3aed; }
+        .title  { font-size: 14px; font-weight: bold; margin-top: 4px; }
+        .meta   { font-size: 9px; color: #64748b; margin-top: 3px; }
+
+        .global-summary { width: 100%; border-collapse: collapse; margin-bottom: 18px; }
+        .global-summary td { border: 1px solid #e2e8f0; padding: 10px; text-align: center; }
+        .summary-label { display: block; font-size: 9px; color: #64748b; text-transform: uppercase; font-weight: bold; }
+        .summary-value { display: block; font-size: 16px; font-weight: bold; margin-top: 4px; }
+        .green { color: #16a34a; }
+        .red   { color: #dc2626; }
+        .blue  { color: #7c3aed; }
+
+        .user-block { margin-bottom: 20px; }
+        .user-header {
+            background-color: #7c3aed;
+            color: #fff;
+            padding: 7px 12px;
+            font-size: 11px;
+            font-weight: bold;
+        }
+
+        table.tx-table { width: 100%; border-collapse: collapse; margin-top: 0; }
+        table.tx-table th { background: #ede9fe; color: #4c1d95; padding: 6px 10px; text-align: left; font-size: 9px; text-transform: uppercase; }
+        table.tx-table td { padding: 6px 10px; border-bottom: 1px solid #f1f5f9; font-size: 10px; }
+        table.tx-table tr:nth-child(even) td { background: #faf5ff; }
+
+        .footer { text-align: center; font-size: 8px; color: #94a3b8; margin-top: 20px; border-top: 1px solid #e2e8f0; padding-top: 8px; }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <div class="logo">FINORA</div>
+    <div class="title">RAPPORT ADMINISTRATEUR — TABLEAU DE BORD WALLET</div>
+    <div class="meta">
+        Génération : {{ "now"|date("d/m/Y H:i") }} &nbsp;|&nbsp;
+        Devise : {{ currency|default('DT') }} &nbsp;|&nbsp;
+        Utilisateurs inclus : {{ users|length }}
+    </div>
+</div>
+
+{# ── Grand totals ── #}
+{% set gtIncome = 0 %}
+{% set gtOutcome = 0 %}
+{% for u in users %}
+    {% set gtIncome  = gtIncome  + u.income %}
+    {% set gtOutcome = gtOutcome + u.outcome %}
+{% endfor %}
+{% set gtBalance = gtIncome - gtOutcome %}
+
+<table class="global-summary">
+    <tr>
+        <td>
+            <span class="summary-label">Total Revenus</span>
+            <span class="summary-value green">+{{ gtIncome|number_format(2, '.', ',') }} {{ currency|default('DT') }}</span>
+        </td>
+        <td>
+            <span class="summary-label">Total Dépenses</span>
+            <span class="summary-value red">-{{ gtOutcome|number_format(2, '.', ',') }} {{ currency|default('DT') }}</span>
+        </td>
+        <td>
+            <span class="summary-label">Solde Net Global</span>
+            <span class="summary-value {{ gtBalance >= 0 ? 'green' : 'red' }}">
+                {{ gtBalance|number_format(2, '.', ',') }} {{ currency|default('DT') }}
+            </span>
+        </td>
+    </tr>
+</table>
+
+{# ── Per-user sections ── #}
+{% for u in users %}
+<div class="user-block">
+    <div class="user-header">
+        {{ u.name }} &nbsp;&mdash;&nbsp;
+        Revenus : +{{ u.income|number_format(2, '.', ',') }} &nbsp;|&nbsp;
+        Dépenses : -{{ u.outcome|number_format(2, '.', ',') }} &nbsp;|&nbsp;
+        Solde : {{ u.balance|number_format(2, '.', ',') }} {{ currency|default('DT') }}
+        &nbsp;({{ u.count }} transaction(s))
+    </div>
+    <table class="tx-table">
+        <thead>
+            <tr>
+                <th>Libellé</th>
+                <th>Type</th>
+                <th>Catégorie</th>
+                <th>Montant</th>
+                <th>Date</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for t in u.transactions %}
+            <tr>
+                <td>{{ t.nomTransaction }}</td>
+                <td style="color: {{ t.type == 'INCOME' ? '#16a34a' : '#dc2626' }}; font-weight:bold;">{{ t.type }}</td>
+                <td>{{ t.category is not null ? t.category.nom : 'Divers' }}</td>
+                <td style="color: {{ t.type == 'INCOME' ? '#16a34a' : '#dc2626' }}; font-weight:bold;">
+                    {{ t.type == 'INCOME' ? '+' : '-' }}{{ t.montant|abs|number_format(2, '.', ',') }} {{ currency|default('DT') }}
+                </td>
+                <td>{{ t.dateTransaction|date('d/m/Y') }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endfor %}
+
+<div class="footer">
+    &copy; {{ "now"|date("Y") }} Finora Smart Finance &mdash; Document confidentiel
+</div>
+
+</body>
+</html>
