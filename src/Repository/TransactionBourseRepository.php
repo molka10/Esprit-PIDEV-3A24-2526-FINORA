@@ -77,7 +77,6 @@ class TransactionBourseRepository extends ServiceEntityRepository
     // =============================
     public function getChartData(int $days = 365): array
     {
-        // On récupère tout pour 2026 pour être sûr de voir les données de février
         $results = $this->createQueryBuilder('t')
             ->select('t.dateTransaction as date, t.montantTotal as total')
             ->where('t.dateTransaction IS NOT NULL')
@@ -90,7 +89,6 @@ class TransactionBourseRepository extends ServiceEntityRepository
         foreach ($results as $result) {
             $date = $result['date'];
             
-            // On gère si c'est un objet DateTime ou une chaîne (SQLite)
             if ($date instanceof \DateTimeInterface) {
                 $day = $date->format('Y-m-d');
             } else {
@@ -125,7 +123,6 @@ class TransactionBourseRepository extends ServiceEntityRepository
     public function findPaginated(int $page = 1, int $limit = 10, ?string $type = null): array
     {
         $offset = ($page - 1) * $limit;
-
         $qb = $this->createQueryBuilder('t');
 
         if ($type) {
@@ -157,6 +154,74 @@ class TransactionBourseRepository extends ServiceEntityRepository
     }
 
     // =============================
+    // 🔹 USER-SPECIFIC METHODS (NEW/FIX)
+    // =============================
+
+    public function getTotalAchatsByUser(int $userId): float
+    {
+        return (float) $this->createQueryBuilder('t')
+            ->select('SUM(t.montantTotal)')
+            ->where('t.user = :userId')
+            ->andWhere('t.typeTransaction = :type')
+            ->setParameter('userId', $userId)
+            ->setParameter('type', 'ACHAT')
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+
+    public function getTotalVentesByUser(int $userId): float
+    {
+        return (float) $this->createQueryBuilder('t')
+            ->select('SUM(t.montantTotal)')
+            ->where('t.user = :userId')
+            ->andWhere('t.typeTransaction = :type')
+            ->setParameter('userId', $userId)
+            ->setParameter('type', 'VENTE')
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+
+    public function getTotalCommissionsByUser(int $userId): float
+    {
+        return (float) $this->createQueryBuilder('t')
+            ->select('SUM(t.commission)')
+            ->where('t.user = :userId')
+            ->setParameter('userId', $userId)
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+
+    /**
+     * 🛡️ Calculate net stock owned by a user for a specific action
+     */
+    public function getUserStockForAction(int $userId, int $actionId): int
+    {
+        $achats = (int) $this->createQueryBuilder('t')
+            ->select('SUM(t.quantite)')
+            ->where('t.user = :userId')
+            ->andWhere('t.action = :actionId')
+            ->andWhere('t.typeTransaction = :type')
+            ->setParameter('userId', $userId)
+            ->setParameter('actionId', $actionId)
+            ->setParameter('type', 'ACHAT')
+            ->getQuery()
+            ->getSingleScalarResult();
+
+        $ventes = (int) $this->createQueryBuilder('t')
+            ->select('SUM(t.quantite)')
+            ->where('t.user = :userId')
+            ->andWhere('t.action = :actionId')
+            ->andWhere('t.typeTransaction = :type')
+            ->setParameter('userId', $userId)
+            ->setParameter('actionId', $actionId)
+            ->setParameter('type', 'VENTE')
+            ->getQuery()
+            ->getSingleScalarResult();
+
+        return $achats - $ventes;
+    }
+
+    // =============================
     // 🔹 PAR ACTION
     // =============================
     public function findByAction(int $actionId): array
@@ -170,24 +235,19 @@ class TransactionBourseRepository extends ServiceEntityRepository
     }
 
     // =============================
-    // 🔹 SAVE
+    // 🔹 SAVE & DELETE
     // =============================
     public function save(TransactionBourse $transaction, bool $flush = true): void
     {
         $this->getEntityManager()->persist($transaction);
-
         if ($flush) {
             $this->getEntityManager()->flush();
         }
     }
 
-    // =============================
-    // 🔹 DELETE
-    // =============================
     public function remove(TransactionBourse $transaction, bool $flush = true): void
     {
         $this->getEntityManager()->remove($transaction);
-
         if ($flush) {
             $this->getEntityManager()->flush();
         }

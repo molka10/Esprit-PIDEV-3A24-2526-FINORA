@@ -64,7 +64,7 @@
             <div class="row g-4" id="certificatesGrid">
                 {% if certificates is defined and certificates|length > 0 %}
                     {% for cert in certificates %}
-                        <div class="col-md-6 col-lg-4 cert-item" data-title="{{ cert.quizTitle|lower }}" data-formation="{{ cert.formationTitle|lower }}">
+                        <div class="col-md-6 col-lg-4 cert-item" data-title="{{ cert.lessonTitle|lower }}" data-formation="{{ cert.formationTitle|lower }}">
                             <div class="diploma-card-pro h-100">
                                 <div class="holofoil-effect"></div>
                                 
@@ -72,7 +72,7 @@
                                     <div class="d-flex justify-content-between align-items-start mb-4">
                                         <span class="badge-premium">FINORA OFFICIAL</span>
                                         <div class="dropdown">
-                                            <a href="#" class="btn-share-linkedin" title="Partager sur LinkedIn" onclick="alert('Partage LinkedIn activé pour {{ cert.quizTitle }}')">
+                                            <a href="#" class="btn-share-linkedin" title="Partager sur LinkedIn" onclick="alert('Partage LinkedIn activé pour {{ cert.lessonTitle }}')">
                                                 <i class="fab fa-linkedin-in"></i>
                                             </a>
                                         </div>
@@ -83,7 +83,7 @@
                                     </div>
 
                                     <div class="cert-type">CERTIFICAT D'EXCELLENCE</div>
-                                    <h4 class="cert-title mb-2">{{ cert.quizTitle }}</h4>
+                                    <h4 class="cert-title mb-2">{{ cert.lessonTitle }}</h4>
                                     <p class="cert-subtitle mb-4">Délivré pour la formation <strong>{{ cert.formationTitle }}</strong></p>
 
                                     <div class="cert-divider mx-auto mb-4"></div>

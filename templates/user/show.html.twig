@@ -1,55 +1,78 @@
-{% extends 'base.html.twig' %}
+{% extends app.request.query.get('role') == 'admin' ? 'admin_base.html.twig' : 'base.html.twig' %}
 
-{% block title %}User{% endblock %}
+{% block title %}{{ user.nom }}{% endblock %}
 
 {% block body %}
-    <h1>User</h1>
 
-    <table class="table">
-        <tbody>
-            <tr>
-                <th>Id</th>
-                <td>{{ user.id }}</td>
-            </tr>
-            <tr>
-                <th>Username</th>
-                <td>{{ user.username }}</td>
-            </tr>
-            <tr>
-                <th>Email</th>
-                <td>{{ user.email }}</td>
-            </tr>
-           
-            <tr>
-                <th>Role</th>
-                <td>{{ user.role }}</td>
-            </tr>
-            <tr>
-                <th>Phone</th>
-                <td>{{ user.phone }}</td>
-            </tr>
-            <tr>
-                <th>Address</th>
-                <td>{{ user.address }}</td>
-            </tr>
-            <tr>
-                <th>Date_of_birth</th>
-                <td>{{ user.dateOfBirth ? user.dateOfBirth|date('Y-m-d') : '' }}</td>
-            </tr>
-            <tr>
-                <th>Created_at</th>
-                <td>{{ user.createdAt ? user.createdAt|date('Y-m-d H:i:s') : '' }}</td>
-            </tr>
-            <tr>
-                <th>IsVerified</th>
-                <td>{{ user.isVerified ? 'Yes' : 'No' }}</td>
-            </tr>
-        </tbody>
-    </table>
+<div class="py-3 mb-4" style="background: linear-gradient(135deg, #1a1a2e, #16213e); border-radius: 10px;">
+    <div class="container text-white text-center py-2">
+        <h2 class="font-weight-bold"><i class="fas fa-user"></i> {{ user.username }}</h2>
+        <p class="mb-0">{{ user.email }}</p>
+    </div>
+</div>
 
-    <a href="{{ path('app_user_index') }}">back to list</a>
+<div class="row">
+    <div class="col-md-8">
+        <div class="card shadow-sm">
+            <div class="card-header" style="background:#1a1a2e; color:white;">
+                <h5 class="mb-0"><i class="fas fa-info-circle"></i> Informations</h5>
+            </div>
+            <div class="card-body">
+                <table class="table table-borderless">
+                    <tr>
+                        <th width="35%"><i class="fas fa-user text-muted"></i> Nom</th>
+                        <td>{{ user.nom }}</td>
+                    </tr>
+                    <tr>
+                        <th><i class="fas fa-envelope text-muted"></i> Email</th>
+                        <td>{{ user.email }}</td>
+                    </tr>
+                    <tr>
+                        <th><i class="fas fa-phone text-muted"></i> Téléphone</th>
+                        <td>{{ user.telephone ?? 'N/A' }}</td>
+                    </tr>
+                    <tr>
+                        <th><i class="fas fa-shield-alt text-muted"></i> Rôles</th>
+                        <td>
+                            {% for role in user.roles %}
+                                {% if role == 'ROLE_ADMIN' %}
+                                    <span class="badge bg-danger text-white">Admin</span>
+                                {% elseif role == 'ROLE_FOURNISSEUR' %}
+                                    <span class="badge bg-info text-dark">Entreprise</span>
+                                {% else %}
+                                    <span class="badge bg-secondary text-white">Utilisateur</span>
+                                {% endif %}
+                            {% endfor %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <th><i class="fas fa-file-contract text-muted"></i> Candidatures</th>
+                        <td>{{ user.candidatures|length }}</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
 
-    <a href="{{ path('app_user_edit', {'id': user.id}) }}">edit</a>
+    <div class="col-md-4">
+        <div class="card shadow-sm">
+            <div class="card-header" style="background:#1a1a2e; color:white;">
+                <h5 class="mb-0"><i class="fas fa-cogs"></i> Actions</h5>
+            </div>
+            <div class="card-body">
+                <a href="{{ path('app_user_edit', {'id': user.id, 'role': app.request.query.get('role')}) }}"
+                   class="btn btn-warning btn-block mb-2">
+                    <i class="fas fa-edit"></i> Modifier
+                </a>
+                <a href="{{ path('app_user_index', {'role': app.request.query.get('role')}) }}"
+                   class="btn btn-secondary btn-block mb-2">
+                    <i class="fas fa-arrow-left"></i> Retour
+                </a>
+                <hr>
+                {{ include('user/_delete_form.html.twig') }}
+            </div>
+        </div>
+    </div>
+</div>
 
-    {{ include('user/_delete_form.html.twig') }}
 {% endblock %}

@@ -1,21 +1,98 @@
-{% extends 'base.html.twig' %}
+{% extends app.request.query.get('role') == 'admin' ? 'admin_base.html.twig' : 'base.html.twig' %}
 
-{% block title %}Edit User{% endblock %}
+{% block title %}Modifier Utilisateur{% endblock %}
 
 {% block body %}
-    <h1>Edit User</h1>
-    {{ form_errors(form) }}
 
-    {{ include('user/_form.html.twig', {'button_label': 'Update'}) }}
+<div class="py-3 mb-4" style="background: linear-gradient(135deg, #1a1a2e, #16213e); border-radius: 10px;">
+    <div class="container text-white text-center py-2">
+        <h2 class="font-weight-bold"><i class="fas fa-user-edit"></i> Modifier Utilisateur</h2>
+        <p class="mb-0">{{ user.username }}</p>
+    </div>
+</div>
 
-    <a href="{{ path('app_user_index') }}">back to list</a>
+<div class="row justify-content-center">
+    <div class="col-md-7">
+        <div class="card shadow">
+            <div class="card-header" style="background:#1a1a2e; color:white;">
+                <h5 class="mb-0"><i class="fas fa-user"></i> Modifier les informations</h5>
+            </div>
+            <div class="card-body">
+                {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
 
-    {{ include('user/_delete_form.html.twig') }}
-    <br>
+                <div class="mb-3">
+                    {{ form_label(form.username) }}
+                    {{ form_widget(form.username) }}
+                    {% if form_errors(form.username) %}
+                        <div class="text-danger small mt-1">
+                            <i class="fas fa-exclamation-circle"></i>
+                            {{ form_errors(form.username) }}
+                        </div>
+                    {% endif %}
+                </div>
 
-{% if is_granted('ROLE_ADMIN') %}
-    <a href="{{ path('app_user_index') }}">⬅ Back to list</a>
-{% else %}
-    <a href="{{ path('app_dashboard') }}">⬅ Back to dashboard</a>
-{% endif %}
+                <div class="mb-3">
+                    {{ form_label(form.email) }}
+                    {{ form_widget(form.email) }}
+                    {% if form_errors(form.email) %}
+                        <div class="text-danger small mt-1">
+                            <i class="fas fa-exclamation-circle"></i>
+                            {{ form_errors(form.email) }}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="mb-3">
+                    {{ form_label(form.phone) }}
+                    {{ form_widget(form.phone) }}
+                    {% if form_errors(form.phone) %}
+                        <div class="text-danger small mt-1">
+                            <i class="fas fa-exclamation-circle"></i>
+                            {{ form_errors(form.phone) }}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="mb-3">
+                    {{ form_label(form.roles) }}
+                    {{ form_widget(form.roles) }}
+                    {% if form_errors(form.roles) %}
+                        <div class="text-danger small mt-1">
+                            <i class="fas fa-exclamation-circle"></i>
+                            {{ form_errors(form.roles) }}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="mb-3">
+                    {{ form_label(form.password) }}
+                    {{ form_widget(form.password) }}
+                    {% if form_errors(form.password) %}
+                        <div class="text-danger small mt-1">
+                            <i class="fas fa-exclamation-circle"></i>
+                            {{ form_errors(form.password) }}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="d-flex justify-content-between mt-3">
+                    <a href="{{ path('app_user_index', {'role': app.request.query.get('role')}) }}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Retour
+                    </a>
+                    <button type="submit" class="btn btn-warning">
+                        <i class="fas fa-save"></i> Enregistrer
+                    </button>
+                </div>
+
+                {{ form_end(form) }}
+
+                <div class="mt-2">
+                    {{ include('user/_delete_form.html.twig') }}
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
 {% endblock %}

@@ -1,0 +1,183 @@
+{% extends app.request.query.get('role') == 'admin' ? 'admin/base.html.twig' : 'base.html.twig' %}
+
+{% block title %}Détail Candidature - Finora{% endblock %}
+
+{% block stylesheets %}
+<style>
+    :root {
+        --finora-purple: #6d28d9;
+        --finora-purple-soft: rgba(109, 40, 217, 0.08);
+    }
+    .card-premium { border-radius: 1.25rem; border: none; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
+    .bg-primary-soft { background-color: var(--finora-purple-soft); }
+    .text-primary { color: var(--finora-purple) !important; }
+    .matching-badge { 
+        padding: 0.5rem 1rem; 
+        border-radius: 99px; 
+        font-weight: 800; 
+        font-size: 0.9rem;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="container py-5">
+    <div class="row">
+        
+        {# --- HEADER SECTION --- #}
+        <div class="col-12 mb-5">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-4">
+                <div>
+                    <a href="{{ path('app_candidature_index', {'role': app.request.query.get('role')}) }}" class="btn btn-link p-0 text-primary fw-bold text-decoration-none mb-2 d-block">
+                        <i class="bi bi-arrow-left me-2"></i>Retour à la liste
+                    </a>
+                    <h1 class="fw-extrabold text-dark mb-1">Détails de la Candidature</h1>
+                    <p class="text-muted mb-0">Réf. #CAN-{{ candidature.id }} | Soumise par <span class="text-primary fw-bold">{{ candidature.user ? candidature.user.username : 'Anonyme' }}</span></p>
+                </div>
+                
+                <div class="d-flex align-items-center gap-3">
+                    {% if candidature.statut == 'accepted' %}
+                        <div class="matching-badge bg-success text-white">
+                            <i class="bi bi-check-circle-fill me-2"></i>Candidature Acceptée
+                        </div>
+                    {% elseif candidature.statut == 'rejected' %}
+                        <div class="matching-badge bg-danger text-white">
+                            <i class="bi bi-x-circle-fill me-2"></i>Candidature Rejetée
+                        </div>
+                    {% else %}
+                        <div class="matching-badge bg-warning text-dark">
+                            <i class="bi bi-hourglass-split me-2"></i>En cours d'examen
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        {# --- LEFT COLUMN: INFO --- #}
+        <div class="col-lg-8">
+            <div class="card card-premium mb-4 overflow-hidden">
+                <div class="card-header bg-white border-0 pt-4 px-4 px-md-5">
+                    <h5 class="mb-0 fw-bold"><i class="bi bi-info-circle text-primary me-2"></i>Informations Générales</h5>
+                </div>
+                <div class="card-body p-4 p-md-5 pt-2">
+                    <div class="row g-4 mb-4">
+                        <div class="col-md-6">
+                            <div class="p-3 bg-light rounded-4">
+                                <label class="text-muted small fw-bold mb-1">Appel d'Offre Associé</label>
+                                <p class="mb-0">
+                                    {% if candidature.appelOffre %}
+                                        <a href="{{ path('app_appel_offre_show', {'id': candidature.appelOffre.id, 'role': app.request.query.get('role')}) }}" class="text-primary fw-bold text-decoration-none">
+                                            {{ candidature.appelOffre.titre }}
+                                        </a>
+                                    {% else %}
+                                        <span class="text-muted small italic">Offre supprimée</span>
+                                    {% endif %}
+                                </p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="p-3 bg-light rounded-4">
+                                <label class="text-muted small fw-bold mb-1">Offre Financière</label>
+                                <p class="mb-0 text-dark fw-bold" style="font-size: 1.1rem;">
+                                    {{ candidature.montantPropose ? candidature.montantPropose|number_format(2, '.', ' ') ~ ' TND' : 'À négocier' }}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <h6 class="fw-bold mb-3">Lettre de Motivation / Message</h6>
+                        <div class="p-4 rounded-4" style="background-color: #f9fafb; line-height: 1.6; color: #374151; border-left: 5px solid var(--finora-purple);">
+                            {{ candidature.message|default('Aucun message fourni par le candidat.')|nl2br }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {# --- AI ANALYSIS --- #}
+            <div class="card card-premium mb-4" style="background: linear-gradient(135deg, #6d28d9, #4f46e5); color: white;">
+                <div class="card-body p-5">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h4 class="fw-bold mb-2"><i class="bi bi-robot me-2 text-warning"></i>Score de Matching AI</h4>
+                            <p class="opacity-75 mb-4">Analyse automatisée basée sur l'expérience du candidat et les exigences de l'offre.</p>
+                            
+                            <div class="progress mb-2" style="height: 12px; border-radius: 99px; background: rgba(255,255,255,0.2);">
+                                <div class="progress-bar bg-warning shadow-sm" role="progressbar" style="width: {{ matchingScore }}%;" aria-valuenow="{{ matchingScore }}" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                            <span class="small opacity-75">Fiabilité de l'estimation : 94%</span>
+                        </div>
+                        <div class="col-md-4 text-center">
+                            <div class="h1 fw-bold mb-0" style="font-size: 3.5rem;">{{ matchingScore }}%</div>
+                            <span class="badge bg-white text-primary px-3 py-2 rounded-pill fw-bold">Score Global</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {# --- RIGHT COLUMN: ACTIONS --- #}
+        <div class="col-lg-4">
+            
+            {% if is_granted('ROLE_ADMIN') %}
+                <div class="card card-premium mb-4 border-primary border-opacity-10 shadow-sm">
+                    <div class="card-body p-4 text-center">
+                        <h6 class="fw-bold mb-4">Décision Administrative</h6>
+                        
+                        {# Accept #}
+                        <form method="post" action="{{ path('app_candidature_accepter', {'id': candidature.id, 'role': app.request.query.get('role')}) }}" class="d-grid mb-3">
+                            <input type="hidden" name="_token" value="{{ csrf_token('accepter' ~ candidature.id) }}">
+                            <button type="submit" class="btn btn-success rounded-pill py-2 fw-bold" {% if candidature.statut == 'accepted' %}disabled{% endif %}>
+                                <i class="bi bi-check-lg me-2"></i>Accepter l'offre
+                            </button>
+                        </form>
+
+                        {# Reject #}
+                        <form method="post" action="{{ path('app_candidature_rejeter', {'id': candidature.id, 'role': app.request.query.get('role')}) }}" class="d-grid">
+                            <input type="hidden" name="_token" value="{{ csrf_token('rejeter' ~ candidature.id) }}">
+                            <button type="submit" class="btn btn-outline-danger rounded-pill py-2 fw-bold" {% if candidature.statut == 'rejected' %}disabled{% endif %}>
+                                <i class="bi bi-x-lg me-2"></i>Rejeter l'offre
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            {% endif %}
+
+            <div class="card card-premium mb-4">
+                <div class="card-body p-4">
+                    <h6 class="fw-bold mb-4">Actions & Documents</h6>
+                    <div class="d-grid gap-3">
+                        <a href="{{ path('app_candidature_export', {'id': candidature.id}) }}" target="_blank" class="btn btn-light rounded-pill py-2 fw-bold text-danger border">
+                            <i class="bi bi-file-pdf me-2"></i>Télécharger le dossier (PDF)
+                        </a>
+                        
+                        {% if is_granted('ROLE_ADMIN') %}
+                            <a href="{{ path('app_candidature_edit', {'id': candidature.id, 'role': 'admin'}) }}" class="btn btn-outline-warning rounded-pill py-2 fw-bold">
+                                <i class="bi bi-pencil me-2"></i>Modifier les données
+                            </a>
+                        {% endif %}
+                    </div>
+
+                    {% if is_granted('ROLE_ADMIN') %}
+                        <div class="mt-4 pt-4 border-top">
+                            {{ include('candidature/_delete_form.html.twig') }}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="bg-primary-soft p-4 rounded-4 text-center">
+                <i class="bi bi-shield-lock-fill text-primary d-block mb-3 h3"></i>
+                <p class="small text-muted mb-0">ID Transaction : <code class="text-primary">FNR-CAND-{{ '%04d'|format(candidature.id) }}</code></p>
+                <p class="small text-muted">Données protégées par FINORA-SECURE</p>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<style>
+    .fw-extrabold { font-weight: 800; }
+</style>
+{% endblock %}

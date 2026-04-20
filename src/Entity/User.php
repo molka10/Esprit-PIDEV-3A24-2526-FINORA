@@ -20,6 +20,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     {
         $this->wishlist = new ArrayCollection();
         $this->purchasedFormations = new ArrayCollection();
+        $this->candidatures = new ArrayCollection();
+        $this->appelOffres = new ArrayCollection();
+        $this->ratings = new ArrayCollection();
         $this->created_at = new \DateTime();
     }
     // ================= ID =================
@@ -285,6 +288,95 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
         $this->userBiometrics = $userBiometrics;
 
+        return $this;
+    }
+
+    #[ORM\OneToMany(targetEntity: Candidature::class, mappedBy: 'user')]
+    private Collection $candidatures;
+
+    #[ORM\OneToMany(targetEntity: AppelOffre::class, mappedBy: 'createdBy')]
+    private Collection $appelOffres;
+
+    #[ORM\ManyToMany(targetEntity: AppelOffre::class)]
+    #[ORM\JoinTable(name: 'user_favorite_appels')]
+    private Collection $favoriteAppels;
+
+    public function getFavoriteAppels(): Collection
+    {
+        return $this->favoriteAppels;
+    }
+
+    public function addFavoriteAppel(AppelOffre $appelOffre): static
+    {
+        if (!$this->favoriteAppels->contains($appelOffre)) {
+            $this->favoriteAppels->add($appelOffre);
+        }
+        return $this;
+    }
+
+    public function removeFavoriteAppel(AppelOffre $appelOffre): static
+    {
+        $this->favoriteAppels->removeElement($appelOffre);
+        return $this;
+    }
+
+    #[ORM\OneToMany(targetEntity: Rating::class, mappedBy: 'user')]
+    private Collection $ratings;
+
+    public function getCandidatures(): Collection { return $this->candidatures; }
+    public function addCandidature(Candidature $candidature): static
+    {
+        if (!$this->candidatures->contains($candidature)) {
+            $this->candidatures->add($candidature);
+            $candidature->setUser($this);
+        }
+        return $this;
+    }
+    public function removeCandidature(Candidature $candidature): static
+    {
+        if ($this->candidatures->removeElement($candidature)) {
+            if ($candidature->getUser() === $this) {
+                $candidature->setUser(null);
+            }
+        }
+        return $this;
+    }
+
+    public function getAppelOffres(): Collection { return $this->appelOffres; }
+    public function addAppelOffre(AppelOffre $appelOffre): static
+    {
+        if (!$this->appelOffres->contains($appelOffre)) {
+            $this->appelOffres->add($appelOffre);
+            $appelOffre->setCreatedBy($this);
+        }
+        return $this;
+    }
+    public function removeAppelOffre(AppelOffre $appelOffre): static
+    {
+        if ($this->appelOffres->removeElement($appelOffre)) {
+            if ($appelOffre->getCreatedBy() === $this) {
+                $appelOffre->setCreatedBy(null);
+            }
+        }
+        return $this;
+    }
+
+    public function getRatings(): Collection { return $this->ratings; }
+    public function addRating(Rating $rating): static
+    {
+        if (!$this->ratings->contains($rating)) {
+            $this->ratings->add($rating);
+            $rating->setUser($this);
+        }
+        return $this;
+    }
+    public function removeRating(Rating $rating): static
+    {
+        if ($this->ratings->removeElement($rating)) {
+            if ($rating->getUser() === $this) {
+                $rating->setUser(null);
+            }
+        }
         return $this;
     }
 }

@@ -51,9 +51,21 @@ class TransactionService
             }
         }
 
-        // 3. Valider la quantité
+        // 3. Valider la quantité et l'appartenance
         if ($quantite <= 0) {
-            throw new \Exception("La quantité doit être positive.");
+            throw new \Exception("La quantité doit être positive (reçu: {$quantite}).");
+        }
+
+        if ($typeTransaction === 'VENTE' && $user) {
+            $userStock = $this->transactionRepo->getUserStockForAction($user->getId(), $idAction);
+            if ($userStock < $quantite) {
+                throw new \Exception(sprintf(
+                    "Vous ne possédez pas assez d'actions %s pour cette vente. En possession: %d, Demandé: %d",
+                    $action->getSymbole(),
+                    $userStock,
+                    $quantite
+                ));
+            }
         }
 
         // 4. Récupérer le prix actuel

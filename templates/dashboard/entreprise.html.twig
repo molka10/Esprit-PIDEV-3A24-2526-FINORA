@@ -32,8 +32,8 @@
                 </div>
                 <h6 class="mb-0">Appels d'offres</h6>
             </div>
-            <h3 class="mb-1">12</h3>
-            <p class="text-success mb-0 small"><i class="bi bi-plus-circle me-1"></i>3 nouveaux cette semaine</p>
+            <h3 class="mb-1">{{ appelPublies }}</h3>
+            <p class="text-success mb-0 small"><i class="bi bi-plus-circle me-1"></i>Projets actifs</p>
         </div>
     </div>
 
@@ -58,8 +58,8 @@
                 </div>
                 <h6 class="mb-0">Candidatures</h6>
             </div>
-            <h3 class="mb-1">28</h3>
-            <p class="text-muted mb-0 small">Reçues au total</p>
+            <h3 class="mb-1">{{ totalCandidatures }}</h3>
+            <p class="text-muted mb-0 small">{{ candidaturesEnAttente }} en attente</p>
         </div>
     </div>
 
@@ -101,13 +101,6 @@
             </div>
             <div class="card-body p-4">
                 <div class="d-grid gap-3">
-                    <a href="#" class="btn btn-primary-soft w-100 p-3 text-start d-flex align-items-center">
-                        <i class="bi bi-plus-square fs-4 me-3"></i>
-                        <div>
-                            <div class="fw-bold">Créer un Appel d'Offre</div>
-                            <div class="small opacity-70">Lancer un nouveau projet</div>
-                        </div>
-                    </a>
                     <a href="{{ path('app_market') }}" class="btn btn-info-soft w-100 p-3 text-start d-flex align-items-center">
                         <i class="bi bi-graph-up-arrow fs-4 me-3"></i>
                         <div>

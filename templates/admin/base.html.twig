@@ -269,6 +269,41 @@
                         </ul>
                     </div>
                 </li>
+				
+				<!-- Title -->
+				<li class="nav-item ms-2 my-2">Appels d'Offre</li>
+
+                <!-- Collapsible Appel d'Offre Menu -->
+                <li class="nav-item">
+                    <a class="nav-link d-flex align-items-center {% if app.request.attributes.get('_route') starts with 'app_appel_offre_' or app.request.attributes.get('_route') starts with 'app_candidature_' or app.request.attributes.get('_route') starts with 'app_categorie_' %}active{% endif %}" data-bs-toggle="collapse" href="#collapseAppel" role="button" aria-expanded="false" aria-controls="collapseAppel">
+                        <i class="bi bi-file-earmark-text fa-fw me-2"></i>Espace Appels d'Offres
+                        <i class="fas fa-chevron-down ms-auto" style="font-size: 0.8em;"></i>
+                    </a>
+                    <div class="collapse {% if app.request.attributes.get('_route') starts with 'app_appel_offre_' or app.request.attributes.get('_route') starts with 'app_candidature_' or app.request.attributes.get('_route') starts with 'app_categorie_' or app.request.attributes.get('_route') == 'app_admin_dashboard' %}show{% endif %}" id="collapseAppel">
+                        <ul class="nav flex-column ms-4 border-start border-secondary">
+                            <li class="nav-item">
+                                <a class="nav-link py-1 {% if app.request.attributes.get('_route') == 'app_admin_dashboard' %}active{% endif %}" href="{{ path('app_admin_dashboard') }}">
+                                    <i class="bi bi-speedometer2 fa-fw me-2" style="font-size: 0.9em;"></i>Tableau de Bord
+                                </a>
+                            </li>
+                            <li class="nav-item mt-1">
+                                <a class="nav-link py-1 {% if app.request.attributes.get('_route') == 'app_appel_offre_index' %}active{% endif %}" href="{{ path('app_appel_offre_index', {'role': 'admin'}) }}">
+                                    <i class="bi bi-grid-fill fa-fw me-2" style="font-size: 0.9em;"></i>Toutes les Offres
+                                </a>
+                            </li>
+                            <li class="nav-item mt-1">
+                                <a class="nav-link py-1 {% if app.request.attributes.get('_route') == 'app_candidature_index' %}active{% endif %}" href="{{ path('app_candidature_index', {'role': 'admin'}) }}">
+                                    <i class="bi bi-people fa-fw me-2" style="font-size: 0.9em;"></i>Candidatures
+                                </a>
+                            </li>
+                            <li class="nav-item mt-1 mb-2">
+                                <a class="nav-link py-1 {% if app.request.attributes.get('_route') == 'app_categorie_index' %}active{% endif %}" href="{{ path('app_categorie_index', {'role': 'admin'}) }}">
+                                    <i class="bi bi-tags fa-fw me-2" style="font-size: 0.9em;"></i>Gérer Catégories
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </li>
 
 			</ul>
 			<!-- Sidebar menu end -->

@@ -1,0 +1,327 @@
+{% extends app.request.query.get('role') == 'admin' ? 'admin/base.html.twig' : 'base.html.twig' %}
+
+{% block title %}{{ appel_offre.titre }} - Finora{% endblock %}
+
+{% block body %}
+<div class="container-fluid {% if app.request.query.get('role') == 'admin' %}px-4 py-4{% else %}py-5{% endif %}">
+
+    {# --- BREADCRUMB / BACK --- #}
+    <div class="mb-4">
+        <a href="{{ path('app_appel_offre_index', {'role': app.request.query.get('role')}) }}" class="btn btn-link text-decoration-none p-0 text-primary fw-bold">
+            <i class="bi bi-arrow-left me-2"></i>Retour à la liste
+        </a>
+    </div>
+
+    <div class="row g-4">
+        {# --- LEFT COLUMN: Main Info --- #}
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
+                <div class="card-header bg-white border-0 pt-4 px-4">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <span class="badge bg-primary-soft text-primary px-3 py-2 rounded-pill mb-2 fw-bold small">
+                                <i class="bi bi-tag-fill me-1"></i>{{ appel_offre.categorie ? appel_offre.categorie.nom : 'Non catégorisé' }}
+                            </span>
+                            <h1 class="h2 fw-extrabold text-dark mt-2 mb-3">{{ appel_offre.titre }}</h1>
+                        </div>
+                        <div class="text-end">
+                            {% if appel_offre.statut == 'published' %}
+                                <span class="badge bg-success-soft text-success px-3 py-2 rounded-pill fw-bold">
+                                    <i class="bi bi-check-circle-fill me-1"></i>Publié
+                                </span>
+                            {% elseif appel_offre.statut == 'draft' %}
+                                <span class="badge bg-gray-200 text-gray-800 px-3 py-2 rounded-pill fw-bold">
+                                    <i class="bi bi-pencil-fill me-1"></i>Brouillon
+                                </span>
+                            {% else %}
+                                <span class="badge bg-danger-soft text-danger px-3 py-2 rounded-pill fw-bold">
+                                    <i class="bi bi-lock-fill me-1"></i>Clôturé
+                                </span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-body px-4 pb-4">
+                    <div class="mb-4">
+                        <h5 class="fw-bold text-dark mb-3"><i class="bi bi-card-text me-2 text-primary"></i>Description du projet</h5>
+                        <div class="p-4 bg-light rounded-4 text-muted" style="line-height: 1.8; font-size: 1.05rem;">
+                            {{ appel_offre.description|nl2br }}
+                        </div>
+                    </div>
+
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <div class="p-3 border rounded-3 bg-white h-100">
+                                <span class="text-muted small d-block mb-1">Budget Estimé</span>
+                                <h4 class="fw-bold mb-0 text-success">
+                                    {{ appel_offre.budgetMin|number_format(0, '.', ' ') }} - {{ appel_offre.budgetMax|number_format(0, '.', ' ') }} TND
+                                </h4>
+                                {% if budgetEur %}
+                                    <div class="text-primary small mt-1 fw-bold">
+                                        ≈ {{ budgetEur.min|number_format(0, '.', ' ') }} - {{ budgetEur.max|number_format(0, '.', ' ') }} EUR
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="p-3 border rounded-3 bg-white h-100">
+                                <span class="text-muted small d-block mb-1">Date Limite</span>
+                                <h4 class="fw-bold mb-0 {% if appel_offre.dateLimite < date() %}text-danger{% else %}text-dark{% endif %}">
+                                    <i class="bi bi-calendar-event me-2"></i>
+                                    {{ appel_offre.dateLimite ? appel_offre.dateLimite|date('d/m/Y') : 'Non définie' }}
+                                </h4>
+                                {% if appel_offre.dateLimite < date() %}
+                                    <span class="text-danger small fw-bold">Expiré</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card-footer bg-light bg-opacity-50 border-0 px-4 py-3 d-flex justify-content-between text-muted small">
+                    <span><i class="bi bi-clock me-1"></i>Publié le {{ appel_offre.createdAt|date('d/m/Y à H:i') }}</span>
+                    <span><i class="bi bi-hash me-1"></i>ID #{{ appel_offre.id }}</span>
+                </div>
+            </div>
+
+            {# --- ADMIN: CANDIDATURES LIST --- #}
+            {% if is_granted('ROLE_ADMIN') %}
+                <div class="card border-0 shadow-sm rounded-4">
+                    <div class="card-header bg-white border-0 pt-4 px-4">
+                        <h5 class="fw-bold text-dark"><i class="bi bi-people me-2 text-primary"></i>Candidatures reçues ({{ appel_offre.candidatures|length }})</h5>
+                    </div>
+                    <div class="card-body px-0 pt-2 pb-0">
+                        {% if appel_offre.candidatures|length > 0 %}
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle mb-0">
+                                    <thead class="bg-light">
+                                        <tr>
+                                            <th class="ps-4">Candidat</th>
+                                            <th>Proposition</th>
+                                            <th>Statut</th>
+                                            <th class="text-end pe-4">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for cand in appel_offre.candidatures %}
+                                            <tr>
+                                                <td class="ps-4">
+                                                    <div class="d-flex align-items-center">
+                                                        <div class="avatar avatar-xs me-2">
+                                                            <div class="bg-primary bg-opacity-10 text-primary rounded-circle p-2 small fw-bold">
+                                                                {{ cand.user ? cand.user.username|first|upper : 'A' }}
+                                                            </div>
+                                                        </div>
+                                                        <span class="fw-bold text-dark small">{{ cand.user ? cand.user.username : 'Anonyme' }}</span>
+                                                    </div>
+                                                </td>
+                                                <td><span class="fw-bold text-success">{{ cand.montantPropose|number_format(0, '.', ' ') }} TND</span></td>
+                                                <td>
+                                                    {% if cand.statut == 'accepted' %}
+                                                        <span class="badge bg-success-soft text-success small fw-bold rounded-pill">Acceptée</span>
+                                                    {% elseif cand.statut == 'rejected' %}
+                                                        <span class="badge bg-danger-soft text-danger small fw-bold rounded-pill">Refusée</span>
+                                                    {% else %}
+                                                        <span class="badge bg-warning-soft text-warning small fw-bold rounded-pill">En attente</span>
+                                                    {% endif %}
+                                                </td>
+                                                <td class="text-end pe-4">
+                                                    <a href="{{ path('app_candidature_show', {'id': cand.id, 'role': 'admin'}) }}" class="btn btn-sm btn-outline-primary py-1 px-3 rounded-pill">Étudier</a>
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% else %}
+                            <div class="text-center py-5 text-muted">
+                                <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                                <span>Aucune candidature déposée pour le moment.</span>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endif %}
+
+            {# --- ENTREPRISE: STATUS CARD --- #}
+            {% if is_granted('ROLE_ENTREPRISE') and not is_granted('ROLE_ADMIN') %}
+                <div class="card border-0 shadow-sm rounded-4 mt-4">
+                    <div class="card-body p-4 text-center">
+                        {% if userCandidature %}
+                           <div class="bg-primary bg-opacity-10 rounded-4 p-4">
+                                <h5 class="fw-bold mb-3">Votre candidature sur ce projet</h5>
+                                <div class="mb-3">
+                                    {% if userCandidature.statut == 'accepted' %}
+                                        <span class="badge bg-success py-2 px-4 rounded-pill"><i class="bi bi-check-circle me-1"></i>Acceptée</span>
+                                    {% elseif userCandidature.statut == 'rejected' %}
+                                        <span class="badge bg-danger py-2 px-4 rounded-pill"><i class="bi bi-x-circle me-1"></i>Refusée</span>
+                                    {% else %}
+                                        <span class="badge bg-warning text-dark py-2 px-4 rounded-pill"><i class="bi bi-clock me-1"></i>En attente de réponse</span>
+                                    {% endif %}
+                                </div>
+                                <p class="text-muted small">Dossier soumis le {{ userCandidature.createdAt|date('d/m/Y') }}</p>
+                                <a href="{{ path('app_candidature_show', {'id': userCandidature.id, 'role': 'entreprise'}) }}" class="btn btn-primary px-4 rounded-pill mt-2">Voir mon dossier</a>
+                           </div>
+                        {% else %}
+                            <div class="py-3">
+                                <h4 class="fw-bold mb-3">Ce projet vous intéresse ?</h4>
+                                <p class="text-muted mb-4">Proposez votre expertise et devenez le partenaire idéal pour cette offre.</p>
+                                <a href="{{ path('app_candidature_new', {'appelOffre': appel_offre.id}) }}" class="btn btn-success btn-lg px-5 rounded-pill shadow-sm">
+                                    <i class="bi bi-send-plus me-2"></i>Soumettre une candidature
+                                </a>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+
+        {# --- RIGHT COLUMN: Widgets & Stats --- #}
+        <div class="col-lg-4">
+            {# Actions Card #}
+            <div class="card border-0 shadow-sm rounded-4 mb-4">
+                <div class="card-body p-4">
+                    <h5 class="fw-bold text-dark mb-4">Actions rapides</h5>
+                    
+                    {% if is_granted('ROLE_ADMIN') %}
+                        <a href="{{ path('app_appel_offre_edit', {'id': appel_offre.id, 'role': 'admin'}) }}" class="btn btn-warning w-100 py-2 rounded-3 mb-3 text-white fw-bold">
+                            <i class="bi bi-pencil-square me-2"></i>Modifier l'offre
+                        </a>
+                        <form method="post" action="{{ path('app_appel_offre_delete', {'id': appel_offre.id, 'role': 'admin'}) }}" onsubmit="return confirm('Supprimer définitivement ?');">
+                            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ appel_offre.id) }}">
+                            <button type="submit" class="btn btn-outline-danger w-100 py-2 rounded-3 mb-4">
+                                <i class="bi bi-trash3 me-2"></i>Supprimer
+                            </button>
+                        </form>
+                        <hr class="my-4 op-1">
+                    {% endif %}
+
+                    {# Rating Widget #}
+                    <div class="text-center py-2">
+                        <span class="text-muted small d-block mb-2">Note moyenne du projet</span>
+                        <h2 class="fw-extrabold text-warning mb-1" id="moyenne-value">--</h2>
+                        <div id="stars-display" class="fs-4 mb-2"></div>
+                        <span class="text-muted extra-small"><span id="total-votes">0</span> votes certifiés</span>
+                    </div>
+
+                    {% if is_granted('ROLE_ENTREPRISE') and not is_granted('ROLE_ADMIN') and not userRating %}
+                        <div class="mt-4 pt-4 border-top">
+                            <span class="text-muted small d-block mb-2 text-center">Évaluer l'attrait du projet</span>
+                            <div class="d-flex justify-content-center gap-1" id="star-rating">
+                                {% for i in 1..5 %}
+                                    <i class="bi bi-star-fill fs-3 star-btn" data-note="{{ i }}" 
+                                       style="cursor:pointer; color:#e0e0e0; transition: color 0.1s;"
+                                       onclick="noterAppel({{ i }})"></i>
+                                {% endfor %}
+                            </div>
+                            <div id="rating-message" class="text-center mt-2 small"></div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            {# Share/Help Widget #}
+            <div class="card border-0 bg-primary bg-opacity-10 rounded-4">
+                <div class="card-body p-4">
+                    <h6 class="fw-bold text-primary mb-3">Besoin d'aide ?</h6>
+                    <p class="small text-muted mb-3">Si vous avez des questions sur cet appel d'offres, notre support est disponible 24/7 pour vous accompagner.</p>
+                    <a href="#" class="btn btn-white btn-sm w-100 rounded-pill shadow-sm py-2">Contacter le support</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .fw-extrabold { font-weight: 800; }
+    .bg-primary-soft { background-color: rgba(109, 40, 217, 0.1); }
+    .bg-success-soft { background-color: rgba(25, 135, 84, 0.1); }
+    .bg-danger-soft { background-color: rgba(220, 53, 69, 0.1); }
+    .bg-warning-soft { background-color: rgba(255, 193, 7, 0.1); }
+    .extra-small { font-size: 0.65rem; }
+    .avatar-xs { width: 32px; height: 32px; }
+    .op-1 { opacity: 0.1; }
+</style>
+{% endblock %}
+
+{% block javascripts %}
+<script>
+    const appelOffreId = {{ appel_offre.id }};
+
+    document.addEventListener('DOMContentLoaded', function() {
+        // Stats via AJAX
+        fetch(`/rating/stats/${appelOffreId}`)
+            .then(r => r.json())
+            .then(data => {
+                updateStarsDisplay(data.moyenne, data.total_votes);
+                if (data.deja_note) {
+                    const stars = document.querySelectorAll('.star-btn');
+                    if (stars) {
+                        stars.forEach(s => s.style.pointerEvents = 'none');
+                    }
+                    const msg = document.getElementById('rating-message');
+                    if (msg) msg.innerHTML = '<span class="text-primary fw-bold">Note enregistrée</span>';
+                }
+            });
+            
+        // Hover effects
+        const stars = document.querySelectorAll('.star-btn');
+        stars.forEach(star => {
+            star.addEventListener('mouseover', function() {
+                highlightStars(parseInt(this.dataset.note));
+            });
+            star.addEventListener('mouseout', function() {
+                resetStars();
+            });
+        });
+    });
+
+    function highlightStars(note) {
+        document.querySelectorAll('.star-btn').forEach(s => {
+            s.style.color = parseInt(s.dataset.note) <= note ? '#ffc107' : '#e0e0e0';
+        });
+    }
+
+    function resetStars() {
+        document.querySelectorAll('.star-btn').forEach(s => s.style.color = '#e0e0e0');
+    }
+
+    function noterAppel(note) {
+        const formData = new FormData();
+        formData.append('note', note);
+        fetch(`/rating/noter/${appelOffreId}`, { method: 'POST', body: formData })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                updateStarsDisplay(data.moyenne, data.total_votes);
+                document.getElementById('rating-message').innerHTML = '<span class="text-success fw-bold">Merci pour votre note!</span>';
+                document.querySelectorAll('.star-btn').forEach(s => {
+                    s.style.pointerEvents = 'none';
+                    if(parseInt(s.dataset.note) <= note) s.style.color = '#ffc107';
+                });
+            }
+        });
+    }
+
+    function updateStarsDisplay(moyenne, totalVotes) {
+        const val = document.getElementById('moyenne-value');
+        if(val) val.textContent = moyenne > 0 ? moyenne : '--';
+        const tv = document.getElementById('total-votes');
+        if(tv) tv.textContent = totalVotes;
+
+        let starsHtml = '';
+        for (let i = 1; i <= 5; i++) {
+            if (i <= Math.floor(moyenne)) {
+                starsHtml += '<i class="bi bi-star-fill text-warning mx-1"></i>';
+            } else if (i - 0.5 <= moyenne) {
+                starsHtml += '<i class="bi bi-star-half text-warning mx-1"></i>';
+            } else {
+                starsHtml += '<i class="bi bi-star text-warning mx-1"></i>';
+            }
+        }
+        const sd = document.getElementById('stars-display');
+        if(sd) sd.innerHTML = starsHtml;
+    }
+</script>
+{% endblock %}

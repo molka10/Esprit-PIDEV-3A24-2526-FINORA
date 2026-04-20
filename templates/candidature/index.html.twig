@@ -1,0 +1,123 @@
+{% extends app.request.query.get('role') == 'admin' ? 'admin/base.html.twig' : 'base.html.twig' %}
+
+{% block title %}Candidatures - FINORA{% endblock %}
+
+{% block stylesheets %}
+<style>
+    .filter-card { border-radius: 1rem; border: none; box-shadow: 0 4px 20px rgba(0,0,0,0.05); }
+    .fw-extrabold { font-weight: 800; }
+    .admin-soft-badge {
+        background: rgba(109, 40, 217, 0.1);
+        color: #6d28d9;
+        padding: 4px 12px;
+        border-radius: 999px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        display: inline-block;
+    }
+    .header-line { width: 60px; height: 4px; background: #6d28d9; border-radius: 2px; }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="container-fluid {% if app.request.query.get('role') == 'admin' %}px-4 py-4{% else %}py-5{% endif %}">
+
+    {% if app.request.query.get('role') == 'admin' %}
+        {# --- ADMIN HEADER --- #}
+        <div class="admin-page-header d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+            <div>
+                <span class="admin-soft-badge mb-2">Suivi des Dossiers</span>
+                <h1 class="h3 mb-1 admin-purple-title">Gestion des Candidatures</h1>
+                <p class="text-muted mb-0">Analysez et étudiez les propositions soumises par les prestataires et partenaires.</p>
+            </div>
+        </div>
+    {% else %}
+        {# --- USER HERO --- #}
+        <div class="d-flex justify-content-between align-items-center mb-5">
+            <div>
+                <h1 class="display-5 fw-extrabold text-dark mb-1">Vos Candidatures</h1>
+                <p class="lead text-muted mb-0">Suivez l'état de vos propositions en temps réel</p>
+                <div class="header-line mt-2"></div>
+            </div>
+            <a href="{{ path('app_appel_offre_index') }}" class="btn btn-primary rounded-pill px-4 fw-bold text-white shadow-sm">
+                <i class="bi bi-search me-2"></i>Découvrir de nouvelles offres
+            </a>
+        </div>
+    {% endif %}
+
+    {# --- FILTERS --- #}
+    <div class="card filter-card mb-4">
+        <div class="card-body p-4">
+            <form method="GET" action="{{ path('app_candidature_index') }}" id="filterForm">
+                <input type="hidden" name="role" value="{{ app.request.query.get('role') }}">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label class="form-label small fw-bold text-muted">Statut du dossier</label>
+                        <select name="statut" class="form-select border-0 bg-light rounded-3" onchange="this.form.submit()">
+                            <option value="">Tous les statuts</option>
+                            <option value="pending" {{ app.request.query.get('statut') == 'pending' ? 'selected' : '' }}>En attente</option>
+                            <option value="accepted" {{ app.request.query.get('statut') == 'accepted' ? 'selected' : '' }}>Acceptées</option>
+                            <option value="rejected" {{ app.request.query.get('statut') == 'rejected' ? 'selected' : '' }}>Rejetées</option>
+                        </select>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {# --- CONTENT --- #}
+    <div id="gridContainer">
+        {% if app.request.query.get('role') == 'admin' %}
+            {{ include('candidature/_admin_table.html.twig') }}
+        {% else %}
+            {{ include('candidature/_grid.html.twig') }}
+        {% endif %}
+    </div>
+
+</div>
+{% endblock %}
+
+{% block javascripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const gridContainer = document.getElementById('gridContainer');
+
+    async function updateResults(url, pushState = true) {
+        const fetchUrl = new URL(url, window.location.origin);
+        fetchUrl.searchParams.set('ajax', '1');
+
+        gridContainer.style.opacity = '0.5';
+        try {
+            const response = await fetch(fetchUrl.toString(), {
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            });
+            const html = await response.text();
+            gridContainer.innerHTML = html;
+            if (pushState) {
+                window.history.pushState({}, '', url);
+            }
+        } catch (error) {
+            console.error('AJAX Error:', error);
+            window.location.href = url;
+        } finally {
+            gridContainer.style.opacity = '1';
+        }
+    }
+
+    // Delegation for pagination links
+    gridContainer.addEventListener('click', function(e) {
+        const link = e.target.closest('.ajax-page-link');
+        if (link) {
+            e.preventDefault();
+            updateResults(link.href);
+            window.scrollTo({ top: gridContainer.offsetTop - 100, behavior: 'smooth' });
+        }
+    });
+
+    // Handle browser back/forward
+    window.addEventListener('popstate', function() {
+        updateResults(window.location.href, false);
+    });
+});
+</script>
+{% endblock %}

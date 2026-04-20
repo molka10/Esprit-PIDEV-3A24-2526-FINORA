@@ -1,0 +1,243 @@
+{% extends app.request.query.get('role') == 'admin' ? 'admin/base.html.twig' : 'base.html.twig' %}
+
+{% block title %}Publier un Appel d'Offre - Finora{% endblock %}
+
+{% block stylesheets %}
+<style>
+    /* Premium Purple Theme Variables */
+    :root {
+        --finora-purple: #6d28d9;
+        --finora-purple-light: #8b5cf6;
+        --finora-purple-soft: rgba(109, 40, 217, 0.08);
+    }
+
+    .card-premium { border-radius: 1.25rem; border: none; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
+    .form-label { font-weight: 600; color: #4b5563; margin-bottom: 0.5rem; }
+    .form-control, .form-select { border-radius: 0.75rem; border: 1px solid #e5e7eb; padding: 0.75rem 1rem; transition: all 0.2s ease; }
+    .form-control:focus, .form-select:focus { border-color: var(--finora-purple); box-shadow: 0 0 0 4px var(--finora-purple-soft); }
+    
+    /* Animation for AI buttons */
+    .btn-ai { background: linear-gradient(135deg, #6d28d9, #4f46e5); color: white; border: none; transition: transform 0.2s, box-shadow 0.2s; }
+    .btn-ai:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(109, 40, 217, 0.3); color: white; }
+
+    /* Progressive Validation */
+    .form-control.is-valid { border-color: #10b981 !important; box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1) !important; }
+    .form-control.is-invalid { border-color: #ef4444 !important; box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.1) !important; }
+    .validation-feedback { font-size: 0.75rem; margin-top: 0.25rem; font-weight: 500; }
+    .char-counter { font-size: 0.7rem; font-weight: 600; padding: 2px 8px; border-radius: 10px; }
+    .char-ok { background: #dcfce7; color: #166534; }
+    .char-warn { background: #fef9c3; color: #854d0e; }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10 col-xl-8">
+            
+            {# --- HEADER --- #}
+            <div class="text-center mb-5">
+                <h1 class="fw-extrabold text-dark mb-2">Publier un Appel d'Offre</h1>
+                <p class="text-muted">Remplissez les détails ci-dessous pour attirer les meilleurs prestataires sur Finora.</p>
+            </div>
+
+            <div class="card card-premium overflow-hidden">
+                <div class="card-header bg-white border-0 pt-4 px-4 px-md-5">
+                    <div class="d-flex align-items-center">
+                        <div class="bg-primary-soft p-3 rounded-circle me-3">
+                            <i class="bi bi-file-earmark-plus fs-3 text-primary"></i>
+                        </div>
+                        <h4 class="mb-0 fw-bold">Configuration de l'offre</h4>
+                    </div>
+                </div>
+
+                <div class="card-body p-4 p-md-5">
+                    {{ form_start(form, {'attr': {'id': 'tender-form', 'novalidate': 'novalidate'}}) }}
+                    
+                    <div class="mb-4">
+                        {{ form_label(form.titre, 'Titre accrocheur du projet') }}
+                        {{ form_widget(form.titre, {'attr': {'placeholder': 'Ex: Refonte plateforme e-commerce B2B'}}) }}
+                        {{ form_errors(form.titre) }}
+                    </div>
+
+                    <div class="mb-4">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            {{ form_label(form.description, 'Description détaillée') }}
+                            <button type="button" id="ai-generate-btn" class="btn btn-sm btn-ai rounded-pill px-3">
+                                <i class="bi bi-stars me-1"></i>Optimiser avec l'IA
+                            </button>
+                        </div>
+                        <div id="ai-loader" class="small text-primary mb-2 d-none">
+                            <div class="spinner-border spinner-border-sm me-2" role="status"></div>L'IA analyse et rédige votre offre...
+                        </div>
+                        {{ form_widget(form.description, {'attr': {'rows': 6, 'placeholder': 'Décrivez les besoins, les livrables attendus et les critères de sélection...'}}) }}
+                        {{ form_errors(form.description) }}
+                    </div>
+
+                    <div class="row g-4 mb-4">
+                        <div class="col-md-6">
+                            {{ form_label(form.type, 'Type de collaboration') }}
+                            {{ form_widget(form.type) }}
+                            {{ form_errors(form.type) }}
+                        </div>
+                        <div class="col-md-6">
+                            {{ form_label(form.categorie, 'Secteur d\'activité') }}
+                            {{ form_widget(form.categorie) }}
+                            {{ form_errors(form.categorie) }}
+                        </div>
+                    </div>
+
+                    <div class="p-4 bg-light rounded-4 mb-4 border-0">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h6 class="fw-bold mb-0 text-dark">Estimation budgétaire</h6>
+                            <button type="button" id="ai-budget-btn" class="btn btn-sm btn-outline-primary rounded-pill px-3">
+                                <i class="bi bi-cursor-fill me-1"></i>Budget suggéré par l'IA
+                            </button>
+                        </div>
+                        <div id="ai-budget-loader" class="small text-primary mb-2 d-none">
+                            <div class="spinner-border spinner-border-sm me-2" role="status"></div>Analyse du marché en cours...
+                        </div>
+                        <div class="row g-3">
+                            <div class="col-sm-4">
+                                {{ form_label(form.budgetMin, 'Min (TND)') }}
+                                {{ form_widget(form.budgetMin) }}
+                            </div>
+                            <div class="col-sm-4">
+                                {{ form_label(form.budgetMax, 'Max (TND)') }}
+                                {{ form_widget(form.budgetMax) }}
+                            </div>
+                            <div class="col-sm-4">
+                                {{ form_label(form.devise, 'Devise') }}
+                                {{ form_widget(form.devise) }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row g-4 mb-5">
+                        <div class="col-md-6">
+                            {{ form_label(form.dateLimite, 'Clôture des candidatures') }}
+                            {{ form_widget(form.dateLimite) }}
+                        </div>
+                        <div class="col-md-6">
+                            {{ form_label(form.statut, 'Visibilité de l\'offre') }}
+                            {{ form_widget(form.statut) }}
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center pt-3 border-top">
+                        <a href="{{ path('app_appel_offre_index', {'role': app.request.query.get('role')}) }}" class="btn btn-link text-muted fw-bold text-decoration-none">
+                            Annuler
+                        </a>
+                        <button type="submit" class="btn btn-primary btn-lg px-5 rounded-pill shadow-sm fw-bold">
+                            <i class="bi bi-check-lg me-2"></i>Publier maintenant
+                        </button>
+                    </div>
+
+                    {{ form_end(form) }}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .fw-extrabold { font-weight: 800; }
+    .bg-primary-soft { background-color: rgba(109, 40, 217, 0.08); }
+</style>
+{% endblock %}
+
+{% block javascripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const titleField = document.querySelector('[name*="[titre]"]');
+    const descField = document.querySelector('[name*="[description]"]');
+    const typeField = document.querySelector('[name*="[type]"]');
+    const categoryField = document.querySelector('[name*="[categorie]"]');
+    
+    // AI Content Generation
+    const aiBtn = document.getElementById('ai-generate-btn');
+    const aiLoader = document.getElementById('ai-loader');
+
+    aiBtn?.addEventListener('click', async function() {
+        if (!titleField.value) {
+            alert('L\'IA a besoin d\'un titre pour commencer !');
+            return;
+        }
+        aiBtn.disabled = true;
+        aiLoader.classList.remove('d-none');
+        try {
+            const r = await fetch('{{ path('app_appel_offre_ai_generate') }}', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    title: titleField.value,
+                    type: typeField.value,
+                    category: categoryField.options[categoryField.selectedIndex]?.text || ''
+                })
+            });
+            const data = await r.json();
+            if (data.description) descField.value = data.description;
+        } finally {
+            aiBtn.disabled = false;
+            aiLoader.classList.add('d-none');
+        }
+    });
+
+    // AI Budget Suggestion
+    const budgetBtn = document.getElementById('ai-budget-btn');
+    const budgetLoader = document.getElementById('ai-budget-loader');
+    const bMin = document.querySelector('[name*="[budgetMin]"]');
+    const bMax = document.querySelector('[name*="[budgetMax]"]');
+
+    budgetBtn?.addEventListener('click', async function() {
+        if (!titleField.value) {
+            alert('Saisissez un titre pour l\'estimation.');
+            return;
+        }
+        budgetBtn.disabled = true;
+        budgetLoader.classList.remove('d-none');
+        try {
+            const r = await fetch('{{ path('app_appel_offre_ai_budget') }}', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({title: titleField.value, type: typeField.value})
+            });
+            const data = await r.json();
+            if (data.min) { bMin.value = data.min; bMax.value = data.max; }
+        } finally {
+            budgetBtn.disabled = false;
+            budgetLoader.classList.add('d-none');
+        }
+    });
+
+    // --- Progressive UI Validations ---
+    function updateValidationUI(el, isValid, msg) {
+        el.classList.toggle('is-valid', isValid);
+        el.classList.toggle('is-invalid', !isValid && el.value !== '');
+    }
+
+    titleField?.addEventListener('input', function() {
+        const ok = this.value.trim().length >= 3;
+        updateValidationUI(this, ok);
+    });
+
+    if (descField) {
+        const counter = document.createElement('div');
+        counter.className = 'text-end mt-1';
+        descField.parentElement.appendChild(counter);
+        descField.addEventListener('input', function() {
+            const len = this.value.length;
+            counter.innerHTML = `<span class="char-counter ${len >= 20 ? 'char-ok' : 'char-warn'}">${len} char</span>`;
+            updateValidationUI(this, len >= 10);
+        });
+    }
+
+    document.getElementById('tender-form')?.addEventListener('submit', function(e) {
+        if (titleField.value.length < 3 || descField.value.length < 10) {
+            e.preventDefault();
+            alert('Certains champs sont incomplets.');
+        }
+    });
+});
+</script>
+{% endblock %}

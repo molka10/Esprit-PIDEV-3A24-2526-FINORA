@@ -1,0 +1,77 @@
+{% extends app.request.query.get('role') == 'admin' ? 'admin/base.html.twig' : 'base.html.twig' %}
+
+{% block title %}Mes Appels d'Offre Favoris{% endblock %}
+
+{% block body %}
+{# HERO SECTION #}
+<div class="py-4 mb-4" style="background: linear-gradient(135deg, #1e1b4b, #7c3aed); border-radius: 10px;">
+    <div class="container text-center py-3">
+        <h1 class="display-5 font-weight-bold" style="color: #ffffff !important;">
+            <i class="fas fa-heart mr-2" style="color: #ff4d4d;"></i>Mes Appels d'Offre Favoris
+        </h1>
+        <p class="lead" style="color: #d0d8e8 !important;">Retrouvez ici tous les appels d'offre que vous avez sauvegardés.</p>
+    </div>
+</div>
+
+<div class="container mb-5">
+    <div id="gridContainer">
+        {% include 'appel_offre/_grid.html.twig' %}
+    </div>
+</div>
+
+{% block javascripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const gridContainer = document.getElementById('gridContainer');
+
+    gridContainer.addEventListener('click', function(e) {
+        const favBtn = e.target.closest('.favorite-toggle');
+
+        if (favBtn) {
+            e.preventDefault();
+            if (favBtn.classList.contains('processing')) return;
+            
+            const id = favBtn.dataset.id;
+            const icon = favBtn.querySelector('i');
+            const card = favBtn.closest('.appel-item');
+            
+            favBtn.classList.add('processing');
+            favBtn.style.opacity = '0.5';
+            
+            fetch(`/appel/offre/wishlist/toggle/${id}`, {
+                method: 'POST',
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            })
+            .then(res => res.json())
+            .then(data => {
+                favBtn.classList.remove('processing');
+                favBtn.style.opacity = '1';
+
+                if (!data.favorite) {
+                    // Smoothly remove from favorites page
+                    card.style.transition = 'all 0.4s ease';
+                    card.style.opacity = '0';
+                    card.style.transform = 'scale(0.8)';
+                    setTimeout(() => {
+                        card.remove();
+                        if (gridContainer.querySelectorAll('.appel-item').length === 0) {
+                            gridContainer.innerHTML = '<div class="col-12 text-center py-5"><i class="fas fa-heart-broken fa-3x mb-3 text-muted"></i><p class="text-muted">Vous n\'avez plus d\'appels d\'offre favoris.</p></div>';
+                        }
+                    }, 400);
+                }
+                
+                Swal.fire({
+                    toast: true,
+                    position: 'top-end',
+                    icon: 'success',
+                    title: data.message,
+                    showConfirmButton: false,
+                    timer: 2000
+                });
+            });
+        }
+    });
+});
+</script>
+{% endblock %}
+{% endblock %}

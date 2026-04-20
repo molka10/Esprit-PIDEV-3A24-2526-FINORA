@@ -1,0 +1,207 @@
+{% extends app.request.query.get('role') == 'admin' ? 'admin/base.html.twig' : 'base.html.twig' %}
+
+{% block title %}Soumettre une Candidature - Finora{% endblock %}
+
+{% block stylesheets %}
+<style>
+    :root {
+        --finora-purple: #6d28d9;
+        --finora-purple-soft: rgba(109, 40, 217, 0.08);
+    }
+    .card-premium { border-radius: 1.25rem; border: none; box-shadow: 0 10px 40px rgba(0,0,0,0.08); }
+    .bg-primary-soft { background-color: var(--finora-purple-soft); }
+    .form-label { font-weight: 700; color: #374151; font-size: 0.9rem; margin-bottom: 0.5rem; }
+    .form-control, .form-select {
+        border-radius: 10px;
+        padding: 0.75rem 1rem;
+        border: 1px solid #e5e7eb;
+        transition: all 0.2s;
+    }
+    .form-control:focus, .form-select:focus {
+        border-color: var(--finora-purple);
+        box-shadow: 0 0 0 4px rgba(109, 40, 217, 0.1);
+    }
+    .form-control.is-valid, .form-select.is-valid { border-color: #10b981 !important; }
+    .form-control.is-invalid, .form-select.is-invalid { border-color: #ef4444 !important; }
+    
+    .validation-feedback { font-size: 0.8rem; margin-top: 5px; font-weight: 600; }
+    .validation-feedback.valid { color: #10b981; }
+    .validation-feedback.invalid { color: #ef4444; }
+    
+    .char-counter { font-size: 0.75rem; color: #9ca3af; margin-top: 5px; font-weight: 500; }
+    .char-counter.ok { color: #10b981; }
+    .char-counter.warning { color: #f59e0b; }
+    .char-counter.error { color: #ef4444; }
+    
+    .fw-extrabold { font-weight: 800; }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        
+        <div class="col-lg-8">
+            {# --- HEADER --- #}
+            <div class="text-center mb-5">
+                <div class="bg-primary-soft p-3 rounded-circle d-inline-block mb-3">
+                    <i class="bi bi-file-earmark-plus text-primary h2 mb-0"></i>
+                </div>
+                <h1 class="fw-extrabold text-dark">Soumettre une Candidature</h1>
+                <p class="text-muted">Partagez votre expertise et proposez votre meilleure offre commerciale.</p>
+            </div>
+
+            {# --- FORM CARD --- #}
+            <div class="card card-premium">
+                <div class="card-body p-4 p-md-5">
+                    {{ form_start(form, {'attr': {'novalidate': 'novalidate', 'id': 'candidatureForm'}}) }}
+
+                    <div class="row g-4">
+                        {# APPEL D'OFFRE #}
+                        <div class="col-12">
+                            <label class="form-label"><i class="bi bi-bullseye me-2"></i>Appel d'Offre Cible</label>
+                            {{ form_widget(form.appelOffre, {'attr': {'class': 'form-select'}}) }}
+                            {% if form_errors(form.appelOffre) %}
+                                <div class="invalid-feedback d-block">{{ form_errors(form.appelOffre) }}</div>
+                            {% endif %}
+                        </div>
+
+                        {# USER (Admin only usually, or hidden) #}
+                        <div class="col-md-6 d-none">
+                            {{ form_widget(form.user) }}
+                        </div>
+
+                        {# MONTANT #}
+                        <div class="col-md-12">
+                            <label class="form-label"><i class="bi bi-currency-dollar me-2"></i>Votre Offre Financière (TND)</label>
+                            <div class="input-group">
+                                {{ form_widget(form.montantPropose, {'attr': {'class': 'form-control', 'placeholder': 'Ex: 15000'}}) }}
+                                <span class="input-group-text bg-light fw-bold text-muted border-start-0">TND</span>
+                            </div>
+                            {% if form_errors(form.montantPropose) %}
+                                <div class="invalid-feedback d-block">{{ form_errors(form.montantPropose) }}</div>
+                            {% endif %}
+                        </div>
+
+                        {# MESSAGE #}
+                        <div class="col-12">
+                            <label class="form-label"><i class="bi bi-chat-left-text me-2"></i>Lettre de Motivation / Proposition Technique</label>
+                            {{ form_widget(form.message, {'attr': {'class': 'form-control', 'rows': '6', 'placeholder': 'Décrivez votre plus-value pour ce projet...'}}) }}
+                            {% if form_errors(form.message) %}
+                                <div class="invalid-feedback d-block">{{ form_errors(form.message) }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="mt-5 d-flex flex-column flex-md-row gap-3 justify-content-between align-items-center">
+                        <a href="{{ path('app_candidature_index', {'role': app.request.query.get('role')}) }}" class="btn btn-link text-muted fw-bold text-decoration-none">
+                            <i class="bi bi-arrow-left me-2"></i>Annuler et revenir
+                        </a>
+                        <button type="submit" class="btn btn-primary rounded-pill px-5 py-3 fw-bold text-white shadow">
+                            <i class="bi bi-send-check me-2"></i>Soumettre ma candidature
+                        </button>
+                    </div>
+
+                    {{ form_end(form) }}
+                </div>
+            </div>
+
+            {# --- SECURITY TAG --- #}
+            <div class="text-center mt-4">
+                <span class="text-muted small"><i class="bi bi-lock-fill text-primary me-2"></i>Connexion sécurisée par FINORA-SECURE. Vos données sont chiffrées.</span>
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('candidatureForm');
+
+    function setValid(el, msg) {
+        el.classList.remove('is-invalid'); el.classList.add('is-valid');
+        let fb = el.parentElement.querySelector('.validation-feedback');
+        if (!fb) { fb = document.createElement('div'); el.parentElement.appendChild(fb); }
+        fb.className = 'validation-feedback valid';
+        fb.innerHTML = '<i class="bi bi-check-circle-fill me-1"></i> ' + msg;
+    }
+
+    function setInvalid(el, msg) {
+        el.classList.remove('is-valid'); el.classList.add('is-invalid');
+        let fb = el.parentElement.querySelector('.validation-feedback');
+        if (!fb) { fb = document.createElement('div'); el.parentElement.appendChild(fb); }
+        fb.className = 'validation-feedback invalid';
+        fb.innerHTML = '<i class="bi bi-exclamation-triangle-fill me-1"></i> ' + msg;
+    }
+
+    function clearState(el) {
+        el.classList.remove('is-valid', 'is-invalid');
+        const fb = el.parentElement.querySelector('.validation-feedback');
+        if (fb) { fb.innerHTML = ''; }
+    }
+
+    // Appel d'Offre select
+    const appelField = document.querySelector('[name*="[appelOffre]"]');
+    if (appelField) {
+        appelField.addEventListener('change', function() {
+            if (this.value) setValid(this, 'Projet sélectionné');
+            else setInvalid(this, 'Veuillez sélectionner un projet');
+        });
+    }
+
+    // Montant Proposé
+    const montantField = document.querySelector('[name*="[montantPropose]"]');
+    if (montantField) {
+        const container = montantField.closest('.input-group') || montantField.parentElement;
+        montantField.addEventListener('input', function() {
+            const val = parseFloat(this.value);
+            if (!this.value) clearState(this);
+            else if (isNaN(val) || val <= 0) setInvalid(this, 'Montant positif requis');
+            else setValid(this, 'Offre : ' + val.toLocaleString('fr-TN') + ' TND');
+        });
+    }
+
+    // Message
+    const msgField = document.querySelector('[name*="[message]"]');
+    if (msgField) {
+        const counter = document.createElement('div');
+        counter.className = 'char-counter';
+        msgField.parentElement.appendChild(counter);
+
+        msgField.addEventListener('input', function() {
+            const len = this.value.trim().length;
+            const min = 20;
+            if (len === 0) {
+                counter.textContent = '0 / ' + min + ' caractères minimum';
+                counter.className = 'char-counter error';
+                clearState(this);
+            } else if (len < min) {
+                counter.textContent = len + ' / ' + min + ' (encore ' + (min - len) + ')';
+                counter.className = 'char-counter warning';
+                setInvalid(this, 'Proposition trop courte');
+            } else {
+                counter.textContent = len + ' caractères';
+                counter.className = 'char-counter ok';
+                setValid(this, 'Argumentaire prêt');
+            }
+        });
+    }
+
+    form.addEventListener('submit', function(e) {
+        if (appelField) appelField.dispatchEvent(new Event('change'));
+        if (montantField) montantField.dispatchEvent(new Event('input'));
+        if (msgField) msgField.dispatchEvent(new Event('input'));
+
+        const firstInvalid = form.querySelector('.is-invalid');
+        if (firstInvalid) {
+            e.preventDefault();
+            firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            firstInvalid.focus();
+        }
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,160 @@
+<div class="card admin-table-card border-0">
+    <div class="card-header border-0 bg-transparent px-4 pt-4 pb-0">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2">
+            <div>
+                <h5 class="mb-1 fw-bold admin-purple-title">Liste des Appels d'Offres</h5>
+                <p class="text-muted mb-0 small">
+                    {{ total_items }} offre(s) active(s) dans le système
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="card-body p-4">
+        <div class="table-responsive rounded-4 overflow-hidden">
+            <table class="table admin-custom-table align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>Titre & Description</th>
+                        <th>Catégorie / Type</th>
+                        <th>Budget Range</th>
+                        <th>Expiration</th>
+                        <th>Statut</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for appel in appel_offres %}
+                        <tr>
+                            <td>
+                                <div class="d-flex flex-column">
+                                    <strong class="table-main-title">{{ appel.titre }}</strong>
+                                    <small class="text-muted table-subtext">
+                                        {{ appel.description ? appel.description|slice(0, 70) ~ '...' : 'Sans description' }}
+                                    </small>
+                                </div>
+                            </td>
+
+                            <td>
+                                <div class="mb-1">
+                                    {% if appel.categorie %}
+                                        <span class="table-chip">{{ appel.categorie.nom }}</span>
+                                    {% else %}
+                                        <span class="badge bg-light text-muted">Aucune</span>
+                                    {% endif %}
+                                </div>
+                                <span class="badge bg-soft-info text-info small fw-bold">{{ appel.type|capitalize }}</span>
+                            </td>
+
+                            <td>
+                                <div class="d-flex flex-column">
+                                    <span class="fw-bold text-dark">{{ appel.budgetMin|number_format(0, '.', ' ') }} DT</span>
+                                    <small class="text-muted">à {{ appel.budgetMax|number_format(0, '.', ' ') }} DT</small>
+                                </div>
+                            </td>
+
+                            <td>
+                                {% if appel.dateLimite %}
+                                    {% set isExpired = appel.dateLimite < date() %}
+                                    <span class="badge {{ isExpired ? 'bg-danger-soft text-danger' : 'bg-success-soft text-success' }} p-2">
+                                        <i class="bi bi-calendar-event me-1"></i>
+                                        {{ appel.dateLimite|date('d/m/Y') }}
+                                    </span>
+                                {% else %}
+                                    <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+
+                            <td>
+                                {% if appel.statut == 'published' %}
+                                    <span class="badge table-status-badge published">Publié</span>
+                                {% elseif appel.statut == 'draft' %}
+                                    <span class="badge table-status-badge draft">Brouillon</span>
+                                {% elseif appel.statut == 'closed' %}
+                                    <span class="badge bg-light text-dark border">Clôturé</span>
+                                {% else %}
+                                    <span class="badge bg-warning-soft text-warning">{{ appel.statut|capitalize }}</span>
+                                {% endif %}
+                            </td>
+
+                            <td class="text-end">
+                                <div class="d-flex justify-content-end gap-2">
+                                    <a href="{{ path('app_appel_offre_show', {'id': appel.id, 'role': 'admin'}) }}" 
+                                       class="action-icon-btn action-edit" style="background: rgba(99, 102, 241, 0.1); color: #4f46e5;"
+                                       data-bs-toggle="tooltip" title="Détails">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                    <a href="{{ path('app_appel_offre_edit', {'id': appel.id, 'role': 'admin'}) }}" 
+                                       class="action-icon-btn action-edit" 
+                                       data-bs-toggle="tooltip" title="Modifier">
+                                        <i class="bi bi-pencil-square"></i>
+                                    </a>
+                                    <form method="post" action="{{ path('app_appel_offre_delete', {'id': appel.id, 'role': 'admin'}) }}" 
+                                          style="display:inline-block;" onsubmit="return confirm('Supprimer cet appel d\'offre ?');">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ appel.id) }}">
+                                        <button type="submit" class="action-icon-btn action-delete" data-bs-toggle="tooltip" title="Supprimer">
+                                            <i class="bi bi-trash3"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="6" class="text-center py-5">
+                                <div class="empty-state">
+                                    <div class="empty-state-icon" style="font-size: 3rem;">📄</div>
+                                    <h5 class="mt-3">Aucun appel d'offre trouvé</h5>
+                                    <p class="text-muted">Commencez par en créer un nouveau.</p>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {# Pagination Premium #}
+        {% if total_pages > 1 %}
+            <div class="d-flex justify-content-center mt-4">
+                <nav aria-label="Page navigation">
+                    <ul class="pagination pagination-sm pagination-primary-soft mb-0">
+                        <li class="page-item {{ current_page <= 1 ? 'disabled' : '' }}">
+                            <a class="page-link ajax-page-link" href="{{ path('app_appel_offre_index', app.request.query.all|merge({'page': current_page - 1})) }}">
+                                <i class="fas fa-chevron-left"></i>
+                            </a>
+                        </li>
+                        {% for i in 1..total_pages %}
+                            <li class="page-item {{ i == current_page ? 'active' : '' }}">
+                                <a class="page-link ajax-page-link" href="{{ path('app_appel_offre_index', app.request.query.all|merge({'page': i})) }}">{{ i }}</a>
+                            </li>
+                        {% endfor %}
+                        <li class="page-item {{ current_page >= total_pages ? 'disabled' : '' }}">
+                            <a class="page-link ajax-page-link" href="{{ path('app_appel_offre_index', app.request.query.all|merge({'page': current_page + 1})) }}">
+                                <i class="fas fa-chevron-right"></i>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+.bg-soft-info { background-color: rgba(13, 202, 240, 0.1); }
+.bg-success-soft { background-color: rgba(25, 135, 84, 0.1); }
+.bg-danger-soft { background-color: rgba(220, 53, 69, 0.1); }
+.bg-warning-soft { background-color: rgba(255, 193, 7, 0.1); }
+.pagination-primary-soft .page-link {
+    border-radius: 8px;
+    margin: 0 3px;
+    border: none;
+    color: #6d28d9;
+    background: rgba(109, 40, 217, 0.05);
+}
+.pagination-primary-soft .page-item.active .page-link {
+    background: #6d28d9;
+    color: white;
+}
+</style>

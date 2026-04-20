@@ -59,4 +59,22 @@ class CurrencyService
     {
         return array_keys(self::RATES);
     }
+
+    /**
+     * Specialized conversion for Tender Module (from TND)
+     */
+    public function convertTndTo(float $amount, string $targetCurrency = 'EUR'): float
+    {
+        // Try internal rates first for consistency with existing modules
+        if (isset(self::RATES[$targetCurrency])) {
+            return $amount * self::RATES[$targetCurrency];
+        }
+
+        // Fallback for non-session based calls or external needs
+        $fallbacks = [
+            'EUR' => 0.30,
+            'USD' => 0.32,
+        ];
+        return $amount * ($fallbacks[$targetCurrency] ?? 1);
+    }
 }

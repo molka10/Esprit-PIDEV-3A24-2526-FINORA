@@ -1,0 +1,85 @@
+<div class="row g-4 pt-2">
+{% for candidature in candidatures %}
+    <div class="col-md-6 col-lg-4">
+        <div class="card h-100 card-premium border-0 shadow-sm overflow-hidden" 
+             style="transition: all 0.3s ease; border-radius: 1.5rem; background: #fff;">
+            
+            {# Card Header: Status #}
+            <div class="card-header border-0 bg-transparent px-4 pt-4 d-flex justify-content-between align-items-center">
+                <span class="small text-muted fw-bold">#CAN-{{ candidature.id }}</span>
+                {% if candidature.statut == 'accepted' %}
+                    <span class="badge py-2 px-3 rounded-pill bg-success-soft text-success fw-bold" style="font-size: 0.75rem;">
+                        <i class="bi bi-check-circle-fill me-1"></i>Acceptée
+                    </span>
+                {% elseif candidature.statut == 'rejected' %}
+                    <span class="badge py-2 px-3 rounded-pill bg-danger-soft text-danger fw-bold" style="font-size: 0.75rem;">
+                        <i class="bi bi-x-circle-fill me-1"></i>Rejetée
+                    </span>
+                {% else %}
+                    <span class="badge py-2 px-3 rounded-pill bg-warning-soft text-warning fw-bold" style="font-size: 0.75rem;">
+                        <i class="bi bi-hourglass-split me-1"></i>En attente
+                    </span>
+                {% endif %}
+            </div>
+
+            {# Card Body #}
+            <div class="card-body px-4 py-3">
+                <h6 class="text-muted small fw-bold mb-2 text-uppercase letter-spacing-1">Appel d'Offre</h6>
+                <h5 class="fw-bold mb-4">
+                    <a href="{{ path('app_candidature_show', {'id': candidature.id}) }}" class="text-dark text-decoration-none hover-primary transition-200">
+                        {{ candidature.appelOffre ? candidature.appelOffre.titre : 'Offre archivée' }}
+                    </a>
+                </h5>
+
+                <div class="p-3 bg-light rounded-4 mb-4">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <span class="text-muted small">Offre Financière</span>
+                        <i class="bi bi-currency-exchange text-primary opacity-50"></i>
+                    </div>
+                    <div class="fw-extrabold text-primary h5 mb-0">
+                        {{ candidature.montantPropose ? candidature.montantPropose|number_format(2, '.', ' ') ~ ' TND' : 'Non précisé' }}
+                    </div>
+                </div>
+
+                <div class="d-flex align-items-center text-muted small">
+                    <i class="bi bi-calendar-event me-2"></i>
+                    Soumis le {{ candidature.createdAt|date('d/m/Y') }}
+                </div>
+            </div>
+
+            {# Card Footer: Action #}
+            <div class="card-footer border-0 bg-transparent px-4 pb-4">
+                <a href="{{ path('app_candidature_show', {'id': candidature.id}) }}" class="btn btn-outline-primary rounded-pill w-100 fw-bold py-2 shadow-xs hover-bg-primary transition-200">
+                    Gérer mon dossier
+                </a>
+            </div>
+        </div>
+    </div>
+{% else %}
+    <div class="col-12 text-center py-5">
+        <div class="p-5 bg-white rounded-5 shadow-sm border border-light">
+            <div class="bg-primary-soft p-4 rounded-circle d-inline-block mb-4">
+                <i class="bi bi-folder-x fa-3x text-primary opacity-50"></i>
+            </div>
+            <h4 class="fw-bold text-dark mb-2">Aucune candidature</h4>
+            <p class="text-muted mb-4">Vous n'avez pas encore postulé à des appels d'offres.</p>
+            <a href="{{ path('app_appel_offre_index') }}" class="btn btn-primary rounded-pill px-5 py-2 fw-bold text-white">
+                Explorer les offres
+            </a>
+        </div>
+    </div>
+{% endfor %}
+</div>
+
+<style>
+    .card-premium:hover { transform: translateY(-8px); box shadow: 0 20px 40px rgba(109, 40, 217, 0.12) !important; border: 1px solid rgba(109, 40, 217, 0.1) !important; }
+    .bg-primary-soft { background-color: rgba(109, 40, 217, 0.08); }
+    .bg-success-soft { background-color: rgba(25, 135, 84, 0.1); }
+    .bg-danger-soft { background-color: rgba(220, 53, 69, 0.1); }
+    .bg-warning-soft { background-color: rgba(255, 193, 7, 0.1); }
+    .hover-primary:hover { color: #6d28d9 !important; }
+    .hover-bg-primary:hover { background-color: #6d28d9 !important; color: white !important; }
+    .letter-spacing-1 { letter-spacing: 1px; }
+    .transition-200 { transition: all 0.2s ease; }
+    .fw-extrabold { font-weight: 800; }
+</style>

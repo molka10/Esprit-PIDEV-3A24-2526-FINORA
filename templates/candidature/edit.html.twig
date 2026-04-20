@@ -1,0 +1,109 @@
+{% extends app.request.query.get('role') == 'admin' ? 'admin/base.html.twig' : 'base.html.twig' %}
+
+{% block title %}Modifier la Candidature - Finora{% endblock %}
+
+{% block stylesheets %}
+<style>
+    :root {
+        --finora-purple: #6d28d9;
+        --finora-purple-soft: rgba(109, 40, 217, 0.08);
+    }
+    .card-premium { border-radius: 1.25rem; border: none; box-shadow: 0 10px 40px rgba(0,0,0,0.08); }
+    .bg-primary-soft { background-color: var(--finora-purple-soft); }
+    .form-label { font-weight: 700; color: #374151; font-size: 0.9rem; margin-bottom: 0.5rem; }
+    .form-control, .form-select {
+        border-radius: 10px;
+        padding: 0.75rem 1rem;
+        border: 1px solid #e5e7eb;
+        transition: all 0.2s;
+    }
+    .form-control:focus, .form-select:focus {
+        border-color: var(--finora-purple);
+        box-shadow: 0 0 0 4px rgba(109, 40, 217, 0.1);
+    }
+    .fw-extrabold { font-weight: 800; }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        
+        <div class="col-lg-8">
+            {# --- HEADER --- #}
+            <div class="text-center mb-5">
+                <div class="bg-warning-soft p-3 rounded-circle d-inline-block mb-3">
+                    <i class="bi bi-pencil-square text-warning h2 mb-0"></i>
+                </div>
+                <h1 class="fw-extrabold text-dark">Modifier la Candidature</h1>
+                <p class="text-muted">Ajustez les détails de votre proposition pour augmenter vos chances.</p>
+            </div>
+
+            {# --- FORM CARD --- #}
+            <div class="card card-premium">
+                <div class="card-body p-4 p-md-5">
+                    {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+
+                    <div class="row g-4">
+                        {# APPEL D'OFFRE #}
+                        <div class="col-12">
+                            <label class="form-label"><i class="bi bi-bullseye me-2"></i>Appel d'Offre Cible</label>
+                            {{ form_widget(form.appelOffre, {'attr': {'class': 'form-select'}}) }}
+                            {% if form_errors(form.appelOffre) %}
+                                <div class="invalid-feedback d-block">{{ form_errors(form.appelOffre) }}</div>
+                            {% endif %}
+                        </div>
+
+                        {# USER #}
+                        <div class="col-md-6 d-none">
+                            {{ form_widget(form.user) }}
+                        </div>
+
+                        {# MONTANT #}
+                        <div class="col-md-12">
+                            <label class="form-label"><i class="bi bi-currency-dollar me-2"></i>Offre Financière (TND)</label>
+                            <div class="input-group">
+                                {{ form_widget(form.montantPropose, {'attr': {'class': 'form-control'}}) }}
+                                <span class="input-group-text bg-light fw-bold text-muted border-start-0">TND</span>
+                            </div>
+                            {% if form_errors(form.montantPropose) %}
+                                <div class="invalid-feedback d-block">{{ form_errors(form.montantPropose) }}</div>
+                            {% endif %}
+                        </div>
+
+                        {# MESSAGE #}
+                        <div class="col-12">
+                            <label class="form-label"><i class="bi bi-chat-left-text me-2"></i>Lettre de Motivation / Proposition Technique</label>
+                            {{ form_widget(form.message, {'attr': {'class': 'form-control', 'rows': '6'}}) }}
+                            {% if form_errors(form.message) %}
+                                <div class="invalid-feedback d-block">{{ form_errors(form.message) }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="mt-5 d-flex flex-column flex-md-row gap-3 justify-content-between align-items-center">
+                        <a href="{{ path('app_candidature_index', {'role': app.request.query.get('role')}) }}" class="btn btn-link text-muted fw-bold text-decoration-none">
+                            <i class="bi bi-arrow-left me-2"></i>Abandonner les modifications
+                        </a>
+                        <button type="submit" class="btn btn-warning rounded-pill px-5 py-3 fw-bold text-dark shadow-sm">
+                            <i class="bi bi-save2 me-2"></i>Mettre à jour le dossier
+                        </button>
+                    </div>
+
+                    {{ form_end(form) }}
+
+                    <div class="mt-4 pt-4 border-top">
+                        <p class="small text-muted mb-3"><i class="bi bi-exclamation-triangle me-2"></i>Zone de danger</p>
+                        {{ include('candidature/_delete_form.html.twig') }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<style>
+    .bg-warning-soft { background-color: rgba(255, 193, 7, 0.1); }
+</style>
+{% endblock %}

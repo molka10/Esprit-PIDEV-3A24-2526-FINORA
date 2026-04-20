@@ -120,9 +120,16 @@ class TransactionController extends AbstractController
     #[Route('/acheter/execute', name: 'app_trading_acheter_execute', methods: ['POST'])]
     public function executeAchat(Request $request): Response
     {
-        $actionId = (int) $request->request->get('action_id');
-        $quantite = (int) $request->request->get('quantite');
+        $actionId = $request->request->get('action_id');
+        $quantiteRaw = $request->request->get('quantite');
 
+        // Validation Control Saisie
+        if (!$actionId || !is_numeric($quantiteRaw) || (int)$quantiteRaw <= 0) {
+            $this->addFlash('danger', '❌ Quantité invalide. Veuillez saisir un nombre entier positif.');
+            return $this->redirectToRoute('app_trading_acheter', ['action' => $actionId]);
+        }
+
+        $quantite = (int) $quantiteRaw;
         $action = $this->actionRepo->find($actionId);
 
         if (!$action) {
@@ -130,7 +137,7 @@ class TransactionController extends AbstractController
             return $this->redirectToRoute('app_trading_acheter');
         }
 
-        // Vérification stock disponible
+        // Vérification stock disponible (Validation rapide avant service)
         if ($quantite > $action->getQuantiteDisponible()) {
             $this->addFlash('danger', sprintf(
                 '❌ Stock insuffisant ! Disponible: %d actions. Vous demandez: %d actions.',
@@ -141,7 +148,7 @@ class TransactionController extends AbstractController
         }
 
         try {
-            $transaction = $this->transactionService->executerTrade('ACHAT', $actionId, $quantite, $this->getUser());
+            $transaction = $this->transactionService->executerTrade('ACHAT', (int)$actionId, $quantite, $this->getUser());
 
             $this->addFlash('success', sprintf(
                 '✅ Achat réussi !<br>• %d actions %s achetées<br>• Montant: %.2f TND<br>• Commission: %.2f TND<br>• Stock restant: %d',
@@ -166,9 +173,16 @@ class TransactionController extends AbstractController
     #[Route('/vendre/execute', name: 'app_trading_vendre_execute', methods: ['POST'])]
     public function executeVente(Request $request): Response
     {
-        $actionId = (int) $request->request->get('action_id');
-        $quantite = (int) $request->request->get('quantite');
+        $actionId = $request->request->get('action_id');
+        $quantiteRaw = $request->request->get('quantite');
 
+        // Validation Control Saisie
+        if (!$actionId || !is_numeric($quantiteRaw) || (int)$quantiteRaw <= 0) {
+            $this->addFlash('danger', '❌ Quantité invalide. Veuillez saisir un nombre entier positif.');
+            return $this->redirectToRoute('app_trading_vendre', ['action' => $actionId]);
+        }
+
+        $quantite = (int) $quantiteRaw;
         $action = $this->actionRepo->find($actionId);
 
         if (!$action) {
@@ -176,12 +190,8 @@ class TransactionController extends AbstractController
             return $this->redirectToRoute('app_trading_vendre');
         }
 
-        // TODO: Vérifier portefeuille utilisateur
-        // Pour simulation: on utilise le stock disponible comme limite max de vente
-        $stockMax = $action->getQuantiteDisponible();
-
         try {
-            $transaction = $this->transactionService->executerTrade('VENTE', $actionId, $quantite, $this->getUser());
+            $transaction = $this->transactionService->executerTrade('VENTE', (int)$actionId, $quantite, $this->getUser());
 
             $this->addFlash('success', sprintf(
                 '✅ Vente réussie !<br>• %d actions %s vendues<br>• Montant reçu: %.2f TND<br>• Commission: %.2f TND',

@@ -31,13 +31,16 @@ class UserRepository extends ServiceEntityRepository
     //        ;
     //    }
 
-    //    public function findOneBySomeField($value): ?User
-    //    {
-    //        return $this->createQueryBuilder('u')
-    //            ->andWhere('u.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->getQuery()
-    //            ->getOneOrNullResult()
-    //        ;
-    //    }
+    /**
+     * Finds the first user with ROLE_ADMIN to receive module notifications.
+     */
+    public function findOneAdmin(): ?User
+    {
+        return $this->createQueryBuilder('u')
+            ->andWhere('u.role = :role')
+            ->setParameter('role', 'ADMIN')
+            ->setMaxResults(1)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
 }

@@ -239,6 +239,7 @@
         <div class="wish-nav">
             <a href="#bourse" class="wish-nav-link active"><i class="bi bi-graph-up-arrow"></i> Bourse</a>
             <a href="#formations" class="wish-nav-link"><i class="bi bi-mortarboard"></i> Formations</a>
+            <a href="#appels" class="wish-nav-link"><i class="bi bi-megaphone"></i> Appels</a>
             <a href="#investments" class="wish-nav-link"><i class="bi bi-gem"></i> Investir</a>
             <a href="#wallet" class="wish-nav-link"><i class="bi bi-wallet2"></i> Objectifs</a>
         </div>
@@ -363,7 +364,61 @@
         {% endif %}
     </div>
 
-    <!-- 3. Investment Section -->
+    <!-- 2.5 Appels d'Offre Section -->
+    <div id="appels" class="section-container animate-up" style="animation-delay: 0.45s;">
+        <div class="section-header">
+            <div class="section-icon" style="background: rgba(59, 130, 246, 0.1); color: #3b82f6;">
+                <i class="bi bi-megaphone"></i>
+            </div>
+            <div>
+                <h2 class="mb-0 fw-bold">Opportunités d'Affaires</h2>
+                <p class="text-muted small mb-0">Retrouvez les appels d'offre que vous avez mis de côté.</p>
+            </div>
+        </div>
+
+        {% if favoriteAppels|length > 0 %}
+            <div class="row g-4">
+                {% for appel in favoriteAppels %}
+                    <div class="col-md-4 col-lg-3">
+                        <div class="premium-card">
+                            <div class="card-visual">
+                                <span class="card-label" style="color: #3b82f6;">{{ appel.type|capitalize }}</span>
+                                <div class="w-100 h-100 d-flex align-items-center justify-content-center" style="background: linear-gradient(135deg, #eff6ff, #dbeafe);">
+                                    <i class="bi bi-file-earmark-text fa-3x opacity-25"></i>
+                                </div>
+                            </div>
+                            <div class="card-content">
+                                <div class="meta-badge badge-blue">
+                                    <i class="bi bi-tag"></i> {{ appel.categorie ? appel.categorie.nom : 'Divers' }}
+                                </div>
+                                <h3 class="card-title">{{ appel.titre }}</h3>
+                                <div class="mt-auto">
+                                    <div class="small text-muted mb-1">Date limite :</div>
+                                    <div class="fw-bold {{ appel.dateLimite < date() ? 'text-danger' : 'text-success' }}">
+                                        {{ appel.dateLimite|date('d/m/Y') }}
+                                    </div>
+                                    <div class="price-tag mt-2">{{ appel.budgetMax|number_format(0, '.', ' ') }} <small>DT</small></div>
+                                </div>
+                            </div>
+                            <div class="card-action-bar">
+                                <a href="{{ path('app_appel_offre_show', {id: appel.id}) }}" class="action-btn btn-primary-glass">Voir</a>
+                                <button type="button" 
+                                        class="action-btn btn-delete-glass tender-fav-toggle" 
+                                        data-id="{{ appel.id }}">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <i class="bi bi-megaphone display-3 mb-3 d-block opacity-25"></i>
+                <a href="{{ path('app_appel_offre_index') }}" class="btn btn-outline-primary rounded-pill mt-3">Explorer les appels</a>
+            </div>
+        {% endif %}
+    </div>
     <div id="investments" class="section-container animate-up" style="animation-delay: 0.5s;">
         <div class="section-header">
             <div class="section-icon" style="background: rgba(245, 158, 11, 0.1); color: #f59e0b;">
@@ -502,6 +557,55 @@
             window.scrollTo({
                 top: target.offsetTop - 120,
                 behavior: 'smooth'
+            });
+        });
+    });
+
+    // Tender AJAX favorites toggle
+    document.querySelectorAll('.tender-fav-toggle').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            if (this.classList.contains('processing')) return;
+            
+            const id = this.dataset.id;
+            const container = this.closest('.col-md-4');
+            
+            this.classList.add('processing');
+            this.style.opacity = '0.5';
+            
+            fetch(`/appel/offre/wishlist/toggle/${id}`, {
+                method: 'POST',
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (!data.favorite) {
+                    container.style.transition = 'all 0.4s ease';
+                    container.style.opacity = '0';
+                    container.style.transform = 'scale(0.8)';
+                    setTimeout(() => {
+                        container.remove();
+                        // Check if section is empty
+                        const section = document.getElementById('appels');
+                        if (section.querySelectorAll('.premium-card').length === 0) {
+                            section.querySelector('.row').innerHTML = '<div class="empty-state"><i class="bi bi-megaphone display-3 mb-3 d-block opacity-25"></i><a href="{{ path('app_appel_offre_index') }}" class="btn btn-outline-primary rounded-pill mt-3">Explorer les appels</a></div>';
+                        }
+                    }, 400);
+                }
+                
+                Swal.fire({
+                    toast: true,
+                    position: 'top-end',
+                    icon: 'success',
+                    title: data.message,
+                    showConfirmButton: false,
+                    timer: 2000
+                });
+            })
+            .catch(err => {
+                console.error(err);
+                this.classList.remove('processing');
+                this.style.opacity = '1';
             });
         });
     });

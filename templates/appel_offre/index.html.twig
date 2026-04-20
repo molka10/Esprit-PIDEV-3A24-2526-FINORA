@@ -1,0 +1,230 @@
+{% extends app.request.query.get('role') == 'admin' ? 'admin/base.html.twig' : 'base.html.twig' %}
+
+{% block title %}Appels d'Offre - FINORA{% endblock %}
+
+{% block body %}
+<div class="container-fluid {% if app.request.query.get('role') == 'admin' %}px-4 py-4{% else %}py-5{% endif %}">
+
+    {% if app.request.query.get('role') == 'admin' %}
+        {# --- ADMIN HEADER --- #}
+        <div class="admin-page-header d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+            <div>
+                <span class="admin-soft-badge mb-2">Gestion des Appels</span>
+                <h1 class="h3 mb-1 admin-purple-title">Espace Appels d'Offres</h1>
+                <p class="text-muted mb-0">Publiez, modifiez et gérez les opportunités de marché de la plateforme.</p>
+            </div>
+            <a href="{{ path('app_appel_offre_new', {'role': 'admin'}) }}" class="btn admin-main-btn px-4 py-2">
+                <i class="fas fa-plus me-2"></i>Nouveau Appel d'Offre
+            </a>
+        </div>
+    {% else %}
+        {# --- USER HERO --- #}
+        <div class="text-center mb-5">
+            <h1 class="display-4 fw-bold text-dark mb-2">Marché des Appels d'Offres</h1>
+            <p class="lead text-muted">Trouvez les meilleures opportunités pour votre entreprise</p>
+            <div class="header-line mx-auto"></div>
+        </div>
+    {% endif %}
+
+    {# --- FILTERS --- #}
+    <div class="card admin-filter-card border-0 mb-4 shadow-sm">
+        <div class="card-body p-4">
+            <form method="GET" action="{{ path('app_appel_offre_index') }}" id="filterForm">
+                <input type="hidden" name="role" value="{{ app.request.query.get('role') }}">
+                <input type="hidden" name="page" id="pageInput" value="{{ current_page }}">
+                
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold text-muted small">Recherche</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-0"><i class="fas fa-search"></i></span>
+                            <input type="text" name="search" id="searchInput" class="form-control bg-light border-0"
+                                   placeholder="Titre de l'offre..." value="{{ filters.search ?? '' }}">
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label fw-bold text-muted small">Type</label>
+                        <select name="type" id="typeFilter" class="form-select bg-light border-0">
+                            <option value="">Tous</option>
+                            <option value="achat" {{ filters.type == 'achat' ? 'selected' : '' }}>Achat</option>
+                            <option value="partenariat" {{ filters.type == 'partenariat' ? 'selected' : '' }}>Partenariat</option>
+                            <option value="don" {{ filters.type == 'don' ? 'selected' : '' }}>Don</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label fw-bold text-muted small">Statut</label>
+                        <select name="statut" id="statutFilter" class="form-select bg-light border-0">
+                            <option value="">Tous</option>
+                            <option value="published" {{ filters.statut == 'published' ? 'selected' : '' }}>Publié</option>
+                            <option value="draft" {{ filters.statut == 'draft' ? 'selected' : '' }}>Brouillon</option>
+                            <option value="closed" {{ filters.statut == 'closed' ? 'selected' : '' }}>Clôturé</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label fw-bold text-muted small">Catégorie</label>
+                        <select name="categorie" id="categorieFilter" class="form-select bg-light border-0">
+                            <option value="">Toutes</option>
+                            {% for cat in categories %}
+                                <option value="{{ cat.id }}" {{ filters.categorie == cat.id ? 'selected' : '' }}>{{ cat.nom }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-2 d-flex align-items-end">
+                        <button type="submit" class="btn btn-primary w-100 py-2">
+                            <i class="fas fa-filter me-2"></i>Filtrer
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {# --- CONTENT --- #}
+    <div id="gridContainer" style="transition: opacity 0.3s ease;">
+        {% if app.request.query.get('role') == 'admin' %}
+            {{ include('appel_offre/_admin_table.html.twig') }}
+        {% else %}
+            {{ include('appel_offre/_grid.html.twig') }}
+        {% endif %}
+    </div>
+
+</div>
+
+<style>
+    .admin-purple-title { color: #1e1b4b; font-weight: 800; }
+    .admin-soft-badge { 
+        background: rgba(124, 58, 237, 0.1); 
+        color: #6d28d9; 
+        padding: 4px 12px; 
+        border-radius: 99px; 
+        font-size: 0.75rem; 
+        font-weight: 700;
+        display: inline-block;
+    }
+    .admin-main-btn {
+        background: #6d28d9;
+        color: white;
+        border: none;
+        border-radius: 10px;
+        font-weight: 600;
+        transition: all 0.2s;
+    }
+    .admin-main-btn:hover { background: #5b21b6; color: white; transform: translateY(-1px); }
+    .header-line { width: 60px; height: 4px; background: #6d28d9; border-radius: 2px; }
+    
+    /* Category Badges Refinement */
+    .table-chip {
+        background: #f3e8ff;
+        color: #6d28d9;
+        padding: 5px 10px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 700;
+        border: 1px solid rgba(124, 58, 237, 0.1);
+    }
+</style>
+
+{% endblock %}
+
+{% block javascripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const filterForm = document.getElementById('filterForm');
+    const searchInput = document.getElementById('searchInput');
+    const gridContainer = document.getElementById('gridContainer');
+    const pageInput = document.getElementById('pageInput');
+    const filters = filterForm.querySelectorAll('select');
+
+    let debounceTimer;
+
+    function updateGrid() {
+        const formData = new FormData(filterForm);
+        const params = new URLSearchParams(formData);
+        params.set('ajax', '1');
+
+        // Update URL bar
+        const newUrl = window.location.pathname + '?' + new URLSearchParams(formData).toString();
+        window.history.pushState({}, '', newUrl);
+
+        gridContainer.style.opacity = '0.5';
+        fetch(window.location.pathname + '?' + params.toString(), {
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(response => response.text())
+        .then(html => {
+            gridContainer.innerHTML = html;
+            gridContainer.style.opacity = '1';
+        });
+    }
+
+    // Delegation to handle pagination
+    gridContainer.addEventListener('click', function(e) {
+        const link = e.target.closest('.ajax-page-link');
+        const favBtn = e.target.closest('.favorite-toggle');
+
+        if (link) {
+            e.preventDefault();
+            const url = new URL(link.href);
+            const page = url.searchParams.get('page') || 1;
+            pageInput.value = page;
+            updateGrid();
+            window.scrollTo({ top: gridContainer.offsetTop - 100, behavior: 'smooth' });
+        }
+
+        if (favBtn) {
+            e.preventDefault();
+            if (favBtn.classList.contains('processing')) return;
+
+            const id = favBtn.dataset.id;
+            const icon = favBtn.querySelector('i');
+            
+            favBtn.classList.add('processing');
+            favBtn.style.opacity = '0.5';
+
+            fetch(`/appel/offre/wishlist/toggle/${id}`, {
+                method: 'POST',
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            })
+            .then(res => res.json())
+            .then(data => {
+                favBtn.classList.remove('processing');
+                favBtn.style.opacity = '1';
+
+                if (data.favorite) {
+                    icon.classList.remove('far');
+                    icon.classList.add('fas');
+                } else {
+                    icon.classList.remove('fas');
+                    icon.classList.add('far');
+                }
+                Swal.fire({
+                    toast: true,
+                    position: 'top-end',
+                    icon: 'success',
+                    title: data.message,
+                    showConfirmButton: false,
+                    timer: 2000
+                });
+            });
+        }
+    });
+
+    searchInput.addEventListener('input', () => {
+        pageInput.value = 1; // Reset to page 1 on search
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(updateGrid, 400);
+    });
+
+    filters.forEach(filter => {
+        filter.addEventListener('change', () => {
+            pageInput.value = 1; // Reset to page 1 on filter
+            updateGrid();
+        });
+    });
+
+    window.addEventListener('popstate', () => {
+        window.location.reload();
+    });
+});
+</script>
+{% endblock %}

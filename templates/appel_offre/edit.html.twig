@@ -1,0 +1,131 @@
+{% extends app.request.query.get('role') == 'admin' ? 'admin/base.html.twig' : 'base.html.twig' %}
+
+{% block title %}Modifier l'Appel d'Offre - Finora{% endblock %}
+
+{% block stylesheets %}
+<style>
+    :root {
+        --finora-purple: #6d28d9;
+        --finora-purple-soft: rgba(109, 40, 217, 0.08);
+    }
+    .card-premium { border-radius: 1.25rem; border: none; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
+    .form-control, .form-select { border-radius: 0.75rem; border: 1px solid #e5e7eb; padding: 0.75rem 1rem; transition: all 0.2s ease; }
+    .form-control:focus, .form-select:focus { border-color: var(--finora-purple); box-shadow: 0 0 0 4px var(--finora-purple-soft); }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10 col-xl-8">
+            
+            {# --- HEADER --- #}
+            <div class="mb-4">
+                <a href="{{ path('app_appel_offre_show', {'id': appel_offre.id, 'role': app.request.query.get('role')}) }}" class="btn btn-link text-decoration-none p-0 text-primary fw-bold">
+                    <i class="bi bi-arrow-left me-2"></i>Retour aux détails
+                </a>
+            </div>
+
+            <div class="text-center mb-5">
+                <h1 class="fw-extrabold text-dark mb-2">Modifier l'Offre</h1>
+                <p class="text-muted">Mise à jour des informations pour : <strong class="text-primary">{{ appel_offre.titre }}</strong></p>
+            </div>
+
+            <div class="card card-premium overflow-hidden">
+                <div class="card-header bg-white border-0 pt-4 px-4 px-md-5">
+                    <div class="d-flex align-items-center">
+                        <div class="bg-primary-soft p-3 rounded-circle me-3">
+                            <i class="bi bi-pencil-square fs-3 text-primary"></i>
+                        </div>
+                        <h4 class="mb-0 fw-bold">Édition des données</h4>
+                    </div>
+                </div>
+
+                <div class="card-body p-4 p-md-5">
+                    {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+                    
+                    <div class="mb-4">
+                        {{ form_label(form.titre) }}
+                        {{ form_widget(form.titre) }}
+                        {{ form_errors(form.titre) }}
+                    </div>
+
+                    <div class="mb-4">
+                        {{ form_label(form.description) }}
+                        {{ form_widget(form.description, {'attr': {'rows': 6}}) }}
+                        {{ form_errors(form.description) }}
+                    </div>
+
+                    <div class="row g-4 mb-4">
+                        <div class="col-md-6">
+                            {{ form_label(form.type) }}
+                            {{ form_widget(form.type) }}
+                            {{ form_errors(form.type) }}
+                        </div>
+                        <div class="col-md-6">
+                            {{ form_label(form.categorie) }}
+                            {{ form_widget(form.categorie) }}
+                            {{ form_errors(form.categorie) }}
+                        </div>
+                    </div>
+
+                    <div class="p-4 bg-light rounded-4 mb-4 border-0">
+                        <h6 class="fw-bold mb-3 text-dark">Détails financiers</h6>
+                        <div class="row g-3">
+                            <div class="col-sm-4">
+                                {{ form_label(form.budgetMin) }}
+                                {{ form_widget(form.budgetMin) }}
+                            </div>
+                            <div class="col-sm-4">
+                                {{ form_label(form.budgetMax) }}
+                                {{ form_widget(form.budgetMax) }}
+                            </div>
+                            <div class="col-sm-4">
+                                {{ form_label(form.devise) }}
+                                {{ form_widget(form.devise) }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row g-4 mb-5">
+                        <div class="col-md-6">
+                            {{ form_label(form.dateLimite) }}
+                            {{ form_widget(form.dateLimite) }}
+                        </div>
+                        <div class="col-md-6">
+                            {{ form_label(form.statut) }}
+                            {{ form_widget(form.statut) }}
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center pt-3 border-top">
+                        <div class="d-flex gap-3">
+                             <a href="{{ path('app_appel_offre_index', {'role': app.request.query.get('role')}) }}" class="btn btn-outline-secondary rounded-pill px-4">
+                                Annuler
+                            </a>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-lg px-5 rounded-pill shadow-sm fw-bold text-white">
+                            <i class="bi bi-save me-2"></i>Enregistrer les modifications
+                        </button>
+                    </div>
+
+                    {{ form_end(form) }}
+                    
+                    {# Zone de danger #}
+                    {% if is_granted('ROLE_ADMIN') %}
+                        <div class="mt-5 pt-4 border-top border-danger border-opacity-10 text-center">
+                            <p class="text-muted small mb-3">Cette action est irréversible</p>
+                            {{ include('appel_offre/_delete_form.html.twig') }}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .fw-extrabold { font-weight: 800; }
+    .bg-primary-soft { background-color: rgba(109, 40, 217, 0.08); }
+</style>
+{% endblock %}

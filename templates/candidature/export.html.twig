@@ -1,0 +1,103 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Export Candidature #{{ candidature.id }}{% endblock %}
+
+{% block stylesheets %}
+<style>
+    @media print {
+        .no-print, header, footer, .navbar, .nav-item { display: none !important; }
+        body { background: white !important; font-size: 11pt; margin: 0; padding: 0; }
+        .card { border: none !important; shadow: none !important; }
+        .container { width: 100% !important; max-width: 100% !important; margin: 0 !important; padding: 0 !important; }
+    }
+    .pdf-header {
+        border-bottom: 3px solid #1a1a2e;
+        padding-bottom: 20px;
+        margin-bottom: 30px;
+    }
+    .digital-stamp {
+        border: 2px solid #28a745;
+        color: #28a745;
+        padding: 10px;
+        text-transform: uppercase;
+        font-weight: bold;
+        transform: rotate(-15deg);
+        display: inline-block;
+        border-radius: 5px;
+        opacity: 0.8;
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="container py-3">
+    <div class="no-print mb-3">
+        <button onclick="window.print()" class="btn btn-primary btn-sm">
+            <i class="fas fa-print"></i> Imprimer / PDF
+        </button>
+        <a href="{{ path('app_candidature_show', {'id': candidature.id}) }}" class="btn btn-outline-secondary btn-sm">
+            <i class="fas fa-arrow-left"></i> Retour
+        </a>
+    </div>
+
+    <div class="card shadow-sm p-4" style="page-break-inside: avoid; border: 1px solid #ddd;">
+        <div class="pdf-header d-flex justify-content-between align-items-center mb-3 pb-2">
+            <div>
+                <h3 class="text-uppercase fw-bold m-0" style="color: #1a1a2e;">Candidature Officielle</h3>
+                <p class="text-muted small m-0">Référence: #CAND-{{ candidature.id }}-{{ "now"|date("Y") }}</p>
+            </div>
+            <div class="text-end">
+                <img src="{{ asset('assets/images/logo-finora.webp') }}" alt="Finora" style="height: 45px;">
+                <p class="small text-muted m-0" style="font-size: 0.7rem;">Plateforme de Gestion des Appels d'Offre</p>
+            </div>
+        </div>
+
+        <div class="row mb-3">
+            <div class="col-6">
+                <h6 class="fw-bold border-bottom pb-1 small text-uppercase">Détails de l'Offre</h6>
+                <p class="small mb-1"><strong>Titre:</strong> {{ candidature.appelOffre.titre }}</p>
+                <p class="small mb-1"><strong>Type:</strong> {{ candidature.appelOffre.type }}</p>
+                <p class="small mb-0"><strong>Catégorie:</strong> {{ candidature.appelOffre.categorie.nom }}</p>
+            </div>
+            <div class="col-6">
+                <h6 class="fw-bold border-bottom pb-1 small text-uppercase">Informations Candidat</h6>
+                <p class="small mb-1"><strong>Nom:</strong> {{ candidature.user.username }}</p>
+                <p class="small mb-1"><strong>Email:</strong> {{ candidature.user.email }}</p>
+                <p class="small mb-0"><strong>Date:</strong> {{ candidature.createdAt|date('d/m/Y') }}</p>
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <h6 class="fw-bold border-bottom pb-1 small text-uppercase">Proposition Financière</h6>
+            <div class="h4 fw-bold text-success m-0">{{ candidature.montantPropose|number_format(0, '.', ' ') }} TND</div>
+            <p class="text-muted" style="font-size: 0.75rem;">Environ {{ (candidature.montantPropose * 0.3)|number_format(0, '.', ' ') }} EUR / {{ (candidature.montantPropose * 0.32)|number_format(0, '.', ' ') }} USD</p>
+        </div>
+
+        <div class="mb-3">
+            <h6 class="fw-bold border-bottom pb-1 small text-uppercase">Message / Motivation</h6>
+            <div class="p-2 bg-light border rounded small" style="min-height: 100px; max-height: 400px; overflow: hidden;">
+                {{ candidature.message|nl2br }}
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center mt-4">
+            <div class="digital-stamp" style="font-size: 0.7rem; padding: 5px;">
+                Vérifié par la plateforme<br>
+                {{ "now"|date("d/m/Y") }}
+            </div>
+            <div class="text-center small" style="width: 150px; border-top: 1px solid #333; padding-top: 5px;">
+                Signature et Cachet
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Déclenche l'impression automatiquement si on vient pour l'export
+    window.onload = function() {
+        if (window.location.search.includes('auto=1')) {
+            window.print();
+        }
+    }
+</script>
+{% endblock %}

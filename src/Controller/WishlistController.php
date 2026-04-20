@@ -40,11 +40,16 @@ class WishlistController extends AbstractController
         // 4. Wallet (WalletWishlist Entity)
         $walletItems = $em->getRepository(WalletWishlist::class)->findBy(['userId' => $user->getId()]);
 
+        // 5. Tenders (Many-to-Many on User)
+        $favoriteAppels = $user->getFavoriteAppels();
+
         return $this->render('wishlist/unified.html.twig', [
+            'totalItems' => count($formations) + count($bourseItems) + count($investmentItems) + count($walletItems) + count($favoriteAppels),
             'formations'  => $formations,
             'bourseItems' => $bourseItems,
             'investmentItems' => $investmentItems,
             'walletItems' => $walletItems,
+            'favoriteAppels' => $favoriteAppels,
         ]);
     }
 

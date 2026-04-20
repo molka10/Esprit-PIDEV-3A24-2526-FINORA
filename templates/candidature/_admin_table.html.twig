@@ -1,0 +1,130 @@
+<div class="card card-premium border-0 overflow-hidden">
+    <div class="card-header bg-white border-0 pt-4 px-4 pb-0">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h5 class="mb-1 fw-bold text-dark">Gestion des Candidatures</h5>
+                <p class="text-muted mb-0 small">{{ candidatures|length }} candidature(s) enregistrée(s)</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="card-body p-4">
+        <div class="table-responsive">
+            <table class="table admin-custom-table align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>Candidat</th>
+                        <th>Appel d'Offre</th>
+                        <th>Montant Proposé</th>
+                        <th>Date de Soumission</th>
+                        <th>Statut</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for candidature in candidatures %}
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="avatar-sm p-2 bg-primary-soft rounded-circle me-3">
+                                        <i class="bi bi-person-fill text-primary"></i>
+                                    </div>
+                                    <div>
+                                        <strong class="text-dark d-block mb-0">{{ candidature.user ? candidature.user.username : 'Anonyme' }}</strong>
+                                        <small class="text-muted">{{ candidature.user ? candidature.user.email : 'N/A' }}</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="d-flex flex-column" style="max-width: 250px;">
+                                    <span class="text-dark fw-bold text-truncate">{{ candidature.appelOffre ? candidature.appelOffre.titre : 'Offre archivée' }}</span>
+                                    <span class="badge py-1 px-2 rounded-pill bg-light text-muted fw-bold align-self-start mt-1" style="font-size: 0.65rem;">
+                                        {{ candidature.appelOffre ? candidature.appelOffre.type|capitalize : '-' }}
+                                    </span>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="fw-bold text-primary">{{ candidature.montantPropose ? candidature.montantPropose|number_format(2, '.', ' ') ~ ' TND' : 'Non précisé' }}</span>
+                            </td>
+                            <td>
+                                <div class="text-muted small">
+                                    <i class="bi bi-calendar3 me-1"></i>
+                                    {{ candidature.createdAt|date('d/m/Y') }}
+                                </div>
+                            </td>
+                            <td>
+                                {% if candidature.statut == 'accepted' %}
+                                    <span class="badge py-2 px-3 rounded-pill bg-success-soft text-success fw-bold">Acceptée</span>
+                                {% elseif candidature.statut == 'rejected' %}
+                                    <span class="badge py-2 px-3 rounded-pill bg-danger-soft text-danger fw-bold">Rejetée</span>
+                                {% else %}
+                                    <span class="badge py-2 px-3 rounded-pill bg-warning-soft text-warning fw-bold">En attente</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-end">
+                                <div class="d-flex justify-content-end gap-2">
+                                    <a href="{{ path('app_candidature_show', {'id': candidature.id, 'role': 'admin'}) }}" class="action-icon-btn bg-primary-soft text-primary" title="Détails">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                    <a href="{{ path('app_candidature_edit', {'id': candidature.id, 'role': 'admin'}) }}" class="action-icon-btn bg-warning-soft text-warning" title="Modifier">
+                                        <i class="bi bi-pencil-square"></i>
+                                    </a>
+                                    {{ include('candidature/_delete_form.html.twig') }}
+                                </div>
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="6" class="text-center py-5">
+                                <div class="text-muted">
+                                    <i class="bi bi-inbox fa-3x mb-3 d-block"></i>
+                                    <p>Aucune candidature reçue pour le moment.</p>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {# Pagination Premium #}
+        {% if total_pages > 1 %}
+            <div class="d-flex justify-content-center mt-4">
+                <nav aria-label="Page navigation">
+                    <ul class="pagination pagination-sm pagination-primary-soft mb-0">
+                        <li class="page-item {{ current_page <= 1 ? 'disabled' : '' }}">
+                            <a class="page-link ajax-page-link" href="{{ path('app_candidature_index', app.request.query.all|merge({'page': current_page - 1})) }}">
+                                <i class="fas fa-chevron-left"></i>
+                            </a>
+                        </li>
+                        {% for i in 1..total_pages %}
+                            <li class="page-item {{ i == current_page ? 'active' : '' }}">
+                                <a class="page-link ajax-page-link" href="{{ path('app_candidature_index', app.request.query.all|merge({'page': i})) }}">{{ i }}</a>
+                            </li>
+                        {% endfor %}
+                        <li class="page-item {{ current_page >= total_pages ? 'disabled' : '' }}">
+                            <a class="page-link ajax-page-link" href="{{ path('app_candidature_index', app.request.query.all|merge({'page': current_page + 1})) }}">
+                                <i class="fas fa-chevron-right"></i>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+.bg-danger-soft { background-color: rgba(220, 53, 69, 0.1); }
+.pagination-primary-soft .page-link {
+    border-radius: 8px;
+    margin: 0 3px;
+    border: none;
+    color: #6d28d9;
+    background: rgba(109, 40, 217, 0.05);
+}
+.pagination-primary-soft .page-item.active .page-link {
+    background: #6d28d9;
+    color: white;
+}
+</style>
