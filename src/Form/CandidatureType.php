@@ -83,6 +83,23 @@ class CandidatureType extends AbstractType
                     ]),
                 ],
             ])
+            ->add('cvFile', \Symfony\Component\Form\Extension\Core\Type\FileType::class, [
+                'label' => 'CV / Profil de l\'entreprise (PDF) *',
+                'mapped' => false,
+                'required' => true,
+                'attr' => ['class' => 'form-control'],
+                'constraints' => [
+                    new \Symfony\Component\Validator\Constraints\File([
+                        'maxSize' => '2M',
+                        'mimeTypes' => [
+                            'application/pdf',
+                            'application/x-pdf',
+                        ],
+                        'mimeTypesMessage' => 'Veuillez uploader un document PDF valide',
+                    ]),
+                    new NotBlank(['message' => 'Le CV est obligatoire']),
+                ],
+            ])
         ;
     }
 

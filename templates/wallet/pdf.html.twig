@@ -28,11 +28,16 @@
 
     {% set total_inc = 0 %}
     {% set total_out = 0 %}
+    {% set rate = rate|default(1.0) %}
+    {% set symbol = currencySymbol|default('DT') %}
+
     {% for t in transactions %}
-        {% if t.type == 'INCOME' %}
-            {% set total_inc = total_inc + t.montant %}
-        {% else %}
-            {% set total_out = total_out + (t.montant|abs) %}
+        {% if t.status == 'ACCEPTED' %}
+            {% if t.type == 'INCOME' %}
+                {% set total_inc = total_inc + (t.montant * rate) %}
+            {% else %}
+                {% set total_out = total_out + (t.montant|abs * rate) %}
+            {% endif %}
         {% endif %}
     {% endfor %}
 
@@ -40,11 +45,11 @@
         <tr>
             <td class="summary-cell">
                 <span class="summary-label">Total Revenus</span>
-                <span class="summary-value">+{{ total_inc|number_format(2, '.', ',') }} DT</span>
+                <span class="summary-value">+{{ total_inc|number_format(2, '.', ',') }} {{ symbol }}</span>
             </td>
             <td class="summary-cell">
                 <span class="summary-label">Total Dépenses</span>
-                <span class="summary-value">-{{ total_out|number_format(2, '.', ',') }} DT</span>
+                <span class="summary-value">-{{ total_out|number_format(2, '.', ',') }} {{ symbol }}</span>
             </td>
         </tr>
     </table>
@@ -53,7 +58,7 @@
         <thead>
             <tr>
                 <th>Libellé</th>
-                <th>Type</th>
+                <th>Statut</th>
                 <th>Catégorie</th>
                 <th>Montant</th>
                 <th>Date</th>
@@ -61,12 +66,16 @@
         </thead>
         <tbody>
         {% for t in transactions %}
-            <tr>
+            <tr style="{{ t.status != 'ACCEPTED' ? 'opacity: 0.6; background-color: #f8fafc;' : '' }}">
                 <td style="font-weight: bold;">{{ t.nomTransaction }}</td>
-                <td>{{ t.type }}</td>
+                <td>
+                    <span style="font-size: 8px; font-weight: bold; color: {{ t.status == 'ACCEPTED' ? '#16a34a' : (t.status == 'REJECTED' ? '#dc2626' : '#f59e0b') }};">
+                        {{ t.status }}
+                    </span>
+                </td>
                 <td>{{ t.category ? t.category.nom : 'Divers' }}</td>
                 <td style="font-weight: bold; color: {{ t.type == 'INCOME' ? '#16a34a' : '#dc2626' }};">
-                    {{ t.type == 'INCOME' ? '+' : '-' }}{{ t.montant|abs|number_format(2, '.', ',') }} DT
+                    {{ t.type == 'INCOME' ? '+' : '-' }}{{ (t.montant|abs * rate)|number_format(2, '.', ',') }} {{ symbol }}
                 </td>
                 <td style="color: #64748b;">{{ t.dateTransaction|date('d/m/Y') }}</td>
             </tr>
@@ -76,7 +85,7 @@
             <tr style="background-color: #f1f5f9;">
                 <td colspan="3" style="text-align: right; padding: 10px; font-weight: bold;">Solde Net:</td>
                 <td colspan="2" style="padding: 10px; font-weight: bold; color: {{ (total_inc - total_out) >= 0 ? '#16a34a' : '#dc2626' }};">
-                    {{ (total_inc - total_out)|number_format(2, '.', ',') }} DT
+                    {{ (total_inc - total_out)|number_format(2, '.', ',') }} {{ symbol }}
                 </td>
             </tr>
         </tfoot>

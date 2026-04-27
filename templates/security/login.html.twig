@@ -7,8 +7,11 @@
         <div class="col-lg-6 d-none d-lg-block vh-100 position-relative p-0" style="background: linear-gradient(135deg, #1e1b4b 0%, #3b1278 100%);">
             <div class="position-absolute top-50 start-50 translate-middle text-center w-75">
                 <div class="mb-5">
-                    <img src="{{ asset('assets/images/logo-light.svg')|default('https://illustrations.popsy.co/purple/success.svg') }}" class="h-100px mb-4" alt="logo" style="max-height: 80px;">
-                    <h1 class="text-white fw-bold mb-3 display-5">Façonnez votre avenir financier.</h1>
+                    <div class="bg-white p-3 rounded-4 d-inline-block mb-4 shadow-lg">
+                        <img src="{{ asset('assets/images/logo-finora.webp') }}" class="h-100px" alt="logo" style="max-height: 80px;">
+                    </div>
+                    <h1 class="text-white fw-bold mb-3 display-5">FINORA</h1>
+                    <h2 class="text-white fw-bold mb-3 h4">Façonnez votre avenir financier.</h2>
                     <p class="text-white opacity-75 fs-5">Rejoignez des milliers d'utilisateurs qui font confiance à FINORA pour gérer leurs investissements et appels d'offres.</p>
                 </div>
                 <!-- Illustration -->
@@ -22,7 +25,7 @@
 
         <!-- Right side: Form -->
         <div class="col-lg-6 vh-100 d-flex align-items-center justify-content-center bg-white p-4 p-sm-5">
-            <div class="w-100" style="max-width: 450px;">
+            <div class="w-100 animate-in" style="max-width: 450px;">
                 <div class="text-center mb-5 d-lg-none">
                      <img src="https://illustrations.popsy.co/purple/success.svg" class="h-50px mb-4" alt="logo" style="max-height: 50px;">
                 </div>
@@ -76,12 +79,17 @@
                         <span class="position-absolute top-50 start-50 translate-middle bg-white px-3 fw-bold small text-uppercase opacity-50">OU</span>
                     </div>
 
-                    <button type="button" id="faceLoginBtn" class="btn btn-outline-primary btn-lg w-100 py-3 d-flex align-items-center justify-content-center" style="border-radius: 16px; border-width: 2px; font-weight: 600;">
+                    <button type="button" id="faceLoginBtn" class="btn btn-outline-primary btn-lg w-100 py-3 d-flex align-items-center justify-content-center mb-2" style="border-radius: 16px; border-width: 2px; font-weight: 600;">
                         <i class="bi bi-person-bounding-box me-3 fs-4"></i> CONNEXION FACIALE
                     </button>
+
+                    <a href="{{ path('connect_google_start') }}" class="btn btn-outline-dark btn-lg w-100 py-3 d-flex align-items-center justify-content-center" style="border-radius: 16px; border-width: 2px; font-weight: 600;">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" style="height: 24px;" class="me-3" alt="Google">
+                        CONNECTER AVEC GOOGLE
+                    </a>
                     
                     <p class="text-center mt-4 mb-0 small text-muted">
-                        Pas encore de compte ? <a href="#" class="text-primary fw-bold">S'inscrire</a>
+                        Pas encore de compte ? <a href="{{ path('app_register') }}" class="text-primary fw-bold">S'inscrire</a>
                     </p>
                 </form>
 
@@ -124,10 +132,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let stream = null;
 
-    faceLoginBtn.addEventListener('click', async () => {
+    const startCamera = async () => {
         const emailInput = document.querySelector('input[name="_username"]').value;
         if (!emailInput) {
-            alert('Please enter your email first to use Face ID.');
+            Swal.fire({
+                icon: 'info',
+                title: 'Email requis',
+                text: 'Veuillez saisir votre adresse email avant d\'utiliser la reconnaissance faciale.',
+                confirmButtonColor: '#7c3aed'
+            });
             return;
         }
 
@@ -138,11 +151,32 @@ document.addEventListener('DOMContentLoaded', () => {
             stream = await navigator.mediaDevices.getUserMedia({ video: true });
             video.srcObject = stream;
         } catch (err) {
-            alert('Cannot access webcam: ' + err.message);
-            document.querySelector('form').style.display = 'block';
-            webcamContainer.style.display = 'none';
+            Swal.fire({
+                icon: 'warning',
+                title: 'Caméra introuvable',
+                text: 'Nous n\'avons pas pu accéder à votre webcam. Voulez-vous réessayer ou utiliser le mode simulation pour votre présentation ?',
+                showCancelButton: true,
+                showDenyButton: true,
+                confirmButtonText: 'Réessayer la caméra',
+                denyButtonText: 'Mode Simulation (Démo)',
+                cancelButtonText: 'Retour au mot de passe',
+                confirmButtonColor: '#10b981',
+                denyButtonColor: '#7c3aed',
+                cancelButtonColor: '#6e7881'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    startCamera(); // Retry loop
+                } else if (result.isDenied) {
+                    simulateFaceLogin();
+                } else {
+                    document.querySelector('form').style.display = 'block';
+                    webcamContainer.style.display = 'none';
+                }
+            });
         }
-    });
+    };
+
+    faceLoginBtn.addEventListener('click', startCamera);
 
     cancelBtn.addEventListener('click', () => {
         stopWebcam();
@@ -188,6 +222,42 @@ document.addEventListener('DOMContentLoaded', () => {
             captureBtn.disabled = false;
         }
     });
+
+    async function simulateFaceLogin() {
+        Swal.fire({
+            title: 'Analyse Biométrique...',
+            html: `
+                <div class="mt-3">
+                    <div class="spinner-grow text-primary" role="status" style="width: 3rem; height: 3rem;"></div>
+                    <p class="mt-3 text-muted">Scan facial en cours (Simulation Démo)</p>
+                    <div class="progress mt-2" style="height: 10px; border-radius: 10px;">
+                        <div id="demoProgress" class="progress-bar progress-bar-striped progress-bar-animated bg-primary" role="progressbar" style="width: 0%"></div>
+                    </div>
+                </div>
+            `,
+            showConfirmButton: false,
+            allowOutsideClick: false,
+            didOpen: () => {
+                let progress = 0;
+                const interval = setInterval(() => {
+                    progress += 5;
+                    document.getElementById('demoProgress').style.width = progress + '%';
+                    if (progress >= 100) {
+                        clearInterval(interval);
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Authentification Réussie',
+                            text: 'Correspondance faciale confirmée (Mode Démo)',
+                            timer: 1500,
+                            showConfirmButton: false
+                        }).then(() => {
+                            window.location.href = '{{ path("app_profile") }}';
+                        });
+                    }
+                }, 100);
+            }
+        });
+    }
 
     function stopWebcam() {
         if (stream) {

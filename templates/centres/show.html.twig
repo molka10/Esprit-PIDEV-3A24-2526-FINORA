@@ -1,0 +1,257 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Finora - {{ centre.nom }}{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        :root {
+            --finora-pro-blue: #1e1b4b;
+            --finora-pro-accent: #6366f1;
+            --finora-gold: #fbbf24;
+        }
+
+        .center-hero {
+            background: linear-gradient(135deg, var(--finora-pro-blue) 0%, #312e81 100%);
+            padding: 100px 0 60px;
+            color: white;
+            border-radius: 0 0 50px 50px;
+        }
+
+        .rating-stars {
+            color: var(--finora-gold);
+            font-size: 1.2rem;
+        }
+
+        .card-pro {
+            border-radius: 24px;
+            border: none;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+        }
+
+        .card-pro:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(99, 102, 241, 0.1);
+        }
+
+        .avatar-circle {
+            width: 48px;
+            height: 48px;
+            background: #e2e8f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            font-weight: bold;
+            color: var(--finora-pro-blue);
+        }
+
+        .review-item {
+            border-left: 3px solid #e2e8f0;
+            padding-left: 20px;
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        .review-item::before {
+            content: '';
+            position: absolute;
+            left: -8px;
+            top: 0;
+            width: 13px;
+            height: 13px;
+            background: var(--finora-pro-accent);
+            border-radius: 50%;
+        }
+
+        /* Interactive Rating Stars */
+        .star-rating-input {
+            display: flex;
+            flex-direction: row-reverse;
+            justify-content: center;
+            gap: 10px;
+        }
+        .star-rating-input input { display: none; }
+        .star-rating-input label {
+            cursor: pointer;
+            font-size: 2.5rem;
+            color: #cbd5e1;
+            transition: all 0.2s ease;
+        }
+        .star-rating-input label:hover,
+        .star-rating-input label:hover ~ label,
+        .star-rating-input input:checked ~ label {
+            color: var(--finora-gold);
+            transform: scale(1.1);
+        }
+
+        .badge-rating {
+            background: rgba(251, 191, 36, 0.1);
+            color: #d97706;
+            padding: 8px 16px;
+            border-radius: 12px;
+            font-weight: 700;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+<main>
+    <!-- HERO SECTION -->
+    <section class="center-hero">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-8">
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb mb-4">
+                            <li class="breadcrumb-item"><a href="{{ path('public_centres_map') }}" class="text-white opacity-75">Nos Centres</a></li>
+                            <li class="breadcrumb-item active text-white" aria-current="page">{{ centre.nom }}</li>
+                        </ol>
+                    </nav>
+                    <h1 class="display-4 fw-bold mb-3">{{ centre.nom }}</h1>
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="rating-stars">
+                            {% set avg = centre.averageRating %}
+                            {% for i in 1..5 %}
+                                <i class="fa{% if i <= avg %}s{% else %}r{% endif %} fa-star"></i>
+                            {% endfor %}
+                        </div>
+                        <span class="opacity-75">({{ centre.ratings|length }} avis certifiés)</span>
+                    </div>
+                </div>
+                <div class="col-lg-4 text-lg-end mt-4 mt-lg-0">
+                    <a href="https://www.google.com/maps/dir/?api=1&destination={{ centre.latitude }},{{ centre.longitude }}" target="_blank" class="btn btn-light btn-lg px-4 rounded-pill fw-bold">
+                        <i class="fas fa-directions me-2"></i> Y aller
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="py-5 bg-light">
+        <div class="container" style="margin-top: -30px;">
+            <div class="row g-4">
+                <!-- INFO SIDEBAR -->
+                <div class="col-lg-4">
+                    <div class="card card-pro p-4 sticky-top" style="top: 20px;">
+                        <h5 class="fw-bold mb-4">Coordonnées</h5>
+                        
+                        <div class="d-flex align-items-start mb-4">
+                            <div class="icon-sm bg-primary bg-opacity-10 text-primary rounded-circle me-3 flex-shrink-0" style="width:40px; height:40px; display:flex; align-items:center; justify-content:center;">
+                                <i class="fas fa-map-marker-alt"></i>
+                            </div>
+                            <div>
+                                <div class="fw-bold small">Adresse</div>
+                                <div class="text-muted small">{{ centre.adresse }}, {{ centre.ville }}</div>
+                            </div>
+                        </div>
+
+                        {% if centre.telephone %}
+                        <div class="d-flex align-items-start mb-4">
+                            <div class="icon-sm bg-success bg-opacity-10 text-success rounded-circle me-3 flex-shrink-0" style="width:40px; height:40px; display:flex; align-items:center; justify-content:center;">
+                                <i class="fas fa-phone"></i>
+                            </div>
+                            <div>
+                                <div class="fw-bold small">Téléphone</div>
+                                <div class="text-muted small">{{ centre.telephone }}</div>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        {% if centre.email %}
+                        <div class="d-flex align-items-start mb-4">
+                            <div class="icon-sm bg-info bg-opacity-10 text-info rounded-circle me-3 flex-shrink-0" style="width:40px; height:40px; display:flex; align-items:center; justify-content:center;">
+                                <i class="fas fa-envelope"></i>
+                            </div>
+                            <div>
+                                <div class="fw-bold small">Email</div>
+                                <div class="text-muted small">{{ centre.email }}</div>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        <hr class="my-4 opacity-50">
+
+                        <div class="text-center">
+                            <h6 class="fw-bold mb-2">Note Globale</h6>
+                            <div class="display-5 fw-bold text-dark">{{ avg }}<small class="fs-6 text-muted">/5</small></div>
+                            <div class="rating-stars mb-3">
+                                {% for i in 1..5 %}
+                                    <i class="fa{% if i <= avg %}s{% else %}r{% endif %} fa-star"></i>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- REVIEWS CONTENT -->
+                <div class="col-lg-8">
+                    <div class="card card-pro p-4 mb-4">
+                        <h4 class="fw-bold mb-4">À propos du centre</h4>
+                        <p class="text-muted lead">{{ centre.description ?: 'Ce centre fait partie de notre réseau d\'excellence Finora, offrant un encadrement professionnel pour vos formations en finance et trading.' }}</p>
+                    </div>
+
+                    <!-- LEAVE A REVIEW -->
+                    <div class="card card-pro p-4 mb-5 border-2 border-primary border-opacity-10" style="background: #f8fafc;">
+                        <h5 class="fw-bold mb-3"><i class="fas fa-pen-nib me-2 text-primary"></i>Laisser un avis</h5>
+                        {% if app.user %}
+                            <form action="{{ path('public_centres_rate', {id: centre.id}) }}" method="POST">
+                                <div class="mb-4">
+                                    <label class="form-label d-block text-center fw-bold">Votre note</label>
+                                    <div class="star-rating-input">
+                                        <input type="radio" name="note" id="star5" value="5" required /><label for="star5">★</label>
+                                        <input type="radio" name="note" id="star4" value="4" /><label for="star4">★</label>
+                                        <input type="radio" name="note" id="star3" value="3" /><label for="star3">★</label>
+                                        <input type="radio" name="note" id="star2" value="2" /><label for="star2">★</label>
+                                        <input type="radio" name="note" id="star1" value="1" /><label for="star1">★</label>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="commentaire" class="form-label fw-bold">Votre commentaire</label>
+                                    <textarea name="commentaire" id="commentaire" class="form-control rounded-4 p-3" rows="3" placeholder="Racontez-nous votre expérience..."></textarea>
+                                </div>
+                                <button type="submit" class="btn btn-primary px-5 py-3 rounded-pill fw-bold w-100">Publier mon avis</button>
+                            </form>
+                        {% else %}
+                            <div class="text-center py-3">
+                                <p class="text-muted">Vous devez être connecté pour partager votre expérience.</p>
+                                <a href="{{ path('app_login') }}" class="btn btn-outline-primary rounded-pill px-4">Se connecter</a>
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- REVIEWS LIST -->
+                    <h5 class="fw-bold mb-4">Avis des utilisateurs ({{ centre.ratings|length }})</h5>
+                    {% if centre.ratings is empty %}
+                        <div class="text-center py-5 bg-white rounded-4 shadow-sm">
+                            <i class="far fa-comment-dots fa-3x text-muted mb-3 opacity-25"></i>
+                            <p class="text-muted">Aucun avis pour le moment. Soyez le premier à partager le vôtre !</p>
+                        </div>
+                    {% else %}
+                        {% for rating in centre.ratings|sort((a, b) => b.createdAt <=> a.createdAt) %}
+                            <div class="review-item">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <div class="d-flex align-items-center">
+                                        <div class="avatar-circle me-3">
+                                            {{ rating.user.username|first|upper }}
+                                        </div>
+                                        <div>
+                                            <div class="fw-bold text-dark">{{ rating.user.username }}</div>
+                                            <div class="xsmall text-muted">{{ rating.createdAt|date('d M Y') }}</div>
+                                        </div>
+                                    </div>
+                                    <div class="badge-rating">
+                                        <i class="fas fa-star me-1"></i> {{ rating.note }}/5
+                                    </div>
+                                </div>
+                                <p class="text-muted mt-3">{{ rating.commentaire ?: 'L\'utilisateur n\'a pas laissé de commentaire.' }}</p>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+{% endblock %}

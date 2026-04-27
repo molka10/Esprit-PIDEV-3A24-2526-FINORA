@@ -13,6 +13,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use App\Service\FaceIdService;
 use App\Repository\UserRepository;
 use App\Security\LoginFormAuthenticator;
+use Doctrine\ORM\EntityManagerInterface;
 
 class SecurityController extends AbstractController
 {
@@ -77,7 +78,8 @@ class SecurityController extends AbstractController
         Request $request,
         FaceIdService $faceIdService,
         UserRepository $userRepository,
-        Security $security
+        Security $security,
+        EntityManagerInterface $entityManager
     ): JsonResponse {
         $data = json_decode($request->getContent(), true);
         $base64Image = $data['image'] ?? null;
@@ -110,6 +112,10 @@ class SecurityController extends AbstractController
             
             // Require 85% similarity threshold to avoid false positives with image backgrounds
             if ($similarity >= 0.85) {
+                // 🔥 SESSION SECURITY: Track session ID for Face ID login too
+                $user->setCurrentSessionId($request->getSession()->getId());
+                $entityManager->flush();
+                
                 // Log the user in programmatically
                 $security->login($user, LoginFormAuthenticator::class, 'main');
                 return new JsonResponse(['success' => true, 'message' => 'Face ID Login successful!']);

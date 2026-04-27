@@ -8,6 +8,7 @@ use App\Repository\TransactionBourseRepository;
 use App\Repository\ActionRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Service\CommissionService;
+use App\Service\NotificationBourseService;
 /**
  * 💹 TransactionService - Logique métier des transactions boursières
  * 
@@ -21,7 +22,8 @@ class TransactionService
         private ActionRepository $actionRepo,
         private CommissionService $commissionService,
         private ActionService $actionService,
-        private \App\Service\WalletBalanceService $walletBalanceService
+        private \App\Service\WalletBalanceService $walletBalanceService,
+        private NotificationBourseService $notificationBourseService
     ) {}
 
     /**
@@ -95,7 +97,7 @@ class TransactionService
                 $category->setNom($categoryName);
                 $category->setType('SERVICES');
                 $category->setPriorite('MOYENNE');
-                $category->setUserId($user->getId());
+                $category->setUser($user);
                 $this->em->persist($category);
                 $this->em->flush();
             }
@@ -115,7 +117,7 @@ class TransactionService
                 $walletTx->setType('OUTCOME');
                 $walletTx->setDateTransaction(new \DateTime());
                 $walletTx->setCategory($category);
-                $walletTx->setUserId($user->getId());
+                $walletTx->setUser($user);
                 $walletTx->setNomTransaction('Achat de ' . $quantite . ' actions ' . $action->getSymbole());
                 $this->em->persist($walletTx);
 
@@ -125,7 +127,7 @@ class TransactionService
                 $walletTx->setType('INCOME');
                 $walletTx->setDateTransaction(new \DateTime());
                 $walletTx->setCategory($category);
-                $walletTx->setUserId($user->getId());
+                $walletTx->setUser($user);
                 $walletTx->setNomTransaction('Vente de ' . $quantite . ' actions ' . $action->getSymbole());
                 $this->em->persist($walletTx);
             }
@@ -159,6 +161,17 @@ class TransactionService
         // 8. Sauvegarder
         $this->em->persist($transaction);
         $this->em->flush();
+
+        // 9. 🔔 In-app + SMS notification for the user
+        if ($user) {
+            $this->notificationBourseService->notifyTradeConfirmation(
+                $user,
+                $typeTransaction,
+                $action,
+                $quantite,
+                $montantTotal
+            );
+        }
 
         return $transaction;
     }

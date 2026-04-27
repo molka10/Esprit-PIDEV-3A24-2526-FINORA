@@ -37,7 +37,7 @@ class UserRepository extends ServiceEntityRepository
     public function findOneAdmin(): ?User
     {
         return $this->createQueryBuilder('u')
-            ->andWhere('u.role = :role')
+            ->andWhere('UPPER(u.role) = :role')
             ->setParameter('role', 'ADMIN')
             ->setMaxResults(1)
             ->getQuery()

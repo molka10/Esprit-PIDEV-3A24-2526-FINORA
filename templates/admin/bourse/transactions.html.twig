@@ -1,161 +1,330 @@
 {% extends 'admin/base.html.twig' %}
 
-{% block title %}Toutes les Transactions — Finora Admin{% endblock %}
+{% block title %}Bourse Intelligence — Flux de Transactions{% endblock %}
 
 {% block body %}
-<div class="row g-4 mb-4">
-    <div class="col-12">
-        <div class="d-flex justify-content-between align-items-center">
-            <h1 class="h3 mb-0 text-gray-800">📜 Toutes les Transactions</h1>
-            <div class="d-flex gap-2">
-                <button onclick="window.print()" class="btn btn-outline-primary"><i class="bi bi-printer me-2"></i>Imprimer</button>
+<div class="container-fluid py-4">
+    <!-- Header -->
+    <div class="row g-4 mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h3 mb-1 text-gray-800 fw-bold">📜 Flux de Trading Global</h1>
+                    <p class="text-muted mb-0 small">Audit complet et surveillance en temps réel des flux boursiers.</p>
+                </div>
+                <div class="d-flex gap-2">
+                    <button onclick="window.print()" class="btn btn-white shadow-sm border rounded-3"><i class="bi bi-printer me-2"></i>Rapport PDF</button>
+                    <button class="btn btn-success shadow-sm rounded-3"><i class="bi bi-file-earmark-excel me-2"></i>Export CSV</button>
+                </div>
             </div>
         </div>
-        <nav aria-label="breadcrumb">
-            <ol class="breadcrumb mt-2">
-                <li class="breadcrumb-item"><a href="{{ path('app_admin') }}">Admin</a></li>
-                <li class="breadcrumb-item"><a href="{{ path('app_bourse_admin') }}">Bourse</a></li>
-                <li class="breadcrumb-item active">Transactions</li>
-            </ol>
-        </nav>
+    </div>
+
+    <!-- ROW 1: Quick Insights Bar -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm rounded-4 p-3 bg-primary text-white">
+                <div class="xsmall fw-bold text-uppercase opacity-75">Volume Page</div>
+                <div class="h4 fw-bold mb-0">{{ summary.pageVolume|number_format(2) }} <small class="xsmall">TND</small></div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white">
+                <div class="xsmall fw-bold text-uppercase text-muted">Commissions Page</div>
+                <div class="h4 fw-bold mb-0 text-dark">{{ summary.pageCommissions|number_format(2) }} <small class="xsmall text-muted">TND</small></div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white">
+                <div class="xsmall fw-bold text-uppercase text-muted">Traders Actifs</div>
+                <div class="h4 fw-bold mb-0 text-dark">{{ summary.tradersCount }}</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white">
+                <div class="xsmall fw-bold text-uppercase text-muted">Moyenne Marché</div>
+                <div class="h4 fw-bold mb-0 text-dark">{{ summary.globalAvg|number_format(0) }} <small class="xsmall text-muted">TND</small></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ROW 2: Interactive Filter Tags -->
+    <div class="d-flex gap-2 mb-3 overflow-auto pb-2">
+        <a href="{{ path('app_admin_bourse_transactions') }}" class="btn btn-sm {{ not currentType ? 'btn-primary' : 'btn-light' }} rounded-pill px-3">Tous</a>
+        <a href="{{ path('app_admin_bourse_transactions', {type: 'ACHAT'}) }}" class="btn btn-sm {{ currentType == 'ACHAT' ? 'btn-success' : 'btn-light' }} rounded-pill px-3">🛍️ Achats</a>
+        <a href="{{ path('app_admin_bourse_transactions', {type: 'VENTE'}) }}" class="btn btn-sm {{ currentType == 'VENTE' ? 'btn-danger' : 'btn-light' }} rounded-pill px-3">💰 Ventes</a>
+        <div class="vr mx-2"></div>
+        <button class="btn btn-sm btn-light rounded-pill px-3" onclick="filterByTag('HIGH_VALUE')">🔥 High Value</button>
+        <button class="btn btn-sm btn-light rounded-pill px-3" onclick="filterByTag('RISK')">⚠️ Alertes Risque</button>
+    </div>
+
+    <!-- Main Table -->
+    <div class="card shadow-sm border-0 rounded-4 overflow-hidden">
+        <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+            <h6 class="m-0 fw-bold text-dark"><i class="bi bi-list-stars me-2 text-primary"></i>Journal d'Audit des Transactions</h6>
+            <div class="d-flex gap-2">
+                 <input type="text" id="txnSearch" class="form-control form-control-sm rounded-3" style="width: 250px;" placeholder="Rechercher par trader, action..." onkeyup="filterTxnTable()">
+            </div>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0" id="txnTable">
+                    <thead class="bg-light">
+                        <tr>
+                            <th class="ps-4 xsmall text-uppercase text-muted border-0">ID / Risque</th>
+                            <th class="xsmall text-uppercase text-muted border-0">Investisseur</th>
+                            <th class="xsmall text-uppercase text-muted border-0">Type</th>
+                            <th class="xsmall text-uppercase text-muted border-0 text-center">Action</th>
+                            <th class="xsmall text-uppercase text-muted border-0 text-end">Volume</th>
+                            <th class="xsmall text-uppercase text-muted border-0 text-end">Commissions</th>
+                            <th class="xsmall text-uppercase text-muted border-0 text-end">Date</th>
+                            <th class="pe-4 xsmall text-uppercase text-muted border-0 text-center">Audit</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for t in transactions %}
+                        <tr class="transaction-row" data-volume="{{ t.montantTotal }}" data-risk="{{ t.riskScore }}">
+                            <td class="ps-4">
+                                <div class="d-flex align-items-center">
+                                    <span class="text-muted xsmall me-2">#{{ t.id }}</span>
+                                    {% if t.riskScore > 30 %}
+                                        <span class="badge bg-danger rounded-circle p-1" data-bs-toggle="tooltip" title="{{ t.riskReasons|join(', ') }}">
+                                            <i class="bi bi-exclamation-triangle-fill xsmall"></i>
+                                        </span>
+                                    {% else %}
+                                        <span class="badge bg-success rounded-circle p-1"><i class="bi bi-shield-check xsmall"></i></span>
+                                    {% endif %}
+                                </div>
+                            </td>
+                            <td>
+                                <div class="d-flex align-items-center" 
+                                     data-bs-toggle="popover" 
+                                     data-bs-trigger="hover" 
+                                     data-bs-html="true" 
+                                     title="Profil: {{ t.user ? t.user.username : 'Market' }}"
+                                     data-bs-content="<div class='small'><strong>Persona:</strong> {{ t.persona }}<br><strong>Portfolio:</strong><br>{% for exp in t.mockExposure %}{{ exp.label }}: {{ exp.value }}%<br>{% endfor %}</div>">
+                                    <div class="avatar avatar-xs me-2 position-relative">
+                                        <img class="avatar-img rounded-circle border" src="https://ui-avatars.com/api/?name={{ t.user ? t.user.username : 'A' }}&background=6366f1&color=fff" alt="" style="width: 28px; height: 28px;">
+                                        <span class="position-absolute bottom-0 start-100 translate-middle badge rounded-circle bg-{{ t.personaColor }} p-1 border border-white" style="width: 12px; height: 12px;"></span>
+                                    </div>
+                                    <div>
+                                        <div class="fw-bold small text-dark d-flex align-items-center">
+                                            {{ t.user ? t.user.username : 'Market Maker' }}
+                                            <span class="ms-2 xsmall text-{{ t.personaColor }} fw-bold"><i class="bi {{ t.personaIcon }} me-1"></i>{{ t.persona }}</span>
+                                        </div>
+                                        <div class="xsmall text-muted">{{ t.user ? t.user.email : 'system@finora.com' }}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="badge {{ t.typeTransaction == 'ACHAT' ? 'bg-success-soft text-success' : 'bg-danger-soft text-danger' }} rounded-pill px-3 xsmall">
+                                    {{ t.typeTransaction == 'ACHAT' ? 'Buy' : 'Sell' }}
+                                </span>
+                            </td>
+                            <td class="text-center">
+                                <div class="fw-bold text-primary small">{{ t.action ? t.action.symbole : 'N/A' }}</div>
+                                <div class="xsmall text-muted">{{ t.action ? t.action.nomEntreprise : 'Bourse de Tunis' }}</div>
+                            </td>
+                            <td class="text-end fw-bold small text-dark">{{ t.montantTotal|number_format(2) }} <small class="xsmall opacity-50">TND</small></td>
+                            <td class="text-end">
+                                <div class="small fw-semibold text-warning">{{ (t.montantTotal * 0.01)|number_format(2) }}</div>
+                                <div class="xsmall text-muted opacity-50">1% fee</div>
+                            </td>
+                            <td class="text-end">
+                                <div class="small text-dark">{{ t.dateTransaction|date('d/m/Y') }}</div>
+                                <div class="xsmall text-muted">{{ t.dateTransaction|date('H:i') }}</div>
+                            </td>
+                            <td class="pe-4 text-center">
+                                <button class="btn btn-sm btn-light rounded-circle border" onclick="showLineage({{ t.id }}, '{{ t.user ? t.user.username : 'Market' }}', '{{ t.action ? t.action.symbole : 'N/A' }}', {{ t.montantTotal }})" data-bs-toggle="modal" data-bs-target="#lineageModal">
+                                    <i class="bi bi-node-plus small"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- PAGINATION -->
+            <div class="card-footer bg-white py-3 border-top">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div class="text-muted xsmall">Affichage de <b>{{ transactions|length }}</b> sur <b>{{ total }}</b> transactions</div>
+                    <nav aria-label="Page navigation">
+                        <ul class="pagination pagination-sm mb-0">
+                            <li class="page-item {{ page <= 1 ? 'disabled' }}">
+                                <a class="page-link rounded-start-3" href="{{ path('app_admin_bourse_transactions', {page: page - 1, type: currentType}) }}"><i class="bi bi-chevron-left"></i></a>
+                            </li>
+                            {% for p in 1..pages %}
+                                <li class="page-item {{ p == page ? 'active' }}"><a class="page-link" href="{{ path('app_admin_bourse_transactions', {page: p, type: currentType}) }}">{{ p }}</a></li>
+                            {% endfor %}
+                            <li class="page-item {{ page >= pages ? 'disabled' }}">
+                                <a class="page-link rounded-end-3" href="{{ path('app_admin_bourse_transactions', {page: page + 1, type: currentType}) }}"><i class="bi bi-chevron-right"></i></a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
-<div class="card shadow-sm border-0 rounded-4 overflow-hidden">
-    <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
-        <h6 class="m-0 font-weight-bold text-primary"><i class="bi bi-clock-history me-2"></i>Flux de trading global</h6>
-        <div class="d-flex gap-2">
-             <div class="dropdown">
-                <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" id="filterTypeDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                    <i class="bi bi-funnel me-1"></i> {{ currentType|default('Tous les types') }}
-                </button>
-                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="filterTypeDropdown">
-                    <li><a class="dropdown-item {{ not currentType ? 'active' }}" href="{{ path('app_admin_bourse_transactions') }}">Tous les types</a></li>
-                    <li><hr class="dropdown-divider"></li>
-                    <li><a class="dropdown-item {{ currentType == 'ACHAT' ? 'active' }}" href="{{ path('app_admin_bourse_transactions', {type: 'ACHAT'}) }}">🛍️ ACHAT uniquement</a></li>
-                    <li><a class="dropdown-item {{ currentType == 'VENTE' ? 'active' }}" href="{{ path('app_admin_bourse_transactions', {type: 'VENTE'}) }}">💰 VENTE uniquement</a></li>
-                </ul>
-             </div>
-             <input type="text" id="txnSearch" class="form-control form-control-sm" style="width: 200px;" placeholder="Rechercher..." onkeyup="filterTxnTable()">
-        </div>
-    </div>
-    <div class="card-body p-0">
-        <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0" id="txnTable">
-                <thead class="bg-light">
-                    <tr>
-                        <th class="ps-4">#ID</th>
-                        <th>Investisseur</th>
-                        <th>Type</th>
-                        <th>Action</th>
-                        <th>Quantité</th>
-                        <th>Prix Unit.</th>
-                        <th>Total</th>
-                        <th>Commission</th>
-                        <th>Date</th>
-                        <th class="pe-4">Statut</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for t in transactions %}
-                    <tr>
-                        <td class="ps-4 text-muted small">#{{ t.id }}</td>
-                        <td>
-                            <div class="d-flex align-items-center">
-                                <div class="avatar avatar-xs me-2">
-                                    <img class="avatar-img rounded-circle" src="https://ui-avatars.com/api/?name={{ t.user ? t.user.username : (t.acteurLabel|default('Anonyme')) }}&background=6366f1&color=fff" alt="" style="width: 32px; height: 32px;">
-                                </div>
-                                <div>
-                                    <div class="fw-bold text-dark">{{ t.user ? t.user.username : (t.acteurLabel|default('Utilisateur inconnu')) }}</div>
-                                    <div class="text-muted small" style="font-size: 11px;">{{ t.user ? t.user.email : 'No email' }}</div>
-                                </div>
-                            </div>
-                        </td>
-                        <td>
-                            {% if t.typeTransaction == 'ACHAT' %}
-                                <span class="badge bg-success-soft text-success"><i class="bi bi-arrow-down-circle me-1"></i>ACHAT</span>
-                            {% else %}
-                                <span class="badge bg-danger-soft text-danger"><i class="bi bi-arrow-up-circle me-1"></i>VENTE</span>
-                            {% endif %}
-                        </td>
-                        <td>
-                            <div class="fw-bold text-primary">{{ t.action ? t.action.symbole : 'N/A' }}</div>
-                            <div class="text-muted small" style="font-size: 11px;">{{ t.action ? t.action.nomEntreprise : 'Bourse de Tunis' }}</div>
-                        </td>
-                        <td><span class="fw-bold">{{ t.quantite }}</span></td>
-                        <td>{{ t.prixUnitaire }} <small class="text-muted">TND</small></td>
-                        <td><span class="fw-bold">{{ t.montantTotal }}</span> <small class="text-muted">TND</small></td>
-                        <td><span class="text-warning fw-semibold">{{ (t.montantTotal * 0.01)|number_format(2) }}</span> <small class="text-muted">TND</small></td>
-                        <td>
-                            <div class="text-dark">{{ t.dateTransaction|date('d/m/Y') }}</div>
-                            <div class="text-muted small">{{ t.dateTransaction|date('H:i') }}</div>
-                        </td>
-                        <td class="pe-4">
-                            <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-10">Complété</span>
-                        </td>
-                    </tr>
-                    {% else %}
-                    <tr>
-                        <td colspan="10" class="text-center py-5 text-muted">Aucune transaction enregistrée.</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-
-        {# 🔥 PAGINATION #}
-        <div class="card-footer bg-white py-3 border-top">
-            <div class="d-flex justify-content-between align-items-center">
-                <div class="text-muted small">
-                    Affichage de <b>{{ transactions|length }}</b> sur <b>{{ total }}</b> transactions
+<!-- LINEAGE MODAL -->
+<div class="modal fade" id="lineageModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-4">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold">Audit de Transaction #<span id="modalTxId"></span></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="d-flex flex-column align-items-center">
+                    <div class="text-center mb-4 w-100">
+                        <div class="p-3 bg-light rounded-4 mb-2">
+                            <i class="bi bi-wallet2 text-primary fs-3 mb-2 d-block"></i>
+                            <span class="fw-bold d-block" id="modalUser">Utilisateur</span>
+                            <span class="xsmall text-muted">Wallet Cash</span>
+                        </div>
+                        <i class="bi bi-arrow-down fs-4 text-muted"></i>
+                        <div class="p-3 bg-warning bg-opacity-10 rounded-4 mb-2 mt-2">
+                            <i class="bi bi-shield-lock text-warning fs-4 mb-1 d-block"></i>
+                            <span class="fw-bold d-block">Moteur de Frais</span>
+                            <span class="xsmall text-muted">Commission de 1% appliquée</span>
+                        </div>
+                        <i class="bi bi-arrow-down fs-4 text-muted"></i>
+                        <div class="p-3 bg-primary bg-opacity-10 rounded-4 mt-2">
+                            <i class="bi bi-bank text-primary fs-3 mb-2 d-block"></i>
+                            <span class="fw-bold d-block" id="modalAction">Action</span>
+                            <span class="h5 fw-bold text-dark d-block mt-1" id="modalAmount">0.00 TND</span>
+                        </div>
+                    </div>
+                    <div class="alert alert-info w-100 xsmall border-0 rounded-3">
+                        <i class="bi bi-info-circle me-2"></i>Cette transaction a été validée par le moteur de trading Finora et est irréversible.
+                    </div>
                 </div>
-                <nav aria-label="Page navigation">
-                    <ul class="pagination pagination-sm mb-0">
-                        <li class="page-item {{ page <= 1 ? 'disabled' }}">
-                            <a class="page-link" href="{{ path('app_admin_bourse_transactions', {page: page - 1, type: currentType}) }}" tabindex="-1"><i class="bi bi-chevron-left"></i></a>
-                        </li>
-                        
-                        {% for p in 1..pages %}
-                        <li class="page-item {{ p == page ? 'active' }}">
-                            <a class="page-link" href="{{ path('app_admin_bourse_transactions', {page: p, type: currentType}) }}">{{ p }}</a>
-                        </li>
-                        {% endfor %}
-
-                        <li class="page-item {{ page >= pages ? 'disabled' }}">
-                            <a class="page-link" href="{{ path('app_admin_bourse_transactions', {page: page + 1, type: currentType}) }}"><i class="bi bi-chevron-right"></i></a>
-                        </li>
-                    </ul>
-                </nav>
             </div>
         </div>
     </div>
+</div>
+
+<!-- FINORA AI ASSISTANT -->
+<div class="position-fixed bottom-0 end-0 p-4" style="z-index: 1050;">
+    <div id="aiChatWindow" class="card shadow-lg border-0 rounded-4 mb-3 d-none" style="width: 320px; height: 400px; display: flex; flex-column: column;">
+        <div class="card-header bg-primary text-white py-3 rounded-top-4 d-flex justify-content-between align-items-center">
+            <h6 class="mb-0 fw-bold"><i class="bi bi-robot me-2"></i>Finora AI Assistant</h6>
+            <button class="btn-close btn-close-white" onclick="toggleAIChat()"></button>
+        </div>
+        <div class="card-body overflow-auto p-3 bg-light" id="aiChatBody" style="flex-grow: 1;">
+            <div class="bg-white p-2 rounded-3 mb-2 small shadow-sm border-start border-4 border-primary">
+                Bonjour Admin ! Je peux filtrer cette liste pour vous. Essayez : <br>
+                <em>"Montre moi les baleines"</em> ou <br>
+                <em>"Cherche Apple"</em>
+            </div>
+        </div>
+        <div class="card-footer bg-white p-2 border-top">
+            <div class="input-group">
+                <input type="text" id="aiInput" class="form-control form-control-sm border-0 bg-light" placeholder="Posez une question..." onkeypress="handleAIEvents(event)">
+                <button class="btn btn-primary btn-sm rounded-3" onclick="processAICommand()"><i class="bi bi-send"></i></button>
+            </div>
+        </div>
+    </div>
+    <button class="btn btn-primary rounded-circle shadow-lg p-0 d-flex align-items-center justify-content-center" style="width: 60px; height: 60px;" onclick="toggleAIChat()">
+        <i class="bi bi-robot fs-2"></i>
+    </button>
 </div>
 
 <style>
     .bg-success-soft { background-color: rgba(25, 135, 84, 0.1); }
     .bg-danger-soft { background-color: rgba(220, 53, 69, 0.1); }
+    .xsmall { font-size: 0.75rem; }
     .avatar-xs { width: 32px; height: 32px; }
-    .breadcrumb-item + .breadcrumb-item::before { content: "\F138"; font-family: "bootstrap-icons"; font-size: 10px; }
+    .popover { border-radius: 12px; border: none; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+    .popover-header { background: #f8f9fa; border-radius: 12px 12px 0 0; font-weight: bold; font-size: 0.8rem; }
+    #aiChatWindow { animation: slideUp 0.3s ease-out; }
+    @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 </style>
 
 <script>
-function filterTxnTable() {
-    var input = document.getElementById("txnSearch");
-    var filter = input.value.toUpperCase();
-    var table = document.getElementById("txnTable");
-    var tr = table.getElementsByTagName("tr");
-
-    for (var i = 1; i < tr.length; i++) {
-        var found = false;
-        var tds = tr[i].getElementsByTagName("td");
-        for (var j = 0; j < tds.length; j++) {
-            if (tds[j].textContent.toUpperCase().indexOf(filter) > -1) {
-                found = true;
-                break;
-            }
-        }
-        tr[i].style.display = found ? "" : "none";
+    function toggleAIChat() {
+        document.getElementById('aiChatWindow').classList.toggle('d-none');
     }
-}
+
+    function handleAIEvents(e) {
+        if (e.key === 'Enter') processAICommand();
+    }
+
+    function processAICommand() {
+        const input = document.getElementById('aiInput');
+        const cmd = input.value.toLowerCase();
+        const chatBody = document.getElementById('aiChatBody');
+        
+        // Add user message
+        chatBody.innerHTML += `<div class='text-end mb-2'><span class='bg-primary text-white p-2 rounded-3 small'>${input.value}</span></div>`;
+        
+        let response = "Je n'ai pas compris votre commande.";
+        
+        if (cmd.includes('baleine')) {
+            filterByTag('HIGH_VALUE');
+            response = "Affichage des baleines (transactions > 500 TND).";
+        } else if (cmd.includes('risque') || cmd.includes('alerte')) {
+            filterByTag('RISK');
+            response = "Affichage des transactions à risque.";
+        } else if (cmd.includes('cherche') || cmd.includes('montre')) {
+            const query = cmd.split(' ').pop();
+            document.getElementById('txnSearch').value = query;
+            filterTxnTable();
+            response = `Recherche lancée pour : ${query}`;
+        } else if (cmd.includes('tous')) {
+            const tr = document.querySelectorAll(".transaction-row");
+            tr.forEach(row => row.style.display = "");
+            response = "Affichage de toutes les transactions.";
+        }
+
+        // Add AI response
+        setTimeout(() => {
+            chatBody.innerHTML += `<div class='mb-2'><span class='bg-white p-2 rounded-3 small shadow-sm border-start border-4 border-primary'>${response}</span></div>`;
+            chatBody.scrollTop = chatBody.scrollHeight;
+        }, 500);
+
+        input.value = '';
+    }
+
+    function filterTxnTable() {
+        var input = document.getElementById("txnSearch");
+        var filter = input.value.toUpperCase();
+        var tr = document.querySelectorAll(".transaction-row");
+        tr.forEach(row => {
+            row.style.display = row.textContent.toUpperCase().includes(filter) ? "" : "none";
+        });
+    }
+
+    function filterByTag(tag) {
+        var tr = document.querySelectorAll(".transaction-row");
+        tr.forEach(row => {
+            if (tag === 'HIGH_VALUE') {
+                row.style.display = parseFloat(row.dataset.volume) > 500 ? "" : "none";
+            } else if (tag === 'RISK') {
+                row.style.display = parseInt(row.dataset.risk) > 30 ? "" : "none";
+            }
+        });
+    }
+
+    function showLineage(id, user, action, amount) {
+        document.getElementById('modalTxId').textContent = id;
+        document.getElementById('modalUser').textContent = user;
+        document.getElementById('modalAction').textContent = action;
+        document.getElementById('modalAmount').textContent = amount.toLocaleString() + ' TND';
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        // Init Bootstrap Popovers and Tooltips
+        var popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'))
+        popoverTriggerList.map(function (popoverTriggerEl) {
+            return new bootstrap.Popover(popoverTriggerEl)
+        })
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+        })
+    });
 </script>
 {% endblock %}

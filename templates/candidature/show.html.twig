@@ -100,13 +100,13 @@
                 <div class="card-body p-5">
                     <div class="row align-items-center">
                         <div class="col-md-8">
-                            <h4 class="fw-bold mb-2"><i class="bi bi-robot me-2 text-warning"></i>Score de Matching AI</h4>
-                            <p class="opacity-75 mb-4">Analyse automatisée basée sur l'expérience du candidat et les exigences de l'offre.</p>
+                            <h4 class="fw-bold mb-2"><i class="bi bi-robot me-2 text-warning"></i>Analyse Professionnelle IA</h4>
+                            <p class="opacity-75 mb-4">{{ aiAnalysis|default('L\'IA n\'a pas encore généré d\'analyse détaillée pour cette candidature.') }}</p>
                             
                             <div class="progress mb-2" style="height: 12px; border-radius: 99px; background: rgba(255,255,255,0.2);">
                                 <div class="progress-bar bg-warning shadow-sm" role="progressbar" style="width: {{ matchingScore }}%;" aria-valuenow="{{ matchingScore }}" aria-valuemin="0" aria-valuemax="100"></div>
                             </div>
-                            <span class="small opacity-75">Fiabilité de l'estimation : 94%</span>
+                            <span class="small opacity-75">Score de Matching : {{ matchingScore }}% | Basé sur les critères requis</span>
                         </div>
                         <div class="col-md-4 text-center">
                             <div class="h1 fw-bold mb-0" style="font-size: 3.5rem;">{{ matchingScore }}%</div>
@@ -115,6 +115,17 @@
                     </div>
                 </div>
             </div>
+
+            {% if candidature.appelOffre and candidature.appelOffre.requiredCriteria %}
+                <div class="card card-premium mb-4">
+                    <div class="card-body p-4">
+                        <h6 class="fw-bold mb-3 text-primary"><i class="bi bi-list-check me-2"></i>Critères Requis (Rappel)</h6>
+                        <div class="p-3 bg-light rounded-4 small">
+                            {{ candidature.appelOffre.requiredCriteria|nl2br }}
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
         </div>
 
         {# --- RIGHT COLUMN: ACTIONS --- #}
@@ -148,6 +159,12 @@
                 <div class="card-body p-4">
                     <h6 class="fw-bold mb-4">Actions & Documents</h6>
                     <div class="d-grid gap-3">
+                        {% if candidature.cvPath %}
+                            <a href="{{ asset('uploads/cvs/' ~ candidature.cvPath) }}" target="_blank" class="btn btn-primary rounded-pill py-2 fw-bold shadow-sm">
+                                <i class="bi bi-file-earmark-person me-2"></i>Voir le CV (PDF)
+                            </a>
+                        {% endif %}
+                        
                         <a href="{{ path('app_candidature_export', {'id': candidature.id}) }}" target="_blank" class="btn btn-light rounded-pill py-2 fw-bold text-danger border">
                             <i class="bi bi-file-pdf me-2"></i>Télécharger le dossier (PDF)
                         </a>

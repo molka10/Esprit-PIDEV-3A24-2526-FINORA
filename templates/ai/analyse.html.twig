@@ -2,6 +2,8 @@
 
 {% block title %}Analyse IA — Finora{% endblock %}
 
+{% block breadcrumb %}Analyse IA{% endblock %}
+
 {% block stylesheets %}
 <style>
 .ai-page { padding: 40px 0 72px; background: #f8f5ff; min-height: 100vh; }
@@ -111,50 +113,61 @@
 {% endblock %}
 
 {% block body %}
-<div class="ai-page">
-<div class="container">
 
-    {# ── Hero ── #}
-    <div class="ai-hero">
-        <div style="display:flex;align-items:center;gap:18px;position:relative;z-index:1;">
-            <div class="ai-hero-icon">🤖</div>
-            <div>
-                <h1><i class="bi bi-robot me-2"></i>Analyse IA Financière</h1>
-                <p>Prédictions intelligentes générées à partir de votre portefeuille</p>
+
+    {# ── NEW: Financial Health Score Meter ── #}
+    <div class="ai-reco-card mb-4" style="background: linear-gradient(135deg, #ffffff 0%, #fdfcff 100%); border: none; box-shadow: 0 10px 40px rgba(124, 58, 237, 0.06);">
+        <div class="row align-items-center">
+            <div class="col-lg-8">
+                <div class="d-flex align-items-center gap-4">
+                    <div class="health-gauge-container">
+                        {% set score = (100 - data.ratio)|round %}
+                        {% if score < 0 %}{% set score = 0 %}{% endif %}
+                        <div class="health-gauge" style="--p:{{ score }}; --c:#7c3aed;">
+                            <div class="gauge-value">{{ score }}%</div>
+                        </div>
+                    </div>
+                    <div>
+                        <h2 class="fw-900 mb-1" style="font-size: 28px; color: #1e1b4b;">Score de Santé Financière</h2>
+                        <p class="text-muted mb-0">Basé sur vos flux de {{ "now"|date("F Y") }}. Votre gestion est 
+                            <strong style="color: {{ score > 70 ? '#10b981' : (score > 40 ? '#f59e0b' : '#dc2626') }}">
+                                {{ score > 70 ? 'Excellente' : (score > 40 ? 'Équilibrée' : 'Critique') }}
+                            </strong>.
+                        </p>
+                    </div>
+                </div>
             </div>
-        </div>
-        <div class="ai-hero-right">
-            <a href="{{ path('dashboard') }}" class="ai-back-btn">
-                <i class="bi bi-arrow-left"></i> Tableau de Bord
-            </a>
+            <div class="col-lg-4 text-end">
+                {# Decorative badge removed as per request #}
+            </div>
         </div>
     </div>
 
     {# ── Stats Grid ── #}
     <div class="ai-stats">
-
-        {# Solde Actuel #}
         <div class="ai-stat">
             <div class="ai-stat-head">
                 <div class="ai-stat-icon asi-blue"><i class="bi bi-wallet2"></i></div>
                 <span class="ai-stat-label">Solde Actuel</span>
             </div>
             <div class="ai-stat-value">{{ data.balance|number_format(2, ',', ' ') }} <sup>DT</sup></div>
-            <p class="ai-stat-sub">État réel de votre portefeuille</p>
+            <div class="progress mt-2" style="height: 4px; background: #eef2ff;">
+                <div class="progress-bar bg-primary" style="width: 85%"></div>
+            </div>
         </div>
 
-        {# Ratio #}
         <div class="ai-stat">
             <div class="ai-stat-head">
                 <div class="ai-stat-icon asi-purple"><i class="bi bi-pie-chart-fill"></i></div>
                 <span class="ai-stat-label">Ratio d'Activité</span>
             </div>
             <div class="ai-stat-value">{{ data.ratio }}<sup>%</sup></div>
-            <p class="ai-stat-sub">Dépenses par rapport aux revenus</p>
+            <p class="ai-stat-sub text-{{ data.ratio > 80 ? 'danger' : 'success' }} fw-bold">
+                <i class="bi bi-{{ data.ratio > 80 ? 'arrow-up' : 'arrow-down' }}-right me-1"></i>
+                {{ data.ratio > 80 ? 'Attention au sur-endettement' : 'Ratio sain et maîtrisé' }}
+            </p>
         </div>
 
-        {# Risk #}
-        {% set colorMap = {'high': '#dc2626', 'medium': '#d97706', 'low': '#16a34a'} %}
         <div class="ai-stat">
             <div class="ai-stat-head">
                 <div class="ai-stat-icon asi-red"><i class="bi bi-shield-exclamation"></i></div>
@@ -163,10 +176,13 @@
             <div class="ai-stat-value" style="color: {{ colorMap[data.cssClass] | default('#1e1b4b') }}; font-size: 24px;">
                 {{ data.risk }}
             </div>
-            <p class="ai-stat-sub">Analyse de la volatilité financière</p>
+            <div class="d-flex gap-1 mt-2">
+                <div class="flex-grow-1" style="height:4px; border-radius:2px; background: {{ data.cssClass == 'low' ? '#16a34a' : '#f3f4f6' }}"></div>
+                <div class="flex-grow-1" style="height:4px; border-radius:2px; background: {{ data.cssClass == 'medium' ? '#f59e0b' : '#f3f4f6' }}"></div>
+                <div class="flex-grow-1" style="height:4px; border-radius:2px; background: {{ data.cssClass == 'high' ? '#dc2626' : '#f3f4f6' }}"></div>
+            </div>
         </div>
 
-        {# Future expenses #}
         <div class="ai-stat">
             <div class="ai-stat-head">
                 <div class="ai-stat-icon asi-green"><i class="bi bi-graph-up-arrow"></i></div>
@@ -175,119 +191,109 @@
             <div class="ai-stat-value">{{ data.predictedExpenses }} <sup>DT</sup></div>
             <p class="ai-stat-sub">Estimation pour la prochaine période</p>
         </div>
-
     </div>
 
     {# ── Prediction & Coach Row ── #}
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 28px; margin-bottom: 30px;">
-        
-        {# ── MODULE: Prédire Futur Solde ── #}
-        <div class="ai-reco-card" style="margin:0; border-top: 5px solid #3b82f6;">
-            <div class="ai-reco-header">
-                <div class="ai-reco-icon" style="background: linear-gradient(135deg, #3b82f6, #2563eb);"><i class="bi bi-graph-up"></i></div>
-                <div>
-                    <h2>Prédire Futur Solde</h2>
-                    <p>Projection financière sur 30 jours</p>
-                </div>
-            </div>
-            <div style="text-align:center; padding: 20px 0;">
-                <div style="font-size: 42px; font-weight: 900; color: #1e1b4b;">
-                    {{ data.predictedBalance|number_format(2, ',', ' ') }} <span style="font-size: 18px; color: #64748b;">DT</span>
-                </div>
-                <div style="margin-top: 10px; display: inline-flex; align-items: center; gap: 8px; padding: 6px 15px; border-radius: 50px; background: {{ (data.predictedBalance >= data.balance) ? '#dcfce7' : '#fee2e2' }}; color: {{ (data.predictedBalance >= data.balance) ? '#15803d' : '#991b1b' }}; font-weight: 700; font-size: 14px;">
-                    <i class="bi {{ (data.predictedBalance >= data.balance) ? 'bi-caret-up-fill' : 'bi-caret-down-fill' }}"></i>
-                    {{ (data.predictedBalance - data.balance)|abs|number_format(2, ',', ' ') }} DT vs Aujourd'hui
-                </div>
-            </div>
-            <p style="font-size: 13px; color: #64748b; text-align: center; font-style: italic;">
-                *Cette prédiction utilise une courbe de tendance basée sur vos dépenses futures estimées à {{ data.predictedExpenses }} DT.
-            </p>
-        </div>
-
-        {# ── MODULE: Coach Financier ── #}
-        <div class="ai-reco-card" style="margin:0; border-top: 5px solid #7c3aed;">
-            <div class="ai-reco-header">
-                <div class="ai-reco-icon"><i class="bi bi-person-badge"></i></div>
-                <div>
-                    <h2>Coach Financier</h2>
-                    <p>Votre guide digital intelligent</p>
-                </div>
-            </div>
-            <div class="ai-reco-list">
-                {% for r in data.recommendation %}
-                    <div class="ai-reco-item" style="border-left-color: #7c3aed;">
-                        <i class="bi bi-chat-right-dots-fill"></i>
-                        <span>{{ r }}</span>
+    <div class="row g-4 mb-5">
+        <div class="col-lg-6">
+            <div class="ai-reco-card h-100 overflow-hidden position-relative" style="border-top: 5px solid #3b82f6;">
+                <div class="prediction-pulse-bg"></div>
+                <div class="ai-reco-header">
+                    <div class="ai-reco-icon" style="background: linear-gradient(135deg, #3b82f6, #2563eb);"><i class="bi bi-cpu"></i></div>
+                    <div>
+                        <h2>Moteur de Prédiction</h2>
+                        <p>Algorithme de projection à 30 jours</p>
                     </div>
-                {% else %}
-                    <div style="text-align:center;padding:40px;color:#9ca3af;">
-                        Tout est parfait ! Votre coach n'a aucune alerte à signaler.
+                </div>
+                <div class="text-center py-4">
+                    <div class="prediction-value-wrap">
+                        <div class="display-3 fw-900 mb-0" style="color: #1e1b4b;">
+                            {{ data.predictedBalance|number_format(2, ',', ' ') }} <small style="font-size: 20px;">DT</small>
+                        </div>
+                        <div class="prediction-status-badge {{ (data.predictedBalance >= data.balance) ? 'positive' : 'negative' }}">
+                            <i class="bi {{ (data.predictedBalance >= data.balance) ? 'bi-graph-up' : 'bi-graph-down' }} me-2"></i>
+                            {{ (data.predictedBalance - data.balance)|abs|number_format(2, ',', ' ') }} DT vs Aujourd'hui
+                        </div>
                     </div>
-                {% endfor %}
+                </div>
+                <div class="p-3 bg-light rounded-4 border border-blue-100">
+                    <p class="small text-muted mb-0 fst-italic">
+                        <i class="bi bi-info-circle me-1"></i> Notre IA prévoit une {{ (data.predictedBalance >= data.balance) ? 'croissance' : 'diminution' }} de votre solde basée sur votre historique de consommation de {{ data.predictedExpenses }} DT.
+                    </p>
+                </div>
             </div>
         </div>
 
+        <div class="col-lg-6">
+            <div class="ai-reco-card h-100" style="border-top: 5px solid #7c3aed;">
+                <div class="ai-reco-header">
+                    <div class="ai-reco-icon"><i class="bi bi-robot"></i></div>
+                    <div>
+                        <h2>Smart Coach Financier</h2>
+                        <p>Vos recommandations personnalisées</p>
+                    </div>
+                </div>
+                <div class="ai-reco-list">
+                    {% for r in data.recommendation %}
+                        <div class="coach-bubble {{ loop.index is odd ? 'left' : 'right' }}">
+                            <div class="bubble-content">
+                                <i class="bi bi-stars text-primary me-2"></i>
+                                {{ r }}
+                            </div>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5 opacity-50">
+                            <i class="bi bi-check2-all display-4"></i>
+                            <p class="mt-2">Tout est parfait ! Votre coach n'a aucune alerte.</p>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
     </div>
 
     {# ── Comparaison Mensuelle ── #}
-    <div class="ai-reco-card" style="margin-top: 28px; border-top: 5px solid #10b981;">
-        <div class="ai-reco-header">
-            <div class="ai-reco-icon" style="background: linear-gradient(135deg, #10b981, #059669);"><i class="bi bi-calendar-range"></i></div>
+    <div class="ai-reco-card border-0 shadow-lg mb-5" style="background: linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%);">
+        <div class="ai-reco-header mb-4">
+            <div class="ai-reco-icon" style="background: linear-gradient(135deg, #10b981, #059669);"><i class="bi bi-bar-chart-steps"></i></div>
             <div>
-                <h2>Comparaison Mensuelle</h2>
-                <p>Évolution de votre santé financière par rapport au mois dernier</p>
+                <h2 class="fw-900">Performance Mensuelle</h2>
+                <p>Analyse comparative des flux de trésorerie</p>
             </div>
         </div>
 
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
-            {# Last Month Card #}
-            <div style="background: #f8fafc; border-radius: 20px; padding: 24px; border: 1px solid #e2e8f0;">
-                <h6 style="font-size: 11px; font-weight: 800; color: #64748b; text-transform: uppercase; margin-bottom: 15px;">Mois Précédent</h6>
-                <div style="display: flex; flex-direction: column; gap: 10px;">
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <span style="font-size: 13px; color: #475569;">Revenus</span>
-                        <span style="font-size: 15px; font-weight: 700; color: #1e1b4b;">{{ data.prevMonth.income|number_format(2, ',', ' ') }} DT</span>
-                    </div>
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <span style="font-size: 13px; color: #475569;">Dépenses</span>
-                        <span style="font-size: 15px; font-weight: 700; color: #1e1b4b;">{{ data.prevMonth.expenses|number_format(2, ',', ' ') }} DT</span>
-                    </div>
-                    <hr style="margin: 10px 0; border: none; border-top: 1px dashed #cbd5e1;">
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <span style="font-size: 13px; font-weight: 700; color: #1e1b4b;">Auto-Financement</span>
-                        <span style="font-size: 15px; font-weight: 800; color: #4f46e5;">{{ data.prevMonth.balance|number_format(2, ',', ' ') }} DT</span>
+        <div class="row g-4">
+            <div class="col-md-6">
+                <div class="month-card prev">
+                    <div class="month-label">MOIS PRÉCÉDENT <small style="opacity:0.6;font-size:10px;">({{ data.debugPrevMonth }}/{{ data.debugPrevYear }})</small></div>
+                    <div class="month-stats">
+                        <div class="m-stat"><span class="l">Entrées</span><span class="v">+{{ data.prevMonth.income|number_format(0, ',', ' ') }} DT</span></div>
+                        <div class="m-stat"><span class="l">Sorties</span><span class="v">-{{ data.prevMonth.expenses|number_format(0, ',', ' ') }} DT</span></div>
+                        <div class="m-stat total"><span class="l">Net</span><span class="v">{{ data.prevMonth.balance|number_format(0, ',', ' ') }} DT</span></div>
                     </div>
                 </div>
             </div>
-
-            {# Current Month Card #}
-            <div style="background: white; border-radius: 20px; padding: 24px; border: 1px solid #10b981; box-shadow: 0 10px 25px rgba(16,185,129,0.1);">
-                {% set balDiff = data.currentMonth.balance - data.prevMonth.balance %}
-                <h6 style="font-size: 11px; font-weight: 800; color: #10b981; text-transform: uppercase; margin-bottom: 15px;">Ce Mois-ci (En Cours)</h6>
-                <div style="display: flex; flex-direction: column; gap: 10px;">
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <span style="font-size: 13px; color: #475569;">Revenus</span>
-                        {% set incDiffPct = data.prevMonth.income > 0 ? (data.currentMonth.income - data.prevMonth.income) / data.prevMonth.income * 100 : 100 %}
-                        <span style="font-size: 15px; font-weight: 700; color: #1e1b4b;">
-                            {{ data.currentMonth.income|number_format(2, ',', ' ') }} DT
-                            <small style="font-size: 11px; color: {{ incDiffPct >= 0 ? '#10b981' : '#dc2626' }};">({{ incDiffPct >= 0 ? '+' : '' }}{{ incDiffPct|round(1) }}%)</small>
-                        </span>
-                    </div>
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <span style="font-size: 13px; color: #475569;">Dépenses</span>
-                        {% set expDiffPct = data.prevMonth.expenses > 0 ? (data.currentMonth.expenses - data.prevMonth.expenses) / data.prevMonth.expenses * 100 : 0 %}
-                        <span style="font-size: 15px; font-weight: 700; color: #1e1b4b;">
-                            {{ data.currentMonth.expenses|number_format(2, ',', ' ') }} DT
-                            <small style="font-size: 11px; color: {{ expDiffPct <= 0 ? '#10b981' : '#dc2626' }};">({{ expDiffPct >= 0 ? '+' : '' }}{{ expDiffPct|round(1) }}%)</small>
-                        </span>
-                    </div>
-                    <hr style="margin: 10px 0; border: none; border-top: 1px dashed #10b981;">
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <span style="font-size: 13px; font-weight: 700; color: #1e1b4b;">Solde Net Actuel</span>
-                        <div style="text-align: right;">
-                            <div style="font-size: 18px; font-weight: 900; color: #059669;">{{ data.currentMonth.balance|number_format(2, ',', ' ') }} DT</div>
-                            <div style="font-size: 11px; font-weight: 700; color: {{ balDiff >= 0 ? '#10b981' : '#dc2626' }};">
-                                {{ balDiff >= 0 ? '▲ +' : '▼ ' }}{{ balDiff|abs|number_format(2, ',', ' ') }} DT vs mois dernier
+            <div class="col-md-6">
+                <div class="month-card current">
+                    {% set balDiff = data.currentMonth.balance - data.prevMonth.balance %}
+                    <div class="month-label">CE MOIS-CI <span class="badge bg-success ms-2">ACTIF</span></div>
+                    <div class="month-stats">
+                        <div class="m-stat">
+                            <span class="l">Entrées</span>
+                            <span class="v">+{{ data.currentMonth.income|number_format(0, ',', ' ') }} DT</span>
+                        </div>
+                        <div class="m-stat">
+                            <span class="l">Sorties</span>
+                            <span class="v">-{{ data.currentMonth.expenses|number_format(0, ',', ' ') }} DT</span>
+                        </div>
+                        <div class="m-stat total">
+                            <span class="l">Solde Net</span>
+                            <div class="v-group">
+                                <span class="v text-success">{{ data.currentMonth.balance|number_format(0, ',', ' ') }} DT</span>
+                                <span class="diff {{ balDiff >= 0 ? 'up' : 'down' }}">
+                                    <i class="bi bi-caret-{{ balDiff >= 0 ? 'up' : 'down' }}-fill"></i>
+                                    {{ balDiff|abs|number_format(0) }} DT
+                                </span>
                             </div>
                         </div>
                     </div>
@@ -296,11 +302,104 @@
         </div>
     </div>
 
+<style>
+    /* Premium Health Gauge */
+    .health-gauge-container {
+        width: 100px; height: 100px;
+        filter: drop-shadow(0 10px 20px rgba(124, 58, 237, 0.2));
+    }
+    .health-gauge {
+        width: 100%; height: 100%;
+        border-radius: 50%;
+        background: radial-gradient(closest-side, white 79%, transparent 80% 100%),
+                    conic-gradient(var(--c) calc(var(--p) * 1%), #f3f4f6 0);
+        display: flex; align-items: center; justify-content: center;
+    }
+    .gauge-value { font-size: 24px; font-weight: 900; color: #1e1b4b; }
+
+    .ai-badge-premium {
+        background: rgba(124, 58, 237, 0.1);
+        color: #7c3aed;
+        padding: 8px 16px;
+        border-radius: 12px;
+        font-weight: 800;
+        font-size: 11px;
+        letter-spacing: 1px;
+        display: inline-block;
+        border: 1px solid rgba(124, 58, 237, 0.2);
+    }
+
+    /* Prediction Animations */
+    .prediction-pulse-bg {
+        position: absolute; top: 50%; left: 50%;
+        width: 300px; height: 300px;
+        background: radial-gradient(circle, rgba(59, 130, 246, 0.05) 0%, transparent 70%);
+        transform: translate(-50%, -50%);
+        animation: pulsePredict 4s infinite;
+        z-index: 0;
+    }
+    @keyframes pulsePredict {
+        0% { transform: translate(-50%, -50%) scale(0.8); opacity: 0.5; }
+        50% { transform: translate(-50%, -50%) scale(1.2); opacity: 0.8; }
+        100% { transform: translate(-50%, -50%) scale(0.8); opacity: 0.5; }
+    }
+
+    .prediction-status-badge {
+        display: inline-flex; align-items: center;
+        padding: 8px 20px; border-radius: 100px;
+        font-weight: 800; font-size: 14px;
+        margin-top: 15px;
+    }
+    .prediction-status-badge.positive { background: #dcfce7; color: #16a34a; }
+    .prediction-status-badge.negative { background: #fee2e2; color: #dc2626; }
+
+    /* Coach Bubbles */
+    .coach-bubble {
+        margin-bottom: 20px;
+        max-width: 90%;
+    }
+    .bubble-content {
+        background: #fdfcff;
+        padding: 16px 20px;
+        border-radius: 20px;
+        border: 1px solid #f3f0ff;
+        font-size: 14px;
+        color: #334155;
+        line-height: 1.6;
+        box-shadow: 0 4px 12px rgba(124, 58, 237, 0.05);
+    }
+    .coach-bubble.left { margin-right: auto; .bubble-content { border-bottom-left-radius: 4px; } }
+    .coach-bubble.right { margin-left: auto; .bubble-content { border-bottom-right-radius: 4px; background: #fff; } }
+    .bubble-actions { margin-top: 8px; padding-left: 10px; }
+
+    /* Month Cards */
+    .month-card {
+        padding: 30px; border-radius: 24px;
+        height: 100%; transition: all 0.3s;
+    }
+    .month-card.prev { background: #f8fafc; border: 1px solid #e2e8f0; }
+    .month-card.current { background: white; border: 1.5px solid #10b981; box-shadow: 0 15px 35px rgba(16, 185, 129, 0.1); }
+    
+    .month-label { font-size: 11px; font-weight: 900; color: #94a3b8; letter-spacing: 1px; margin-bottom: 20px; }
+    .month-stats { display: flex; flex-direction: column; gap: 15px; }
+    .m-stat { display: flex; justify-content: space-between; align-items: center; }
+    .m-stat .l { font-size: 14px; color: #64748b; font-weight: 500; }
+    .m-stat .v { font-size: 16px; font-weight: 700; color: #1e1b4b; }
+    .m-stat.total { margin-top: 10px; padding-top: 15px; border-top: 1px dashed rgba(0,0,0,0.1); }
+    .m-stat.total .l { font-weight: 800; color: #1e1b4b; }
+    .m-stat.total .v { font-size: 22px; font-weight: 900; }
+    
+    .v-group { text-align: right; }
+    .diff { font-size: 12px; font-weight: 800; display: block; }
+    .diff.up { color: #10b981; }
+    .diff.down { color: #dc2626; }
+
+    .fw-900 { font-weight: 900; }
+</style>
+
     {# ── Legacy Recommendations (Hidden or removed if redundant) ── #}
     {# <div class="ai-reco-card"> ... </div> #}
 
 
-</div>
-</div>
 {% endblock %}
 

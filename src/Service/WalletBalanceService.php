@@ -15,13 +15,22 @@ class WalletBalanceService
 
     public function calculateUserBalance(int $userId): float
     {
-        $transactions = $this->transactionRepository->findBy(['userId' => $userId]);
+        $transactions = $this->transactionRepository->findBy(['user' => $userId]);
         $balance = 0.0;
 
         foreach ($transactions as $transaction) {
-            // The native wallet stores INCOME as positive montant, OUTCOME as negative montant.
-            // We simply sum all raw montant values.
-            $balance += $transaction->getMontant();
+            // Only count ACCEPTED transactions
+            if ($transaction->getStatus() !== 'ACCEPTED') {
+                continue;
+            }
+            // Robust calculation: Use the type field to determine the sign,
+            // ensuring that even if signs are inconsistent in the DB, the balance is correct.
+            $amount = abs($transaction->getMontant());
+            if ($transaction->getType() === 'OUTCOME') {
+                $balance -= $amount;
+            } else {
+                $balance += $amount;
+            }
         }
 
         return $balance;

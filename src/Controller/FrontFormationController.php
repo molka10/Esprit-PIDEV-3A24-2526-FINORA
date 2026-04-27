@@ -279,7 +279,7 @@ final class FrontFormationController extends AbstractController
                     $category->setNom($categoryName);
                     $category->setType('OUTCOME');
                     $category->setPriorite('HAUTE');
-                    $category->setUserId($user->getId());
+                    $category->setUser($user);
                     $entityManager->persist($category);
                     $entityManager->flush();
                 }
@@ -289,7 +289,7 @@ final class FrontFormationController extends AbstractController
                 $transaction->setType('OUTCOME');
                 $transaction->setDateTransaction(new \DateTime());
                 $transaction->setCategory($category);
-                $transaction->setUserId($user->getId());
+                $transaction->setUser($user);
                 $transaction->setNomTransaction('Achat Formation: ' . $formation->getTitre());
                 
                 $entityManager->persist($transaction);

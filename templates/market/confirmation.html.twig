@@ -1,0 +1,89 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Confirmation de {{ transaction.typeTransaction|capitalize }} — FINORA{% endblock %}
+
+{% block body %}
+<div class="container py-5">
+<div class="row justify-content-center">
+    <div class="col-lg-6">
+        <div class="card border-0 shadow-sm" style="border-radius: 20px; overflow: hidden;">
+            <div class="card-header p-5 text-center position-relative" style="background: linear-gradient(135deg, #1e0a3c 0%, #3b1278 100%);">
+                <!-- Checkmark Animation -->
+                <div class="mb-3 d-flex justify-content-center">
+                    <div style="width: 80px; height: 80px; background: rgba(34, 197, 94, 0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 3px solid #22c55e;">
+                        <i class="bi bi-check-lg text-success" style="font-size: 3rem; animation: scaleIn 0.5s ease-out;"></i>
+                    </div>
+                </div>
+                <h3 class="text-white fw-bold mb-1">Transaction Réussie !</h3>
+                <p class="text-white-50 mb-0">Votre ordre a été exécuté sur le marché.</p>
+
+                <!-- Decorative circles -->
+                <div class="position-absolute top-0 start-0 translate-middle" style="width: 150px; height: 150px; background: rgba(255,255,255,0.05); border-radius: 50%;"></div>
+                <div class="position-absolute bottom-0 end-0 translate-middle" style="width: 100px; height: 100px; background: rgba(255,255,255,0.05); border-radius: 50%;"></div>
+            </div>
+
+            <div class="card-body p-4 p-md-5">
+                <div class="text-center mb-4">
+                    <div class="text-muted small text-uppercase fw-bold mb-1">Montant {{ transaction.typeTransaction == 'ACHAT' ? 'Débité' : 'Crédité' }}</div>
+                    <div class="display-5 fw-bolder {{ transaction.typeTransaction == 'ACHAT' ? 'text-primary' : 'text-success' }}">
+                        {{ transaction.typeTransaction == 'ACHAT' ? '-' : '+' }}{{ transaction.montantTotal|number_format(2, '.', ' ') }} TND
+                    </div>
+                </div>
+
+                <div class="p-4 rounded-4 mb-4" style="background-color: #f8fafc; border: 1px dashed #cbd5e1;">
+                    <div class="d-flex justify-content-between mb-3 border-bottom pb-2">
+                        <span class="text-muted">Type d'Ordre</span>
+                        <span class="fw-bold {{ transaction.typeTransaction == 'ACHAT' ? 'text-primary' : 'text-danger' }}">{{ transaction.typeTransaction }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-3 border-bottom pb-2">
+                        <span class="text-muted">Action</span>
+                        <span class="fw-bold">{{ transaction.action.nomEntreprise }} ({{ transaction.action.symbole }})</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-3 border-bottom pb-2">
+                        <span class="text-muted">Quantité</span>
+                        <span class="fw-bold">{{ transaction.quantite }} unités</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-3 border-bottom pb-2">
+                        <span class="text-muted">Prix Unitaire</span>
+                        <span class="fw-bold">{{ transaction.prixUnitaire|number_format(2, '.', ' ') }} TND</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-3 border-bottom pb-2">
+                        <span class="text-muted">Frais & Commissions</span>
+                        <span class="fw-bold text-warning">{{ transaction.commission|number_format(2, '.', ' ') }} TND</span>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span class="text-muted">Date & Heure</span>
+                        <span class="fw-bold fs-6">{{ transaction.dateTransaction|date('d/m/Y H:i:s') }}</span>
+                    </div>
+                </div>
+
+                <div class="alert alert-success border-0 d-flex align-items-center" style="background-color: rgba(34, 197, 94, 0.1); border-radius: 12px;">
+                    <i class="bi bi-wallet2 fs-3 text-success me-3"></i>
+                    <div>
+                        <div class="text-success small fw-semibold">Nouveau Solde Wallet</div>
+                        <div class="fs-5 fw-bold text-success">{{ walletBalance|number_format(2, '.', ' ') }} TND</div>
+                    </div>
+                </div>
+
+                <div class="d-grid gap-3 mt-4 mt-md-5">
+                    <a href="{{ path('app_history') }}" class="btn btn-primary btn-lg fw-bold" style="border-radius: 12px; background: linear-gradient(135deg, #7c3aed 0%, #3b1278 100%); border: none;">
+                        <i class="bi bi-clock-history me-2"></i> Voir mon Portfolio
+                    </a>
+                    <a href="{{ path('app_market') }}" class="btn btn-light btn-lg text-muted fw-semibold" style="border-radius: 12px;">
+                        Retour au Marché
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+
+<style>
+    @keyframes scaleIn {
+        0% { transform: scale(0); border-width: 0px; }
+        50% { transform: scale(1.2); border-width: 5px; }
+        100% { transform: scale(1); border-width: 3px; }
+    }
+</style>
+{% endblock %}

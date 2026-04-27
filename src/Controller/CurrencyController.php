@@ -16,7 +16,9 @@ class CurrencyController extends AbstractController
         $currency = strtoupper($currency);
         
         if (in_array($currency, $allowed)) {
-            $request->getSession()->set('currency', $currency);
+            $session = $request->getSession();
+            $session->set('currency', $currency);
+            $session->set('app_currency', $currency);
         }
 
         $referer = $request->headers->get('referer');

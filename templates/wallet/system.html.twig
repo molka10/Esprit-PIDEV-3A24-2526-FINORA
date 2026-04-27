@@ -132,11 +132,12 @@
             <h1 class="fw-bolder">Wallet System <span class="badge bg-indigo-600 fs-6">External API Beta</span></h1>
         </div>
         <div class="col-md-4 text-end">
-            <div id="authStatus" class="d-inline-flex align-items-center glass-card py-2 px-3">
+            <div id="authStatus" class="d-inline-flex align-items-center bg-white border border-primary py-2 px-3 rounded-pill shadow-sm">
                 <span class="status-indicator me-2 bg-success rounded-circle animate-pulse" style="width:10px; height:10px;"></span>
-                <span id="statusText">System Online</span>
+                <span id="statusText" class="text-primary fw-bold" style="font-size: 0.9rem;">System Online</span>
             </div>
         </div>
+
     </div>
 
     <!-- Main Content Grid -->
@@ -234,39 +235,70 @@
                 <form id="addCardForm">
                     <div class="mb-3">
                         <label class="text-muted small">Full Name</label>
-                        <input type="text" name="cardHolderName" class="form-control bg-dark text-white border-glass" required>
+                        <input type="text" id="cardHolderName" name="cardHolderName" class="form-control bg-dark text-white border-glass" required>
                     </div>
-                    <div class="mb-3">
-                        <label class="text-muted small">Card Number</label>
-                        <input type="text" name="cardNumber" class="form-control bg-dark text-white border-glass" placeholder="16 digits" required>
+                    <div class="mb-4">
+                        <label class="text-muted small">Card Details</label>
+                        <!-- Stripe Elements Container -->
+                        <div id="card-element" class="form-control bg-dark text-white border-glass" style="padding: 12px;"></div>
+                        <div id="card-errors" class="text-danger small mt-2" role="alert"></div>
                     </div>
-                    <div class="row">
-                        <div class="col-6 mb-3">
-                            <label class="text-muted small">Expiry</label>
-                            <input type="text" name="expiryDate" class="form-control bg-dark text-white border-glass" placeholder="MM/YY" required>
-                        </div>
-                        <div class="col-6 mb-3">
-                            <label class="text-muted small">CVV</label>
-                            <input type="text" name="cvv" class="form-control bg-dark text-white border-glass" placeholder="***" required>
-                        </div>
-                    </div>
-                    <button type="submit" class="btn btn-premium w-100 mt-3">Link System Card</button>
+                    <button type="submit" id="submitStripeBtn" class="btn btn-premium w-100 mt-2">
+                        <i class="fas fa-lock me-2"></i> Save Card Securely
+                    </button>
                 </form>
             </div>
         </div>
     </div>
 </div>
 
+<!-- Include Stripe.js -->
+<script src="https://js.stripe.com/v3/"></script>
+
 <script>
     let currentRequestId = null;
+    let stripe = null;
+    let cardElement = null;
 
     document.addEventListener('DOMContentLoaded', () => {
         initializeApp();
+        setupStripe();
     });
 
-    function log(message, type = 'info') {
-        // Console logging disabled for clean UI
+    function setupStripe() {
+        // Initialize Stripe with a test publishable key (Replace with the real one later)
+        stripe = Stripe('pk_test_TYooMQauvdEDq54NiTphI7jx');
+        const elements = stripe.elements();
+
+        // Custom styling for the Stripe Element
+        const style = {
+            base: {
+                color: '#ffffff',
+                fontFamily: '"Inter", sans-serif',
+                fontSmoothing: 'antialiased',
+                fontSize: '16px',
+                '::placeholder': { color: '#94a3b8' }
+            },
+            invalid: { color: '#fa755a', iconColor: '#fa755a' }
+        };
+
+        // Mount the element to the DOM
+        cardElement = elements.create('card', {style: style});
+        cardElement.mount('#card-element');
+
+        // Handle real-time validation errors
+        cardElement.on('change', function(event) {
+            const displayError = document.getElementById('card-errors');
+            if (event.error) {
+                displayError.textContent = event.error.message;
+            } else {
+                displayError.textContent = '';
+            }
+        });
     }
+
+    // ... logging and apiFetch functions ...
+    function log(message, type = 'info') {}
 
     async function apiFetch(endpoint, method = 'GET', body = null) {
         const options = {
@@ -325,15 +357,48 @@
 
     document.getElementById('addCardForm').addEventListener('submit', async (e) => {
         e.preventDefault();
-        const formData = new FormData(e.target);
-        const body = Object.fromEntries(formData);
-        
-        try {
-            await apiFetch('/api/cards/link', 'POST', body);
-            bootstrap.Modal.getInstance(document.getElementById('addCardModal')).hide();
-            loadCards();
-            e.target.reset();
-        } catch (e) {}
+        const submitBtn = document.getElementById('submitStripeBtn');
+        const errorElement = document.getElementById('card-errors');
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Processing...';
+
+        const cardHolderName = document.getElementById('cardHolderName').value;
+
+        // Securely request a Token/PaymentMethod from Stripe servers
+        const {paymentMethod, error} = await stripe.createPaymentMethod({
+            type: 'card',
+            card: cardElement,
+            billing_details: { name: cardHolderName },
+        });
+
+        if (error) {
+            errorElement.textContent = error.message;
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="fas fa-lock me-2"></i> Save Card Securely';
+        } else {
+            // Success! Send the secure Token to the Backend instead of raw card numbers
+            const month = paymentMethod.card.exp_month.toString().padStart(2, '0');
+            const year = paymentMethod.card.exp_year.toString().slice(-2); // e.g., "24"
+
+            const body = {
+                cardHolderName: cardHolderName,
+                stripePaymentMethodId: paymentMethod.id, // "pm_12345..."
+                last4: paymentMethod.card.last4,
+                brand: paymentMethod.card.brand,
+                expiryDate: `${month}/${year}` // MM/YY format to match existing DB
+            };
+            
+            try {
+                await apiFetch('/api/cards/link', 'POST', body);
+                bootstrap.Modal.getInstance(document.getElementById('addCardModal')).hide();
+                loadCards();
+                e.target.reset();
+                cardElement.clear(); // Clear the secure iframe
+            } catch (e) {}
+            
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="fas fa-lock me-2"></i> Save Card Securely';
+        }
     });
 
     document.getElementById('rechargeForm').addEventListener('submit', async (e) => {

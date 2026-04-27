@@ -9,36 +9,36 @@
         }
         body {
             font-family: 'Helvetica', 'Arial', sans-serif;
-            font-size: 11pt;
+            font-size: 10pt;
             color: #334155;
-            margin-top: 3cm;
-            margin-bottom: 2cm;
-            margin-left: 1.5cm;
-            margin-right: 1.5cm;
-            line-height: 1.5;
+            margin-top: 2.2cm;
+            margin-bottom: 1.2cm;
+            margin-left: 1.2cm;
+            margin-right: 1.2cm;
+            line-height: 1.4;
         }
         header {
             position: fixed;
             top: 0cm;
             left: 0cm;
             right: 0cm;
-            height: 2.5cm;
+            height: 1.8cm;
             background-color: #7c3aed;
             color: white;
             text-align: center;
-            line-height: 2.5cm;
+            line-height: 1.8cm;
         }
         footer {
             position: fixed;
             bottom: 0cm;
             left: 0cm;
             right: 0cm;
-            height: 1.5cm;
+            height: 1cm;
             background-color: #f8fafc;
             color: #64748b;
             text-align: center;
-            font-size: 9pt;
-            line-height: 1.5cm;
+            font-size: 8pt;
+            line-height: 1cm;
             border-top: 1px solid #e2e8f0;
         }
         .logo {
@@ -47,14 +47,14 @@
             letter-spacing: 2px;
         }
         .report-title {
-            margin-bottom: 30px;
+            margin-bottom: 15px;
             border-bottom: 2px solid #7c3aed;
-            padding-bottom: 10px;
+            padding-bottom: 5px;
         }
         .report-title h1 {
             color: #1e1b4b;
             margin: 0;
-            font-size: 22pt;
+            font-size: 18pt;
         }
         .report-title span {
             color: #64748b;
@@ -63,8 +63,8 @@
         .summary-box {
             background-color: #f5f3ff;
             border-radius: 10px;
-            padding: 20px;
-            margin-bottom: 30px;
+            padding: 15px;
+            margin-bottom: 15px;
         }
         .summary-table {
             width: 100%;
@@ -82,16 +82,16 @@
             margin-bottom: 5px;
         }
         .metric-value {
-            font-size: 14pt;
+            font-size: 12pt;
             font-weight: bold;
             color: #7c3aed;
         }
         .section-header {
-            font-size: 12pt;
+            font-size: 10pt;
             font-weight: bold;
             color: #1e1b4b;
-            margin-top: 30px;
-            margin-bottom: 15px;
+            margin-top: 15px;
+            margin-bottom: 10px;
             text-transform: uppercase;
             letter-spacing: 1px;
         }
@@ -127,6 +127,39 @@
         .text-right { text-align: right; }
         .text-center { text-align: center; }
         .text-primary { color: #7c3aed; }
+        
+        .signature-section {
+            margin-top: 30px;
+            width: 100%;
+        }
+        .signature-box {
+            width: 45%;
+            float: left;
+            border-top: 1px solid #cbd5e1;
+            padding-top: 8px;
+            text-align: center;
+        }
+        .signature-spacer {
+            width: 10%;
+            float: left;
+        }
+        .signature-title {
+            font-size: 8pt;
+            font-weight: bold;
+            color: #1e1b4b;
+            margin-bottom: 40px;
+            text-transform: uppercase;
+        }
+        .signature-label {
+            font-size: 8pt;
+            color: #64748b;
+            font-style: italic;
+        }
+        .clearfix::after {
+            content: "";
+            clear: both;
+            display: table;
+        }
     </style>
 </head>
 <body>
@@ -147,8 +180,8 @@
                         <span>Document généré le {{ "now"|date("d/m/Y H:i") }}</span>
                     </td>
                     <td class="text-right" style="vertical-align: bottom;">
-                        <span style="font-weight: bold; color: #1e1b4b;">Client: {{ user.username }}</span><br>
-                        <span>ID Investisseur: #{{ user.id|default('000') }}</span>
+                        <span style="font-weight: bold; color: #1e1b4b;">Client: {{ user ? user.username : 'Visiteur' }}</span><br>
+                        <span>ID Investisseur: #{{ user ? user.id : '000' }}</span>
                     </td>
                 </tr>
             </table>
@@ -225,48 +258,84 @@
             </table>
         {% else %}
             <div class="section-header">Résumé Technique du Projet</div>
-            <div style="background-color: white; border: 1px solid #e2e8f0; border-radius: 10px; padding: 25px;">
+            <div style="background-color: white; border: 1px solid #e2e8f0; border-radius: 10px; padding: 15px;">
                 <table style="width: 100%;">
                     <tr>
-                        <td style="width: 50%; padding-bottom: 15px;">
+                        <td style="width: 50%; padding-bottom: 10px;">
                             <span class="metric-label">Nom du Projet</span>
-                            <span style="font-size: 14pt; font-weight: bold; color: #1e1b4b;">{{ investment.name }}</span>
+                            <span style="font-size: 11pt; font-weight: bold; color: #1e1b4b;">{{ investment.name }}</span>
                         </td>
-                        <td style="width: 50%; padding-bottom: 15px;">
+                        <td style="width: 50%; padding-bottom: 10px;">
                             <span class="metric-label">Emplacement</span>
-                            <span style="font-size: 14pt; font-weight: bold; color: #1e1b4b;">{{ investment.location }}</span>
+                            <span style="font-size: 11pt; font-weight: bold; color: #1e1b4b;">{{ investment.location }}</span>
                         </td>
                     </tr>
                     <tr>
-                        <td style="padding-bottom: 15px;">
+                        <td style="padding-bottom: 10px;">
                             <span class="metric-label">Financement Actuel</span>
-                            <span style="font-size: 14pt; font-weight: bold; color: #7c3aed;">{{ stats.fundingCurrent|format_currency }} / {{ stats.fundingPercentage }}%</span>
+                            <span style="font-size: 11pt; font-weight: bold; color: #7c3aed;">{{ stats.fundingCurrent|format_currency }} / {{ stats.fundingPercentage }}%</span>
                         </td>
                         <td>
                             <span class="metric-label">Statut Administratif</span>
-                            <span style="font-size: 14pt; font-weight: bold; color: #1e1b4b;">Certifié FINORA</span>
+                            <span style="font-size: 11pt; font-weight: bold; color: #1e1b4b;">Certifié FINORA</span>
                         </td>
                     </tr>
                 </table>
-                <div style="margin-top: 20px;">
+                <div style="margin-top: 10px;">
                     <span class="metric-label">Description De l'Opportunité</span>
-                    <p style="font-size: 10pt; color: #475569; margin-top: 5px;">{{ investment.description|nl2br }}</p>
+                    <p style="font-size: 9pt; color: #475569; margin-top: 3px; margin-bottom: 0;">{{ investment.description|nl2br }}</p>
                 </div>
             </div>
         {% endif %}
 
-        <div style="margin-top: 50px; padding: 20px; border: 1px dashed #cbd5e1; border-radius: 10px;">
-            <h4 style="margin-top: 0; color: #1e1b4b;">Note de Conformité</h4>
-            <p style="font-size: 9pt; color: #64748b; margin-bottom: 0;">
-                Ce document constitue un relevé informatif de vos positions actuelles sur la plateforme FINORA. 
-                Toutes les transactions figurant sur ce rapport sont enregistrées dans notre système sécurisé. 
-                Pour toute question, veuillez contacter notre équipe support.
+        <div style="margin-top: 25px; padding: 12px; border: 1px dashed #cbd5e1; border-radius: 10px;">
+            <h4 style="margin-top: 0; margin-bottom: 5px; color: #1e1b4b; font-size: 10pt;">Note de Conformité</h4>
+            <p style="font-size: 8pt; color: #64748b; margin-bottom: 0;">
+                Ce document constitue un relevé informatif de vos positions sur la plateforme FINORA. 
+                Toutes les transactions sont enregistrées dans notre système sécurisé.
             </p>
         </div>
 
-        <div class="text-center" style="margin-top: 30px;">
-            <div style="font-style: italic; color: #94a3b8; font-size: 8pt;">
-                Scellé numériquement par l'IA de FINORA
+        <div style="margin-top: 20px; text-align: center;">
+            <table style="width: 100%; border: 1px solid #e2e8f0; border-radius: 10px; background-color: #f8fafc; padding: 10px;">
+                <tr>
+                    <td style="width: 70%; text-align: left; padding-left: 10px;">
+                        <h4 style="margin: 0; color: #1e1b4b; font-size: 10pt;">Accès Numérique</h4>
+                        <p style="font-size: 8pt; color: #64748b; margin-top: 5px; margin-bottom: 0;">
+                            Scanner ce QR code pour accéder aux détails mis à jour, 
+                            consulter les avis et suivre l'évolution de ce projet en temps réel sur la plateforme web.
+                        </p>
+                    </td>
+                    <td style="width: 30%; text-align: center;">
+                        {% if qrCodeUrl is defined and qrCodeUrl is not empty %}
+                            <img src="{{ qrCodeUrl }}" width="70" height="70" style="border: 2px solid white; border-radius: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                        {% endif %}
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="signature-section clearfix">
+            <div class="signature-box">
+                <div class="signature-title">L'Investisseur</div>
+                <div style="height: 30px;"></div>
+                <div class="signature-label">Mention "Bon pour accord"</div>
+                <div style="font-weight: bold; margin-top: 5px; color: #1e1b4b; font-size: 9pt;">{{ user ? user.username|upper : 'INVESTISSEUR POTENTIEL' }}</div>
+            </div>
+            <div class="signature-spacer"></div>
+            <div class="signature-box">
+                <div class="signature-title">Direction Finora</div>
+                <div style="height: 30px; position: relative;">
+                    <div style="position: absolute; top: -25px; left: 50%; margin-left: -40px; color: rgba(124, 58, 237, 0.12); font-size: 18pt; font-weight: bold; border: 3px double rgba(124, 58, 237, 0.12); border-radius: 50%; width: 80px; height: 80px; line-height: 80px; transform: rotate(-15deg); text-align: center;">FINORA</div>
+                </div>
+                <div class="signature-label">Certifié numériquement</div>
+                <div style="font-weight: bold; margin-top: 5px; color: #1e1b4b; font-size: 9pt;">IA Assistant Finora</div>
+            </div>
+        </div>
+
+        <div class="text-center" style="margin-top: 25px;">
+            <div style="font-style: italic; color: #94a3b8; font-size: 6pt;">
+                Ce document a une valeur contractuelle dans le cadre de la plateforme Finora. Document scellé numériquement.
             </div>
         </div>
     </main>

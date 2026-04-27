@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.example.finora.controllers.DashboardController"
+            styleClass="root">
+
+    <left>
+        <VBox spacing="10" styleClass="sidebar">
+            <padding><Insets top="18" right="12" bottom="18" left="12"/></padding>
+
+            <Label text="FINORA" styleClass="title"/>
+            <Label fx:id="roleLabel" text="Rôle" styleClass="muted"/>
+
+            <Separator/>
+
+            <Button fx:id="btnHome" text="🏠 Accueil" styleClass="nav-btn" onAction="#goHome"/>
+            <Button fx:id="btnAppelOffre" text="📣 Appels d’Offres" styleClass="nav-btn" onAction="#goAppelOffre"/>
+            <Button fx:id="btnCandidature" text="🧾 Candidatures" styleClass="nav-btn" onAction="#goCandidature"/>
+            <Button fx:id="btnStats" text="📊 Statistiques" styleClass="nav-btn" onAction="#goStats"/>
+
+            <Pane VBox.vgrow="ALWAYS"/>
+
+            <!-- Theme toggle (kept in the main dashboard so it affects all screens) -->
+            <Button fx:id="btnTheme" text="🌙 Thème" styleClass="ghost-btn" onAction="#toggleTheme"/>
+
+            <Button text="⏻ Changer rôle" styleClass="ghost-btn" onAction="#logout"/>
+        </VBox>
+    </left>
+
+    <center>
+        <StackPane fx:id="contentPane" styleClass="content">
+            <padding><Insets top="18" right="18" bottom="18" left="18"/></padding>
+        </StackPane>
+    </center>
+</BorderPane>

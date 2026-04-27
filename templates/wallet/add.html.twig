@@ -268,7 +268,13 @@
                 <div class="type-toggle-grid">
                     {% for choice in form.type %}
                         <div class="type-option">
-                            {{ form_widget(choice) }}
+                            <input
+                                type="radio"
+                                id="{{ choice.vars.id }}"
+                                name="{{ choice.vars.full_name }}"
+                                value="{{ choice.vars.value }}"
+                                {% if choice.vars.checked %}checked{% endif %}
+                            >
                             <label class="type-label {{ choice.vars.value == 'INCOME' ? 'income' : 'outcome' }}" for="{{ choice.vars.id }}">
                                 {% if choice.vars.value == 'INCOME' %}
                                     <i class="bi bi-arrow-down-circle-fill"></i> Revenu
@@ -311,8 +317,8 @@
             </div>
 
             <button type="submit" id="form_submit_btn" class="fp-submit">
-                <i class="bi bi-check-circle-fill"></i>
-                Enregistrer la Transaction
+                <i class="bi bi-save-fill me-1"></i>
+                Sauvegarder
             </button>
 
             {{ form_widget(form._token) }}
@@ -325,11 +331,11 @@
 {% block javascripts %}
 <script>
 document.addEventListener("DOMContentLoaded", function () {
-    const radios = document.querySelectorAll('input[name="transaction_wallet[type]"]');
     const categoryVisible = document.getElementById('category_visible');
     const categoryHidden  = document.getElementById('category_hidden');
     const categoryError   = document.getElementById('category_error');
-    const labels = document.querySelectorAll('.type-option');
+
+    let currentController = null;
 
     // Sync visible select → hidden field
     categoryVisible.addEventListener('change', function () {
@@ -338,32 +344,53 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     function loadCategories(type) {
-        fetch('/api/categories/' + type.toUpperCase())
+        if (!type) return;
+        type = type.toUpperCase();
+
+        if (currentController) currentController.abort();
+        currentController = new AbortController();
+
+        categoryVisible.innerHTML = '<option value="">Chargement…</option>';
+        categoryHidden.value = '';
+
+        // Add a timestamp cache buster to completely bypass browser caching
+        const url = '/api/categories/' + type + '?_t=' + new Date().getTime();
+
+        fetch(url, { signal: currentController.signal, cache: "no-store" })
             .then(res => res.json())
             .then(data => {
-                categoryVisible.innerHTML = '<option value="">Sélectionner une catégorie</option>';
-                categoryHidden.value = '';
-                data.forEach(cat => {
-                    let option = document.createElement('option');
-                    option.value = cat.id;
-                    option.textContent = cat.nom;
-                    categoryVisible.appendChild(option);
-                });
+                // Show the type in the default option to confirm what was fetched
+                categoryVisible.innerHTML = '<option value="">— Catégories ' + (type === 'INCOME' ? 'Revenus' : 'Dépenses') + ' —</option>';
+                
+                if (!Array.isArray(data) || data.length === 0) {
+                    const opt = document.createElement('option');
+                    opt.disabled = true;
+                    opt.textContent = 'Aucune catégorie configurée';
+                    categoryVisible.appendChild(opt);
+                } else {
+                    data.forEach(cat => {
+                        const option = document.createElement('option');
+                        option.value = cat.id;
+                        option.textContent = cat.nom;
+                        categoryVisible.appendChild(option);
+                    });
+                }
+            })
+            .catch(err => {
+                if (err.name !== 'AbortError') {
+                    categoryVisible.innerHTML = '<option value="">Erreur de chargement</option>';
+                }
             });
     }
 
-    labels.forEach(label => {
-        label.addEventListener("click", function () {
-            const radio = this.querySelector('input');
-            if (radio) { radio.checked = true; loadCategories(radio.value); }
-        });
+    // Attach a single click event to the container, using event delegation
+    document.querySelector('.type-toggle-grid').addEventListener('change', function(e) {
+        if (e.target && e.target.type === 'radio') {
+            loadCategories(e.target.value);
+        }
     });
 
-    radios.forEach(radio => {
-        radio.addEventListener("change", function () { loadCategories(this.value); });
-    });
-
-    // Client-side guard before submit
+    // Guard: block submit if no category selected
     document.getElementById('form_submit_btn').addEventListener('click', function (e) {
         if (!categoryHidden.value) {
             e.preventDefault();
@@ -372,6 +399,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
 
+    // Initial load
     const checked = document.querySelector('input[name="transaction_wallet[type]"]:checked');
     loadCategories(checked ? checked.value : 'INCOME');
 });

@@ -6,6 +6,7 @@ use App\Entity\Action;
 use App\Form\ActionType;
 use App\Repository\ActionRepository;
 use App\Service\ActionService;
+use App\Service\NotificationBourseService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -17,7 +18,8 @@ class ActionController extends AbstractController
 {
     public function __construct(
         private ActionService $actionService,
-        private EntityManagerInterface $em
+        private EntityManagerInterface $em,
+        private NotificationBourseService $notificationBourseService
     ) {}
 
     /**
@@ -45,10 +47,13 @@ class ActionController extends AbstractController
             try {
                 // Utiliser le service pour la logique métier
                 $this->actionService->create($action);
-                
-                $this->addFlash('success', '✅ Action créée avec succès !');
+
+                // 🔔 Notify all users about the new action
+                $this->notificationBourseService->notifyNewAction($action);
+
+                $this->addFlash('success', '✅ Action créée avec succès ! Tous les utilisateurs ont été notifiés.');
                 return $this->redirectToRoute('app_action_index');
-                
+
             } catch (\Exception $e) {
                 $this->addFlash('danger', '❌ Erreur : ' . $e->getMessage());
             }

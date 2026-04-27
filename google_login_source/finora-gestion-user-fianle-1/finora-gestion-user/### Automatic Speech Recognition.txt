@@ -1,0 +1,85 @@
+### Automatic Speech Recognition
+Find out more about Automatic Speech Recognition [here](https://huggingface.co/docs/inference-providers/en/tasks/automatic-speech-recognition).
+Language
+Client
+Provider
+Settings
+
+```
+import os from huggingface_hub import InferenceClient client = InferenceClient( provider="hf-inference", api_key=os.environ["HF_TOKEN"], ) output = client.automatic_speech_recognition("sample1.flac", model="openai/whisper-large-v3")
+```
+
+### Chat Completion (LLM)
+Find out more about Chat Completion (LLM) [here](https://huggingface.co/docs/inference-providers/en/tasks/chat-completion).
+Language
+Client
+Provider
+Settings
+
+```
+import os from openai import OpenAI client = OpenAI( base_url="https://router.huggingface.co/v1", api_key=os.environ["HF_TOKEN"], ) completion = client.chat.completions.create( model="katanemo/Arch-Router-1.5B:hf-inference", messages=[ { "role": "user", "content": "What is the capital of France?" } ], ) print(completion.choices[0].message)
+```
+
+### Feature Extraction
+Find out more about Feature Extraction [here](https://huggingface.co/docs/inference-providers/en/tasks/feature-extraction).
+Language
+Client
+Provider
+Settings
+
+```
+import os from huggingface_hub import InferenceClient client = InferenceClient( provider="hf-inference", api_key=os.environ["HF_TOKEN"], ) result = client.feature_extraction( "Today is a sunny day and I will get some ice cream.", model="intfloat/multilingual-e5-large", )
+```
+
+### Fill Mask
+Find out more about Fill Mask [here](https://huggingface.co/docs/inference-providers/en/tasks/fill-mask).
+Language
+Client
+Provider
+Settings
+
+```
+import os from huggingface_hub import InferenceClient client = InferenceClient( provider="hf-inference", api_key=os.environ["HF_TOKEN"], ) result = client.fill_mask( "The answer to the universe is undefined.", model="medicalai/ClinicalBERT", )
+```
+
+### Image Classification
+Find out more about Image Classification [here](https://huggingface.co/docs/inference-providers/en/tasks/image-classification).
+Language
+Client
+Provider
+Settings
+
+```
+import os from huggingface_hub import InferenceClient client = InferenceClient( provider="hf-inference", api_key=os.environ["HF_TOKEN"], ) output = client.image_classification("cats.jpg", model="Falconsai/nsfw_image_detection")
+```
+
+### Image Segmentation
+Find out more about Image Segmentation [here](https://huggingface.co/docs/inference-providers/en/tasks/image-segmentation).
+Language
+Client
+Provider
+Settings
+
+```
+import os from huggingface_hub import InferenceClient client = InferenceClient( provider="hf-inference", api_key=os.environ["HF_TOKEN"], ) output = client.image_segmentation("cats.jpg", model="mattmdjaga/segformer_b2_clothes")
+```
+
+### Object Detection
+Find out more about Object Detection [here](https://huggingface.co/docs/inference-providers/en/tasks/object-detection).
+Language
+Client
+Provider
+Settings
+
+```
+import os from huggingface_hub import InferenceClient client = InferenceClient( provider="hf-inference", api_key=os.environ["HF_TOKEN"], ) output = client.object_detection("cats.jpg", model="facebook/detr-resnet-50")
+```
+
+### Question Answering
+Find out more about Question Answering [here](https://huggingface.co/docs/inference-providers/en/tasks/question-answering).
+Provider
+Settings
+
+```
+import os from huggingface_hub import InferenceClient client = InferenceClient( provider="hf-inference", api_key=os.environ["HF_TOKEN"], ) answer = client.question_answering( question="What is my name?", context="My name is Clara and I live in Berkeley.", model="google-bert/bert-large-uncased-whole-word-masking-finetuned-squad", )
+```

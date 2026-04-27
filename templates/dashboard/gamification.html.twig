@@ -1,0 +1,83 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mes Trophées — FINORA{% endblock %}
+
+{% block breadcrumb %}Gamification & Badges{% endblock %}
+
+{% block body %}
+<style>
+.badge-trophy {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+    height: 100%;
+}
+.badge-trophy.locked {
+    filter: grayscale(100%);
+    opacity: 0.6;
+    background: #f8fafc !important;
+    border: 1px dashed #cbd5e1 !important;
+}
+.badge-trophy.unlocked {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+}
+.badge-trophy.unlocked::before {
+    content: ''; position: absolute; top: 0; left: -100%; width: 50%; height: 100%;
+    background: linear-gradient(to right, transparent, rgba(255,255,255,0.4), transparent);
+    transform: skewX(-25deg); animation: shine 3s infinite;
+}
+@keyframes shine { 0% { left: -100%; } 20% { left: 200%; } 100% { left: 200%; } }
+.trophy-icon { font-size: 42px; margin-bottom: 12px; display: inline-block; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1)); }
+.trophy-lock { position: absolute; top: 12px; right: 12px; color: #94a3b8; font-size: 14px; }
+</style>
+
+        <!-- Welcome Section -->
+        <div class="col-12">
+            <div class="card border-0 shadow-sm p-4 text-white" style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); border-radius: 20px;">
+                <div class="row align-items-center">
+                    <div class="col-md-9">
+                        <h2 class="text-white mb-1"><i class="bi bi-award-fill text-warning me-2"></i> Ma Vitrine de Trophées</h2>
+                        <p class="mb-0 opacity-80">Découvrez vos accomplissements et débloquez de nouveaux badges en explorant la plateforme Finora.</p>
+                    </div>
+                    <div class="col-md-3 text-md-end mt-3 mt-md-0">
+                        <a href="{{ path(type == 'entreprise' ? 'app_entreprise_dashboard' : 'app_dashboard') }}" class="btn btn-outline-light btn-sm px-4 py-2" style="border-radius: 10px; font-weight: 600;">Retour Dashboard</a>
+                    </div>
+                </div>
+            </div>
+
+    {% if badges is defined and badges|length > 0 %}
+    <div class="row g-4">
+        {% for badge in badges %}
+        <div class="col-md-6 col-lg-3">
+            <div class="card border-0 p-4 text-center badge-trophy {{ badge.unlocked ? 'unlocked' : 'locked' }}" 
+                 style="{{ badge.unlocked ? 'background: linear-gradient(145deg, #ffffff, #f8fafc); border: 2px solid ' ~ badge.color ~ '40 !important;' : '' }}">
+                {% if not badge.unlocked %}
+                    <i class="bi bi-lock-fill trophy-lock" title="Trophée verrouillé"></i>
+                {% else %}
+                    <i class="bi bi-check-circle-fill trophy-lock" style="color: {{ badge.color }};" title="Trophée débloqué !"></i>
+                {% endif %}
+                <div class="trophy-icon">{{ badge.icon }}</div>
+                <h6 class="fw-bold mb-2" style="color: {{ badge.unlocked ? badge.color : '#64748b' }}; font-size: 16px;">{{ badge.name }}</h6>
+                <p class="small text-muted mb-0" style="font-size: 12.5px; line-height: 1.5;">{{ badge.description }}</p>
+                
+                {% if not badge.unlocked %}
+                <div class="mt-3 pt-3 border-top" style="font-size: 10px; color: #94a3b8; text-transform: uppercase; font-weight: bold;">
+                    Statut : À Débloquer
+                </div>
+                {% else %}
+                <div class="mt-3 pt-3 border-top" style="font-size: 10px; color: {{ badge.color }}; text-transform: uppercase; font-weight: bold;">
+                    Statut : Acquis
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="text-center py-5">
+        <i class="bi bi-inbox text-muted" style="font-size: 40px;"></i>
+        <h5 class="mt-3 text-muted">Aucun badge disponible.</h5>
+    </div>
+    {% endif %}
+{% endblock %}

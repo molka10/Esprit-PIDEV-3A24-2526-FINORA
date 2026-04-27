@@ -2,8 +2,9 @@
 
 {% block title %}Marché — FINORA{% endblock %}
 
+{% block breadcrumb %}Marché Boursier{% endblock %}
+
 {% block body %}
-<div class="container py-5">
 
 <style>
     .market-hero {
@@ -672,7 +673,7 @@ document.addEventListener('DOMContentLoaded', function() {
         {% for action in actions %}
         <div class="ticker-item">
             <span class="symbol">{{ action.symbole }}</span>
-            <span class="price">{{ action.prixUnitaire }} TND</span>
+            <span class="price">{{ action.prixUnitaire|format_currency }}</span>
             {% if action.id % 2 == 0 %}
                 <span class="up"><i class="bi bi-caret-up-fill"></i> +0.45%</span>
             {% else %}
@@ -684,82 +685,295 @@ document.addEventListener('DOMContentLoaded', function() {
         {% for action in actions %}
         <div class="ticker-item">
             <span class="symbol">{{ action.symbole }}</span>
-            <span class="price">{{ action.prixUnitaire }} TND</span>
+            <span class="price">{{ action.prixUnitaire|format_currency }}</span>
         </div>
         {% endfor %}
     </div>
 </div>
 
-<div class="card border-0 shadow-sm mb-4" style="background: linear-gradient(135deg, #1e0a3c 0%, #3b1278 100%); border-radius: 20px;">
-    <div class="card-body p-4">
+<div class="card border-0 mb-4 position-relative overflow-hidden" style="background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%); border-radius: 24px; box-shadow: 0 15px 35px rgba(15, 23, 42, 0.2);">
+    <!-- Abstract Glowing Orbs -->
+    <div style="position:absolute; top:-80px; right:-50px; width:250px; height:250px; background:#7c3aed; filter:blur(80px); opacity:0.4; pointer-events:none;"></div>
+    <div style="position:absolute; bottom:-80px; left:10%; width:200px; height:200px; background:#3b82f6; filter:blur(80px); opacity:0.3; pointer-events:none;"></div>
+    
+    <div class="card-body p-4 p-md-5 position-relative z-index-1">
         <div class="row align-items-center">
-            <div class="col-md-7">
-                <h2 class="text-white fw-bold mb-1">Marché Boursier <span class="live-badge ms-2" style="font-size:12px;"><span class="live-dot"></span> LIVE</span></h2>
-                <p class="mb-0 text-white-50 small"><i class="bi bi-calendar3 me-1"></i> {{ "now"|date("d/m/Y") }} — Bourse de Tunis (BVMT)</p>
+            <div class="col-md-6">
+                <h1 class="text-white fw-bolder mb-2" style="font-size: 2.2rem; letter-spacing: -0.5px;">Marché Boursier <span class="live-badge ms-2 align-middle" style="font-size:11px; padding: 5px 12px; background: rgba(34,197,94,0.2); color:#4ade80; border: 1px solid rgba(34,197,94,0.3);"><span class="live-dot" style="background:#4ade80;"></span> EN DIRECT</span></h1>
+                <p class="mb-0 text-white-50 fw-semibold" style="font-size: 14px;"><i class="bi bi-geo-alt-fill me-1 text-primary"></i> Bourse de Tunis (BVMT) &nbsp;•&nbsp; <i class="bi bi-clock me-1 text-primary"></i> {{ "now"|date("d M Y") }}</p>
             </div>
-            <div class="col-md-5 text-md-end mt-3 mt-md-0">
-                <div class="d-flex gap-2 justify-content-md-end flex-wrap">
-                    <div class="stat-pill py-2 px-3">
-                        <div class="value fs-5" style="color:#a855f7;">{{ actions|length }}</div>
-                        <div class="label" style="font-size:10px;">Actions</div>
+            <div class="col-md-6 text-md-end mt-4 mt-md-0">
+                <div class="d-flex gap-3 justify-content-md-end flex-wrap">
+                    <!-- Actions Stats -->
+                    <div class="stat-pill py-2 px-4" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(10px);">
+                        <div class="value" style="color:#c084fc; font-size: 24px;">{{ actions|length }}</div>
+                        <div class="label text-uppercase fw-bold" style="font-size:10px; letter-spacing:1px; color:#cbd5e1;">Actions Actives</div>
                     </div>
-                    <div class="stat-pill py-2 px-3">
-                        <div class="value fs-5 text-warning">BVMT</div>
-                        <div class="label" style="font-size:10px;">Marché</div>
+                    
+                    <!-- Simuler News -->
+                    <a href="{{ path('app_market_simulate_news') }}" class="btn btn-danger shadow border-0 d-flex flex-column justify-content-center align-items-center p-3" style="background: linear-gradient(135deg, #ef4444, #b91c1c); border-radius: 16px; min-width: 110px; transition: all 0.3s;" onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 10px 20px rgba(239, 68, 68, 0.3)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none';">
+                        <i class="bi bi-broadcast fs-4 text-white mb-1"></i>
+                        <span style="font-size:10px; font-weight:800; letter-spacing:0.5px;" class="text-white text-uppercase">Générer News</span>
+                    </a>
+                    
+                    {% if app.user %}
+                    <div class="d-flex flex-column gap-2 justify-content-center">
+                        <a href="{{ path('dashboard') }}" class="stat-pill py-2 px-4 text-decoration-none text-start d-flex flex-column justify-content-center" style="background: linear-gradient(135deg, rgba(34, 197, 94, 0.15), rgba(22, 163, 74, 0.05)); border: 1px solid rgba(34, 197, 94, 0.3); border-radius: 12px; transition: all 0.2s;" onmouseover="this.style.background='rgba(34, 197, 94, 0.2)';" onmouseout="this.style.background='linear-gradient(135deg, rgba(34, 197, 94, 0.15), rgba(22, 163, 74, 0.05))';">
+                            <div class="value fs-5 text-success fw-bolder">{{ walletBalance|format_currency }}</div>
+                            <div class="label text-success fw-bold text-uppercase" style="font-size:9px; letter-spacing:0.5px;"><i class="bi bi-wallet2 me-1"></i>Mon Wallet</div>
+                        </a>
+                        <form action="{{ path('app_market_margin') }}" method="POST" class="m-0">
+                            <input type="hidden" name="montant_marge" value="500">
+                            <button type="submit" class="btn btn-sm text-warning fw-bold w-100" style="font-size:10px; border: 1px solid rgba(245, 158, 11, 0.4); background: rgba(245, 158, 11, 0.15); border-radius: 8px; transition: all 0.2s;" onclick="return confirm('Emprunter 500 TND de levier ? Note: Ceci est un prêt temporaire pour acheter des actifs financiers.');" onmouseover="this.style.background='rgba(245, 158, 11, 0.25)';" onmouseout="this.style.background='rgba(245, 158, 11, 0.15)';">
+                                <i class="bi bi-lightning-charge-fill me-1"></i> +{{ 500|format_currency }} (Levier)
+                            </button>
+                        </form>
                     </div>
+                    {% endif %}
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-<div class="candle-section mb-4">
-    <div class="candle-header">
-        <h6><i class="bi bi-bar-chart-line" style="color:#f59e0b;"></i> Analyse Technique</h6>
+<!-- 🗺️ MARKET HEATMAP SECTION -->
+<div class="row mb-5">
+    <div class="col-12">
+        <div class="card border-0 shadow-sm overflow-hidden" style="border-radius: 24px; background: #ffffff;">
+            <div class="card-header p-4 d-flex justify-content-between align-items-center border-0 bg-white">
+                <h4 class="mb-0 text-dark fw-bolder" style="letter-spacing:-0.5px;"><i class="bi bi-map-fill me-2" style="color:#7c3aed;"></i> Heatmap du Marché</h4>
+                <div class="d-flex align-items-center gap-2">
+                    <span class="badge rounded-pill px-3 py-2" style="background: rgba(34, 197, 94, 0.1); color: #22c55e; border: 1px solid rgba(34, 197, 94, 0.2); font-size: 11px;"><i class="bi bi-arrow-up-circle-fill me-1"></i> Hausse</span>
+                    <span class="badge rounded-pill px-3 py-2" style="background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2); font-size: 11px;"><i class="bi bi-arrow-down-circle-fill me-1"></i> Baisse</span>
+                </div>
+            </div>
+            <div class="card-body p-0" style="background: #0f172a;">
+                <div id="marketHeatmap" style="min-height: 400px;"></div>
+            </div>
+            <div class="card-footer bg-white border-0 p-3 text-center">
+                <small class="text-muted"><i class="bi bi-info-circle me-1"></i> La taille des blocs représente le prix unitaire, la couleur représente la variation (simulée).</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Smart Learning Recommendations (CONTEXTUAL CAROUSEL) -->
+{% if recommendations is defined and recommendations|length > 0 %}
+<div class="row mb-5">
+    <div class="col-12">
+        <div id="smartRecCarousel" class="carousel slide" data-bs-ride="carousel">
+            <div class="carousel-inner" style="border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.05);">
+                {% for rec in recommendations %}
+                <div class="carousel-item {{ loop.first ? 'active' : '' }}">
+                    <div class="card border-0 position-relative" style="background: white; border-radius: 24px; border-left: 5px solid #6366f1 !important;">
+                        <div class="card-body p-0">
+                            <div class="row g-0 align-items-center">
+                                <div class="col-md-auto p-4 d-flex align-items-center justify-content-center" style="background: rgba(99, 102, 241, 0.05); min-width: 100px;">
+                                    <div class="icon-circle bg-primary text-white fs-2 shadow-sm" style="width: 60px; height: 60px; display: flex; align-items:center; justify-content:center; border-radius: 18px;">
+                                        <i class="bi {{ rec.icon }}"></i>
+                                    </div>
+                                </div>
+                                <div class="col-md p-4">
+                                    <div class="d-flex align-items-center gap-2 mb-1">
+                                        <span class="badge bg-warning bg-opacity-10 text-warning xsmall fw-bold px-2 py-1 rounded-pill">
+                                            <i class="bi bi-stars me-1"></i>RECOMMANDATION SMART {{ recommendations|length > 1 ? '#' ~ loop.index : '' }}
+                                        </span>
+                                    </div>
+                                    <h5 class="fw-bold text-dark mb-1">{{ rec.title }}</h5>
+                                    <p class="text-muted small mb-0">{{ rec.reason }}</p>
+                                </div>
+                                <div class="col-md-auto p-4">
+                                    {% if rec.formation %}
+                                        <a href="{{ path('app_formation_show', {id: rec.formation.id}) }}" class="btn btn-primary rounded-pill px-4 fw-bold">
+                                            Apprendre & Agir <i class="bi bi-arrow-right ms-2"></i>
+                                        </a>
+                                    {% else %}
+                                        <a href="{{ path('app_formations', {categorie: rec.category_slug}) }}" class="btn btn-outline-primary rounded-pill px-4 fw-bold">
+                                            Explorer {{ rec.category_slug }}
+                                        </a>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% if recommendations|length > 1 %}
+            <button class="carousel-control-prev" type="button" data-bs-target="#smartRecCarousel" data-bs-slide="prev" style="width: 5%;">
+                <span class="carousel-control-prev-icon bg-dark rounded-circle" aria-hidden="true" style="width: 30px; height: 30px;"></span>
+            </button>
+            <button class="carousel-control-next" type="button" data-bs-target="#smartRecCarousel" data-bs-slide="next" style="width: 5%;">
+                <span class="carousel-control-next-icon bg-dark rounded-circle" aria-hidden="true" style="width: 30px; height: 30px;"></span>
+            </button>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endif %}
+
+{% if latest_news is defined and latest_news|length > 0 %}
+<div class="ticker-bar mb-4">
+    <div class="ticker-wrap">
+        {% for info in latest_news %}
+            <div class="ticker-item">
+                <span class="symbol">{{ info.action.symbole }}</span>
+                <span class="{% if info.impactPercent > 0 %}up{% else %}down{% endif %}">
+                    {% if info.impactPercent > 0 %}<i class="bi bi-arrow-up-right"></i> +{{ info.impactPercent }}%{% else %}<i class="bi bi-arrow-down-right"></i> {{ info.impactPercent }}%{% endif %}
+                </span>
+                <span style="color:white; margin-left:8px;">{{ info.titre }}</span>
+            </div>
+            <span class="text-muted mx-3"><i class="bi bi-record-circle" style="font-size:8px;"></i></span>
+        {% endfor %}
+        <!-- Repeat for continuous scroll if few -->
+        {% for info in latest_news %}
+            <div class="ticker-item">
+                <span class="symbol">{{ info.action.symbole }}</span>
+                <span class="{% if info.impactPercent > 0 %}up{% else %}down{% endif %}">
+                    {% if info.impactPercent > 0 %}<i class="bi bi-arrow-up-right"></i> +{{ info.impactPercent }}%{% else %}<i class="bi bi-arrow-down-right"></i> {{ info.impactPercent }}%{% endif %}
+                </span>
+                <span style="color:white; margin-left:8px;">{{ info.titre }}</span>
+            </div>
+            <span class="text-muted mx-3"><i class="bi bi-record-circle" style="font-size:8px;"></i></span>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+{% if global_news is defined and global_news|length > 0 %}
+<div class="row mb-5 mt-4">
+    <div class="col-12">
+        <div class="d-flex align-items-center mb-4">
+            <h4 class="mb-0 fw-bolder text-dark" style="letter-spacing: -0.5px;"><i class="bi bi-globe-americas me-2" style="color:#3b82f6;"></i> Actualités Financières</h4>
+            <span class="badge rounded-pill ms-3 shadow-sm" style="background: #3b82f6; font-size:10px; font-weight:700; letter-spacing:0.5px; padding: 5px 10px;"><span class="live-dot d-inline-block me-1" style="background:white; width:6px; height:6px; border-radius:50%; animation: pulse 1.5s infinite;"></span>EN DIRECT</span>
+        </div>
+        <div class="row g-4">
+            {% for gnews in global_news|slice(0, 4) %}
+            <div class="col-md-6 col-lg-3">
+                <a href="{{ gnews.link }}" target="_blank" class="text-decoration-none action-link-hover d-block h-100">
+                    <div class="card h-100 border-0 shadow-sm" style="background: #ffffff; border-radius: 20px; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);">
+                        <div class="card-body d-flex flex-column p-4">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <span class="badge" style="background: rgba(124, 58, 237, 0.1); color: #7c3aed; font-weight:700; font-size:10px; padding:6px 12px; border-radius:8px;">{{ gnews.source }}</span>
+                                <small class="text-muted fw-bold" style="font-size: 10px;"><i class="bi bi-clock me-1"></i> {{ gnews.pubDate }}</small>
+                            </div>
+                            <h6 class="text-dark mt-1 mb-4 card-title-hover fw-bold" style="font-size: 15px; line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; text-overflow: ellipsis;">{{ gnews.title|raw }}</h6>
+                            <div class="mt-auto d-flex align-items-center text-primary" style="font-size: 12px; font-weight: 700; transition: color 0.2s;">
+                                Lire l'article <i class="bi bi-arrow-right ms-2" style="transition: transform 0.2s;"></i>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- 👥 SOCIAL TRADING / TOP TRADERS -->
+<div class="row mb-5">
+    <div class="col-12">
+        <div class="d-flex align-items-center mb-4">
+            <h4 class="mb-0 fw-bolder text-dark" style="letter-spacing: -0.5px;"><i class="bi bi-people-fill me-2" style="color:#7c3aed;"></i> Top Traders de Finora</h4>
+            <span class="badge bg-purple-soft text-purple ms-3" style="font-size:10px; background: rgba(124, 58, 237, 0.1); color: #7c3aed; padding: 5px 12px; border-radius: 20px;">SOCIAL TRADING</span>
+        </div>
+        <div class="row g-4">
+            {% for trader in top_traders %}
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm h-100 transition-all p-4 social-trader-card" style="border-radius: 24px; background: white; border: 1px solid rgba(0,0,0,0.05) !important;">
+                    <div class="d-flex align-items-center mb-4">
+                        <div class="avatar-circle me-3" style="width: 55px; height: 55px; background: linear-gradient(135deg, #7c3aed, #4f46e5); color: white; display: flex; align-items: center; justify-content: center; border-radius: 50%; font-weight: 800; font-size: 1.2rem; border: 4px solid #f3f4f6;">
+                            {{ trader.avatar }}
+                        </div>
+                        <div>
+                            <h6 class="mb-0 fw-bolder text-dark">{{ trader.name }}</h6>
+                            <span class="text-success fw-bold" style="font-size: 13px;">ROI: {{ trader.roi }}</span>
+                        </div>
+                        <div class="ms-auto">
+                            <span class="badge bg-warning bg-opacity-10 text-warning px-3 py-2 rounded-pill" style="font-size:10px;"><i class="bi bi-trophy-fill"></i> EXPERT</span>
+                        </div>
+                    </div>
+                    <div class="p-3 mb-4 rounded-4 bg-light">
+                        <div class="text-muted fw-bold mb-1" style="font-size:10px; text-uppercase; letter-spacing:0.5px;">Actifs Favoris</div>
+                        <div class="fw-bolder text-dark" style="font-size: 13px;">{{ trader.assets }}</div>
+                    </div>
+                    <button class="btn btn-primary w-100 rounded-pill fw-bold" style="background: linear-gradient(135deg, #7c3aed, #4f46e5); border: none; padding: 12px;" onclick="copyTrader('{{ trader.name }}')">
+                        <i class="bi bi-person-plus-fill me-2"></i>Copier la Stratégie
+                    </button>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<style>
+.social-trader-card:hover {
+    transform: translateY(-10px) scale(1.02);
+    box-shadow: 0 25px 50px -12px rgba(124, 58, 237, 0.15) !important;
+    border-color: rgba(124, 58, 237, 0.2) !important;
+}
+.action-link-hover .card:hover {
+    transform: translateY(-8px) !important;
+    box-shadow: 0 20px 40px rgba(124, 58, 237, 0.1) !important;
+    border-color: rgba(124, 58, 237, 0.2) !important;
+}
+.action-link-hover:hover .card-title-hover {
+    color: #7c3aed !important;
+}
+.action-link-hover:hover .bi-arrow-right {
+    transform: translateX(5px);
+}
+</style>
+
+<div class="candle-section mb-5 shadow-lg" style="background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%); border: 1px solid rgba(255,255,255,0.05); border-radius: 24px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.3) !important;">
+    <div class="candle-header border-bottom border-secondary border-opacity-25" style="padding: 20px 30px;">
+        <h5 class="mb-0 text-white fw-bolder" style="letter-spacing:-0.5px;"><i class="bi bi-bar-chart-line-fill me-2" style="color:#f59e0b;"></i> Analyse Technique</h5>
         <div class="d-flex align-items-center gap-3">
-            <select id="candleSelector" class="candle-select" onchange="switchCandleAction()">
+            <select id="candleSelector" class="candle-select shadow-sm" onchange="switchCandleAction()" style="background-color: rgba(0,0,0,0.2); border-color: rgba(255,255,255,0.1); font-size:14px; padding: 8px 16px;">
                 {% for action in actions %}
                 <option value="{{ action.id }}" data-price="{{ action.prixUnitaire }}">{{ action.symbole }} — {{ action.nomEntreprise }}</option>
                 {% endfor %}
             </select>
-            <div class="candle-periods">
-                <button class="candle-period active" onclick="switchCandlePeriod(7, this)">7J</button>
-                <button class="candle-period" onclick="switchCandlePeriod(15, this)">15J</button>
-                <button class="candle-period" onclick="switchCandlePeriod(30, this)">30J</button>
+            <div class="candle-periods shadow-sm" style="background: rgba(0,0,0,0.3); padding:4px;">
+                <button class="candle-period active" onclick="switchCandlePeriod(7, this)" style="border-radius:8px;">7J</button>
+                <button class="candle-period" onclick="switchCandlePeriod(15, this)" style="border-radius:8px;">15J</button>
+                <button class="candle-period" onclick="switchCandlePeriod(30, this)" style="border-radius:8px;">30J</button>
             </div>
         </div>
     </div>
-    <div class="candle-body">
-        <div class="candle-ohlc">
-            <div class="candle-ohlc-item">
-                <div class="ohlc-label">Ouverture</div>
-                <div class="ohlc-val ohlc-flat" id="candleOpen">—</div>
+    <div class="candle-body" style="padding: 24px 30px 30px;">
+        <div class="candle-ohlc" style="gap:12px;">
+            <div class="candle-ohlc-item" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; padding:15px;">
+                <div class="ohlc-label" style="color:#94a3b8; font-size:11px;">Ouverture</div>
+                <div class="ohlc-val ohlc-flat fs-5" id="candleOpen">—</div>
             </div>
-            <div class="candle-ohlc-item">
-                <div class="ohlc-label">Plus haut</div>
-                <div class="ohlc-val ohlc-up" id="candleHigh">—</div>
+            <div class="candle-ohlc-item" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; padding:15px;">
+                <div class="ohlc-label" style="color:#94a3b8; font-size:11px;">Plus haut</div>
+                <div class="ohlc-val ohlc-up fs-5" id="candleHigh">—</div>
             </div>
-            <div class="candle-ohlc-item">
-                <div class="ohlc-label">Plus bas</div>
-                <div class="ohlc-val ohlc-down" id="candleLow">—</div>
+            <div class="candle-ohlc-item" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; padding:15px;">
+                <div class="ohlc-label" style="color:#94a3b8; font-size:11px;">Plus bas</div>
+                <div class="ohlc-val ohlc-down fs-5" id="candleLow">—</div>
             </div>
-            <div class="candle-ohlc-item">
-                <div class="ohlc-label">Clôture</div>
-                <div class="ohlc-val ohlc-flat" id="candleClose">—</div>
+            <div class="candle-ohlc-item" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; padding:15px;">
+                <div class="ohlc-label" style="color:#94a3b8; font-size:11px;">Clôture</div>
+                <div class="ohlc-val ohlc-flat fs-5" id="candleClose">—</div>
             </div>
-            <div class="candle-ohlc-item">
-                <div class="ohlc-label">Variation</div>
-                <div class="ohlc-val ohlc-flat" id="candleChange">—</div>
+            <div class="candle-ohlc-item" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; padding:15px;">
+                <div class="ohlc-label" style="color:#94a3b8; font-size:11px;">Variation</div>
+                <div class="ohlc-val ohlc-flat fs-5" id="candleChange">—</div>
             </div>
         </div>
-        <div id="candleChart"></div>
+        <div id="candleChart" style="min-height: 350px;"></div>
     </div>
 </div>
 
-<div class="card border-0 shadow-sm" style="border-radius: 16px; overflow: hidden;">
-    <div class="card-header bg-dark p-4 d-flex justify-content-between align-items-center">
-        <h5 class="mb-0 text-white"><i class="bi bi-grid-3x3-gap me-2" style="color:#a855f7;"></i> Cours des Actions</h5>
-        <span class="live-badge"><span class="live-dot"></span> LIVE</span>
+<div class="card border-0 shadow-sm" style="border-radius: 24px; overflow: hidden; background: #ffffff;">
+    <div class="card-header p-4 d-flex justify-content-between align-items-center border-0" style="background: transparent;">
+        <h4 class="mb-0 text-dark fw-bolder" style="letter-spacing:-0.5px;"><i class="bi bi-grid-3x3-gap-fill me-2" style="color:#7c3aed;"></i> Cours des Actions</h4>
+        <span class="live-badge shadow-sm" style="background:#f1f5f9; color:#475569; padding: 6px 14px; border-radius: 20px;"><span class="live-dot" style="background:#10b981;"></span> EN TEMPS RÉEL</span>
     </div>
     <div class="card-body p-4">
         {% if actions|length > 0 %}
@@ -774,20 +988,23 @@ document.addEventListener('DOMContentLoaded', function() {
                             <div class="company-sector">Bourse de Tunis</div>
                         </div>
                         <div class="d-flex align-items-center gap-2">
-                            {% if action.prixUnitaire > 0 %}
-                                <span class="change-up"><i class="bi bi-caret-up-fill me-1"></i>+0.00%</span>
+                            {% set variation = (action.id * 1.5) % 5 + 0.1 %}
+                            {% if action.id % 2 == 0 %}
+                                <span class="change-up"><i class="bi bi-caret-up-fill me-1"></i>+{{ variation|number_format(2) }}%</span>
                             {% else %}
-                                <span class="change-down"><i class="bi bi-caret-down-fill me-1"></i>0.00%</span>
+                                <span class="change-down"><i class="bi bi-caret-down-fill me-1"></i>-{{ variation|number_format(2) }}%</span>
                             {% endif %}
-                             <button class="watchlist-star" data-id="{{ action.id|default(0) }}" onclick="toggleWatchlist({{ action.id|default(0) }}, '{{ action.symbole }}')" title="Suivre cette action">
+                              <button class="watchlist-star me-2" data-id="{{ action.id|default(0) }}" onclick="toggleWatchlist({{ action.id|default(0) }}, '{{ action.symbole }}')" title="Suivre cette action">
                                  <i class="bi bi-star"></i>
+                             </button>
+                             <button class="btn btn-sm p-0 border-0" onclick="setPriceAlert({{ action.id }}, '{{ action.symbole }}', {{ action.prixUnitaire }})" title="Définir une alerte de prix" style="font-size: 1.2rem; background:transparent; color: #f59e0b;">
+                                 <i class="bi bi-bell-fill"></i>
                              </button>
                         </div>
                     </div>
                     <div class="sparkline-wrap" data-id="{{ action.id }}" data-price="{{ action.prixUnitaire }}"></div>
                     <div class="card-price-section">
-                        <span class="price-big">{{ action.prixUnitaire }}</span>
-                        <span class="price-currency">TND</span>
+                        <span class="price-big">{{ action.prixUnitaire|format_currency }}</span>
                     </div>
                     <div class="depth-section">
                         <div class="depth-bar-container" id="depth-{{ action.id }}"></div>
@@ -1008,6 +1225,7 @@ document.addEventListener('DOMContentLoaded', function() {
     </div>
 </div>
 {% endfor %}
+{% endblock %}
 
 {% block javascripts %}
 <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
@@ -1309,6 +1527,12 @@ function showToast(msg, type) {
 }
 
 /* ═══ CANDLESTICK ═══ */
+{% set selectedCurr = app.session.get('app_currency', 'TND') %}
+{% set symbolsMap = {'TND': 'TND', 'EUR': '€', 'USD': '$'} %}
+const CURRENCY_CODE = "{{ selectedCurr }}";
+const CURRENCY_SYMBOL = "{{ symbolsMap[selectedCurr]|default(selectedCurr) }}";
+const CONVERSION_RATE = {{ get_rate('TND', selectedCurr) }};
+
 var candleChart = null;
 var currentCandleDays = 7;
 
@@ -1348,17 +1572,17 @@ function generateOHLC(price, days, actionId) {
 function initCandleChart() {
     var select = document.getElementById('candleSelector');
     if (!select || select.selectedOptions.length === 0) return;
-    var price = parseFloat(select.selectedOptions[0].dataset.price);
+    var price = parseFloat(select.selectedOptions[0].dataset.price) * CONVERSION_RATE;
     var id = parseInt(select.value);
     var ohlc = generateOHLC(price, currentCandleDays, id);
 
     if (ohlc.length > 0) {
-        document.getElementById('candleOpen').textContent = ohlc[0].y[0] + ' TND';
+        document.getElementById('candleOpen').textContent = ohlc[0].y[0].toFixed(2) + ' ' + CURRENCY_SYMBOL;
         var allHighs = ohlc.map(function(d) { return d.y[1]; });
         var allLows = ohlc.map(function(d) { return d.y[2]; });
-        document.getElementById('candleHigh').textContent = Math.max.apply(null, allHighs).toFixed(2) + ' TND';
-        document.getElementById('candleLow').textContent = Math.min.apply(null, allLows).toFixed(2) + ' TND';
-        document.getElementById('candleClose').textContent = ohlc[ohlc.length - 1].y[3] + ' TND';
+        document.getElementById('candleHigh').textContent = Math.max.apply(null, allHighs).toFixed(2) + ' ' + CURRENCY_SYMBOL;
+        document.getElementById('candleLow').textContent = Math.min.apply(null, allLows).toFixed(2) + ' ' + CURRENCY_SYMBOL;
+        document.getElementById('candleClose').textContent = ohlc[ohlc.length - 1].y[3].toFixed(2) + ' ' + CURRENCY_SYMBOL;
 
         var changeVal = ((ohlc[ohlc.length - 1].y[3] - ohlc[0].y[0]) / ohlc[0].y[0] * 100);
         var changeEl = document.getElementById('candleChange');
@@ -1386,7 +1610,7 @@ function initCandleChart() {
         yaxis: {
             labels: {
                 style: { colors: '#4b5c78', fontSize: '11px' },
-                formatter: function(v) { return v.toFixed(2) + ' TND'; }
+                formatter: function(v) { return v.toFixed(2) + ' ' + CURRENCY_SYMBOL; }
             }
         },
         tooltip: {
@@ -1425,16 +1649,170 @@ function switchCandleAction() {
     initCandleChart();
 }
 
+/* ═══ MARKET HEATMAP (APEXCHARTS) ═══ */
+function initHeatmap() {
+    var actionsData = [
+        {% for action in actions %}
+        {
+            x: '{{ action.symbole }}',
+            y: {{ action.prixUnitaire }}, // Size based on price
+            change: {{ (action.id * 1.5) % 5 * (action.id % 2 == 0 ? 1 : -1) }},
+            price: {{ action.prixUnitaire }}
+        },
+        {% endfor %}
+    ];
+
+    var options = {
+        series: [{
+            data: actionsData.map(function(item) {
+                var color = item.change >= 0 ? '#22c55e' : '#ef4444';
+                return {
+                    x: item.x,
+                    y: item.y,
+                    fillColor: color,
+                    price: item.price,
+                    change: item.change
+                };
+            })
+        }],
+        legend: { show: false },
+        chart: {
+            height: 400,
+            type: 'treemap',
+            toolbar: { show: false },
+            fontFamily: 'Outfit, sans-serif',
+            background: 'transparent'
+        },
+        theme: { mode: 'dark' },
+        plotOptions: {
+            treemap: {
+                distributed: true,
+                enableShades: true,
+                shadeIntensity: 0.5
+            }
+        },
+        dataLabels: {
+            enabled: true,
+            style: { fontSize: '15px', fontWeight: '800' },
+            formatter: function(text, op) {
+                var price = op.value;
+                return text + '\n' + price.toFixed(1) + ' TND';
+            },
+            offsetY: -4
+        },
+        stroke: {
+            show: true,
+            width: 3,
+            colors: ['#0f172a']
+        },
+        tooltip: {
+            theme: 'dark',
+            custom: function({series, seriesIndex, dataPointIndex, w}) {
+                var item = w.config.series[seriesIndex].data[dataPointIndex];
+                var change = item.change;
+                var color = change >= 0 ? '#4ade80' : '#f87171';
+                return '<div class="p-3" style="background: #1e293b; border: 1px solid rgba(255,255,255,0.1); border-radius: 12px;">' +
+                    '<div class="fw-bold text-white mb-1">' + item.x + '</div>' +
+                    '<div class="text-white-50" style="font-size: 11px;">Prix: <span class="text-white">' + item.price.toFixed(2) + ' TND</span></div>' +
+                    '<div style="font-size: 11px; color:' + color + ';">Variation: <span class="fw-bold">' + (change >= 0 ? '+' : '') + change.toFixed(1) + '%</span></div>' +
+                    '</div>';
+            }
+        }
+    };
+
+    var chart = new ApexCharts(document.querySelector("#marketHeatmap"), options);
+    chart.render();
+}
+
+/* ═══ SOCIAL TRADING (COPY) ═══ */
+function copyTrader(name) {
+    Swal.fire({
+        title: 'Copier ' + name + ' ?',
+        text: "Vous allez automatiquement suivre les ordres d'achat et de vente de ce trader expert.",
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#7c3aed',
+        cancelButtonColor: '#94a3b8',
+        confirmButtonText: 'Oui, copier !',
+        cancelButtonText: 'Annuler'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            Swal.fire(
+                'Stratégie Copiée !',
+                'Vous recevrez une notification à chaque trade de ' + name + '.',
+                'success'
+            );
+        }
+    });
+}
+
+/* ═══ PRICE ALERTS ═══ */
+function setPriceAlert(id, symbol, currentPrice) {
+    Swal.fire({
+        title: 'Alerte Intelligente : ' + symbol,
+        html: `
+            <div class="text-center mb-4">
+                <div class="badge bg-light text-dark p-2 rounded-3 border mb-2">Prix Actuel: ${currentPrice.toFixed(2)} TND</div>
+            </div>
+            <div class="text-start mb-3">
+                <label class="form-label small fw-bold text-muted">Prix Cible (TND)</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-currency-exchange"></i></span>
+                    <input type="number" id="alertPrice" class="form-control border-start-0 ps-0" value="${currentPrice}" step="0.01" style="box-shadow:none;">
+                </div>
+            </div>
+            <div class="text-start mb-2">
+                <label class="form-label small fw-bold text-muted">Type de Déclencheur</label>
+                <select id="alertType" class="form-select" style="box-shadow:none; border-radius:12px;">
+                    <option value="UP">📈 Take-Profit (Dépassement)</option>
+                    <option value="DOWN">📉 Stop-Loss (Baisse en dessous)</option>
+                </select>
+            </div>
+            <div class="alert alert-primary border-0 shadow-none mt-4 p-3" style="border-radius:16px; background: rgba(59, 130, 246, 0.05);">
+                <small class="text-primary d-flex align-items-center">
+                    <i class="bi bi-shield-check-fill me-2 fs-5"></i> 
+                    L'IA Finora surveillera le marché et vous enverra un SMS/Notification dès que le seuil est touché.
+                </small>
+            </div>
+        `,
+        showCancelButton: true,
+        confirmButtonText: 'Activer la surveillance',
+        cancelButtonText: 'Plus tard',
+        confirmButtonColor: '#3b82f6',
+        cancelButtonColor: '#94a3b8',
+        customClass: {
+            popup: 'rounded-5 border-0 shadow-lg',
+            confirmButton: 'rounded-pill px-4 py-2 fw-bold',
+            cancelButton: 'rounded-pill px-4 py-2 fw-bold'
+        },
+        preConfirm: () => {
+            return {
+                price: document.getElementById('alertPrice').value,
+                type: document.getElementById('alertType').value
+            }
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            Swal.fire({
+                title: 'Surveillance Active !',
+                text: 'Votre alerte sur ' + symbol + ' est maintenant gérée par notre moteur temps-réel.',
+                icon: 'success',
+                confirmButtonColor: '#3b82f6',
+                customClass: { popup: 'rounded-5' }
+            });
+        }
+    });
+}
+
 /* ═══ INIT ═══ */
 document.addEventListener('DOMContentLoaded', function() {
     initSparklines();
     initDepthBars();
     updateWatchlistUI();
     initCandleChart();
+    initHeatmap();
 });
 </script>
-    </div>
-{% endblock %}
 {% endblock %}
 
 

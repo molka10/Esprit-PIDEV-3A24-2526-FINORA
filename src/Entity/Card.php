@@ -18,19 +18,22 @@ class Card
     #[Assert\NotBlank]
     private ?string $cardHolderName = null;
 
-    #[ORM\Column(length: 20)]
+    #[ORM\Column(length: 4)]
     #[Assert\NotBlank]
-    #[Assert\Luhn]
-    private ?string $cardNumber = null; // Stored masked or encrypted in real apps, but here we store as string for simplicity
+    private ?string $last4 = null;
+
+    #[ORM\Column(length: 50)]
+    #[Assert\NotBlank]
+    private ?string $brand = null;
+
+    #[ORM\Column(length: 255)]
+    #[Assert\NotBlank]
+    private ?string $stripePaymentMethodId = null;
 
     #[ORM\Column(length: 5)]
     #[Assert\NotBlank]
     #[Assert\Regex(pattern: "/^(0[1-9]|1[0-2])\/\d{2}$/")]
     private ?string $expiryDate = null; // Format: MM/YY
-
-    #[ORM\Column(length: 4)]
-    #[Assert\NotBlank]
-    private ?string $cvv = null;
 
     #[ORM\Column]
     private ?int $userId = null;
@@ -62,14 +65,36 @@ class Card
         return $this;
     }
 
-    public function getCardNumber(): ?string
+    public function getLast4(): ?string
     {
-        return $this->cardNumber;
+        return $this->last4;
     }
 
-    public function setCardNumber(string $cardNumber): static
+    public function setLast4(string $last4): static
     {
-        $this->cardNumber = $cardNumber;
+        $this->last4 = $last4;
+        return $this;
+    }
+
+    public function getBrand(): ?string
+    {
+        return $this->brand;
+    }
+
+    public function setBrand(string $brand): static
+    {
+        $this->brand = $brand;
+        return $this;
+    }
+
+    public function getStripePaymentMethodId(): ?string
+    {
+        return $this->stripePaymentMethodId;
+    }
+
+    public function setStripePaymentMethodId(string $stripePaymentMethodId): static
+    {
+        $this->stripePaymentMethodId = $stripePaymentMethodId;
         return $this;
     }
 
@@ -81,17 +106,6 @@ class Card
     public function setExpiryDate(string $expiryDate): static
     {
         $this->expiryDate = $expiryDate;
-        return $this;
-    }
-
-    public function getCvv(): ?string
-    {
-        return $this->cvv;
-    }
-
-    public function setCvv(string $cvv): static
-    {
-        $this->cvv = $cvv;
         return $this;
     }
 
@@ -124,6 +138,7 @@ class Card
 
     public function getMaskedNumber(): string
     {
-        return '**** **** **** ' . substr($this->cardNumber, -4);
+        return '**** **** **** ' . ($this->last4 ?? '0000');
     }
 }
+

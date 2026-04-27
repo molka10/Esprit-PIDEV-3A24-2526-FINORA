@@ -1,0 +1,795 @@
+/* ===================================================
+   FINORA PROFESSIONAL VIOLET FINTECH THEME
+   Light + Dark Mode (Premium Version)
+=================================================== */
+
+.root {
+    -fx-font-family: "Inter", "Segoe UI", Arial;
+    -fx-background-color: #F5F3FF;
+}
+
+.app-root {
+    -fx-background-color: #F5F3FF;
+}
+
+.app-root {
+    -fx-background-color: #F5F3FF;
+}
+
+/* ================= HEADER SECTIONS ================= */
+
+.header-section {
+    -fx-padding: 30 40 20 40;
+}
+
+.content-section {
+    -fx-padding: 0 40 40 40;
+}
+
+/* ================= TITLES ================= */
+
+.title {
+    -fx-font-size: 30px;
+    -fx-font-weight: 800;
+    -fx-text-fill: #2E1065;
+}
+
+.subtitle {
+    -fx-font-size: 14px;
+    -fx-text-fill: #7C3AED;
+}
+
+/* ================= KPI CARDS ================= */
+
+.kpi-card {
+    -fx-background-color: white;
+    -fx-background-radius: 22;
+    -fx-padding: 24;
+    -fx-spacing: 8;
+    -fx-min-width: 220;
+    -fx-effect: dropshadow(gaussian, rgba(109, 40, 217, 0.15), 25, 0.2, 0, 8);
+}
+
+.kpi-title {
+    -fx-font-size: 12px;
+    -fx-text-fill: #7C3AED;
+}
+
+.kpi-value {
+    -fx-font-size: 24px;
+    -fx-font-weight: 800;
+    -fx-text-fill: #2E1065;
+}
+
+/* ================= INVESTMENT CARD ================= */
+
+.investment-card {
+    -fx-background-color: white;
+    -fx-background-radius: 24;
+    -fx-effect: dropshadow(gaussian, rgba(109, 40, 217, 0.08), 28, 0.2, 0, 10);
+    -fx-cursor: hand;
+    -fx-transition: all 0.2s ease-in-out;
+}
+
+.investment-card:hover {
+    -fx-effect: dropshadow(gaussian, rgba(109, 40, 217, 0.25), 36, 0.3, 0, 16);
+    -fx-translate-y: -4;
+}
+
+.card-image-modern {
+    -fx-background-radius: 24 24 0 0;
+}
+
+.card-title {
+    -fx-font-size: 18px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #2E1065;
+}
+
+.card-name {
+    -fx-font-size: 14px;
+    -fx-text-fill: #6D28D9;
+}
+
+.card-subtitle {
+    -fx-font-size: 12px;
+    -fx-text-fill: #6B21A8;
+}
+
+.card-amount {
+    -fx-font-size: 20px;
+    -fx-font-weight: 800;
+    -fx-text-fill: #4C1D95;
+}
+
+.card-value {
+    -fx-font-size: 22px;
+    -fx-font-weight: 800;
+    -fx-text-fill: #3B0764;
+}
+
+/* ================= RISK BADGES ================= */
+
+.risk-badge {
+    -fx-font-size: 11px;
+    -fx-font-weight: 700;
+    -fx-text-fill: white;
+    -fx-padding: 5 14;
+    -fx-background-radius: 22;
+}
+
+.badge-low-modern {
+    -fx-background-color: linear-gradient(to right, #16A34A, #4ADE80);
+}
+
+.badge-medium-modern {
+    -fx-background-color: linear-gradient(to right, #F59E0B, #FBBF24);
+}
+
+.badge-high-modern {
+    -fx-background-color: linear-gradient(to right, #DC2626, #F87171);
+}
+
+/* ================= BUTTONS ================= */
+
+.btn-primary {
+    -fx-background-color: linear-gradient(to right, #6D28D9, #8B5CF6);
+    -fx-text-fill: white;
+    -fx-font-weight: 700;
+    -fx-background-radius: 16;
+    -fx-padding: 10 22;
+    -fx-cursor: hand;
+}
+
+.btn-primary:hover {
+    -fx-background-color: linear-gradient(to right, #5B21B6, #7C3AED);
+}
+
+/* Delete bouton premium rouge */
+
+.btn-delete-modern {
+    -fx-background-color: linear-gradient(to right, #DC2626, #F87171);
+    -fx-text-fill: white;
+    -fx-font-weight: 700;
+    -fx-background-radius: 16;
+    -fx-padding: 10 22;
+    -fx-cursor: hand;
+}
+
+.btn-delete-modern:hover {
+    -fx-background-color: linear-gradient(to right, #B91C1C, #EF4444);
+}
+
+/* ===== UPDATE BUTTON PRO ===== */
+
+.btn-update-modern {
+    -fx-background-color: linear-gradient(to right, #6D28D9, #8B5CF6);
+    -fx-text-fill: white;
+    -fx-font-weight: 700;
+    -fx-background-radius: 18;
+    -fx-padding: 12 28;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(109, 40, 217, 0.4), 18, 0.3, 0, 4);
+}
+
+.btn-update-modern:hover {
+    -fx-background-color: linear-gradient(to right, #5B21B6, #7C3AED);
+    -fx-translate-y: -2;
+}
+
+/* Secondary */
+
+.btn-secondary {
+    -fx-background-color: rgba(109, 40, 217, 0.08);
+    -fx-text-fill: #6D28D9;
+    -fx-font-weight: 600;
+    -fx-background-radius: 16;
+    -fx-border-color: rgba(109, 40, 217, 0.35);
+    -fx-border-radius: 16;
+    -fx-cursor: hand;
+}
+
+/* Clear bouton subtil */
+
+.btn-clear {
+    -fx-background-color: transparent;
+    -fx-text-fill: #7C3AED;
+    -fx-font-weight: 600;
+    -fx-border-color: rgba(109, 40, 217, 0.3);
+    -fx-border-radius: 14;
+    -fx-background-radius: 14;
+}
+
+/* Management bouton distinct */
+
+.btn-management {
+    -fx-background-color: linear-gradient(to right, #9333EA, #C084FC);
+    -fx-text-fill: white;
+    -fx-font-weight: 700;
+    -fx-background-radius: 16;
+    -fx-padding: 10 22;
+}
+
+/* Dark mode toggle */
+
+.btn-dark-toggle {
+    -fx-background-color: rgba(109, 40, 217, 0.12);
+    -fx-text-fill: #6D28D9;
+    -fx-background-radius: 18;
+    -fx-border-color: rgba(109, 40, 217, 0.4);
+    -fx-border-radius: 18;
+}
+
+/* ================= SEARCH BAR ================= */
+
+.search-container {
+    -fx-background-color: white;
+    -fx-background-radius: 18;
+    -fx-padding: 10 18;
+    -fx-effect: dropshadow(gaussian, rgba(109, 40, 217, 0.08), 15, 0.2, 0, 4);
+}
+
+.search-field {
+    -fx-background-color: transparent;
+    -fx-border-width: 0;
+}
+
+.search-icon {
+    -fx-font-size: 16;
+    -fx-text-fill: #8B5CF6;
+}
+
+/* ================= SCROLL ================= */
+
+.transparent-scroll {
+    -fx-background-color: transparent;
+}
+
+.scroll-pane>.viewport {
+    -fx-background-color: transparent;
+}
+
+/* ================= DARK MODE ================= */
+
+.dark-root {
+    -fx-background-color: #0F0B1F !important;
+}
+
+.dark-root .header-section,
+.dark-root .content-section {
+    -fx-background-color: transparent;
+}
+
+.dark-root .kpi-card,
+.dark-root .investment-card {
+    -fx-background-color: #1A162B;
+    -fx-border-color: #2D2942;
+}
+
+.dark-root .title {
+    -fx-text-fill: white;
+}
+
+.dark-root .subtitle {
+    -fx-text-fill: #C4B5FD;
+}
+
+.dark-root .investment-card {
+    -fx-background-color: #1A1333;
+}
+
+.dark-root .card-title {
+    -fx-text-fill: white;
+}
+
+.dark-root .card-subtitle {
+    -fx-text-fill: #C4B5FD;
+}
+
+.dark-root .card-value {
+    -fx-text-fill: #EDE9FE;
+}
+
+.dark-root .kpi-card {
+    -fx-background-color: #1A1333;
+}
+
+.dark-root .kpi-value {
+    -fx-text-fill: white;
+}
+
+.dark-root .search-container {
+    -fx-background-color: #1A1333;
+}
+
+/* ===== FILTER COMBOBOX PRO ===== */
+
+.risk-combo {
+    -fx-background-color: white;
+    -fx-background-radius: 16;
+    -fx-border-radius: 16;
+    -fx-border-color: rgba(109, 40, 217, 0.3);
+    -fx-border-width: 1.5;
+    -fx-padding: 6 14;
+    -fx-font-weight: 600;
+    -fx-text-fill: #2E1065;
+}
+
+.risk-combo:hover {
+    -fx-border-color: #8B5CF6;
+}
+
+.risk-combo .arrow-button {
+    -fx-background-color: transparent;
+}
+
+.risk-combo .arrow {
+    -fx-background-color: #6D28D9;
+}
+
+.field-error {
+    -fx-text-fill: #DC2626;
+    -fx-font-size: 11px;
+    -fx-font-weight: 600;
+}
+
+.input-error {
+    -fx-border-color: #DC2626;
+    -fx-border-width: 1.5;
+    -fx-border-radius: 8;
+}
+
+.card-value {
+    -fx-font-size: 20px;
+    -fx-font-weight: 800;
+    -fx-text-fill: #3B0764;
+}
+
+.card-currency-combo {
+    -fx-background-radius: 12;
+    -fx-border-radius: 12;
+    -fx-padding: 4 8;
+    -fx-font-size: 11px;
+}
+
+.top-badge {
+    -fx-background-color: linear-gradient(to right, #F59E0B, #FBBF24);
+    -fx-text-fill: white;
+    -fx-font-weight: 700;
+    -fx-background-radius: 20;
+    -fx-padding: 6 14;
+    -fx-font-size: 12px;
+}
+
+.management-card-modern {
+    -fx-background-color: white;
+    -fx-background-radius: 22;
+    -fx-padding: 18;
+    -fx-spacing: 8;
+    -fx-effect: dropshadow(gaussian, rgba(109, 40, 217, 0.15), 20, 0.2, 0, 6);
+}
+
+.management-title {
+    -fx-font-size: 16px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #2E1065;
+}
+
+.management-investment-name {
+    -fx-font-size: 14px;
+    -fx-text-fill: #6D28D9;
+}
+
+.management-amount {
+    -fx-font-size: 18px;
+    -fx-font-weight: 800;
+    -fx-text-fill: #3B0764;
+}
+
+.high-amount {
+    -fx-text-fill: #16A34A;
+}
+
+.status-badge {
+    -fx-text-fill: white;
+    -fx-font-weight: 700;
+    -fx-padding: 4 12;
+    -fx-background-radius: 20;
+}
+
+.badge-active {
+    -fx-background-color: linear-gradient(to right, #16A34A, #4ADE80);
+}
+
+.badge-closed {
+    -fx-background-color: linear-gradient(to right, #DC2626, #F87171);
+}
+
+/* GLASS CARD */
+
+.glass-card {
+    -fx-background-color: rgba(255, 255, 255, 0.35);
+    -fx-background-radius: 25;
+    -fx-padding: 22;
+    -fx-border-color: rgba(255, 255, 255, 0.5);
+    -fx-border-radius: 25;
+    -fx-border-width: 1;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.2), 30, 0.3, 0, 10);
+}
+
+/* TITLES */
+
+.card-title {
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #4b2ed6;
+}
+
+.card-name {
+    -fx-font-size: 13px;
+    -fx-text-fill: #444;
+}
+
+.card-amount {
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #1a9f4b;
+}
+
+/* STATUS */
+
+.card-status {
+    -fx-padding: 6 14;
+    -fx-background-radius: 15;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+}
+
+.status-active {
+    -fx-background-color: rgba(46, 204, 113, 0.25);
+    -fx-text-fill: #1a9f4b;
+}
+
+.status-closed {
+    -fx-background-color: rgba(231, 76, 60, 0.25);
+    -fx-text-fill: #d11a2a;
+}
+
+/* BUTTONS */
+
+.btn-edit {
+    -fx-background-color: linear-gradient(to right, #6c4df6, #4b2ed6);
+    -fx-text-fill: white;
+    -fx-background-radius: 20;
+    -fx-padding: 8 16;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+}
+
+.btn-delete {
+    -fx-background-color: linear-gradient(to right, #ff5f6d, #d11a2a);
+    -fx-text-fill: white;
+    -fx-background-radius: 20;
+    -fx-padding: 8 16;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+}
+
+.btn-edit:hover,
+.btn-delete:hover {
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.4), 15, 0.4, 0, 3);
+}
+
+/* ===================================================
+   GLASSMORPHISM & ADDITIONAL STYLES
+   =================================================== */
+
+.glass-kpi-card {
+    -fx-background-color: rgba(255, 255, 255, 0.85);
+    -fx-background-radius: 20;
+    -fx-padding: 20;
+    -fx-spacing: 10;
+    -fx-min-width: 200;
+    -fx-effect: dropshadow(gaussian, rgba(124, 58, 237, 0.1), 20, 0.2, 0, 8);
+    -fx-border-color: rgba(255, 255, 255, 0.5);
+    -fx-border-radius: 20;
+    -fx-border-width: 1;
+}
+
+.glass-chart {
+    -fx-background-color: rgba(255, 255, 255, 0.7);
+    -fx-background-radius: 22;
+    -fx-padding: 15;
+    -fx-effect: dropshadow(gaussian, rgba(124, 58, 237, 0.08), 20, 0.2, 0, 6);
+    -fx-border-color: rgba(255, 255, 255, 0.4);
+    -fx-border-radius: 22;
+    -fx-border-width: 1;
+}
+
+.title-section {
+    -fx-padding: 0 0 10 0;
+}
+
+/* Updated Glass Card for better Light Mode visibility */
+.glass-card {
+    -fx-background-color: rgba(255, 255, 255, 0.9);
+    -fx-background-radius: 22;
+    -fx-padding: 22;
+    -fx-border-color: rgba(124, 58, 237, 0.15);
+    -fx-border-radius: 22;
+    -fx-border-width: 1.5;
+    -fx-effect: dropshadow(gaussian, rgba(124, 58, 237, 0.15), 30, 0.2, 0, 10);
+}
+
+/* ===================================================
+   DARK MODE OVERRIDES FOR GLASS ELEMENTS
+   =================================================== */
+
+.dark-root .glass-card,
+.dark-root .glass-kpi-card,
+.dark-root .glass-chart {
+    -fx-background-color: rgba(26, 19, 51, 0.9);
+    -fx-border-color: rgba(124, 58, 237, 0.3);
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.5), 30, 0.3, 0, 10);
+}
+
+.dark-root .kpi-title,
+.dark-root .card-name {
+    -fx-text-fill: #A78BFA;
+}
+
+.dark-root .kpi-value,
+.dark-root .card-title,
+.dark-root .card-amount {
+    -fx-text-fill: white;
+}
+
+.dark-root .glass-chart .chart-title {
+    -fx-text-fill: white;
+}
+
+.dark-root .glass-chart .axis-label {
+    -fx-text-fill: #A78BFA;
+}
+
+.dark-root .glass-chart .axis {
+    -fx-tick-label-fill: #A78BFA;
+}
+
+.app-background {
+    -fx-background-color: linear-gradient(to bottom right, #eef1ff, #ffffff);
+}
+
+.form-card-modern {
+    -fx-background-color: white;
+    -fx-background-radius: 30;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.15), 40, 0.3, 0, 15);
+}
+
+.page-title-modern {
+    -fx-font-size: 28px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #4b2ed6;
+}
+
+.modern-field {
+    -fx-background-radius: 15;
+    -fx-border-radius: 15;
+    -fx-padding: 10 15;
+}
+
+.business-card-modern {
+    -fx-background-color: #f7f8ff;
+    -fx-background-radius: 20;
+    -fx-padding: 15;
+}
+
+.section-title-modern {
+    -fx-font-weight: bold;
+    -fx-text-fill: #333;
+}
+
+.exposure-modern {
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #2c3e50;
+}
+
+.modern-progress {
+    -fx-accent: #4b2ed6;
+}
+
+.percent-modern {
+    -fx-font-weight: bold;
+}
+
+.btn-primary-modern {
+    -fx-background-color: linear-gradient(to right, #6c4df6, #4b2ed6);
+    -fx-text-fill: white;
+    -fx-background-radius: 25;
+}
+
+.btn-secondary-modern {
+    -fx-background-color: transparent;
+    -fx-border-color: #6c4df6;
+    -fx-text-fill: #6c4df6;
+    -fx-background-radius: 25;
+}
+
+.error-label {
+    -fx-text-fill: #c0392b;
+    -fx-font-size: 11px;
+}
+
+/* ============================= */
+/* BACKGROUND */
+/* ============================= */
+
+/* BACKGROUND GRADIENT */
+.background-root {
+    -fx-background-color: linear-gradient(to right, #0f172a, #1e293b);
+}
+
+/* GLASS CARD */
+.glass-card {
+    -fx-background-color: rgba(255, 255, 255, 0.95);
+    -fx-background-radius: 20;
+    -fx-effect: dropshadow(gaussian, rgba(124, 58, 237, 0.4), 40, 0.3, 0, 10);
+}
+
+/* TITLE */
+.main-title {
+    -fx-font-size: 34px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #7c3aed;
+}
+
+/* SUBTITLE */
+.subtitle {
+    -fx-font-size: 14px;
+    -fx-text-fill: #64748b;
+}
+
+/* PRIMARY BUTTON */
+.btn-primary {
+    -fx-background-color: linear-gradient(to right, #7c3aed, #a855f7);
+    -fx-text-fill: white;
+    -fx-background-radius: 15;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+}
+
+.btn-primary:hover {
+    -fx-background-color: linear-gradient(to right, #6d28d9, #9333ea);
+}
+
+/* SECONDARY BUTTON */
+.btn-secondary {
+    -fx-background-color: transparent;
+    -fx-border-color: #7c3aed;
+    -fx-border-width: 2;
+    -fx-text-fill: #7c3aed;
+    -fx-background-radius: 15;
+    -fx-border-radius: 15;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+}
+
+.btn-secondary:hover {
+    -fx-background-color: #f3e8ff;
+}
+
+/* FOOTER */
+.footer-text {
+    -fx-text-fill: #cbd5e1;
+    -fx-font-size: 11px;
+}
+
+/* HINT */
+.hint-text {
+    -fx-text-fill: #94a3b8;
+    -fx-font-size: 12px;
+}
+
+/* Logout / Change Role Button */
+.btn-logout {
+    -fx-background-color: transparent;
+    -fx-border-color: #7c3aed;
+    -fx-border-radius: 10;
+    -fx-background-radius: 10;
+    -fx-text-fill: #7c3aed;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+}
+
+.btn-logout:hover {
+    -fx-background-color: #f3e8ff;
+}
+
+.recommended-badge {
+    -fx-background-color: linear-gradient(to right, #f4c430, #ffd700);
+    -fx-text-fill: black;
+    -fx-font-weight: bold;
+    -fx-padding: 6 12 6 12;
+    -fx-background-radius: 20;
+}
+
+.medal-icon {
+    -fx-font-size: 18px;
+}
+
+.rank-number {
+    -fx-font-size: 14px;
+    -fx-text-fill: #999;
+}
+
+.rec-name {
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+}
+
+.internal-badge {
+    -fx-background-color: #6C5CE7;
+    -fx-text-fill: white;
+    -fx-padding: 4 10 4 10;
+    -fx-background-radius: 12;
+    -fx-font-size: 11px;
+}
+
+.market-badge {
+    -fx-background-color: #00B894;
+    -fx-text-fill: white;
+    -fx-padding: 4 10 4 10;
+    -fx-background-radius: 12;
+    -fx-font-size: 11px;
+}
+
+.gold-row {
+    -fx-background-color: rgba(255, 215, 0, 0.12);
+    -fx-padding: 8;
+    -fx-background-radius: 10;
+}
+
+.silver-row {
+    -fx-background-color: rgba(192, 192, 192, 0.12);
+    -fx-padding: 8;
+    -fx-background-radius: 10;
+}
+
+.bronze-row {
+    -fx-background-color: rgba(205, 127, 50, 0.12);
+    -fx-padding: 8;
+    -fx-background-radius: 10;
+}
+
+.btn-refresh-rec {
+    -fx-background-color: #0984e3;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-background-radius: 20;
+}
+
+.rec-counter {
+    -fx-font-size: 12px;
+    -fx-text-fill: #999;
+}
+
+.gold-row {
+    -fx-background-color: rgba(255, 215, 0, 0.12);
+    -fx-padding: 8;
+    -fx-background-radius: 10;
+}
+
+.silver-row {
+    -fx-background-color: rgba(192, 192, 192, 0.12);
+    -fx-padding: 8;
+    -fx-background-radius: 10;
+}
+
+.bronze-row {
+    -fx-background-color: rgba(205, 127, 50, 0.12);
+    -fx-padding: 8;
+    -fx-background-radius: 10;
+}

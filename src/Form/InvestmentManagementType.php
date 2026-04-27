@@ -10,6 +10,7 @@ use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\NumberType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
@@ -75,7 +76,27 @@ class InvestmentManagementType extends AbstractType
                 'placeholder' => 'Choisir un statut',
                 'required' => true,
                 'attr' => ['class' => 'form-select']
+            ])
+            ->add('priority', ChoiceType::class, [
+                'label' => 'Priorité',
+                'choices' => [
+                    'Basse' => 'LOW',
+                    'Moyenne' => 'MEDIUM',
+                    'Haute' => 'HIGH',
+                ],
+                'required' => true,
+                'attr' => ['class' => 'form-select']
+            ])
+            ->add('notes', TextareaType::class, [
+                'label' => 'Notes / Actions à entreprendre',
+                'required' => false,
+                'attr' => [
+                    'class' => 'form-control',
+                    'rows' => 4,
+                    'placeholder' => 'Ex: Contacter l’agent immobilier, vérifier le rendement mensuel...'
+                ]
             ]);
+
     }
 
     public function configureOptions(OptionsResolver $resolver): void

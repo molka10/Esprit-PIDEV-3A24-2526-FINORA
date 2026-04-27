@@ -107,20 +107,117 @@
                 animation: fadeDown 0.2s ease-out forwards;
             }
         }
-        .glass-header {
-            background: rgba(255, 255, 255, 0.95) !important; /* Made more solid to avoid bleed-through */
-            backdrop-filter: blur(12px) saturate(180%);
-            -webkit-backdrop-filter: blur(12px) saturate(180%);
-            border-bottom: 2px solid rgba(124, 58, 237, 0.1) !important;
-            transition: all 0.3s ease;
-            z-index: 1050; /* Ensure it stays above everything */
+        /* --- Header & Module Navigation --- */
+        .nav-link-module {
+            color: #4b5563 !important;
+            font-size: 0.8rem !important;
+            letter-spacing: 0.05rem;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
         }
-        body {
-            padding-top: {% if app.user %}160px{% else %}80px{% endif %};
-            background: #f8fafc;
+        .nav-link-module:hover {
+            color: #7c3aed !important;
+            transform: translateY(-1px);
+        }
+        .nav-link-module i {
+            font-size: 1.1rem;
+            opacity: 0.8;
+        }
+        .header-search-input {
+            background: #f1f5f9 !important;
+            border: 1px solid transparent !important;
+            transition: all 0.2s ease;
+        }
+        .header-search-input:focus {
+            background: #fff !important;
+            border-color: #7c3aed !important;
+            box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1) !important;
+        }
+        body.no-sidebar .header-search-container {
+            display: none !important;
+        }
+        .btn-round-light {
+            background: #f1f5f9;
+            width: 38px;
+            height: 38px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: all 0.2s ease;
+        }
+        .btn-round-light:hover {
+            background: #e2e8f0;
+            color: #7c3aed;
         }
 
-        /* --- Premium Redesign Tokens --- */
+        /* --- Layout & Utilities --- */
+        body {
+            padding-top: 140px; /* Adjusted for two-row header */
+            background: #f8fafc;
+            overflow-x: hidden;
+            scroll-behavior: smooth;
+        }
+        /* Constrain containers on ultra-wide screens */
+        @media (min-width: 1400px) {
+            .container {
+                max-width: 1240px !important;
+            }
+            .container-fluid {
+                max-width: 1600px !important;
+                margin-left: auto !important;
+                margin-right: auto !important;
+            }
+        }
+        .dropdown-item {
+            padding: 0.5rem 1.5rem !important;
+            font-size: 0.85rem !important;
+            font-weight: 500 !important;
+            color: #475569 !important;
+            transition: all 0.2s ease;
+            position: relative;
+            line-height: 1.5 !important;
+        }
+        .dropdown-item:hover {
+            background-color: rgba(124, 58, 237, 0.08) !important;
+            color: var(--finora-purple) !important;
+            padding-left: 1.75rem !important;
+        }
+        .dropdown-item::before {
+            content: "";
+            position: absolute;
+            left: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            background-color: var(--finora-purple);
+            opacity: 0;
+            transition: all 0.2s ease;
+        }
+        .dropdown-item:hover::before {
+            opacity: 1;
+        }
+        .dropdown-item i {
+            display: none !important;
+        }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        .btn-round {
+            width: 38px;
+            height: 38px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            padding: 0 !important;
+        }
         .text-gradient {
             background: linear-gradient(135deg, #7c3aed 0%, #3b1278 100%);
             -webkit-background-clip: text;
@@ -137,17 +234,31 @@
             z-index: 1;
         }
         .glass-card {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 24px;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 20px;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
         }
         .glass-card:hover {
-            background: rgba(255, 255, 255, 0.1);
-            transform: translateY(-10px);
-            border-color: rgba(124, 58, 237, 0.4);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+            transform: translateY(-8px);
+            background: rgba(255, 255, 255, 0.9);
+            border-color: var(--finora-purple);
+            box-shadow: 0 20px 40px rgba(124, 58, 237, 0.15);
+        }
+        
+        /* Premium Buttons */
+        .btn-premium {
+            background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+            color: white;
+            border: none;
+            box-shadow: 0 4px 15px rgba(124, 58, 237, 0.3);
+            transition: all 0.3s ease;
+        }
+        .btn-premium:hover {
+            transform: scale(1.03);
+            box-shadow: 0 8px 25px rgba(124, 58, 237, 0.4);
+            color: white;
         }
         .explore-icon {
             width: 70px;
@@ -188,6 +299,165 @@
 	[id] {
 		scroll-margin-top: 160px; /* Offset for dual navbars */
 	}
+
+    /* Sidebar Variables */
+    :root {
+        --sidebar-width: 260px; /* Slightly narrower for better fit */
+        --sidebar-bg: rgba(255, 255, 255, 0.9);
+        --sidebar-blur: 25px;
+        --sidebar-transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    [data-bs-theme='dark'] {
+        --sidebar-bg: rgba(15, 23, 42, 0.85);
+    }
+
+    /* Sidebar Structure */
+    .sidebar-wrapper {
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 100vh;
+        width: var(--sidebar-width);
+        background: var(--sidebar-bg);
+        backdrop-filter: blur(var(--sidebar-blur));
+        -webkit-backdrop-filter: blur(var(--sidebar-blur));
+        z-index: 2000;
+        transform: translateX(-105%); /* Ensure it's fully hidden */
+        transition: var(--sidebar-transition);
+        border-right: 1px solid rgba(124, 58, 237, 0.1);
+        display: flex;
+        flex-direction: column;
+        box-shadow: 20px 0 60px rgba(0, 0, 0, 0.1);
+    }
+
+    body.sidebar-open .sidebar-wrapper {
+        transform: translateX(0);
+    }
+
+    .sidebar-header {
+        padding: 1.25rem 1.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background: rgba(124, 58, 237, 0.03);
+    }
+
+    .sidebar-content {
+        flex: 1;
+        overflow-y: auto;
+        padding: 1.5rem;
+    }
+
+    /* Sidebar Nav Links */
+    .sidebar-nav-link {
+        display: flex;
+        align-items: center;
+        padding: 0.85rem 1.25rem;
+        margin-bottom: 0.4rem;
+        border-radius: 14px;
+        color: inherit;
+        text-decoration: none;
+        font-weight: 500;
+        transition: all 0.25s ease;
+        gap: 15px;
+        font-size: 0.95rem;
+    }
+
+    .sidebar-nav-link i {
+        font-size: 1.3rem;
+        color: var(--finora-purple);
+        opacity: 0.85;
+    }
+
+    .sidebar-nav-link:hover {
+        background: rgba(124, 58, 237, 0.08);
+        color: var(--finora-purple);
+        transform: translateX(8px);
+    }
+
+    .sidebar-nav-link.active {
+        background: var(--finora-gradient);
+        color: white !important;
+        box-shadow: 0 4px 15px rgba(124, 58, 237, 0.3);
+    }
+    .sidebar-nav-link.active i { color: white; opacity: 1; }
+
+    /* Accordion Customization */
+    .sidebar-content .collapse {
+        transition: all 0.3s ease;
+    }
+
+    /* Overlay */
+    .sidebar-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: rgba(0, 0, 0, 0.3);
+        backdrop-filter: blur(4px);
+        z-index: 1999;
+        opacity: 0;
+        visibility: hidden;
+        transition: var(--sidebar-transition);
+    }
+
+    body.sidebar-open .sidebar-overlay {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    /* Desktop Push Logic */
+    @media (min-width: 1200px) {
+        body.sidebar-open:not(.no-sidebar) {
+            padding-left: var(--sidebar-width);
+            transition: padding-left 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        body.sidebar-open:not(.no-sidebar) .fixed-top {
+            width: calc(100% - var(--sidebar-width));
+            left: var(--sidebar-width);
+            transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        /* When open, remove overlay on desktop for 'dont block view' */
+        body.sidebar-open:not(.no-sidebar) .sidebar-overlay {
+            display: none;
+        }
+    }
+    
+    /* Strictly contain the width for a premium centered look */
+    .container {
+        max-width: 1240px !important; 
+        margin-left: auto !important;
+        margin-right: auto !important;
+    }
+    
+    /* Animation Tokens */
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-in {
+        animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    .sidebar-toggle-btn {
+        background: rgba(124, 58, 237, 0.05);
+        border: 1px solid rgba(124, 58, 237, 0.1);
+        font-size: 1.4rem;
+        padding: 0.5rem;
+        margin-right: 1.25rem;
+        border-radius: 12px;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        color: var(--finora-purple);
+    }
+
+    .sidebar-toggle-btn:hover {
+        background: rgba(124, 58, 237, 0.15);
+        transform: scale(1.05);
+    }
 </style>
 
 {% block stylesheets %}{% endblock %}
@@ -196,373 +466,382 @@
 </head>
 
 
-<body>
+<body class="{% if app.request.attributes.get('_route') in ['app_login', 'app_register'] %}no-sidebar{% endif %}">
+
+{% if app.request.attributes.get('_route') not in ['app_login', 'app_register'] %}
+<!-- Sidebar Wrapper -->
+<div class="sidebar-wrapper shadow-lg" style="left: 0 !important;">
+    <div class="sidebar-header">
+        <div class="d-flex align-items-center">
+            <img src="{{ asset('assets/images/logo-finora.webp') }}" alt="FINORA" style="height: 40px;">
+        </div>
+        <button class="btn btn-sm btn-light btn-round mb-0" id="sidebarClose"><i class="bi bi-x-lg"></i></button>
+    </div>
+    
+    <div class="sidebar-content custom-scrollbar p-3">
+        <!-- User Profile Quick Info -->
+        {% if app.user %}
+        <div class="d-flex align-items-center p-3 mb-4 rounded-4 bg-primary bg-opacity-10 border border-primary border-opacity-10">
+            <div class="avatar avatar-md me-3">
+                {% if app.user.image %}
+                    <img class="avatar-img rounded-circle border border-2 border-white" src="{{ asset('uploads/' ~ app.user.image) }}" alt="avatar" style="width: 45px; height: 45px; object-fit: cover;">
+                {% else %}
+                    <img class="avatar-img rounded-circle border border-2 border-white" src="https://ui-avatars.com/api/?name={{ app.user.username }}&background=7c3aed&color=fff" alt="avatar" style="width: 45px;">
+                {% endif %}
+            </div>
+            <div class="overflow-hidden">
+                <h6 class="mb-0 text-truncate">{{ app.user.username }}</h6>
+                <p class="small text-muted mb-0 text-truncate">{{ app.user.email }}</p>
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="sidebar-section mb-4">
+            <h6 class="text-uppercase xsmall text-muted fw-bold mb-3 px-2" style="font-size: 0.65rem; letter-spacing: 1.5px;">Navigation Principale</h6>
+            <a href="{{ path('app_home') }}" class="sidebar-nav-link {{ app.request.attributes.get('_route') == 'app_home' ? 'active' : '' }}">
+                <i class="bi bi-house-door-fill"></i> Accueil
+            </a>
+            
+            {% if app.user %}
+                <div class="px-2 mb-3">
+                    <div class="p-3 rounded-4 bg-success bg-opacity-10 border border-success border-opacity-10 d-flex justify-content-between align-items-center">
+                        <div>
+                            <span class="d-block xsmall text-muted mb-1" style="font-size: 0.7rem;">Mon Solde (Wallet)</span>
+                            <span class="h5 mb-0 fw-bold text-success">{{ wallet_balance()|format_currency(current_currency()) }}</span>
+                        </div>
+                        <div class="bg-success bg-opacity-25 p-2 rounded-3 text-success">
+                            <i class="bi bi-wallet2 fs-5"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <a href="{{ path('app_dashboard') }}" class="sidebar-nav-link {{ app.request.attributes.get('_route') == 'app_dashboard' ? 'active' : '' }}">
+                    <i class="bi bi-speedometer2"></i> Tableau de Bord
+                </a>
+
+                <a href="{{ path('app_unified_wishlist') }}" class="sidebar-nav-link {{ app.request.attributes.get('_route') == 'app_unified_wishlist' ? 'active' : '' }}">
+                    <i class="bi bi-heart-fill text-danger"></i> Ma Wishlist
+                </a>
+            {% endif %}
+        </div>
+
+        <div class="sidebar-section">
+            <h6 class="text-uppercase xsmall text-muted fw-bold mb-3 px-2" style="font-size: 0.65rem; letter-spacing: 1.5px;">Écosystème Finora</h6>
+            
+            <!-- Bourse -->
+            <div class="mb-2">
+                <a class="sidebar-nav-link d-flex justify-content-between align-items-center" data-bs-toggle="collapse" href="#sideBourse">
+                    <div class="d-flex align-items-center gap-3"><i class="bi bi-graph-up-arrow"></i> Bourse</div>
+                    <i class="bi bi-chevron-down small"></i>
+                </a>
+                <div class="collapse ps-3 {{ app.request.attributes.get('_route') starts with 'app_market' or app.request.attributes.get('_route') == 'app_history' ? 'show' : '' }}" id="sideBourse">
+                    <a href="{{ path('app_market') }}" class="sidebar-nav-link py-2 small fw-normal">Marché Live</a>
+                    <a href="{{ path('app_history') }}" class="sidebar-nav-link py-2 small fw-normal">Historique</a>
+                </div>
+            </div>
+
+            <!-- Wallet -->
+            <div class="mb-2">
+                <a class="sidebar-nav-link d-flex justify-content-between align-items-center" data-bs-toggle="collapse" href="#sideWallet">
+                    <div class="d-flex align-items-center gap-3"><i class="bi bi-wallet2"></i> Wallet</div>
+                    <i class="bi bi-chevron-down small"></i>
+                </a>
+                <div class="collapse ps-3 {{ app.request.attributes.get('_route') == 'dashboard' or app.request.attributes.get('_route') == 'ai_analyse' or app.request.attributes.get('_route') == 'transactions' or app.request.attributes.get('_route') == 'category_list' ? 'show' : '' }}" id="sideWallet">
+                    <a href="{{ path('dashboard') }}" class="sidebar-nav-link py-2 small fw-normal">Mon Wallet (Dashboard)</a>
+                    <a href="{{ path('category_list') }}" class="sidebar-nav-link py-2 small fw-normal">Mes Catégories</a>
+                    <a href="{{ path('transactions') }}" class="sidebar-nav-link py-2 small fw-normal">Mes Transactions</a>
+                    <a href="{{ path('ai_analyse') }}" class="sidebar-nav-link py-2 small fw-normal text-warning"><i class="bi bi-robot me-2"></i>Finora AI Analysis</a>
+                </div>
+            </div>
+
+            <!-- Portefeuille / Investir -->
+            <div class="mb-2">
+                <a class="sidebar-nav-link d-flex justify-content-between align-items-center" data-bs-toggle="collapse" href="#sideInvest">
+                    <div class="d-flex align-items-center gap-3"><i class="bi bi-cash-stack"></i> Investir</div>
+                    <i class="bi bi-chevron-down small"></i>
+                </a>
+                <div class="collapse ps-3 {{ app.request.attributes.get('_route') starts with 'app_investment' or app.request.attributes.get('_route') == 'app_management_index' or app.request.attributes.get('_route') == 'app_investor_profile' ? 'show' : '' }}" id="sideInvest">
+                    <a href="{{ path('app_investment_home') }}" class="sidebar-nav-link py-2 small fw-normal">Recommandation</a>
+                    <a href="{{ path('app_investment_index') }}" class="sidebar-nav-link py-2 small fw-normal">MarketPlace</a>
+                    <a href="{{ path('app_management_index') }}" class="sidebar-nav-link py-2 small fw-normal">Suivi Management</a>
+                    {% if not is_granted('ROLE_ADMIN') %}
+                        <a href="{{ path('app_investor_profile') }}" class="sidebar-nav-link py-2 small fw-normal">Profil Investisseur</a>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Appels d'offres -->
+            <div class="mb-2">
+                <a class="sidebar-nav-link d-flex justify-content-between align-items-center" data-bs-toggle="collapse" href="#sideAppels">
+                    <div class="d-flex align-items-center gap-3"><i class="bi bi-megaphone"></i> Appel d'offre</div>
+                    <i class="bi bi-chevron-down small"></i>
+                </a>
+                <div class="collapse ps-3 {{ app.request.attributes.get('_route') starts with 'app_appel_offre' or app.request.attributes.get('_route') starts with 'app_candidature' ? 'show' : '' }}" id="sideAppels">
+                    <a href="{{ path('app_appel_offre_index') }}" class="sidebar-nav-link py-2 small fw-normal">Liste des Appels</a>
+                    {% if is_granted('ROLE_ADMIN') %}
+                        <a href="{{ path('app_appel_offre_new') }}" class="sidebar-nav-link py-2 small fw-normal">Lancer un Appel</a>
+                        <a href="{{ path('app_candidature_index') }}" class="sidebar-nav-link py-2 small fw-normal">Gérer Candidatures</a>
+                        <a href="{{ path('app_categorie_index') }}" class="sidebar-nav-link py-2 small fw-normal">Catégories</a>
+                    {% else %}
+                        <a href="{{ path('app_candidature_index') }}" class="sidebar-nav-link py-2 small fw-normal">Mes Candidatures</a>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Formation -->
+            <div class="mb-2">
+                <a class="sidebar-nav-link d-flex justify-content-between align-items-center" data-bs-toggle="collapse" href="#sideFormation">
+                    <div class="d-flex align-items-center gap-3"><i class="bi bi-mortarboard"></i> Formation</div>
+                    <i class="bi bi-chevron-down small"></i>
+                </a>
+                <div class="collapse ps-3 {{ app.request.attributes.get('_route') == 'app_formations' or app.request.attributes.get('_route') == 'app_lessons' or app.request.attributes.get('_route') == 'app_my_certificates' or app.request.attributes.get('_route') == 'public_centres_map' ? 'show' : '' }}" id="sideFormation">
+                    <a href="{{ path('app_formations') }}" class="sidebar-nav-link py-2 small fw-normal">Toutes les Formations</a>
+                    <a href="{{ path('app_lessons') }}" class="sidebar-nav-link py-2 small fw-normal">Toutes les Leçons</a>
+                    <a href="{{ path('app_my_certificates') }}" class="sidebar-nav-link py-2 small fw-normal">Mes Certificats</a>
+                    <hr class="dropdown-divider mx-3">
+                    <a href="{{ path('public_centres_map') }}" class="sidebar-nav-link py-2 small fw-normal text-primary"><i class="bi bi-map me-2"></i>Centres de Formations</a>
+                </div>
+            </div>
+
+            <!-- Gamification -->
+            <a href="{{ path('app_gamification') }}" class="sidebar-nav-link {{ app.request.attributes.get('_route') == 'app_gamification' ? 'active' : '' }}">
+                <i class="bi bi-trophy"></i> Classement & Trophées
+            </a>
+        </div>
+
+        {% if is_granted('ROLE_ADMIN') %}
+        <div class="sidebar-section mt-4 pt-4 border-top">
+            <h6 class="text-uppercase xsmall text-muted fw-bold mb-3 px-2" style="font-size: 0.65rem; letter-spacing: 1.5px;">Administration</h6>
+            <a href="{{ path('app_admin') }}" class="sidebar-nav-link text-danger border border-danger border-opacity-10">
+                <i class="bi bi-shield-lock-fill"></i> Panel Admin
+            </a>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="sidebar-footer mt-auto p-3 border-top bg-light bg-opacity-50">
+        <a href="{{ path('app_logout') }}" class="btn btn-danger-soft w-100 d-flex align-items-center justify-content-center gap-2" style="border-radius: 12px;">
+            <i class="bi bi-power"></i> Déconnexion
+        </a>
+    </div>
+</div>
+
+<!-- Sidebar Overlay -->
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+{% endif %}
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const toggle = document.getElementById('sidebarToggle');
+        const close = document.getElementById('sidebarClose');
+        const overlay = document.getElementById('sidebarOverlay');
+        const body = document.body;
+
+        function toggleSidebar() {
+            body.classList.toggle('sidebar-open');
+            localStorage.setItem('sidebarState', body.classList.contains('sidebar-open') ? 'open' : 'closed');
+        }
+
+        if(toggle) toggle.addEventListener('click', toggleSidebar);
+        if(close) close.addEventListener('click', toggleSidebar);
+        if(overlay) overlay.addEventListener('click', toggleSidebar);
+
+        // YouTube-style: on large screens, if it was open, keep it open
+        const isAuthPage = document.body.classList.contains('no-sidebar');
+        if(!isAuthPage && window.innerWidth >= 1200 && localStorage.getItem('sidebarState') === 'open') {
+            body.classList.add('sidebar-open');
+        }
+    });
+</script>
 
 <!-- Header START -->
 {% block header %}
-<header class="navbar-light fixed-top glass-header">
-	<!-- Nav START -->
-	<nav class="navbar navbar-expand-xl z-index-9">
-		<div class="container">
-			<!-- Logo START -->
-			<a class="navbar-brand" href="{{ path('app_home') }}">
-				<img class="light-mode-item navbar-brand-item" src="{{ asset('assets/images/logo-finora.webp') }}" alt="FINORA" style="height:45px;">
-				<img class="dark-mode-item navbar-brand-item" src="{{ asset('assets/images/logo-finora.webp') }}" alt="FINORA" style="height:45px; filter: brightness(0) invert(1);">
-			</a>
-			<!-- Logo END -->
-	
-			<!-- Responsive navbar toggler -->
-            {% if app.request.attributes.get('_route') not in ['app_login', 'app_register'] %}
-			<button class="navbar-toggler ms-auto" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
-				<span class="navbar-toggler-animation">
-					<span></span>
-					<span></span>
-					<span></span>
-				</span>
-			</button>
-            {% else %}
-            <!-- Spacer for alignment when toggler is hidden -->
-            <div class="ms-auto d-xl-none"></div>
-            {% endif %}
-	
-			<!-- Main navbar START -->
-            {% if app.request.attributes.get('_route') not in ['app_login', 'app_register'] %}
-			<div class="navbar-collapse collapse" id="navbarCollapse">
-				<!-- Nav Search START -->
-				<div class="col-xxl-6">
-					<div class="nav my-3 my-xl-0 px-4 flex-nowrap align-items-center">
-						<div class="nav-item w-100">
-							<form class="rounded position-relative">
-								<input class="form-control pe-5 bg-secondary bg-opacity-10 border-0" type="search" placeholder="Search" aria-label="Search">
-								<button class="btn btn-link bg-transparent px-2 py-0 position-absolute top-50 end-0 translate-middle-y" type="submit"><i class="fas fa-search fs-6 text-primary"></i></button>
-							</form>
-						</div>
-					</div>
-				</div>
-				<!-- Nav Search END -->
+<header class="navbar-light fixed-top bg-white border-bottom shadow-sm">
+    <!-- Row 1: Brand, Search, User START -->
+    <div class="container-xl py-2">
+        <div class="d-flex align-items-center justify-content-between w-100">
+            <!-- Left: Sidebar Toggle & Logo -->
+            <div class="d-flex align-items-center">
+                {% if app.request.attributes.get('_route') not in ['app_login', 'app_register'] %}
+                <button class="sidebar-toggle-btn text-primary border-0 bg-transparent me-2 p-2" id="sidebarToggle" type="button">
+                    <i class="bi bi-list fs-3"></i>
+                </button>
+                {% endif %}
+                <a class="navbar-brand m-0 p-0" href="{{ path('app_home') }}">
+                    <img class="navbar-brand-item" src="{{ asset('assets/images/logo-finora.webp') }}" alt="FINORA" style="height:42px;">
+                </a>
+            </div>
 
-				<!-- Nav Main menu START -->
-				<ul class="navbar-nav navbar-nav-scroll ms-auto">
-					<li class="nav-item">
-						<a class="nav-link fw-bold" href="{{ path('app_home') }}" style="font-size: 0.95rem;">Accueil</a>
-					</li>
+            <!-- Center: Search Bar -->
+            <div class="flex-grow-1 mx-4 d-none d-lg-block header-search-container" style="max-width: 480px;">
+                <form class="position-relative w-100" action="{{ path('app_market') }}" method="GET">
+                    <input class="form-control rounded-pill border-0 ps-4 pe-5 header-search-input" type="search" name="q" placeholder="Rechercher sur Finora..." style="background: #f1f5f9; height: 42px; font-size: 0.9rem;">
+                    <button class="btn btn-link position-absolute top-50 end-0 translate-middle-y text-primary pe-3" type="submit">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </form>
+            </div>
 
-					<!-- Dropdown Formations -->
-					<li class="nav-item dropdown">
-						<a class="nav-link fw-bold dropdown-toggle" href="{{ path('app_formations') }}" id="formationsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" style="font-size: 0.95rem;">
-							Formations
-						</a>
-						<ul class="dropdown-menu dropdown-menu-end border-0 shadow-sm" aria-labelledby="formationsDropdown" style="border-radius: 12px; min-width: 200px;">
-							<li><a class="dropdown-item py-2 fw-semibold" href="{{ path('app_formations') }}"><i class="fas fa-layer-group me-2" style="color:var(--finora-purple, #7c3aed);"></i>Toutes les Formations</a></li>
-							<li><a class="dropdown-item py-2 fw-semibold" href="{{ path('app_lessons') }}"><i class="fas fa-book-open me-2" style="color:var(--finora-purple, #7c3aed);"></i>Toutes les Leçons</a></li>
-							<li><a class="dropdown-item py-2 fw-semibold" href="{{ path('app_my_certificates') }}"><i class="fas fa-certificate me-2" style="color:var(--finora-purple, #7c3aed);"></i>Mes Certificats</a></li>
-							<li><a class="dropdown-item py-2 fw-semibold" href="{{ path('app_unified_wishlist') }}#formations"><i class="fas fa-heart me-2" style="color:var(--finora-purple, #7c3aed);"></i>Ma Wishlist</a></li>
-							<li><hr class="dropdown-divider"></li>
-							<li><a class="dropdown-item py-2 fw-semibold text-primary" href="{{ path('public_centres_map') }}"><i class="fas fa-map-marker-alt me-2"></i>Centres de Formations</a></li>
-						</ul>
-					</li>
-
-					<!-- Dropdown Bourse -->
-					<li class="nav-item dropdown">
-						<a class="nav-link fw-bold dropdown-toggle" href="#" id="bourseMainDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" style="font-size: 0.95rem;">
-							Marché
-						</a>
-						<ul class="dropdown-menu dropdown-menu-end border-0 shadow-sm" aria-labelledby="bourseMainDropdown" style="border-radius: 12px; min-width: 180px;">
-							<li><a class="dropdown-item py-2 fw-semibold" href="{{ path('app_market') }}"><i class="fas fa-chart-line me-2" style="color:var(--finora-purple, #7c3aed);"></i>Marché Live</a></li>
-							<li><a class="dropdown-item py-2 fw-semibold" href="{{ path('app_history') }}"><i class="fas fa-history me-2" style="color:var(--finora-purple, #7c3aed);"></i>Mon Historique</a></li>
-						</ul>
-					</li>
-
-					<li class="nav-item dropdown">
-						<a class="nav-link fw-bold dropdown-toggle" href="#" id="investMainDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" style="font-size: 0.95rem;">
-							Investir
-						</a>
-						<ul class="dropdown-menu dropdown-menu-end border-0 shadow-sm" aria-labelledby="investMainDropdown" style="border-radius: 12px; min-width: 200px;">
-							<li><a class="dropdown-item py-2 fw-semibold" href="{{ path('app_investment_index') }}"><i class="fas fa-project-diagram me-2" style="color:var(--finora-purple, #7c3aed);"></i>MarketPlace</a></li>
-							<li><a class="dropdown-item py-2 fw-semibold" href="{{ path('app_investor_profile') }}"><i class="fas fa-user-tie me-2" style="color:var(--finora-purple, #7c3aed);"></i>My Portfolio</a></li>
-							<li><a class="dropdown-item py-2 fw-semibold" href="{{ path('app_management_index') }}"><i class="fas fa-tasks me-2" style="color:var(--finora-purple, #7c3aed);"></i>Suivi management</a></li>
-							<li><hr class="dropdown-divider"></li>
-							<li><a class="dropdown-item py-2 fw-semibold" href="{{ path('app_unified_wishlist') }}#investments"><i class="fas fa-heart me-2" style="color:#7c3aed;"></i>Ma Wishlist</a></li>
-						</ul>
-					</li>
-
-					<!-- Dropdown Appel d'Offres -->
-					<li class="nav-item dropdown">
-						<a class="nav-link fw-bold dropdown-toggle" href="#" id="offreDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" style="font-size: 0.95rem;">
-							Appels d'Offres
-						</a>
-						<ul class="dropdown-menu dropdown-menu-end border-0 shadow-sm" aria-labelledby="offreDropdown" style="border-radius: 12px; min-width: 220px;">
-							<li><a class="dropdown-item py-2 fw-semibold" href="{{ path('app_appel_offre_index') }}"><i class="fas fa-file-contract me-2" style="color:var(--finora-purple, #7c3aed);"></i>Appels d'Offres</a></li>
-							
-							{% if is_granted('ROLE_ADMIN') %}
-								<li><a class="dropdown-item py-2 fw-semibold" href="{{ path('app_appel_offre_new') }}"><i class="fas fa-plus-circle me-2" style="color:var(--finora-purple, #7c3aed);"></i>Lancer un Appel</a></li>
-								<li><a class="dropdown-item py-2 fw-semibold" href="{{ path('app_candidature_index') }}"><i class="fas fa-users-cog me-2" style="color:var(--finora-purple, #7c3aed);"></i>Gérer Candidatures</a></li>
-								<li><hr class="dropdown-divider"></li>
-								<li><a class="dropdown-item py-2 fw-semibold" href="{{ path('app_categorie_index') }}"><i class="fas fa-tags me-2" style="color:#7c3aed;"></i>Catégories</a></li>
-							{% else %}
-								<li><a class="dropdown-item py-2 fw-semibold" href="{{ path('app_candidature_index') }}"><i class="fas fa-tasks me-2" style="color:var(--finora-purple, #7c3aed);"></i>Mes Candidatures</a></li>
-								<li><a class="dropdown-item py-2 fw-semibold" href="{{ path('app_appel_offre_wishlist_index') }}"><i class="fas fa-heart me-2" style="color:var(--finora-purple, #7c3aed);"></i>Mes Favoris</a></li>
-							{% endif %}
-						</ul>
-					</li>
-
-				</ul>
-				<!-- Nav Main menu END -->
-
-			</div>
-            {% else %}
-            <!-- Spacer to push auth buttons to the right -->
-            <div class="me-auto"></div>
-            {% endif %}
-			<!-- Main navbar END -->
-
-			<!-- Profile and notification START -->
-			<ul class="nav flex-row align-items-center list-unstyled ms-xl-auto">
-                {% if app.user %}
-
-
-
-                    <!-- Wishlist Link START -->
-                    <li class="nav-item ms-0 ms-sm-2 d-none d-sm-block">
-                        <a class="btn btn-light btn-round mb-0" href="{{ path('app_unified_wishlist') }}" title="Ma Wishlist Unifiée">
-                            <i class="fas fa-heart" style="color:#7c3aed;"></i>
-                        </a>
-                    </li>
-                    <!-- Wishlist Link END -->
-
-                    <!-- Notification dropdown START -->
-                    <li class="nav-item ms-2 ms-sm-3 dropdown">
-                        <!-- Notification button -->
-                        <a class="btn btn-light btn-round mb-0" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" data-bs-auto-close="outside">
-                            <i class="bi bi-bell fa-fw"></i>
-                        </a>
-                        <!-- Notification dote -->
-                        <span class="notif-badge animation-blink"></span>
-
-                        <!-- Notification dropdown menu START -->
-                        <div class="dropdown-menu dropdown-animation dropdown-menu-end dropdown-menu-size-md p-0 shadow-lg border-0">
-                            <div class="card bg-transparent">
-                                <div class="card-header bg-transparent border-bottom py-4 d-flex justify-content-between align-items-center">
-                                    <h6 class="m-0">Notifications <span class="badge bg-danger bg-opacity-10 text-danger ms-2">1 new</span></h6>
-                                    <a class="small" href="#">Clear all</a>
-                                </div>
-                                <div class="card-body p-0">
-                                    <ul class="list-group list-unstyled list-group-flush">
-                                        {# Fraud Alerts #}
-                                        {% for message in app.flashes('fraud_alert') %}
-                                            <li>
-                                                <div class="list-group-item-action border-0 border-bottom d-flex p-3 bg-danger bg-opacity-10">
-                                                    <div class="me-3">
-                                                        <div class="avatar avatar-md bg-danger text-white rounded-circle d-flex align-items-center justify-content-center">
-                                                            <i class="fas fa-shield-alt"></i>
-                                                        </div>
-                                                    </div>
-                                                    <div>
-                                                        <h6 class="mb-1 text-danger">Alerte de Sécurité</h6>
-                                                        <p class="small text-body m-0">{{ message }}</p>
-                                                        <small class="text-body font-size-xs">Action requise</small>
-                                                    </div>
-                                                </div>
-                                            </li>
-                                        {% endfor %}
-
-                                        <!-- Notif item -->
-                                        <li>
-                                            <a href="#" class="list-group-item-action border-0 border-bottom d-flex p-3">
-                                                <div class="me-3">
-                                                    <div class="avatar avatar-md">
-                                                        <img class="avatar-img rounded-circle" src="{{ asset('assets/images/avatar/03.jpg') }}" alt="avatar">
-                                                    </div>
-                                                </div>
-                                                <div>
-                                                    <h6 class="mb-1">Welcome to Finora</h6>
-                                                    <p class="small text-body m-0">Thanks for joining us!</p>
-                                                    <small class="text-body">Just now</small>
-                                                </div>
-                                            </a>
+            <!-- Right: User Actions -->
+            <div class="d-flex align-items-center">
+                <div class="d-flex align-items-center gap-3">
+{% if app.user %}
+                        <a href="{{ path('app_unified_wishlist') }}" class="btn btn-light btn-round btn-sm mb-0 shadow-sm" style="background: #fff; width: 38px; height: 38px; display: flex; align-items: center; justify-content: center;"><i class="fas fa-heart text-primary"></i></a>
+                        <div class="dropdown">
+                            <button class="btn btn-light btn-round btn-sm mb-0 shadow-sm position-relative" type="button" data-bs-toggle="dropdown" aria-expanded="false" onclick="markAllNotifsRead()">
+                                <i class="bi bi-bell fs-6"></i>
+                                <span id="notifBadge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger border border-white" style="font-size:8px; padding: 3px 5px; display: none;">0</span>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 mt-3 p-0 overflow-hidden" style="border-radius: 16px; width: 320px;">
+                                <li class="p-3 border-bottom bg-light bg-opacity-50">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <h6 class="m-0 fw-bold">Notifications</h6>
+                                        <span id="notifCount" class="badge bg-primary bg-opacity-10 text-primary">0</span>
+                                    </div>
+                                </li>
+                                <li>
+                                    <ul class="list-unstyled mb-0" id="notifList" style="max-height: 400px; overflow-y: auto;">
+                                        <!-- Notifications populated by JS -->
+                                        <li id="notifEmpty" class="p-4 text-center">
+                                            <i class="bi bi-bell-slash fs-2 text-muted opacity-25 d-block mb-2"></i>
+                                            <span class="small text-muted">Aucune notification</span>
                                         </li>
                                     </ul>
-                                </div>
-                                <!-- Button -->
-                                <div class="card-footer bg-transparent border-0 py-3 text-center position-relative">
-                                    <a href="#" class="stretched-link">See all incoming activity</a>
-                                </div>
-                            </div>
+                                </li>
+                            </ul>
                         </div>
-                        <!-- Notification dropdown menu END -->
-                    </li>
-                    <!-- Profile dropdown START -->
-                    <li class="nav-item ms-3 dropdown">
-                        <!-- Avatar -->
-                        <a class="avatar avatar-sm p-0" href="#" id="profileDropdown" role="button" data-bs-auto-close="outside" data-bs-display="static" data-bs-toggle="dropdown" aria-expanded="false">
-                            {% if app.user.image %}
-                                <img class="avatar-img rounded-circle" src="{{ asset('uploads/' ~ app.user.image) }}" alt="avatar">
-                            {% else %}
-                                <img class="avatar-img rounded-circle" src="https://ui-avatars.com/api/?name={{ app.user.username }}" alt="avatar">
-                            {% endif %}
-                        </a>
-
-                        <!-- Profile dropdown START -->
-                        <ul class="dropdown-menu dropdown-animation dropdown-menu-end shadow pt-3" aria-labelledby="profileDropdown">
-                            <!-- Profile info -->
-                            <li class="px-3 mb-3">
-                                <div class="d-flex align-items-center">
-                                    <!-- Avatar -->
-                                    <div class="avatar me-3">
-                                        {% if app.user.image %}
-                                            <img class="avatar-img rounded-circle shadow" src="{{ asset('uploads/' ~ app.user.image) }}" alt="avatar">
-                                        {% else %}
-                                            <img class="avatar-img rounded-circle shadow" src="https://ui-avatars.com/api/?name={{ app.user.username }}" alt="avatar">
-                                        {% endif %}
-                                    </div>
-                                    <div>
-                                        <a class="h6" href="{{ path('app_profile') }}">{{ app.user.username }}</a>
-                                        <p class="small m-0">{{ app.user.email }}</p>
-                                    </div>
-                                </div>
-                            </li>
-                            <!-- Links -->
-                            <li> <hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="{{ path('app_profile') }}"><i class="bi bi-person fa-fw me-2"></i>My Profile</a></li>
-                            {% if is_granted('ROLE_ADMIN') %}
-                            <li><a class="dropdown-item" href="{{ path('app_admin') }}"><i class="bi bi-speedometer2 fa-fw me-2"></i>Admin Dashboard</a></li>
-                            {% endif %}
-                            <li><a class="dropdown-item bg-danger-soft-hover" href="{{ path('app_logout') }}"><i class="bi bi-power fa-fw me-2"></i>Sign Out</a></li>
-                            <li> <hr class="dropdown-divider"></li>
-                            <!-- Dark mode options START -->
-                            <li>
-                                <div class="bg-light dark-mode-switch theme-icon-active d-flex align-items-center p-1 rounded mt-2">
-                                    <button type="button" class="btn btn-sm mb-0" data-bs-theme-value="light">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-sun fa-fw mode-switch" viewBox="0 0 16 16">
-                                            <path d="M8 11a3 3 0 1 1 0-6 3 3 0 0 1 0 6zm0 1a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM8 0a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 0zm0 13a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 13zm8-5a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2a.5.5 0 0 1 .5.5zM3 8a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2A.5.5 0 0 1 3 8zm10.657-5.657a.5.5 0 0 1 0 .707l-1.414 1.415a.5.5 0 1 1-.707-.708l1.414-1.414a.5.5 0 0 1 .707 0zm-9.193 9.193a.5.5 0 0 1 0 .707L3.05 13.657a.5.5 0 0 1-.707-.707l1.414-1.414a.5.5 0 0 1 .707 0zm9.193 2.121a.5.5 0 0 1-.707 0l-1.414-1.414a.5.5 0 0 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .707zM4.464 4.465a.5.5 0 0 1-.707 0L2.343 3.05a.5.5 0 1 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .708z"/>
-                                            <use href="#"></use>
-                                        </svg> Light
-                                    </button>
-                                    <button type="button" class="btn btn-sm mb-0" data-bs-theme-value="dark">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-moon-stars fa-fw mode-switch" viewBox="0 0 16 16">
-                                            <path d="M6 .278a.768.768 0 0 1 .08.858 7.208 7.208 0 0 0-.878 3.46c0 4.021 3.278 7.277 7.318 7.277.527 0 1.04-.055 1.533-.16a.787.787 0 0 1 .81.316.733.733 0 0 1-.031.893A8.349 8.349 0 0 1 8.344 16C3.734 16 0 12.286 0 7.71 0 4.266 2.114 1.312 5.124.06A.752.752 0 0 1 6 .278zM4.858 1.311A7.269 7.269 0 0 0 1.025 7.71c0 4.02 3.279 7.276 7.319 7.276a7.316 7.316 0 0 0 5.205-2.162c-.337.042-.68.063-1.029.063-4.61 0-8.343-3.714-8.343-8.29 0-1.167.242-2.278.681-3.286z"/>
-                                            <path d="M10.794 3.148a.217.217 0 0 1 .412 0l.387 1.162c.173.518.579.924 1.097 1.097l1.162.387a.217.217 0 0 1 0 .412l-1.162.387a1.734 1.734 0 0 0-1.097 1.097l-.387 1.162a.217.217 0 0 1-.412 0l-.387-1.162A1.734 1.734 0 0 0 9.31 6.593l-1.162-.387a.217.217 0 0 1 0-.412l1.162-.387a1.734 1.734 0 0 0 1.097-1.097l.387-1.162zM13.863.099a.145.145 0 0 1 .274 0l.258.774c.115.346.386.617.732.732l.774.258a.145.145 0 0 1 0 .274l-.774.258a1.156 1.156 0 0 0-.732.732l-.258.774a.145.145 0 0 1-.274 0l-.258-.774a1.156 1.156 0 0 0-.732-.732l-.774-.258a.145.145 0 0 1 0-.274l.774-.258c.346-.115.617-.386.732-.732L13.863.1z"/>
-                                            <use href="#"></use>
-                                        </svg> Dark
-                                    </button>
-                                    <button type="button" class="btn btn-sm mb-0 active" data-bs-theme-value="auto">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-circle-half fa-fw mode-switch" viewBox="0 0 16 16">
-                                            <path d="M8 15A7 7 0 1 0 8 1v14zm0 1A8 8 0 1 1 8 0a8 8 0 0 1 0 16z"/>
-                                            <use href="#"></use>
-                                        </svg> Auto
-                                    </button>
-                                </div>
-                            </li> 
-                            <!-- Dark mode options END-->
-                        </ul>
-                        <!-- Profile dropdown END -->
-                    </li>
-                {% else %}
-                    <li class="nav-item ms-3">
-                        <div class="d-none d-sm-block">
-                            <a href="{{ path('app_login') }}" class="btn btn-sm btn-light">Login</a>
-                            <a href="{{ path('app_register') }}" class="btn btn-sm btn-primary">Sign up</a>
+                        
+                        <!-- Currency Switcher -->
+                        <div class="dropdown">
+                            <button class="btn btn-primary rounded-pill px-3 py-1 d-flex align-items-center gap-2 shadow-sm border-0" type="button" data-bs-toggle="dropdown" style="background: linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%); font-size: 0.85rem; height: 38px;">
+                                <i class="fas fa-coins small"></i>
+                                <span class="fw-bold">{{ current_currency() }}</span>
+                                <i class="bi bi-chevron-down smaller opacity-80"></i>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 mt-3 p-2" style="border-radius: 12px; min-width: 180px;">
+                                <li><span class="dropdown-item-text small text-muted text-uppercase fw-bold pb-2 border-bottom mb-2 text-center d-block" style="font-size: 0.7rem;">Choisir la devise</span></li>
+                                <li><a class="dropdown-item py-2 px-3 small rounded-3 d-flex align-items-center {{ current_currency() == 'TND' ? 'bg-light fw-bold' : '' }}" href="{{ path('app_switch_currency', {currency: 'TND'}) }}">
+                                    <span class="me-2">🇹🇳</span> TND (Dinar)
+                                </a></li>
+                                <li><a class="dropdown-item py-2 px-3 small rounded-3 d-flex align-items-center {{ current_currency() == 'EUR' ? 'bg-light fw-bold' : '' }}" href="{{ path('app_switch_currency', {currency: 'EUR'}) }}">
+                                    <span class="me-2">🇪🇺</span> EUR (Euro)
+                                </a></li>
+                                <li><a class="dropdown-item py-2 px-3 small rounded-3 d-flex align-items-center {{ current_currency() == 'USD' ? 'bg-light fw-bold' : '' }}" href="{{ path('app_switch_currency', {currency: 'USD'}) }}">
+                                    <span class="me-2">🇺🇸</span> USD (Dollar)
+                                </a></li>
+                            </ul>
                         </div>
-                    </li>
-                {% endif %}
-			</ul>
-			<!-- Profile and notification END -->
-		</div>
-	</nav>
-	<!-- Nav END -->
+                        <div class="dropdown ms-1">
+                            <a class="avatar avatar-sm p-0 shadow-sm rounded-circle border border-2 border-white" href="#" data-bs-toggle="dropdown">
+                                {% if app.user.image %}
+                                    <img class="avatar-img rounded-circle" src="{{ asset('uploads/' ~ app.user.image) }}" alt="avatar">
+                                {% else %}
+                                    <img class="avatar-img rounded-circle" src="https://ui-avatars.com/api/?name={{ app.user.username }}&background=7c3aed&color=fff" alt="avatar">
+                                {% endif %}
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 mt-3" style="border-radius: 12px; min-width: 200px;">
+                                <li class="px-3 py-2 border-bottom mb-2"><div class="fw-bold small">{{ app.user.username }}</div><div class="small text-muted" style="font-size: 0.75rem;">{{ app.user.email }}</div></li>
+                                <li><a class="dropdown-item py-2 px-3 small fw-semibold" href="{{ path('app_profile') }}"><i class="bi bi-person me-2"></i>Profil</a></li>
+                                <li><a class="dropdown-item py-2 px-3 small fw-semibold" href="{{ path('app_admin') }}"><i class="bi bi-grid me-2"></i>Dashboard</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item py-2 px-3 small fw-semibold text-danger" href="{{ path('app_logout') }}"><i class="bi bi-power me-2"></i>Déconnexion</a></li>
+                            </ul>
+                        </div>
+                    {% else %}
+                        <div class="d-flex align-items-center gap-2">
+                            <a href="{{ path('app_login') }}" class="btn btn-light btn-sm px-3 rounded-pill shadow-sm mb-0 fw-bold text-primary">Connexion</a>
+                            <a href="{{ path('app_register') }}" class="btn btn-primary btn-sm px-3 rounded-pill shadow-sm mb-0 fw-bold">S'inscrire</a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Row 1 END -->
 
-	<hr class="my-0">
+    <!-- Row 2: Secondary Nav START -->
+    {% if app.request.attributes.get('_route') not in ['app_login', 'app_register'] %}
+    <div class="w-100 bg-white border-top border-bottom shadow-sm" style="height: 55px;">
+        <div class="container h-100">
+            <ul class="nav justify-content-center h-100 align-items-center gap-4 list-unstyled">
+                <!-- ACCUEIL -->
+                <li class="nav-item h-100 d-flex align-items-center">
+                    <a class="nav-link-module fw-bold small text-uppercase d-flex align-items-center text-decoration-none" href="{{ path('app_home') }}" style="color:#475569;">
+                        <i class="fas fa-home me-2 text-primary"></i>ACCUEIL
+                    </a>
+                </li>
+                <!-- BOURSE -->
+                <li class="nav-item dropdown h-100 d-flex align-items-center">
+                    <a class="nav-link-module fw-bold small text-uppercase d-flex align-items-center dropdown-toggle text-decoration-none" href="#" data-bs-toggle="dropdown" style="color:#475569;">
+                        <i class="fas fa-chart-line me-2 text-primary"></i>BOURSE
+                    </a>
+                    <ul class="dropdown-menu border-0 shadow-lg mt-0 p-2" style="border-radius: 16px; min-width: 220px;">
+                        <li><a class="dropdown-item rounded-3 mb-1" href="{{ path('app_market') }}">Marché Live</a></li>
+                        <li><a class="dropdown-item rounded-3" href="{{ path('app_history') }}">Historique</a></li>
+                    </ul>
+                </li>
 
-    {% if app.user %}
-	<!-- Category Nav link START -->
-	<nav class="navbar navbar-expand-xl nav-category" style="background: #f0f5ff; border-bottom: 1px solid #e0e8f9;">
-		<div class="container px-0">
-			<!-- Main navbar START -->
-			<div class="navbar-collapse w-100 collapse justify-content-center" id="navbarCollapse2">
-				<!-- Nav Main menu START -->
-				<ul class="navbar-nav navbar-nav-scroll mx-auto">
+                <!-- WALLET -->
+                <li class="nav-item dropdown h-100 d-flex align-items-center">
+                    <a class="nav-link-module fw-bold small text-uppercase d-flex align-items-center dropdown-toggle text-decoration-none" href="#" data-bs-toggle="dropdown" style="color:#475569;">
+                        <i class="fas fa-wallet me-2 text-primary"></i>WALLET
+                    </a>
+                    <ul class="dropdown-menu border-0 shadow-lg mt-0 p-2" style="border-radius: 16px; min-width: 240px;">
+                        <li class="px-3 py-3 mb-2 rounded-4" style="background: #f8fafc;">
+                            <div class="small text-muted mb-1 text-uppercase fw-bold" style="font-size: 0.65rem; letter-spacing: 0.5px;">Solde Disponible</div>
+                            <div class="h5 mb-0 text-primary fw-bold">{{ wallet_balance()|format_currency }}</div>
+                        </li>
+                        <li><a class="dropdown-item rounded-3 mb-1" href="{{ path('dashboard') }}">Mon Wallet (Dashboard)</a></li>
+                        <li><a class="dropdown-item rounded-3 mb-1" href="{{ path('category_list') }}">Mes Catégories</a></li>
+                        <li><a class="dropdown-item rounded-3 mb-1" href="{{ path('transactions') }}">Mes Transactions</a></li>
+                        <li><a class="dropdown-item rounded-3 text-warning fw-bold" href="{{ path('ai_analyse') }}">Finora AI Analysis</a></li>
+                    </ul>
+                </li>
 
-					<li class="nav-item dropdown">
-						<a class="nav-link dropdown-toggle fw-bold text-primary" href="#" id="bourseDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" style="font-size: 0.9rem;">
-                            <i class="bi bi-graph-up-arrow me-2"></i>BOURSE
-                        </a>
-						<ul class="dropdown-menu shadow border-0" aria-labelledby="bourseDropdown" style="border-radius: 12px; min-width: 180px;">
-							<li><a class="dropdown-item py-2 fw-semibold" href="{{ path('app_market') }}"><i class="bi bi-shop me-2 text-primary"></i>Marché Live</a></li>
-							<li><a class="dropdown-item py-2 fw-semibold" href="{{ path('app_unified_wishlist') }}#bourse"><i class="fas fa-heart me-2" style="color:#7c3aed;"></i>Ma Wishlist Bourse</a></li>
-							<li><a class="dropdown-item py-2 fw-semibold" href="{{ path('app_history') }}"><i class="bi bi-clock-history me-2 text-primary"></i>Historique</a></li>
-						</ul>
-					</li>
+                <!-- APPEL D'OFFRE -->
+                <li class="nav-item dropdown h-100 d-flex align-items-center">
+                    <a class="nav-link-module fw-bold small text-uppercase d-flex align-items-center dropdown-toggle text-decoration-none" href="#" data-bs-toggle="dropdown" style="color:#475569;">
+                        <i class="fas fa-bullhorn me-2 text-primary"></i>APPEL D'OFFRE
+                    </a>
+                    <ul class="dropdown-menu border-0 shadow-lg mt-0 p-2" style="border-radius: 16px; min-width: 220px;">
+                        <li><a class="dropdown-item rounded-3 mb-1" href="{{ path('app_appel_offre_index') }}">Liste des Appels</a></li>
+                        <li><a class="dropdown-item rounded-3" href="{{ path('app_candidature_index') }}">Mes Candidatures</a></li>
+                    </ul>
+                </li>
 
-					<li class="nav-item dropdown">
-						<a class="nav-link dropdown-toggle fw-bold text-secondary mx-3" href="#" id="walletDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" style="font-size: 0.9rem;">
-							<i class="bi bi-wallet2 me-2"></i>WALLET
-						</a>
-						<ul class="dropdown-menu shadow border-0" aria-labelledby="walletDropdown" style="border-radius: 12px; min-width: 200px;">
-							<li><a class="dropdown-item py-2 fw-semibold" href="{{ path('dashboard') }}"><i class="bi bi-ui-checks-grid me-2 text-primary"></i>Mon Wallet (Dashboard)</a></li>
-							<li><a class="dropdown-item py-2 fw-semibold" href="{{ path('category_list') }}"><i class="bi bi-tags me-2 text-primary"></i>Mes Catégories</a></li>
-							<li><a class="dropdown-item py-2 fw-semibold" href="{{ path('transactions') }}"><i class="bi bi-card-list me-2 text-primary"></i>Historique Transactions</a></li>
-							<li><a class="dropdown-item py-2 fw-semibold" href="{{ path('wishlist') }}"><i class="bi bi-heart me-2 text-primary"></i>Objectifs Wishlist</a></li>
-							<li><a class="dropdown-item py-2 fw-semibold" href="{{ path('ai_analyse') }}"><i class="bi bi-robot me-2 text-warning"></i>Finora AI Analysis</a></li>
-						</ul>
-					</li>
-					<li class="nav-item"><a class="nav-link fw-bold text-secondary mx-3" href="{{ path('app_management_index') }}" style="font-size: 0.9rem;"><i class="bi bi-briefcase me-2"></i>PORTFEUILLE</a></li>
-					<li class="nav-item dropdown">
-						<a class="nav-link dropdown-toggle fw-bold text-secondary mx-3" href="#" id="appelOffreDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" style="font-size: 0.9rem;">
-							<i class="bi bi-megaphone me-2"></i>APPEL D'OFFRE
-						</a>
-						<ul class="dropdown-menu shadow border-0" aria-labelledby="appelOffreDropdown" style="border-radius: 12px; min-width: 220px;">
-							<li><a class="dropdown-item py-2 fw-semibold" href="{{ path('app_appel_offre_index') }}"><i class="bi bi-file-earmark-text me-2 text-primary"></i>Liste des Appels</a></li>
-							
-							{% if is_granted('ROLE_ADMIN') %}
-								<li><a class="dropdown-item py-2 fw-semibold" href="{{ path('app_appel_offre_new') }}"><i class="bi bi-plus-circle me-2 text-primary"></i>Lancer un Appel</a></li>
-								<li><a class="dropdown-item py-2 fw-semibold" href="{{ path('app_candidature_index') }}"><i class="bi bi-people me-2 text-primary"></i>Gérer Candidatures</a></li>
-								<li><hr class="dropdown-divider"></li>
-								<li><a class="dropdown-item py-2 fw-semibold" href="{{ path('app_categorie_index') }}"><i class="bi bi-tags me-2 text-primary"></i>Catégories</a></li>
-							{% else %}
-								<li><a class="dropdown-item py-2 fw-semibold" href="{{ path('app_candidature_index') }}"><i class="bi bi-person-badge me-2 text-primary"></i>Mes Candidatures</a></li>
-								<li><a class="dropdown-item py-2 fw-semibold" href="{{ path('app_appel_offre_wishlist_index') }}"><i class="bi bi-heart me-2 text-primary"></i>Mes Favoris</a></li>
-							{% endif %}
-						</ul>
-					</li>
-					<li class="nav-item dropdown">
-						<a class="nav-link dropdown-toggle fw-bold text-secondary mx-3" href="#" id="formationPagesDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" style="font-size: 0.9rem;">
-							<i class="bi bi-mortarboard me-2"></i>FORMATION
-						</a>
-						<ul class="dropdown-menu shadow border-0" aria-labelledby="formationPagesDropdown" style="border-radius: 12px; min-width: 200px;">
-							<li><a class="dropdown-item py-2 fw-semibold" href="{{ path('app_formations') }}"><i class="fas fa-layer-group me-2" style="color:var(--finora-purple, #7c3aed);"></i>Toutes les Formations</a></li>
-							<li><a class="dropdown-item py-2 fw-semibold" href="{{ path('app_lessons') }}"><i class="fas fa-book-open me-2" style="color:var(--finora-purple, #7c3aed);"></i>Toutes les Leçons</a></li>
-							<li><a class="dropdown-item py-2 fw-semibold" href="{{ path('app_my_certificates') }}"><i class="fas fa-certificate me-2" style="color:var(--finora-purple, #7c3aed);"></i>Mes Certificats</a></li>
-							<li><a class="dropdown-item py-2 fw-semibold" href="{{ path('app_unified_wishlist') }}#formations"><i class="fas fa-heart me-2" style="color:var(--finora-purple, #7c3aed);"></i>Ma Wishlist</a></li>
-							<li><hr class="dropdown-divider"></li>
-							<li><a class="dropdown-item py-2 fw-semibold text-primary" href="{{ path('public_centres_map') }}"><i class="fas fa-map-marker-alt me-2"></i>Centres de Formations</a></li>
-						</ul>
-					</li>
-					<li class="nav-item dropdown">
-						<a class="nav-link dropdown-toggle fw-bold text-secondary mx-3" href="#" id="investmentDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" style="font-size: 0.9rem;">
-							<i class="bi bi-cash-stack me-2"></i>INVESTIR
-						</a>
-						<ul class="dropdown-menu shadow border-0" aria-labelledby="investmentDropdown" style="border-radius: 12px; min-width: 200px;">
-							<li><a class="dropdown-item py-2 fw-semibold" href="{{ path('app_investment_home') }}"><i class="bi bi-star-fill me-2" style="color:var(--finora-purple, #7c3aed);"></i>Recommandation</a></li>
-							<li><a class="dropdown-item py-2 fw-semibold" href="{{ path('app_investment_index') }}"><i class="bi bi-grid-fill me-2" style="color:var(--finora-purple, #7c3aed);"></i>MarketPlace</a></li>
-							<li><a class="dropdown-item py-2 fw-semibold" href="{{ path('app_management_index') }}"><i class="bi bi-briefcase-fill me-2" style="color:var(--finora-purple, #7c3aed);"></i>Suivi management</a></li>
-							<li><a class="dropdown-item py-2 fw-semibold" href="{{ path('app_unified_wishlist') }}#investments"><i class="fas fa-heart me-2" style="color:#7c3aed;"></i>Ma Wishlist Investissements</a></li>
-							{% if not is_granted('ROLE_ADMIN') %}
-								<li><a class="dropdown-item py-2 fw-semibold" href="{{ path('app_investor_profile') }}"><i class="bi bi-person-fill me-2" style="color:var(--finora-purple, #7c3aed);"></i>Profil Investisseur</a></li>
-							{% endif %}
-							{% if is_granted('ROLE_ENTREPRISE') or is_granted('ROLE_ADMIN') %}
-								<li><hr class="dropdown-divider"></li>
-								<li><a class="dropdown-item py-2 fw-semibold text-primary" href="{{ path('app_investment_new') }}"><i class="bi bi-plus-circle-fill me-2"></i>Publier un Projet</a></li>
-							{% endif %}
-						</ul>
-					</li>
-				</ul>
-			</div>
-			<!-- Main navbar END -->
-        </div> 
-	</nav>
-	<!-- Category Nav link END -->
+                <!-- FORMATION -->
+                <li class="nav-item dropdown h-100 d-flex align-items-center">
+                    <a class="nav-link-module fw-bold small text-uppercase d-flex align-items-center dropdown-toggle text-decoration-none" href="#" data-bs-toggle="dropdown" style="color:#475569;">
+                        <i class="fas fa-graduation-cap me-2 text-primary"></i>FORMATION
+                    </a>
+                    <ul class="dropdown-menu border-0 shadow-lg mt-0 p-2" style="border-radius: 16px; min-width: 220px;">
+                        <li><a class="dropdown-item rounded-3 mb-1" href="{{ path('app_formations') }}">Toutes les Formations</a></li>
+                        <li><a class="dropdown-item rounded-3 mb-1" href="{{ path('app_lessons') }}">Toutes les Leçons</a></li>
+                        <li><a class="dropdown-item rounded-3 mb-1" href="{{ path('app_my_certificates') }}">Mes Certificats</a></li>
+                        <li><a class="dropdown-item rounded-3 text-primary fw-bold" href="{{ path('public_centres_map') }}">Centres de Formations</a></li>
+                    </ul>
+                </li>
+
+                <!-- INVESTIR -->
+                <li class="nav-item dropdown h-100 d-flex align-items-center">
+                    <a class="nav-link-module fw-bold small text-uppercase d-flex align-items-center dropdown-toggle text-decoration-none" href="#" data-bs-toggle="dropdown" style="color:#475569;">
+                        <i class="fas fa-hand-holding-usd me-2 text-primary"></i>INVESTIR
+                    </a>
+                    <ul class="dropdown-menu border-0 shadow-lg mt-0 p-2" style="border-radius: 16px; min-width: 220px;">
+                        <li><a class="dropdown-item rounded-3 mb-1" href="{{ path('app_investment_home') }}">Recommandation</a></li>
+                        <li><a class="dropdown-item rounded-3 mb-1" href="{{ path('app_investment_index') }}">MarketPlace</a></li>
+                        <li><a class="dropdown-item rounded-3 mb-1" href="{{ path('app_management_index') }}">Suivi Management</a></li>
+                        {% if not is_granted('ROLE_ADMIN') %}
+                            <li><a class="dropdown-item rounded-3" href="{{ path('app_investor_profile') }}">Profil Investisseur</a></li>
+                        {% endif %}
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
+    <style>.hover-purple:hover { background-color: #f5f3ff !important; color: #7c3aed !important; }</style>
     {% endif %}
-
+    <!-- Row 2 END -->
 </header>
 {% endblock %}
 <!-- Header END -->
@@ -598,7 +877,7 @@ Footer START -->
 			<div class="col-lg-3">
 				<!-- logo -->
 				<a class="me-0" href="{{ path('app_home') }}">
-					<img class="h-40px" src="{{ asset('assets/images/logo-finora.webp') }}" alt="logo" style="filter: brightness(0) invert(1);">
+					<img class="h-40px bg-white p-1 rounded-2" src="{{ asset('assets/images/logo-finora.webp') }}" alt="logo">
 				</a>
 				<p class="my-3 text-body-secondary">FINORA — Votre plateforme de gestion financière intelligente, combinant éducation, bourse et investissements. </p>
 				<!-- Social media icon -->
@@ -793,30 +1072,89 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
-    <!-- Floating Currency Switcher START -->
-    {% if app.request.attributes.get('_route') != 'dashboard' %}
-    <div class="position-fixed bottom-0 start-0 m-4" style="z-index: 9999;">
-        <div class="dropdown dropup">
-            <button class="btn btn-primary shadow-lg rounded-pill px-4 py-3 dropdown-toggle d-flex align-items-center" type="button" id="floatingCurrencyBtn" data-bs-toggle="dropdown" aria-expanded="false">
-                <i class="fas fa-coins me-2"></i>
-                <span class="fw-bold">{{ app.session.get('currency', 'TND') }}</span>
-            </button>
-            <ul class="dropdown-menu shadow-lg border-0 mb-3" aria-labelledby="floatingCurrencyBtn" style="border-radius: 15px; min-width: 200px;">
-                <li><span class="dropdown-item-text small text-muted text-uppercase fw-bold pb-2 border-bottom mb-2 text-center d-block">Devise de la plateforme</span></li>
-                <li><a class="dropdown-item py-2 d-flex align-items-center {{ app.session.get('currency', 'TND') == 'TND' ? 'bg-light fw-bold' : '' }}" href="{{ path('app_switch_currency', {currency: 'TND'}) }}">
-                    <span class="me-2">🇹🇳</span> TND (Dinar Tunisien)
-                </a></li>
-                <li><a class="dropdown-item py-2 d-flex align-items-center {{ app.session.get('currency') == 'EUR' ? 'bg-light fw-bold' : '' }}" href="{{ path('app_switch_currency', {currency: 'EUR'}) }}">
-                    <span class="me-2">🇪🇺</span> EUR (Euro)
-                </a></li>
-                <li><a class="dropdown-item py-2 d-flex align-items-center {{ app.session.get('currency') == 'USD' ? 'bg-light fw-bold' : '' }}" href="{{ path('app_switch_currency', {currency: 'USD'}) }}">
-                    <span class="me-2">🇺🇸</span> USD (Dollar US)
-                </a></li>
-            </ul>
-        </div>
-    </div>
-    {% endif %}
-    <!-- Floating Currency Switcher END -->
+
+<!-- Unified Notification Bell JS -->
+{% if app.user %}
+<script>
+(function() {
+    function loadNotifications() {
+        // Fetch from both APIs
+        const boursePromise = fetch('/api/bourse/notifications', { headers: { 'X-Requested-With': 'XMLHttpRequest' } }).then(r => r.json()).catch(() => ({count:0, notifications:[]}));
+        const investPromise = fetch('/api/investment/notifications', { headers: { 'X-Requested-With': 'XMLHttpRequest' } }).then(r => r.json()).catch(() => ({count:0, notifications:[]}));
+
+        Promise.all([boursePromise, investPromise]).then(([bourseData, investData]) => {
+            const badge   = document.getElementById('notifBadge');
+            const countEl = document.getElementById('notifCount');
+            const list    = document.getElementById('notifList');
+            const emptyEl = document.getElementById('notifEmpty');
+            if (!badge || !list) return;
+
+            const totalUnread = (bourseData.count || 0) + (investData.count || 0);
+            badge.textContent = totalUnread > 9 ? '9+' : totalUnread;
+            badge.style.display = totalUnread > 0 ? '' : 'none';
+
+            if (countEl) {
+                countEl.textContent = totalUnread > 0 ? totalUnread + ' non lues' : 'À jour';
+                countEl.className = totalUnread > 0
+                    ? 'badge bg-danger bg-opacity-10 text-danger'
+                    : 'badge bg-success bg-opacity-10 text-success';
+            }
+
+            // Merge and sort by time (approximate since we don't have absolute timestamps in the API JSON yet, 
+            // but we can assume order of fetch if they were sorted on server)
+            const allNotifs = [
+                ...(bourseData.notifications || []).map(n => ({...n, module: 'bourse'})),
+                ...(investData.notifications || []).map(n => ({...n, module: 'invest'}))
+            ];
+
+            // Clean list (keep empty placeholder if needed)
+            list.querySelectorAll('.notif-item').forEach(el => el.remove());
+
+            if (allNotifs.length === 0) {
+                if (emptyEl) emptyEl.style.display = '';
+                return;
+            }
+            if (emptyEl) emptyEl.style.display = 'none';
+
+            allNotifs.forEach(n => {
+                const bg = n.isRead ? '' : 'style="background:rgba(124,58,237,0.04);"';
+                const dot = !n.isRead ? '<span class="ms-2 mt-1 flex-shrink-0"><span style="width:7px;height:7px;background:#7c3aed;border-radius:50%;display:inline-block;"></span></span>' : '';
+                const sym = n.symbol ? ` · <span class="badge bg-secondary bg-opacity-10 text-secondary fw-bold" style="font-size:10px;">${n.symbol}</span>` : '';
+                const link = n.module === 'invest' ? `/investments/${n.investmentId}` : '#';
+                
+                list.insertAdjacentHTML('beforeend', `
+                <li class="notif-item">
+                    <a href="${link}" class="list-group-item-action border-0 border-bottom d-flex p-3 text-decoration-none" ${bg}>
+                        <div class="me-3 mt-1"><i class="${n.icon} fs-5"></i></div>
+                        <div class="flex-grow-1 overflow-hidden">
+                            <h6 class="mb-1 fw-semibold text-dark" style="font-size:13px;">${n.titre}</h6>
+                            <p class="small text-muted m-0" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${n.message}</p>
+                            <small class="text-muted" style="font-size:11px;">${n.timeAgo}${sym}</small>
+                        </div>${dot}
+                    </a>
+                </li>`);
+            });
+        });
+    }
+
+    window.markAllNotifsRead = function() {
+        // Call both "read" endpoints
+        fetch('/api/bourse/notifications/read', { method: 'POST', headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+        fetch('/api/investment/notifications/read', { method: 'POST', headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+        
+        const badge = document.getElementById('notifBadge');
+        if (badge) badge.style.display = 'none';
+        const countEl = document.getElementById('notifCount');
+        if (countEl) { countEl.textContent = 'À jour'; countEl.className = 'badge bg-success bg-opacity-10 text-success'; }
+    };
+
+    document.addEventListener('DOMContentLoaded', function() {
+        loadNotifications();
+        setInterval(loadNotifications, 30000);
+    });
+})();
+</script>
+{% endif %}
 
 </body>
 </html>

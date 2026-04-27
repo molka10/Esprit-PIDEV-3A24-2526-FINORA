@@ -35,16 +35,39 @@ class TransactionWallet
     #[ORM\Column(nullable: true)]
     private ?string $source = null;
 
-    #[ORM\Column(name: "user_id")]
-    private ?int $userId = null;
+    #[ORM\ManyToOne(targetEntity: User::class, inversedBy: "walletTransactions")]
+    #[ORM\JoinColumn(name: "user_id", referencedColumnName: "id", nullable: true)]
+    private ?User $user = null;
 
     #[ORM\Column(type: "boolean", options: ["default" => true])]
     private ?bool $isActive = true;
 
+    #[ORM\Column(length: 20, options: ["default" => "ACCEPTED"])]
+    private string $status = "ACCEPTED";
+
+    public function getUser(): ?User
+    {
+        return $this->user;
+    }
+
+    public function setUser(?User $user): static
+    {
+        $this->user = $user;
+        return $this;
+    }
+
     public function getUserId(): ?int
-{
-    return $this->userId;
-}
+    {
+        return $this->user ? $this->user->getId() : null;
+    }
+
+    public function setUserId(?int $userId): static
+    {
+        // This is a helper for legacy code
+        // We will need the EntityManager to fetch the user if we really want to set it via ID
+        // For now, we keep the getter compatible.
+        return $this;
+    }
 
  
 
@@ -105,17 +128,7 @@ class TransactionWallet
         return $this;
     }
 
-    public function setUserId(int $userId): static
-    {
-        $this->userId = $userId;
-        return $this;
-    }
 
-    public function setCategoryId(int $categoryId): static
-    {
-        $this->categoryId = $categoryId;
-        return $this;
-    }
 
     public function getIsActive(): ?bool
     {
@@ -146,6 +159,15 @@ public function setCategory(?Category $category): self
     return $this;
 }
 
+public function getStatus(): string
+{
+    return $this->status;
+}
 
+public function setStatus(string $status): self
+{
+    $this->status = $status;
+    return $this;
+}
 
 }

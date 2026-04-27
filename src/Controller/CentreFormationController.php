@@ -114,6 +114,8 @@ final class CentreFormationController extends AbstractController
                     'telephone'   => $c->getTelephone(),
                     'email'       => $c->getEmail(),
                     'siteWeb'     => $c->getSiteWeb(),
+                    'avgRating'   => $c->getAverageRating(),
+                    'reviewCount' => count($c->getRatings()),
                 ];
             }
 
@@ -134,5 +136,50 @@ final class CentreFormationController extends AbstractController
         return $this->render('centres/map.html.twig', [
             'centres' => $centres
         ]);
+    }
+
+    // ────────────────────────────────────────────────────────────────
+    //  PUBLIC — Detail page with Reviews
+    // ────────────────────────────────────────────────────────────────
+    #[Route('/centres/{id}', name: 'public_centres_show', methods: ['GET'])]
+    public function show(CentreFormation $centre): Response
+    {
+        return $this->render('centres/show.html.twig', [
+            'centre' => $centre,
+        ]);
+    }
+
+    // ────────────────────────────────────────────────────────────────
+    //  PUBLIC — Submit Rating (POST)
+    // ────────────────────────────────────────────────────────────────
+    #[Route('/centres/{id}/avis', name: 'public_centres_rate', methods: ['POST'])]
+    public function rate(Request $request, CentreFormation $centre, EntityManagerInterface $em): Response
+    {
+        /** @var \App\Entity\User $user */
+        $user = $this->getUser();
+        if (!$user) {
+            $this->addFlash('error', 'Vous devez être connecté pour laisser un avis.');
+            return $this->redirectToRoute('app_login');
+        }
+
+        $note = (int) $request->request->get('note');
+        $commentaire = $request->request->get('commentaire');
+
+        if ($note < 1 || $note > 5) {
+            $this->addFlash('error', 'Note invalide.');
+            return $this->redirectToRoute('public_centres_show', ['id' => $centre->getId()]);
+        }
+
+        $rating = new \App\Entity\RatingCentre();
+        $rating->setUser($user)
+               ->setCentre($centre)
+               ->setNote($note)
+               ->setCommentaire($commentaire);
+
+        $em->persist($rating);
+        $em->flush();
+
+        $this->addFlash('success', 'Merci ! Votre avis a été enregistré.');
+        return $this->redirectToRoute('public_centres_show', ['id' => $centre->getId()]);
     }
 }

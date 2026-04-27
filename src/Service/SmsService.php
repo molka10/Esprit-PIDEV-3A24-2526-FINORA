@@ -13,6 +13,7 @@ class SmsService
     private $twilioSid;
     private $twilioToken;
     private $twilioFrom;
+    private $lastError;
 
     public function __construct(
         HttpClientInterface $httpClient, 
@@ -28,6 +29,11 @@ class SmsService
         $this->twilioFrom = $twilioFrom;
     }
 
+    public function getLastError(): ?string
+    {
+        return $this->lastError;
+    }
+
     /**
      * Envoie un SMS via Twilio
      * 
@@ -37,13 +43,13 @@ class SmsService
      */
     public function sendSms(string $to, string $message): bool
     {
-        // Nettoyage et formatage du numéro (Twilio nécessite souvent le format E.164, ex: +216...)
+        // Nettoyage du numéro (suppression des espaces, tirets, etc.)
+        $to = preg_replace('/[^0-9+]/', '', $to);
+        
         if (!str_starts_with($to, '+')) {
-            // Si le numéro commence par 00, on remplace par +
             if (str_starts_with($to, '00')) {
                 $to = '+' . substr($to, 2);
             } else {
-                // Par défaut on assume un numéro tunisien si pas de préfixe (ajuster si besoin)
                 $to = '+216' . ltrim($to, '0');
             }
         }
@@ -53,9 +59,10 @@ class SmsService
         try {
             $response = $this->httpClient->request('POST', "https://api.twilio.com/2010-04-01/Accounts/{$this->twilioSid}/Messages.json", [
                 'auth_basic' => [$this->twilioSid, $this->twilioToken],
+                'verify_peer' => false, // Désactivé pour compatibilité environnements locaux
                 'body' => [
                     'To' => $to,
-                    'From' => $this->twilioFrom,
+                    'From' => trim($this->twilioFrom),
                     'Body' => $message,
                 ],
             ]);
@@ -67,10 +74,12 @@ class SmsService
 
             $content = $response->toArray(false);
             $errorDetail = $content['message'] ?? ($content['more_info'] ?? 'Détails inconnus');
+            $this->lastError = $errorDetail;
             $this->logger->error("Erreur Twilio ({$statusCode}) pour {$to} : {$errorDetail}");
             return false;
 
         } catch (\Exception $e) {
+            $this->lastError = $e->getMessage();
             $this->logger->error("Exception grave lors de l'envoi SMS à {$to} : " . $e->getMessage());
             return false;
         }

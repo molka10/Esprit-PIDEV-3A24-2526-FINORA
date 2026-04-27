@@ -29,7 +29,7 @@ class CategoryController extends AbstractController
         $form->handleRequest($req);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $category->setUserId($user->getId());
+            $category->setUser($user);
             $em->persist($category);
             $em->flush();
 
@@ -126,7 +126,7 @@ class CategoryController extends AbstractController
         }
 
         $qb = $em->getRepository(Category::class)->createQueryBuilder('c')
-                 ->andWhere('c.userId = :uid')
+                 ->andWhere('c.user = :uid')
                  ->setParameter('uid', $user->getId());
 
         $search     = $request->query->get('search');

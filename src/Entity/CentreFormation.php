@@ -4,6 +4,8 @@ namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 
 #[ORM\Entity]
 #[ORM\Table(name: 'centre_formation')]
@@ -32,7 +34,7 @@ class CentreFormation
     #[ORM\Column(type: 'decimal', precision: 10, scale: 7)]
     #[Assert\NotNull(message: 'La latitude est obligatoire.')]
     #[Assert\Range(min: 30.0, max: 38.0, notInRangeMessage: 'Latitude invalide pour la Tunisie.')]
-    private ?float $latitude = null;
+    private ?string $latitude = null;
 
     /**
      * Longitude (WGS84) — Tunisia range ~7.5 to 11.6
@@ -40,7 +42,7 @@ class CentreFormation
     #[ORM\Column(type: 'decimal', precision: 10, scale: 7)]
     #[Assert\NotNull(message: 'La longitude est obligatoire.')]
     #[Assert\Range(min: 7.0, max: 12.0, notInRangeMessage: 'Longitude invalide pour la Tunisie.')]
-    private ?float $longitude = null;
+    private ?string $longitude = null;
 
     #[ORM\Column(type: 'text', nullable: true)]
     private ?string $description = null;
@@ -64,9 +66,13 @@ class CentreFormation
     #[ORM\Column(type: 'datetime_immutable')]
     private \DateTimeImmutable $createdAt;
 
+    #[ORM\OneToMany(targetEntity: RatingCentre::class, mappedBy: 'centre', cascade: ['remove'])]
+    private Collection $ratings;
+
     public function __construct()
     {
         $this->createdAt = new \DateTimeImmutable();
+        $this->ratings = new ArrayCollection();
     }
 
     public function getId(): ?int { return $this->id; }
@@ -81,10 +87,10 @@ class CentreFormation
     public function setVille(string $ville): self { $this->ville = $ville; return $this; }
 
     public function getLatitude(): ?float { return $this->latitude !== null ? (float) $this->latitude : null; }
-    public function setLatitude(?float $latitude): self { $this->latitude = $latitude; return $this; }
+    public function setLatitude(string|float|null $latitude): self { $this->latitude = (string) $latitude; return $this; }
 
     public function getLongitude(): ?float { return $this->longitude !== null ? (float) $this->longitude : null; }
-    public function setLongitude(?float $longitude): self { $this->longitude = $longitude; return $this; }
+    public function setLongitude(string|float|null $longitude): self { $this->longitude = (string) $longitude; return $this; }
 
     public function getDescription(): ?string { return $this->description; }
     public function setDescription(?string $description): self { $this->description = $description; return $this; }
@@ -102,4 +108,29 @@ class CentreFormation
     public function setIsActive(bool $isActive): self { $this->isActive = $isActive; return $this; }
 
     public function getCreatedAt(): \DateTimeImmutable { return $this->createdAt; }
+
+    /**
+     * @return Collection<int, RatingCentre>
+     */
+    public function getRatings(): Collection { return $this->ratings; }
+
+    public function addRating(RatingCentre $rating): self
+    {
+        if (!$this->ratings->contains($rating)) {
+            $this->ratings->add($rating);
+            $rating->setCentre($this);
+        }
+        return $this;
+    }
+
+    public function getAverageRating(): float
+    {
+        if ($this->ratings->isEmpty()) return 0.0;
+        
+        $total = 0;
+        foreach ($this->ratings as $rating) {
+            $total += $rating->getNote();
+        }
+        return round($total / $this->ratings->count(), 1);
+    }
 }

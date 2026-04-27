@@ -45,13 +45,21 @@
                     {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
                     
                     <div class="mb-4">
-                        {{ form_label(form.titre) }}
+                        {{ form_label(form.titre, 'Titre accrocheur du projet') }}
                         {{ form_widget(form.titre) }}
                         {{ form_errors(form.titre) }}
                     </div>
 
                     <div class="mb-4">
-                        {{ form_label(form.description) }}
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            {{ form_label(form.description, 'Description détaillée') }}
+                            <button type="button" id="ai-generate-btn" class="btn btn-sm btn-ai rounded-pill px-3">
+                                <i class="bi bi-stars me-1"></i>Optimiser avec l'IA
+                            </button>
+                        </div>
+                        <div id="ai-loader" class="small text-primary mb-2 d-none">
+                            <div class="spinner-border spinner-border-sm me-2" role="status"></div>L'IA analyse et rédige votre offre...
+                        </div>
                         {{ form_widget(form.description, {'attr': {'rows': 6}}) }}
                         {{ form_errors(form.description) }}
                     </div>
@@ -70,7 +78,15 @@
                     </div>
 
                     <div class="p-4 bg-light rounded-4 mb-4 border-0">
-                        <h6 class="fw-bold mb-3 text-dark">Détails financiers</h6>
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h6 class="fw-bold mb-0 text-dark">Détails financiers</h6>
+                            <button type="button" id="ai-budget-btn" class="btn btn-sm btn-outline-primary rounded-pill px-3">
+                                <i class="bi bi-cursor-fill me-1"></i>Budget suggéré par l'IA
+                            </button>
+                        </div>
+                        <div id="ai-budget-loader" class="small text-primary mb-2 d-none">
+                            <div class="spinner-border spinner-border-sm me-2" role="status"></div>Analyse du marché en cours...
+                        </div>
                         <div class="row g-3">
                             <div class="col-sm-4">
                                 {{ form_label(form.budgetMin) }}
@@ -87,7 +103,7 @@
                         </div>
                     </div>
 
-                    <div class="row g-4 mb-5">
+                    <div class="row g-4 mb-4">
                         <div class="col-md-6">
                             {{ form_label(form.dateLimite) }}
                             {{ form_widget(form.dateLimite) }}
@@ -96,6 +112,20 @@
                             {{ form_label(form.statut) }}
                             {{ form_widget(form.statut) }}
                         </div>
+                    </div>
+
+                    <div class="mb-5">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            {{ form_label(form.requiredCriteria, 'Critères de Sélection (IA) *') }}
+                            <button type="button" id="ai-criteria-btn" class="btn btn-sm btn-outline-info rounded-pill px-3">
+                                <i class="bi bi-magic me-1"></i>Suggérer par l'IA
+                            </button>
+                        </div>
+                        <div id="ai-criteria-loader" class="small text-info mb-2 d-none">
+                            <div class="spinner-border spinner-border-sm me-2" role="status"></div>L'IA définit vos besoins...
+                        </div>
+                        {{ form_widget(form.requiredCriteria) }}
+                        {{ form_errors(form.requiredCriteria) }}
                     </div>
 
                     <div class="d-flex justify-content-between align-items-center pt-3 border-top">
@@ -128,4 +158,101 @@
     .fw-extrabold { font-weight: 800; }
     .bg-primary-soft { background-color: rgba(109, 40, 217, 0.08); }
 </style>
+{% endblock %}
+
+{% block javascripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const titleField = document.querySelector('[name*="[titre]"]');
+    const descField = document.querySelector('[name*="[description]"]');
+    const typeField = document.querySelector('[name*="[type]"]');
+    const categoryField = document.querySelector('[name*="[categorie]"]');
+    
+    // AI Content Generation
+    const aiBtn = document.getElementById('ai-generate-btn');
+    const aiLoader = document.getElementById('ai-loader');
+
+    aiBtn?.addEventListener('click', async function() {
+        if (!titleField.value) {
+            alert('L\'IA a besoin d\'un titre pour commencer !');
+            return;
+        }
+        aiBtn.disabled = true;
+        aiLoader.classList.remove('d-none');
+        try {
+            const r = await fetch('{{ path('ai_suggest_description') }}', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    title: titleField.value,
+                    type: typeField.value,
+                    category: categoryField.options[categoryField.selectedIndex]?.text || ''
+                })
+            });
+            const data = await r.json();
+            if (data.description) descField.value = data.description;
+        } finally {
+            aiBtn.disabled = false;
+            aiLoader.classList.add('d-none');
+        }
+    });
+
+    // AI Budget Suggestion
+    const budgetBtn = document.getElementById('ai-budget-btn');
+    const budgetLoader = document.getElementById('ai-budget-loader');
+    const bMin = document.querySelector('[name*="[budgetMin]"]');
+    const bMax = document.querySelector('[name*="[budgetMax]"]');
+
+    budgetBtn?.addEventListener('click', async function() {
+        if (!titleField.value) {
+            alert('Saisissez un titre pour l\'estimation.');
+            return;
+        }
+        budgetBtn.disabled = true;
+        budgetLoader.classList.remove('d-none');
+        try {
+            const r = await fetch('{{ path('ai_suggest_budget') }}', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({title: titleField.value, type: typeField.value})
+            });
+            const data = await r.json();
+            if (data.min) { bMin.value = data.min; bMax.value = data.max; }
+        } finally {
+            budgetBtn.disabled = false;
+            budgetLoader.classList.add('d-none');
+        }
+    });
+
+    // AI Criteria Suggestion
+    const criteriaBtn = document.getElementById('ai-criteria-btn');
+    const criteriaLoader = document.getElementById('ai-criteria-loader');
+    const criteriaField = document.querySelector('[name*="[requiredCriteria]"]');
+
+    criteriaBtn?.addEventListener('click', async function() {
+        if (!titleField.value) {
+            alert('Saisissez un titre pour suggérer des critères.');
+            return;
+        }
+        criteriaBtn.disabled = true;
+        criteriaLoader.classList.remove('d-none');
+        try {
+            const r = await fetch('{{ path('ai_suggest_criteria') }}', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    title: titleField.value,
+                    type: typeField.value,
+                    category: categoryField.options[categoryField.selectedIndex]?.text || ''
+                })
+            });
+            const data = await r.json();
+            if (data.criteria) criteriaField.value = data.criteria;
+        } finally {
+            criteriaBtn.disabled = false;
+            criteriaLoader.classList.add('d-none');
+        }
+    });
+});
+</script>
 {% endblock %}

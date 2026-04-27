@@ -92,6 +92,9 @@ class AppelOffre
     #[ORM\OneToMany(targetEntity: Rating::class, mappedBy: 'appelOffre', cascade: ['remove'], orphanRemoval: true)]
     private Collection $ratings;
 
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    private ?string $requiredCriteria = null;
+
     public function __construct()
     {
         $this->candidatures = new ArrayCollection();
@@ -174,6 +177,18 @@ class AppelOffre
                 $rating->setAppelOffre(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getRequiredCriteria(): ?string
+    {
+        return $this->requiredCriteria;
+    }
+
+    public function setRequiredCriteria(?string $requiredCriteria): static
+    {
+        $this->requiredCriteria = $requiredCriteria;
 
         return $this;
     }

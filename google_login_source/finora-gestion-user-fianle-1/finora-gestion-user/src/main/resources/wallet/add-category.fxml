@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+
+<StackPane prefWidth="900" prefHeight="650"
+           stylesheets="@dashboard.css"
+           xmlns="http://javafx.com/javafx/8"
+           xmlns:fx="http://javafx.com/fxml/1"
+           fx:controller="com.example.finora.controllers.AddCategoryController">
+
+    <VBox spacing="25"
+          maxWidth="650"
+          styleClass="card">
+
+        <Label text="Gestion des Catégories"
+               styleClass="title-label"/>
+
+        <VBox spacing="10">
+            <Label text="Nom"/>
+            <TextField fx:id="nameField"/>
+        </VBox>
+
+        <VBox spacing="10">
+            <Label text="Priorité"/>
+            <ComboBox fx:id="priorityBox" prefWidth="250"/>
+        </VBox>
+
+        <Button text="Enregistrer"
+                styleClass="btn-green"
+                onAction="#saveCategory"
+                prefWidth="250"/>
+
+        <Separator/>
+
+        <Label text="Liste des catégories"
+               styleClass="title-label"/>
+
+        <ScrollPane fitToWidth="true"
+                    prefHeight="280">
+
+            <VBox fx:id="categoryListBox"
+                  spacing="15"/>
+
+        </ScrollPane>
+
+    </VBox>
+
+</StackPane>

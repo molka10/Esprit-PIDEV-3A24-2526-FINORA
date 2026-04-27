@@ -2,6 +2,8 @@
 
 {% block title %}Suivi de Portefeuille - FINORA{% endblock %}
 
+{% block breadcrumb %}Suivi de Portefeuille{% endblock %}
+
 {% block stylesheets %}
     {{ parent() }}
     <style>
@@ -67,153 +69,130 @@
 {% endblock %}
 
 {% block body %}
-    <!-- ======================= PAGE BANNER START ======================= -->
-    <section class="align-items-center d-flex position-relative overflow-hidden"
-             style="background: linear-gradient(135deg, #8b5cf6 0%, #a855f7 50%, #c084fc 100%); min-height: 180px; border-radius: 0 0 30px 30px;">
-        <div class="container position-relative z-index-1">
-            <div class="row align-items-center py-5">
-                <div class="col-lg-8">
-                    <h6 class="text-white text-opacity-75 text-uppercase fw-bold mb-2" style="letter-spacing: 2px; font-size: 0.75rem;">Mon espace investisseur</h6>
-                    <h1 class="text-white fw-bold mb-2">Suivi de Portefeuille</h1>
-                    <nav aria-label="breadcrumb">
-                        <ol class="breadcrumb breadcrumb-dark breadcrumb-dots mb-0">
-                            <li class="breadcrumb-item"><a href="{{ path('app_home') }}" class="text-white-50">Accueil</a></li>
-                            <li class="breadcrumb-item active text-white" aria-current="page">Suivi</li>
-                        </ol>
-                    </nav>
-                </div>
-            </div>
-        </div>
-    </section>
-    <!-- ======================= PAGE BANNER END ======================= -->
 
-    <section class="py-5">
-        <div class="container">
-            <div class="row">
-                <!-- ======================= MAIN LIST START ======================= -->
-                <div class="col-xl-9">
+    <div class="row">
+        <!-- ======================= MAIN LIST START ======================= -->
+        <div class="col-xl-9">
 
-                    <!-- AI ROBO ADVISOR -->
-                    <div class="card border-0 mb-5 overflow-hidden shadow-sm" style="background: linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%); border-radius: 20px;">
-                        <div class="card-body p-4 p-md-5 position-relative">
-                            <div class="position-absolute opacity-10" style="top: -20px; right: -20px;">
-                                <i class="bi bi-robot" style="font-size: 8rem; color: #7c3aed;"></i>
-                            </div>
-                            
-                            <div class="row align-items-center position-relative z-index-1">
-                                <div class="col-lg-12">
-                                    <div class="d-flex align-items-center mb-3">
-                                        <div class="icon-md bg-primary bg-opacity-10 text-primary rounded-circle me-3">
-                                            <i class="bi bi-cpu-fill fs-5"></i>
-                                        </div>
-                                        <h4 class="fw-bold mb-0" style="color: #4338ca;">Copilote IA : Analyse Stratégique</h4>
-                                    </div>
-                                    <p class="mb-4 text-secondary">Notre Robo-Advisor analyse votre diversification et votre exposition au risque en temps réel pour optimiser vos décisions.</p>
-                                    <button id="btnAiAnalyze" class="btn btn-primary px-4 py-2 rounded-pill shadow-sm" style="background: #6366f1; border: none; font-weight: 600;">
-                                        <i class="bi bi-magic me-2"></i>Lancer le Diagnostic IA
-                                    </button>
+            <!-- AI ROBO ADVISOR -->
+            <div class="card border-0 mb-5 overflow-hidden shadow-sm" style="background: linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%); border-radius: 20px;">
+                <div class="card-body p-4 p-md-5 position-relative">
+                    <div class="position-absolute opacity-10" style="top: -20px; right: -20px;">
+                        <i class="bi bi-robot" style="font-size: 8rem; color: #7c3aed;"></i>
+                    </div>
+                    
+                    <div class="row align-items-center position-relative z-index-1">
+                        <div class="col-lg-12">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="icon-md bg-primary bg-opacity-10 text-primary rounded-circle me-3">
+                                    <i class="bi bi-cpu-fill fs-5"></i>
                                 </div>
+                                <h4 class="fw-bold mb-0" style="color: #4338ca;">Copilote IA : Analyse Stratégique</h4>
                             </div>
-
-                            <div id="aiReportContainer" class="mt-4" style="display: none;">
-                                <div id="aiLoader" class="text-center py-5">
-                                    <div class="spinner-border text-primary mb-3" style="width: 3rem; height: 3rem;" role="status">
-                                        <span class="visually-hidden">Loading...</span>
-                                    </div>
-                                    <p class="mb-0 text-primary h5 fw-bold">🧠 Finora Analyst AI analyse votre portefeuille...</p>
-                                    <p class="text-muted small">Évaluation de la diversification et des vecteurs de risque en cours.</p>
-                                </div>
-                                <div id="aiReportContent" class="overflow-hidden" style="border-radius: 15px;">
-                                    <div class="row g-4 mb-4">
-                                        <!-- CHART 1: RISK -->
-                                        <div class="col-md-6">
-                                            <div class="card border-0 shadow-sm h-100 p-3 bg-white">
-                                                <h6 class="fw-bold mb-3"><i class="bi bi-shield-shaded me-2 text-primary"></i>Exposition au Risque</h6>
-                                                <div style="height: 250px;">
-                                                    <canvas id="chartRisk"></canvas>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <!-- CHART 2: CATEGORY -->
-                                        <div class="col-md-6">
-                                            <div class="card border-0 shadow-sm h-100 p-3 bg-white">
-                                                <h6 class="fw-bold mb-3"><i class="bi bi-pie-chart-fill me-2 text-success"></i>Allocation Sectorielle</h6>
-                                                <div style="height: 250px;">
-                                                    <canvas id="chartCategory"></canvas>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <!-- TEXT REPORT -->
-                                    <div class="card border-0 shadow-sm p-4 bg-white">
-                                        <h6 class="fw-bold mb-3 text-secondary text-uppercase small" style="letter-spacing: 1px;">Expertise Stratégique</h6>
-                                        <div id="aiTextBody" class="lh-lg"></div>
-                                    </div>
-                                </div>
-                            </div>
+                            <p class="mb-4 text-secondary">Notre Robo-Advisor analyse votre diversification et votre exposition au risque en temps réel pour optimiser vos décisions.</p>
+                            <button id="btnAiAnalyze" class="btn btn-primary px-4 py-2 rounded-pill shadow-sm" style="background: #6366f1; border: none; font-weight: 600;">
+                                <i class="bi bi-magic me-2"></i>Lancer le Diagnostic IA
+                            </button>
                         </div>
                     </div>
 
-                    <div class="d-flex justify-content-between align-items-center mb-4">
-                        <div>
-                            <h4 class="mb-0 fw-bold">{{ managements.getTotalItemCount }} investissement(s)</h4>
-                            <p class="text-muted small">Suivi détaillé de vos participations</p>
+                    <div id="aiReportContainer" class="mt-4" style="display: none;">
+                        <div id="aiLoader" class="text-center py-5">
+                            <div class="spinner-border text-primary mb-3" style="width: 3rem; height: 3rem;" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <p class="mb-0 text-primary h5 fw-bold">🧠 Finora Analyst AI analyse votre portefeuille...</p>
+                            <p class="text-muted small">Évaluation de la diversification et des vecteurs de risque en cours.</p>
                         </div>
-                        <div class="d-flex gap-2">
-                            <a href="{{ path('app_management_export_portfolio') }}" class="btn btn-outline-primary rounded-pill px-4">
-                                <i class="bi bi-file-earmark-bar-graph me-1"></i>Rapport PDF
-                            </a>
-                            <a href="{{ path('app_investment_index') }}" class="btn btn-dark rounded-pill px-4">
-                                <i class="bi bi-plus-lg me-1"></i>Nouvel Investissement
-                            </a>
-                        </div>
-                    </div>
-
-                    <div id="management-list-container">
-                        {% include 'investment_management/_management_list.html.twig' %}
-                    </div>
-                </div>
-
-                <!-- ======================= SIDEBAR START ======================= -->
-                <div class="col-xl-3">
-                    <div class="sticky-top" style="top: 2rem;">
-                        <div class="card border-0 shadow-sm rounded-4 p-3 mb-4">
-                            <h5 class="card-title fw-bold mb-3 px-2">Filtres</h5>
-                            <form id="portfolio-filter-form" method="get" action="{{ path('app_management_index') }}">
-                                <div class="mb-3">
-                                    <label class="form-label small text-muted">Recherche</label>
-                                    <input type="text" name="search" class="form-control rounded-3" placeholder="Projet..." value="{{ search }}">
+                        <div id="aiReportContent" class="overflow-hidden" style="border-radius: 15px;">
+                            <div class="row g-4 mb-4">
+                                <!-- CHART 1: RISK -->
+                                <div class="col-md-6">
+                                    <div class="card border-0 shadow-sm h-100 p-3 bg-white">
+                                        <h6 class="fw-bold mb-3"><i class="bi bi-shield-shaded me-2 text-primary"></i>Exposition au Risque</h6>
+                                        <div style="height: 250px;">
+                                            <canvas id="chartRisk"></canvas>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div class="mb-3">
-                                    <label class="form-label small text-muted">Statut</label>
-                                    <select name="status" class="form-select rounded-3">
-                                        <option value="">Tous</option>
-                                        <option value="ACTIVE" {{ status == 'ACTIVE' ? 'selected' : '' }}>Actif</option>
-                                        <option value="CRITICAL" {{ status == 'CRITICAL' ? 'selected' : '' }}>Critique</option>
-                                        <option value="CLOSED" {{ status == 'CLOSED' ? 'selected' : '' }}>Clôturé</option>
-                                    </select>
+                                <!-- CHART 2: CATEGORY -->
+                                <div class="col-md-6">
+                                    <div class="card border-0 shadow-sm h-100 p-3 bg-white">
+                                        <h6 class="fw-bold mb-3"><i class="bi bi-pie-chart-fill me-2 text-success"></i>Allocation Sectorielle</h6>
+                                        <div style="height: 250px;">
+                                            <canvas id="chartCategory"></canvas>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div class="mb-3">
-                                    <label class="form-label small text-muted">Trier par</label>
-                                    <select name="tri" class="form-select rounded-3 mb-2">
-                                        <option value="managementId" {{ tri == 'managementId' ? 'selected' : '' }}>Récent</option>
-                                        <option value="amountInvested" {{ tri == 'amountInvested' ? 'selected' : '' }}>Montant</option>
-                                        <option value="ownershipPercentage" {{ tri == 'ownershipPercentage' ? 'selected' : '' }}>% Part</option>
-                                    </select>
-                                    <select name="ordre" class="form-select rounded-3">
-                                        <option value="desc" {{ ordre == 'desc' ? 'selected' : '' }}>Décroissant</option>
-                                        <option value="asc" {{ ordre == 'asc' ? 'selected' : '' }}>Croissant</option>
-                                    </select>
-                                </div>
-                                <button type="submit" class="btn btn-primary w-100 rounded-pill">Appliquer</button>
-                                <a href="{{ path('app_management_index') }}" class="btn btn-link w-100 btn-sm text-secondary mt-2">Réinitialiser</a>
-                            </form>
+                            </div>
+                            <!-- TEXT REPORT -->
+                            <div class="card border-0 shadow-sm p-4 bg-white">
+                                <h6 class="fw-bold mb-3 text-secondary text-uppercase small" style="letter-spacing: 1px;">Expertise Stratégique</h6>
+                                <div id="aiTextBody" class="lh-lg"></div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
+
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h4 class="mb-0 fw-bold">{{ managements.getTotalItemCount }} investissement(s)</h4>
+                    <p class="text-muted small">Suivi détaillé de vos participations</p>
+                </div>
+                <div class="d-flex gap-2">
+                    <a href="{{ path('app_management_export_portfolio') }}" class="btn btn-outline-primary rounded-pill px-4">
+                        <i class="bi bi-file-earmark-bar-graph me-1"></i>Rapport PDF
+                    </a>
+                    <a href="{{ path('app_investment_index') }}" class="btn btn-dark rounded-pill px-4">
+                        <i class="bi bi-plus-lg me-1"></i>Nouvel Investissement
+                    </a>
+                </div>
+            </div>
+
+            <div id="management-list-container">
+                {% include 'investment_management/_management_list.html.twig' %}
+            </div>
         </div>
-    </section>
+
+        <!-- ======================= SIDEBAR START ======================= -->
+        <div class="col-xl-3">
+            <div class="sticky-top" style="top: 2rem;">
+                <div class="card border-0 shadow-sm rounded-4 p-3 mb-4">
+                    <h5 class="card-title fw-bold mb-3 px-2">Filtres</h5>
+                    <form id="portfolio-filter-form" method="get" action="{{ path('app_management_index') }}">
+                        <div class="mb-3">
+                            <label class="form-label small text-muted">Recherche</label>
+                            <input type="text" name="search" class="form-control rounded-3" placeholder="Projet..." value="{{ search }}">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small text-muted">Statut</label>
+                            <select name="status" class="form-select rounded-3">
+                                <option value="">Tous</option>
+                                <option value="ACTIVE" {{ status == 'ACTIVE' ? 'selected' : '' }}>Actif</option>
+                                <option value="CRITICAL" {{ status == 'CRITICAL' ? 'selected' : '' }}>Critique</option>
+                                <option value="CLOSED" {{ status == 'CLOSED' ? 'selected' : '' }}>Clôturé</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small text-muted">Trier par</label>
+                            <select name="tri" class="form-select rounded-3 mb-2">
+                                <option value="managementId" {{ tri == 'managementId' ? 'selected' : '' }}>Récent</option>
+                                <option value="amountInvested" {{ tri == 'amountInvested' ? 'selected' : '' }}>Montant</option>
+                                <option value="ownershipPercentage" {{ tri == 'ownershipPercentage' ? 'selected' : '' }}>% Part</option>
+                            </select>
+                            <select name="ordre" class="form-select rounded-3">
+                                <option value="desc" {{ ordre == 'desc' ? 'selected' : '' }}>Décroissant</option>
+                                <option value="asc" {{ ordre == 'asc' ? 'selected' : '' }}>Croissant</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100 rounded-pill">Appliquer</button>
+                        <a href="{{ path('app_management_index') }}" class="btn btn-link w-100 btn-sm text-secondary mt-2">Réinitialiser</a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>

@@ -43,8 +43,9 @@ private ?string $type = null;
 #[Assert\NotBlank(message: "La priorité est obligatoire")]
 private ?string $priorite = null;
 
-    #[ORM\Column(name: "user_id", nullable: true)]
-    private ?int $userId = null;
+    #[ORM\ManyToOne(targetEntity: User::class)]
+    #[ORM\JoinColumn(name: "user_id", referencedColumnName: "id", nullable: true)]
+    private ?User $user = null;
 
     // GETTERS & SETTERS
 
@@ -60,6 +61,9 @@ private ?string $priorite = null;
 
     public function setPriorite(?string $priorite): self { $this->priorite = $priorite; return $this; }
 
-    public function getUserId(): ?int { return $this->userId; }
-    public function setUserId(int $id): self { $this->userId = $id; return $this; }
+    public function getUser(): ?User { return $this->user; }
+    public function setUser(?User $user): self { $this->user = $user; return $this; }
+
+    public function getUserId(): ?int { return $this->user ? $this->user->getId() : null; }
+    public function setUserId(int $id): self { return $this; }
 }

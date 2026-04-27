@@ -13,23 +13,23 @@ Hero Section START -->
                 <h6 class="text-white bg-white bg-opacity-10 py-2 px-4 rounded-pill d-inline-block mb-4 fw-bold">
                     <i class="bi bi-shield-check me-2"></i> Plateforme de Finance Intégrée
                 </h6>
-                <h1 class="display-3 fw-bold mb-4">
-                    Maîtrisez votre <span class="text-gradient" style="background: linear-gradient(135deg, #a78bfa 0%, #ffffff 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Liberté Financière</span>
+                <h1 class="display-3 fw-bold mb-4 animate-in" style="letter-spacing: -1px;">
+                    Maîtrisez votre <span class="text-gradient d-block d-sm-inline" style="background: linear-gradient(135deg, #c084fc 0%, #ffffff 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Liberté Financière</span>
                 </h1>
-                <p class="lead mb-5 opacity-75">
+                <p class="lead mb-5 opacity-75 animate-in" style="animation-delay: 0.1s; max-width: 600px;">
                     Apprenez, investissez et gérez votre trading au même endroit. Une expérience premium conçue pour les esprits ambitieux.
                 </p>
-                <div class="d-flex flex-wrap justify-content-center justify-content-lg-start gap-3">
+                <div class="d-flex flex-wrap justify-content-center justify-content-lg-start gap-4 animate-in" style="animation-delay: 0.2s;">
                     {% if app.user %}
-                        <a href="{{ path('app_dashboard') }}" class="btn btn-premium shadow-lg">
+                        <a href="{{ path('app_dashboard') }}" class="btn btn-premium btn-lg px-5 py-3 rounded-pill">
                             Accéder au Dashboard <i class="bi bi-arrow-right ms-2"></i>
                         </a>
                     {% else %}
-                        <a href="{{ path('app_register') }}" class="btn btn-premium shadow-lg">
+                        <a href="{{ path('app_register') }}" class="btn btn-premium btn-lg px-5 py-3 rounded-pill">
                             Commencer l'Aventure <i class="bi bi-rocket-takeoff ms-2"></i>
                         </a>
                     {% endif %}
-                    <a href="#explore" class="btn btn-outline-light btn-lg rounded-pill px-5 border-2">Explorer</a>
+                    <a href="#explore" class="btn btn-outline-light btn-lg rounded-pill px-5 border-2 hover-lift">Explorer</a>
                 </div>
             </div>
             <div class="col-lg-5 d-none d-lg-block" data-aos="zoom-in">

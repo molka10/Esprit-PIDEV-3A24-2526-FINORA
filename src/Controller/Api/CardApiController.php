@@ -56,16 +56,18 @@ class CardApiController extends AbstractController
             $userId = $user->getId();
             $data = json_decode($request->getContent(), true);
 
-            if (!isset($data['cardNumber'], $data['expiryDate'], $data['cvv'], $data['cardHolderName'])) {
-                return $this->json($this->apiService->error('Missing required fields.'), 400);
+            if (!isset($data['stripePaymentMethodId'], $data['last4'], $data['brand'], $data['expiryDate'], $data['cardHolderName'])) {
+                return $this->json($this->apiService->error('Missing required secure card fields.'), 400);
             }
 
             $card = new Card();
             $card->setUserId($userId);
             $card->setCardHolderName($data['cardHolderName']);
-            $card->setCardNumber($data['cardNumber']); 
+            $card->setStripePaymentMethodId($data['stripePaymentMethodId']);
+            $card->setLast4($data['last4']);
+            $card->setBrand($data['brand']);
             $card->setExpiryDate($data['expiryDate']);
-            $card->setCvv($data['cvv']);
+
             
             $existingCards = $this->entityManager->getRepository(Card::class)->findBy(['userId' => $userId]);
             if (empty($existingCards)) {

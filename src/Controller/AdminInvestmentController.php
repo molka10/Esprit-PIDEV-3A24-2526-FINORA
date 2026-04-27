@@ -78,6 +78,16 @@ class AdminInvestmentController extends AbstractController
         }
 
         $investment->setStatus('ACTIVE');
+
+        // Notification logic
+        $notification = new \App\Entity\InvestmentNotification();
+        $notification->setUser($investment->getUser());
+        $notification->setInvestment($investment);
+        $notification->setType('INVESTMENT_ACCEPTED');
+        $notification->setTitle('Investissement Accepté');
+        $notification->setMessage('Votre investissement "' . $investment->getName() . '" a été accepté par l\'administrateur.');
+        $entityManager->persist($notification);
+
         $entityManager->flush();
 
         $this->addFlash('success', 'Le projet "' . $investment->getName() . '" a été approuvé et est désormais public.');
@@ -93,6 +103,16 @@ class AdminInvestmentController extends AbstractController
         }
 
         $investment->setStatus('REJECTED');
+
+        // Notification logic
+        $notification = new \App\Entity\InvestmentNotification();
+        $notification->setUser($investment->getUser());
+        $notification->setInvestment($investment);
+        $notification->setType('INVESTMENT_REJECTED');
+        $notification->setTitle('Investissement Rejeté');
+        $notification->setMessage('Votre investissement "' . $investment->getName() . '" a été rejeté par l\'administrateur.');
+        $entityManager->persist($notification);
+
         $entityManager->flush();
 
         $this->addFlash('warning', 'Le projet "' . $investment->getName() . '" a été rejeté.');

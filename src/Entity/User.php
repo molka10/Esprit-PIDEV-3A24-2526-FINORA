@@ -23,6 +23,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->candidatures = new ArrayCollection();
         $this->appelOffres = new ArrayCollection();
         $this->ratings = new ArrayCollection();
+        $this->centreRatings = new ArrayCollection();
+        $this->walletTransactions = new ArrayCollection();
         $this->created_at = new \DateTime();
     }
     // ================= ID =================
@@ -92,6 +94,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     // ================= VERIFIED =================
     #[ORM\Column(type: 'boolean')]
     private bool $isVerified = false;
+
+    // ================= SESSION TRACKING =================
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $currentSessionId = null;
 
     // ================= SECURITY =================
 
@@ -214,6 +220,17 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
+    public function getCurrentSessionId(): ?string
+    {
+        return $this->currentSessionId;
+    }
+
+    public function setCurrentSessionId(?string $currentSessionId): static
+    {
+        $this->currentSessionId = $currentSessionId;
+        return $this;
+    }
+
     #[ORM\ManyToMany(targetEntity: Formation::class, inversedBy: 'wishlistedBy')]
     #[ORM\JoinTable(name: 'user_formation_wishlist')]
     private Collection $wishlist;
@@ -260,8 +277,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    #[ORM\Column(type: "float", options: ["default" => 0.0])]
-    private ?float $balance = 0.0;
+    #[ORM\Column(type: "decimal", precision: 10, scale: 2, options: ["default" => 0], nullable: false)]
+    private string $balance = "0.00";
 
     public function getBalance(): ?float
     {
@@ -379,4 +396,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         }
         return $this;
     }
+
+    #[ORM\OneToMany(targetEntity: RatingCentre::class, mappedBy: 'user')]
+    private Collection $centreRatings;
+
+    #[ORM\OneToMany(targetEntity: TransactionWallet::class, mappedBy: 'user')]
+    private Collection $walletTransactions;
+
+    public function getCentreRatings(): Collection { return $this->centreRatings; }
 }

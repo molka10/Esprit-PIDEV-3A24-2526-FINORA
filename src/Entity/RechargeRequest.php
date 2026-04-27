@@ -26,8 +26,9 @@ class RechargeRequest
     #[ORM\Column(length: 10, nullable: true)]
     private ?string $otp = null;
 
-    #[ORM\Column]
-    private ?int $userId = null;
+    #[ORM\ManyToOne(targetEntity: User::class)]
+    #[ORM\JoinColumn(name: "user_id", referencedColumnName: "id", nullable: false)]
+    private ?User $user = null;
 
     #[ORM\Column]
     private ?int $cardId = null;
@@ -81,16 +82,11 @@ class RechargeRequest
         return $this;
     }
 
-    public function getUserId(): ?int
-    {
-        return $this->userId;
-    }
+    public function getUser(): ?User { return $this->user; }
+    public function setUser(?User $user): self { $this->user = $user; return $this; }
 
-    public function setUserId(int $userId): static
-    {
-        $this->userId = $userId;
-        return $this;
-    }
+    public function getUserId(): ?int { return $this->user ? $this->user->getId() : null; }
+    public function setUserId(int $id): self { return $this; }
 
     public function getCardId(): ?int
     {

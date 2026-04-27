@@ -113,7 +113,7 @@
                         </div>
                     </div>
 
-                    <div class="row g-4 mb-5">
+                    <div class="row g-4 mb-4">
                         <div class="col-md-6">
                             {{ form_label(form.dateLimite, 'Clôture des candidatures') }}
                             {{ form_widget(form.dateLimite) }}
@@ -122,6 +122,21 @@
                             {{ form_label(form.statut, 'Visibilité de l\'offre') }}
                             {{ form_widget(form.statut) }}
                         </div>
+                    </div>
+
+                    <div class="mb-5">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            {{ form_label(form.requiredCriteria, 'Critères de Sélection (IA) *') }}
+                            <button type="button" id="ai-criteria-btn" class="btn btn-sm btn-outline-info rounded-pill px-3">
+                                <i class="bi bi-magic me-1"></i>Suggérer par l'IA
+                            </button>
+                        </div>
+                        <div id="ai-criteria-loader" class="small text-info mb-2 d-none">
+                            <div class="spinner-border spinner-border-sm me-2" role="status"></div>L'IA définit vos besoins...
+                        </div>
+                        {{ form_widget(form.requiredCriteria) }}
+                        <small class="text-muted d-block mt-1">L'IA utilisera ces critères pour évaluer automatiquement les candidatures.</small>
+                        {{ form_errors(form.requiredCriteria) }}
                     </div>
 
                     <div class="d-flex justify-content-between align-items-center pt-3 border-top">
@@ -207,6 +222,36 @@ document.addEventListener('DOMContentLoaded', function() {
         } finally {
             budgetBtn.disabled = false;
             budgetLoader.classList.add('d-none');
+        }
+    });
+
+    // AI Criteria Suggestion
+    const criteriaBtn = document.getElementById('ai-criteria-btn');
+    const criteriaLoader = document.getElementById('ai-criteria-loader');
+    const criteriaField = document.querySelector('[name*="[requiredCriteria]"]');
+
+    criteriaBtn?.addEventListener('click', async function() {
+        if (!titleField.value) {
+            alert('Saisissez un titre pour suggérer des critères.');
+            return;
+        }
+        criteriaBtn.disabled = true;
+        criteriaLoader.classList.remove('d-none');
+        try {
+            const r = await fetch('{{ path('ai_suggest_criteria') }}', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    title: titleField.value,
+                    type: typeField.value,
+                    category: categoryField.options[categoryField.selectedIndex]?.text || ''
+                })
+            });
+            const data = await r.json();
+            if (data.criteria) criteriaField.value = data.criteria;
+        } finally {
+            criteriaBtn.disabled = false;
+            criteriaLoader.classList.add('d-none');
         }
     });
 

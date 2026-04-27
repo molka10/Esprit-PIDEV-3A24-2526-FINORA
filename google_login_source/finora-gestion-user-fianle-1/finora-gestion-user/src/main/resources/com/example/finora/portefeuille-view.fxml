@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+      spacing="10" styleClass="card">
+    <Label text="Portefeuille (Wallet)" styleClass="h2"/>
+    <Label text="This is a Wallet" styleClass="muted"/>
+    <Label text="TODO: page portefeuille" styleClass="muted"/>
+</VBox>

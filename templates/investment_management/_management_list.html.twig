@@ -28,16 +28,54 @@
                         </a>
                     </h5>
                     
-                    <div class="bg-light p-3 rounded-3 mb-4">
+                    <div class="bg-light p-3 rounded-3 mb-3">
                         <div class="d-flex justify-content-between mb-2">
                             <span class="text-muted small">Investi</span>
                             <span class="fw-bold">{{ (item.amountInvested ?? 0)|format_currency }}</span>
                         </div>
-                        <div class="d-flex justify-content-between">
+                        <div class="d-flex justify-content-between mb-2">
                             <span class="text-muted small">Part détenue</span>
                             <span class="fw-bold text-primary">{{ item.ownershipPercentage ?? 0 }}%</span>
                         </div>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="text-muted small">Priorité</span>
+                            {% set priority_class = 'bg-info' %}
+                            {% set priority_label = 'Basse' %}
+                            {% if item.priority == 'HIGH' %}
+                                {% set priority_class = 'bg-danger' %}
+                                {% set priority_label = 'Haute' %}
+                            {% elseif item.priority == 'MEDIUM' %}
+                                {% set priority_class = 'bg-warning text-dark' %}
+                                {% set priority_label = 'Moyenne' %}
+                            {% endif %}
+                            <span class="badge {{ priority_class }} small">{{ priority_label }}</span>
+                        </div>
                     </div>
+                    
+                    <!-- Progress Section -->
+                    <div class="mb-4">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <span class="small text-muted fw-bold">Progression du cycle</span>
+                            <span class="small fw-bold text-primary">{{ item.getProgressPercentage() }}%</span>
+                        </div>
+                        <div class="progress shadow-sm" style="height: 8px; border-radius: 4px; background-color: #eef2ff;">
+                            <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                                 role="progressbar" 
+                                 style="width: {{ item.getProgressPercentage() }}%; background: var(--finora-gradient);" 
+                                 aria-valuenow="{{ item.getProgressPercentage() }}" 
+                                 aria-valuemin="0" 
+                                 aria-valuemax="100">
+                            </div>
+                        </div>
+                    </div>
+
+                    {% if item.notes %}
+                        <div class="mb-4 p-2 rounded-2 border-start border-4 border-primary bg-light">
+                            <p class="small text-muted mb-0 text-truncate" title="{{ item.notes }}">
+                                <i class="bi bi-sticky me-1"></i> {{ item.notes }}
+                            </p>
+                        </div>
+                    {% endif %}
                     
                     <div class="d-flex justify-content-between align-items-center">
                         <a href="{{ path('app_management_show', {'id': item.id}) }}" class="btn btn-outline-primary btn-sm rounded-pill px-3">

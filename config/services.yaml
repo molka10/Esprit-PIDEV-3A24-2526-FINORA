@@ -9,6 +9,7 @@
 parameters:
     images_directory: '%kernel.project_dir%/public/uploads'
     investment_images_directory: '%kernel.project_dir%/public/uploads/investments'
+    cv_directory: '%kernel.project_dir%/public/uploads/cvs'
     ai_api_key: '%env(GEMINI_API_KEY)%'
     groq_api_key: '%env(GROQ_API_KEY)%'
     tts_api_key: '%env(DEEPGRAM_API_KEY)%'
@@ -66,3 +67,11 @@ services:
     App\Service\InvestmentImageUploader:
         arguments:
             $targetDirectory: '%investment_images_directory%'
+
+    App\Service\CvUploader:
+        arguments:
+            $cvDirectory: '%cv_directory%'
+
+    App\EventListener\SessionSecurityListener:
+        tags:
+            - { name: kernel.event_listener, event: kernel.request, priority: 10 }

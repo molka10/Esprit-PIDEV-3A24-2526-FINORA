@@ -91,6 +91,16 @@
                                 <div class="invalid-feedback d-block">{{ form_errors(form.message) }}</div>
                             {% endif %}
                         </div>
+
+                        {# CV FILE #}
+                        <div class="col-12">
+                            <label class="form-label"><i class="bi bi-file-earmark-pdf me-2"></i>CV / Profil de l'entreprise (PDF)</label>
+                            {{ form_widget(form.cvFile, {'attr': {'class': 'form-control', 'accept': 'application/pdf'}}) }}
+                            <div class="char-counter small mt-1">Format PDF uniquement (Max 2Mo)</div>
+                            {% if form_errors(form.cvFile) %}
+                                <div class="invalid-feedback d-block">{{ form_errors(form.cvFile) }}</div>
+                            {% endif %}
+                        </div>
                     </div>
 
                     <div class="mt-5 d-flex flex-column flex-md-row gap-3 justify-content-between align-items-center">
@@ -172,6 +182,10 @@ document.addEventListener('DOMContentLoaded', function() {
         msgField.parentElement.appendChild(counter);
 
         msgField.addEventListener('input', function() {
+            // Clear server errors
+            const serverError = this.parentElement.querySelector('.invalid-feedback');
+            if (serverError) serverError.style.display = 'none';
+
             const len = this.value.trim().length;
             const min = 20;
             if (len === 0) {
@@ -190,10 +204,33 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+    // CV File
+    const cvField = document.querySelector('[name*="[cvFile]"]');
+    if (cvField) {
+        cvField.addEventListener('change', function() {
+            const serverError = this.parentElement.querySelector('.invalid-feedback');
+            if (serverError) serverError.style.display = 'none';
+
+            if (this.files && this.files[0]) {
+                const file = this.files[0];
+                if (file.type !== 'application/pdf') {
+                    setInvalid(this, 'Le fichier doit être un PDF');
+                } else if (file.size > 2 * 1024 * 1024) {
+                    setInvalid(this, 'Le fichier est trop lourd (> 2Mo)');
+                } else {
+                    setValid(this, 'Document prêt : ' + file.name);
+                }
+            } else {
+                setInvalid(this, 'Le CV est obligatoire');
+            }
+        });
+    }
+
     form.addEventListener('submit', function(e) {
         if (appelField) appelField.dispatchEvent(new Event('change'));
         if (montantField) montantField.dispatchEvent(new Event('input'));
         if (msgField) msgField.dispatchEvent(new Event('input'));
+        if (cvField) cvField.dispatchEvent(new Event('change'));
 
         const firstInvalid = form.querySelector('.is-invalid');
         if (firstInvalid) {

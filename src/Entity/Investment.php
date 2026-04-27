@@ -60,6 +60,9 @@ class Investment
     #[ORM\Column(name: 'created_at', type: 'datetime')]
     private ?\DateTimeInterface $createdAt = null;
 
+    #[ORM\Column(type: 'json', nullable: true)]
+    private ?array $commentsJson = [];
+
     /** 🔥 REFACTORED: Relation with User entity */
     #[ORM\ManyToOne(targetEntity: User::class)]
     #[ORM\JoinColumn(name: 'user_id', referencedColumnName: 'id', nullable: true, onDelete: 'SET NULL')]
@@ -290,5 +293,27 @@ class Investment
     public function getInvestorCount(): int
     {
         return $this->managements->count();
+    }
+
+    public function getCommentsJson(): array
+    {
+        return $this->commentsJson ?? [];
+    }
+
+    public function setCommentsJson(?array $commentsJson): self
+    {
+        $this->commentsJson = $commentsJson;
+        return $this;
+    }
+
+    public function addCommentJson(array $comment): self
+    {
+        $comments = $this->getCommentsJson();
+        $comments[] = array_merge($comment, [
+            'id' => uniqid(),
+            'createdAt' => (new \DateTime())->format('Y-m-d H:i:s')
+        ]);
+        $this->commentsJson = $comments;
+        return $this;
     }
 }

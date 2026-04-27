@@ -19,3 +19,21 @@
 /public/assets/
 /assets/vendor/
 ###< symfony/asset-mapper ###
+
+# IDEs
+/.idea/
+/.vscode/
+*.swp
+*.swo
+
+# Build/Java
+/target/
+**/bin/
+!/bin/console
+!/bin/phpunit
+*.class
+*.jar
+
+# Logs/Cache
+/var/
+/.phpunit.cache/

@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.example.finora.controllers.investment.InvestmentManagementFormController"
+            stylesheets="@style.css"
+            styleClass="app-background">
+
+    <center>
+
+        <ScrollPane fitToWidth="true"
+                    vbarPolicy="AS_NEEDED"
+                    styleClass="form-scroll">
+
+            <content>
+
+                <!-- ✅ FIXED VBox (no padding="40") -->
+                <VBox alignment="TOP_CENTER"
+                      spacing="40">
+
+                    <padding>
+                        <Insets top="40" right="40" bottom="40" left="40"/>
+                    </padding>
+
+                    <!-- FORM CARD -->
+                    <VBox spacing="25"
+                          maxWidth="750"
+                          styleClass="form-card-modern">
+
+                        <padding>
+                            <Insets top="35" right="45" bottom="35" left="45"/>
+                        </padding>
+
+                        <Label fx:id="titleLabel"
+                               text="Investment Management"
+                               styleClass="page-title-modern"/>
+
+                        <!-- GRID FORM -->
+                        <GridPane hgap="18" vgap="8">
+
+                            <columnConstraints>
+                                <ColumnConstraints percentWidth="35"/>
+                                <ColumnConstraints percentWidth="65"/>
+                            </columnConstraints>
+
+                            <!-- Investment -->
+                            <Label text="Investment:" GridPane.rowIndex="0"/>
+                            <ComboBox fx:id="investmentCombo"
+                                      GridPane.rowIndex="0"
+                                      GridPane.columnIndex="1"
+                                      styleClass="modern-field"/>
+
+                            <Label fx:id="investmentErrorLabel"
+                                   GridPane.rowIndex="1"
+                                   GridPane.columnIndex="1"
+                                   styleClass="error-label"/>
+
+                            <!-- Type -->
+                            <Label text="Investment Type:" GridPane.rowIndex="2"/>
+                            <TextField fx:id="typeField"
+                                       promptText="ex: LONG_TERM"
+                                       GridPane.rowIndex="2"
+                                       GridPane.columnIndex="1"
+                                       styleClass="modern-field"/>
+
+                            <Label fx:id="typeErrorLabel"
+                                   GridPane.rowIndex="3"
+                                   GridPane.columnIndex="1"
+                                   styleClass="error-label"/>
+
+                            <!-- Amount -->
+                            <Label text="Amount Invested:" GridPane.rowIndex="4"/>
+                            <TextField fx:id="amountField"
+                                       promptText="ex: 5000.00"
+                                       GridPane.rowIndex="4"
+                                       GridPane.columnIndex="1"
+                                       styleClass="modern-field"/>
+
+                            <Label fx:id="amountErrorLabel"
+                                   GridPane.rowIndex="5"
+                                   GridPane.columnIndex="1"
+                                   styleClass="error-label"/>
+
+                            <!-- Ownership -->
+                            <Label text="Ownership %:" GridPane.rowIndex="6"/>
+                            <TextField fx:id="percentField"
+                                       promptText="0 - 100"
+                                       GridPane.rowIndex="6"
+                                       GridPane.columnIndex="1"
+                                       styleClass="modern-field"/>
+
+                            <Label fx:id="percentErrorLabel"
+                                   GridPane.rowIndex="7"
+                                   GridPane.columnIndex="1"
+                                   styleClass="error-label"/>
+
+                            <!-- Start Date -->
+                            <Label text="Start Date:" GridPane.rowIndex="8"/>
+                            <DatePicker fx:id="startDatePicker"
+                                        GridPane.rowIndex="8"
+                                        GridPane.columnIndex="1"
+                                        styleClass="modern-field"/>
+
+                            <Label fx:id="startDateErrorLabel"
+                                   GridPane.rowIndex="9"
+                                   GridPane.columnIndex="1"
+                                   styleClass="error-label"/>
+
+                            <!-- Status -->
+                            <Label text="Status:" GridPane.rowIndex="10"/>
+                            <ComboBox fx:id="statusCombo"
+                                      GridPane.rowIndex="10"
+                                      GridPane.columnIndex="1"
+                                      styleClass="modern-field"/>
+
+                            <Label fx:id="statusErrorLabel"
+                                   GridPane.rowIndex="11"
+                                   GridPane.columnIndex="1"
+                                   styleClass="error-label"/>
+
+                        </GridPane>
+
+                        <Separator/>
+
+                        <!-- BUSINESS SECTION -->
+                        <VBox spacing="12"
+                              styleClass="business-card-modern">
+
+                            <Label text="Funding Overview"
+                                   styleClass="section-title-modern"/>
+
+                            <Label text="Capital Exposure"/>
+                            <Label fx:id="exposureLabel"
+                                   text="\$0.00"
+                                   styleClass="exposure-modern"/>
+
+                            <Label text="Funding Progress"/>
+                            <ProgressBar fx:id="fundingProgressBar"
+                                         prefHeight="10"
+                                         progress="0"
+                                         styleClass="modern-progress"/>
+
+                            <Label fx:id="fundingPercentLabel"
+                                   text="0%"
+                                   styleClass="percent-modern"/>
+
+                            <Label fx:id="fundingStatusBadge"
+                                   text="PARTIALLY FUNDED"
+                                   styleClass="badge-partial-modern"/>
+
+                        </VBox>
+
+                        <!-- BUTTONS -->
+                        <HBox alignment="CENTER_RIGHT"
+                              spacing="15">
+
+                            <Button text="Save"
+                                    onAction="#onSave"
+                                    styleClass="btn-primary-modern"/>
+
+                            <Button text="Cancel"
+                                    onAction="#onCancel"
+                                    styleClass="btn-secondary-modern"/>
+                        </HBox>
+
+                    </VBox>
+
+                </VBox>
+
+            </content>
+
+        </ScrollPane>
+
+    </center>
+
+</BorderPane>

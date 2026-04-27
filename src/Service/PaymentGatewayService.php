@@ -9,6 +9,7 @@ use App\Entity\RechargeRequest;
 use App\Entity\Card;
 use App\Entity\Category;
 use App\Entity\TransactionWallet;
+use App\Entity\User;
 
 class PaymentGatewayService
 {
@@ -103,8 +104,13 @@ class PaymentGatewayService
         $recharge->setConfirmedAt(new \DateTimeImmutable());
 
         // Create Transaction for Dashboard
+        $user = $this->entityManager->getRepository(User::class)->find($userId);
+        if (!$user) {
+            $this->logger->error('Cannot create recharge transaction: User not found', ['userId' => $userId]);
+            return;
+        }
         $transaction = new TransactionWallet();
-        $transaction->setUserId($userId);
+        $transaction->setUser($user);
         $transaction->setNomTransaction('Recharge Portfolio (API Stripe)');
         $transaction->setMontant($amount);
         $transaction->setType('INCOME');
@@ -118,6 +124,13 @@ class PaymentGatewayService
         
         if ($category) {
             $transaction->setCategory($category);
+        }
+
+        // --- APPROVAL LOGIC ---
+        if (abs($amount) > 5000) {
+            $transaction->setStatus('PENDING');
+        } else {
+            $transaction->setStatus('ACCEPTED');
         }
         
         $this->entityManager->persist($transaction);

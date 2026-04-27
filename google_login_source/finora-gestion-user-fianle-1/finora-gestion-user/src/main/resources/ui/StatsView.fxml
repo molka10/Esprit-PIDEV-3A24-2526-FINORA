@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.chart.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx/17"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.example.finora.controllers.appeldoffre.StatsController"
+      spacing="12" styleClass="content">
+
+    <HBox spacing="10" alignment="CENTER_LEFT">
+        <Label text="Statistiques" styleClass="title"/>
+        <Pane HBox.hgrow="ALWAYS"/>
+        <Button text="Retour" styleClass="secondary-btn" onAction="#onReturn"/>
+        <Button text="Actualiser" styleClass="ghost-btn" onAction="#refresh"/>
+    </HBox>
+
+    <HBox spacing="12">
+        <VBox styleClass="card" spacing="8" prefWidth="520">
+            <Label text="Appels d’Offres (par statut)" styleClass="section-title"/>
+            <PieChart fx:id="appelPie" prefHeight="280"/>
+        </VBox>
+
+        <VBox styleClass="card" spacing="8" prefWidth="520">
+            <Label text="Candidatures (par statut)" styleClass="section-title"/>
+            <PieChart fx:id="candidaturePie" prefHeight="280"/>
+        </VBox>
+    </HBox>
+
+    <VBox styleClass="card" spacing="8">
+        <Label text="Indicateurs" styleClass="section-title"/>
+        <HBox spacing="12">
+            <VBox styleClass="stat-card" spacing="6" prefWidth="260">
+                <Label text="Total Appels" styleClass="muted"/>
+                <Label fx:id="aoTotal" text="-" styleClass="section-title"/>
+            </VBox>
+            <VBox styleClass="stat-card" spacing="6" prefWidth="260">
+                <Label text="Total Candidatures" styleClass="muted"/>
+                <Label fx:id="candTotal" text="-" styleClass="section-title"/>
+            </VBox>
+            <VBox styleClass="stat-card" spacing="6" prefWidth="260">
+                <Label text="Taux publication" styleClass="muted"/>
+                <Label fx:id="pubRate" text="-" styleClass="section-title"/>
+            </VBox>
+        </HBox>
+    </VBox>
+</VBox>

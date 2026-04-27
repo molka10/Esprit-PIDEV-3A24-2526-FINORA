@@ -24,8 +24,11 @@ class WalletService
     {
         if ($amount <= 0) throw new \InvalidArgumentException('Amount must be positive.');
 
+        $user = $this->entityManager->getRepository(User::class)->find($userId);
+        if (!$user) throw new \InvalidArgumentException('User not found.');
+
         $rechargeRequest = new RechargeRequest();
-        $rechargeRequest->setUserId($userId);
+        $rechargeRequest->setUser($user);
         $rechargeRequest->setCardId($cardId);
         $rechargeRequest->setAmount($amount);
         
@@ -42,7 +45,7 @@ class WalletService
     {
         $request = $this->entityManager->getRepository(RechargeRequest::class)->findOneBy([
             'id' => $requestId,
-            'userId' => $userId,
+            'user' => $userId,
             'status' => RechargeRequest::STATUS_PENDING
         ]);
 

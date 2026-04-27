@@ -1,0 +1,298 @@
+<!-- ======================= FLOATING AI CHATBOT WIDGET ======================= -->
+<div id="ai-chat-widget">
+    <!-- Floating Button with Pulse Effect -->
+    <div class="ai-pulse-ring"></div>
+    <button id="ai-chat-toggle" class="btn rounded-circle shadow-lg d-flex align-items-center justify-content-center ai-floating-btn" style="width: 65px; height: 65px; position: fixed; bottom: 40px; right: 40px; z-index: 10000; background: linear-gradient(135deg, #6610f2 0%, #4338ca 100%); border: none; cursor: pointer; transition: transform 0.3s ease;">
+        <i class="bi bi-robot fs-3 text-white"></i>
+        <span class="position-absolute top-0 start-100 translate-middle p-2 bg-danger border border-2 border-white rounded-circle" id="ai-notif-dot">
+            <span class="visually-hidden">Nouveau message</span>
+        </span>
+    </button>
+    
+    <!-- Chat Window -->
+    <div id="ai-chat-window" class="card border-0" style="position: fixed; bottom: 120px; right: 40px; width: 400px; max-height: 600px; z-index: 10000; border-radius: 24px; overflow: hidden; display: none; flex-direction: column; pointer-events: auto; box-shadow: 0 20px 40px rgba(0,0,0,0.2) !important; font-family: 'Inter', sans-serif;">
+        
+        <!-- Header -->
+        <div class="card-header text-white p-3 border-0 d-flex justify-content-between align-items-center" style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);">
+            <div class="d-flex align-items-center gap-3">
+                <div class="position-relative">
+                    <div class="bg-gradient-primary rounded-circle d-flex align-items-center justify-content-center" style="width: 42px; height: 42px; background: linear-gradient(135deg, #7c3aed, #4338ca);">
+                        <i class="bi bi-stars text-white fs-5"></i>
+                    </div>
+                    <span class="position-absolute bottom-0 end-0 p-1 bg-success border border-2 border-dark rounded-circle"></span>
+                </div>
+                <div>
+                    <h6 class="mb-0 fw-bold" style="letter-spacing: 0.3px; font-size: 1rem;">Finora Advisor AI</h6>
+                    <small class="text-white-50" style="font-size: 0.75rem;">Intelligence Patrimoniale</small>
+                </div>
+            </div>
+            
+            <div class="d-flex align-items-center gap-2">
+                <!-- Premium Language Selector -->
+                <div class="dropdown">
+                    <button class="btn btn-sm text-white border border-secondary rounded-pill d-flex align-items-center gap-1 shadow-none" type="button" id="aiLangDropdown" data-bs-toggle="dropdown" aria-expanded="false" style="background: rgba(255,255,255,0.1); backdrop-filter: blur(5px); font-size: 0.75rem; font-weight: 600;">
+                        <i class="bi bi-translate text-white-50"></i> <span id="current-lang-display">FR</span>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 py-2" aria-labelledby="aiLangDropdown" style="font-size: 0.85rem; border-radius: 16px; min-width: 150px; animation: slideDown 0.2s ease-out;">
+                        <li><h6 class="dropdown-header text-uppercase fw-bold text-primary" style="font-size:0.7rem; letter-spacing: 1px;">Langue / Language</h6></li>
+                        <li><a class="dropdown-item py-2 fw-bold ai-lang-option d-flex align-items-center gap-2" href="#" data-lang="fr" data-label="FR"><span class="badge bg-primary rounded-pill">FR</span> Français</a></li>
+                        <li><a class="dropdown-item py-2 ai-lang-option d-flex align-items-center gap-2" href="#" data-lang="en" data-label="EN"><span class="badge bg-light text-dark border rounded-pill">EN</span> English</a></li>
+                        <li><a class="dropdown-item py-2 ai-lang-option d-flex align-items-center gap-2" href="#" data-lang="ar" data-label="AR"><span class="badge bg-light text-dark border rounded-pill">AR</span> العربية</a></li>
+                        <li><a class="dropdown-item py-2 ai-lang-option d-flex align-items-center gap-2" href="#" data-lang="es" data-label="ES"><span class="badge bg-light text-dark border rounded-pill">ES</span> Español</a></li>
+                        <li><a class="dropdown-item py-2 ai-lang-option d-flex align-items-center gap-2" href="#" data-lang="de" data-label="DE"><span class="badge bg-light text-dark border rounded-pill">DE</span> Deutsch</a></li>
+                        <li><a class="dropdown-item py-2 ai-lang-option d-flex align-items-center gap-2" href="#" data-lang="it" data-label="IT"><span class="badge bg-light text-dark border rounded-pill">IT</span> Italiano</a></li>
+                    </ul>
+                </div>
+                <input type="hidden" id="ai-language-selector" value="fr">
+                
+                <!-- Close Button -->
+                <button id="ai-chat-close" class="btn btn-sm btn-link text-white-50 p-0 ms-1 hover-white" aria-label="Close" onclick="document.getElementById('ai-chat-window').style.setProperty('display', 'none', 'important')">
+                    <i class="bi bi-x-lg fs-5"></i>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Messages Area -->
+        <div id="ai-chat-messages" class="card-body overflow-auto" style="height: 450px; font-size: 0.95rem; background-color: #f1f5f9; scroll-behavior: smooth;">
+            <div class="mb-4 d-flex justify-content-start">
+                <div class="d-inline-block p-3 rounded-4 bg-white shadow-sm" style="border-bottom-left-radius: 4px; max-width: 85%;">
+                    <div class="d-flex align-items-center mb-2">
+                        <i class="bi bi-robot text-primary me-2"></i>
+                        <span class="text-muted fw-bold" style="font-size: 0.75rem;">Finora Advisor AI</span>
+                    </div>
+                    <span id="ai-welcome-text" class="text-dark" style="line-height: 1.6;">Bonjour ! 👋 <br>Je suis votre conseiller financier d'élite. Quel est votre objectif d'investissement ou votre budget ?</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Input Area -->
+        <div class="card-footer bg-white border-top p-3">
+            <form id="ai-chat-form" class="position-relative">
+                <input type="text" id="ai-chat-input" class="form-control rounded-pill bg-light border-0 shadow-none pe-5" placeholder="Écrivez votre message..." required autocomplete="off" style="height: 50px; font-size: 0.95rem;">
+                <button type="submit" class="btn rounded-circle position-absolute top-50 translate-middle-y d-flex align-items-center justify-content-center shadow-sm" style="right: 5px; width: 40px; height: 40px; background: linear-gradient(135deg, #7c3aed 0%, #4338ca 100%); border: none; transition: transform 0.2s;">
+                    <i class="bi bi-send-fill text-white ms-1" style="font-size: 0.9rem;"></i>
+                </button>
+            </form>
+            <div class="text-center mt-2">
+                <small class="text-muted" style="font-size: 0.65rem;">IA générative. Les conseils financiers peuvent nécessiter une vérification.</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Animations and Refinements */
+@keyframes slideDown {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+@keyframes pulseRing {
+    0% { transform: scale(1); opacity: 0.5; }
+    100% { transform: scale(1.5); opacity: 0; }
+}
+.ai-pulse-ring {
+    position: fixed; bottom: 40px; right: 40px; width: 65px; height: 65px;
+    background: #7c3aed; border-radius: 50%; z-index: 9999;
+    animation: pulseRing 2s infinite cubic-bezier(0.215, 0.61, 0.355, 1);
+}
+.ai-floating-btn:hover { transform: scale(1.05) translateY(-5px); }
+.hover-white:hover { color: white !important; }
+#ai-chat-messages::-webkit-scrollbar { width: 6px; }
+#ai-chat-messages::-webkit-scrollbar-track { background: transparent; }
+#ai-chat-messages::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+#ai-chat-messages::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+.ai-msg-bot { border-bottom-left-radius: 4px !important; }
+.ai-msg-user { border-bottom-right-radius: 4px !important; }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const chatToggle = document.getElementById('ai-chat-toggle');
+    const chatWindow = document.getElementById('ai-chat-window');
+    const chatForm = document.getElementById('ai-chat-form');
+    const chatInput = document.getElementById('ai-chat-input');
+    const chatMessages = document.getElementById('ai-chat-messages');
+
+    if (chatToggle && chatWindow) {
+        const toggleChat = () => {
+            const isHidden = chatWindow.style.display === 'none' || chatWindow.style.display === '';
+            chatWindow.style.setProperty('display', isHidden ? 'flex' : 'none', 'important');
+            if (isHidden) chatInput.focus();
+        };
+
+        chatToggle.onclick = toggleChat;
+        
+        document.addEventListener('click', function(e) {
+            if (e.target.closest('.open-ai-chat')) {
+                e.preventDefault();
+                chatWindow.style.setProperty('display', 'flex', 'important');
+                chatInput.focus();
+            }
+        });
+
+        const langSelector = document.getElementById('ai-language-selector');
+        
+        // Translation Logic
+        function updateWelcomeMessage(lang) {
+            const welcomeText = document.getElementById('ai-welcome-text');
+            chatInput.dir = "ltr"; 
+            if (lang === 'en') {
+                welcomeText.innerHTML = "Hello! 👋 <br>I am your Finora financial advisor. How can I assist you with your investments today?";
+                chatInput.placeholder = "Write your message...";
+            } else if (lang === 'ar') {
+                welcomeText.innerHTML = "مرحباً! 👋 <br>أنا مستشارك المالي من Finora. كيف يمكنني مساعدتك في استثماراتك اليوم؟";
+                chatInput.placeholder = "اكتب رسالتك...";
+                chatInput.dir = "rtl";
+            } else if (lang === 'es') {
+                welcomeText.innerHTML = "¡Hola! 👋 <br>Soy su asesor financiero de Finora. ¿Cómo puedo ayudarle con sus inversiones hoy?";
+                chatInput.placeholder = "Escribe tu mensaje...";
+            } else if (lang === 'de') {
+                welcomeText.innerHTML = "Hallo! 👋 <br>Ich bin Ihr Finora-Finanzberater. Wie kann ich Ihnen bei Ihren Investitionen helfen?";
+                chatInput.placeholder = "Schreibe deine Nachricht...";
+            } else if (lang === 'it') {
+                welcomeText.innerHTML = "Ciao! 👋 <br>Sono il tuo consulente finanziario Finora. Come posso aiutarti con i tuoi investimenti?";
+                chatInput.placeholder = "Scrivi il tuo messaggio...";
+            } else {
+                welcomeText.innerHTML = "Bonjour ! 👋 <br>Je suis votre conseiller financier Finora. Comment puis-je vous aider dans vos projets ?";
+                chatInput.placeholder = "Écrivez votre message...";
+            }
+        }
+
+        // Language Dropdown Event Listener
+        document.querySelectorAll('.ai-lang-option').forEach(item => {
+            item.addEventListener('click', function(e) {
+                e.preventDefault();
+                const langCode = this.getAttribute('data-lang');
+                const langLabel = this.getAttribute('data-label');
+                langSelector.value = langCode;
+                
+                // Update button display
+                document.getElementById('current-lang-display').textContent = langLabel;
+                
+                // Styling active state
+                document.querySelectorAll('.ai-lang-option').forEach(el => {
+                    el.classList.remove('fw-bold', 'bg-light');
+                    const badge = el.querySelector('.badge');
+                    if(badge) {
+                        badge.classList.remove('bg-primary');
+                        badge.classList.add('bg-light', 'text-dark', 'border');
+                    }
+                });
+                this.classList.add('fw-bold', 'bg-light');
+                const badge = this.querySelector('.badge');
+                if(badge) {
+                    badge.classList.remove('bg-light', 'text-dark', 'border');
+                    badge.classList.add('bg-primary');
+                }
+                
+                updateWelcomeMessage(langCode);
+            });
+        });
+
+        if (chatForm) {
+            chatForm.onsubmit = function(e) {
+                e.preventDefault();
+                const msg = chatInput.value.trim();
+                if (!msg) return;
+                
+                appendMsg(msg, 'user');
+                chatInput.value = '';
+                const selectedLang = langSelector ? langSelector.value : 'fr';
+                
+                // Show loading
+                const loadingId = 'loading-' + Date.now();
+                const loadingTexts = {'fr': 'Analyse en cours...', 'en': 'Analyzing...', 'ar': 'جاري التحليل...', 'es': 'Analizando...', 'de': 'Analysieren...', 'it': 'Analizzando...'};
+                appendMsg('<div class="spinner-border spinner-border-sm text-primary" role="status"></div> ' + (loadingTexts[selectedLang] || 'Analyse en cours...'), 'bot', loadingId);
+
+                fetch('{{ path("app_investment_ai_chat") }}', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+                    body: JSON.stringify({ message: msg, language: selectedLang })
+                })
+                .then(r => r.json())
+                .then(data => {
+                    const lNode = document.getElementById(loadingId);
+                    if(lNode) lNode.remove();
+                    
+                    if(data.error) {
+                        appendMsg('<span class="text-danger"><i class="bi bi-exclamation-triangle"></i> Erreur serveur.</span>', 'bot');
+                        return;
+                    }
+                    if (data.text) appendMsg(data.text, 'bot');
+                    if (data.investments && data.investments.length > 0) renderCards(data.investments);
+                })
+                .catch(err => {
+                    const lNode = document.getElementById(loadingId);
+                    if(lNode) lNode.remove();
+                    appendMsg('<span class="text-danger"><i class="bi bi-bug"></i> Connexion interrompue.</span>', 'bot');
+                });
+            };
+        }
+    }
+
+    function appendMsg(text, sender, id = null) {
+        const div = document.createElement('div');
+        div.className = 'mb-4 d-flex w-100 ' + (sender === 'user' ? 'justify-content-end' : 'justify-content-start');
+        if(id) div.id = id;
+        
+        let bubbleClass = sender === 'user' ? 'bg-primary text-white ai-msg-user' : 'bg-white text-dark ai-msg-bot border';
+        let style = sender === 'user' ? 'background: linear-gradient(135deg, #7c3aed, #4338ca) !important;' : '';
+        let headerHTML = '';
+        
+        if (sender !== 'user') {
+            headerHTML = `<div class="d-flex align-items-center mb-2">
+                <i class="bi bi-robot text-primary me-2"></i>
+                <span class="text-muted fw-bold" style="font-size: 0.75rem;">Finora Advisor AI</span>
+            </div>`;
+        }
+        
+        // RTL Support
+        const langVal = document.getElementById('ai-language-selector')?.value;
+        if (langVal === 'ar') {
+            div.classList.replace(sender === 'user' ? 'justify-content-end' : 'justify-content-start', sender === 'user' ? 'justify-content-start' : 'justify-content-end');
+            div.setAttribute('dir', 'rtl');
+        }
+
+        div.innerHTML = `<div class="d-inline-block p-3 rounded-4 shadow-sm ${bubbleClass}" style="max-width: 85%; font-size: 0.95rem; line-height: 1.6; ${style}">
+            ${headerHTML}
+            <span>${text}</span>
+        </div>`;
+        chatMessages.appendChild(div);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    function renderCards(investments) {
+        let html = '<div class="mt-3 d-flex flex-column gap-3">';
+        investments.forEach(inv => {
+            let riskBadge = '';
+            if (inv.risk_level === 'LOW') riskBadge = '<span class="badge bg-success-subtle text-success rounded-pill px-2 py-1" style="font-size: 0.65rem;">Risque Faible</span>';
+            else if (inv.risk_level === 'MEDIUM') riskBadge = '<span class="badge bg-warning-subtle text-warning rounded-pill px-2 py-1" style="font-size: 0.65rem;">Risque Modéré</span>';
+            else if (inv.risk_level === 'HIGH') riskBadge = '<span class="badge bg-danger-subtle text-danger rounded-pill px-2 py-1" style="font-size: 0.65rem;">Risque Élevé</span>';
+            
+            html += `<div class="card p-3 border-0 shadow-sm rounded-4 position-relative overflow-hidden" style="background: #ffffff;">
+                <div class="position-absolute top-0 start-0 w-100" style="height: 4px; background: linear-gradient(90deg, #7c3aed, #4338ca);"></div>
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <div class="fw-bold text-dark text-truncate pe-2" style="font-size: 0.95rem;">${inv.name}</div>
+                    ${riskBadge}
+                </div>
+                <div class="d-flex align-items-center mb-2">
+                    <span class="badge bg-light text-secondary border me-2"><i class="bi bi-tag-fill me-1 text-primary"></i> ${inv.category || 'Général'}</span>
+                    <span class="text-primary fw-bold" style="font-size: 0.85rem;">${inv.estimated_value} TND</span>
+                </div>
+                <div class="text-muted mb-3" style="font-size:0.8rem; line-height: 1.4;">
+                    <i class="bi bi-info-circle text-primary me-1"></i> ${inv.match_reason || ''}
+                </div>
+                <a href="/investment/${inv.id}" class="btn w-100 rounded-pill py-2 text-white fw-bold d-flex align-items-center justify-content-center" style="font-size:0.85rem; background: linear-gradient(135deg, #7c3aed 0%, #4338ca 100%); border: none; transition: transform 0.2s;">
+                    Découvrir ce projet <i class="bi bi-arrow-right-short fs-5 ms-1"></i>
+                </a>
+            </div>`;
+        });
+        html += '</div>';
+        const botDiv = document.createElement('div');
+        botDiv.className = 'mb-4 d-flex justify-content-start w-100';
+        botDiv.innerHTML = `<div class="w-100" style="max-width: 90%;">${html}</div>`;
+        chatMessages.appendChild(botDiv);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+});
+</script>

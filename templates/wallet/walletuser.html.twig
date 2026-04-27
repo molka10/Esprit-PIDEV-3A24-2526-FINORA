@@ -125,19 +125,66 @@
         </div>
         
         <div class="dash-actions" style="display:flex; align-items:center; gap:12px; z-index:2;">
-             <div class="currency-group" style="background: rgba(255,255,255,0.1); padding: 5px; border-radius: 100px; border: 1px solid rgba(255,255,255,0.2); display:flex; gap:4px; margin-right: 15px;">
-                {% for c in ['DT', 'EUR', 'USD'] %}
-                    <a href="?currency={{ c }}" 
-                       style="padding: 6px 16px; border-radius: 100px; font-size: 12px; font-weight: 800; text-decoration: none; transition: all 0.3s;
-                              {{ currencySymbol == c ? 'background:#fff; color:#7c3aed;' : 'color:#fff;' }}">
-                        {{ c }}
-                    </a>
-                {% endfor %}
-            </div>
 
             <a href="{{ path('app_wallet_system') }}" class="btn-outline">
                 <i class="bi bi-grid-fill"></i> Système
             </a>
+            
+            <a href="#" class="btn-outline" style="background: linear-gradient(135deg, #ec4899, #8b5cf6); color: white; border: none; font-weight: bold;" data-bs-toggle="modal" data-bs-target="#finoraPayModal">
+                <i class="bi bi-send-fill text-white"></i> Finora Pay
+            </a>
+            
+            <!-- Calculator Dropdown (Onglet) -->
+            <div class="dropdown d-inline-block">
+                <a class="btn-outline" href="#" role="button" data-bs-toggle="dropdown" data-bs-auto-close="outside">
+                    <i class="bi bi-calculator"></i> Calculatrice
+                </a>
+                <div class="dropdown-menu shadow-lg border-0 p-3" style="min-width: 280px; border-radius: 20px; background: #ffffff; margin-top: 15px; border: 1px solid #e2e8f0 !important;">
+                    <h6 class="text-muted mb-3 text-center" style="font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:1px;">Simulateur Financier</h6>
+                    <div class="calculator-ui">
+                        <div class="calc-display bg-light text-end rounded p-3 mb-1 fs-3 fw-bold" id="calc-display" style="word-break: break-all; min-height: 70px; color: #1e293b; border: 1px solid #cbd5e1; box-shadow: inset 0 2px 4px rgba(0,0,0,0.05); position: relative;">
+                            {% set displayBalance = (currencySymbol == 'EUR') ? (balance * 0.295) : ((currencySymbol == 'USD') ? (balance * 0.321) : balance) %}
+                            {{ displayBalance|number_format(2, '.', '') }}
+                        </div>
+                        <div class="d-flex justify-content-between mb-3 px-1" style="font-size: 10px; font-weight: 700; text-transform: uppercase;">
+                            <div id="calc-conv-tnd" class="text-primary">DT: {{ balance|number_format(2) }}</div>
+                            <div id="calc-conv-eur" class="text-success">EUR: {{ (balance * 0.295)|number_format(2) }}</div>
+                            <div id="calc-conv-usd" class="text-info">USD: {{ (balance * 0.321)|number_format(2) }}</div>
+                        </div>
+                        <div class="calc-grid" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;">
+                            <button class="btn btn-secondary text-white fw-bold calc-btn" data-val="C" style="border-radius:12px;">C</button>
+                            <button class="btn btn-secondary text-white fw-bold calc-btn" data-val="DEL" style="border-radius:12px;"><i class="bi bi-backspace"></i></button>
+                            <button class="btn btn-secondary text-white fw-bold calc-btn" data-val="%" style="border-radius:12px;">%</button>
+                            <button class="btn text-white fw-bold calc-btn" style="background:#8b5cf6; border-radius:12px;" data-val="/">÷</button>
+
+                            <button class="btn btn-light fw-bold calc-btn" data-val="7" style="border-radius:12px; border:1px solid #e2e8f0;">7</button>
+                            <button class="btn btn-light fw-bold calc-btn" data-val="8" style="border-radius:12px; border:1px solid #e2e8f0;">8</button>
+                            <button class="btn btn-light fw-bold calc-btn" data-val="9" style="border-radius:12px; border:1px solid #e2e8f0;">9</button>
+                            <button class="btn text-white fw-bold calc-btn" style="background:#8b5cf6; border-radius:12px;" data-val="*">×</button>
+
+                            <button class="btn btn-light fw-bold calc-btn" data-val="4" style="border-radius:12px; border:1px solid #e2e8f0;">4</button>
+                            <button class="btn btn-light fw-bold calc-btn" data-val="5" style="border-radius:12px; border:1px solid #e2e8f0;">5</button>
+                            <button class="btn btn-light fw-bold calc-btn" data-val="6" style="border-radius:12px; border:1px solid #e2e8f0;">6</button>
+                            <button class="btn text-white fw-bold calc-btn" style="background:#8b5cf6; border-radius:12px;" data-val="-">-</button>
+
+                            <button class="btn btn-light fw-bold calc-btn" data-val="1" style="border-radius:12px; border:1px solid #e2e8f0;">1</button>
+                            <button class="btn btn-light fw-bold calc-btn" data-val="2" style="border-radius:12px; border:1px solid #e2e8f0;">2</button>
+                            <button class="btn btn-light fw-bold calc-btn" data-val="3" style="border-radius:12px; border:1px solid #e2e8f0;">3</button>
+                            <button class="btn text-white fw-bold calc-btn" style="background:#8b5cf6; border-radius:12px;" data-val="+">+</button>
+
+                            <button class="btn btn-light fw-bold calc-btn" data-val="0" style="grid-column: span 2; border-radius:12px; border:1px solid #e2e8f0;">0</button>
+                            <button class="btn btn-light fw-bold calc-btn" data-val="." style="border-radius:12px; border:1px solid #e2e8f0;">.</button>
+                            <button class="btn btn-success text-white fw-bold calc-btn" data-val="=" style="border-radius:12px;">=</button>
+                        </div>
+                        <div class="mt-3">
+                            <button class="btn btn-sm w-100 fw-bold" id="calc-reset-balance" style="color:#6366f1; background:#e0e7ff; border-radius:10px;">
+                                <i class="bi bi-arrow-counterclockwise"></i> Réinitialiser au solde
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <a href="{{ path('transactions_pdf') }}" class="btn-outline"><i class="bi bi-file-earmark-pdf"></i> PDF</a>
             <a href="{{ path('transactions_excel') }}" class="btn-outline"><i class="bi bi-file-earmark-excel"></i> Excel</a>
             
@@ -169,7 +216,7 @@
                 <div class="stat-icon" style="background:#e0e7ff; color:#4338ca;"><i class="bi bi-wallet2"></i></div>
                 <div>
                     <span>Solde Actuel</span>
-                    <h2 style="color:#4338ca;">{{ balance|number_format(2, '.', ',') }} {{ currencySymbol }}</h2>
+                    <h2 style="color:#4338ca;">{{ balance|format_currency(currencySymbol) }}</h2>
                 </div>
             </div>
         </div>
@@ -178,7 +225,7 @@
                 <div class="stat-icon" style="background:#dcfce7; color:#16a34a;"><i class="bi bi-graph-up"></i></div>
                 <div>
                     <span>Total Revenus</span>
-                    <h2 style="color:#16a34a;">+{{ income|number_format(2, '.', ',') }} {{ currencySymbol }}</h2>
+                    <h2 style="color:#16a34a;">+{{ income|format_currency(currencySymbol) }}</h2>
                 </div>
             </div>
         </div>
@@ -187,7 +234,7 @@
                 <div class="stat-icon" style="background:#fee2e2; color:#dc2626;"><i class="bi bi-graph-down"></i></div>
                 <div>
                     <span>Total Dépenses</span>
-                    <h2 style="color:#dc2626;">-{{ outcome|number_format(2, '.', ',') }} {{ currencySymbol }}</h2>
+                    <h2 style="color:#dc2626;">-{{ outcome|format_currency(currencySymbol) }}</h2>
                 </div>
             </div>
         </div>
@@ -202,6 +249,61 @@
         </div>
     </div>
 
+    <!-- Smart Learning Recommendations (CONTEXTUAL CAROUSEL) -->
+    {% if recommendations is defined and recommendations|length > 0 %}
+    <div class="row mb-5 px-1">
+        <div class="col-12">
+            <div id="smartRecCarousel" class="carousel slide" data-bs-ride="carousel">
+                <div class="carousel-inner" style="border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.05);">
+                    {% for rec in recommendations %}
+                    <div class="carousel-item {{ loop.first ? 'active' : '' }}">
+                        <div class="card border-0 position-relative" style="background: white; border-radius: 24px; border-left: 5px solid #6366f1 !important;">
+                            <div class="card-body p-0">
+                                <div class="row g-0 align-items-center">
+                                    <div class="col-md-auto p-4 d-flex align-items-center justify-content-center" style="background: rgba(99, 102, 241, 0.05); min-width: 100px;">
+                                        <div class="icon-circle bg-primary text-white fs-2 shadow-sm" style="width: 60px; height: 60px; display: flex; align-items:center; justify-content:center; border-radius: 18px;">
+                                            <i class="bi {{ rec.icon }}"></i>
+                                        </div>
+                                    </div>
+                                    <div class="col-md p-4">
+                                        <div class="d-flex align-items-center gap-2 mb-1">
+                                            <span class="badge bg-warning bg-opacity-10 text-warning xsmall fw-bold px-2 py-1 rounded-pill">
+                                                <i class="bi bi-stars me-1"></i>RECOMMANDATION SMART {{ recommendations|length > 1 ? '#' ~ loop.index : '' }}
+                                            </span>
+                                        </div>
+                                        <h5 class="fw-bold text-dark mb-1">{{ rec.title }}</h5>
+                                        <p class="text-muted small mb-0">{{ rec.reason }}</p>
+                                    </div>
+                                    <div class="col-md-auto p-4">
+                                        {% if rec.formation %}
+                                            <a href="{{ path('app_formation_show', {id: rec.formation.id}) }}" class="btn btn-primary rounded-pill px-4 fw-bold">
+                                                Apprendre & Agir <i class="bi bi-arrow-right ms-2"></i>
+                                            </a>
+                                        {% else %}
+                                            <a href="{{ path('app_formations', {categorie: rec.category_slug}) }}" class="btn btn-outline-primary rounded-pill px-4 fw-bold">
+                                                Explorer {{ rec.category_slug }}
+                                            </a>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% if recommendations|length > 1 %}
+                <button class="carousel-control-prev" type="button" data-bs-target="#smartRecCarousel" data-bs-slide="prev" style="width: 5%;">
+                    <span class="carousel-control-prev-icon bg-dark rounded-circle" aria-hidden="true" style="width: 30px; height: 30px;"></span>
+                </button>
+                <button class="carousel-control-next" type="button" data-bs-target="#smartRecCarousel" data-bs-slide="next" style="width: 5%;">
+                    <span class="carousel-control-next-icon bg-dark rounded-circle" aria-hidden="true" style="width: 30px; height: 30px;"></span>
+                </button>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
     <!-- Main Charts Layout -->
     <div class="dashboard-main-row">
         <!-- Timeline Chart -->
@@ -213,6 +315,42 @@
             <div style="height: 380px;">
                 <canvas id="mainFlowChart"></canvas>
             </div>
+
+    <!-- Finora Pay Modal -->
+    <div class="modal fade" id="finoraPayModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0" style="border-radius: 20px; overflow: hidden; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);">
+                <div class="modal-header text-white" style="background: linear-gradient(135deg, #ec4899, #8b5cf6); border: none; padding: 20px 25px;">
+                    <h5 class="modal-title fw-bold fs-4"><i class="bi bi-send-fill me-2"></i> Finora Pay</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <p class="text-muted small mb-4">Envoyez de l'argent instantanément et sans frais à n'importe quel autre membre du réseau Finora.</p>
+                    <form id="finoraPayForm">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold small text-uppercase" style="color: #64748b; letter-spacing: 1px;">Email du Destinataire</label>
+                            <div class="input-group input-group-lg">
+                                <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-person"></i></span>
+                                <input type="email" class="form-control border-start-0 fs-6" id="finoraPayEmail" placeholder="etudiant@finora.com" required>
+                            </div>
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label fw-bold small text-uppercase" style="color: #64748b; letter-spacing: 1px;">Montant ({{ currencySymbol }})</label>
+                            <div class="input-group input-group-lg">
+                                <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-currency-exchange"></i></span>
+                                <input type="number" step="0.01" min="1" max="{{ balance }}" class="form-control border-start-0 fs-6 fw-bold text-primary" id="finoraPayAmount" placeholder="0.00" required>
+                            </div>
+                            <div class="form-text mt-2 text-end small">Solde disponible : <strong class="text-success">{{ balance|format_currency(currencySymbol) }}</strong></div>
+                        </div>
+                        <div id="finoraPayAlert" class="alert d-none small fw-bold"></div>
+                        <button type="submit" class="btn w-100 text-white fw-bold py-3 fs-5" id="finoraPaySubmit" style="background: #1e1b4b; border-radius: 14px; transition: all 0.3s;">
+                            <i class="bi bi-rocket-takeoff me-2"></i> Envoyer Maintenant
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
         </div>
 
         <!-- Donut & Top Tx -->
@@ -229,7 +367,7 @@
                 {% if biggestTx %}
                     <div style="display:flex; justify-content:space-between; align-items:center;">
                         <span style="font-weight:700; color:var(--text-dark);">{{ biggestTx.nomTransaction }}</span>
-                        <strong style="color:#ef4444; font-size:16px;">-{{ biggestAmt }} {{ currencySymbol }}</strong>
+                        <strong style="color:#ef4444; font-size:16px;">-{{ biggestAmt|format_currency(currencySymbol) }}</strong>
                     </div>
                 {% else %}
                     <span style="color:#cbd5e1; font-style:italic;">Aucune donnée</span>
@@ -577,6 +715,219 @@
             }
         }
     });
+
+    // 4. Notifications Logic
+    const balance = {{ balance }};
+    const notifList = document.getElementById('notif-list');
+    const notifBadge = document.getElementById('notif-badge');
+    const notifCount = document.getElementById('notif-count');
+    
+    let notifications = [];
+
+    // Check Balance Conditions
+    if (balance < 0) {
+        notifications.push({
+            type: 'danger',
+            icon: 'bi-exclamation-octagon',
+            title: 'Solde Critique',
+            text: 'Votre solde est négatif ({{ balance|format_currency }}). Veuillez régulariser votre situation.'
+        });
+    } else if (balance < 100) {
+        notifications.push({
+            type: 'warning',
+            icon: 'bi-exclamation-triangle',
+            title: 'Solde Bas',
+            text: 'Votre solde est inférieur à 100 TND. Pensez à limiter vos dépenses.'
+        });
+    }
+
+    // Check High Transactions (> 5000)
+    {% for t in transactions %}
+        {% if t.montant|abs > 5000 %}
+            notifications.push({
+                type: 'info',
+                icon: 'bi-shield-exclamation',
+                title: 'Transaction Élevée',
+                text: 'Une transaction de {{ t.montant|abs|format_currency }} a été détectée ({{ t.nomTransaction }}).'
+            });
+        {% endif %}
+    {% endfor %}
+
+    // Render Notifications
+    if (notifications.length > 0) {
+        notifList.innerHTML = '';
+        notifBadge.classList.remove('d-none');
+        notifCount.innerText = notifications.length;
+        
+        notifications.forEach(n => {
+            const li = document.createElement('li');
+            li.className = 'list-group-item p-3 border-0 border-bottom';
+            li.innerHTML = `
+                <div class="d-flex align-items-center gap-3">
+                    <div class="rounded-circle bg-${n.type} bg-opacity-10 p-2">
+                        <i class="bi ${n.icon} text-${n.type}"></i>
+                    </div>
+                    <div>
+                        <h6 class="mb-0 fw-bold small">${n.title}</h6>
+                        <p class="mb-0 text-muted" style="font-size: 11px;">${n.text}</p>
+                    </div>
+                </div>
+            `;
+            notifList.appendChild(li);
+        });
+    } else {
+        notifList.innerHTML = '<li class="list-group-item p-4 text-center text-muted small"><i class="bi bi-check2-circle d-block fs-3 mb-2 text-success"></i>Tout est en ordre !<br>Aucune alerte pour le moment.</li>';
+        notifBadge.classList.add('d-none');
+        notifCount.innerText = '0';
+    }
+    // 5. Calculator Simulator Logic
+    const calcDisplay = document.getElementById('calc-display');
+    const calcBtns = document.querySelectorAll('.calc-btn');
+    const resetBalanceBtn = document.getElementById('calc-reset-balance');
+    
+    // Converted initial balance based on selected currency
+    {% set displayBalance = (currencySymbol == 'EUR') ? (balance * 0.295) : ((currencySymbol == 'USD') ? (balance * 0.321) : balance) %}
+    const initialBalance = "{{ displayBalance|number_format(2, '.', '') }}";
+    
+    let currentCalcStr = initialBalance;
+    let calcCalculated = true; // start as if we just showed the balance
+
+    function updateConversions(val) {
+        const num = parseFloat(val);
+        if (isNaN(num)) return;
+
+        let tnd, eur, usd;
+        const sym = "{{ currencySymbol }}";
+
+        // Reverse calculation to get TND base, then convert to others
+        if (sym === 'EUR') {
+            tnd = num / 0.295;
+        } else if (sym === 'USD') {
+            tnd = num / 0.321;
+        } else {
+            tnd = num;
+        }
+        
+        eur = tnd * 0.295;
+        usd = tnd * 0.321;
+
+        document.getElementById('calc-conv-tnd').innerText = `DT: ${tnd.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+        document.getElementById('calc-conv-eur').innerText = `EUR: ${eur.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+        document.getElementById('calc-conv-usd').innerText = `USD: ${usd.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+    }
+
+    function updateDisplay(val) {
+        calcDisplay.innerText = val || '0';
+        updateConversions(val);
+    }
+
+    calcBtns.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation(); // Prevent dropdown from closing
+            const val = btn.getAttribute('data-val');
+
+            if (val === 'C') {
+                currentCalcStr = '0';
+                calcCalculated = false;
+            } else if (val === 'DEL') {
+                if (calcCalculated) return;
+                currentCalcStr = currentCalcStr.toString().slice(0, -1);
+                if (currentCalcStr === '') currentCalcStr = '0';
+            } else if (val === '=') {
+                try {
+                    // Safe evaluation: allow only numbers and basic math operators
+                    const safeStr = currentCalcStr.replace(/[^0-9+\-*/.%]/g, '');
+                    const result = new Function('return ' + safeStr)();
+                    currentCalcStr = Number.isInteger(result) ? result.toString() : result.toFixed(2);
+                    calcCalculated = true;
+                } catch (err) {
+                    currentCalcStr = 'Erreur';
+                    calcCalculated = true;
+                }
+            } else if (val === '%') {
+                try {
+                    const safeStr = currentCalcStr.replace(/[^0-9+\-*/.%]/g, '');
+                    const result = new Function('return ' + safeStr)() / 100;
+                    currentCalcStr = Number.isInteger(result) ? result.toString() : result.toFixed(2);
+                    calcCalculated = true;
+                } catch (err) {
+                    currentCalcStr = 'Erreur';
+                }
+            } else {
+                // If it's a number/operator after a calculation, start fresh unless it's an operator
+                if (calcCalculated && !['+', '-', '*', '/'].includes(val)) {
+                    currentCalcStr = val;
+                    calcCalculated = false;
+                } else {
+                    if (currentCalcStr === '0' && val !== '.') {
+                        currentCalcStr = val;
+                    } else {
+                        currentCalcStr += val;
+                    }
+                    calcCalculated = false;
+                }
+            }
+            updateDisplay(currentCalcStr);
+        });
+    });
+
+    resetBalanceBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        currentCalcStr = initialBalance;
+        calcCalculated = true;
+        updateDisplay(currentCalcStr);
+    });
+
+    // Prevent closing when clicking inside the calculator
+    document.querySelector('.calculator-ui').addEventListener('click', function(e) {
+        e.stopPropagation();
+    });
+
+    // 6. Finora Pay Logic
+    const finoraPayForm = document.getElementById('finoraPayForm');
+    if (finoraPayForm) {
+        finoraPayForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const submitBtn = document.getElementById('finoraPaySubmit');
+            const alertBox = document.getElementById('finoraPayAlert');
+            const email = document.getElementById('finoraPayEmail').value;
+            const amount = document.getElementById('finoraPayAmount').value;
+
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="spinner-border spinner-border-sm me-2"></i> Traitement...';
+            alertBox.className = 'alert d-none small fw-bold';
+
+            try {
+                const response = await fetch('/api/wallet/transfer', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        recipientEmail: email, 
+                        amount: amount,
+                        currency: '{{ current_currency() }}'
+                    })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.message || 'Erreur lors du transfert.');
+                }
+
+                alertBox.className = 'alert alert-success small fw-bold';
+                alertBox.innerHTML = '<i class="bi bi-check-circle-fill me-2"></i>' + data.message;
+                
+                // Refresh page after 1.5 seconds to show new balance and transaction
+                setTimeout(() => { window.location.reload(); }, 1500);
+
+            } catch (error) {
+                alertBox.className = 'alert alert-danger small fw-bold';
+                alertBox.innerHTML = '<i class="bi bi-exclamation-triangle-fill me-2"></i>' + error.message;
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="bi bi-rocket-takeoff me-2"></i> Envoyer Maintenant';
+            }
+        });
+    }
 
 </script>
 {% endblock %}

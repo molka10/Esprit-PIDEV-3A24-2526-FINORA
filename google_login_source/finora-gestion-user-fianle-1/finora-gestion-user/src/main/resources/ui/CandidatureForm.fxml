@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.example.finora.controllers.appeldoffre.CandidatureFormController">
+
+    <top>
+        <HBox spacing="12" styleClass="topbar">
+            <padding>
+                <Insets top="14" right="18" bottom="14" left="18"/>
+            </padding>
+
+            <VBox spacing="2">
+                <Label fx:id="formTitle" text="Nouvelle Candidature" styleClass="title"/>
+                <Label text="Remplis les champs puis enregistre" styleClass="subtitle"/>
+            </VBox>
+
+            <Pane HBox.hgrow="ALWAYS"/>
+            <Button text="Retour" styleClass="ghost-btn" onAction="#onBack"/>
+        </HBox>
+    </top>
+
+    <center>
+        <VBox spacing="14" styleClass="content">
+            <padding>
+                <Insets top="18" right="18" bottom="18" left="18"/>
+            </padding>
+
+            <VBox spacing="12" styleClass="card">
+                <Label text="Informations candidature" styleClass="section-title"/>
+
+                <GridPane hgap="12" vgap="12">
+                    <columnConstraints>
+                        <ColumnConstraints percentWidth="25"/>
+                        <ColumnConstraints percentWidth="75"/>
+                    </columnConstraints>
+
+                    <Label text="Appel d’Offre"/>
+                    <ComboBox fx:id="appelOffreCombo"
+                              promptText="Sélectionner un appel d’offre..."
+                              prefWidth="300"/>
+
+                    <Label text="Nom candidat" GridPane.rowIndex="1"/>
+                    <TextField fx:id="nomField" promptText="Ex: Sami Ben Ali" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+
+                    <Label text="Email candidat" GridPane.rowIndex="2"/>
+                    <TextField fx:id="emailField" promptText="Ex: sami@mail.com" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+
+                    <Label text="Montant proposé" GridPane.rowIndex="3"/>
+                    <TextField fx:id="montantField" promptText="Ex: 1500" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+
+                    <Label text="Message" GridPane.rowIndex="4"/>
+                    <TextArea fx:id="messageArea" prefRowCount="3" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
+
+                    <Label text="Statut" GridPane.rowIndex="5"/>
+                    <ComboBox fx:id="statutCombo" promptText="submitted/accepted/rejected" GridPane.rowIndex="5" GridPane.columnIndex="1"/>
+                </GridPane>
+
+                <HBox spacing="10" alignment="CENTER_RIGHT">
+                    <Label fx:id="errorLabel" text="" styleClass="error-text"/>
+                    <Pane HBox.hgrow="ALWAYS"/>
+                    <Button text="Annuler" styleClass="ghost-btn" onAction="#onCancel"/>
+                    <Button text="Enregistrer" styleClass="primary-btn" onAction="#onSave"/>
+                </HBox>
+            </VBox>
+        </VBox>
+    </center>
+</BorderPane>

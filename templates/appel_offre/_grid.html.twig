@@ -49,13 +49,9 @@
                 </div>
 
                 <div class="p-3 bg-light rounded-4 mb-4">
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <span class="text-muted small">Budget Estimé</span>
-                        <span class="badge bg-white text-dark border shadow-xs">DT</span>
-                    </div>
                     <div class="fw-extrabold text-primary h5 mb-0">
                         {% if appel.budgetMin and appel.budgetMax %}
-                            {{ appel.budgetMin|number_format(0, '.', ' ') }} - {{ appel.budgetMax|number_format(0, '.', ' ') }}
+                            {{ appel.budgetMin|format_currency }} - {{ appel.budgetMax|format_currency }}
                         {% else %}
                             <span class="text-muted">À définir</span>
                         {% endif %}

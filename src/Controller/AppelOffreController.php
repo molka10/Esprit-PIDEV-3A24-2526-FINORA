@@ -18,8 +18,17 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 final class AppelOffreController extends AbstractController
 {
     #[Route(name: 'app_appel_offre_index', methods: ['GET'])]
-    public function index(Request $request, AppelOffreRepository $appelOffreRepository, CategorieRepository $categorieRepository, EntityManagerInterface $entityManager): Response
+    public function index(
+        Request $request, 
+        AppelOffreRepository $appelOffreRepository, 
+        CategorieRepository $categorieRepository, 
+        EntityManagerInterface $entityManager,
+        \App\Service\SmartLearningService $smartLearningService
+    ): Response
     {
+        $user = $this->getUser();
+        $recommendations = $user ? $smartLearningService->getRecommendations($user) : [];
+
         // Auto-clôture des appels d'offre expirés
         $appelsExpires = $appelOffreRepository->findAppelsExpires(new \DateTime());
         foreach ($appelsExpires as $appel) {
@@ -80,11 +89,15 @@ final class AppelOffreController extends AbstractController
                 'statut' => $statut,
                 'categorie' => $categorieId,
                 'search' => $search,
-            ]
+            ],
+            'recommendations' => $recommendations
         ];
 
         if ($request->query->get('ajax')) {
-            return $this->render('appel_offre/_grid.html.twig', $renderData);
+            $template = ($request->query->get('role') === 'admin') 
+                ? 'appel_offre/_admin_table.html.twig' 
+                : 'appel_offre/_grid.html.twig';
+            return $this->render($template, $renderData);
         }
 
         return $this->render('appel_offre/index.html.twig', $renderData);

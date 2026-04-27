@@ -487,9 +487,14 @@
             <div class="section-icon" style="background: rgba(219, 39, 119, 0.1); color: #db2777;">
                 <i class="bi bi-bullseye"></i>
             </div>
-            <div>
-                <h2 class="mb-0 fw-bold">Objectifs de Vie</h2>
-                <p class="text-muted small mb-0">Gérez vos ambitions d'épargne et vos projets personnels.</p>
+            <div class="d-flex justify-content-between align-items-center w-100">
+                <div>
+                    <h2 class="mb-0 fw-bold">Objectifs de Vie</h2>
+                    <p class="text-muted small mb-0">Gérez vos ambitions d'épargne et vos projets personnels.</p>
+                </div>
+                <a href="{{ path('wishlist') }}" class="btn btn-primary rounded-pill px-4 shadow-sm">
+                    <i class="bi bi-plus-circle me-2"></i> Ajouter
+                </a>
             </div>
         </div>
 
@@ -511,8 +516,7 @@
                                 </div>
                             </div>
                             <div class="card-action-bar">
-                                <a href="{{ path('wishlist') }}" class="action-btn btn-primary-glass">Simuler</a>
-                                <a href="{{ path('wishlist_delete', {id: item.id}) }}" class="action-btn btn-delete-glass"><i class="bi bi-trash"></i></a>
+                                <a href="{{ path('wishlist_delete', {id: item.id}) }}" class="action-btn btn-delete-glass w-100"><i class="bi bi-trash me-2"></i> Supprimer</a>
                             </div>
                         </div>
                     </div>

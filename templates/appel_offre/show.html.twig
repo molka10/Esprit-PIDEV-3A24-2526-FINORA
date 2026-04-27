@@ -45,9 +45,17 @@
                 <div class="card-body px-4 pb-4">
                     <div class="mb-4">
                         <h5 class="fw-bold text-dark mb-3"><i class="bi bi-card-text me-2 text-primary"></i>Description du projet</h5>
-                        <div class="p-4 bg-light rounded-4 text-muted" style="line-height: 1.8; font-size: 1.05rem;">
+                        <div class="p-4 bg-light rounded-4 text-muted mb-4" style="line-height: 1.8; font-size: 1.05rem;">
                             {{ appel_offre.description|nl2br }}
                         </div>
+
+                        {% if appel_offre.requiredCriteria %}
+                            <h5 class="fw-bold text-dark mb-3"><i class="bi bi-robot me-2 text-primary"></i>Critères de Sélection (Évaluation IA)</h5>
+                            <div class="p-4 rounded-4" style="background-color: rgba(109, 40, 217, 0.03); border: 1px dashed var(--finora-purple); line-height: 1.6;">
+                                <p class="small text-primary fw-bold mb-2"><i class="bi bi-info-circle me-1"></i>L'IA de Finora utilisera ces points pour noter votre candidature :</p>
+                                <div class="text-muted">{{ appel_offre.requiredCriteria|nl2br }}</div>
+                            </div>
+                        {% endif %}
                     </div>
 
                     <div class="row g-4">

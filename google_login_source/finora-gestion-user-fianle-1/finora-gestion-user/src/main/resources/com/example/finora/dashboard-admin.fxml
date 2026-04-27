@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.example.finora.controllers.DashboardAdminController"
+      stylesheets="@theme.css" spacing="20" styleClass="content-area">
+
+    <padding><Insets top="25" right="25" bottom="25" left="25"/></padding>
+
+    <!-- Titre + Date -->
+    <HBox alignment="CENTER_LEFT" spacing="15">
+        <Label text="📊 Tableau de Bord Administrateur" styleClass="page-title"/>
+        <Region HBox.hgrow="ALWAYS"/>
+        <Label fx:id="lblDateTime" text="27 février 2026" styleClass="datetime-label"/>
+    </HBox>
+
+    <!-- Welcome Card -->
+    <VBox styleClass="card-elevated" spacing="10">
+        <padding><Insets top="25" right="25" bottom="25" left="25"/></padding>
+        <Label text="👨‍💼 Panneau d'Administration FINORA" styleClass="h2"/>
+        <Label text="Vue d'ensemble et supervision de la plateforme" styleClass="text-secondary"/>
+        <Separator>
+            <VBox.margin><Insets top="10" bottom="10"/></VBox.margin>
+        </Separator>
+        <Label fx:id="lblWelcomeMessage" text="Bienvenue ! Consultez les statistiques et gérez les modules" styleClass="text-muted"/>
+    </VBox>
+
+    <!-- Statistiques Globales -->
+    <Label text="📈 Statistiques Globales" styleClass="section-title"/>
+
+    <GridPane hgap="15" vgap="15">
+        <!-- Stat 1 -->
+        <VBox styleClass="stat-card-primary" GridPane.columnIndex="0" GridPane.rowIndex="0" spacing="8">
+            <padding><Insets top="20" right="20" bottom="20" left="20"/></padding>
+            <Label text="👥 Utilisateurs" styleClass="stat-label"/>
+            <Label fx:id="lblTotalUsers" text="0" styleClass="stat-value"/>
+            <Label text="Inscrits" styleClass="stat-sublabel"/>
+        </VBox>
+
+        <!-- Stat 2 -->
+        <VBox styleClass="stat-card-success" GridPane.columnIndex="1" GridPane.rowIndex="0" spacing="8">
+            <padding><Insets top="20" right="20" bottom="20" left="20"/></padding>
+            <Label text="💰 Transactions" styleClass="stat-label"/>
+            <Label fx:id="lblTotalTransactions" text="0" styleClass="stat-value"/>
+            <Label text="Total" styleClass="stat-sublabel"/>
+        </VBox>
+
+        <!-- Stat 3 -->
+        <VBox styleClass="stat-card-warning" GridPane.columnIndex="2" GridPane.rowIndex="0" spacing="8">
+            <padding><Insets top="20" right="20" bottom="20" left="20"/></padding>
+            <Label text="📊 Volume" styleClass="stat-label"/>
+            <Label fx:id="lblVolumeTotal" text="0 TND" styleClass="stat-value"/>
+            <Label text="Échanges" styleClass="stat-sublabel"/>
+        </VBox>
+
+        <!-- Stat 4 -->
+        <VBox styleClass="stat-card-info" GridPane.columnIndex="3" GridPane.rowIndex="0" spacing="8">
+            <padding><Insets top="20" right="20" bottom="20" left="20"/></padding>
+            <Label text="💳 Commissions" styleClass="stat-label"/>
+            <Label fx:id="lblTotalCommissions" text="0 TND" styleClass="stat-value"/>
+            <Label text="Revenus" styleClass="stat-sublabel"/>
+        </VBox>
+
+        <columnConstraints>
+            <ColumnConstraints percentWidth="25"/>
+            <ColumnConstraints percentWidth="25"/>
+            <ColumnConstraints percentWidth="25"/>
+            <ColumnConstraints percentWidth="25"/>
+        </columnConstraints>
+    </GridPane>
+
+    <!-- Modules -->
+    <Label text="🚀 Accès Rapide" styleClass="section-title">
+        <VBox.margin><Insets top="10"/></VBox.margin>
+    </Label>
+
+    <GridPane hgap="15" vgap="15">
+        <!-- Bourse -->
+        <VBox styleClass="module-card" GridPane.columnIndex="0" GridPane.rowIndex="0"
+              spacing="15" alignment="CENTER" style="-fx-cursor: hand;">
+            <padding><Insets top="30" right="20" bottom="30" left="20"/></padding>
+
+            <StackPane styleClass="module-icon-primary">
+                <Label text="📊" style="-fx-font-size: 36px;"/>
+            </StackPane>
+
+            <Label text="Bourse" styleClass="module-title"/>
+            <Label text="Gestion bourses, actions, commissions"
+                   styleClass="module-description" wrapText="true" alignment="CENTER"/>
+
+            <Button text="Accéder →" onAction="#goBourse"
+                    styleClass="btn-primary" prefWidth="180">
+                <VBox.margin><Insets top="10"/></VBox.margin>
+            </Button>
+        </VBox>
+
+        <!-- Portefeuille -->
+        <VBox styleClass="module-card" GridPane.columnIndex="1" GridPane.rowIndex="0"
+              spacing="15" alignment="CENTER" style="-fx-cursor: hand;">
+            <padding><Insets top="30" right="20" bottom="30" left="20"/></padding>
+
+            <StackPane styleClass="module-icon-success">
+                <Label text="💼" style="-fx-font-size: 36px;"/>
+            </StackPane>
+
+            <Label text="Portefeuille" styleClass="module-title"/>
+            <Label text="Supervision portefeuilles et wallet"
+                   styleClass="module-description" wrapText="true" alignment="CENTER"/>
+
+            <Button text="Accéder →" onAction="#goPortefeuille"
+                    styleClass="btn-success" prefWidth="180">
+                <VBox.margin><Insets top="10"/></VBox.margin>
+            </Button>
+        </VBox>
+
+        <!-- Appels d'Offre -->
+        <VBox styleClass="module-card" GridPane.columnIndex="2" GridPane.rowIndex="0"
+              spacing="15" alignment="CENTER" style="-fx-cursor: hand;">
+            <padding><Insets top="30" right="20" bottom="30" left="20"/></padding>
+
+            <StackPane styleClass="module-icon-warning">
+                <Label text="📋" style="-fx-font-size: 36px;"/>
+            </StackPane>
+
+            <Label text="Appels d'Offre" styleClass="module-title"/>
+            <Label text="Gestion offres et candidatures"
+                   styleClass="module-description" wrapText="true" alignment="CENTER"/>
+
+            <Button text="Accéder →" onAction="#goAppelOffre"
+                    styleClass="btn-warning" prefWidth="180">
+                <VBox.margin><Insets top="10"/></VBox.margin>
+            </Button>
+        </VBox>
+
+        <!-- Formation -->
+        <VBox styleClass="module-card" GridPane.columnIndex="0" GridPane.rowIndex="1"
+              spacing="15" alignment="CENTER" style="-fx-cursor: hand;">
+            <padding><Insets top="30" right="20" bottom="30" left="20"/></padding>
+
+            <StackPane styleClass="module-icon-info">
+                <Label text="🎓" style="-fx-font-size: 36px;"/>
+            </StackPane>
+
+            <Label text="Formation" styleClass="module-title"/>
+            <Label text="Gestion cours et formations"
+                   styleClass="module-description" wrapText="true" alignment="CENTER"/>
+
+            <Button text="Accéder →" onAction="#goFormation"
+                    styleClass="btn-info" prefWidth="180">
+                <VBox.margin><Insets top="10"/></VBox.margin>
+            </Button>
+        </VBox>
+
+        <!-- Investissement -->
+        <VBox styleClass="module-card" GridPane.columnIndex="1" GridPane.rowIndex="1"
+              spacing="15" alignment="CENTER" style="-fx-cursor: hand;">
+            <padding><Insets top="30" right="20" bottom="30" left="20"/></padding>
+
+            <StackPane styleClass="module-icon-success">
+                <Label text="🏘️" style="-fx-font-size: 36px;"/>
+            </StackPane>
+
+            <Label text="Investissement" styleClass="module-title"/>
+            <Label text="Gestion investissements immobiliers"
+                   styleClass="module-description" wrapText="true" alignment="CENTER"/>
+
+            <Button text="Accéder →" onAction="#goInvestmentManagement"
+                    styleClass="btn-success" prefWidth="180">
+                <VBox.margin><Insets top="10"/></VBox.margin>
+            </Button>
+        </VBox>
+
+        <!-- Users -->
+        <VBox styleClass="module-card" GridPane.columnIndex="2" GridPane.rowIndex="1"
+              spacing="15" alignment="CENTER" style="-fx-cursor: hand;">
+            <padding><Insets top="30" right="20" bottom="30" left="20"/></padding>
+
+            <StackPane styleClass="module-icon-primary">
+                <Label text="👥" style="-fx-font-size: 36px;"/>
+            </StackPane>
+
+            <Label text="Utilisateurs" styleClass="module-title"/>
+            <Label text="Administration utilisateurs"
+                   styleClass="module-description" wrapText="true" alignment="CENTER"/>
+
+            <Button text="Accéder →" onAction="#goGestionUsers"
+                    styleClass="btn-primary" prefWidth="180">
+                <VBox.margin><Insets top="10"/></VBox.margin>
+            </Button>
+        </VBox>
+
+        <columnConstraints>
+            <ColumnConstraints percentWidth="33.33"/>
+            <ColumnConstraints percentWidth="33.33"/>
+            <ColumnConstraints percentWidth="33.33"/>
+        </columnConstraints>
+    </GridPane>
+
+    <!-- Footer -->
+    <HBox alignment="CENTER" spacing="20" styleClass="footer-info">
+        <VBox.margin><Insets top="20"/></VBox.margin>
+        <Label text="🛡️ Panneau Admin" styleClass="footer-text"/>
+        <Label text="•" styleClass="footer-separator"/>
+        <Label text="© 2026 FINORA" styleClass="footer-text"/>
+    </HBox>
+
+</VBox>

@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import java.net.URL?>
+
+<VBox xmlns="http://javafx.com/javafx/17"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.example.finora.controllers.FormationFormController"
+      spacing="12" styleClass="card">
+    <stylesheets>
+        <URL value="@style.css" />
+    </stylesheets>
+
+    <Label fx:id="lblTitle" text="Ajouter Formation" styleClass="title"/>
+
+    <GridPane hgap="10" vgap="10">
+        <columnConstraints>
+            <ColumnConstraints percentWidth="25"/>
+            <ColumnConstraints percentWidth="75"/>
+        </columnConstraints>
+
+        <Label text="Titre:" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+        <TextField fx:id="txtTitre" promptText="ex: Introduction à la bourse" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+
+        <!-- Catégories (Pinterest tags) -->
+        <Label text="Catégories:" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+
+        <VBox spacing="8" GridPane.rowIndex="1" GridPane.columnIndex="1">
+            <HBox spacing="8">
+                <ComboBox fx:id="cbCategorie"
+                          prefWidth="260"
+                          promptText="Choisir une catégorie..."
+                          onAction="#onPickCategorie"/>
+
+                <TextField fx:id="txtCategorieTag"
+                           promptText="Ou écrire un tag..."
+                           onAction="#onAddTag"/>
+
+                <Button text="+ Ajouter" styleClass="btn-ghost" onAction="#onAddTag"/>
+            </HBox>
+
+            <FlowPane fx:id="tagsPane" hgap="8" vgap="8" prefWrapLength="520"/>
+        </VBox>
+
+        <Label text="Niveau:" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+        <ComboBox fx:id="cbNiveau" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+
+        <Label text="Description:" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
+        <TextArea fx:id="txtDescription" prefRowCount="4" promptText="Description..." GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+
+        <Label text="Image URL:" GridPane.rowIndex="4" GridPane.columnIndex="0"/>
+        <TextField fx:id="txtImageUrl" promptText="optionnel: http..." GridPane.rowIndex="4" GridPane.columnIndex="1"/>
+
+        <Label text="Publié:" GridPane.rowIndex="5" GridPane.columnIndex="0"/>
+        <CheckBox fx:id="chkPublished" GridPane.rowIndex="5" GridPane.columnIndex="1"/>
+    </GridPane>
+
+    <Label fx:id="lblError" text="" styleClass="error"/>
+
+    <HBox spacing="10">
+        <Button text="💾 Enregistrer" styleClass="btn-primary" onAction="#onSave"/>
+        <Button text="Annuler" styleClass="btn-ghost" onAction="#onCancel"/>
+    </HBox>
+
+</VBox>

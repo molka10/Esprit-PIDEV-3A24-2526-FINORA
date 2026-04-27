@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.ToggleGroup?>
+<?import javafx.scene.control.ToggleButton?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.example.finora.controllers.UsersController"
+            stylesheets="@theme.css"
+            styleClass="root-bg">
+
+    <!-- TOP BAR -->
+    <top>
+        <HBox spacing="12" styleClass="topbar" alignment="CENTER_LEFT">
+            <padding>
+                <Insets top="12" right="20" bottom="12" left="20"/>
+            </padding>
+
+            <fx:define>
+                <ToggleGroup fx:id="searchModeGroup"/>
+            </fx:define>
+
+            <children>
+                <Label text="Finora - Gestion Utilisateurs" styleClass="topbar-title"/>
+                <Region HBox.hgrow="ALWAYS"/>
+
+                <ToggleButton fx:id="toggleText" text="Nom/Email"
+                              toggleGroup="$searchModeGroup" selected="true"
+                              onAction="#handleSearchMode" styleClass="btn-ghost"/>
+
+                <ToggleButton fx:id="toggleRole" text="Role"
+                              toggleGroup="$searchModeGroup"
+                              onAction="#handleSearchMode" styleClass="btn-ghost"/>
+
+                <TextField fx:id="searchField"
+                           promptText="Rechercher par username/email..."
+                           prefWidth="280"
+                           onKeyReleased="#handleSearchDynamic"
+                           styleClass="field"/>
+
+                <ComboBox fx:id="roleFilterCombo"
+                          promptText="Choisir role"
+                          visible="false"
+                          managed="false"
+                          prefWidth="160"
+                          onAction="#handleRoleFilter"
+                          styleClass="field"/>
+
+                <Button text="Actualiser" onAction="#handleRefresh" styleClass="btn-ghost"/>
+            </children>
+        </HBox>
+    </top>
+
+    <!-- CENTER -->
+    <center>
+        <ScrollPane fitToWidth="true"
+                    vbarPolicy="AS_NEEDED"
+                    styleClass="content-scroll">
+
+            <content>
+                <HBox spacing="20">
+                    <padding>
+                        <Insets top="20" right="20" bottom="20" left="20"/>
+                    </padding>
+
+                    <!-- LIST -->
+                    <VBox spacing="10" styleClass="card" HBox.hgrow="ALWAYS">
+                        <padding>
+                            <Insets top="15" right="15" bottom="15" left="15"/>
+                        </padding>
+
+                        <children>
+                            <HBox alignment="CENTER_LEFT" spacing="10">
+                                <Label text="Liste des utilisateurs" styleClass="h2"/>
+                                <Region HBox.hgrow="ALWAYS"/>
+                                <Label fx:id="countLabel" text="" styleClass="muted"/>
+                            </HBox>
+
+                            <ListView fx:id="usersList"
+                                      prefHeight="620"
+                                      styleClass="users-list">
+                                <placeholder>
+                                    <Label text="Aucun utilisateur trouvé." styleClass="muted"/>
+                                </placeholder>
+                            </ListView>
+                        </children>
+                    </VBox>
+
+                    <!-- DETAILS -->
+                    <VBox spacing="12" styleClass="card" prefWidth="400">
+                        <padding>
+                            <Insets top="15" right="15" bottom="15" left="15"/>
+                        </padding>
+
+                        <children>
+                            <Label text="Détails utilisateur" styleClass="h2"/>
+
+                            <Label text="Username"/>
+                            <TextField fx:id="usernameField" promptText="Entrer username"/>
+
+                            <Label text="Email"/>
+                            <TextField fx:id="emailField" promptText="Entrer email"/>
+
+                            <Label text="Role"/>
+                            <ComboBox fx:id="roleCombo"/>
+
+                            <Label text="Téléphone"/>
+                            <TextField fx:id="phoneField" promptText="Ex: 0612345678"/>
+
+                            <Label text="Adresse"/>
+                            <TextField fx:id="addressField" promptText="Ex: Rabat, Maroc"/>
+
+                            <Label text="Date de naissance"/>
+                            <DatePicker fx:id="dobPicker"/>
+
+                            <HBox spacing="10">
+                                <Button text="Ajouter"
+                                        onAction="#handleAdd"
+                                        styleClass="btn-primary"
+                                        HBox.hgrow="ALWAYS"
+                                        maxWidth="Infinity"/>
+
+                                <Button text="Modifier"
+                                        onAction="#handleUpdate"
+                                        styleClass="btn-secondary"
+                                        HBox.hgrow="ALWAYS"
+                                        maxWidth="Infinity"/>
+                            </HBox>
+
+                            <Button text="Supprimer"
+                                    onAction="#handleDelete"
+                                    styleClass="btn-danger"
+                                    maxWidth="Infinity"/>
+
+                            <Button text="Vider"
+                                    onAction="#handleClear"
+                                    styleClass="btn-ghost"
+                                    maxWidth="Infinity"/>
+
+                            <Label fx:id="statusLabel" text="" wrapText="true"/>
+                        </children>
+                    </VBox>
+
+                </HBox>
+            </content>
+        </ScrollPane>
+    </center>
+
+</BorderPane>

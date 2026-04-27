@@ -128,6 +128,19 @@ class AppelOffreType extends AbstractType
                     new NotBlank(['message' => 'La catégorie est obligatoire']),
                 ],
             ])
+            ->add('requiredCriteria', TextareaType::class, [
+                'label' => 'Critères de Sélection (IA) *',
+                'required' => true,
+                'attr' => [
+                    'class' => 'form-control', 
+                    'rows' => 3, 
+                    'placeholder' => "Ex: Minimum 2 ans d'expérience en PHP, Maîtrise de Symfony, Certification Cloud..."
+                ],
+                'help' => "L'IA utilisera ces critères pour évaluer automatiquement les candidatures.",
+                'constraints' => [
+                    new NotBlank(['message' => 'Les critères de sélection sont obligatoires']),
+                ],
+            ])
         ;
     }
 

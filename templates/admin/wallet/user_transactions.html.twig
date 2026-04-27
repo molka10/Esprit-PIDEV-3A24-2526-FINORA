@@ -265,7 +265,7 @@
     {# â”€â”€ Hero header â”€â”€ #}
     <div class="ut-hero">
         <div class="ut-hero-left">
-            <h1><i class="bi bi-person-circle me-2"></i>User {{ userId }} — Transactions</h1>
+            <h1><i class="bi bi-person-circle me-2"></i>{{ userName }} — Transactions</h1>
             <p>{{ transactions|length }} transaction{{ transactions|length != 1 ? 's' : '' }} · Vue détaillée & Analytics</p>
         </div>
         <div class="ut-hero-right">
@@ -311,7 +311,7 @@
         <div class="ut-card">
             <div class="ut-card-cal-header">
                 <i class="bi bi-calendar3" style="color:var(--p);font-size:18px;"></i>
-                <h3>Calendrier des Transactions — User {{ userId }}</h3>
+                <h3>Calendrier des Transactions — {{ userName }}</h3>
             </div>
             <div style="display:flex;gap:16px;margin-bottom:14px;flex-wrap:wrap;">
                 <div class="ut-stat" style="flex:1 1 130px;animation:none;">

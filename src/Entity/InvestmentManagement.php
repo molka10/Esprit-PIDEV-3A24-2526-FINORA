@@ -45,10 +45,20 @@ class InvestmentManagement
     #[ORM\Column(name: "created_at", type: "datetime", nullable: true)]
     private ?\DateTimeInterface $createdAt = null;
 
-    /** 🔥 REFACTORED: Relation with User entity */
     #[ORM\ManyToOne(targetEntity: User::class)]
     #[ORM\JoinColumn(name: 'user_id', referencedColumnName: 'id', nullable: true, onDelete: 'SET NULL')]
     private ?User $user = null;
+
+    #[ORM\Column(name: "rating", type: "integer", nullable: true)]
+    #[Assert\Range(min: 1, max: 5, notInRangeMessage: "Le rating doit être entre 1 et 5")]
+    private ?int $rating = null;
+
+    #[ORM\Column(length: 20, nullable: true)]
+    #[Assert\Choice(choices: ['LOW', 'MEDIUM', 'HIGH'])]
+    private ?string $priority = 'MEDIUM';
+
+    #[ORM\Column(type: 'text', nullable: true)]
+    private ?string $notes = null;
 
     public function getId(): ?int
     {
@@ -232,4 +242,66 @@ class InvestmentManagement
         
         return (float)$this->amountInvested * $rate * $durationYears;
     }
+
+    public function getRating(): ?int
+    {
+        return $this->rating;
+    }
+
+    public function setRating(?int $rating): self
+    {
+        $this->rating = $rating;
+        return $this;
+    }
+
+    public function getPriority(): ?string
+    {
+        return $this->priority;
+    }
+
+    public function setPriority(?string $priority): self
+    {
+        $this->priority = $priority;
+        return $this;
+    }
+
+    public function getNotes(): ?string
+    {
+        return $this->notes;
+    }
+
+    public function setNotes(?string $notes): self
+    {
+        $this->notes = $notes;
+        return $this;
+    }
+
+    /**
+     * 🔥 Logic: Calculate progress based on time elapsed in the investment duration
+     */
+    public function getProgressPercentage(): int
+    {
+        if (!$this->startDate || !$this->investment) {
+            return 0;
+        }
+
+        $now = new \DateTime();
+        $start = $this->startDate;
+        $durationMonths = $this->investment->getDurationMonths();
+        $end = (clone $start)->modify("+$durationMonths months");
+
+        if ($now >= $end) {
+            return 100;
+        }
+
+        if ($now <= $start) {
+            return 0;
+        }
+
+        $totalDays = $end->getTimestamp() - $start->getTimestamp();
+        $elapsedDays = $now->getTimestamp() - $start->getTimestamp();
+
+        return (int) round(($elapsedDays / $totalDays) * 100);
+    }
 }
+

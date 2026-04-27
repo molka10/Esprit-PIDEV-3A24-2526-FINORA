@@ -51,14 +51,25 @@ final class CandidatureController extends AbstractController
         ];
 
         if ($request->query->get('ajax')) {
-            return $this->render('candidature/_grid.html.twig', $renderData);
+            $template = ($request->query->get('role') === 'admin') 
+                ? 'candidature/_admin_table.html.twig' 
+                : 'candidature/_grid.html.twig';
+            return $this->render($template, $renderData);
         }
 
         return $this->render('candidature/index.html.twig', $renderData);
     }
 
     #[Route('/new', name: 'app_candidature_new', methods: ['GET', 'POST'])]
-    public function new(Request $request, EntityManagerInterface $entityManager, SmsService $smsService, UserRepository $userRepository, AppelOffreRepository $appelOffreRepository): Response
+    public function new(
+        Request $request, 
+        EntityManagerInterface $entityManager, 
+        SmsService $smsService, 
+        UserRepository $userRepository, 
+        AppelOffreRepository $appelOffreRepository,
+        \App\Service\CvUploader $cvUploader,
+        \App\Service\AiService $aiService
+    ): Response
     {
         $candidature = new Candidature();
         
@@ -78,6 +89,39 @@ final class CandidatureController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            // Handle CV Upload & Text Extraction
+            $cvFile = $form->get('cvFile')->getData();
+            $cvText = "";
+            if ($cvFile) {
+                $cvFileName = $cvUploader->upload($cvFile);
+                $candidature->setCvPath($cvFileName);
+
+                try {
+                    $pdfParser = new \Smalot\PdfParser\Parser();
+                    $pdf = $pdfParser->parseFile($cvUploader->getTargetDirectory() . '/' . $cvFileName);
+                    $cvText = $pdf->getText();
+                } catch (\Exception $e) {
+                    // Silently fail or log if PDF parsing fails
+                }
+            }
+
+            // AI Analysis
+            $tender = $candidature->getAppelOffre();
+            $criteria = $tender->getRequiredCriteria() ?? $tender->getDescription();
+            
+            // Combine Message + CV Text for a full profile analysis
+            $candidateProfile = "MESSAGE DE MOTIVATION:\n" . $candidature->getMessage() . 
+                               "\n\nCONTENU DU CV:\n" . $cvText;
+
+            $aiResult = $aiService->analyzeCandidature(
+                $tender->getTitre(),
+                $criteria,
+                $candidateProfile
+            );
+
+            $candidature->setAiScore($aiResult['score']);
+            $candidature->setAiAnalysis($aiResult['analysis']);
+
             $entityManager->persist($candidature);
             $entityManager->flush();
 
@@ -85,15 +129,18 @@ final class CandidatureController extends AbstractController
             $admin = $userRepository->findOneAdmin();
             if ($admin) {
                 if ($admin->getPhone()) {
-                    $smsService->sendSms($admin->getPhone(), "Nouvelle candidature reçue pour l'appel d'offre: " . $candidature->getAppelOffre()->getTitre());
+                    $success = $smsService->sendSms($admin->getPhone(), "Nouvelle candidature reçue (" . $aiResult['score'] . "%) pour: " . $tender->getTitre());
+                    if (!$success) {
+                        $this->addFlash('warning', 'Échec SMS : ' . $smsService->getLastError());
+                    }
                 } else {
-                    $this->addFlash('warning', "L'admin n'a pas de numéro de téléphone.");
+                    $this->addFlash('warning', 'L\'administrateur n\'a pas de numéro de téléphone configuré.');
                 }
             } else {
-                $this->addFlash('warning', "Aucun administrateur trouvé pour la notification SMS.");
+                $this->addFlash('warning', 'Aucun administrateur trouvé pour recevoir la notification SMS.');
             }
 
-            $this->addFlash('success', 'Candidature soumise avec succès !');
+            $this->addFlash('success', 'Candidature soumise avec succès ! L\'IA a évalué votre profil à ' . $aiResult['score'] . '%.');
             return $this->redirectToRoute('app_candidature_index', ['role' => $request->query->get('role')], Response::HTTP_SEE_OTHER);
         }
 
@@ -104,17 +151,12 @@ final class CandidatureController extends AbstractController
     }
 
     #[Route('/{id}', name: 'app_candidature_show', methods: ['GET'])]
-    public function show(Candidature $candidature, \App\Service\AiService $aiService): Response
+    public function show(Candidature $candidature): Response
     {
-        $matchingScore = $aiService->calculateMatchingScore(
-            (string)$candidature->getAppelOffre()->getTitre(),
-            (string)$candidature->getAppelOffre()->getDescription(),
-            (string)$candidature->getMessage()
-        );
-
         return $this->render('candidature/show.html.twig', [
             'candidature' => $candidature,
-            'matchingScore' => $matchingScore,
+            'matchingScore' => $candidature->getAiScore(),
+            'aiAnalysis' => $candidature->getAiAnalysis(),
         ]);
     }
 

@@ -14,6 +14,8 @@ use Symfony\Component\Security\Http\Authenticator\Passport\Badge\CsrfTokenBadge;
 use Symfony\Component\Security\Core\User\UserProviderInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Symfony\Component\Security\Core\Exception\CustomUserMessageAuthenticationException;
+use Doctrine\ORM\EntityManagerInterface;
+
 
 
 class LoginFormAuthenticator extends AbstractLoginFormAuthenticator
@@ -25,10 +27,12 @@ class LoginFormAuthenticator extends AbstractLoginFormAuthenticator
     public function __construct(
         private UrlGeneratorInterface $urlGenerator,
         private UserProviderInterface $userProvider,
-        private HttpClientInterface $httpClient
+        private HttpClientInterface $httpClient,
+        private EntityManagerInterface $entityManager
     )
     {
     }
+
 
     public function authenticate(Request $request): Passport
     {
@@ -74,9 +78,15 @@ class LoginFormAuthenticator extends AbstractLoginFormAuthenticator
 
     public function onAuthenticationSuccess(Request $request, $token, string $firewallName): RedirectResponse
     {
+        /** @var \App\Entity\User $user */
         $user = $token->getUser();
 
+        // 🔥 SESSION SECURITY: Save current session ID to invalidate others
+        $user->setCurrentSessionId($request->getSession()->getId());
+        $this->entityManager->flush();
+
         if (in_array('ROLE_ADMIN', $user->getRoles())) {
+
             return new RedirectResponse($this->urlGenerator->generate('app_admin'));
         }
 

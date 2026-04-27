@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import java.net.URL?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.example.finora.controllers.YoutubeSearchController"
+            styleClass="screen">
+    <stylesheets>
+        <URL value="@style.css" />
+    </stylesheets>
+
+    <top>
+        <VBox styleClass="card" spacing="10">
+            <padding><Insets top="16" right="18" bottom="16" left="18"/></padding>
+
+            <HBox alignment="CENTER_LEFT" spacing="10">
+                <Label text="YouTube Suggestions" styleClass="title"/>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Button text="✖ Fermer" styleClass="btn-ghost" onAction="#onClose"/>
+            </HBox>
+
+            <Label fx:id="lblLessonTitle" text="Leçon: ..." styleClass="subtitle"/>
+
+            <!-- Current linked video row -->
+            <HBox fx:id="currentVideoRow" alignment="CENTER_LEFT" spacing="10"
+                  visible="false" managed="false">
+                <Label fx:id="lblCurrentVideo" text="Vidéo actuelle: ..." styleClass="viewer-meta"/>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Button text="🗑 Supprimer le lien" styleClass="btn-ghost" onAction="#onRemoveVideo"/>
+            </HBox>
+
+            <!-- Search toolbar -->
+            <HBox spacing="10" alignment="CENTER_LEFT">
+                <TextField fx:id="txtQuery"
+                           promptText="Rechercher sur YouTube..."
+                           HBox.hgrow="ALWAYS"/>
+
+                <ComboBox fx:id="cmbSort" prefWidth="170"/>
+
+                <Button text="🔎 Rechercher" styleClass="btn-primary" onAction="#onSearch"/>
+            </HBox>
+
+            <!-- Loading / status line -->
+            <HBox spacing="10" alignment="CENTER_LEFT">
+                <ProgressIndicator fx:id="loader" prefWidth="18" prefHeight="18"
+                                   visible="false" managed="false"/>
+                <Label fx:id="lblStatus" text="" styleClass="viewer-meta"/>
+            </HBox>
+        </VBox>
+    </top>
+
+    <center>
+        <ScrollPane fitToWidth="true" styleClass="scroll">
+            <content>
+                <VBox fx:id="resultsBox" spacing="12">
+                    <padding><Insets top="16" right="18" bottom="18" left="18"/></padding>
+                </VBox>
+            </content>
+        </ScrollPane>
+    </center>
+
+</BorderPane>

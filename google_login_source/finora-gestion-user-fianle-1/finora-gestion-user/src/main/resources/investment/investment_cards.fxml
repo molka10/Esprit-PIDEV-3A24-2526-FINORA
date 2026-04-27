@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<ScrollPane fx:id="investmentRoot" fitToWidth="true" fitToHeight="true" xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.example.finora.controllers.investment.InvestmentCardsController"
+            stylesheets="@style.css"
+            styleClass="transparent-scroll, app-root">
+
+    <VBox spacing="0" alignment="TOP_CENTER">
+        <!-- ================= HEADER ================= -->
+        <VBox spacing="24" styleClass="header-section" alignment="TOP_CENTER">
+
+            <!-- Title + Dark Mode -->
+            <HBox alignment="CENTER_LEFT" spacing="20">
+
+                <VBox spacing="6">
+                    <Label text="Investment Portfolio"
+                           styleClass="title"/>
+                    <Label text="Manage and monitor your investments efficiently"
+                           styleClass="subtitle"/>
+                </VBox>
+
+                <Region HBox.hgrow="ALWAYS"/>
+
+                <ToggleButton text="🌙 Dark Mode"
+                              onAction="#toggleDarkMode"
+                              styleClass="btn-dark-toggle"
+                              prefHeight="38"
+                              prefWidth="140"/>
+            </HBox>
+
+            <!-- Dashboard KPI -->
+            <HBox spacing="24" alignment="CENTER">
+
+                <VBox styleClass="kpi-card">
+                    <Label text="Total Portfolio Value"
+                           styleClass="kpi-title"/>
+                    <Label fx:id="totalValueLabel"
+                           styleClass="kpi-value"/>
+                </VBox>
+
+                <VBox styleClass="kpi-card">
+                    <Label text="Total Investments"
+                           styleClass="kpi-title"/>
+                    <Label fx:id="totalCountLabel"
+                           styleClass="kpi-value"/>
+                </VBox>
+
+            </HBox>
+            <!-- ===== RECOMMENDATION SECTION ===== -->
+            <HBox spacing="24" alignment="CENTER">
+
+                <!-- INTERNAL -->
+                <VBox styleClass="kpi-card" prefWidth="350">
+                    <Label text="📊 Internal Recommendation"
+                           styleClass="kpi-title"/>
+                    <VBox fx:id="internalRecommendationBox"
+                          spacing="8"
+                          styleClass="kpi-value"/>
+                </VBox>
+
+                <!-- EXTERNAL -->
+                <VBox styleClass="kpi-card" prefWidth="350">
+                    <Label text="🌍 Market Recommendation"
+                           styleClass="kpi-title"/>
+                    <VBox fx:id="externalRecommendationBox"
+                          spacing="8"
+                          styleClass="kpi-value"/>
+                </VBox>
+
+            </HBox>
+            <Button text="🔄 Refresh Recommendations"
+                    onAction="#onRefreshRecommendations"
+                    styleClass="btn-refresh-rec"
+                    prefHeight="36"
+                    prefWidth="220"/>
+
+        </VBox>
+
+        <!-- ================= MAIN CONTENT ================= -->
+        <VBox spacing="28" styleClass="content-section" VBox.vgrow="ALWAYS" alignment="TOP_CENTER">
+
+            <!-- ===== TOOLBAR ===== -->
+            <HBox spacing="16" alignment="CENTER_LEFT">
+
+                <Button fx:id="addButton"
+                        text="＋ Add Investment"
+                        onAction="#onAdd"
+                        styleClass="btn-primary"
+                        prefWidth="170"
+                        prefHeight="40"/>
+
+                <Button text="⟳ Refresh"
+                        onAction="#onRefresh"
+                        styleClass="btn-secondary"
+                        prefWidth="120"
+                        prefHeight="40"/>
+
+                <Region HBox.hgrow="ALWAYS"/>
+
+                <Button text="Management"
+                        onAction="#goToManagement"
+                        styleClass="btn-management"
+                        prefWidth="140"
+                        prefHeight="40"/>
+
+            </HBox>
+
+            <!-- ===== SEARCH BAR ===== -->
+            <HBox spacing="18" alignment="CENTER_LEFT">
+
+                <HBox alignment="CENTER_LEFT"
+                      spacing="10"
+                      styleClass="search-container"
+                      HBox.hgrow="ALWAYS">
+
+                    <Label text="🔍"
+                           styleClass="search-icon"/>
+
+                    <TextField fx:id="searchField"
+                               promptText="Search investments by name..."
+                               styleClass="search-field"
+                               HBox.hgrow="ALWAYS"
+                               prefHeight="38"/>
+
+                </HBox>
+
+                <Button text="Search"
+                        onAction="#onSearch"
+                        styleClass="btn-primary"
+                        prefWidth="110"
+                        prefHeight="38"/>
+
+                <Button text="Clear"
+                        onAction="#onClearSearch"
+                        styleClass="btn-clear"
+                        prefWidth="100"
+                        prefHeight="38"/>
+
+                <ComboBox fx:id="riskFilter"
+                          promptText="Risk Level"
+                          onAction="#onFilterRisk"
+                          prefWidth="160"
+                          prefHeight="38"
+                          styleClass="risk-combo"/>
+
+            </HBox>
+
+            <!-- ===== CARDS AREA ===== -->
+            <FlowPane fx:id="cardsPane"
+                      hgap="24"
+                      vgap="24"
+                      prefWrapLength="1100"
+                      alignment="TOP_CENTER"
+                      styleClass="cards-container">
+
+                <padding>
+                    <Insets top="20"
+                            right="10"
+                            bottom="20"
+                            left="10"/>
+                </padding>
+
+            </FlowPane>
+
+        </VBox>
+    </VBox>
+
+</ScrollPane>

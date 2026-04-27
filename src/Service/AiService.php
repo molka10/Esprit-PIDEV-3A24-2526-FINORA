@@ -33,13 +33,14 @@ class AiService
     }
 
     /**
-     * Feature 1: Matching Score
-     * Uses AI to compare the candidate's message with the tender requirements.
+     * Feature 1: Advanced Matching Analysis
+     * Uses AI to analyze the candidate's profile against specific criteria.
+     * Returns an array with 'score' and 'analysis'.
      */
-    public function calculateMatchingScore(string $tenderTitle, string $tenderDescription, string $candidateMessage): int
+    public function analyzeCandidature(string $tenderTitle, string $tenderCriteria, string $candidateProfile): array
     {
         if (!$this->isKeyValid()) {
-            return 0;
+            return ['score' => 0, 'analysis' => 'Clé API non configurée.'];
         }
 
         try {
@@ -49,28 +50,32 @@ class AiService
                     'Authorization' => 'Bearer ' . $this->apiKey,
                     'Content-Type' => 'application/json',
                     'HTTP-Referer' => 'http://localhost:8000',
-                    'X-Title' => 'Gestion Appel Offre',
                 ],
                 'json' => [
                     'model' => $this->getModel(),
                     'messages' => [
-                        ['role' => 'system', 'content' => 'Tu es un expert RH. Évalue le matching. RÈGLE CRUCIALE : Si le candidat mentionne des mots techniques comme "PHP", "Symfony", "PFE", ou une motivation sérieuse, donne un score ÉLEVÉ (entre 75 et 95). Ne sois pas sévère. Réponds UNIQUEMENT par un nombre.'],
-                        ['role' => 'user', 'content' => "Offre: $tenderTitle\nDescription: $tenderDescription\n\nCandidat: $candidateMessage"]
+                        ['role' => 'system', 'content' => 'Tu es un expert en recrutement. Évalue la candidature par rapport aux critères fournis.
+                        Réponds UNIQUEMENT au format JSON suivant :
+                        {
+                            "score": <nombre entre 0 et 100>,
+                            "analysis": "<analyse détaillée en 2-3 phrases en français soulignant les points forts et faibles>"
+                        }'],
+                        ['role' => 'user', 'content' => "Appel d'offre: $tenderTitle\nCritères requis: $tenderCriteria\nProfil du candidat: $candidateProfile"]
                     ],
-                    'temperature' => 0.5,
+                    'temperature' => 0.4,
+                    'response_format' => ['type' => 'json_object']
                 ],
             ]);
 
             $data = $response->toArray();
-            $content = trim($data['choices'][0]['message']['content']);
+            $result = json_decode($data['choices'][0]['message']['content'], true);
 
-            if (preg_match('/\d+/', $content, $matches)) {
-                return (int)$matches[0];
-            }
-
-            return 15;
+            return [
+                'score' => (int)($result['score'] ?? 0),
+                'analysis' => $result['analysis'] ?? 'Analyse indisponible.',
+            ];
         } catch (\Exception $e) {
-            return 10;
+            return ['score' => 0, 'analysis' => 'Erreur lors de l\'analyse AI : ' . $e->getMessage()];
         }
     }
 
@@ -164,6 +169,40 @@ class AiService
             return ['min' => 0, 'max' => 0, 'error' => 'Format inattendu: ' . $content];
         } catch (\Exception $e) {
             return ['min' => 0, 'max' => 0, 'error' => $e->getMessage()];
+        }
+    }
+    /**
+     * Feature 4: Criteria Suggestion
+     * Uses AI to suggest selection criteria based on the offer details.
+     */
+    public function suggestCriteria(string $title, string $type, string $category): string
+    {
+        if (!$this->isKeyValid()) {
+            return "Veuillez configurer votre clé API.";
+        }
+
+        try {
+            $response = $this->httpClient->request('POST', $this->getUrl(), [
+                'verify_peer' => false,
+                'headers' => [
+                    'Authorization' => 'Bearer ' . $this->apiKey,
+                    'Content-Type' => 'application/json',
+                    'HTTP-Referer' => 'http://localhost:8000',
+                ],
+                'json' => [
+                    'model' => $this->getModel(),
+                    'messages' => [
+                        ['role' => 'system', 'content' => 'Tu es un expert en recrutement. Réponds UNIQUEMENT en Français. Suggère 3 à 5 critères de sélection précis pour cet appel d\'offre sous forme de liste courte séparée par des virgules. Ne fais pas de phrases complètes. Exemple: "Maîtrise de Java, Certification AWS, 2 ans d\'expérience"'],
+                        ['role' => 'user', 'content' => "Génère des critères pour l'offre suivante : \nTitre: $title\nType: $type\nCatégorie: $category"]
+                    ],
+                    'temperature' => 0.5,
+                ],
+            ]);
+
+            $data = $response->toArray();
+            return trim($data['choices'][0]['message']['content'], '"\' ');
+        } catch (\Exception $e) {
+            return "Erreur lors de la suggestion : " . $e->getMessage();
         }
     }
 }

@@ -54,6 +54,15 @@ class Candidature
     #[ORM\ManyToOne(inversedBy: 'candidatures')]
     private ?User $user = null;
 
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $cvPath = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?int $aiScore = null;
+
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    private ?string $aiAnalysis = null;
+
     #[ORM\PrePersist]
     public function setCreatedAtValue(): void
     {
@@ -75,4 +84,40 @@ class Candidature
     public function setAppelOffre(?AppelOffre $appelOffre): static { $this->appelOffre = $appelOffre; return $this; }
     public function getUser(): ?User { return $this->user; }
     public function setUser(?User $user): static { $this->user = $user; return $this; }
+
+    public function getCvPath(): ?string
+    {
+        return $this->cvPath;
+    }
+
+    public function setCvPath(?string $cvPath): static
+    {
+        $this->cvPath = $cvPath;
+
+        return $this;
+    }
+
+    public function getAiScore(): ?int
+    {
+        return $this->aiScore;
+    }
+
+    public function setAiScore(?int $aiScore): static
+    {
+        $this->aiScore = $aiScore;
+
+        return $this;
+    }
+
+    public function getAiAnalysis(): ?string
+    {
+        return $this->aiAnalysis;
+    }
+
+    public function setAiAnalysis(?string $aiAnalysis): static
+    {
+        $this->aiAnalysis = $aiAnalysis;
+
+        return $this;
+    }
 }

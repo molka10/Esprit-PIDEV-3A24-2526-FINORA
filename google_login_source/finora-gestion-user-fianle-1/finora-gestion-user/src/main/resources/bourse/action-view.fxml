@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane prefHeight="700.0" prefWidth="1200.0"
+            xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.example.finora.controllers.bourse.ActionController"
+            style="-fx-background-color: #ffffff;">
+
+    <!-- ===== TOP BAR ===== -->
+    <top>
+        <HBox alignment="CENTER_LEFT" spacing="14"
+              style="-fx-background-color: white; -fx-padding: 20 24; -fx-border-color: transparent transparent #e9ecef transparent; -fx-border-width: 0 0 1 0;">
+
+            <VBox spacing="2">
+                <Label text="Gestion des Actions"
+                       style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #1f2937;"/>
+                <Label text="Marchés Boursiers"
+                       style="-fx-font-size: 13px; -fx-text-fill: #6b7280;"/>
+            </VBox>
+
+            <Pane HBox.hgrow="ALWAYS"/>
+
+            <HBox spacing="10" alignment="CENTER_RIGHT">
+                <ComboBox fx:id="cbBourse"
+                          promptText="Filtrer par bourse"
+                          style="-fx-background-color: white; -fx-border-color: #e5e7eb; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 10 14; -fx-pref-width: 250;"/>
+
+                <TextField fx:id="searchField"
+                           promptText="Rechercher..."
+                           style="-fx-background-color: white; -fx-border-color: #e5e7eb; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 10 14; -fx-pref-width: 200;"/>
+
+                <Button text="🔍 Rechercher"
+                        onAction="#handleRechercher"
+                        style="-fx-background-color: #f3f4f6; -fx-text-fill: #4b5563; -fx-font-size: 13px; -fx-background-radius: 8; -fx-padding: 10 18; -fx-cursor: hand;"/>
+
+                <Button text="Actualiser"
+                        onAction="#handleActualiser"
+                        style="-fx-background-color: #f3f4f6; -fx-text-fill: #4b5563; -fx-font-size: 13px; -fx-background-radius: 8; -fx-padding: 10 18; -fx-cursor: hand;"/>
+
+                <Button text="📊 Actualiser Prix"
+                        onAction="#actualiserPrix"
+                        style="-fx-background-color: #10b981; -fx-text-fill: white; -fx-font-size: 13px; -fx-font-weight: bold; -fx-background-radius: 8; -fx-padding: 10 20; -fx-cursor: hand;"/>
+
+                <Button text="+ Nouvelle"
+                        onAction="#ouvrirDialogAjout"
+                        style="-fx-background-color: #10b981; -fx-text-fill: white; -fx-font-size: 13px; -fx-font-weight: bold; -fx-background-radius: 8; -fx-padding: 10 20; -fx-cursor: hand;"/>
+
+                <Button text="↩ Retour Bourses"
+                        onAction="#retourBourses"
+                        style="-fx-background-color: transparent; -fx-text-fill: #6b7280; -fx-font-size: 13px; -fx-border-color: #e5e7eb; -fx-border-radius: 8; -fx-background-radius: 8; -fx-border-width: 1; -fx-padding: 10 18; -fx-cursor: hand;"/>
+            </HBox>
+        </HBox>
+    </top>
+
+    <!-- ===== CENTER CONTENT ===== -->
+    <center>
+        <VBox spacing="14" style="-fx-padding: 24; -fx-background-color: #f8f9fa;">
+
+            <!-- Stats bar -->
+            <HBox spacing="14" alignment="CENTER_LEFT"
+                  style="-fx-padding: 16; -fx-background-color: white; -fx-background-radius: 12; -fx-border-color: #e5e7eb; -fx-border-radius: 12; -fx-border-width: 1;">
+
+                <Label fx:id="lblTotal"
+                       text="📊 Total : 0 action(s)"
+                       style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #1f2937;"/>
+
+                <Pane HBox.hgrow="ALWAYS"/>
+
+                <Label text="Données en temps réel"
+                       style="-fx-font-size: 12px; -fx-text-fill: #10b981;"/>
+            </HBox>
+
+            <!-- Liste des actions -->
+            <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS" hbarPolicy="NEVER"
+                        style="-fx-background-color: transparent; -fx-background: transparent;">
+                <content>
+                    <VBox fx:id="cardsContainer"
+                          spacing="0"
+                          style="-fx-background-color: white; -fx-background-radius: 12; -fx-border-color: #e5e7eb; -fx-border-radius: 12; -fx-border-width: 1;">
+                        <padding>
+                            <Insets top="0" right="0" bottom="0" left="0"/>
+                        </padding>
+                    </VBox>
+                </content>
+            </ScrollPane>
+
+        </VBox>
+    </center>
+
+</BorderPane>

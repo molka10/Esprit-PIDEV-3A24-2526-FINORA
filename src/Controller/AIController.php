@@ -19,7 +19,7 @@ class AIController extends AbstractController
         if (!$user) {
             return $this->redirectToRoute('app_login');
         }
-        $transactions = $repo->findBy(['userId' => $user->getId()]);
+        $transactions = $repo->findBy(['user' => $user->getId()]);
         
         $currentMonth = (int) date('m');
         $currentYear = (int) date('Y');
@@ -36,6 +36,11 @@ class AIController extends AbstractController
         $globalIncome = 0; $globalExpenses = 0;
 
         foreach ($transactions as $t) {
+            // CRITICAL FIX: Only analyze ACCEPTED transactions to match dashboard reality
+            if ($t->getStatus() !== 'ACCEPTED') {
+                continue;
+            }
+
             $date = $t->getDateTransaction();
             $m = (int) $date->format('m');
             $y = (int) $date->format('Y');
@@ -58,8 +63,18 @@ class AIController extends AbstractController
         $result = $ai->analyze($globalIncome, $globalExpenses);
         
         // Add monthly comparison data
-        $result['currentMonth'] = ['income' => $currIncome, 'expenses' => $currExpenses, 'balance' => $currIncome - $currExpenses];
-        $result['prevMonth'] = ['income' => $prevIncome, 'expenses' => $prevExpenses, 'balance' => $prevIncome - $prevExpenses];
+        $result['currentMonth'] = [
+            'income'   => round($currIncome, 2),
+            'expenses' => round($currExpenses, 2),
+            'balance'  => round($currIncome - $currExpenses, 2)
+        ];
+        $result['prevMonth'] = [
+            'income'   => round($prevIncome, 2),
+            'expenses' => round($prevExpenses, 2),
+            'balance'  => round($prevIncome - $prevExpenses, 2)
+        ];
+        $result['debugPrevMonth'] = $prevMonth;
+        $result['debugPrevYear']  = $prevYear;
 
         return $this->render('ai/analyse.html.twig', [
             'data' => $result

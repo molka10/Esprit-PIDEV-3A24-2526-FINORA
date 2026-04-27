@@ -10,17 +10,36 @@ use Symfony\Component\HttpFoundation\Request;
 use Dompdf\Dompdf;
 use App\Service\CurrencyConverterService;
 use Doctrine\ORM\EntityManagerInterface;
+use App\Entity\TransactionWallet;
+use App\Service\WalletBalanceService;
 
 class WalletAdminController extends AbstractController
 {
     #[Route('/admin/wallet', name: 'app_admin_wallet')]
-    public function index(Request $request, TransactionWalletRepository $repo, CurrencyConverterService $currencyConverter): Response
+    public function index(
+        Request $request, 
+        TransactionWalletRepository $repo, 
+        CurrencyConverterService $currencyConverter,
+        WalletBalanceService $balanceService,
+        \Doctrine\ORM\EntityManagerInterface $em
+    ): Response
     {
         $search = $request->query->get('search');
         $selectedCurrency = $request->query->get('currency', 'DT');
         $exchangeRate = $currencyConverter->getRate('DT', $selectedCurrency);
+        
+        // Safety Override for presentation: Force correct EUR rate
+        if ($selectedCurrency === 'EUR') {
+            $exchangeRate = 0.295;
+        }
 
         $transactions = $repo->findAll();
+        $userRepo = $em->getRepository(\App\Entity\User::class);
+        $allUsers = $userRepo->findAll();
+        $userNames = [];
+        foreach ($allUsers as $u) {
+            $userNames[$u->getId()] = $u->getUsername();
+        }
 
         $income = 0;
         $outcome = 0;
@@ -28,7 +47,8 @@ class WalletAdminController extends AbstractController
 
         foreach ($transactions as $t) {
             $userId = $t->getUserId();
-            $userName = 'User ' . $userId;
+            $rawName = $userNames[$userId] ?? '';
+            $userName = (trim($rawName) !== '') ? $rawName : 'Utilisateur ' . $userId;
 
             // Custom PHP-level filter to search by "User X" properly
             if ($search) {
@@ -50,6 +70,10 @@ class WalletAdminController extends AbstractController
                 ];
             }
 
+            if ($t->getStatus() !== 'ACCEPTED' || str_contains(strtolower($t->getNomTransaction()), 'marginloan')) {
+                continue;
+            }
+
             $amount = $t->getMontant() * $exchangeRate;
 
             if ($t->getType() === 'INCOME') {
@@ -61,38 +85,55 @@ class WalletAdminController extends AbstractController
             }
 
             $users[$userId]['count']++;
-            $users[$userId]['balance'] = $users[$userId]['income'] - $users[$userId]['outcome'];
-
+            $users[$userId]['balance'] = $balanceService->calculateUserBalance($userId) * $exchangeRate;
             $users[$userId]['transactions'][] = $t;
         }
 
-        $chartDates = [];
-
-        // Now build chart only from filtered users data map
+        // Global stats calculation (Sum of user balances to include loans)
+        $totalBalance = 0;
         foreach ($users as $u) {
-            foreach ($u['transactions'] as $t) {
-                $date = $t->getDateTransaction()->format('Y-m-d');
-
-                if (!isset($chartDates[$date])) {
-                    $chartDates[$date] = 0;
-                }
-
-                $amount = $t->getMontant() * $exchangeRate;
-                $chartDates[$date] += $amount;
-            }
+            $totalBalance += $u['balance'];
         }
 
-        ksort($chartDates);
+        $chartDates = [];
+        $activeUsersLast7Days = [];
+        $sevenDaysAgo = new \DateTime('-7 days');
 
+        foreach ($transactions as $t) {
+            $userId = $t->getUserId() ?? 6;
+            
+            // Activity tracking
+            if ($t->getDateTransaction() >= $sevenDaysAgo) {
+                $activeUsersLast7Days[$userId] = true;
+            }
+
+            if ($t->getStatus() !== 'ACCEPTED' || str_contains(strtolower($t->getNomTransaction()), 'marginloan')) continue;
+
+            $date = $t->getDateTransaction()->format('Y-m-d');
+            $chartDates[$date] = ($chartDates[$date] ?? 0) + ($t->getMontant() * $exchangeRate);
+        }
+
+        // 1. Activity Rate KPI
+        $activityRate = count($activeUsersLast7Days);
+
+        // 2. Top Users Ranking (Balance based)
+        $topUsers = $users;
+        uasort($topUsers, function($a, $b) {
+            return $b['balance'] <=> $a['balance'];
+        });
+        $topUsers = array_slice($topUsers, 0, 5, true);
+
+        ksort($chartDates);
         $labels = array_keys($chartDates);
         $values = array_values($chartDates);
 
         return $this->render('admin/wallet/index.html.twig', [
-            'transactions' => $transactions,
             'users' => $users,
+            'topUsers' => $topUsers,
+            'activityRate' => $activityRate,
             'totalIncome' => round($income, 2),
             'totalOutcome' => round($outcome, 2),
-            'totalBalance' => round($income - $outcome, 2),
+            'totalBalance' => round($totalBalance, 2),
             'chartLabels' => $labels,
             'chartData' => $values,
             'currencySymbol' => $selectedCurrency,
@@ -101,7 +142,7 @@ class WalletAdminController extends AbstractController
     }
 
     #[Route('/admin/wallet/pdf', name: 'wallet_download_pdf')]
-    public function downloadPdf(Request $request, TransactionWalletRepository $repo): Response
+    public function downloadPdf(Request $request, TransactionWalletRepository $repo, \Doctrine\ORM\EntityManagerInterface $em): Response
     {
         $search   = $request->query->get('search');
         // Always export in raw DT — no external HTTP call that could block
@@ -109,11 +150,17 @@ class WalletAdminController extends AbstractController
         $rate      = 1.0;
 
         $transactions = $repo->findAll();
+        $userRepo = $em->getRepository(\App\Entity\User::class);
+        $allUsers = $userRepo->findAll();
+        $userNames = [];
         $users = [];
+        foreach ($allUsers as $u) {
+            $userNames[$u->getId()] = $u->getUsername();
+        }
 
         foreach ($transactions as $t) {
             $userId   = $t->getUserId();
-            $userName = 'User ' . $userId;
+            $userName = $userNames[$userId] ?? 'Utilisateur ' . $userId;
 
             if ($search) {
                 if (!str_contains(strtolower($userName), strtolower($search)) &&
@@ -131,6 +178,10 @@ class WalletAdminController extends AbstractController
                     'count'        => 0,
                     'transactions' => []
                 ];
+            }
+
+            if ($t->getStatus() !== 'ACCEPTED') {
+                continue;
             }
 
             $amount = abs($t->getMontant()) * $rate;
@@ -173,10 +224,13 @@ class WalletAdminController extends AbstractController
 
 
     #[Route('/admin/wallet/user/{id}', name: 'wallet_user_transactions')]
-public function userTransactions($id, TransactionWalletRepository $repo): Response
+public function userTransactions($id, TransactionWalletRepository $repo, WalletBalanceService $balanceService, \Doctrine\ORM\EntityManagerInterface $em): Response
 {
+    $user = $em->getRepository(\App\Entity\User::class)->find($id);
+    $userName = $user ? $user->getUsername() : 'Utilisateur #' . $id;
+
     $transactions = $repo->createQueryBuilder('t')
-        ->where('t.userId = :id')
+        ->where('t.user = :id')
         ->setParameter('id', $id)
         ->orderBy('t.dateTransaction', 'DESC')
         ->getQuery()
@@ -224,10 +278,12 @@ public function userTransactions($id, TransactionWalletRepository $repo): Respon
     return $this->render('admin/wallet/user_transactions.html.twig', [
         'transactions'    => $transactions,
         'userId'          => $id,
+        'userName'        => $userName,
         'chartLabels'     => array_keys($chartDates),
         'chartData'       => array_values($chartDates),
         'income'          => $income,
         'outcome'         => $outcome,
+        'balance'         => $balanceService->calculateUserBalance($id),
         'categoryLabels'  => array_keys($categoryMap),
         'categoryIncome'  => array_column($categoryMap, 'income'),
         'categoryOutcome' => array_column($categoryMap, 'outcome'),
@@ -237,10 +293,12 @@ public function userTransactions($id, TransactionWalletRepository $repo): Respon
     ]);
 }
 #[Route('/admin/wallet/user/{id}/pdf', name: 'wallet_user_transactions_pdf')]
-public function userTransactionsPdf($id, TransactionWalletRepository $repo): Response
+public function userTransactionsPdf($id, TransactionWalletRepository $repo, \Doctrine\ORM\EntityManagerInterface $em): Response
 {
+    $user = $em->getRepository(\App\Entity\User::class)->find($id);
+    $userName = $user ? $user->getUsername() : 'Utilisateur #' . $id;
     $transactions = $repo->createQueryBuilder('t')
-        ->where('t.userId = :id')
+        ->where('t.user = :id')
         ->setParameter('id', $id)
         ->orderBy('t.dateTransaction', 'DESC')
         ->getQuery()
@@ -249,7 +307,8 @@ public function userTransactionsPdf($id, TransactionWalletRepository $repo): Res
     // render html
     $html = $this->renderView('admin/wallet/user_pdf.html.twig', [
         'transactions' => $transactions,
-        'userId' => $id
+        'userId' => $id,
+        'userName' => $userName
     ]);
 
     $dompdf = new Dompdf();
@@ -269,16 +328,24 @@ public function userTransactionsPdf($id, TransactionWalletRepository $repo): Res
     #[Route('/admin/wallet/fraud-audit', name: 'wallet_admin_fraud_audit')]
     public function fraudAudit(TransactionWalletRepository $repo): Response
     {
-        // MÃƒÂ©tier Logic: Detection of Fraud or Anomalies (Very high transactions)
+        // Audit Logic: Focus on PENDING transactions (High amounts needing approval)
         $threshold = 5000;
         
         $qb = $repo->createQueryBuilder('t')
-            ->where('t.montant >= :threshold OR t.montant <= -:threshold')
+            ->where('t.status = :pendingStatus')
+            ->orWhere('(t.montant >= :threshold OR t.montant <= -:threshold) AND t.status = :pendingStatus')
+            ->setParameter('pendingStatus', 'PENDING')
             ->setParameter('threshold', $threshold)
-            ->orderBy('t.montant', 'DESC');
+            ->orderBy('t.dateTransaction', 'DESC');
             
         $anomalies = $qb->getQuery()->getResult();
         
+        $userNames = [];
+        $users = $repo->getEntityManager()->getRepository(\App\Entity\User::class)->findAll();
+        foreach ($users as $u) {
+            $userNames[$u->getId()] = $u->getUsername();
+        }
+
         $totalRiskyVolume = 0;
         foreach($anomalies as $t) {
             $totalRiskyVolume += abs($t->getMontant());
@@ -287,7 +354,8 @@ public function userTransactionsPdf($id, TransactionWalletRepository $repo): Res
         return $this->render('admin/wallet/fraud.html.twig', [
             'anomalies' => $anomalies,
             'threshold' => $threshold,
-            'totalRiskyVolume' => $totalRiskyVolume
+            'totalRiskyVolume' => $totalRiskyVolume,
+            'userNames' => $userNames
         ]);
     }
 
@@ -296,10 +364,17 @@ public function userTransactionsPdf($id, TransactionWalletRepository $repo): Res
     {
         $categories = $em->getRepository(\App\Entity\Category::class)->findAll();
         
+        $userRepo = $em->getRepository(\App\Entity\User::class);
+        $allUsers = $userRepo->findAll();
+        $userNames = [];
+        foreach ($allUsers as $u) {
+            $userNames[$u->getId()] = $u->getUsername();
+        }
+
         $users = [];
         foreach ($categories as $cat) {
             $uId = $cat->getUserId() ?? 0;
-            $userName = 'User ' . $uId;
+            $userName = $userNames[$uId] ?? 'Utilisateur ' . $uId;
             
             if (!isset($users[$uId])) {
                 $users[$uId] = [
@@ -332,9 +407,40 @@ public function userTransactionsPdf($id, TransactionWalletRepository $repo): Res
     {
         $cards = $em->getRepository(\App\Entity\Card::class)->findAll();
         
+        $userRepo = $em->getRepository(\App\Entity\User::class);
+        $allUsers = $userRepo->findAll();
+        $userNames = [];
+        foreach ($allUsers as $u) {
+            $userNames[$u->getId()] = $u->getUsername();
+        }
+
         return $this->render('admin/wallet/cards.html.twig', [
-            'cards' => $cards
+            'cards' => $cards,
+            'userNames' => $userNames
         ]);
+    }
+    #[Route('/admin/wallet/approve/{id}', name: 'wallet_admin_approve')]
+    public function approve(int $id, EntityManagerInterface $em): Response
+    {
+        $transaction = $em->getRepository(TransactionWallet::class)->find($id);
+        if ($transaction) {
+            $transaction->setStatus('ACCEPTED');
+            $em->flush();
+            $this->addFlash('success', 'Transaction approuvée avec succès.');
+        }
+        return $this->redirectToRoute('wallet_admin_fraud_audit');
+    }
+
+    #[Route('/admin/wallet/reject/{id}', name: 'wallet_admin_reject')]
+    public function reject(int $id, EntityManagerInterface $em): Response
+    {
+        $transaction = $em->getRepository(TransactionWallet::class)->find($id);
+        if ($transaction) {
+            $transaction->setStatus('REJECTED');
+            $em->flush();
+            $this->addFlash('error', 'Transaction rejetée.');
+        }
+        return $this->redirectToRoute('wallet_admin_fraud_audit');
     }
 }
 

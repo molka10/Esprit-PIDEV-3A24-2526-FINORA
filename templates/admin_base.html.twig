@@ -1,15 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
 
-<!-- Mirrored from eduport.webestica.com/admin-dashboard.html by HTTrack Website Copier/3.x [XR&CO'2014], Tue, 07 Nov 2023 13:15:29 GMT -->
+
 <head>
-	<title>{% block title %}Eduport{% endblock %}</title>
+	<title>{% block title %}Finora{% endblock %}</title>
 
 	<!-- Meta Tags -->
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 	<meta name="author" content="Webestica.com">
-	<meta name="description" content="Eduport- LMS, Education and Course Theme">
+	<meta name="description" content="Finora - Gestion Financière & Investissement">
 
 	<!-- Dark mode -->
 	<script>
@@ -88,6 +88,104 @@
 	<!-- Theme CSS -->
 	<link rel="stylesheet" type="text/css" href="{{ asset('assets/css/style.css') }}">
 
+    <style>
+        :root {
+            --finora-purple: #7c3aed;
+            --finora-dark: #1e1b4b;
+            --finora-gradient: linear-gradient(135deg, #7c3aed 0%, #3b1278 100%);
+            --finora-bg: #f8fafc;
+            --sidebar-bg: #111827; /* Darker for admin contrast */
+        }
+
+        /* Constrain containers on ultra-wide screens */
+        @media (min-width: 1400px) {
+            .container {
+                max-width: 1240px !important;
+            }
+            .container-fluid {
+                max-width: 1600px !important;
+                margin-left: auto !important;
+                margin-right: auto !important;
+            }
+        }
+
+        body {
+            background-color: var(--finora-bg);
+            font-family: 'Inter', 'Heebo', sans-serif;
+        }
+
+        .admin-purple-title { color: var(--finora-purple) !important; font-weight: 800; }
+        .admin-main-btn { 
+            background: var(--finora-gradient); 
+            color: #fff; 
+            border: none; 
+            border-radius: 12px; 
+            font-weight: 700;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(124, 58, 237, 0.2);
+        }
+        .admin-main-btn:hover { 
+            background: linear-gradient(135deg, #6d28d9 0%, #2e1065 100%); 
+            color: #fff; 
+            transform: translateY(-2px);
+            box-shadow: 0 6px 18px rgba(124, 58, 237, 0.3);
+        }
+
+        /* Sidebar Customization */
+        .navbar.sidebar {
+            background: var(--sidebar-bg) !important;
+            border-right: 1px solid rgba(255,255,255,0.05);
+        }
+        .sidebar-content .nav-link {
+            border-radius: 10px;
+            margin: 2px 10px;
+            padding: 10px 15px !important;
+            transition: all 0.2s ease;
+            color: rgba(255,255,255,0.7) !important;
+        }
+        .sidebar-content .nav-link:hover {
+            background: rgba(124, 58, 237, 0.1);
+            color: #fff !important;
+            transform: translateX(5px);
+        }
+        .sidebar-content .nav-link.active {
+            background: var(--finora-gradient) !important;
+            color: #fff !important;
+            box-shadow: 0 4px 15px rgba(124, 58, 237, 0.3);
+        }
+        .sidebar-content .nav-link i {
+            color: var(--finora-purple);
+            font-size: 1.1rem;
+        }
+        .sidebar-content .nav-link.active i {
+            color: #fff;
+        }
+
+        .page-content-wrapper {
+            border-radius: 20px;
+            overflow: hidden;
+            background: #fff;
+            box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.05);
+            margin: 20px;
+            border: none !important;
+        }
+
+        /* Top Bar */
+        .top-bar {
+            background: rgba(255, 255, 255, 0.8) !important;
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(0,0,0,0.05) !important;
+        }
+
+        .navbar-brand-item {
+            transition: transform 0.3s ease;
+        }
+        .navbar-brand:hover .navbar-brand-item {
+            transform: scale(1.05);
+        }
+
+    </style>
+
 
 	{% block stylesheets %}{% endblock %}
 </head>
@@ -104,7 +202,9 @@
 	<!-- Navbar brand for xl START -->
 	<div class="d-flex align-items-center">
 		<a class="navbar-brand" href="{{ path('app_dashboard', {'role': 'admin'}) }}">
-			<img class="navbar-brand-item" src="{{ asset('assets/images/logo-light.svg') }}" alt="">
+            <div class="bg-white p-2 rounded-3 d-inline-block shadow-sm">
+			    <img class="navbar-brand-item" src="{{ asset('assets/images/logo-finora.webp') }}" alt="Finora" style="height: 35px;">
+            </div>
 		</a>
 	</div>
 	<!-- Navbar brand for xl END -->
@@ -123,6 +223,7 @@
                 <li class="nav-item"><a class="nav-link" href="{{ path('app_appel_offre_index', {'role': 'admin'}) }}"><i class="bi bi-file-earmark-text fa-fw me-2"></i>Appels d'Offre</a></li>
                 <li class="nav-item"><a class="nav-link" href="{{ path('app_candidature_index', {'role': 'admin'}) }}"><i class="bi bi-people fa-fw me-2"></i>Candidatures</a></li>
                 <li class="nav-item"><a class="nav-link" href="{{ path('app_categorie_index', {'role': 'admin'}) }}"><i class="bi bi-tags fa-fw me-2"></i>Catégories</a></li>
+                <li class="nav-item"><a class="nav-link" href="{{ path('app_management_index') }}"><i class="bi bi-tasks fa-fw me-2"></i>Suivi Management</a></li>
                 <li class="nav-item"><a class="nav-link" href="{{ path('admin_user_index') }}"><i class="bi bi-person-gear fa-fw me-2"></i>Utilisateurs</a></li>
             </ul>
 			<!-- Sidebar menu end -->
@@ -300,5 +401,5 @@
 {% block javascripts %}{% endblock %}
 </body>
 
-<!-- Mirrored from eduport.webestica.com/admin-dashboard.html by HTTrack Website Copier/3.x [XR&CO'2014], Tue, 07 Nov 2023 13:15:39 GMT -->
+
 </html>

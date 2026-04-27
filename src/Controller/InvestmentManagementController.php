@@ -177,7 +177,7 @@ class InvestmentManagementController extends AbstractController
                     $category->setNom($categoryName);
                     $category->setType('OUTCOME');
                     $category->setPriorite('HAUTE');
-                    $category->setUserId($user->getId());
+                    $category->setUser($user);
                     $em->persist($category);
                     $em->flush();
                 }
@@ -187,7 +187,7 @@ class InvestmentManagementController extends AbstractController
                 $walletTx->setType('OUTCOME');
                 $walletTx->setDateTransaction(new \DateTime());
                 $walletTx->setCategory($category);
-                $walletTx->setUserId($user->getId());
+                $walletTx->setUser($user);
                 
                 $investmentName = $item->getInvestment() ? $item->getInvestment()->getName() : 'Projet (' . $item->getInvestmentType() . ')';
                 $walletTx->setNomTransaction('Investissement: ' . $investmentName);

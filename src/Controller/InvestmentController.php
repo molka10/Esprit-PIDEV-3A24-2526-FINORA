@@ -59,6 +59,9 @@ class InvestmentController extends AbstractController
     #[Route('/ai/chat', name: 'app_investment_ai_chat', methods: ['POST'])]
     public function aiChat(Request $request, \App\Service\AiAssistantService $aiService): \Symfony\Component\HttpFoundation\JsonResponse
     {
+        // Increase time limit for slow AI APIs (Groq/Gemini)
+        set_time_limit(120);
+        
         $data = json_decode($request->getContent(), true);
         $message = $data['message'] ?? '';
         $language = $data['language'] ?? 'fr';
@@ -85,6 +88,65 @@ class InvestmentController extends AbstractController
         return $this->render('investment/external_show.html.twig', [
             'project' => $project,
         ]);
+    }
+
+    /**
+     * 📄 Export External Project Factsheet PDF
+     */
+    #[Route('/external/{id}/factsheet', name: 'app_investment_external_factsheet', methods: ['GET'])]
+    public function exportExternalFactsheet(int $id): Response
+    {
+        $projectData = $this->recommendationsBuilder->findExternalById($id);
+        if (!$projectData) {
+            throw $this->createNotFoundException('Projet partenaire introuvable.');
+        }
+
+        // Create a temporary Investment object for the template compatibility
+        $investment = new Investment();
+        $investment->setName($projectData['name']);
+        $investment->setCategory($projectData['category']);
+        $investment->setLocation($projectData['location']);
+        $investment->setEstimatedValue((float)$projectData['estimated_value']);
+        $investment->setRiskLevel($projectData['risk_level']);
+        $investment->setDescription("Opportunité partenaire certifiée. Origine: " . $projectData['published_by']);
+        $investment->setStatus('ACTIVE');
+
+        $stats = [
+            'fundingGoal' => $projectData['estimated_value'],
+            'fundingCurrent' => 0,
+            'fundingPercentage' => 0,
+            'totalInvested' => $projectData['estimated_value'],
+        ];
+
+        // Generate QR code pointing back to the real site detail page
+        $appUrl = $_ENV['APP_URL'] ?? null;
+        if ($appUrl && !str_contains($appUrl, 'localhost')) {
+            $publicUrl = rtrim($appUrl, '/') . $this->generateUrl('app_investment_external_show', ['id' => $id]);
+        } else {
+            $publicUrl = $this->generateUrl('app_investment_external_show', ['id' => $id], \Symfony\Component\Routing\Generator\UrlGeneratorInterface::ABSOLUTE_URL);
+        }
+        
+        $qrCodeUrl = sprintf('https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=%s&format=png', urlencode($publicUrl));
+
+        // Get Base64 of QR Code (Now working thanks to GD)
+        $qrCodeBase64 = null;
+        try {
+            $qrData = @file_get_contents($qrCodeUrl);
+            if ($qrData) {
+                $qrCodeBase64 = 'data:image/png;base64,' . base64_encode($qrData);
+            }
+        } catch (\Exception $e) {}
+
+        $html = $this->renderView('investment_management/portfolio_pdf.html.twig', [
+            'items' => [],
+            'investment' => $investment,
+            'user'  => $this->getUser(),
+            'stats' => $stats,
+            'qrCodeUrl' => $qrCodeBase64,
+            'title' => 'Fiche Partenaire - ' . $investment->getName()
+        ]);
+
+        return $this->generatePdfResponse($html, 'Finora_Partner_Factsheet_' . $id . '.pdf');
     }
 
     /**
@@ -122,8 +184,16 @@ class InvestmentController extends AbstractController
      * Browsing all investment opportunities (Public to Investors/Entreprises)
      */
     #[Route('', name: 'app_investment_index', methods: ['GET'])]
-    public function index(Request $request, InvestmentRepository $investmentRepository, PaginatorInterface $paginator): Response
+    public function index(
+        Request $request, 
+        InvestmentRepository $investmentRepository, 
+        PaginatorInterface $paginator,
+        \App\Service\SmartLearningService $smartLearningService
+    ): Response
     {
+        $user = $this->getUser();
+        $recommendations = $user ? $smartLearningService->getRecommendations($user) : [];
+
         $search = $request->query->get('search');
         $category = $request->query->all()['category'] ?? null;
         $risk = $request->query->get('risk');
@@ -146,6 +216,7 @@ class InvestmentController extends AbstractController
 
         return $this->render('investment/index.html.twig', [
             'investments' => $investments,
+            'recommendations' => $recommendations
         ]);
     }
 
@@ -230,6 +301,10 @@ class InvestmentController extends AbstractController
     #[Route('/{id}/factsheet', name: 'app_investment_export_factsheet', methods: ['GET'])]
     public function exportFactsheet(Investment $investment): Response
     {
+        if ($investment->getStatus() !== 'ACTIVE' && !$this->isGranted('ROLE_ADMIN')) {
+            throw $this->createAccessDeniedException('Cet investissement n\'est pas encore public.');
+        }
+
         $stats = [
             'fundingGoal' => $investment->getFundingGoal(),
             'fundingCurrent' => $investment->getFundingCurrent(),
@@ -237,11 +312,30 @@ class InvestmentController extends AbstractController
             'totalInvested' => $investment->getEstimatedValue(), // Use total as primary metric
         ];
 
+        $appUrl = $_ENV['APP_URL'] ?? null;
+        if ($appUrl && !str_contains($appUrl, 'localhost')) {
+            $publicUrl = rtrim($appUrl, '/') . $this->generateUrl('app_investment_show', ['id' => $investment->getId()]);
+        } else {
+            $publicUrl = $this->generateUrl('app_investment_show', ['id' => $investment->getId()], \Symfony\Component\Routing\Generator\UrlGeneratorInterface::ABSOLUTE_URL);
+        }
+        
+        $qrCodeUrl = sprintf('https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=%s&format=png', urlencode($publicUrl));
+
+        // Get Base64 of QR Code
+        $qrCodeBase64 = null;
+        try {
+            $qrData = @file_get_contents($qrCodeUrl);
+            if ($qrData) {
+                $qrCodeBase64 = 'data:image/png;base64,' . base64_encode($qrData);
+            }
+        } catch (\Exception $e) {}
+
         $html = $this->renderView('investment_management/portfolio_pdf.html.twig', [
-            'items' => [], // Empty for factsheet mode, or I could pass something else
-            'investment' => $investment, // Pass the project directly
+            'items' => [], // Empty for factsheet mode
+            'investment' => $investment,
             'user'  => $this->getUser(),
             'stats' => $stats,
+            'qrCodeUrl' => $qrCodeBase64,
             'title' => 'Fiche Signature - ' . $investment->getName()
         ]);
 
