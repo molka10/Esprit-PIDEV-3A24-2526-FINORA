@@ -34,7 +34,7 @@ class MarketController extends AbstractController
         $user         = $this->getUser();
         $walletBalance = $user ? $this->walletBalanceService->calculateUserBalance($user->getId()) : 0.0;
 
-        $news = $em->getRepository(\App\Entity\ActionNews::class)->findBy([], ['dateAjout' => 'DESC'], 5);
+        $news = $em->getRepository(\App\Entity\ActionNews::class)->findRecentWithAction(5);
         $globalNews = $financialNewsService->getLatestGlobalNews(4);
 
         $topTraders = [
@@ -47,7 +47,7 @@ class MarketController extends AbstractController
         $recommendations = $user ? $smartLearningService->getRecommendations($user) : [];
 
         return $this->render('market/index.html.twig', [
-            'actions'       => $repo->findAll(),
+            'actions'       => $repo->findAllWithBourse(),
             'type'          => null,
             'walletBalance' => round($walletBalance, 2),
             'latest_news'   => $news,
@@ -118,14 +118,14 @@ class MarketController extends AbstractController
         $montant = (float) $request->request->get('montant_marge', 500);
 
         // Security check
-        $activeLoans = $em->getRepository(\App\Entity\MarginLoan::class)->findBy(['userId' => $user->getId(), 'statut' => 'ACTIF']);
+        $activeLoans = $em->getRepository(\App\Entity\MarginLoan::class)->findBy(['user' => $user, 'statut' => 'ACTIF']);
         if (count($activeLoans) > 0) {
             $this->addFlash('warning', 'Vous avez déjà un emprunt sur marge actif. Remboursez-le (ou revendez vos actifs) pour l\'instant.');
             return $this->redirectToRoute('app_market');
         }
 
         $loan = new \App\Entity\MarginLoan();
-        $loan->setUserId($user->getId());
+        $loan->setUser($user);
         $loan->setMontantEmprunte($montant);
 
         $em->persist($loan);
@@ -219,7 +219,7 @@ class MarketController extends AbstractController
         $limit = 10;
 
         $qb = $repo->createQueryBuilder('t')
-            ->leftJoin('t.action', 'a')
+            ->innerJoin('t.action', 'a')
             ->addSelect('a')
             ->where('t.user = :user')
             ->setParameter('user', $user)

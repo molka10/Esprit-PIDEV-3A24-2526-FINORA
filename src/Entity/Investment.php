@@ -17,32 +17,32 @@ class Investment
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column(name: 'investment_id', type: 'integer')]
-    private ?int $investmentId = null;
+    #[ORM\Column(name: 'investment_id')]
+    private ?int $id = null;
 
     #[ORM\Column(type: 'string', length: 255)]
     #[Assert\NotBlank(message: 'Le nom est obligatoire')]
     #[Assert\Length(min: 3, max: 255, minMessage: 'Minimum 3 caractères')]
-    private ?string $name = null;
+    private string $name;
 
     #[ORM\Column(type: 'string', length: 50)]
     #[Assert\NotBlank(message: 'La catégorie est obligatoire')]
     #[Assert\Choice(callback: [InvestmentCategory::class, 'values'], message: 'Choisissez : maison, startup, hôtel ou terrain.')]
-    private ?string $category = null;
+    private string $category;
 
     #[ORM\Column(type: 'string', length: 255)]
     #[Assert\NotBlank(message: 'La localisation est obligatoire')]
-    private ?string $location = null;
+    private string $location;
 
     #[ORM\Column(name: 'estimated_value', type: 'decimal', precision: 10, scale: 2)]
     #[Assert\NotBlank(message: 'La valeur est obligatoire')]
     #[Assert\Positive(message: 'La valeur doit être positive')]
-    private ?string $estimatedValue = null;
+    private string $estimatedValue;
 
     #[ORM\Column(name: 'risk_level', type: 'string', length: 50)]
     #[Assert\NotBlank(message: 'Le niveau de risque est obligatoire')]
     #[Assert\Choice(choices: ['LOW', 'MEDIUM', 'HIGH'], message: 'Choix invalide')]
-    private ?string $riskLevel = null;
+    private string $riskLevel;
 
     #[ORM\Column(name: 'image_url', type: 'string', length: 255, nullable: true)]
     #[Assert\Length(max: 255)]
@@ -55,10 +55,10 @@ class Investment
     #[ORM\Column(name: 'status', type: 'string', length: 50)]
     #[Assert\NotBlank(message: 'Le statut est obligatoire')]
     #[Assert\Choice(choices: ['PENDING', 'ACTIVE', 'REJECTED', 'INACTIVE', 'CLOSED'], message: 'Statut invalide')]
-    private ?string $status = 'PENDING';
+    private string $status = 'PENDING';
 
-    #[ORM\Column(name: 'created_at', type: 'datetime')]
-    private ?\DateTimeInterface $createdAt = null;
+    #[ORM\Column(name: 'created_at', type: 'datetime_immutable')]
+    private \DateTimeImmutable $createdAt;
 
     #[ORM\Column(type: 'json', nullable: true)]
     private ?array $commentsJson = [];
@@ -69,7 +69,7 @@ class Investment
     private ?User $user = null;
 
     /** @var Collection<int, InvestmentManagement> */
-    #[ORM\OneToMany(targetEntity: InvestmentManagement::class, mappedBy: 'investment', orphanRemoval: true)]
+    #[ORM\OneToMany(targetEntity: InvestmentManagement::class, mappedBy: 'investment', cascade: ['persist', 'remove'], orphanRemoval: true)]
     private Collection $managements;
 
     public function __construct()
@@ -80,8 +80,8 @@ class Investment
     #[ORM\PrePersist]
     public function setCreatedAtValue(): void
     {
-        if (!$this->createdAt) {
-            $this->createdAt = new \DateTime();
+        if (!isset($this->createdAt)) {
+            $this->createdAt = new \DateTimeImmutable();
         }
     }
 
@@ -92,121 +92,36 @@ class Investment
 
     public function getId(): ?int
     {
-        return $this->investmentId;
+        return $this->id;
     }
 
     public function getInvestmentId(): ?int
     {
-        return $this->investmentId;
+        return $this->id;
     }
 
-    public function getName(): ?string
-    {
-        return $this->name;
-    }
+    public function getName(): string { return $this->name; }
+    public function setName(string $name): self { $this->name = $name; return $this; }
+    public function getCategory(): string { return $this->category; }
+    public function setCategory(string $category): self { $this->category = $category; return $this; }
+    public function getLocation(): string { return $this->location; }
+    public function setLocation(string $location): self { $this->location = $location; return $this; }
+    public function getEstimatedValue(): string { return $this->estimatedValue; }
+    public function setEstimatedValue(string $value): self { $this->estimatedValue = $value; return $this; }
+    public function getRiskLevel(): string { return $this->riskLevel; }
+    public function setRiskLevel(string $risk): self { $this->riskLevel = $risk; return $this; }
+    public function getStatus(): string { return $this->status; }
+    public function setStatus(string $status): self { $this->status = $status; return $this; }
+    public function getCreatedAt(): \DateTimeImmutable { return $this->createdAt; }
+    public function setCreatedAt(\DateTimeImmutable $date): self { $this->createdAt = $date; return $this; }
 
-    public function setName(?string $name): self
-    {
-        $this->name = $name;
+    public function getImageUrl(): ?string { return $this->imageUrl; }
+    public function setImageUrl(?string $imageUrl): self { $this->imageUrl = $imageUrl; return $this; }
 
-        return $this;
-    }
+    public function getDescription(): ?string { return $this->description; }
+    public function setDescription(?string $description): self { $this->description = $description; return $this; }
 
-    public function getCategory(): ?string
-    {
-        return $this->category;
-    }
-
-    public function setCategory(?string $category): self
-    {
-        $this->category = $category;
-
-        return $this;
-    }
-
-    public function getLocation(): ?string
-    {
-        return $this->location;
-    }
-
-    public function setLocation(?string $location): self
-    {
-        $this->location = $location;
-
-        return $this;
-    }
-
-    public function getEstimatedValue(): ?string
-    {
-        return $this->estimatedValue;
-    }
-
-    public function setEstimatedValue(?string $value): self
-    {
-        $this->estimatedValue = $value;
-
-        return $this;
-    }
-
-    public function getRiskLevel(): ?string
-    {
-        return $this->riskLevel;
-    }
-
-    public function setRiskLevel(?string $risk): self
-    {
-        $this->riskLevel = $risk;
-
-        return $this;
-    }
-
-    public function getImageUrl(): ?string
-    {
-        return $this->imageUrl;
-    }
-
-    public function setImageUrl(?string $imageUrl): self
-    {
-        $this->imageUrl = $imageUrl;
-
-        return $this;
-    }
-
-    public function getDescription(): ?string
-    {
-        return $this->description;
-    }
-
-    public function setDescription(?string $desc): self
-    {
-        $this->description = $desc;
-
-        return $this;
-    }
-
-    public function getStatus(): ?string
-    {
-        return $this->status;
-    }
-
-    public function setStatus(?string $status): self
-    {
-        $this->status = $status;
-
-        return $this;
-    }
-
-    public function getCreatedAt(): ?\DateTimeInterface
-    {
-        return $this->createdAt;
-    }
-
-    public function setCreatedAt(\DateTimeInterface $date): self
-    {
-        $this->createdAt = $date;
-
-        return $this;
-    }
+    public function getUserId(): ?int { return $this->user ? $this->user->getId() : null; }
 
     public function getUser(): ?User
     {

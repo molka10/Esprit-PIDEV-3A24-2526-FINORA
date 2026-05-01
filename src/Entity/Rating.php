@@ -22,14 +22,14 @@ class Rating
         max: 5,
         notInRangeMessage: 'La note doit être entre {{ min }} et {{ max }}'
     )]
-    private ?int $note = null;
+    private int $note;
 
-    #[ORM\Column]
-    private ?\DateTime $createdAt = null;
+    #[ORM\Column(name: "created_at", type: "datetime_immutable")]
+    private \DateTimeImmutable $createdAt;
 
     #[ORM\ManyToOne(inversedBy: 'ratings')]
-    #[ORM\JoinColumn(nullable: false)]
-    private ?AppelOffre $appelOffre = null;
+    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
+    private AppelOffre $appelOffre;
 
     #[ORM\ManyToOne(inversedBy: 'ratings')]
     private ?User $user = null;
@@ -43,12 +43,13 @@ class Rating
     }
 
     public function getId(): ?int { return $this->id; }
-    public function getNote(): ?int { return $this->note; }
-    public function setNote(int $note): static { $this->note = $note; return $this; }
-    public function getCreatedAt(): ?\DateTime { return $this->createdAt; }
-    public function setCreatedAt(\DateTime $createdAt): static { $this->createdAt = $createdAt; return $this; }
-    public function getAppelOffre(): ?AppelOffre { return $this->appelOffre; }
-    public function setAppelOffre(?AppelOffre $appelOffre): static { $this->appelOffre = $appelOffre; return $this; }
+    public function getNote(): int { return $this->note; }
+    public function setNote(int $note): self { $this->note = $note; return $this; }
+    public function getCreatedAt(): \DateTimeImmutable { return $this->createdAt; }
+    public function setCreatedAt(\DateTimeImmutable $createdAt): self { $this->createdAt = $createdAt; return $this; }
+    public function getAppelOffre(): AppelOffre { return $this->appelOffre; }
+    public function setAppelOffre(AppelOffre $appelOffre): self { $this->appelOffre = $appelOffre; return $this; }
+    public function getAppelOffreId(): ?int { return $this->appelOffre ? $this->appelOffre->getId() : null; }
     public function getUser(): ?User { return $this->user; }
     public function setUser(?User $user): static { $this->user = $user; return $this; }
 }

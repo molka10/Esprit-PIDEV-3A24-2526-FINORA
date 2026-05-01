@@ -51,8 +51,6 @@ final class FrontFormationController extends AbstractController
         }
 
         $qb = $entityManager->getRepository(Formation::class)->createQueryBuilder('f')
-            ->leftJoin('f.lessons', 'l')
-            ->addSelect('l')
             ->where('f.is_published = 1');
 
         if ($titre !== '') {

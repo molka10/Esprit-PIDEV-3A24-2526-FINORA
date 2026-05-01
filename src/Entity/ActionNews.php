@@ -4,7 +4,7 @@ namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Entity]
+#[ORM\Entity(repositoryClass: \App\Repository\ActionNewsRepository::class)]
 #[ORM\Table(name: 'action_news')]
 class ActionNews
 {
@@ -14,21 +14,21 @@ class ActionNews
     private ?int $id = null;
 
     #[ORM\ManyToOne(targetEntity: Action::class)]
-    #[ORM\JoinColumn(name: 'id_action', referencedColumnName: 'id_action', nullable: false)]
+    #[ORM\JoinColumn(name: 'action_id', referencedColumnName: 'id_action', nullable: false, onDelete: 'CASCADE')]
     private ?Action $action = null;
 
-    #[ORM\Column(length: 255)]
-    private ?string $titre = null;
+    #[ORM\Column(type: 'string', length: 255)]
+    private string $titre;
 
-    #[ORM\Column(type: 'float')]
-    private ?float $impactPercent = null;
+    #[ORM\Column(type: 'decimal', precision: 10, scale: 2)]
+    private string $impactPercent;
 
-    #[ORM\Column(type: 'datetime')]
-    private ?\DateTimeInterface $dateAjout = null;
+    #[ORM\Column(name: 'date_ajout', type: 'datetime_immutable')]
+    private \DateTimeImmutable $dateAjout;
 
     public function __construct()
     {
-        $this->dateAjout = new \DateTime();
+        $this->dateAjout = new \DateTimeImmutable();
     }
 
     public function getId(): ?int
@@ -47,34 +47,34 @@ class ActionNews
         return $this;
     }
 
-    public function getTitre(): ?string
+    public function getTitre(): string
     {
         return $this->titre;
     }
 
-    public function setTitre(string $titre): static
+    public function setTitre(string $titre): self
     {
         $this->titre = $titre;
         return $this;
     }
 
-    public function getImpactPercent(): ?float
+    public function getImpactPercent(): string
     {
         return $this->impactPercent;
     }
 
-    public function setImpactPercent(float $impactPercent): static
+    public function setImpactPercent(string $impactPercent): self
     {
         $this->impactPercent = $impactPercent;
         return $this;
     }
 
-    public function getDateAjout(): ?\DateTimeInterface
+    public function getDateAjout(): \DateTimeImmutable
     {
         return $this->dateAjout;
     }
 
-    public function setDateAjout(\DateTimeInterface $dateAjout): static
+    public function setDateAjout(\DateTimeImmutable $dateAjout): self
     {
         $this->dateAjout = $dateAjout;
         return $this;

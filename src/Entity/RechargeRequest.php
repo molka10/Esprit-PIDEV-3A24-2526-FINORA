@@ -3,8 +3,9 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use App\Repository\RechargeRequestRepository;
 
-#[ORM\Entity]
+#[ORM\Entity(repositoryClass: RechargeRequestRepository::class)]
 #[ORM\Table(name: "recharge_requests")]
 class RechargeRequest
 {
@@ -17,8 +18,8 @@ class RechargeRequest
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column]
-    private ?float $amount = null;
+    #[ORM\Column(type: "decimal", precision: 10, scale: 2)]
+    private string $amount;
 
     #[ORM\Column(length: 20)]
     private string $status = self::STATUS_PENDING;
@@ -30,11 +31,12 @@ class RechargeRequest
     #[ORM\JoinColumn(name: "user_id", referencedColumnName: "id", nullable: false)]
     private ?User $user = null;
 
-    #[ORM\Column]
-    private ?int $cardId = null;
+    #[ORM\ManyToOne(targetEntity: Card::class)]
+    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
+    private Card $card;
 
     #[ORM\Column(type: "datetime_immutable")]
-    private ?\DateTimeImmutable $createdAt = null;
+    private \DateTimeImmutable $createdAt;
 
     #[ORM\Column(type: "datetime_immutable", nullable: true)]
     private ?\DateTimeImmutable $confirmedAt = null;
@@ -49,12 +51,12 @@ class RechargeRequest
         return $this->id;
     }
 
-    public function getAmount(): ?float
+    public function getAmount(): ?string
     {
         return $this->amount;
     }
 
-    public function setAmount(float $amount): static
+    public function setAmount(string $amount): static
     {
         $this->amount = $amount;
         return $this;
@@ -88,14 +90,14 @@ class RechargeRequest
     public function getUserId(): ?int { return $this->user ? $this->user->getId() : null; }
     public function setUserId(int $id): self { return $this; }
 
-    public function getCardId(): ?int
+    public function getCard(): Card
     {
-        return $this->cardId;
+        return $this->card;
     }
 
-    public function setCardId(int $cardId): static
+    public function setCard(Card $card): static
     {
-        $this->cardId = $cardId;
+        $this->card = $card;
         return $this;
     }
 

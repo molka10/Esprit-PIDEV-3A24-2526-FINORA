@@ -13,9 +13,9 @@ class UserBiometrics
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\OneToOne(inversedBy: 'userBiometrics', targetEntity: User::class, cascade: ['persist', 'remove'])]
+    #[ORM\OneToOne(inversedBy: 'userBiometrics', targetEntity: User::class, cascade: ['persist'], fetch: 'EAGER')]
     #[ORM\JoinColumn(nullable: false, onDelete: "CASCADE")]
-    private ?User $user = null;
+    private User $user;
 
     #[ORM\Column(type: 'text', nullable: true)]
     private ?string $face_embedding = null;
@@ -24,7 +24,7 @@ class UserBiometrics
     private bool $is_active = true;
 
     #[ORM\Column(type: 'datetime_immutable')]
-    private ?\DateTimeImmutable $created_at = null;
+    private \DateTimeImmutable $created_at;
 
     public function __construct()
     {
@@ -36,7 +36,7 @@ class UserBiometrics
         return $this->id;
     }
 
-    public function getUser(): ?User
+    public function getUser(): User
     {
         return $this->user;
     }
@@ -72,7 +72,7 @@ class UserBiometrics
         return $this;
     }
 
-    public function getCreatedAt(): ?\DateTimeImmutable
+    public function getCreatedAt(): \DateTimeImmutable
     {
         return $this->created_at;
     }

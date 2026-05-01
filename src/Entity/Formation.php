@@ -14,7 +14,7 @@ use Vich\UploaderBundle\Mapping\Annotation as Vich;
 #[Vich\Uploadable]
 class Formation
 {
-    #[ORM\OneToMany(mappedBy: 'formation', targetEntity: Lesson::class, orphanRemoval: true)]
+    #[ORM\OneToMany(mappedBy: 'formation', targetEntity: Lesson::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
     #[ORM\OrderBy(['ordre' => 'ASC'])]
     private Collection $lessons;
 
@@ -37,7 +37,7 @@ class Formation
         minMessage: 'Le titre doit contenir au moins {{ limit }} caractères.',
         maxMessage: 'Le titre ne doit pas dépasser {{ limit }} caractères.'
     )]
-    private ?string $titre = null;
+    private string $titre;
 
     #[ORM\Column(type: 'text', nullable: true)]
     #[Assert\Length(
@@ -54,7 +54,7 @@ class Formation
         minMessage: 'La catégorie doit contenir au moins {{ limit }} caractères.',
         maxMessage: 'La catégorie ne doit pas dépasser {{ limit }} caractères.'
     )]
-    private ?string $categorie = null;
+    private string $categorie;
 
     #[ORM\Column(type: 'string', length: 255)]
     #[Assert\NotBlank(message: 'Le niveau est obligatoire.')]
@@ -62,7 +62,7 @@ class Formation
         choices: ['Débutant', 'Intermédiaire', 'Avancé'],
         message: 'Le niveau choisi est invalide.'
     )]
-    private ?string $niveau = null;
+    private string $niveau;
 
     #[ORM\Column(type: 'integer')]
     #[Assert\NotNull(message: 'Le statut de publication est obligatoire.')]
@@ -70,7 +70,7 @@ class Formation
         choices: [0, 1],
         message: 'Le statut de publication doit être Oui ou Non.'
     )]
-    private ?int $is_published = null;
+    private int $is_published = 0;
 
     #[ORM\Column(type: 'string', length: 255, nullable: true)]
     private ?string $image_url = null;
@@ -78,8 +78,8 @@ class Formation
     #[ORM\Column(type: 'text', nullable: true)]
     private ?string $pourquoiAcheter = null;
 
-    #[ORM\Column(type: 'float', nullable: true)]
-    private ?float $prix = null;
+    #[ORM\Column(type: 'decimal', precision: 10, scale: 2, nullable: true)]
+    private ?string $prix = null;
 
     #[ORM\Column(type: 'float', nullable: true)]
     #[Assert\Range(min: 0, max: 5)]
@@ -104,7 +104,7 @@ class Formation
         return $this->id;
     }
 
-    public function getTitre(): ?string
+    public function getTitre(): string
     {
         return $this->titre;
     }
@@ -126,7 +126,7 @@ class Formation
         return $this;
     }
 
-    public function getCategorie(): ?string
+    public function getCategorie(): string
     {
         return $this->categorie;
     }
@@ -137,7 +137,7 @@ class Formation
         return $this;
     }
 
-    public function getNiveau(): ?string
+    public function getNiveau(): string
     {
         return $this->niveau;
     }
@@ -148,7 +148,7 @@ class Formation
         return $this;
     }
 
-    public function getIsPublished(): ?int
+    public function getIsPublished(): int
     {
         return $this->is_published;
     }
@@ -181,12 +181,12 @@ class Formation
         return $this;
     }
 
-    public function getPrix(): ?float
+    public function getPrix(): ?string
     {
         return $this->prix;
     }
 
-    public function setPrix(?float $prix): self
+    public function setPrix(?string $prix): self
     {
         $this->prix = $prix;
         return $this;

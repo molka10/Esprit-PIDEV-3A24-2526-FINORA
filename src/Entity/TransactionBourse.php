@@ -23,8 +23,8 @@ class TransactionBourse
     // =============================
     #[ORM\ManyToOne(targetEntity: Action::class)]
     #[ORM\JoinColumn(
-        name: 'id_action',
-        referencedColumnName: 'id_action', // ✅ TRÈS IMPORTANT
+        name: 'action_id',
+        referencedColumnName: 'id_action',
         nullable: false
     )]
     #[Assert\NotNull(message: "L'action est obligatoire.")]
@@ -39,7 +39,7 @@ class TransactionBourse
         choices: ['ACHAT', 'VENTE'],
         message: 'Le type doit être ACHAT ou VENTE.'
     )]
-    private ?string $typeTransaction = null;
+    private string $typeTransaction;
 
     // =============================
     // 🔹 QUANTITÉ
@@ -47,39 +47,39 @@ class TransactionBourse
     #[ORM\Column]
     #[Assert\NotBlank(message: 'La quantité est obligatoire.')]
     #[Assert\Positive(message: 'La quantité doit être positive.')]
-    private ?int $quantite = null;
+    private int $quantite;
 
     // =============================
     // 🔹 PRIX
     // =============================
-    #[ORM\Column(name: 'prix_unitaire', type: 'float')]
+    #[ORM\Column(name: 'prix_unitaire', type: 'decimal', precision: 10, scale: 2)]
     #[Assert\NotBlank(message: 'Le prix unitaire est obligatoire.')]
     #[Assert\Positive(message: 'Le prix doit être positif.')]
-    private ?float $prixUnitaire = null;
+    private string $prixUnitaire;
 
     // =============================
     // 🔹 MONTANT TOTAL
     // =============================
-    #[ORM\Column(name: 'montant_total', type: 'float')]
-    private ?float $montantTotal = null;
+    #[ORM\Column(name: 'montant_total', type: 'decimal', precision: 10, scale: 2)]
+    private string $montantTotal;
 
     // =============================
     // 🔹 COMMISSION
     // =============================
-    #[ORM\Column(type: 'float')]
-    private ?float $commission = 0;
+    #[ORM\Column(type: 'decimal', precision: 10, scale: 2)]
+    private string $commission = '0';
 
     // =============================
     // 🔹 DATE
     // =============================
-    #[ORM\Column(name: 'date_transaction', type: 'datetime')]
-    private ?\DateTimeInterface $dateTransaction = null;
+    #[ORM\Column(name: 'date_transaction', type: 'datetime_immutable')]
+    private \DateTimeImmutable $dateTransaction;
 
     // =============================
     // 👤 RELATION AVEC UTILISATEUR
     // =============================
     #[ORM\ManyToOne(targetEntity: User::class)]
-    #[ORM\JoinColumn(name: 'id_user', referencedColumnName: 'id', nullable: true)]
+    #[ORM\JoinColumn(name: 'user_id', referencedColumnName: 'id', nullable: true)]
     private ?User $user = null;
 
     #[ORM\Column(name: 'acteur_role', length: 50, nullable: true)]
@@ -90,7 +90,7 @@ class TransactionBourse
 
     public function __construct()
     {
-        $this->dateTransaction = new \DateTime();
+        $this->dateTransaction = new \DateTimeImmutable();
     }
 
     // =============================
@@ -113,7 +113,7 @@ class TransactionBourse
         return $this;
     }
 
-    public function getTypeTransaction(): ?string
+    public function getTypeTransaction(): string
     {
         return $this->typeTransaction;
     }
@@ -124,7 +124,7 @@ class TransactionBourse
         return $this;
     }
 
-    public function getQuantite(): ?int
+    public function getQuantite(): int
     {
         return $this->quantite;
     }
@@ -135,45 +135,45 @@ class TransactionBourse
         return $this;
     }
 
-    public function getPrixUnitaire(): ?float
+    public function getPrixUnitaire(): string
     {
         return $this->prixUnitaire;
     }
 
-    public function setPrixUnitaire(float $prixUnitaire): self
+    public function setPrixUnitaire(string $prixUnitaire): self
     {
         $this->prixUnitaire = $prixUnitaire;
         return $this;
     }
 
-    public function getMontantTotal(): ?float
+    public function getMontantTotal(): string
     {
         return $this->montantTotal;
     }
 
-    public function setMontantTotal(float $montantTotal): self
+    public function setMontantTotal(string $montantTotal): self
     {
         $this->montantTotal = $montantTotal;
         return $this;
     }
 
-    public function getCommission(): ?float
+    public function getCommission(): string
     {
         return $this->commission;
     }
 
-    public function setCommission(float $commission): self
+    public function setCommission(string $commission): self
     {
         $this->commission = $commission;
         return $this;
     }
 
-    public function getDateTransaction(): ?\DateTimeInterface
+    public function getDateTransaction(): \DateTimeImmutable
     {
         return $this->dateTransaction;
     }
 
-    public function setDateTransaction(\DateTimeInterface $dateTransaction): self
+    public function setDateTransaction(\DateTimeImmutable $dateTransaction): self
     {
         $this->dateTransaction = $dateTransaction;
         return $this;

@@ -1,0 +1,44 @@
+<?php
+
+namespace App\Repository;
+
+use App\Entity\Card;
+use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\Persistence\ManagerRegistry;
+
+/**
+ * @extends ServiceEntityRepository<Card>
+ *
+ * @method Card|null find($id, $lockMode = null, $lockVersion = null)
+ * @method Card|null findOneBy(array $criteria, array $orderBy = null)
+ * @method Card[]    findAll()
+ * @method Card[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
+ */
+class CardRepository extends ServiceEntityRepository
+{
+    public function __construct(ManagerRegistry $registry)
+    {
+        parent::__construct($registry, Card::class);
+    }
+
+    public function findByUser($user)
+    {
+        return $this->createQueryBuilder('c')
+            ->andWhere('c.user = :user')
+            ->setParameter('user', $user)
+            ->orderBy('c.createdAt', 'DESC')
+            ->getQuery()
+            ->getResult();
+    }
+
+    public function findDefaultByUser($user)
+    {
+        return $this->createQueryBuilder('c')
+            ->andWhere('c.user = :user')
+            ->andWhere('c.isDefault = :default')
+            ->setParameter('user', $user)
+            ->setParameter('default', true)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
+}

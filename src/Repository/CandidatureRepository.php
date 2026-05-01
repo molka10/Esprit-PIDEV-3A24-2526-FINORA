@@ -44,7 +44,7 @@ class CandidatureRepository extends ServiceEntityRepository
     private function getQueryBuilderByRole(?User $user, string $role)
     {
         $qb = $this->createQueryBuilder('c')
-            ->leftJoin('c.appelOffre', 'a')
+            ->innerJoin('c.appelOffre', 'a')
             ->addSelect('a');
 
         if ($role === 'entreprise' && $user) {

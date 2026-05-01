@@ -18,42 +18,49 @@ class RatingCentre
     #[ORM\Column]
     #[Assert\NotBlank(message: 'La note est obligatoire')]
     #[Assert\Range(min: 1, max: 5)]
-    private ?int $note = null;
+    private int $note;
 
     #[ORM\Column(type: 'text', nullable: true)]
     private ?string $commentaire = null;
 
-    #[ORM\Column]
-    private ?\DateTime $createdAt = null;
+    #[ORM\Column(type: 'datetime_immutable')]
+    private \DateTimeImmutable $createdAt;
 
     #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'centreRatings')]
-    #[ORM\JoinColumn(nullable: false)]
-    private ?User $user = null;
+    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
+    private User $user;
 
     #[ORM\ManyToOne(targetEntity: CentreFormation::class, inversedBy: 'ratings')]
-    #[ORM\JoinColumn(nullable: false)]
-    private ?CentreFormation $centre = null;
+    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
+    private CentreFormation $centre;
+
+    public function __construct()
+    {
+        $this->createdAt = new \DateTimeImmutable();
+    }
 
     #[ORM\PrePersist]
     public function setCreatedAtValue(): void
     {
-        $this->createdAt = new \DateTime();
+        if (!isset($this->createdAt)) {
+            $this->createdAt = new \DateTimeImmutable();
+        }
     }
 
     public function getId(): ?int { return $this->id; }
 
-    public function getNote(): ?int { return $this->note; }
+    public function getNote(): int { return $this->note; }
     public function setNote(int $note): self { $this->note = $note; return $this; }
 
     public function getCommentaire(): ?string { return $this->commentaire; }
     public function setCommentaire(?string $commentaire): self { $this->commentaire = $commentaire; return $this; }
 
-    public function getCreatedAt(): ?\DateTime { return $this->createdAt; }
-    public function setCreatedAt(\DateTime $createdAt): self { $this->createdAt = $createdAt; return $this; }
+    public function getCreatedAt(): \DateTimeImmutable { return $this->createdAt; }
+    public function setCreatedAt(\DateTimeImmutable $createdAt): self { $this->createdAt = $createdAt; return $this; }
 
-    public function getUser(): ?User { return $this->user; }
-    public function setUser(?User $user): self { $this->user = $user; return $this; }
+    public function getUser(): User { return $this->user; }
+    public function setUser(User $user): self { $this->user = $user; return $this; }
 
-    public function getCentre(): ?CentreFormation { return $this->centre; }
-    public function setCentre(?CentreFormation $centre): self { $this->centre = $centre; return $this; }
+    public function getCentre(): CentreFormation { return $this->centre; }
+    public function setCentre(CentreFormation $centre): self { $this->centre = $centre; return $this; }
 }

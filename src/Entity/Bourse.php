@@ -17,7 +17,7 @@ class Bourse
 {
     #[ORM\Id]
     #[ORM\GeneratedValue(strategy: 'AUTO')]
-    #[ORM\Column(name: 'id_bourse', type: 'integer')] // <-- colonne primaire exact
+    #[ORM\Column(name: 'id_bourse', type: 'integer')]
     private ?int $id = null;
 
     #[ORM\Column(name: 'nom_bourse', type: 'string', length: 100)]
@@ -32,7 +32,7 @@ class Bourse
         pattern: '/^[a-zA-ZÀ-ÿ0-9\s\-]+$/',
         message: 'Le nom ne peut contenir que des lettres, chiffres, espaces et tirets.'
     )]
-    private ?string $nomBourse = null;
+    private string $nomBourse;
 
     #[ORM\Column(type: 'string', length: 50)]
     #[Assert\NotBlank(message: 'Le pays est obligatoire.')]
@@ -42,7 +42,7 @@ class Bourse
         minMessage: 'Le pays doit contenir au moins {{ limit }} caractères.',
         maxMessage: 'Le pays ne peut pas dépasser {{ limit }} caractères.'
     )]
-    private ?string $pays = null;
+    private string $pays;
 
     #[ORM\Column(type: 'string', length: 3)]
     #[Assert\NotBlank(message: 'La devise est obligatoire.')]
@@ -55,7 +55,7 @@ class Bourse
         pattern: '/^[A-Z]{3}$/',
         message: 'La devise doit être un code ISO de 3 lettres majuscules (ex: USD, EUR, TND).'
     )]
-    private ?string $devise = null;
+    private string $devise;
 
     #[ORM\Column(type: 'string', length: 20)]
     #[Assert\NotBlank(message: 'Le statut est obligatoire.')]
@@ -63,14 +63,14 @@ class Bourse
         choices: ['ACTIVE', 'INACTIVE'],
         message: 'Le statut doit être ACTIVE ou INACTIVE.'
     )]
-    private ?string $statut = 'ACTIVE';
+    private string $statut = 'ACTIVE';
 
-    #[ORM\Column(name: 'date_creation', type: 'datetime')]
-    private ?\DateTimeInterface $dateCreation = null;
+    #[ORM\Column(name: 'date_creation', type: 'datetime_immutable')]
+    private \DateTimeImmutable $dateCreation;
 
     public function __construct()
     {
-        $this->dateCreation = new \DateTime();
+        $this->dateCreation = new \DateTimeImmutable();
     }
 
     // Getters & Setters
@@ -79,7 +79,12 @@ class Bourse
         return $this->id;
     }
 
-    public function getNomBourse(): ?string
+    public function getIdBourse(): ?int
+    {
+        return $this->id;
+    }
+
+    public function getNomBourse(): string
     {
         return $this->nomBourse;
     }
@@ -90,7 +95,7 @@ class Bourse
         return $this;
     }
 
-    public function getPays(): ?string
+    public function getPays(): string
     {
         return $this->pays;
     }
@@ -101,7 +106,7 @@ class Bourse
         return $this;
     }
 
-    public function getDevise(): ?string
+    public function getDevise(): string
     {
         return $this->devise;
     }
@@ -112,7 +117,7 @@ class Bourse
         return $this;
     }
 
-    public function getStatut(): ?string
+    public function getStatut(): string
     {
         return $this->statut;
     }
@@ -123,12 +128,12 @@ class Bourse
         return $this;
     }
 
-    public function getDateCreation(): ?\DateTimeInterface
+    public function getDateCreation(): \DateTimeImmutable
     {
         return $this->dateCreation;
     }
 
-    public function setDateCreation(\DateTimeInterface $dateCreation): self
+    public function setDateCreation(\DateTimeImmutable $dateCreation): self
     {
         $this->dateCreation = $dateCreation;
         return $this;

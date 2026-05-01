@@ -31,4 +31,16 @@ class TransactionWalletRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
+
+    public function findByUserWithCategory($user): array
+    {
+        return $this->createQueryBuilder('t')
+            ->innerJoin('t.category', 'c')
+            ->addSelect('c')
+            ->andWhere('t.user = :user')
+            ->setParameter('user', $user)
+            ->orderBy('t.dateTransaction', 'DESC')
+            ->getQuery()
+            ->getResult();
+    }
 }

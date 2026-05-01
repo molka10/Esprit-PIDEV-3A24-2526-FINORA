@@ -9,9 +9,11 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Serializer\Annotation\Ignore;
 
 #[ORM\Entity]
-#[ORM\Table(name: "users")]
+#[ORM\Table(name: 'users')]
+#[ORM\HasLifecycleCallbacks]
 #[UniqueEntity(fields: ['email'], message: 'There is already an account with this email')]
 #[UniqueEntity(fields: ['username'], message: 'This username is already taken')]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
@@ -25,7 +27,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->ratings = new ArrayCollection();
         $this->centreRatings = new ArrayCollection();
         $this->walletTransactions = new ArrayCollection();
-        $this->created_at = new \DateTime();
+        $this->favoriteAppels = new ArrayCollection();
+        $this->createdAt = new \DateTimeImmutable();
     }
     // ================= ID =================
     #[ORM\Id]
@@ -33,7 +36,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\OneToOne(mappedBy: 'user', targetEntity: UserBiometrics::class, cascade: ['persist', 'remove'])]
+    #[ORM\OneToOne(mappedBy: 'user', targetEntity: UserBiometrics::class, cascade: ['persist'])]
     private ?UserBiometrics $userBiometrics = null;
 
     // ================= IMAGE =================
@@ -54,21 +57,22 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     // ================= USERNAME =================
     #[Assert\NotBlank(message: 'Username is required')]
     #[ORM\Column(length: 100, unique: true)]
-    private ?string $username = null;
+    private string $username;
 
     // ================= EMAIL =================
     #[Assert\NotBlank(message: 'Email is required')]
     #[Assert\Email(message: 'Invalid email format')]
     #[ORM\Column(length: 180, unique: true)]
-    private ?string $email = null;
+    private string $email;
 
     // ================= PASSWORD =================
     #[ORM\Column(name: "mot_de_passe", nullable: true)]
+    #[Ignore]
     private ?string $password = null;
 
     // ================= ROLE =================
     #[ORM\Column(length: 20)]
-    private ?string $role = 'USER';
+    private string $role = 'USER';
 
     // ================= PHONE =================
     #[Assert\Regex(
@@ -88,8 +92,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?\DateTimeInterface $date_of_birth = null;
 
     // ================= CREATED =================
-    #[ORM\Column(type: "datetime")]
-    private ?\DateTimeInterface $created_at = null;
+    #[ORM\Column(type: 'datetime_immutable')]
+    private \DateTimeImmutable $createdAt;
 
     // ================= VERIFIED =================
     #[ORM\Column(type: 'boolean')]
@@ -126,7 +130,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->id;
     }
 
-    public function getUsername(): ?string
+    public function getUsername(): string
     {
         return $this->username;
     }
@@ -137,7 +141,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function getEmail(): ?string
+    public function getEmail(): string
     {
         return $this->email;
     }
@@ -154,7 +158,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function getRole(): ?string
+    public function getRole(): string
     {
         return $this->role;
     }
@@ -198,14 +202,14 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function getCreatedAt(): ?\DateTimeInterface
+    public function getCreatedAt(): \DateTimeImmutable
     {
-        return $this->created_at;
+        return $this->createdAt;
     }
 
-    public function setCreatedAt(\DateTimeInterface $date): static
+    public function setCreatedAt(\DateTimeImmutable $createdAt): self
     {
-        $this->created_at = $date;
+        $this->createdAt = $createdAt;
         return $this;
     }
 
@@ -280,12 +284,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: "decimal", precision: 10, scale: 2, options: ["default" => 0], nullable: false)]
     private string $balance = "0.00";
 
-    public function getBalance(): ?float
+    public function getBalance(): string
     {
         return $this->balance;
     }
 
-    public function setBalance(?float $balance): static
+    public function setBalance(string $balance): static
     {
         $this->balance = $balance;
         return $this;

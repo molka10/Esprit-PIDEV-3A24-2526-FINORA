@@ -17,23 +17,24 @@ class QuizResult
     #[ORM\JoinColumn(nullable: true, onDelete: 'SET NULL')]
     private ?User $user = null;
 
-    #[ORM\Column(type: 'string', length: 255, nullable: false)]
-    private ?string $studentName = null;
+    #[ORM\Column(type: 'string', length: 255)]
+    private string $studentName;
 
-    #[ORM\Column(type: 'integer', nullable: false)]
-    private ?int $lessonId = null;
+    #[ORM\ManyToOne(targetEntity: Lesson::class)]
+    #[ORM\JoinColumn(nullable: true, onDelete: 'SET NULL')]
+    private ?Lesson $lesson = null;
 
-    #[ORM\Column(type: 'string', length: 255, nullable: false)]
-    private ?string $lessonTitle = null;
+    #[ORM\Column(type: 'string', length: 255)]
+    private string $lessonTitle;
 
-    #[ORM\Column(type: 'string', length: 255, nullable: false)]
-    private ?string $formationTitle = null;
+    #[ORM\Column(type: 'string', length: 255)]
+    private string $formationTitle;
 
-    #[ORM\Column(type: 'integer', nullable: false)]
-    private ?int $score = null;
+    #[ORM\Column(type: 'integer')]
+    private int $score;
 
-    #[ORM\Column(type: 'integer', nullable: false)]
-    private ?int $passed = null;
+    #[ORM\Column(type: 'integer')]
+    private int $passed;
 
     #[ORM\Column(type: 'datetime', nullable: true)]
     private ?\DateTimeInterface $takenAt = null;
@@ -60,14 +61,14 @@ class QuizResult
         return $this;
     }
 
-    public function getLessonId(): ?int
+    public function getLesson(): ?Lesson
     {
-        return $this->lessonId;
+        return $this->lesson;
     }
 
-    public function setLessonId(int $lessonId): self
+    public function setLesson(?Lesson $lesson): self
     {
-        $this->lessonId = $lessonId;
+        $this->lesson = $lesson;
         return $this;
     }
 
@@ -167,5 +168,10 @@ class QuizResult
     {
         $this->user = $user;
         return $this;
+    }
+
+    public function getLessonId(): ?int
+    {
+        return $this->lesson ? $this->lesson->getId() : null;
     }
 }

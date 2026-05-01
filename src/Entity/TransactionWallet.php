@@ -17,20 +17,19 @@ class TransactionWallet
 
     #[ORM\Column(name: "nom_transaction")]
     #[Assert\NotBlank(message: "Nom obligatoire")]
-    private ?string $nomTransaction = null;
+    private string $nomTransaction;
 
     #[ORM\Column]
-    private ?string $type = null;
+    private string $type;
 
 
-    #[ORM\Column(name: "montant")]
+    #[ORM\Column(name: "montant", type: "decimal", precision: 10, scale: 2)]
     #[Assert\NotBlank(message: "Montant obligatoire")]
+    private string $montant;
 
-    private ?float $montant = null;
-
-    #[ORM\Column(name: "date_transaction", type: "datetime")]    
+    #[ORM\Column(name: "date_transaction", type: "datetime_immutable")]    
     #[Assert\NotNull(message: "Date obligatoire")]
-    private ?\DateTimeInterface $dateTransaction = null;
+    private \DateTimeImmutable $dateTransaction;
 
     #[ORM\Column(nullable: true)]
     private ?string $source = null;
@@ -40,7 +39,7 @@ class TransactionWallet
     private ?User $user = null;
 
     #[ORM\Column(type: "boolean", options: ["default" => true])]
-    private ?bool $isActive = true;
+    private bool $isActive = true;
 
     #[ORM\Column(length: 20, options: ["default" => "ACCEPTED"])]
     private string $status = "ACCEPTED";
@@ -84,18 +83,18 @@ class TransactionWallet
         return $this->id;
     }
 
-    public function getNomTransaction(): ?string
+    public function getNomTransaction(): string
     {
         return $this->nomTransaction;
     }
 
-    public function setNomTransaction(?string $nomTransaction): static
+    public function setNomTransaction(string $nomTransaction): static
     {
         $this->nomTransaction = $nomTransaction;
         return $this;
     }
 
-    public function getType(): ?string
+    public function getType(): string
     {
         return $this->type;
     }
@@ -106,23 +105,23 @@ class TransactionWallet
         return $this;
     }
 
-    public function getMontant(): ?float
+    public function getMontant(): string
     {
         return $this->montant;
     }
 
-  public function setMontant(?float $montant): static
+    public function setMontant(string $montant): static
     {
         $this->montant = $montant;
         return $this;
     }
 
-    public function getDateTransaction(): ?\DateTimeInterface
+    public function getDateTransaction(): \DateTimeImmutable
     {
         return $this->dateTransaction;
     }
 
-    public function setDateTransaction(?\DateTimeInterface $dateTransaction): static
+    public function setDateTransaction(\DateTimeImmutable $dateTransaction): static
     {
         $this->dateTransaction = $dateTransaction;
         return $this;
@@ -157,6 +156,11 @@ public function setCategory(?Category $category): self
 {
     $this->category = $category;
     return $this;
+}
+
+public function getCategoryId(): ?int
+{
+    return $this->category ? $this->category->getId() : null;
 }
 
 public function getStatus(): string

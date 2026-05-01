@@ -26,7 +26,7 @@ class AppelOffre
         minMessage: 'Le titre doit contenir au moins {{ limit }} caractères',
         maxMessage: 'Le titre ne peut pas dépasser {{ limit }} caractères'
     )]
-    private ?string $titre = null;
+    private string $titre;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     #[Assert\Length(
@@ -41,7 +41,7 @@ class AppelOffre
         choices: ['achat', 'partenariat', 'don'],
         message: 'Le type doit être achat, partenariat ou don'
     )]
-    private ?string $type = null;
+    private string $type;
 
     #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2, nullable: true)]
     #[Assert\Positive(message: 'Le budget minimum doit être positif')]
@@ -75,21 +75,22 @@ class AppelOffre
         choices: ['draft', 'published', 'closed'],
         message: 'Le statut doit être draft, published ou closed'
     )]
-    private ?string $statut = null;
+    private string $statut;
 
-    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
-    private ?\DateTimeInterface $createdAt = null;
+    #[ORM\Column(type: Types::DATETIME_IMMUTABLE)]
+    private \DateTimeImmutable $createdAt;
 
     #[ORM\ManyToOne(inversedBy: 'appelOffres')]
     private ?Categorie $categorie = null;
 
     #[ORM\ManyToOne(inversedBy: 'appelOffres')]
+    #[ORM\JoinColumn(nullable: false)]
     private ?User $createdBy = null;
 
-    #[ORM\OneToMany(targetEntity: Candidature::class, mappedBy: 'appelOffre', cascade: ['remove'], orphanRemoval: true)]
+    #[ORM\OneToMany(targetEntity: Candidature::class, mappedBy: 'appelOffre', cascade: ['persist', 'remove'], orphanRemoval: true)]
     private Collection $candidatures;
 
-    #[ORM\OneToMany(targetEntity: Rating::class, mappedBy: 'appelOffre', cascade: ['remove'], orphanRemoval: true)]
+    #[ORM\OneToMany(targetEntity: Rating::class, mappedBy: 'appelOffre', cascade: ['persist', 'remove'], orphanRemoval: true)]
     private Collection $ratings;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
@@ -104,17 +105,23 @@ class AppelOffre
     #[ORM\PrePersist]
     public function setCreatedAtValue(): void
     {
-        if ($this->createdAt === null) {
-            $this->createdAt = new \DateTime();
+        if (!isset($this->createdAt)) {
+            $this->createdAt = new \DateTimeImmutable();
         }
     }
 
     public function getId(): ?int { return $this->id; }
-    public function getTitre(): ?string { return $this->titre; }
+    public function getTitre(): string
+    {
+        return $this->titre;
+    }
     public function setTitre(string $titre): static { $this->titre = $titre; return $this; }
     public function getDescription(): ?string { return $this->description; }
     public function setDescription(?string $description): static { $this->description = $description; return $this; }
-    public function getType(): ?string { return $this->type; }
+    public function getType(): string
+    {
+        return $this->type;
+    }
     public function setType(string $type): static { $this->type = $type; return $this; }
     public function getBudgetMin(): ?string { return $this->budgetMin; }
     public function setBudgetMin(?string $budgetMin): static { $this->budgetMin = $budgetMin; return $this; }
@@ -124,10 +131,17 @@ class AppelOffre
     public function setDevise(?string $devise): static { $this->devise = $devise; return $this; }
     public function getDateLimite(): ?\DateTimeInterface { return $this->dateLimite; }
     public function setDateLimite(?\DateTimeInterface $dateLimite): static { $this->dateLimite = $dateLimite; return $this; }
-    public function getStatut(): ?string { return $this->statut; }
+    public function getStatut(): string
+    {
+        return $this->statut;
+    }
     public function setStatut(string $statut): static { $this->statut = $statut; return $this; }
-    public function getCreatedAt(): ?\DateTimeInterface { return $this->createdAt; }
-    public function setCreatedAt(\DateTimeInterface $createdAt): static { $this->createdAt = $createdAt; return $this; }
+    public function getCreatedAt(): \DateTimeImmutable
+    {
+        return $this->createdAt;
+    }
+
+    public function setCreatedAt(\DateTimeImmutable $createdAt): static { $this->createdAt = $createdAt; return $this; }
     public function getCategorie(): ?Categorie { return $this->categorie; }
     public function setCategorie(?Categorie $categorie): static { $this->categorie = $categorie; return $this; }
     public function getCreatedBy(): ?User { return $this->createdBy; }

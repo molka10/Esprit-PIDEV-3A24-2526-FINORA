@@ -32,19 +32,24 @@ class BourseAdminController extends AbstractController
         $totalActions = $actionRepo->count([]);
         $volumeTotal = $transactionRepo->getStatistics()['volume_total'];
 
-        // --- Advanced Intelligence Logic ---
-        $allTransactions = $transactionRepo->findAll();
-        $buyCount = 0; $sellCount = 0; $totalCommissions = 0;
-        foreach ($allTransactions as $t) {
-            if ($t->getTypeTransaction() === 'ACHAT') $buyCount++;
-            else $sellCount++;
-            $totalCommissions += $t->getCommission();
-        }
+        // --- Advanced Intelligence Logic (optimized: aggregate queries instead of findAll()) ---
+        $stats = $transactionRepo->getStatistics();
+        $buyCount = (int) $stats['achats'];
+        $sellCount = (int) $stats['ventes'];
+        $totalCommissions = $transactionRepo->createQueryBuilder('t')
+            ->select('SUM(t.commission)')
+            ->getQuery()->getSingleScalarResult() ?? 0;
         $sentiment = [
-            'buys' => $buyCount,
+            'buys'  => $buyCount,
             'sells' => $sellCount,
-            'total' => max(1, $buyCount + $sellCount)
+            'total' => max(1, $buyCount + $sellCount),
         ];
+        // Recent transactions for heatmap (last 7 days max 500 rows)
+        $recentForHeatmap = $transactionRepo->createQueryBuilder('t')
+            ->where('t.dateTransaction >= :since')
+            ->setParameter('since', new \DateTimeImmutable('-7 days'))
+            ->setMaxResults(500)
+            ->getQuery()->getResult();
 
         // Whale transactions (Largest ones)
         $whales = $transactionRepo->findBy([], ['montantTotal' => 'DESC'], 6);
@@ -84,42 +89,43 @@ class BourseAdminController extends AbstractController
             (($distinctActionsTraded / max(1, $totalActions)) * 30)
         ));
 
-        // --- 📊 Trading Heatmap (7 Days x 24 Hours) ---
+        // --- 📊 Trading Heatmap (7 Days x 24 Hours, last 7 days only) ---
         $heatmapData = [];
         for ($d = 0; $d < 7; $d++) {
             $dayData = [];
             for ($h = 0; $h < 24; $h++) { $dayData[$h] = 0; }
             $heatmapData[$d] = $dayData;
         }
-        foreach ($allTransactions as $t) {
-            $day = (int) $t->getDateTransaction()->format('w'); // 0-6
+        foreach ($recentForHeatmap as $t) {
+            $day  = (int) $t->getDateTransaction()->format('w'); // 0-6
             $hour = (int) $t->getDateTransaction()->format('G'); // 0-23
             $heatmapData[$day][$hour]++;
         }
 
-        // --- 🚨 Anomaly Detection ---
+        // --- 🚨 Anomaly Detection (DQL-based, no O(n²) loop) ---
         $anomalies = [];
-        // 1. Wash Trading Detection (Buy & Sell same action < 10 mins)
-        foreach ($allTransactions as $t1) {
-            foreach ($allTransactions as $t2) {
-                if ($t1->getId() !== $t2->getId() && 
-                    $t1->getUser() === $t2->getUser() && 
-                    $t1->getAction() === $t2->getAction() && 
-                    $t1->getTypeTransaction() !== $t2->getTypeTransaction()) {
-                    
-                    $diff = abs($t1->getDateTransaction()->getTimestamp() - $t2->getDateTransaction()->getTimestamp());
-                    if ($diff < 600) { // 10 minutes
-                        $anomalies[] = [
-                            'type' => 'Wash Trading',
-                            'user' => $t1->getUser()->getUsername(),
-                            'action' => $t1->getAction()->getSymbole(),
-                            'severity' => 'High',
-                            'time' => $t1->getDateTransaction()->format('H:i')
-                        ];
-                        if (count($anomalies) >= 3) break 2;
-                    }
-                }
-            }
+        // 1. Wash Trading Detection via DQL self-join: Buy & Sell same user+action < 10 mins
+        $washTrades = $transactionRepo->createQueryBuilder('t1')
+            ->select('IDENTITY(t1.user) as uid, IDENTITY(t1.action) as aid, t1.dateTransaction as dt, t1.typeTransaction as type')
+            ->innerJoin(
+                \App\Entity\TransactionBourse::class, 't2',
+                'WITH',
+                't2.user = t1.user AND t2.action = t1.action AND t2.typeTransaction != t1.typeTransaction AND t2.id != t1.id'
+            )
+            ->where('t1.dateTransaction >= :since')
+            ->setParameter('since', new \DateTimeImmutable('-24 hours'))
+            ->groupBy('t1.user, t1.action, t1.typeTransaction, t1.dateTransaction')
+            ->setMaxResults(3)
+            ->getQuery()->getResult();
+
+        foreach ($washTrades as $wt) {
+            $anomalies[] = [
+                'type'     => 'Wash Trading',
+                'user'     => 'User #' . $wt['uid'],
+                'action'   => 'Action #' . $wt['aid'],
+                'severity' => 'High',
+                'time'     => ($wt['dt'] instanceof \DateTimeInterface ? $wt['dt']->format('H:i') : '?'),
+            ];
         }
         // 2. High Impact Spike (> 40% of current volume)
         foreach ($whales as $w) {

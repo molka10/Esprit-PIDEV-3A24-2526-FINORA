@@ -21,6 +21,16 @@ class ActionRepository extends ServiceEntityRepository
         parent::__construct($registry, Action::class);
     }
 
+    public function findAllWithBourse(): array
+    {
+        return $this->createQueryBuilder('a')
+            ->innerJoin('a.bourse', 'b')
+            ->addSelect('b')
+            ->orderBy('a.symbole', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
+
     /**
      * Récupère toutes les actions disponibles
      *

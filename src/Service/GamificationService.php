@@ -45,7 +45,7 @@ class GamificationService
         ];
 
         // 2. Badge Spéculateur (Margin Loan)
-        $loans = $this->em->getRepository(MarginLoan::class)->findBy(['userId' => $user->getId()]);
+        $loans = $this->em->getRepository(MarginLoan::class)->findBy(['user' => $user->getId()]);
         $isSpeculateur = count($loans) > 0;
 
         $badges[] = [

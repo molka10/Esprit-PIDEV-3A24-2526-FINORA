@@ -18,15 +18,15 @@ class CentreFormation
 
     #[ORM\Column(type: 'string', length: 255)]
     #[Assert\NotBlank(message: 'Le nom est obligatoire.')]
-    private ?string $nom = null;
+    private string $nom;
 
     #[ORM\Column(type: 'string', length: 500)]
     #[Assert\NotBlank(message: "L'adresse est obligatoire.")]
-    private ?string $adresse = null;
+    private string $adresse;
 
     #[ORM\Column(type: 'string', length: 50)]
     #[Assert\NotBlank(message: 'La ville est obligatoire.')]
-    private ?string $ville = null;
+    private string $ville;
 
     /**
      * Latitude (WGS84) — Tunisia range ~30.2 to 37.5
@@ -34,7 +34,7 @@ class CentreFormation
     #[ORM\Column(type: 'decimal', precision: 10, scale: 7)]
     #[Assert\NotNull(message: 'La latitude est obligatoire.')]
     #[Assert\Range(min: 30.0, max: 38.0, notInRangeMessage: 'Latitude invalide pour la Tunisie.')]
-    private ?string $latitude = null;
+    private string $latitude;
 
     /**
      * Longitude (WGS84) — Tunisia range ~7.5 to 11.6
@@ -42,7 +42,7 @@ class CentreFormation
     #[ORM\Column(type: 'decimal', precision: 10, scale: 7)]
     #[Assert\NotNull(message: 'La longitude est obligatoire.')]
     #[Assert\Range(min: 7.0, max: 12.0, notInRangeMessage: 'Longitude invalide pour la Tunisie.')]
-    private ?string $longitude = null;
+    private string $longitude;
 
     #[ORM\Column(type: 'text', nullable: true)]
     private ?string $description = null;
@@ -66,7 +66,7 @@ class CentreFormation
     #[ORM\Column(type: 'datetime_immutable')]
     private \DateTimeImmutable $createdAt;
 
-    #[ORM\OneToMany(targetEntity: RatingCentre::class, mappedBy: 'centre', cascade: ['remove'])]
+    #[ORM\OneToMany(targetEntity: RatingCentre::class, mappedBy: 'centre', cascade: ['persist', 'remove'], orphanRemoval: true)]
     private Collection $ratings;
 
     public function __construct()
@@ -77,20 +77,20 @@ class CentreFormation
 
     public function getId(): ?int { return $this->id; }
 
-    public function getNom(): ?string { return $this->nom; }
+    public function getNom(): string { return $this->nom; }
     public function setNom(string $nom): self { $this->nom = $nom; return $this; }
 
-    public function getAdresse(): ?string { return $this->adresse; }
+    public function getAdresse(): string { return $this->adresse; }
     public function setAdresse(string $adresse): self { $this->adresse = $adresse; return $this; }
 
-    public function getVille(): ?string { return $this->ville; }
+    public function getVille(): string { return $this->ville; }
     public function setVille(string $ville): self { $this->ville = $ville; return $this; }
 
-    public function getLatitude(): ?float { return $this->latitude !== null ? (float) $this->latitude : null; }
-    public function setLatitude(string|float|null $latitude): self { $this->latitude = (string) $latitude; return $this; }
+    public function getLatitude(): string { return $this->latitude; }
+    public function setLatitude(string $latitude): self { $this->latitude = $latitude; return $this; }
 
-    public function getLongitude(): ?float { return $this->longitude !== null ? (float) $this->longitude : null; }
-    public function setLongitude(string|float|null $longitude): self { $this->longitude = (string) $longitude; return $this; }
+    public function getLongitude(): string { return $this->longitude; }
+    public function setLongitude(string $longitude): self { $this->longitude = $longitude; return $this; }
 
     public function getDescription(): ?string { return $this->description; }
     public function setDescription(?string $description): self { $this->description = $description; return $this; }

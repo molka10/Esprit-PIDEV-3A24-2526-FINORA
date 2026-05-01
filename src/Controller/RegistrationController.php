@@ -30,7 +30,6 @@ class RegistrationController extends AbstractController
         $user = new User();
 
         // 🔥 Default values
-        $user->setCreatedAt(new \DateTime());
         $user->setRole('USER');
         $user->setIsVerified(false); // 📧 REQUIRES EMAIL VERIFICATION
 

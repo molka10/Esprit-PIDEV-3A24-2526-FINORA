@@ -21,7 +21,7 @@ class Action
     private ?int $id = null;
 
     #[ORM\ManyToOne(targetEntity: Bourse::class)]
-    #[ORM\JoinColumn(name: 'id_bourse', referencedColumnName: 'id_bourse', nullable: false)]
+    #[ORM\JoinColumn(name: 'bourse_id', referencedColumnName: 'id_bourse', nullable: false)]
     #[Assert\NotNull(message: 'La bourse est obligatoire.')]
     private ?Bourse $bourse = null;
 
@@ -37,7 +37,7 @@ class Action
         pattern: '/^[A-Z0-9]+$/',
         message: 'Le symbole ne peut contenir que des lettres majuscules et des chiffres (ex: AAPL, GOOGL).'
     )]
-    private ?string $symbole = null;
+    private string $symbole;
 
     #[ORM\Column(name: 'nom_entreprise', length: 150)]
     #[Assert\NotBlank(message: 'Le nom de l\'entreprise est obligatoire.')]
@@ -47,7 +47,7 @@ class Action
         minMessage: 'Le nom doit contenir au moins {{ limit }} caractères.',
         maxMessage: 'Le nom ne peut pas dépasser {{ limit }} caractères.'
     )]
-    private ?string $nomEntreprise = null;
+    private string $nomEntreprise;
 
     #[ORM\Column(length: 100)]
     #[Assert\NotBlank(message: 'Le secteur est obligatoire.')]
@@ -61,9 +61,9 @@ class Action
         choices: ['Technologie', 'Finance', 'Santé', 'Énergie', 'Industrie', 'Consommation', 'Télécommunications', 'Immobilier', 'Autre'],
         message: 'Le secteur sélectionné n\'est pas valide.'
     )]
-    private ?string $secteur = null;
+    private string $secteur;
 
-    #[ORM\Column(name: 'prix_unitaire', type: 'float')]
+    #[ORM\Column(name: 'prix_unitaire', type: 'decimal', precision: 10, scale: 2)]
     #[Assert\NotBlank(message: 'Le prix unitaire est obligatoire.')]
     #[Assert\Positive(message: 'Le prix unitaire doit être positif.')]
     #[Assert\Range(
@@ -71,7 +71,7 @@ class Action
         max: 999999.99,
         notInRangeMessage: 'Le prix doit être entre {{ min }} et {{ max }}.'
     )]
-    private ?float $prixUnitaire = null;
+    private string $prixUnitaire;
 
     #[ORM\Column(name: 'quantite_disponible', type: 'integer')]
     #[Assert\NotBlank(message: 'La quantité est obligatoire.')]
@@ -81,7 +81,7 @@ class Action
         max: 999999999,
         notInRangeMessage: 'La quantité doit être entre {{ min }} et {{ max }}.'
     )]
-    private ?int $quantiteDisponible = null;
+    private int $quantiteDisponible;
 
     #[ORM\Column(length: 20)]
     #[Assert\NotBlank(message: 'Le statut est obligatoire.')]
@@ -89,18 +89,23 @@ class Action
         choices: ['DISPONIBLE', 'INDISPONIBLE'],
         message: 'Le statut doit être DISPONIBLE ou INDISPONIBLE.'
     )]
-    private ?string $statut = 'DISPONIBLE';
+    private string $statut = 'DISPONIBLE';
 
-    #[ORM\Column(name: 'date_ajout', type: 'datetime')]
-    private ?\DateTimeInterface $dateAjout = null;
+    #[ORM\Column(name: 'date_ajout', type: 'datetime_immutable')]
+    private \DateTimeImmutable $dateAjout;
 
     public function __construct()
     {
-        $this->dateAjout = new \DateTime();
+        $this->dateAjout = new \DateTimeImmutable();
     }
 
     // Getters & Setters
     public function getId(): ?int
+    {
+        return $this->id;
+    }
+
+    public function getIdAction(): ?int
     {
         return $this->id;
     }
@@ -116,19 +121,19 @@ class Action
         return $this;
     }
 
-    public function getSymbole(): ?string
+    public function getSymbole(): string
     {
         return $this->symbole;
     }
 
    // Action.php
-public function setSymbole(?string $symbole): self
+public function setSymbole(string $symbole): self
 {
-    $this->symbole = $symbole !== null ? strtoupper($symbole) : null;
+    $this->symbole = strtoupper($symbole);
     return $this;
 }
 
-    public function getNomEntreprise(): ?string
+    public function getNomEntreprise(): string
     {
         return $this->nomEntreprise;
     }
@@ -139,7 +144,7 @@ public function setSymbole(?string $symbole): self
         return $this;
     }
 
-    public function getSecteur(): ?string
+    public function getSecteur(): string
     {
         return $this->secteur;
     }
@@ -150,18 +155,18 @@ public function setSymbole(?string $symbole): self
         return $this;
     }
 
-    public function getPrixUnitaire(): ?float
+    public function getPrixUnitaire(): string
     {
         return $this->prixUnitaire;
     }
 
-    public function setPrixUnitaire(float $prixUnitaire): self
+    public function setPrixUnitaire(string $prixUnitaire): self
     {
         $this->prixUnitaire = $prixUnitaire;
         return $this;
     }
 
-    public function getQuantiteDisponible(): ?int
+    public function getQuantiteDisponible(): int
     {
         return $this->quantiteDisponible;
     }
@@ -172,7 +177,7 @@ public function setSymbole(?string $symbole): self
         return $this;
     }
 
-    public function getStatut(): ?string
+    public function getStatut(): string
     {
         return $this->statut;
     }
@@ -183,12 +188,12 @@ public function setSymbole(?string $symbole): self
         return $this;
     }
 
-    public function getDateAjout(): ?\DateTimeInterface
+    public function getDateAjout(): \DateTimeImmutable
     {
         return $this->dateAjout;
     }
 
-    public function setDateAjout(\DateTimeInterface $dateAjout): self
+    public function setDateAjout(\DateTimeImmutable $dateAjout): self
     {
         $this->dateAjout = $dateAjout;
         return $this;

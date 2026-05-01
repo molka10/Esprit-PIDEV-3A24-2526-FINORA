@@ -14,13 +14,14 @@ class Wishlist
     private ?int $id = null;
 
     #[ORM\Column(type: "string", length: 255)]
-    private ?string $name = null;
+    private string $name;
 
-    #[ORM\Column(type: "float")]
-    private ?float $price = null;
+    #[ORM\Column(type: "decimal", precision: 10, scale: 2)]
+    private string $price;
 
-    #[ORM\Column(type: "integer")]
-    private ?int $userId = null;
+    #[ORM\ManyToOne(targetEntity: User::class)]
+    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
+    private User $user;
 
     // ========================
     // GETTERS & SETTERS
@@ -42,25 +43,25 @@ class Wishlist
         return $this;
     }
 
-    public function getPrice(): ?float
+    public function getPrice(): ?string
     {
         return $this->price;
     }
 
-    public function setPrice(float $price): static
+    public function setPrice(string $price): static
     {
         $this->price = $price;
         return $this;
     }
 
-    public function getUserId(): ?int
+    public function getUser(): User
     {
-        return $this->userId;
+        return $this->user;
     }
 
-    public function setUserId(int $userId): static
+    public function setUser(User $user): static
     {
-        $this->userId = $userId;
+        $this->user = $user;
         return $this;
     }
 }

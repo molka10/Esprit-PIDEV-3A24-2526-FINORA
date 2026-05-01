@@ -33,7 +33,7 @@ class WalletWishlistController extends AbstractController
                 $item = new Wishlist();
                 $item->setName($name);
                 $item->setPrice((float) $price);
-                $item->setUserId($userId);
+                $item->setUser($user);
 
                 $em->persist($item);
                 $em->flush();
@@ -53,7 +53,7 @@ class WalletWishlistController extends AbstractController
 
         // Ã°Å¸â€œâ€¹ GET LIST
         $wishlist = $em->getRepository(Wishlist::class)
-            ->findBy(['userId' => $userId]);
+            ->findBy(['user' => $userId]);
 
         // Ã°Å¸Â§Â® Compute totals
         $total = array_reduce($wishlist, fn($carry, $item) => $carry + $item->getPrice(), 0.0);

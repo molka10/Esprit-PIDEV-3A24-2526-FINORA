@@ -30,7 +30,7 @@ class CardApiController extends AbstractController
             $user = $this->getUser();
             if (!$user) return $this->json($this->apiService->error('Access Denied.'), 401);
             $userId = $user->getId();
-            $cards = $this->entityManager->getRepository(Card::class)->findBy(['userId' => $userId]);
+            $cards = $this->entityManager->getRepository(Card::class)->findBy(['user' => $user]);
             
             $data = array_map(fn(Card $card) => [
                 'id' => $card->getId(),
@@ -61,7 +61,7 @@ class CardApiController extends AbstractController
             }
 
             $card = new Card();
-            $card->setUserId($userId);
+            $card->setUser($user);
             $card->setCardHolderName($data['cardHolderName']);
             $card->setStripePaymentMethodId($data['stripePaymentMethodId']);
             $card->setLast4($data['last4']);
@@ -69,7 +69,7 @@ class CardApiController extends AbstractController
             $card->setExpiryDate($data['expiryDate']);
 
             
-            $existingCards = $this->entityManager->getRepository(Card::class)->findBy(['userId' => $userId]);
+            $existingCards = $this->entityManager->getRepository(Card::class)->findBy(['user' => $user]);
             if (empty($existingCards)) {
                 $card->setIsDefault(true);
             }
@@ -94,7 +94,7 @@ class CardApiController extends AbstractController
             $user = $this->getUser();
             if (!$user) return $this->json($this->apiService->error('Access Denied.'), 401);
             $userId = $user->getId();
-            $card = $this->entityManager->getRepository(Card::class)->findOneBy(['id' => $id, 'userId' => $userId]);
+            $card = $this->entityManager->getRepository(Card::class)->findOneBy(['id' => $id, 'user' => $user]);
 
             if (!$card) {
                 return $this->json($this->apiService->error('Card not found.'), 404);
@@ -117,13 +117,13 @@ class CardApiController extends AbstractController
             if (!$user) return $this->json($this->apiService->error('Access Denied.'), 401);
             $userId = $user->getId();
             $cardRepository = $this->entityManager->getRepository(Card::class);
-            $card = $cardRepository->findOneBy(['id' => $id, 'userId' => $userId]);
+            $card = $cardRepository->findOneBy(['id' => $id, 'user' => $user]);
 
             if (!$card) {
                 return $this->json($this->apiService->error('Card not found.'), 404);
             }
 
-            $cards = $cardRepository->findBy(['userId' => $userId]);
+            $cards = $cardRepository->findBy(['user' => $user]);
             foreach ($cards as $c) {
                 $c->setIsDefault($c->getId() === $id);
             }

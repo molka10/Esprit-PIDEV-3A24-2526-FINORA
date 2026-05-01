@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use App\Repository\UserApiKeyRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Ignore;
 
 #[ORM\Entity(repositoryClass: UserApiKeyRepository::class)]
 class UserApiKey
@@ -14,13 +15,15 @@ class UserApiKey
     private ?int $id = null;
 
     #[ORM\Column(length: 255, unique: true)]
+    #[Ignore]
     private ?string $token = null;
 
-    #[ORM\Column]
-    private ?int $userId = null;
+    #[ORM\ManyToOne(targetEntity: User::class)]
+    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
+    private User $user;
 
     #[ORM\Column(type: "datetime_immutable")]
-    private ?\DateTimeImmutable $createdAt = null;
+    private \DateTimeImmutable $createdAt;
 
     #[ORM\Column(type: "datetime_immutable", nullable: true)]
     private ?\DateTimeImmutable $expiresAt = null;
@@ -46,14 +49,14 @@ class UserApiKey
         return $this;
     }
 
-    public function getUserId(): ?int
+    public function getUser(): User
     {
-        return $this->userId;
+        return $this->user;
     }
 
-    public function setUserId(int $userId): static
+    public function setUser(User $user): static
     {
-        $this->userId = $userId;
+        $this->user = $user;
         return $this;
     }
 

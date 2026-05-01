@@ -146,6 +146,8 @@ $transaction->setType($type);
 
 $user = $this->getUser();
 $qb = $em->getRepository(TransactionWallet::class)->createQueryBuilder('t')
+    ->innerJoin('t.category', 'c')
+    ->addSelect('c')
     ->andWhere('t.user = :userId')
     ->setParameter('userId', $user->getId());
 
@@ -220,7 +222,7 @@ return $this->render('wallet/list.html.twig', [
             }
         }
 
-        $transactions = $em->getRepository(TransactionWallet::class)->findBy(['user' => $user->getId()]);
+        $transactions = $em->getRepository(TransactionWallet::class)->findByUserWithCategory($user);
         
         $incomeData  = [];
         $outcomeData = [];

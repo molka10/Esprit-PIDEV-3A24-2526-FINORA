@@ -4,9 +4,10 @@ namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
+use App\Repository\CardRepository;
 
-#[ORM\Entity]
-#[ORM\Table(name: "cards")]
+#[ORM\Entity(repositoryClass: CardRepository::class)]
+#[ORM\Table(name: 'cards')]
 class Card
 {
     #[ORM\Id]
@@ -16,33 +17,34 @@ class Card
 
     #[ORM\Column(length: 255)]
     #[Assert\NotBlank]
-    private ?string $cardHolderName = null;
+    private string $cardHolderName;
 
     #[ORM\Column(length: 4)]
     #[Assert\NotBlank]
-    private ?string $last4 = null;
+    private string $last4;
 
     #[ORM\Column(length: 50)]
     #[Assert\NotBlank]
-    private ?string $brand = null;
+    private string $brand;
 
     #[ORM\Column(length: 255)]
     #[Assert\NotBlank]
-    private ?string $stripePaymentMethodId = null;
+    private string $stripePaymentMethodId;
 
     #[ORM\Column(length: 5)]
     #[Assert\NotBlank]
     #[Assert\Regex(pattern: "/^(0[1-9]|1[0-2])\/\d{2}$/")]
-    private ?string $expiryDate = null; // Format: MM/YY
+    private string $expiryDate; // Format: MM/YY
 
-    #[ORM\Column]
-    private ?int $userId = null;
+    #[ORM\ManyToOne(targetEntity: User::class)]
+    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
+    private User $user;
 
     #[ORM\Column(type: "boolean")]
     private bool $isDefault = false;
 
     #[ORM\Column(type: "datetime_immutable")]
-    private ?\DateTimeImmutable $createdAt = null;
+    private \DateTimeImmutable $createdAt;
 
     public function __construct()
     {
@@ -109,14 +111,14 @@ class Card
         return $this;
     }
 
-    public function getUserId(): ?int
+    public function getUser(): User
     {
-        return $this->userId;
+        return $this->user;
     }
 
-    public function setUserId(int $userId): static
+    public function setUser(User $user): static
     {
-        $this->userId = $userId;
+        $this->user = $user;
         return $this;
     }
 

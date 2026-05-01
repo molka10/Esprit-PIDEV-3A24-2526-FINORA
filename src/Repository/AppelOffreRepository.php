@@ -40,6 +40,8 @@ class AppelOffreRepository extends ServiceEntityRepository
     private function getQueryBuilderByFilters(?string $type, ?string $statut, ?int $categorieId, ?string $search, ?string $role = null)
     {
         $qb = $this->createQueryBuilder('a')
+            ->innerJoin('a.createdBy', 'u')
+            ->addSelect('u')
             ->leftJoin('a.categorie', 'c')
             ->addSelect('c');
 

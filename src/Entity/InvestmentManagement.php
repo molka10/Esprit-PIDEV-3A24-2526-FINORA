@@ -16,38 +16,45 @@ class InvestmentManagement
     private ?int $managementId = null;
 
     #[ORM\ManyToOne(inversedBy: 'managements', targetEntity: Investment::class)]
-    #[ORM\JoinColumn(name: "investment_id", referencedColumnName: "investment_id", nullable: false)]
+    #[ORM\JoinColumn(name: "investment_id", referencedColumnName: "investment_id", nullable: false, onDelete: 'CASCADE')]
     #[Assert\NotNull(message: "Please select an investment")]
-    private ?Investment $investment = null;
+    private Investment $investment;
 
     #[ORM\Column(name: "investment_type", type: "string", length: 255)]
     #[Assert\NotBlank]
-    private ?string $investmentType = null;
+    private string $investmentType;
 
     #[ORM\Column(name: "amount_invested", type: "decimal", precision: 10, scale: 2)]
     #[Assert\NotBlank]
     #[Assert\Positive]
-    private ?string $amountInvested = null;
+    private string $amountInvested;
 
     #[ORM\Column(name: "ownership_percentage", type: "decimal", precision: 5, scale: 2)]
     #[Assert\NotBlank]
     #[Assert\Range(min: 0, max: 100)]
-    private ?string $ownershipPercentage = null;
+    private string $ownershipPercentage;
 
-    #[ORM\Column(name: "start_date", type: "date")]
+    #[ORM\Column(name: "start_date", type: "date_immutable")]
     #[Assert\NotNull]
-    private ?\DateTimeInterface $startDate = null;
+    private \DateTimeImmutable $startDate;
 
     #[ORM\Column(name: "status", type: "string", length: 50)]
     #[Assert\Choice(choices: ['ACTIVE', 'CLOSED', 'CRITICAL'], message: "Statut invalide")]
-    private ?string $status = 'ACTIVE';
+    private string $status = 'ACTIVE';
 
-    #[ORM\Column(name: "created_at", type: "datetime", nullable: true)]
-    private ?\DateTimeInterface $createdAt = null;
+    #[ORM\Column(name: "created_at", type: "datetime_immutable")]
+    private \DateTimeImmutable $createdAt;
+
+    public function __construct()
+    {
+        $this->createdAt = new \DateTimeImmutable();
+    }
 
     #[ORM\ManyToOne(targetEntity: User::class)]
     #[ORM\JoinColumn(name: 'user_id', referencedColumnName: 'id', nullable: true, onDelete: 'SET NULL')]
     private ?User $user = null;
+
+
 
     #[ORM\Column(name: "rating", type: "integer", nullable: true)]
     #[Assert\Range(min: 1, max: 5, notInRangeMessage: "Le rating doit être entre 1 et 5")]
@@ -70,82 +77,21 @@ class InvestmentManagement
         return $this->managementId;
     }
 
-    public function getInvestment(): ?Investment
-    {
-        return $this->investment;
-    }
-
-    public function setInvestment(?Investment $investment): self
-    {
-        $this->investment = $investment;
-        return $this;
-    }
-
-    public function getInvestmentType(): ?string
-    {
-        return $this->investmentType;
-    }
-
-    public function setInvestmentType(?string $investmentType): self
-    {
-        $this->investmentType = $investmentType;
-        return $this;
-    }
-
-    public function getAmountInvested(): ?string
-    {
-        return $this->amountInvested;
-    }
-
-    public function setAmountInvested(?string $amountInvested): self
-    {
-        $this->amountInvested = $amountInvested;
-        return $this;
-    }
-
-    public function getOwnershipPercentage(): ?string
-    {
-        return $this->ownershipPercentage;
-    }
-
-    public function setOwnershipPercentage(?string $ownershipPercentage): self
-    {
-        $this->ownershipPercentage = $ownershipPercentage;
-        return $this;
-    }
-
-    public function getStartDate(): ?\DateTimeInterface
-    {
-        return $this->startDate;
-    }
-
-    public function setStartDate(?\DateTimeInterface $startDate): self
-    {
-        $this->startDate = $startDate;
-        return $this;
-    }
-
-    public function getStatus(): ?string
-    {
-        return $this->status;
-    }
-
-    public function setStatus(?string $status): self
-    {
-        $this->status = $status;
-        return $this;
-    }
-
-    public function getCreatedAt(): ?\DateTimeInterface
-    {
-        return $this->createdAt;
-    }
-
-    public function setCreatedAt(?\DateTimeInterface $createdAt): self
-    {
-        $this->createdAt = $createdAt;
-        return $this;
-    }
+    public function getInvestment(): Investment { return $this->investment; }
+    public function setInvestment(Investment $investment): self { $this->investment = $investment; return $this; }
+    public function getInvestmentId(): ?int { return $this->investment ? $this->investment->getId() : null; }
+    public function getInvestmentType(): string { return $this->investmentType; }
+    public function setInvestmentType(string $investmentType): self { $this->investmentType = $investmentType; return $this; }
+    public function getAmountInvested(): string { return $this->amountInvested; }
+    public function setAmountInvested(string $amountInvested): self { $this->amountInvested = $amountInvested; return $this; }
+    public function getOwnershipPercentage(): string { return $this->ownershipPercentage; }
+    public function setOwnershipPercentage(string $ownershipPercentage): self { $this->ownershipPercentage = $ownershipPercentage; return $this; }
+    public function getStartDate(): \DateTimeImmutable { return $this->startDate; }
+    public function setStartDate(\DateTimeImmutable $startDate): self { $this->startDate = $startDate; return $this; }
+    public function getStatus(): string { return $this->status; }
+    public function setStatus(string $status): self { $this->status = $status; return $this; }
+    public function getCreatedAt(): \DateTimeImmutable { return $this->createdAt; }
+    public function setCreatedAt(\DateTimeImmutable $createdAt): self { $this->createdAt = $createdAt; return $this; }
 
     public function getUser(): ?User
     {

@@ -42,12 +42,13 @@ class Candidature
         choices: ['submitted', 'accepted', 'rejected'],
         message: 'Statut invalide'
     )]
-    private ?string $statut = null;
+    private string $statut;
 
-    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
-    private ?\DateTimeInterface $createdAt = null;
+    #[ORM\Column(type: Types::DATETIME_IMMUTABLE)]
+    private \DateTimeImmutable $createdAt;
 
-    #[ORM\ManyToOne(inversedBy: 'candidatures')]
+    #[ORM\ManyToOne(targetEntity: AppelOffre::class, inversedBy: 'candidatures')]
+    #[ORM\JoinColumn(name: 'appel_offre_id', referencedColumnName: 'id', nullable: false, onDelete: 'CASCADE')]
     #[Assert\NotNull(message: "L'appel d'offre est obligatoire")]
     private ?AppelOffre $appelOffre = null;
 
@@ -66,8 +67,8 @@ class Candidature
     #[ORM\PrePersist]
     public function setCreatedAtValue(): void
     {
-        if ($this->createdAt === null) {
-            $this->createdAt = new \DateTime();
+        if (!isset($this->createdAt)) {
+            $this->createdAt = new \DateTimeImmutable();
         }
     }
 
@@ -78,10 +79,15 @@ class Candidature
     public function setMessage(?string $message): static { $this->message = $message; return $this; }
     public function getStatut(): ?string { return $this->statut; }
     public function setStatut(string $statut): static { $this->statut = $statut; return $this; }
-    public function getCreatedAt(): ?\DateTimeInterface { return $this->createdAt; }
-    public function setCreatedAt(\DateTimeInterface $createdAt): static { $this->createdAt = $createdAt; return $this; }
+    public function getCreatedAt(): \DateTimeImmutable
+    {
+        return $this->createdAt;
+    }
+
+    public function setCreatedAt(\DateTimeImmutable $createdAt): static { $this->createdAt = $createdAt; return $this; }
     public function getAppelOffre(): ?AppelOffre { return $this->appelOffre; }
     public function setAppelOffre(?AppelOffre $appelOffre): static { $this->appelOffre = $appelOffre; return $this; }
+    public function getAppelOffreId(): ?int { return $this->appelOffre ? $this->appelOffre->getId() : null; }
     public function getUser(): ?User { return $this->user; }
     public function setUser(?User $user): static { $this->user = $user; return $this; }
 

@@ -67,7 +67,7 @@ class InvestmentRepository extends ServiceEntityRepository
         } elseif ($sort === 'new') {
             $qb->orderBy('i.createdAt', 'DESC');
         } else {
-            $qb->orderBy('i.investmentId', 'DESC');
+            $qb->orderBy('i.id', 'DESC');
         }
 
         return $qb;

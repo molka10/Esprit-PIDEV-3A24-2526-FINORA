@@ -19,19 +19,19 @@ class InvestmentNotification
     private ?User $user = null;
 
     #[ORM\Column(length: 255)]
-    private ?string $title = null;
+    private string $title;
 
     #[ORM\Column(type: Types::TEXT)]
-    private ?string $message = null;
+    private string $message;
 
     #[ORM\Column(length: 50)]
-    private ?string $type = null;
+    private string $type;
 
     #[ORM\Column]
-    private ?bool $isRead = false;
+    private bool $isRead = false;
 
-    #[ORM\Column]
-    private ?\DateTimeImmutable $createdAt = null;
+    #[ORM\Column(type: 'datetime_immutable')]
+    private \DateTimeImmutable $createdAt;
 
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(name: 'investment_id', referencedColumnName: 'investment_id', onDelete: 'CASCADE')]

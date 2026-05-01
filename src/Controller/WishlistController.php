@@ -38,7 +38,7 @@ class WishlistController extends AbstractController
         $investmentItems = $em->getRepository(InvestmentWishlist::class)->findBy(['user' => $user]);
 
         // 4. Wallet (WalletWishlist Entity)
-        $walletItems = $em->getRepository(WalletWishlist::class)->findBy(['userId' => $user->getId()]);
+        $walletItems = $em->getRepository(WalletWishlist::class)->findBy(['user' => $user->getId()]);
 
         // 5. Tenders (Many-to-Many on User)
         $favoriteAppels = $user->getFavoriteAppels();

@@ -13,21 +13,24 @@ class MarginLoan
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(name: 'user_id')]
-    private ?int $userId = null;
+    #[ORM\ManyToOne(targetEntity: User::class)]
+    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
+    private User $user;
 
-    #[ORM\Column(type: 'float')]
-    private ?float $montantEmprunte = null;
+    #[ORM\Column(name: 'montant_emprunte', type: 'decimal', precision: 10, scale: 2)]
+    private ?string $montantEmprunte = null;
 
     #[ORM\Column(length: 50)]
-    private ?string $statut = 'ACTIF';
+    private string $statut = 'ACTIF';
 
-    #[ORM\Column(type: 'datetime')]
-    private ?\DateTimeInterface $dateEmprunt = null;
+    #[ORM\Column(type: 'datetime_immutable')]
+    private \DateTimeImmutable $dateEmprunt;
 
-    public function __construct()
+    public function __construct(User $user, string $montant)
     {
-        $this->dateEmprunt = new \DateTime();
+        $this->user = $user;
+        $this->montantEmprunte = $montant;
+        $this->dateEmprunt = new \DateTimeImmutable();
     }
 
     public function getId(): ?int
@@ -35,23 +38,23 @@ class MarginLoan
         return $this->id;
     }
 
-    public function getUserId(): ?int
+    public function getUser(): User
     {
-        return $this->userId;
+        return $this->user;
     }
 
-    public function setUserId(int $userId): static
+    public function setUser(User $user): static
     {
-        $this->userId = $userId;
+        $this->user = $user;
         return $this;
     }
 
-    public function getMontantEmprunte(): ?float
+    public function getMontantEmprunte(): ?string
     {
         return $this->montantEmprunte;
     }
 
-    public function setMontantEmprunte(float $montantEmprunte): static
+    public function setMontantEmprunte(string $montantEmprunte): static
     {
         $this->montantEmprunte = $montantEmprunte;
         return $this;

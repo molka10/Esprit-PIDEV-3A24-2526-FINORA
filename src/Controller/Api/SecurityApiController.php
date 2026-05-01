@@ -33,7 +33,7 @@ class SecurityApiController extends AbstractController
         $userId = $data['userId'] ?? 6; // Default to 6 for testing
 
         // Check if user already has a valid token
-        $existingToken = $this->entityManager->getRepository(UserApiKey::class)->findOneBy(['userId' => $userId]);
+        $existingToken = $this->entityManager->getRepository(UserApiKey::class)->findOneBy(['user' => $userId]);
         
         if ($existingToken && $existingToken->isValid()) {
             return $this->json($this->apiService->success([
@@ -45,7 +45,8 @@ class SecurityApiController extends AbstractController
         // Generate new token
         $token = bin2hex(random_bytes(32));
         $apiKey = new UserApiKey();
-        $apiKey->setUserId($userId);
+        $userReference = $this->entityManager->getReference(\App\Entity\User::class, $userId);
+        $apiKey->setUser($userReference);
         $apiKey->setToken($token);
         $apiKey->setExpiresAt((new \DateTimeImmutable())->modify('+30 days'));
 

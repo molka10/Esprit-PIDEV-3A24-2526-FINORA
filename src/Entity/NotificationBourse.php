@@ -38,7 +38,7 @@ class NotificationBourse
     private \DateTimeInterface $createdAt;
 
     #[ORM\ManyToOne(targetEntity: Action::class)]
-    #[ORM\JoinColumn(name: 'id_action', referencedColumnName: 'id_action', nullable: true, onDelete: 'SET NULL')]
+    #[ORM\JoinColumn(name: 'action_id', referencedColumnName: 'id_action', nullable: true, onDelete: 'SET NULL')]
     private ?Action $action = null;
 
     public function __construct()
