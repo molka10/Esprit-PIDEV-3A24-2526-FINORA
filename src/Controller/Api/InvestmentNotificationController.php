@@ -3,6 +3,7 @@
 namespace App\Controller\Api;
 
 use App\Repository\InvestmentNotificationRepository;
+use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -13,15 +14,14 @@ use Symfony\Component\Routing\Attribute\Route;
 class InvestmentNotificationController extends AbstractController
 {
     public function __construct(
-        private InvestmentNotificationRepository $repo,
-        private EntityManagerInterface           $em
+        private InvestmentNotificationRepository $repo
     ) {}
 
     #[Route('', name: 'list', methods: ['GET'])]
     public function list(): JsonResponse
     {
         $user = $this->getUser();
-        if (!$user) {
+        if (!$user instanceof User) {
             return $this->json(['count' => 0, 'notifications' => []]);
         }
 
@@ -49,7 +49,7 @@ class InvestmentNotificationController extends AbstractController
     public function markRead(): JsonResponse
     {
         $user = $this->getUser();
-        if (!$user) {
+        if (!$user instanceof User) {
             return $this->json(['success' => false], Response::HTTP_UNAUTHORIZED);
         }
 

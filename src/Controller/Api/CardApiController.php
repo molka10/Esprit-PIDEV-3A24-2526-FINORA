@@ -3,6 +3,7 @@
 namespace App\Controller\Api;
 
 use App\Entity\Card;
+use App\Entity\User;
 use App\Service\ApiService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -28,7 +29,7 @@ class CardApiController extends AbstractController
     {
         try {
             $user = $this->getUser();
-            if (!$user) return $this->json($this->apiService->error('Access Denied.'), 401);
+            if (!$user instanceof User) return $this->json($this->apiService->error('Access Denied.'), 401);
             $userId = $user->getId();
             $cards = $this->entityManager->getRepository(Card::class)->findBy(['user' => $user]);
             
@@ -52,7 +53,7 @@ class CardApiController extends AbstractController
     {
         try {
             $user = $this->getUser();
-            if (!$user) return $this->json($this->apiService->error('Access Denied.'), 401);
+            if (!$user instanceof User) return $this->json($this->apiService->error('Access Denied.'), 401);
             $userId = $user->getId();
             $data = json_decode($request->getContent(), true);
 

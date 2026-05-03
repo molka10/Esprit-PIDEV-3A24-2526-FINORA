@@ -36,7 +36,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\OneToOne(mappedBy: 'user', targetEntity: UserBiometrics::class, cascade: ['persist'])]
+    #[ORM\OneToOne(mappedBy: 'user', targetEntity: UserBiometrics::class, cascade: ['persist'], fetch: 'EXTRA_LAZY')]
     private ?UserBiometrics $userBiometrics = null;
 
     // ================= IMAGE =================

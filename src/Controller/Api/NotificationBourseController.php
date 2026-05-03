@@ -3,6 +3,7 @@
 namespace App\Controller\Api;
 
 use App\Repository\NotificationBourseRepository;
+use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -13,8 +14,7 @@ use Symfony\Component\Routing\Attribute\Route;
 class NotificationBourseController extends AbstractController
 {
     public function __construct(
-        private NotificationBourseRepository $repo,
-        private EntityManagerInterface       $em
+        private NotificationBourseRepository $repo
     ) {}
 
     /**
@@ -24,7 +24,7 @@ class NotificationBourseController extends AbstractController
     public function list(): JsonResponse
     {
         $user = $this->getUser();
-        if (!$user) {
+        if (!$user instanceof User) {
             return $this->json(['count' => 0, 'notifications' => []]);
         }
 
@@ -55,7 +55,7 @@ class NotificationBourseController extends AbstractController
     public function markRead(): JsonResponse
     {
         $user = $this->getUser();
-        if (!$user) {
+        if (!$user instanceof User) {
             return $this->json(['success' => false], Response::HTTP_UNAUTHORIZED);
         }
 

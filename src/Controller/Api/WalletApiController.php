@@ -3,6 +3,7 @@
 namespace App\Controller\Api;
 
 use App\Service\ApiService;
+use App\Entity\User;
 use App\Service\WalletService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -39,7 +40,7 @@ class WalletApiController extends AbstractController
     {
         // Calculate real balance from transactions to match main dashboard
         $user = $this->getUser();
-        if (!$user) return $this->json($this->apiService->error('Access Denied.'), 401);
+        if (!$user instanceof User) return $this->json($this->apiService->error('Access Denied.'), 401);
         $userId = $user->getId();
         $balance = $this->balanceService->calculateUserBalance($userId);
         
@@ -50,6 +51,7 @@ class WalletApiController extends AbstractController
     public function requestRecharge(Request $request): JsonResponse
     {
         try {
+            /** @var User $user */
             $user = $this->getUser();
             if (!$user) return $this->json($this->apiService->error('Access Denied.'), 401);
             $userId = $user->getId();
@@ -77,6 +79,7 @@ class WalletApiController extends AbstractController
     public function confirmRecharge(Request $request): JsonResponse
     {
         try {
+            /** @var User $user */
             $user = $this->getUser();
             if (!$user) return $this->json($this->apiService->error('Access Denied.'), 401);
             $userId = $user->getId();
@@ -113,6 +116,7 @@ class WalletApiController extends AbstractController
     public function transfer(Request $request): JsonResponse
     {
         try {
+            /** @var User $user */
             $user = $this->getUser();
             if (!$user) return $this->json($this->apiService->error('Access Denied.'), 401);
             $userId = $user->getId();

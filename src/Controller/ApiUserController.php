@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Service\WalletBalanceService;
 use App\Repository\TransactionWalletRepository;
+use App\Entity\User;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -16,7 +17,7 @@ class ApiUserController extends AbstractController
     public function getNotifications(WalletBalanceService $balanceService): JsonResponse
     {
         $user = $this->getUser();
-        if (!$user) { return $this->json(['status' => 'error', 'data' => []], 401); }
+        if (!$user instanceof User) { return $this->json(['status' => 'error', 'data' => []], 401); }
         $userId = $user->getId();
         $balance = $balanceService->calculateUserBalance($userId);
 
@@ -44,7 +45,7 @@ class ApiUserController extends AbstractController
     public function getUserTransactions(Request $request, TransactionWalletRepository $repo): JsonResponse
     {
         $user = $this->getUser();
-        if (!$user) { return $this->json(['status' => 'error'], 401); }
+        if (!$user instanceof User) { return $this->json(['status' => 'error'], 401); }
         $userId = $user->getId();
 
         $page      = max(1, $request->query->getInt('page', 1));
