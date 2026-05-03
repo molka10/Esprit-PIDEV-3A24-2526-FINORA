@@ -51,9 +51,8 @@ class WalletApiController extends AbstractController
     public function requestRecharge(Request $request): JsonResponse
     {
         try {
-            /** @var User $user */
             $user = $this->getUser();
-            if (!$user) return $this->json($this->apiService->error('Access Denied.'), 401);
+            if (!$user instanceof User) return $this->json($this->apiService->error('Access Denied.'), 401);
             $userId = $user->getId();
             $data = json_decode($request->getContent(), true);
 
@@ -79,9 +78,8 @@ class WalletApiController extends AbstractController
     public function confirmRecharge(Request $request): JsonResponse
     {
         try {
-            /** @var User $user */
             $user = $this->getUser();
-            if (!$user) return $this->json($this->apiService->error('Access Denied.'), 401);
+            if (!$user instanceof User) return $this->json($this->apiService->error('Access Denied.'), 401);
             $userId = $user->getId();
             $data = json_decode($request->getContent(), true);
 
@@ -116,9 +114,8 @@ class WalletApiController extends AbstractController
     public function transfer(Request $request): JsonResponse
     {
         try {
-            /** @var User $user */
             $user = $this->getUser();
-            if (!$user) return $this->json($this->apiService->error('Access Denied.'), 401);
+            if (!$user instanceof User) return $this->json($this->apiService->error('Access Denied.'), 401);
             $userId = $user->getId();
             
             $data = json_decode($request->getContent(), true);
