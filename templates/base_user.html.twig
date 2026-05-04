@@ -112,6 +112,24 @@
                         <a class="nav-link {{ app.request.get('_route') starts with 'app_history' ? 'active' : '' }}"
                            href="{{ path('app_history') }}">📜 Historique</a>
                     </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle {{ app.request.get('_route') in ['app_formations', 'app_lessons', 'app_my_certificates', 'public_centres_map', 'app_simulation'] ? 'active' : '' }}" href="#" id="formationDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            🎓 Formation
+                        </a>
+                        <ul class="dropdown-menu shadow-lg border-0 mt-3" aria-labelledby="formationDropdown" style="border-radius: 12px; min-width: 220px;">
+                            <li><a class="dropdown-item py-2 px-3 small fw-semibold" href="{{ path('app_formations') }}"><i class="bi bi-collection me-2"></i>Catalogue</a></li>
+                            <li><a class="dropdown-item py-2 px-3 small fw-semibold" href="{{ path('app_lessons') }}"><i class="bi bi-book me-2"></i>Mes Leçons</a></li>
+                            <li><a class="dropdown-item py-2 px-3 small fw-semibold" href="{{ path('app_my_certificates') }}"><i class="bi bi-award me-2"></i>Certificats</a></li>
+                            <li><a class="dropdown-item py-2 px-3 small fw-semibold text-primary" href="{{ path('public_centres_map') }}"><i class="bi bi-map me-2"></i>Centres de Formations</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <a class="dropdown-item py-2 px-3 small fw-bold" href="{{ path('app_simulation') }}" style="color: #7c3aed !important;">
+                                    <i class="bi bi-lightning-charge-fill me-1"></i>Simulation
+                                    <span class="badge ms-2 rounded-pill" style="font-size: 0.6rem; background: linear-gradient(135deg, #7c3aed, #4338ca); color: white;">NOUVEAU</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
                 </ul>
             </div>
 
