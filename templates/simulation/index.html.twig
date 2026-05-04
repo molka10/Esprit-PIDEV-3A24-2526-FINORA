@@ -1,0 +1,338 @@
+{% extends 'base.html.twig' %}
+{% block title %}Simulation - FINORA{% endblock %}
+{% block breadcrumb %}Simulation{% endblock %}
+
+{% block stylesheets %}{{ parent() }}
+<style>
+:root { --sim-green: #10b981; --sim-red: #ef4444; --sim-purple: #7c3aed; }
+.sim-hero { background: linear-gradient(135deg, #1e0a3c 0%, #3b1278 50%, #4338ca 100%); border-radius: 24px; padding: 40px; color: white; position: relative; overflow: hidden; margin-bottom: 24px; }
+.sim-hero::before { content:''; position:absolute; top:-60px; right:-60px; width:200px; height:200px; background:rgba(255,255,255,0.05); border-radius:50%; }
+.sim-hero::after { content:''; position:absolute; bottom:-40px; left:30%; width:120px; height:120px; background:rgba(124,58,237,0.3); border-radius:50%; }
+.balance-card { background: white; border-radius: 20px; padding: 24px; box-shadow: 0 8px 30px rgba(124,58,237,0.1); border: 1px solid rgba(124,58,237,0.1); }
+.asset-row { display:flex; align-items:center; justify-content:space-between; padding:12px 16px; border-radius:12px; border:1px solid #f1f5f9; margin-bottom:8px; transition:all 0.2s; cursor:pointer; background:white; }
+.asset-row:hover { border-color: rgba(124,58,237,0.3); background: rgba(124,58,237,0.02); transform:translateX(4px); }
+.asset-row.selected { border-color: #7c3aed; background: rgba(124,58,237,0.05); }
+.price-up { color: var(--sim-green); }
+.price-down { color: var(--sim-red); }
+.scenario-card { border-radius: 20px; border: 2px solid #f1f5f9; padding: 20px; cursor: pointer; transition: all 0.3s; background: white; }
+.scenario-card:hover { border-color: #7c3aed; transform: translateY(-4px); box-shadow: 0 12px 30px rgba(124,58,237,0.15); }
+.qty-input { width: 80px; border: 2px solid #e2e8f0; border-radius: 10px; padding: 6px 10px; text-align:center; font-weight:700; }
+.qty-input:focus { outline:none; border-color:#7c3aed; }
+.portfolio-item { display:flex; align-items:center; justify-content:space-between; padding:10px 14px; border-radius:12px; background:#f8fafc; margin-bottom:6px; }
+.btn-buy { background:linear-gradient(135deg,#10b981,#059669); color:white; border:none; border-radius:10px; padding:8px 18px; font-weight:700; font-size:13px; transition:all 0.2s; }
+.btn-buy:hover { transform:translateY(-2px); box-shadow:0 6px 15px rgba(16,185,129,0.4); color:white; }
+.btn-sell { background:linear-gradient(135deg,#ef4444,#dc2626); color:white; border:none; border-radius:10px; padding:8px 18px; font-weight:700; font-size:13px; transition:all 0.2s; }
+.btn-sell:hover { transform:translateY(-2px); box-shadow:0 6px 15px rgba(239,68,68,0.4); color:white; }
+.pnl-positive { color: var(--sim-green); font-weight:800; }
+.pnl-negative { color: var(--sim-red); font-weight:800; }
+.toast-sim { position:fixed; bottom:90px; right:24px; z-index:9999; border-radius:14px; padding:14px 20px; font-weight:600; color:white; font-size:14px; box-shadow:0 8px 25px rgba(0,0,0,0.2); transition:all 0.4s; }
+.section-title { font-weight:800; font-size:1.1rem; color:#1e0a3c; margin-bottom:16px; display:flex; align-items:center; gap:8px; }
+</style>
+{% endblock %}
+
+{% block body %}
+<!-- Hero -->
+<div class="sim-hero">
+    <div style="position:relative;z-index:2;">
+        <div class="d-flex align-items-center gap-3 mb-3">
+            <div style="background:rgba(255,255,255,0.15);padding:12px;border-radius:16px;font-size:28px;">⚡</div>
+            <div>
+                <h1 class="mb-0 fw-800" style="font-size:1.8rem;">Simulateur de Trading</h1>
+                <p class="mb-0 opacity-75">Pratiquez sans risque · Apprenez par l'action · Construisez votre confiance</p>
+            </div>
+        </div>
+        <div class="d-flex gap-3 flex-wrap">
+            <span class="badge" style="background:rgba(16,185,129,0.2);color:#6ee7b7;padding:8px 14px;border-radius:20px;font-size:12px;">✅ Zéro risque financier</span>
+            <span class="badge" style="background:rgba(245,158,11,0.2);color:#fcd34d;padding:8px 14px;border-radius:20px;font-size:12px;">📊 Prix réels du marché</span>
+            <span class="badge" style="background:rgba(124,58,237,0.3);color:#c4b5fd;padding:8px 14px;border-radius:20px;font-size:12px;">🎯 Scénarios interactifs</span>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- LEFT: Market + Trade -->
+    <div class="col-lg-8">
+        <!-- Balance bar -->
+        <div class="balance-card mb-4">
+            <div class="row align-items-center g-3">
+                <div class="col-md-3 text-center">
+                    <div class="text-muted small fw-bold text-uppercase mb-1" style="font-size:10px;letter-spacing:1px;">Solde Virtuel</div>
+                    <div id="balanceDisplay" class="fw-800" style="font-size:1.8rem;color:#7c3aed;">$10,000.00</div>
+                </div>
+                <div class="col-md-3 text-center border-start">
+                    <div class="text-muted small fw-bold text-uppercase mb-1" style="font-size:10px;letter-spacing:1px;">Valeur Portef.</div>
+                    <div id="portfolioValue" class="fw-800" style="font-size:1.8rem;color:#1e0a3c;">$0.00</div>
+                </div>
+                <div class="col-md-3 text-center border-start">
+                    <div class="text-muted small fw-bold text-uppercase mb-1" style="font-size:10px;letter-spacing:1px;">P&L Total</div>
+                    <div id="pnlDisplay" class="fw-800" style="font-size:1.8rem;">$0.00</div>
+                </div>
+                <div class="col-md-3 text-center border-start">
+                    <button onclick="resetSimulation()" class="btn btn-outline-danger btn-sm rounded-pill px-3">
+                        <i class="bi bi-arrow-counterclockwise me-1"></i>Reset
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Market Assets -->
+        <div class="balance-card mb-4">
+            <div class="section-title"><i class="bi bi-graph-up" style="color:#7c3aed;"></i>Marché en Direct</div>
+            <div id="assetList">
+                {% for asset in assets %}
+                <div class="asset-row" id="asset-{{ asset.symbol }}" onclick="selectAsset('{{ asset.symbol }}', {{ asset.price }}, '{{ asset.name }}')">
+                    <div class="d-flex align-items-center gap-3">
+                        <div style="width:40px;height:40px;border-radius:12px;background:rgba(124,58,237,0.1);display:flex;align-items:center;justify-content:center;font-size:18px;">
+                            <i class="bi {{ asset.icon }}" style="color:#7c3aed;"></i>
+                        </div>
+                        <div>
+                            <div class="fw-700" style="font-size:0.9rem;">{{ asset.symbol }}</div>
+                            <div class="text-muted" style="font-size:11px;">{{ asset.name }}</div>
+                        </div>
+                    </div>
+                    <div class="text-end">
+                        <div class="fw-700">${{ asset.price|number_format(2) }}</div>
+                        <div class="small fw-600 {{ asset.change >= 0 ? 'price-up' : 'price-down' }}">
+                            {{ asset.change >= 0 ? '+' : '' }}{{ asset.change }}%
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-center gap-2 ms-3">
+                        <input type="number" class="qty-input" id="qty-{{ asset.symbol }}" value="1" min="1" onclick="event.stopPropagation()">
+                        <button class="btn-buy" onclick="event.stopPropagation(); tradeAsset('{{ asset.symbol }}', {{ asset.price }}, '{{ asset.name }}', 'buy')">
+                            <i class="bi bi-arrow-up-circle me-1"></i>Acheter
+                        </button>
+                        <button class="btn-sell" onclick="event.stopPropagation(); tradeAsset('{{ asset.symbol }}', {{ asset.price }}, '{{ asset.name }}', 'sell')">
+                            <i class="bi bi-arrow-down-circle me-1"></i>Vendre
+                        </button>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Scenarios -->
+        <div class="balance-card">
+            <div class="section-title"><i class="bi bi-lightning-charge-fill" style="color:#f59e0b;"></i>Scénarios de Marché</div>
+            <div class="row g-3">
+                {% for scenario in scenarios %}
+                <div class="col-md-6">
+                    <div class="scenario-card" onclick="runScenario('{{ scenario.id }}', {{ scenario.impact }}, '{{ scenario.title }}')">
+                        <div class="d-flex align-items-start gap-3 mb-2">
+                            <span style="font-size:2rem;">{{ scenario.emoji }}</span>
+                            <div>
+                                <div class="fw-700" style="font-size:0.95rem;">{{ scenario.title }}</div>
+                                <span class="badge {{ scenario.badge_class }} bg-opacity-10 text-{{ scenario.badge_class|replace({'bg-':'','text-':''}) }} rounded-pill" style="font-size:10px;">{{ scenario.difficulty }}</span>
+                            </div>
+                        </div>
+                        <p class="text-muted small mb-2">{{ scenario.description }}</p>
+                        <div class="d-flex align-items-center justify-content-between">
+                            <span class="small fw-600 {{ scenario.impact >= 0 ? 'text-success' : 'text-danger' }}">
+                                Impact : {{ scenario.impact >= 0 ? '+' : '' }}{{ scenario.impact }}%
+                            </span>
+                            <span class="badge" style="background:rgba(124,58,237,0.1);color:#7c3aed;font-size:10px;">Simuler →</span>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- RIGHT: Portfolio -->
+    <div class="col-lg-4">
+        <div class="balance-card" style="position:sticky;top:100px;">
+            <div class="section-title"><i class="bi bi-briefcase-fill" style="color:#7c3aed;"></i>Mon Portefeuille</div>
+            <div id="portfolioContainer">
+                <div class="text-center py-5 text-muted" id="emptyPortfolio">
+                    <i class="bi bi-inbox" style="font-size:3rem;opacity:0.3;"></i>
+                    <p class="mt-3 small">Aucune position ouverte.<br>Achetez un actif pour commencer !</p>
+                </div>
+            </div>
+            <hr>
+            <div class="section-title mt-3"><i class="bi bi-clock-history" style="color:#64748b;"></i>Historique</div>
+            <div id="tradeHistory" style="max-height:250px;overflow-y:auto;">
+                <p class="text-muted small text-center">Aucune transaction.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Scenario Result Modal -->
+<div class="modal fade" id="scenarioModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0" style="border-radius:24px;overflow:hidden;">
+            <div class="modal-header border-0" id="scenarioHeader" style="padding:24px;">
+                <h5 class="modal-title fw-800" id="scenarioTitle"></h5>
+            </div>
+            <div class="modal-body" style="padding:24px;">
+                <div id="scenarioResult" class="text-center py-3"></div>
+            </div>
+            <div class="modal-footer border-0">
+                <button class="btn btn-primary rounded-pill px-4" data-bs-dismiss="modal">Compris !</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="simToast" class="toast-sim" style="display:none;"></div>
+{% endblock %}
+
+{% block javascripts %}{{ parent() }}
+<script>
+let balance = 10000;
+let portfolio = {};
+let tradeCount = 0;
+
+function formatMoney(n) {
+    return '$' + n.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+}
+
+function showToast(msg, color) {
+    const t = document.getElementById('simToast');
+    t.style.background = color;
+    t.innerHTML = msg;
+    t.style.display = 'block';
+    setTimeout(() => { t.style.display = 'none'; }, 3000);
+}
+
+function updateBalanceUI() {
+    document.getElementById('balanceDisplay').textContent = formatMoney(balance);
+    let portfolioVal = 0;
+    let totalCost = 0;
+    for (const sym in portfolio) {
+        portfolioVal += portfolio[sym].qty * portfolio[sym].price;
+        totalCost += portfolio[sym].cost;
+    }
+    document.getElementById('portfolioValue').textContent = formatMoney(portfolioVal);
+    const pnl = portfolioVal - totalCost;
+    const pnlEl = document.getElementById('pnlDisplay');
+    pnlEl.textContent = (pnl >= 0 ? '+' : '') + formatMoney(pnl);
+    pnlEl.className = pnl >= 0 ? 'fw-800 pnl-positive' : 'fw-800 pnl-negative';
+    pnlEl.style.fontSize = '1.8rem';
+    renderPortfolio();
+}
+
+function tradeAsset(symbol, price, name, action) {
+    const qtyInput = document.getElementById('qty-' + symbol);
+    const qty = parseInt(qtyInput.value) || 1;
+    const total = price * qty;
+
+    if (action === 'buy') {
+        if (total > balance) {
+            showToast('❌ Solde insuffisant !', '#ef4444');
+            return;
+        }
+        balance -= total;
+        if (!portfolio[symbol]) portfolio[symbol] = {name, qty:0, price, cost:0};
+        portfolio[symbol].qty += qty;
+        portfolio[symbol].cost += total;
+        showToast(`✅ Acheté ${qty}x ${symbol} pour ${formatMoney(total)}`, '#10b981');
+    } else {
+        if (!portfolio[symbol] || portfolio[symbol].qty < qty) {
+            showToast('❌ Positions insuffisantes !', '#ef4444');
+            return;
+        }
+        balance += total;
+        const avgCost = portfolio[symbol].cost / portfolio[symbol].qty;
+        portfolio[symbol].cost -= avgCost * qty;
+        portfolio[symbol].qty -= qty;
+        if (portfolio[symbol].qty === 0) delete portfolio[symbol];
+        showToast(`🔴 Vendu ${qty}x ${symbol} pour ${formatMoney(total)}`, '#f59e0b');
+    }
+
+    addTradeHistory(action, symbol, qty, price, total);
+    updateBalanceUI();
+}
+
+function addTradeHistory(action, symbol, qty, price, total) {
+    tradeCount++;
+    const hist = document.getElementById('tradeHistory');
+    if (tradeCount === 1) hist.innerHTML = '';
+    const color = action === 'buy' ? '#10b981' : '#ef4444';
+    const icon = action === 'buy' ? '▲' : '▼';
+    const time = new Date().toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'});
+    hist.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px;border-radius:8px;background:#f8fafc;margin-bottom:4px;font-size:12px;">
+        <span style="color:${color};font-weight:700;">${icon} ${symbol}</span>
+        <span class="text-muted">x${qty}</span>
+        <span style="font-weight:600;">${formatMoney(total)}</span>
+        <span class="text-muted">${time}</span>
+    </div>` + hist.innerHTML;
+}
+
+function renderPortfolio() {
+    const container = document.getElementById('portfolioContainer');
+    const empty = document.getElementById('emptyPortfolio');
+    if (Object.keys(portfolio).length === 0) {
+        container.innerHTML = `<div class="text-center py-5 text-muted" id="emptyPortfolio"><i class="bi bi-inbox" style="font-size:3rem;opacity:0.3;"></i><p class="mt-3 small">Aucune position ouverte.<br>Achetez un actif pour commencer !</p></div>`;
+        return;
+    }
+    let html = '';
+    for (const sym in portfolio) {
+        const p = portfolio[sym];
+        const currentVal = p.qty * p.price;
+        const pnl = currentVal - p.cost;
+        const pnlClass = pnl >= 0 ? 'pnl-positive' : 'pnl-negative';
+        html += `<div class="portfolio-item">
+            <div><div style="font-size:13px;font-weight:700;">${sym}</div><div style="font-size:10px;color:#94a3b8;">${p.name}</div></div>
+            <div class="text-center"><div style="font-size:12px;font-weight:600;">x${p.qty}</div></div>
+            <div class="text-end"><div style="font-size:13px;font-weight:700;">${formatMoney(currentVal)}</div><div class="small ${pnlClass}">${pnl>=0?'+':''}${formatMoney(pnl)}</div></div>
+        </div>`;
+    }
+    container.innerHTML = html;
+}
+
+function runScenario(id, impact, title) {
+    const modal = new bootstrap.Modal(document.getElementById('scenarioModal'));
+    const header = document.getElementById('scenarioHeader');
+    const result = document.getElementById('scenarioResult');
+    document.getElementById('scenarioTitle').textContent = '⚡ ' + title;
+
+    let portfolioVal = 0;
+    for (const sym in portfolio) portfolioVal += portfolio[sym].qty * portfolio[sym].price;
+
+    const impactAmount = portfolioVal * (impact / 100);
+    const isPositive = impact >= 0;
+
+    header.style.background = isPositive ? 'linear-gradient(135deg,#d1fae5,#a7f3d0)' : 'linear-gradient(135deg,#fee2e2,#fecaca)';
+    result.innerHTML = `
+        <div style="font-size:4rem;margin-bottom:16px;">${isPositive ? '🚀' : '📉'}</div>
+        <h4 class="fw-800" style="color:${isPositive?'#10b981':'#ef4444'};">${isPositive?'+':''}${impact}% ${isPositive?'de gain':'de perte'}</h4>
+        <p class="text-muted">Impact sur votre portefeuille :</p>
+        <div style="font-size:2rem;font-weight:800;color:${isPositive?'#10b981':'#ef4444'};">
+            ${isPositive?'+':''}${formatMoney(impactAmount)}
+        </div>
+        ${portfolioVal === 0 ? '<p class="text-muted small mt-3">💡 Investissez d\'abord dans des actifs pour voir l\'impact réel sur votre portefeuille.</p>' : ''}
+        <div class="mt-4 p-3 rounded-3" style="background:#f8fafc;text-align:left;">
+            <strong>💡 Leçon :</strong> ${getLessonForScenario(id)}
+        </div>`;
+    modal.show();
+}
+
+function getLessonForScenario(id) {
+    const lessons = {
+        crash: "Lors d'un krach, la diversification protège votre capital. Les investisseurs qui conservent leurs positions historiquement récupèrent leurs pertes en 2-3 ans.",
+        bull: "Le secteur tech peut offrir des rendements extraordinaires, mais la concentration augmente le risque. Rééquilibrez régulièrement votre portefeuille.",
+        inflation: "L'or, les matières premières et les actions de valeur résistent mieux à l'inflation que les obligations et le cash.",
+        ipo: "Les IPO sont volatiles. Les investisseurs qui attendent 3-6 mois après l'introduction obtiennent généralement de meilleurs prix d'entrée."
+    };
+    return lessons[id] || "Apprenez de chaque scénario pour améliorer votre stratégie.";
+}
+
+function selectAsset(symbol, price, name) {
+    document.querySelectorAll('.asset-row').forEach(r => r.classList.remove('selected'));
+    document.getElementById('asset-' + symbol).classList.add('selected');
+}
+
+function resetSimulation() {
+    if (!confirm('Réinitialiser toute la simulation ? Toutes vos positions seront perdues.')) return;
+    balance = 10000;
+    portfolio = {};
+    tradeCount = 0;
+    document.getElementById('tradeHistory').innerHTML = '<p class="text-muted small text-center">Aucune transaction.</p>';
+    updateBalanceUI();
+    showToast('🔄 Simulation réinitialisée avec $10,000 virtuels', '#7c3aed');
+}
+
+updateBalanceUI();
+</script>
+{% endblock %}

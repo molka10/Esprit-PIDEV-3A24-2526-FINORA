@@ -783,14 +783,18 @@
                     <div class="d-flex align-items-center gap-3"><i class="bi bi-mortarboard"></i> Formation</div>
                     <i class="bi bi-chevron-down small"></i>
                 </a>
-                <div class="collapse ps-3 {{ app.request.attributes.get('_route') == 'app_formations' or app.request.attributes.get('_route') == 'app_lessons' or app.request.attributes.get('_route') == 'app_my_certificates' or app.request.attributes.get('_route') == 'public_centres_map' ? 'show' : '' }}" id="sideFormation">
+                <div class="collapse ps-3 {{ app.request.attributes.get('_route') == 'app_formations' or app.request.attributes.get('_route') == 'app_lessons' or app.request.attributes.get('_route') == 'app_my_certificates' or app.request.attributes.get('_route') == 'public_centres_map' or app.request.attributes.get('_route') == 'app_simulation' ? 'show' : '' }}" id="sideFormation">
                     <a href="{{ path('app_formations') }}" class="sidebar-nav-link py-2 small fw-normal">Catalogue <span class="badge bg-warning bg-opacity-10 text-warning ms-auto" style="font-size: 0.6rem;">PRO</span></a>
                     <a href="{{ path('app_lessons') }}" class="sidebar-nav-link py-2 small fw-normal">Mes Leçons</a>
                     <a href="{{ path('app_my_certificates') }}" class="sidebar-nav-link py-2 small fw-normal">Certificats <i class="fas fa-medal text-warning ms-auto"></i></a>
+                    <a href="{{ path('app_simulation') }}" class="sidebar-nav-link py-2 small fw-normal {{ app.request.attributes.get('_route') == 'app_simulation' ? 'active' : '' }}" style="color: #7c3aed !important;">
+                        <i class="bi bi-lightning-charge-fill me-1" style="color: #7c3aed;"></i>Simulation <span class="badge ms-auto" style="font-size: 0.6rem; background: linear-gradient(135deg, #7c3aed, #4338ca); color: white;">NOUVEAU</span>
+                    </a>
                     <hr class="dropdown-divider mx-3">
                     <a href="{{ path('public_centres_map') }}" class="sidebar-nav-link py-2 small fw-normal text-primary"><i class="bi bi-map me-2"></i>Centres de Formations</a>
                 </div>
             </div>
+
 
             <!-- Gamification -->
             <a href="{{ path('app_gamification') }}" class="sidebar-nav-link {{ app.request.attributes.get('_route') == 'app_gamification' ? 'active' : '' }}">
