@@ -76,7 +76,7 @@ class MarginLoan
         return $this->dateEmprunt;
     }
 
-    public function setDateEmprunt(\DateTimeInterface $dateEmprunt): static
+    public function setDateEmprunt(\DateTimeImmutable $dateEmprunt): static
     {
         $this->dateEmprunt = $dateEmprunt;
         return $this;

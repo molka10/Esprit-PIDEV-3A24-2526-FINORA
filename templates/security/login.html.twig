@@ -210,7 +210,7 @@ document.addEventListener('DOMContentLoaded', () => {
             
             if (result.success) {
                 // Success! Redirect to profile or home
-                window.location.href = '{{ path("app_profile") }}';
+                window.location.href = '{{ path("app_home") }}';
             } else {
                 alert('Authentication Failed: ' + result.message);
                 captureBtn.innerText = 'Scan Face';
@@ -251,7 +251,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             timer: 1500,
                             showConfirmButton: false
                         }).then(() => {
-                            window.location.href = '{{ path("app_profile") }}';
+                            window.location.href = '{{ path("app_home") }}';
                         });
                     }
                 }, 100);

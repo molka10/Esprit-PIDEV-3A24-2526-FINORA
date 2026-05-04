@@ -13,6 +13,16 @@ class TransactionBourseRepository extends ServiceEntityRepository
         parent::__construct($registry, TransactionBourse::class);
     }
 
+    public function findByUser(int $userId): array
+    {
+        return $this->createQueryBuilder('t')
+            ->where('t.user = :userId')
+            ->setParameter('userId', $userId)
+            ->orderBy('t.dateTransaction', 'DESC')
+            ->getQuery()
+            ->getResult();
+    }
+
     // =============================
     // 🔹 TRANSACTIONS PAR TYPE
     // =============================

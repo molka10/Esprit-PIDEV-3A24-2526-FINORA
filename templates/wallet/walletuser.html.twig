@@ -12,7 +12,7 @@
     }
 
     .clean-dashboard {
-        padding: 40px;
+        padding: 24px;
         background: #fdfcff;
         min-height: 100vh;
         font-family: 'Outfit', 'Inter', sans-serif;
@@ -71,38 +71,38 @@
     .clean-stats {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-        gap: 25px;
-        margin-bottom: 35px;
+        gap: 16px;
+        margin-bottom: 24px;
     }
     .stat-card {
         background: #fff;
-        padding: 28px;
-        border-radius: 24px;
+        padding: 12px;
+        border-radius: 20px;
         box-shadow: 0 10px 30px rgba(124, 58, 237, 0.05);
         border: 1px solid rgba(124, 58, 237, 0.05);
         transition: all 0.3s;
     }
     .stat-card:hover { transform: translateY(-5px); box-shadow: 0 20px 40px rgba(124, 58, 237, 0.1); }
     .stat-icon {
-        width: 54px; height: 54px;
-        border-radius: 16px;
+        width: 40px; height: 40px;
+        border-radius: 12px;
         display: flex; align-items: center; justify-content: center;
-        font-size: 24px; flex-shrink: 0;
+        font-size: 18px; flex-shrink: 0;
     }
     .stat-card span { font-size: 11px; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; }
-    .stat-card h2 { font-size: 24px; font-weight: 800; margin: 2px 0 0; }
+    .stat-card h2 { font-size: 20px; font-weight: 800; margin: 2px 0 0; }
 
     /* ── Charts Row ── */
     .dashboard-main-row {
         display: grid;
         grid-template-columns: 2.2fr 1fr;
-        gap: 25px;
-        margin-bottom: 30px;
+        gap: 16px;
+        margin-bottom: 24px;
     }
     .chart-container-card {
         background: #fff;
-        padding: 30px;
-        border-radius: 28px;
+        padding: 15px;
+        border-radius: 24px;
         box-shadow: 0 10px 30px rgba(124, 58, 237, 0.05);
         border: 1px solid rgba(124, 58, 237, 0.05);
     }
@@ -117,7 +117,7 @@
 <div class="clean-dashboard">
 
     {# ── Slim Premium Header ── #}
-    <div class="dash-hero" style="padding: 35px 40px; margin-bottom: 30px;">
+    <div class="dash-hero" style="padding: 15px 25px; margin-bottom: 20px;">
         <div class="dash-hero-bg"></div>
         <div class="dash-hero-content" style="z-index: 2; position: relative;">
             <h1><i class="bi bi-wallet2 me-3"></i>Tableau de Bord Wallet</h1>
@@ -425,7 +425,7 @@
         align-items: center;
         justify-content: space-between;
         background: linear-gradient(135deg, #1e1b4b 0%, #4338ca 100%);
-        padding: 30px 40px;
+        padding: 16px 24px;
         border-radius: 28px;
         color: white;
         text-decoration: none;

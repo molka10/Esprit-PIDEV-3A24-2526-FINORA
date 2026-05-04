@@ -146,8 +146,8 @@ class AiAssistantService
         $allInvestments = $this->investmentRepository->findAll();
         $processableItems = [];
         foreach ($allInvestments as $inv) {
-            // Requirement: exclude status != ACTIVE and exclude CRITICAL
-            if ($inv->getStatus() !== 'ACTIVE' || $inv->getStatus() === 'CRITICAL') {
+            // Requirement: exclude status != ACTIVE (this automatically excludes CLOSED and CRITICAL)
+            if ($inv->getStatus() !== 'ACTIVE') {
                 continue;
             }
             
@@ -343,7 +343,7 @@ class AiAssistantService
                 'en' => "I highly recommend these projects that might fit your profile.",
                 'ar' => "أوصي بشدة بهذه المشاريع التي قد تناسب ملفك الشخصي."
             ];
-            return $fallbackMsgs[$selectedLang] ?? $fallbackMsgs['fr'];
+            return $fallbackMsgs[$language] ?? $fallbackMsgs['fr'];
         }
     }
 

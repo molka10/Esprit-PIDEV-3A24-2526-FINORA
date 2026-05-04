@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\User;
 use App\Entity\Investment;
 use App\Entity\InvestmentWishlist;
 use App\Repository\InvestmentRepository;
@@ -31,6 +32,9 @@ class InvestmentWishlistController extends AbstractController
         }
 
         $user = $this->getUser();
+        if (!$user instanceof User) {
+            return new JsonResponse(['status' => 'error', 'message' => 'User not found'], 404);
+        }
         
         // 2. Vérification de l'existence
         $existingWishlist = $repository->findOneBy([

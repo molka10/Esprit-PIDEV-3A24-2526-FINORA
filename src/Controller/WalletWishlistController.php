@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Wishlist;
+use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -18,12 +19,12 @@ class WalletWishlistController extends AbstractController
     public function index(Request $request, EntityManagerInterface $em, SessionInterface $session, WalletBalanceService $balanceService, WishlistPredictorService $predictor): Response
     {
         $user = $this->getUser();
-        if (!$user) {
+        if (!$user instanceof User) {
             return $this->redirectToRoute('app_login');
         }
         $userId = $user->getId();
 
-        // Ã¢Å¾â€¢ ADD ITEM
+        // ➕ ADD ITEM
         if ($request->isMethod('POST') && $request->request->get('_action') !== 'set_goal') {
 
             $name  = $request->request->get('name');
@@ -32,7 +33,7 @@ class WalletWishlistController extends AbstractController
             if ($name && $price) {
                 $item = new Wishlist();
                 $item->setName($name);
-                $item->setPrice((float) $price);
+                $item->setPrice((string) $price);
                 $item->setUser($user);
 
                 $em->persist($item);
@@ -66,7 +67,7 @@ class WalletWishlistController extends AbstractController
         $predictions = [];
         $currentBalance = 0;
         foreach ($wishlist as $item) {
-            $pred = $predictor->canAffordWishlistItem($userId, $item->getPrice());
+            $pred = $predictor->canAffordWishlistItem($userId, (float)$item->getPrice());
             $currentBalance = $pred['current_balance'];
             $predictions[$item->getId()] = $pred;
         }

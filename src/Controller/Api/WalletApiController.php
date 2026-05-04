@@ -173,8 +173,8 @@ class WalletApiController extends AbstractController
                 $tOut->setUser($user);
                 $tOut->setNomTransaction("Finora Pay - Envoi à " . $recipientEmail);
                 $tOut->setType('OUTCOME');
-                $tOut->setMontant(-abs($amount)); // Explicitly negative
-                $tOut->setDateTransaction(new \DateTime());
+                $tOut->setMontant((string)(-abs($amount))); // Explicitly negative string
+                $tOut->setDateTransaction(new \DateTimeImmutable());
                 $tOut->setCategory($catOut);
                 $tOut->setStatus($status);
                 $this->entityManager->persist($tOut);
@@ -185,8 +185,8 @@ class WalletApiController extends AbstractController
                 $tIn->setUser($recipient);
                 $tIn->setNomTransaction("Finora Pay - Reçu de " . $user->getUserIdentifier());
                 $tIn->setType('INCOME');
-                $tIn->setMontant(abs($amount)); // Explicitly positive
-                $tIn->setDateTransaction(new \DateTime());
+                $tIn->setMontant((string)abs($amount)); // Explicitly positive string
+                $tIn->setDateTransaction(new \DateTimeImmutable());
                 $tIn->setCategory($catIn);
                 $tIn->setStatus($status);
                 $this->entityManager->persist($tIn);

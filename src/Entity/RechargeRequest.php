@@ -90,7 +90,7 @@ class RechargeRequest
     public function getUserId(): ?int { return $this->user ? $this->user->getId() : null; }
     public function setUserId(int $id): self { return $this; }
 
-    public function getCard(): Card
+    public function getCard(): ?Card
     {
         return $this->card;
     }

@@ -37,8 +37,8 @@ class InvestmentLifecycleService
         $ownership = (float) $investment->getOwnershipPercentage();
         $amount = (float) $investment->getAmountInvested();
 
-        $now = new \DateTime();
-        $startDate = $investment->getStartDate() ?? clone $now;
+        $now = new \DateTimeImmutable();
+        $startDate = $investment->getStartDate();
         
         $monthsElapsed = $startDate->diff($now)->m + ($startDate->diff($now)->y * 12);
         
@@ -62,7 +62,7 @@ class InvestmentLifecycleService
     private function reconstructTimeline(InvestmentManagement $investment): array
     {
         $timeline = [];
-        $creationDate = $investment->getCreatedAt() ?? $investment->getStartDate() ?? clone (new \DateTime());
+        $creationDate = $investment->getCreatedAt();
         
         $timeline[] = [
             'phase' => 'CREATED',
@@ -73,12 +73,11 @@ class InvestmentLifecycleService
         $currentPhase = $this->getCurrentPhase($investment);
         
         if (in_array($currentPhase, ['ACTIVE', 'GROWING', 'CLOSED'])) {
-            $activeDate = clone $creationDate;
-            $activeDate->modify('+2 days');
+            $activeDate = $creationDate->modify('+2 days');
             
             // Si la date calculée est dans le futur, la plafonner à "maintenant"
-            if ($activeDate > new \DateTime()) {
-                $activeDate = new \DateTime();
+            if ($activeDate > new \DateTimeImmutable()) {
+                $activeDate = new \DateTimeImmutable();
             }
 
             $timeline[] = [
@@ -89,11 +88,10 @@ class InvestmentLifecycleService
         }
 
         if (in_array($currentPhase, ['GROWING', 'CLOSED'])) {
-            $growingDate = clone $creationDate;
-            $growingDate->modify('+1 month');
+            $growingDate = $creationDate->modify('+1 month');
             
-            if ($growingDate > new \DateTime()) {
-                $growingDate = new \DateTime();
+            if ($growingDate > new \DateTimeImmutable()) {
+                $growingDate = new \DateTimeImmutable();
             }
 
             $timeline[] = [
@@ -209,9 +207,8 @@ class InvestmentLifecycleService
         }
 
         // 💎 BONUS : Détection de stagnation
-        $startDate = $investment->getStartDate();
-        if ($startDate && $currentPhase === 'ACTIVE' && $ownership < 5) {
-            $diff = $startDate->diff(new \DateTime());
+        if ($currentPhase === 'ACTIVE' && $ownership < 5) {
+            $diff = $investment->getStartDate()->diff(new \DateTime());
             if ($diff->m >= 6 || $diff->y > 0) {
                 $insights[] = [
                     'type' => 'warning',

@@ -20,7 +20,7 @@ class GoogleController extends AbstractController
             ->getClient('google') // key used in knpu_oauth2_client.yaml
             ->redirect([
                 'email', 'profile' // the scopes you want to access
-            ]);
+            ], []);
     }
 
     /**

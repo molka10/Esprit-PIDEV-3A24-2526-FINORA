@@ -87,8 +87,8 @@ class BourseService
         $bourse->setDevise(strtoupper($bourse->getDevise()));
 
         // Définir la date de création
-        if (!$bourse->getDateCreation()) {
-            $bourse->setDateCreation(new \DateTime());
+        if ($bourse->getDateCreation() === null) {
+            $bourse->setDateCreation(new \DateTimeImmutable());
         }
 
         $this->em->persist($bourse);

@@ -9,6 +9,7 @@ use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
 
 class ApiService
 {
+    private EntityManagerInterface $entityManager;
     private string $masterApiKey;
 
     public function __construct(EntityManagerInterface $entityManager, string $masterApiKey)
@@ -26,7 +27,7 @@ class ApiService
     {
         // For this demo, we assume the user is authenticated via session or default
         // We'll use X-User-Id header if present, or default to 6.
-        return (int) $request->headers->get('X-User-Id', 6);
+        return (int) $request->headers->get('X-User-Id', '6');
     }
 
     public function success(mixed $data = [], string $message = 'Success'): array

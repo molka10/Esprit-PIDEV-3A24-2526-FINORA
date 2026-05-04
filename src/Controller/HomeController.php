@@ -9,23 +9,21 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Contracts\Cache\ItemInterface;
 
 class HomeController extends AbstractController
 {
     #[Route('/', name: 'app_home')]
     public function index(EntityManagerInterface $entityManager, \Symfony\Contracts\Cache\CacheInterface $cache): Response
     {
-        // Cache home page data for 1 hour to maximize performance
-        $data = $cache->get('home_page_data', function (\Symfony\Contracts\Cache\ItemInterface $item) use ($entityManager) {
-            $item->expiresAfter(3600); // 1 hour
-
-            // Statistics
+        // Temporarily disabled cache for debugging
+        $data = $cache->get('home_stats', function (ItemInterface $item) use ($entityManager) {
+            $item->expiresAfter(3600);
+            
             $formationCount = $entityManager->getRepository(Formation::class)->count(['is_published' => 1]);
             $lessonCount = $entityManager->getRepository(Lesson::class)->count([]);
             $userCount = $entityManager->getRepository(User::class)->count([]);
 
-            // 🏆 Bestsellers Logic: Order by number of purchases
-            // We use a optimized query to avoid loading too many entities
             $bestsellers = $entityManager->getRepository(Formation::class)->createQueryBuilder('f')
                 ->leftJoin('f.purchasedBy', 'p')
                 ->select('f')

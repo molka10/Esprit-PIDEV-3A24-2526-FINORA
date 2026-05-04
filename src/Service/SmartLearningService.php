@@ -48,7 +48,7 @@ class SmartLearningService
                 ->setParameter('status', 'ACCEPTED')
                 ->setParameter('type', 'OUTCOME')
                 ->getQuery()
-                ->getSingleScalarResult() ?? 0;
+                ->getSingleScalarResult();
 
             // ── 2. Trading count ──────────────────────────────────────────────
             $tradeCount = (int) $this->entityManager

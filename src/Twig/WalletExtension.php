@@ -3,6 +3,7 @@
 namespace App\Twig;
 
 use App\Service\WalletBalanceService;
+use App\Entity\User;
 use Symfony\Bundle\SecurityBundle\Security;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFunction;
@@ -48,7 +49,7 @@ class WalletExtension extends AbstractExtension
     public function getWalletBalance(): float
     {
         $user = $this->security->getUser();
-        if (!$user) {
+        if (!$user instanceof User) {
             return 0.0;
         }
 

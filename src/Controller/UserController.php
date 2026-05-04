@@ -75,7 +75,8 @@ final class UserController extends AbstractController
         UserPasswordHasherInterface $passwordHasher
     ): Response {
         $user = new User();
-        $user->setCreatedAt(new \DateTime());
+        $user->setCreatedAt(new \DateTimeImmutable());
+
 
         $form = $this->createForm(UserType::class, $user);
         $form->handleRequest($request);

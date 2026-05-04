@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\User;
 use App\Entity\Action;
 use App\Entity\BourseWishlist;
 use App\Repository\ActionRepository;
@@ -49,7 +50,9 @@ class BourseWishlistController extends AbstractController
         }
 
         $wishlist = new BourseWishlist();
-        $wishlist->setUser($user);
+        if ($user instanceof User) {
+            $wishlist->setUser($user);
+        }
         $wishlist->setAction($action);
 
         $em->persist($wishlist);

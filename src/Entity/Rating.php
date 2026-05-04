@@ -29,7 +29,7 @@ class Rating
 
     #[ORM\ManyToOne(inversedBy: 'ratings')]
     #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
-    private AppelOffre $appelOffre;
+    private ?AppelOffre $appelOffre = null;
 
     #[ORM\ManyToOne(inversedBy: 'ratings')]
     private ?User $user = null;
@@ -47,8 +47,8 @@ class Rating
     public function setNote(int $note): self { $this->note = $note; return $this; }
     public function getCreatedAt(): \DateTimeImmutable { return $this->createdAt; }
     public function setCreatedAt(\DateTimeImmutable $createdAt): self { $this->createdAt = $createdAt; return $this; }
-    public function getAppelOffre(): AppelOffre { return $this->appelOffre; }
-    public function setAppelOffre(AppelOffre $appelOffre): self { $this->appelOffre = $appelOffre; return $this; }
+    public function getAppelOffre(): ?AppelOffre { return $this->appelOffre; }
+    public function setAppelOffre(?AppelOffre $appelOffre): self { $this->appelOffre = $appelOffre; return $this; }
     public function getAppelOffreId(): ?int { return $this->appelOffre ? $this->appelOffre->getId() : null; }
     public function getUser(): ?User { return $this->user; }
     public function setUser(?User $user): static { $this->user = $user; return $this; }

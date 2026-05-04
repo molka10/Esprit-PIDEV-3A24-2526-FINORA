@@ -183,9 +183,9 @@ class InvestmentManagementController extends AbstractController
                 }
                 
                 $walletTx = new \App\Entity\TransactionWallet();
-                $walletTx->setMontant(-abs($amountInvested)); // Negative = expense
+                $walletTx->setMontant((string)(-abs((float)$amountInvested))); // Negative = expense
                 $walletTx->setType('OUTCOME');
-                $walletTx->setDateTransaction(new \DateTime());
+                $walletTx->setDateTransaction(new \DateTimeImmutable());
                 $walletTx->setCategory($category);
                 $walletTx->setUser($user);
                 
@@ -196,7 +196,7 @@ class InvestmentManagementController extends AbstractController
             }
 
             $item->setUser($user);
-            $item->setCreatedAt(new \DateTime());
+            $item->setCreatedAt(new \DateTimeImmutable());
             
             $em->persist($item);
             $em->flush();

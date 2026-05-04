@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\User;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -20,7 +21,7 @@ class DashboardController extends AbstractController
     {
         $user = $this->getUser();
 
-        if (!$user) {
+        if (!$user instanceof User) {
             return $this->redirectToRoute('app_login');
         }
 
@@ -125,6 +126,9 @@ class DashboardController extends AbstractController
     ): Response {
         $this->denyAccessUnlessGranted('ROLE_ENTREPRISE');
         $user = $this->getUser();
+        if (!$user instanceof \App\Entity\User) {
+            return $this->redirectToRoute('app_login');
+        }
 
         $badges = $gamificationService->getEntrepriseBadges($user);
 
@@ -140,7 +144,7 @@ class DashboardController extends AbstractController
     public function gamification(\App\Service\GamificationService $gamificationService): Response
     {
         $user = $this->getUser();
-        if (!$user) {
+        if (!$user instanceof User) {
             return $this->redirectToRoute('app_login');
         }
 

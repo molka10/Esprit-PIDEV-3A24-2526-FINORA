@@ -39,7 +39,7 @@ class GoogleAuthenticator extends OAuth2Authenticator
         $accessToken = $this->fetchAccessToken($client);
 
         return new SelfValidatingPassport(
-            new UserBadge($accessToken->getToken(), function() use ($accessToken, $client, $request) {
+            new UserBadge($accessToken->getToken(), function() use ($accessToken, $client) {
                 /** @var \League\OAuth2\Client\Provider\GoogleUser $googleUser */
                 $googleUser = $client->fetchUserFromToken($accessToken);
 
@@ -94,7 +94,7 @@ class GoogleAuthenticator extends OAuth2Authenticator
             return new RedirectResponse($targetPath);
         }
 
-        return new RedirectResponse($this->router->generate('app_dashboard'));
+        return new RedirectResponse($this->router->generate('app_home'));
     }
 
     public function onAuthenticationFailure(Request $request, AuthenticationException $exception): ?Response

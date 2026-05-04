@@ -21,7 +21,7 @@ class FixAdminController extends AbstractController
             $user = new User();
             $user->setEmail($email);
             $user->setUsername('Admin');
-            $user->setCreatedAt(new \DateTime());
+            $user->setCreatedAt(new \DateTimeImmutable());
         }
 
         $user->setRole('ADMIN');

@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Lesson;
 use App\Entity\Formation;
 use App\Entity\QuizResult;
+use App\Entity\User;
 use App\Service\GroqQuizService;
 use App\Service\QuizFraudService;
 use App\Service\QuizAiCommentService;
@@ -29,9 +30,13 @@ final class QuizController extends AbstractController
         EntityManagerInterface $entityManager
     ): Response {
         $user = $this->getUser();
-        $studentName = $user ? $user->getUsername() : 'Invité';
+        if (!$user instanceof User) {
+             $studentName = 'Invité';
+        } else {
+             $studentName = $user->getUsername();
+        }
 
-        if ($user && !$user->getPurchasedFormations()->contains($lesson->getFormation())) {
+        if ($user instanceof User && !$user->getPurchasedFormations()->contains($lesson->getFormation())) {
             $this->addFlash('danger', '🚫 Vous devez acheter cette formation pour accéder au quiz.');
             return $this->redirectToRoute('app_formation_show', ['id' => $lesson->getFormation()->getId()]);
         }
@@ -93,7 +98,11 @@ final class QuizController extends AbstractController
         }
 
         $user = $this->getUser();
-        $studentName = $user ? $user->getUsername() : 'Invité';
+        if (!$user instanceof User) {
+             $studentName = 'Invité';
+        } else {
+             $studentName = $user->getUsername();
+        }
 
         $correctAnswers = 0;
         $totalQuestions = count($questions);
@@ -133,15 +142,15 @@ final class QuizController extends AbstractController
             $this->addFlash('fraud_alert', 'Un comportement suspect a été détecté durant votre quiz. Toute récidive entraînera un blocage.');
         }
 
-        if ($user && !$user->getPurchasedFormations()->contains($lesson->getFormation())) {
+        if ($user instanceof User && !$user->getPurchasedFormations()->contains($lesson->getFormation())) {
             return new JsonResponse(['error' => 'Enrollment required'], 403);
         }
 
         $result = new QuizResult();
         $result
-            ->setUser($user)
+            ->setUser($user instanceof User ? $user : null)
             ->setStudentName($studentName)
-            ->setLessonId((int) $lesson->getId())
+            ->setLesson($lesson)
             ->setLessonTitle((string) $lesson->getTitre())
             ->setFormationTitle($lesson->getFormation() ? (string) $lesson->getFormation()->getTitre() : 'Formation inconnue')
             ->setScore($score)
@@ -191,7 +200,7 @@ final class QuizController extends AbstractController
         EntityManagerInterface $entityManager
     ): Response {
         $user = $this->getUser();
-        $studentName = $user ? $user->getUsername() : null;
+        $studentName = $user instanceof User ? $user->getUsername() : null;
         
         $certificates = [];
         $suggestedQuizzes = [];
@@ -211,8 +220,10 @@ final class QuizController extends AbstractController
             }
 
             $purchasedIds = [];
-            foreach ($user->getPurchasedFormations() as $f) {
-                $purchasedIds[] = $f->getId();
+            if ($user instanceof User) {
+                foreach ($user->getPurchasedFormations() as $f) {
+                    $purchasedIds[] = $f->getId();
+                }
             }
 
             if (!empty($purchasedIds)) {
@@ -248,7 +259,7 @@ final class QuizController extends AbstractController
         DompdfWrapperInterface $dompdfWrapper
     ): Response {
         $user = $this->getUser();
-        if (!$user || !$user->getPurchasedFormations()->contains($formation)) {
+        if (!$user instanceof User || !$user->getPurchasedFormations()->contains($formation)) {
             $this->addFlash('danger', 'Accès refusé.');
             return $this->redirectToRoute('app_formations');
         }
@@ -302,6 +313,7 @@ final class QuizController extends AbstractController
             return $this->json(['error' => 'Données invalides'], Response::HTTP_BAD_REQUEST);
         }
 
+        $session = $request->getSession();
         $lang = $session->get('quiz_lang_' . $lesson->getId(), 'fr');
         
         $explanation = $groqQuizService->explainQuestion(

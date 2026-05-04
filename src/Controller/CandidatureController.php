@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Candidature;
+use App\Entity\User;
 use App\Form\CandidatureType;
 use App\Repository\CandidatureRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -17,15 +18,19 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 
 #[Route('/candidature')]
+#[IsGranted('ROLE_USER')]
 final class CandidatureController extends AbstractController
 {
     #[Route(name: 'app_candidature_index', methods: ['GET'])]
     public function index(CandidatureRepository $candidatureRepository, Request $request): Response
     {
         $user = $this->getUser();
+        if (!$user instanceof User) {
+            return $this->redirectToRoute('app_login');
+        }
         
         // Use security service to determine role for repository filtering
-        $role = 'visiteur';
+        $role = 'user';
         if ($this->isGranted('ROLE_ADMIN')) {
             $role = 'admin';
         } elseif ($this->isGranted('ROLE_ENTREPRISE')) {
@@ -74,7 +79,10 @@ final class CandidatureController extends AbstractController
         $candidature = new Candidature();
         
         // Pre-fill user
-        $candidature->setUser($this->getUser());
+        $user = $this->getUser();
+        if ($user instanceof User) {
+            $candidature->setUser($user);
+        }
 
         // Pre-fill AppelOffre if ID is provided in query
         $appelOffreId = $request->query->get('appelOffre');

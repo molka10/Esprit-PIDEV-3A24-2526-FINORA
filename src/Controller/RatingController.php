@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Rating;
+use App\Entity\User;
 use App\Repository\AppelOffreRepository;
 use App\Repository\RatingRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -66,7 +67,7 @@ class RatingController extends AbstractController
         $rating->setNote($note);
         $rating->setAppelOffre($appelOffre);
         
-        if ($user) {
+        if ($user instanceof User) {
             $rating->setUser($user);
         }
 

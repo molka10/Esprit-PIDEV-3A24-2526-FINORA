@@ -18,7 +18,6 @@ class ActionController extends AbstractController
 {
     public function __construct(
         private ActionService $actionService,
-        private EntityManagerInterface $em,
         private NotificationBourseService $notificationBourseService
     ) {}
 

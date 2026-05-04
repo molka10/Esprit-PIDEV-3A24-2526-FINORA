@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\User;
 use App\Entity\AppelOffre;
 use App\Form\AppelOffreType;
 use App\Repository\AppelOffreRepository;
@@ -27,7 +28,7 @@ final class AppelOffreController extends AbstractController
     ): Response
     {
         $user = $this->getUser();
-        $recommendations = $user ? $smartLearningService->getRecommendations($user) : [];
+        $recommendations = ($user instanceof User) ? $smartLearningService->getRecommendations($user) : [];
 
         // Auto-clôture des appels d'offre expirés
         $appelsExpires = $appelOffreRepository->findAppelsExpires(new \DateTime());
@@ -188,12 +189,12 @@ final class AppelOffreController extends AbstractController
         $budgetMaxUsd = null;
 
         if ($appelOffre->getBudgetMin()) {
-            $budgetMinEur = $currencyService->convertTndTo($appelOffre->getBudgetMin(), 'EUR');
-            $budgetMinUsd = $currencyService->convertTndTo($appelOffre->getBudgetMin(), 'USD');
+            $budgetMinEur = $currencyService->convertTndTo((float)$appelOffre->getBudgetMin(), 'EUR');
+            $budgetMinUsd = $currencyService->convertTndTo((float)$appelOffre->getBudgetMin(), 'USD');
         }
         if ($appelOffre->getBudgetMax()) {
-            $budgetMaxEur = $currencyService->convertTndTo($appelOffre->getBudgetMax(), 'EUR');
-            $budgetMaxUsd = $currencyService->convertTndTo($appelOffre->getBudgetMax(), 'USD');
+            $budgetMaxEur = $currencyService->convertTndTo((float)$appelOffre->getBudgetMax(), 'EUR');
+            $budgetMaxUsd = $currencyService->convertTndTo((float)$appelOffre->getBudgetMax(), 'USD');
         }
 
         return $this->render('appel_offre/show.html.twig', [

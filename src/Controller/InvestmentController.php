@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\User;
 use App\Entity\Investment;
 use App\Form\InvestmentType;
 use App\Repository\InvestmentRepository;
@@ -106,7 +107,7 @@ class InvestmentController extends AbstractController
         $investment->setName($projectData['name']);
         $investment->setCategory($projectData['category']);
         $investment->setLocation($projectData['location']);
-        $investment->setEstimatedValue((float)$projectData['estimated_value']);
+        $investment->setEstimatedValue((string)$projectData['estimated_value']);
         $investment->setRiskLevel($projectData['risk_level']);
         $investment->setDescription("Opportunité partenaire certifiée. Origine: " . $projectData['published_by']);
         $investment->setStatus('ACTIVE');
@@ -168,7 +169,7 @@ class InvestmentController extends AbstractController
             $investment->setName($projectData['name']);
             $investment->setCategory($projectData['category']);
             $investment->setLocation($projectData['location']);
-            $investment->setEstimatedValue((float)$projectData['estimated_value']);
+            $investment->setEstimatedValue((string)$projectData['estimated_value']);
             $investment->setRiskLevel($projectData['risk_level']);
             $investment->setStatus('ACTIVE'); // External projects are verified
             $investment->setDescription("Opportunité partenaire certifiée par FINORA. Origine: " . $projectData['source']);
@@ -192,7 +193,7 @@ class InvestmentController extends AbstractController
     ): Response
     {
         $user = $this->getUser();
-        $recommendations = $user ? $smartLearningService->getRecommendations($user) : [];
+        $recommendations = $user instanceof User ? $smartLearningService->getRecommendations($user) : [];
 
         $search = $request->query->get('search');
         $category = $request->query->all()['category'] ?? null;
@@ -237,7 +238,10 @@ class InvestmentController extends AbstractController
                 $investment->setImageUrl($this->imageUploader->upload($imageFile));
             }
 
-            $investment->setUser($this->getUser());
+            $user = $this->getUser();
+            if ($user instanceof User) {
+                $investment->setUser($user);
+            }
             $entityManager->persist($investment);
             $entityManager->flush();
 

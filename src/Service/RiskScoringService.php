@@ -92,8 +92,6 @@ class RiskScoringService
     private function getAccountAgeDays(User $user): int
     {
         $createdAt = $user->getCreatedAt();
-        if (!$createdAt) return -1;
-
-        return $createdAt->diff(new \DateTime())->days;
+        return $createdAt->diff(new \DateTimeImmutable())->days;
     }
 }

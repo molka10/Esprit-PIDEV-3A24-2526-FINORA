@@ -8,7 +8,7 @@ use Twig\TwigFilter;
 
 class AppExtension extends AbstractExtension
 {
-    public function __construct(private CurrencyService $currencyService) {}
+    public function __construct() {}
 
     public function getFilters(): array
     {

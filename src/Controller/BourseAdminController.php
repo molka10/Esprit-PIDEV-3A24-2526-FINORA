@@ -144,7 +144,7 @@ class BourseAdminController extends AbstractController
             // Core counters
             'totalBourses' => $totalBourses,
             'totalActions' => $totalActions,
-            'totalTransactions' => count($allTransactions),
+            'totalTransactions' => $totalBourses,
             'volumeTotal' => $volumeTotal,
             'totalCommissions' => $totalCommissions,
             

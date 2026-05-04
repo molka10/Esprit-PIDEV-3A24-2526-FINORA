@@ -113,7 +113,7 @@ class ActionService
 
         // Définir la date d'ajout
         if (!$action->getDateAjout()) {
-            $action->setDateAjout(new \DateTime());
+            $action->setDateAjout(new \DateTimeImmutable());
         }
 
         $this->em->persist($action);
@@ -213,7 +213,7 @@ class ActionService
      */
     public function calculateTotalValue(Action $action): float
     {
-        return $action->getPrixUnitaire() * $action->getQuantiteDisponible();
+        return (float)$action->getPrixUnitaire() * $action->getQuantiteDisponible();
     }
 
     /**

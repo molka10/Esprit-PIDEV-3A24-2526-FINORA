@@ -39,8 +39,8 @@ class PaymentGatewayService
      */
     public function processRecharge(RechargeRequest $recharge): array
     {
-        $amount = $recharge->getAmount();
-        $card = $this->entityManager->getRepository(Card::class)->find($recharge->getCardId());
+        $amount = (float) $recharge->getAmount();
+        $card = $recharge->getCard();
         $userId = $recharge->getUserId() ?? 6;
 
         if (!$card) {
@@ -112,9 +112,9 @@ class PaymentGatewayService
         $transaction = new TransactionWallet();
         $transaction->setUser($user);
         $transaction->setNomTransaction('Recharge Portfolio (API Stripe)');
-        $transaction->setMontant($amount);
+        $transaction->setMontant((string)$amount);
         $transaction->setType('INCOME');
-        $transaction->setDateTransaction(new \DateTime());
+        $transaction->setDateTransaction(new \DateTimeImmutable());
         $transaction->setSource('STRIPE_GW');
         
         // Assign default category

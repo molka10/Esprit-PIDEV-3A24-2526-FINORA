@@ -241,9 +241,8 @@ final class FrontFormationController extends AbstractController
             throw $this->createNotFoundException('Formation introuvable');
         }
 
-        /** @var User $user */
         $user = $this->getUser();
-        if (!$user) {
+        if (!$user instanceof User) {
             $this->addFlash('danger', 'Veuillez vous connecter pour acheter cette formation.');
             return $this->redirectToRoute('app_login');
         }
@@ -283,9 +282,9 @@ final class FrontFormationController extends AbstractController
                 }
                 
                 $transaction = new \App\Entity\TransactionWallet();
-                $transaction->setMontant(-abs($price)); // Negative = expense
+                $transaction->setMontant((string)(-abs((float)$price))); // Negative = expense
                 $transaction->setType('OUTCOME');
-                $transaction->setDateTransaction(new \DateTime());
+                $transaction->setDateTransaction(new \DateTimeImmutable());
                 $transaction->setCategory($category);
                 $transaction->setUser($user);
                 $transaction->setNomTransaction('Achat Formation: ' . $formation->getTitre());

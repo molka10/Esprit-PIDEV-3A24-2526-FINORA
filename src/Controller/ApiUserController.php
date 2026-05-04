@@ -99,7 +99,7 @@ class ApiUserController extends AbstractController
     public function getChartData(TransactionWalletRepository $repo): JsonResponse
     {
         $user = $this->getUser();
-        if (!$user) { return $this->json(['status' => 'error'], 401); }
+        if (!$user instanceof User) { return $this->json(['status' => 'error'], 401); }
         $userId = $user->getId();
 
         $transactions = $repo->createQueryBuilder('t')
@@ -152,7 +152,7 @@ class ApiUserController extends AbstractController
     public function getCategoryStatistics(TransactionWalletRepository $repo): JsonResponse
     {
         $user = $this->getUser();
-        if (!$user) { return $this->json(['status' => 'error'], 401); }
+        if (!$user instanceof User) { return $this->json(['status' => 'error'], 401); }
         $userId = $user->getId();
 
         $transactions = $repo->createQueryBuilder('t')
@@ -194,7 +194,7 @@ class ApiUserController extends AbstractController
     public function getCalendarEvents(TransactionWalletRepository $repo): JsonResponse
     {
         $user = $this->getUser();
-        if (!$user) { return $this->json(['status' => 'error', 'data' => []], 401); }
+        if (!$user instanceof User) { return $this->json(['status' => 'error', 'data' => []], 401); }
         $userId = $user->getId();
 
         $transactions = $repo->createQueryBuilder('t')
@@ -231,7 +231,7 @@ class ApiUserController extends AbstractController
     public function getCalendarEventsByUser(Request $request, TransactionWalletRepository $repo): JsonResponse
     {
         $user = $this->getUser();
-        if (!$user) { return $this->json(['status' => 'error', 'data' => []], 401); }
+        if (!$user instanceof User) { return $this->json(['status' => 'error', 'data' => []], 401); }
         $userId = $request->query->getInt('userId', $user->getId());
 
         $transactions = $repo->createQueryBuilder('t')

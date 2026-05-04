@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\User;
 use App\Repository\ActionRepository;
 use App\Repository\TransactionBourseRepository;
 use App\Service\TransactionService;
@@ -19,8 +20,7 @@ class TransactionController extends AbstractController
 
     public function __construct(
         private TransactionService $transactionService,
-        private ActionRepository $actionRepo,
-        private CommissionService $commissionService
+        private ActionRepository $actionRepo
     ) {}
 
     /**
@@ -59,9 +59,10 @@ class TransactionController extends AbstractController
         $totalPages = ceil($totalItems / self::ITEMS_PER_PAGE);
 
         // Statistiques
-        $totalInvesti = $this->transactionService->getTotalAchats($this->getUser()?->getId());
-        $totalVendu = $this->transactionService->getTotalVentes($this->getUser()?->getId());
-        $totalCommissions = $this->transactionService->getTotalCommissions($this->getUser()?->getId());
+        $user = $this->getUser();
+        $totalInvesti = $user instanceof User ? $this->transactionService->getTotalAchats($user->getId()) : 0.0;
+        $totalVendu = $user instanceof User ? $this->transactionService->getTotalVentes($user->getId()) : 0.0;
+        $totalCommissions = $user instanceof User ? $this->transactionService->getTotalCommissions($user->getId()) : 0.0;
         $nbTransactions = $transactionRepo->count(['user' => $this->getUser()]);
 
         return $this->render('trading/historique.html.twig', [
@@ -148,7 +149,11 @@ class TransactionController extends AbstractController
         }
 
         try {
-            $transaction = $this->transactionService->executerTrade('ACHAT', (int)$actionId, $quantite, $this->getUser());
+            $user = $this->getUser();
+            if (!$user instanceof User) {
+                throw new \Exception("Utilisateur non connecté.");
+            }
+            $transaction = $this->transactionService->executerTrade('ACHAT', (int)$actionId, $quantite, $user);
 
             $this->addFlash('success', sprintf(
                 '✅ Achat réussi !<br>• %d actions %s achetées<br>• Montant: %.2f TND<br>• Commission: %.2f TND<br>• Stock restant: %d',
@@ -191,7 +196,11 @@ class TransactionController extends AbstractController
         }
 
         try {
-            $transaction = $this->transactionService->executerTrade('VENTE', (int)$actionId, $quantite, $this->getUser());
+            $user = $this->getUser();
+            if (!$user instanceof User) {
+                throw new \Exception("Utilisateur non connecté.");
+            }
+            $transaction = $this->transactionService->executerTrade('VENTE', (int)$actionId, $quantite, $user);
 
             $this->addFlash('success', sprintf(
                 '✅ Vente réussie !<br>• %d actions %s vendues<br>• Montant reçu: %.2f TND<br>• Commission: %.2f TND',

@@ -154,18 +154,25 @@
 
         /* --- Layout & Utilities --- */
         body {
-            padding-top: 140px; /* Adjusted for two-row header */
+            padding-top: 105px; /* Reduced from 140px */
             background: #f8fafc;
             overflow-x: hidden;
             scroll-behavior: smooth;
         }
+        body.no-sidebar {
+            padding-top: 0;
+        }
         /* Constrain containers on ultra-wide screens */
-        @media (min-width: 1400px) {
-            .container {
-                max-width: 1240px !important;
+        @media (min-width: 1200px) {
+            body:not(.is-formation-page) .main-content-wrapper {
+                max-width: 1320px;
+                margin: 0 auto;
+                position: relative;
             }
-            .container-fluid {
-                max-width: 1600px !important;
+            body:not(.is-formation-page) .container,
+            body:not(.is-formation-page) .container-xl,
+            body:not(.is-formation-page) .container-fluid {
+                max-width: 1320px !important;
                 margin-left: auto !important;
                 margin-right: auto !important;
             }
@@ -227,7 +234,7 @@
             background: linear-gradient(rgba(30, 27, 75, 0.85), rgba(30, 27, 75, 0.75)), url('{{ asset('assets/images/finora_hero_bg.png') }}');
             background-size: cover;
             background-position: center;
-            min-height: 85vh;
+            min-height: 60vh;
             display: flex;
             align-items: center;
             position: relative;
@@ -466,7 +473,9 @@
 </head>
 
 
-<body class="{% if app.request.attributes.get('_route') in ['app_login', 'app_register'] %}no-sidebar{% endif %}">
+<body class="{% if app.request.attributes.get('_route') in ['app_login', 'app_register'] %}no-sidebar{% endif %} 
+             {% set route = app.request.attributes.get('_route') %}
+             {% if route in ['app_home', 'app_formation_home', 'app_formations', 'public_centres_map'] or route starts with 'app_formation' or route starts with 'app_lesson' %}is-formation-page{% endif %}">
 
 {% if app.request.attributes.get('_route') not in ['app_login', 'app_register'] %}
 <!-- Sidebar Wrapper -->
@@ -658,7 +667,7 @@
 {% block header %}
 <header class="navbar-light fixed-top bg-white border-bottom shadow-sm">
     <!-- Row 1: Brand, Search, User START -->
-    <div class="container-xl py-2">
+    <div class="container-xl py-1">
         <div class="d-flex align-items-center justify-content-between w-100">
             <!-- Left: Sidebar Toggle & Logo -->
             <div class="d-flex align-items-center">
@@ -668,14 +677,14 @@
                 </button>
                 {% endif %}
                 <a class="navbar-brand m-0 p-0" href="{{ path('app_home') }}">
-                    <img class="navbar-brand-item" src="{{ asset('assets/images/logo-finora.webp') }}" alt="FINORA" style="height:42px;">
+                    <img class="navbar-brand-item" src="{{ asset('assets/images/logo-finora.webp') }}" alt="FINORA" style="height:34px;">
                 </a>
             </div>
 
             <!-- Center: Search Bar -->
             <div class="flex-grow-1 mx-4 d-none d-lg-block header-search-container" style="max-width: 480px;">
                 <form class="position-relative w-100" action="{{ path('app_market') }}" method="GET">
-                    <input class="form-control rounded-pill border-0 ps-4 pe-5 header-search-input" type="search" name="q" placeholder="Rechercher sur Finora..." style="background: #f1f5f9; height: 42px; font-size: 0.9rem;">
+                    <input class="form-control rounded-pill border-0 ps-4 pe-5 header-search-input" type="search" name="q" placeholder="Rechercher sur Finora..." style="background: #f1f5f9; height: 36px; font-size: 0.85rem;">
                     <button class="btn btn-link position-absolute top-50 end-0 translate-middle-y text-primary pe-3" type="submit">
                         <i class="fas fa-search"></i>
                     </button>
@@ -761,7 +770,7 @@
 
     <!-- Row 2: Secondary Nav START -->
     {% if app.request.attributes.get('_route') not in ['app_login', 'app_register'] %}
-    <div class="w-100 bg-white border-top border-bottom shadow-sm" style="height: 55px;">
+    <div class="w-100 bg-white border-top border-bottom shadow-sm" style="height: 45px;">
         <div class="container h-100">
             <ul class="nav justify-content-center h-100 align-items-center gap-4 list-unstyled">
                 <!-- ACCUEIL -->
@@ -860,7 +869,8 @@
             {% endif %}
         {% endfor %}
     </div>
-    {% block body %}{% endblock %}
+    <div class="main-content-wrapper">
+        {% block body %}{% endblock %}
 </main>
 <!-- **************** MAIN CONTENT END **************** -->
 
@@ -870,60 +880,58 @@ Footer START -->
 {% block footer %}
 <footer class="bg-dark pt-5">
 	<div class="container">
+        <!-- Sponsors START -->
+        <div class="row mb-5 align-items-center">
+            <div class="col-12 text-center mb-4">
+                <h6 class="text-uppercase text-muted small letter-spacing-2 mb-0">Nos Partenaires Officiels</h6>
+                <div class="d-flex flex-wrap justify-content-center align-items-center gap-5 mt-4">
+                    <img src="{{ asset('assets/images/partners/linkedin.png') }}" class="h-40px rounded-1 shadow-sm" alt="LinkedIn Sponsor">
+                    <img src="{{ asset('assets/images/partners/esprit.png') }}" class="h-50px" alt="Esprit University">
+                </div>
+            </div>
+        </div>
+        <!-- Sponsors END -->
+
 		<!-- Row START -->
 		<div class="row g-4">
 
 			<!-- Widget 1 START -->
-			<div class="col-lg-3">
+			<div class="col-lg-5">
 				<!-- logo -->
 				<a class="me-0" href="{{ path('app_home') }}">
 					<img class="h-40px bg-white p-1 rounded-2" src="{{ asset('assets/images/logo-finora.webp') }}" alt="logo">
 				</a>
-				<p class="my-3 text-body-secondary">FINORA — Votre plateforme de gestion financière intelligente, combinant éducation, bourse et investissements. </p>
+				<p class="my-3 text-body-secondary pe-lg-5">FINORA est l'écosystème financier de référence pour la nouvelle génération tunisienne. Nous combinons éducation de pointe, outils de trading live et opportunités d'investissement pour forger les leaders de demain.</p>
 				<!-- Social media icon -->
 				<ul class="list-inline mb-0 mt-3">
-					<li class="list-inline-item"> <a class="btn btn-white btn-sm shadow px-2 text-facebook" href="#"><i class="fab fa-fw fa-facebook-f"></i></a> </li>
-					<li class="list-inline-item"> <a class="btn btn-white btn-sm shadow px-2 text-instagram" href="#"><i class="fab fa-fw fa-instagram"></i></a> </li>
-					<li class="list-inline-item"> <a class="btn btn-white btn-sm shadow px-2 text-twitter" href="#"><i class="fab fa-fw fa-twitter"></i></a> </li>
+					<li class="list-inline-item"> <a class="btn btn-white btn-sm shadow px-2 text-instagram" href="https://www.instagram.com/finora____6" target="_blank"><i class="fab fa-fw fa-instagram"></i></a> </li>
 					<li class="list-inline-item"> <a class="btn btn-white btn-sm shadow px-2 text-linkedin" href="#"><i class="fab fa-fw fa-linkedin-in"></i></a> </li>
 				</ul>
 			</div>
 			<!-- Widget 1 END -->
 
 			<!-- Widget 2 START -->
-			<div class="col-lg-6">
+			<div class="col-lg-4">
 				<div class="row g-4">
 					<!-- Link block -->
-					<div class="col-6 col-md-4">
-						<h5 class="mb-2 mb-md-4 text-white">Finora</h5>
+					<div class="col-6">
+						<h5 class="mb-2 mb-md-4 text-white">Navigation</h5>
 						<ul class="nav flex-column text-primary-hover">
-							<li class="nav-item"><a class="nav-link" href="{{ path('app_home') }}">À propos</a></li>
-							<li class="nav-item"><a class="nav-link" href="#">Contactez-nous</a></li>
-							<li class="nav-item"><a class="nav-link" href="#">Blog & Actus</a></li>
-							<li class="nav-item"><a class="nav-link" href="#">Nos Partenaires</a></li>
-							<li class="nav-item"><a class="nav-link" href="#">Carrières</a></li>
+							<li class="nav-item"><a class="nav-link" href="{{ path('app_home') }}">Accueil</a></li>
+							<li class="nav-item"><a class="nav-link" href="{{ path('app_formations') }}">Cours & Quiz</a></li>
+							<li class="nav-item"><a class="nav-link" href="{{ path('app_market') }}">Marché Boursier</a></li>
+							<li class="nav-item"><a class="nav-link" href="{{ path('app_investment_index') }}">Investissements</a></li>
 						</ul>
 					</div>
 									
 					<!-- Link block -->
-					<div class="col-6 col-md-4">
-						<h5 class="mb-2 mb-md-4 text-white">Modules</h5>
+					<div class="col-6">
+						<h5 class="mb-2 mb-md-4 text-white">Espace Pro</h5>
 						<ul class="nav flex-column text-primary-hover">
-							<li class="nav-item"><a class="nav-link" href="{{ path('app_market') }}">Marché Boursier</a></li>
-							<li class="nav-item"><a class="nav-link" href="{{ path('app_investment_index') }}">Investissements</a></li>
-							<li class="nav-item"><a class="nav-link" href="{{ path('app_formations') }}">Formations AI</a></li>
-							<li class="nav-item"><a class="nav-link" href="{{ path('app_home') }}">Trading Simulator</a></li>
-						</ul>
-					</div>
-
-					<!-- Link block -->
-					<div class="col-6 col-md-4">
-						<h5 class="mb-2 mb-md-4 text-white">Aide</h5>
-						<ul class="nav flex-column text-primary-hover">
-							<li class="nav-item"><a class="nav-link" href="#">FAQ</a></li>
-							<li class="nav-item"><a class="nav-link" href="#">Documentation</a></li>
-							<li class="nav-item"><a class="nav-link" href="#">Support Technique</a></li>
-							<li class="nav-item"><a class="nav-link" href="#">Plan du site</a></li>
+							<li class="nav-item"><a class="nav-link" href="{{ path('dashboard') }}">Mon Wallet</a></li>
+							<li class="nav-item"><a class="nav-link" href="{{ path('ai_analyse') }}">Finora AI</a></li>
+							<li class="nav-item"><a class="nav-link" href="{{ path('app_management_index') }}">Management</a></li>
+							<li class="nav-item"><a class="nav-link" href="{{ path('app_history') }}">Historique</a></li>
 						</ul>
 					</div>
 				</div>
@@ -932,56 +940,38 @@ Footer START -->
 
 			<!-- Widget 3 START -->
 			<div class="col-lg-3">
-				<h5 class="mb-2 mb-md-4 text-white">Contact</h5>
-				<!-- Time -->
+				<h5 class="mb-2 mb-md-4 text-white">Contact Direct</h5>
 				<p class="mb-2 text-body-secondary">
-					Téléphone :<span class="h6 fw-light text-white ms-2">+216 71 123 456</span>
-					<span class="d-block small">(Lun - Ven / 09:00 - 18:00)</span>
+					Tunisie, Ariana :<span class="h6 fw-light text-white ms-2">+216 71 000 000</span>
 				</p>
-
 				<p class="mb-0 text-body-secondary">Email :<span class="h6 fw-light text-white ms-2">contact@finora.tn</span></p>
 
-				<div class="row g-2 mt-2">
-					<!-- Google play store button -->
-					<div class="col-6 col-sm-4 col-md-3 col-lg-6">
-						<a href="#"> <img src="{{ asset('assets/images/client/google-play.svg') }}" alt="Google Play Finora"> </a>
+				<div class="row g-2 mt-4">
+					<div class="col-6 col-lg-12 col-xl-6">
+						<a href="#"> <img src="{{ asset('assets/images/client/google-play.svg') }}" alt="Google Play" class="img-fluid"> </a>
 					</div>
-					<!-- App store button -->
-					<div class="col-6 col-sm-4 col-md-3 col-lg-6">
-						<a href="#"> <img src="{{ asset('assets/images/client/app-store.svg') }}" alt="App Store Finora"> </a>
+					<div class="col-6 col-lg-12 col-xl-6">
+						<a href="#"> <img src="{{ asset('assets/images/client/app-store.svg') }}" alt="App Store" class="img-fluid"> </a>
 					</div>
-				</div> <!-- Row END -->
+				</div>
 			</div> 
 			<!-- Widget 3 END -->
 		</div><!-- Row END -->
 
 		<!-- Divider -->
-		<hr class="mt-4 mb-0">
+		<hr class="mt-4 mb-0 opacity-10">
 
 		<!-- Bottom footer -->
 		<div class="py-3">
 			<div class="container px-0">
-				<div class="d-lg-flex justify-content-between align-items-center py-3 text-center text-md-left">
+				<div class="d-lg-flex justify-content-between align-items-center py-3 text-center text-lg-start">
 					<!-- copyright text -->
-					<div class="text-body-secondary"> Copyrights ©{{ 'now'|date('Y') }} Finora. Build by <a href="#" class="text-body-secondary text-primary-hover">Finora</a>. </div>
+					<div class="text-body-secondary small"> ©{{ 'now'|date('Y') }} <a href="{{ path('app_home') }}" class="text-white fw-bold">FINORA</a>. Propulsé par la technologie et l'éducation. </div>
 					<!-- copyright links-->
 					<div class="nav justify-content-center mt-3 mt-lg-0">
-						<ul class="list-inline mb-0">
-							<li class="list-inline-item text-primary-hover">
-								<!-- Language selector -->
-								<div class="dropup mt-0 text-center text-sm-end">
-									<a class="dropdown-toggle nav-link" href="#" role="button" id="languageSwitcher" data-bs-toggle="dropdown" aria-expanded="false">
-										<i class="fas fa-globe me-2"></i>Language
-									</a>
-									<ul class="dropdown-menu min-w-auto" aria-labelledby="languageSwitcher">
-										<li><a class="dropdown-item me-4 text-body" href="#"><img class="fa-fw me-2" src="{{ asset('assets/images/flags/uk.svg') }}" alt="">English</a></li>
-										<li><a class="dropdown-item me-4 text-body" href="#"><img class="fa-fw me-2" src="{{ asset('assets/images/flags/gr.svg') }}" alt="">German </a></li>
-										<li><a class="dropdown-item me-4 text-body" href="#"><img class="fa-fw me-2" src="{{ asset('assets/images/flags/sp.svg') }}" alt="">French</a></li>
-									</ul>
-								</div>
-							</li>
-							<li class="list-inline-item text-primary-hover"><a class="nav-link" href="#">Terms of use</a></li>
-							<li class="list-inline-item text-primary-hover"><a class="nav-link pe-0" href="#">Privacy policy</a></li>
+						<ul class="list-inline mb-0 small">
+							<li class="list-inline-item"><a class="nav-link py-0 text-body-secondary" href="#">Conditions d'utilisation</a></li>
+							<li class="list-inline-item"><a class="nav-link py-0 text-body-secondary pe-0" href="#">Confidentialité</a></li>
 						</ul>
 					</div>
 				</div>
@@ -1012,6 +1002,15 @@ Footer END -->
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // Initialize AOS globally
+    if (typeof AOS !== 'undefined') {
+        AOS.init({
+            duration: 800,
+            easing: 'ease-out-quart',
+            once: true
+        });
+    }
+
     {% for label, messages in app.flashes %}
         {% for message in messages %}
             (function() {

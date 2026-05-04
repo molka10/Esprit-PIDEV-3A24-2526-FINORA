@@ -93,7 +93,7 @@ class CardApiController extends AbstractController
     {
         try {
             $user = $this->getUser();
-            if (!$user) return $this->json($this->apiService->error('Access Denied.'), 401);
+            if (!$user instanceof User) return $this->json($this->apiService->error('Access Denied.'), 401);
             $userId = $user->getId();
             $card = $this->entityManager->getRepository(Card::class)->findOneBy(['id' => $id, 'user' => $user]);
 
@@ -115,7 +115,7 @@ class CardApiController extends AbstractController
     {
         try {
             $user = $this->getUser();
-            if (!$user) return $this->json($this->apiService->error('Access Denied.'), 401);
+            if (!$user instanceof User) return $this->json($this->apiService->error('Access Denied.'), 401);
             $userId = $user->getId();
             $cardRepository = $this->entityManager->getRepository(Card::class);
             $card = $cardRepository->findOneBy(['id' => $id, 'user' => $user]);

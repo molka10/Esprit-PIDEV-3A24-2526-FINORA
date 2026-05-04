@@ -20,7 +20,7 @@ class CategoryController extends AbstractController
     public function add(Request $req, EntityManagerInterface $em): Response
     {
         $user = $this->getUser();
-        if (!$user) {
+        if (!$user instanceof \App\Entity\User) {
             return $this->redirectToRoute('app_login');
         }
 
@@ -163,7 +163,7 @@ class CategoryController extends AbstractController
             $recentCount = 0;
 
             foreach ($transactions as $t) {
-                $amt = abs($t->getMontant());
+                $amt = abs((float)$t->getMontant());
                 if ($t->getType() === 'INCOME') {
                     $income += $amt;
                 } else {

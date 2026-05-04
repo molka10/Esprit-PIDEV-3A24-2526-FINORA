@@ -14,7 +14,7 @@ class StatisticsService
     public function __construct(
         private BourseRepository $bourseRepo,
         private ActionRepository $actionRepo,
-        private TransactionbourseRepository $transactionRepo
+        private TransactionBourseRepository $transactionRepo
     ) {}
 
     /**

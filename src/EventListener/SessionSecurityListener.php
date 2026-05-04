@@ -31,6 +31,7 @@ class SessionSecurityListener
             // If the session ID in the database is different from the current one, 
             // it means the user logged in from somewhere else.
             if ($storedSessionId && $session->getId() !== $storedSessionId) {
+                /** @var \Symfony\Component\HttpFoundation\Session\Session $session */
                 $session->getFlashBag()->add('danger', 'Déconnexion : Une autre session a été ouverte pour ce compte.');
                 $event->setResponse(new RedirectResponse($this->urlGenerator->generate('app_logout')));
                 return;
@@ -42,7 +43,7 @@ class SessionSecurityListener
             $hasAdminRole = in_array('ROLE_ADMIN', $user->getRoles());
 
             if ($isAdminPath && !$hasAdminRole) {
-                $event->setResponse(new RedirectResponse($this->urlGenerator->generate('app_dashboard')));
+                $event->setResponse(new RedirectResponse($this->urlGenerator->generate('app_home')));
             } elseif (!$isAdminPath && $hasAdminRole && !str_starts_with($request->getPathInfo(), '/logout')) {
                 // If an Admin tries to browse the front-end user pages, redirect them back to Admin
                 // Unless they are trying to logout.

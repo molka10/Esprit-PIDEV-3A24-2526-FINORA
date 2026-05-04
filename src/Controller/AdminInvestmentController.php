@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\User;
 use App\Entity\Investment;
 use App\Entity\InvestmentManagement;
 use App\Form\InvestmentManagementType;
@@ -146,7 +147,10 @@ class AdminInvestmentController extends AbstractController
             if ($imageFile instanceof UploadedFile) {
                 $investment->setImageUrl($this->imageUploader->upload($imageFile));
             }
-            $investment->setUser($this->getUser());
+            $user = $this->getUser();
+            if ($user instanceof User) {
+                $investment->setUser($user);
+            }
             $em->persist($investment);
             $em->flush();
 

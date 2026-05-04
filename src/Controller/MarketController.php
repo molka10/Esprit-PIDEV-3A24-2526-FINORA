@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\User;
 use Dompdf\Dompdf;
 use App\Entity\Action;
 use App\Entity\TransactionBourse;
@@ -32,7 +33,7 @@ class MarketController extends AbstractController
     ): Response
     {
         $user         = $this->getUser();
-        $walletBalance = $user ? $this->walletBalanceService->calculateUserBalance($user->getId()) : 0.0;
+        $walletBalance = ($user instanceof User) ? $this->walletBalanceService->calculateUserBalance($user->getId()) : 0.0;
 
         $news = $em->getRepository(\App\Entity\ActionNews::class)->findRecentWithAction(5);
         $globalNews = $financialNewsService->getLatestGlobalNews(4);
@@ -44,7 +45,7 @@ class MarketController extends AbstractController
         ];
 
         // 🧠 SMART RECOMMENDATIONS
-        $recommendations = $user ? $smartLearningService->getRecommendations($user) : [];
+        $recommendations = ($user instanceof User) ? $smartLearningService->getRecommendations($user) : [];
 
         return $this->render('market/index.html.twig', [
             'actions'       => $repo->findAllWithBourse(),
@@ -86,15 +87,15 @@ class MarketController extends AbstractController
         $news = new \App\Entity\ActionNews();
         $news->setAction($action);
         $news->setTitre($titre);
-        $news->setImpactPercent($pourcentage);
+        $news->setImpactPercent((string)$pourcentage);
 
         // Modify Action Price
-        $oldPrice = $action->getPrixUnitaire();
+        $oldPrice = (float) $action->getPrixUnitaire();
         $newPrice = $oldPrice + ($oldPrice * ($pourcentage / 100));
         // Prevent price dropping below 1
         $newPrice = max(1.0, $newPrice);
         
-        $action->setPrixUnitaire(round($newPrice, 2));
+        $action->setPrixUnitaire((string)round($newPrice, 2));
 
         $em->persist($news);
         $em->flush();
@@ -111,7 +112,7 @@ class MarketController extends AbstractController
     public function requestMargin(Request $request, EntityManagerInterface $em): Response
     {
         $user = $this->getUser();
-        if (!$user) {
+        if (!$user instanceof User) {
             return $this->redirectToRoute('app_login');
         }
 
@@ -124,10 +125,7 @@ class MarketController extends AbstractController
             return $this->redirectToRoute('app_market');
         }
 
-        $loan = new \App\Entity\MarginLoan();
-        $loan->setUser($user);
-        $loan->setMontantEmprunte($montant);
-
+        $loan = new \App\Entity\MarginLoan($user, (string)$montant);
         $em->persist($loan);
         $em->flush();
 
@@ -145,7 +143,11 @@ class MarketController extends AbstractController
             $quantite = (int) $request->request->get('quantite');
 
             try {
-                $transaction = $this->transactionService->executerTrade('ACHAT', $action->getId(), $quantite, $this->getUser());
+                $user = $this->getUser();
+                if (!$user instanceof User) {
+                    return $this->redirectToRoute('app_login');
+                }
+                $transaction = $this->transactionService->executerTrade('ACHAT', $action->getId(), (int)$quantite, $user);
                 return $this->redirectToRoute('app_market_confirmation', ['id' => $transaction->getId()]);
 
             } catch (\Exception $e) {
@@ -155,9 +157,10 @@ class MarketController extends AbstractController
             }
         }
 
+        $user = $this->getUser();
         return $this->render('market/buy.html.twig', [
             'action'        => $action,
-            'walletBalance' => $this->getUser() ? round($this->walletBalanceService->calculateUserBalance($this->getUser()->getId()), 2) : 0.0,
+            'walletBalance' => ($user instanceof User) ? round($this->walletBalanceService->calculateUserBalance($user->getId()), 2) : 0.0,
         ]);
     }
 
@@ -171,7 +174,11 @@ class MarketController extends AbstractController
             $quantite = (int) $request->request->get('quantite');
 
             try {
-                $transaction = $this->transactionService->executerTrade('VENTE', $action->getId(), $quantite, $this->getUser());
+                $user = $this->getUser();
+                if (!$user instanceof User) {
+                    return $this->redirectToRoute('app_login');
+                }
+                $transaction = $this->transactionService->executerTrade('VENTE', $action->getId(), (int)$quantite, $user);
                 return $this->redirectToRoute('app_market_confirmation', ['id' => $transaction->getId()]);
 
             } catch (\Exception $e) {
@@ -180,9 +187,10 @@ class MarketController extends AbstractController
             }
         }
 
+        $user = $this->getUser();
         return $this->render('market/sell.html.twig', [
             'action'        => $action,
-            'walletBalance' => $this->getUser() ? round($this->walletBalanceService->calculateUserBalance($this->getUser()->getId()), 2) : 0.0,
+            'walletBalance' => ($user instanceof User) ? round($this->walletBalanceService->calculateUserBalance($user->getId()), 2) : 0.0,
         ]);
     }
 
@@ -197,9 +205,10 @@ class MarketController extends AbstractController
             throw $this->createAccessDeniedException("Accès refusé.");
         }
 
+        $user = $this->getUser();
         return $this->render('market/confirmation.html.twig', [
             'transaction'   => $transaction,
-            'walletBalance' => round($this->walletBalanceService->calculateUserBalance($this->getUser()->getId()), 2),
+            'walletBalance' => ($user instanceof User) ? round($this->walletBalanceService->calculateUserBalance($user->getId()), 2) : 0.0,
         ]);
     }
 
@@ -338,11 +347,17 @@ class MarketController extends AbstractController
             $performanceCurve[] = round(-5 + ($i * ($currentROI + 5) / 10) + rand(-2, 2), 2);
         }
 
+        $user = $this->getUser();
+        if (!$user instanceof User) {
+            return $this->json(['error' => 'User not found'], 404);
+        }
+        $badges = $gamificationService->getUserBadges($user);
+
         return $this->render('market/history.html.twig', [
             'transactions' => $transactions,
             'currentPage' => $page,
             'totalPages' => $totalPages,
-            'badges' => $gamificationService->getUserBadges($user),
+            'badges' => $badges,
             'simulatorData' => $simulatorData,
             'ai_insights' => $aiInsights,
             'diversification_score' => round($diversificationScore),
@@ -367,7 +382,7 @@ class MarketController extends AbstractController
     public function pdf(TransactionBourseRepository $repo): Response
     {
         $user = $this->getUser();
-        if (!$user) {
+        if (!$user instanceof User) {
             return $this->redirectToRoute('app_login');
         }
 

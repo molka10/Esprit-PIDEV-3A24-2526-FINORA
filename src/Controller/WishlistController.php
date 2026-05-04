@@ -2,6 +2,8 @@
 
 namespace App\Controller;
 
+use App\Entity\User;
+use App\Entity\Formation;
 use App\Entity\BourseWishlist;
 use App\Entity\InvestmentWishlist;
 use App\Entity\Wishlist as WalletWishlist;
@@ -22,9 +24,8 @@ class WishlistController extends AbstractController
     #[Route('/my-wishlist', name: 'app_unified_wishlist')]
     public function index(EntityManagerInterface $em): Response
     {
-        /** @var User $user */
         $user = $this->getUser();
-        if (!$user) {
+        if (!$user instanceof User) {
             return $this->redirectToRoute('app_login');
         }
 
@@ -56,8 +57,10 @@ class WishlistController extends AbstractController
     #[Route('/formations', name: 'app_wishlist_index')]
     public function formationsWishlist(): Response
     {
-        /** @var User $user */
         $user = $this->getUser();
+        if (!$user instanceof User) {
+            return $this->redirectToRoute('app_login');
+        }
         $wishlist = $user->getWishlist();
 
         return $this->render('wishlist/index.html.twig', [
@@ -68,8 +71,10 @@ class WishlistController extends AbstractController
     #[Route('/toggle/{id}', name: 'app_wishlist_toggle', methods: ['POST'])]
     public function toggle(Formation $formation, EntityManagerInterface $entityManager): Response
     {
-        /** @var User $user */
         $user = $this->getUser();
+        if (!$user instanceof User) {
+            throw $this->createAccessDeniedException();
+        }
 
         if ($user->getWishlist()->contains($formation)) {
             $user->removeFromWishlist($formation);

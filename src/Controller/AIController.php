@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\User;
 use App\Service\AIAnalyzerService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
@@ -16,7 +17,7 @@ class AIController extends AbstractController
     public function analyse(AIAnalyzerService $ai, TransactionWalletRepository $repo): Response
     {
         $user = $this->getUser();
-        if (!$user) {
+        if (!$user instanceof User) {
             return $this->redirectToRoute('app_login');
         }
         $transactions = $repo->findBy(['user' => $user->getId()]);

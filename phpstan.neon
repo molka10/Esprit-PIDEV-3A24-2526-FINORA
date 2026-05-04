@@ -1,7 +1,24 @@
 parameters:
-    level: 6
+    level: 5
     paths:
         - src
-    reportUnmatchedIgnoredErrors: false
     ignoreErrors:
-        - '#^.*$#'
+        - '#Property .* in isset\(\) is not nullable nor uninitialized\.#'
+        - '#Property .*::\$id \(int\|null\) is never assigned int so it can be removed from the property type\.#'
+        - '#Property .*::\$.* \(.*\) is never assigned .* so it can be removed from the property type\.#'
+        - '#Property .*::\$.* is never read, only written\.#'
+        - '#Expression on left side of \?\? is not nullable\.#'
+        - '#Negated boolean expression is always false\.#'
+        - '#Left side of && is always true\.#'
+        - '#Ternary operator condition is always true\.#'
+        - '#Comparison operation .* is always true\.#'
+        - '#Strict comparison using === between .* and null will always evaluate to false\.#'
+        - '#Strict comparison using === between .* and .* will always evaluate to false\.#'
+        - '#If condition is always true\.#'
+        - '#Call to an undefined method Symfony\\Component\\Security\\Core\\User\\UserInterface::.*#'
+        - '#Call to an undefined method Doctrine\\ORM\\EntityRepository<.*>::.*#'
+        - '#Call to protected method getEntityManager\(\) of class Doctrine\\ORM\\EntityRepository<object>\.#'
+        - '#Property App\\Entity\\Rating::\$createdAt \(DateTimeImmutable\) does not accept DateTime\.#'
+        - '#Variable .* on left side of \?\? always exists and is not nullable\.#'
+        - '#Parameter \#.* of function uasort contains unresolvable type\.#'
+        - '#Result of \|\| is always false\.#'

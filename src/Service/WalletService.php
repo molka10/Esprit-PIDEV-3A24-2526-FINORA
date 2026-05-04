@@ -27,10 +27,13 @@ class WalletService
         $user = $this->entityManager->getRepository(User::class)->find($userId);
         if (!$user) throw new \InvalidArgumentException('User not found.');
 
+        $card = $this->entityManager->getRepository(Card::class)->find($cardId);
+        if (!$card) throw new \InvalidArgumentException('Card not found.');
+
         $rechargeRequest = new RechargeRequest();
         $rechargeRequest->setUser($user);
-        $rechargeRequest->setCardId($cardId);
-        $rechargeRequest->setAmount($amount);
+        $rechargeRequest->setCard($card);
+        $rechargeRequest->setAmount((string)$amount);
         
         if ($amount > 1000) {
             $rechargeRequest->setOtp((string)rand(100000, 999999));

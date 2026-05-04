@@ -71,7 +71,7 @@ class TransactionService
         }
 
         // 4. Récupérer le prix actuel
-        $prixUnitaire = $action->getPrixUnitaire();
+        $prixUnitaire = (float)$action->getPrixUnitaire();
 
         // 5. Calculer le montant et la commission
         $montant = $prixUnitaire * $quantite;
@@ -113,9 +113,9 @@ class TransactionService
                 }
                 
                 $walletTx = new \App\Entity\TransactionWallet();
-                $walletTx->setMontant(-abs($montantTotal)); // Negative = expense/outcome
+                $walletTx->setMontant((string)(-abs($montantTotal))); // Negative = expense/outcome
                 $walletTx->setType('OUTCOME');
-                $walletTx->setDateTransaction(new \DateTime());
+                $walletTx->setDateTransaction(new \DateTimeImmutable());
                 $walletTx->setCategory($category);
                 $walletTx->setUser($user);
                 $walletTx->setNomTransaction('Achat de ' . $quantite . ' actions ' . $action->getSymbole());
@@ -123,9 +123,9 @@ class TransactionService
 
             } else { // VENTE
                 $walletTx = new \App\Entity\TransactionWallet();
-                $walletTx->setMontant(abs($montantTotal)); // Positive = income
+                $walletTx->setMontant((string)abs($montantTotal)); // Positive = income
                 $walletTx->setType('INCOME');
-                $walletTx->setDateTransaction(new \DateTime());
+                $walletTx->setDateTransaction(new \DateTimeImmutable());
                 $walletTx->setCategory($category);
                 $walletTx->setUser($user);
                 $walletTx->setNomTransaction('Vente de ' . $quantite . ' actions ' . $action->getSymbole());
@@ -138,10 +138,10 @@ class TransactionService
         $transaction->setAction($action);
         $transaction->setTypeTransaction($typeTransaction);
         $transaction->setQuantite($quantite);
-        $transaction->setPrixUnitaire($prixUnitaire);
-        $transaction->setMontantTotal($montantTotal);
-        $transaction->setCommission($commission);
-        $transaction->setDateTransaction(new \DateTime());
+        $transaction->setPrixUnitaire((string)$prixUnitaire);
+        $transaction->setMontantTotal((string)$montantTotal);
+        $transaction->setCommission((string)$commission);
+        $transaction->setDateTransaction(new \DateTimeImmutable());
         if ($user) {
             $transaction->setUser($user);
         }

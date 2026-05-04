@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\TransactionWallet;
+use App\Entity\User;
 use App\Form\TransactionType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -31,7 +32,7 @@ public function add(Request $req, EntityManagerInterface $em): Response
 {
     $transaction = new TransactionWallet();
         $user = $this->getUser();
-        if (!$user) {
+        if (!$user instanceof User) {
             return $this->redirectToRoute('app_login'); // Security measure
         }
         $transaction->setUser($user);
@@ -58,18 +59,18 @@ public function add(Request $req, EntityManagerInterface $em): Response
 
     if ($form->isSubmitted() && $form->isValid()) {
         if ($transaction->getType() == "OUTCOME") {
-            $transaction->setMontant(-abs($transaction->getMontant()));
+            $transaction->setMontant((string)(-abs((float)$transaction->getMontant())));
         } else {
-            $transaction->setMontant(abs($transaction->getMontant()));
+            $transaction->setMontant((string)abs((float)$transaction->getMontant()));
         }
 
         if (!$transaction->getDateTransaction()) {
-            $transaction->setDateTransaction(new \DateTime());
+            $transaction->setDateTransaction(new \DateTimeImmutable());
         }
 
         // --- APPROVAL LOGIC ---
         // If absolute amount > 5000, set status to PENDING
-        if (abs($transaction->getMontant()) > 5000) {
+        if (abs((float)$transaction->getMontant()) > 5000) {
             $transaction->setStatus('PENDING');
             $this->addFlash('warning', 'Transaction de montant élevé détectée (> 5000). Elle est en attente de validation par un administrateur.');
         } else {
@@ -99,7 +100,7 @@ public function index(
     $transaction = new TransactionWallet();
 
         $user = $this->getUser();
-        if (!$user) {
+        if (!$user instanceof User) {
             return $this->redirectToRoute('app_login'); // Security measure
         }
         $transaction->setUser($user);
@@ -130,12 +131,12 @@ $transaction->setType($type);
     if ($form->isSubmitted() && $form->isValid()) {
 
         if ($transaction->getType() == "OUTCOME") {
-            $transaction->setMontant(-abs($transaction->getMontant()));
+            $transaction->setMontant((string)(-abs((float)$transaction->getMontant())));
         } else {
-            $transaction->setMontant(abs($transaction->getMontant()));
+            $transaction->setMontant((string)abs((float)$transaction->getMontant()));
         }
         if (!$transaction->getDateTransaction()) {
-            $transaction->setDateTransaction(new \DateTime());
+            $transaction->setDateTransaction(new \DateTimeImmutable());
         }
         
         $em->persist($transaction);
@@ -144,12 +145,15 @@ $transaction->setType($type);
         return $this->redirectToRoute('transactions');
     }
 
-$user = $this->getUser();
-$qb = $em->getRepository(TransactionWallet::class)->createQueryBuilder('t')
-    ->innerJoin('t.category', 'c')
-    ->addSelect('c')
-    ->andWhere('t.user = :userId')
-    ->setParameter('userId', $user->getId());
+    $user = $this->getUser();
+    if (!$user instanceof User) {
+        return $this->redirectToRoute('app_login');
+    }
+    $qb = $em->getRepository(TransactionWallet::class)->createQueryBuilder('t')
+        ->innerJoin('t.category', 'c')
+        ->addSelect('c')
+        ->andWhere('t.user = :userId')
+        ->setParameter('userId', $user->getId());
 
 $search = $req->query->get('search');
 $filterType = $req->query->get('filter_type');
@@ -203,7 +207,7 @@ return $this->render('wallet/list.html.twig', [
     ): Response
     {
         $user = $this->getUser();
-        if (!$user) {
+        if (!$user instanceof User) {
             return $this->redirectToRoute('app_login');
         }
 
@@ -245,7 +249,7 @@ return $this->render('wallet/list.html.twig', [
         if ($t->getStatus() !== 'ACCEPTED') {
             continue;
         }
-        $amountTnd = $t->getMontant();
+        $amountTnd = (float) $t->getMontant();
         $amountConverted = $amountTnd * $exchangeRate;
         $cat = $t->getCategory() ? $t->getCategory()->getNom() : 'Autre';
 
@@ -374,8 +378,9 @@ return $this->render('wallet/list.html.twig', [
     public function edit($id, Request $req, EntityManagerInterface $em): Response
     {
         $transaction = $em->getRepository(TransactionWallet::class)->find($id);
+        $user = $this->getUser();
 
-        if (!$transaction || $transaction->getUserId() !== $this->getUser()->getId()) {
+        if (!$transaction || !$user instanceof User || $transaction->getUserId() !== $user->getId()) {
             throw $this->createAccessDeniedException("Vous n'avez pas le droit de modifier cette transaction.");
         }
 
@@ -388,9 +393,9 @@ return $this->render('wallet/list.html.twig', [
         if ($form->isSubmitted()) {
             if ($form->isValid()) {
                 if ($transaction->getType() == "OUTCOME") {
-                    $transaction->setMontant(-abs($transaction->getMontant()));
+                    $transaction->setMontant((string)(-abs((float)$transaction->getMontant())));
                 } else {
-                    $transaction->setMontant(abs($transaction->getMontant()));
+                    $transaction->setMontant((string)abs((float)$transaction->getMontant()));
                 }
 
                 $em->flush();
@@ -408,8 +413,9 @@ return $this->render('wallet/list.html.twig', [
     public function delete($id, EntityManagerInterface $em): Response
     {
         $transaction = $em->getRepository(TransactionWallet::class)->find($id);
+        $user = $this->getUser();
 
-        if ($transaction && $transaction->getUserId() === $this->getUser()->getId()) {
+        if ($transaction && $user instanceof User && $transaction->getUserId() === $user->getId()) {
             $em->remove($transaction);
             $em->flush();
         } else if ($transaction) {
@@ -430,7 +436,7 @@ public function getCategoriesByType($type, EntityManagerInterface $em): JsonResp
         ->where('c.type = :type')
         ->andWhere('c.user = :uid OR c.user IS NULL')
         ->setParameter('type', strtoupper($type))
-        ->setParameter('uid', $user ? $user->getId() : null)
+        ->setParameter('uid', $user instanceof User ? $user->getId() : null)
         ->getQuery()
         ->getResult();
 
@@ -451,7 +457,7 @@ public function getCategoriesByType($type, EntityManagerInterface $em): JsonResp
 public function exportPdf(EntityManagerInterface $em): Response
 {
     $user = $this->getUser();
-    if (!$user) {
+    if (!$user instanceof User) {
         return $this->redirectToRoute('app_login');
     }
 
@@ -500,7 +506,7 @@ public function exportPdf(EntityManagerInterface $em): Response
 public function exportExcel(EntityManagerInterface $em): Response
 {
     $user = $this->getUser();
-    if (!$user) {
+    if (!$user instanceof User) {
         return $this->redirectToRoute('app_login');
     }
 
@@ -519,7 +525,7 @@ public function exportExcel(EntityManagerInterface $em): Response
             fputcsv($handle, [
                 $t->getNomTransaction(),
                 $t->getType(),
-                number_format($t->getMontant(), 2, '.', ''),
+                number_format((float)$t->getMontant(), 2, '.', ''),
                 $t->getCategory() ? $t->getCategory()->getNom() : 'N/A',
                 $t->getDateTransaction()->format('d/m/Y')
             ], ';');

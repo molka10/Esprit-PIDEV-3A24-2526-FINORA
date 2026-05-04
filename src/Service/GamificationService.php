@@ -45,7 +45,7 @@ class GamificationService
         ];
 
         // 2. Badge Spéculateur (Margin Loan)
-        $loans = $this->em->getRepository(MarginLoan::class)->findBy(['user' => $user->getId()]);
+        $loans = $this->em->getRepository(MarginLoan::class)->findBy(['user' => $user]);
         $isSpeculateur = count($loans) > 0;
 
         $badges[] = [
@@ -58,7 +58,7 @@ class GamificationService
         ];
 
         // 3. Badge Erudit (Formation) : Vérifie si la relation purchasedFormations existe et > 0
-        $isErudit = method_exists($user, 'getPurchasedFormations') && $user->getPurchasedFormations() && $user->getPurchasedFormations()->count() > 0;
+        $isErudit = $user->getPurchasedFormations()->count() > 0;
         $badges[] = [
             'id' => 'erudit',
             'name' => 'Érudit Financier',
