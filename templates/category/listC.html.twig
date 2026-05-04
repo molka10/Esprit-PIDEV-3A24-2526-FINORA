@@ -18,20 +18,20 @@
 
 /* ── Hero banner ── */
 .cat-hero {
-    background: linear-gradient(135deg,#7c3aed,#4f46e5);
+    background: var(--finora-gradient-soft);
+    border: 1px solid rgba(124, 58, 237, 0.1);
     border-radius: 22px;
     padding: 24px 28px;
     margin-bottom: 26px;
     display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap:14px;
-    box-shadow: 0 16px 40px rgba(124,58,237,0.28);
     position: relative; overflow: hidden;
 }
 .cat-hero::after {
     content:''; position: absolute; right:-50px; top:-50px;
-    width:200px;height:200px; border-radius:50%; background:rgba(255,255,255,0.06);
+    width:200px;height:200px; border-radius:50%; background:rgba(124, 58, 237, 0.05);
 }
 .cat-hero h1 { margin:0; font-size:24px; font-weight:900; color:#fff; }
-.cat-hero p  { margin:4px 0 0; font-size:13px; color:rgba(255,255,255,0.65); }
+.cat-hero p  { margin:4px 0 0; font-size:13px; color:rgba(255,255,255,0.7); }
 .cat-hero-btns { display:flex; gap:10px; flex-wrap:wrap; position:relative; z-index:1; }
 .btn-hero {
     display:inline-flex; align-items:center; gap:7px;
@@ -127,8 +127,8 @@
                 <thead>
                     <tr>
                         <th>Nom</th>
-                        <th>Type</th>
-                        <th>Priorité</th>
+                        <th>Type <span class="info-trigger" data-bs-toggle="tooltip" title="Revenu: Entrée d'argent | Dépense: Sortie d'argent.">?</span></th>
+                        <th>Priorité <span class="info-trigger" data-bs-toggle="tooltip" title="Niveau d'importance (Haut/Moyen/Bas) pour la planification budgétaire.">?</span></th>
                         <th>Dernier Mois</th>
                         <th>Actions</th>
                     </tr>

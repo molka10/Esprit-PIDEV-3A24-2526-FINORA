@@ -9,18 +9,18 @@
             <!-- 📊 Achievements Dashboard -->
             <div class="row g-4 mb-5">
                 <div class="col-lg-12">
-                    <div class="card border-0 shadow-lg overflow-hidden" style="border-radius: 24px; background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%);">
+                    <div class="card border-0 shadow-sm overflow-hidden" style="border-radius: 24px; background: var(--finora-gradient-soft); border: 1px solid rgba(124, 58, 237, 0.1);">
                         <div class="card-body p-4 p-md-5 position-relative">
                             <!-- Background Decoration -->
-                            <div class="position-absolute top-0 end-0 p-5 opacity-10">
-                                <i class="fas fa-award display-1 text-white"></i>
+                            <div class="position-absolute top-0 end-0 p-5 opacity-05">
+                                <i class="fas fa-award display-1 text-primary"></i>
                             </div>
                             
                             <div class="row align-items-center position-relative z-index-2">
-                                <div class="col-lg-7 text-white">
-                                    <span class="badge bg-primary bg-opacity-20 text-primary-light mb-3 px-3 py-2 rounded-pill">Tableau de Bord Premium</span>
-                                    <h1 class="display-5 fw-bold mb-3">Félicitations, {{ studentName ?: 'Apprenant' }} !</h1>
-                                    <p class="lead opacity-75 mb-0">Vous avez franchi des étapes importantes dans votre parcours financier. Voici vos accréditations officielles.</p>
+                                <div class="col-lg-7">
+                                    <span class="badge bg-white bg-opacity-15 text-white mb-3 px-3 py-2 rounded-pill">Tableau de Bord Premium</span>
+                                    <h1 class="display-5 fw-bold mb-3 text-white">Félicitations, {{ studentName ?: 'Apprenant' }} !</h1>
+                                    <p class="lead text-white opacity-75 mb-0">Vous avez franchi des étapes importantes dans votre parcours financier. Voici vos accréditations officielles.</p>
                                 </div>
                                 <div class="col-lg-5 mt-4 mt-lg-0">
                                     <div class="row g-3">
@@ -71,9 +71,14 @@
                                 <div class="card-body p-4 text-center">
                                     <div class="d-flex justify-content-between align-items-start mb-4">
                                         <span class="badge-premium">FINORA OFFICIAL</span>
-                                        <div class="dropdown">
-                                            <a href="#" class="btn-share-linkedin" title="Partager sur LinkedIn" onclick="alert('Partage LinkedIn activé pour {{ cert.lessonTitle }}')">
+                                        <div class="d-flex gap-2">
+                                            <a href="javascript:void(0)" class="btn-share-linkedin" title="Partager sur LinkedIn" 
+                                               onclick="shareOnLinkedIn('{{ cert.lessonTitle|escape('js') }}', '{{ cert.formationTitle|escape('js') }}', '{{ cert.score }}')">
                                                 <i class="fab fa-linkedin-in"></i>
+                                            </a>
+                                            <a href="javascript:void(0)" class="btn-share-facebook" title="Partager sur Facebook" 
+                                               onclick="shareOnFacebook('{{ cert.lessonTitle|escape('js') }}', '{{ cert.formationTitle|escape('js') }}', '{{ cert.score }}')">
+                                                <i class="fab fa-facebook-f"></i>
                                             </a>
                                         </div>
                                     </div>
@@ -186,15 +191,27 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 });
+
+function shareOnLinkedIn(lessonTitle, formationTitle, score) {
+    const url = window.location.href;
+    const shareUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`;
+    window.open(shareUrl, '_blank', 'width=600,height=600');
+}
+
+function shareOnFacebook(lessonTitle, formationTitle, score) {
+    const url = window.location.href;
+    const shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
+    window.open(shareUrl, '_blank', 'width=600,height=600');
+}
 </script>
 {% endblock %}
 
 {% block stylesheets %}
 <style>
     :root {
-        --finora-pro-blue: #1e1b4b;
+        --finora-pro-blue: var(--finora-purple-deep);
         --finora-pro-gold: #d4af37;
-        --finora-pro-accent: #6366f1;
+        --finora-pro-accent: var(--finora-purple);
     }
 
     .backdrop-blur {
@@ -258,11 +275,10 @@ document.addEventListener('DOMContentLoaded', function() {
         border: 1px solid #e2e8f0;
     }
 
-    .btn-share-linkedin {
+    .btn-share-linkedin, .btn-share-facebook {
         width: 32px;
         height: 32px;
         border-radius: 50%;
-        background: #0077b5;
         color: white;
         display: flex;
         align-items: center;
@@ -272,10 +288,13 @@ document.addEventListener('DOMContentLoaded', function() {
         text-decoration: none;
     }
 
-    .btn-share-linkedin:hover {
+    .btn-share-linkedin { background: #0077b5; }
+    .btn-share-facebook { background: #1877f2; }
+
+    .btn-share-linkedin:hover, .btn-share-facebook:hover {
         transform: scale(1.1);
         color: white;
-        background: #005582;
+        opacity: 0.9;
     }
 
     .diploma-seal-pro {

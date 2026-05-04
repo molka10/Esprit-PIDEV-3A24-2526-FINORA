@@ -9,7 +9,7 @@
     <!-- Welcome Section -->
     <div class="row mb-4">
         <div class="col-12">
-            <div class="card border-0 shadow-lg p-4 p-md-5 text-white position-relative overflow-hidden" 
+            <div id="guide-dash-welcome" class="card border-0 shadow-lg p-4 p-md-5 text-white position-relative overflow-hidden" 
                  style="background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%); border-radius: 24px;">
                 <!-- Decorative Circle -->
                 <div class="position-absolute top-0 end-0 mt-n5 me-n5 bg-white bg-opacity-10 rounded-circle" style="width: 200px; height: 200px;"></div>
@@ -32,65 +32,10 @@
         </div>
     </div>
 
-    <!-- Smart Learning Recommendations (CONTEXTUAL CAROUSEL) -->
-    {% if recommendations is defined and recommendations|length > 0 %}
-    <div class="row mb-4">
-        <div class="col-12">
-            <div id="smartRecCarousel" class="carousel slide" data-bs-ride="carousel">
-                <div class="carousel-inner" style="border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.05);">
-                    {% for rec in recommendations %}
-                    <div class="carousel-item {{ loop.first ? 'active' : '' }}">
-                        <div class="card border-0 position-relative" style="background: white; border-radius: 24px;">
-                            <div class="card-body p-0">
-                                <div class="row g-0 align-items-center">
-                                    <div class="col-md-auto p-4 d-flex align-items-center justify-content-center" style="background: rgba(99, 102, 241, 0.05); min-width: 100px;">
-                                        <div class="icon-circle bg-primary text-white fs-2 shadow-sm" style="width: 60px; height: 60px; display: flex; align-items:center; justify-content:center; border-radius: 18px;">
-                                            <i class="bi {{ rec.icon }}"></i>
-                                        </div>
-                                    </div>
-                                    <div class="col-md p-4">
-                                        <div class="d-flex align-items-center gap-2 mb-1">
-                                            <span class="badge bg-warning bg-opacity-10 text-warning xsmall fw-bold px-2 py-1 rounded-pill">
-                                                <i class="bi bi-stars me-1"></i>RECOMMANDATION SMART {{ recommendations|length > 1 ? '#' ~ loop.index : '' }}
-                                            </span>
-                                        </div>
-                                        <h5 class="fw-bold text-dark mb-1">{{ rec.title }}</h5>
-                                        <p class="text-muted small mb-0">{{ rec.reason }}</p>
-                                    </div>
-                                    <div class="col-md-auto p-4">
-                                        {% if rec.formation %}
-                                            <a href="{{ path('app_formation_show', {id: rec.formation.id}) }}" class="btn btn-primary rounded-pill px-4 fw-bold">
-                                                Apprendre & Agir <i class="bi bi-arrow-right ms-2"></i>
-                                            </a>
-                                        {% else %}
-                                            <a href="{{ path('app_formations', {categorie: rec.category_slug}) }}" class="btn btn-outline-primary rounded-pill px-4 fw-bold">
-                                                Explorer {{ rec.category_slug }}
-                                            </a>
-                                        {% endif %}
-                                    </div>
-                                </div>
-                            </div>
-                            <!-- Subtle side accent -->
-                            <div class="position-absolute top-0 bottom-0 start-0" style="width: 4px; background: #6366f1;"></div>
-                        </div>
-                    </div>
-                    {% endfor %}
-                </div>
-                {% if recommendations|length > 1 %}
-                <button class="carousel-control-prev" type="button" data-bs-target="#smartRecCarousel" data-bs-slide="prev" style="width: 5%;">
-                    <span class="carousel-control-prev-icon bg-dark rounded-circle" aria-hidden="true" style="width: 30px; height: 30px;"></span>
-                </button>
-                <button class="carousel-control-next" type="button" data-bs-target="#smartRecCarousel" data-bs-slide="next" style="width: 5%;">
-                    <span class="carousel-control-next-icon bg-dark rounded-circle" aria-hidden="true" style="width: 30px; height: 30px;"></span>
-                </button>
-                {% endif %}
-            </div>
-        </div>
-    </div>
-    {% endif %}
+
 
     <!-- Stats Grid -->
-    <div class="row g-4 mb-4">
+    <div id="guide-dash-stats" class="row g-4 mb-4">
         <!-- Solde Bourse (Volume) -->
         <div class="col-xl-3 col-md-6">
             <div class="card border-0 shadow-sm p-4 h-100 transition-up" style="border-radius: 20px;">
@@ -100,7 +45,10 @@
                     </div>
                     <span class="badge bg-success-soft text-success">+12%</span>
                 </div>
-                <h6 class="text-muted small text-uppercase fw-bold mb-1">Volume Bourse Total</h6>
+                <h6 class="text-muted small text-uppercase fw-bold mb-1">
+                    Volume Bourse Total
+                    <span class="info-trigger" data-bs-toggle="tooltip" title="Somme totale de vos achats et ventes sur le marché boursier.">?</span>
+                </h6>
                 <h3 class="fw-bold mb-0">{{ convert_currency(stats.bourseVolume, current_currency())|format_currency(current_currency()) }}</h3>
             </div>
         </div>
@@ -114,7 +62,10 @@
                     </div>
                     <span class="text-muted small">Mois en cours</span>
                 </div>
-                <h6 class="text-muted small text-uppercase fw-bold mb-1">Transactions Wallet</h6>
+                <h6 class="text-muted small text-uppercase fw-bold mb-1">
+                    Transactions Wallet
+                    <span class="info-trigger" data-bs-toggle="tooltip" title="Nombre total de flux financiers (dépôts, retraits, transferts) enregistrés.">?</span>
+                </h6>
                 <h3 class="fw-bold mb-0">{{ stats.walletTransactions }} <span class="fs-6 fw-normal">Actions</span></h3>
             </div>
         </div>
@@ -152,7 +103,10 @@
         <div class="col-lg-8">
             <div class="card border-0 shadow-sm" style="border-radius: 20px;">
                 <div class="card-header bg-transparent border-0 p-4 d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0 fw-bold">Dernières Activités Bourse</h5>
+                    <h5 class="mb-0 fw-bold">
+                        Dernières Activités Bourse
+                        <span class="info-trigger" data-bs-toggle="tooltip" title="Historique récent de vos ordres exécutés sur le marché.">?</span>
+                    </h5>
                     <a href="{{ path('app_history') }}" class="btn btn-sm btn-light rounded-pill px-3">Tout voir</a>
                 </div>
                 <div class="card-body p-0">
@@ -201,7 +155,7 @@
         </div>
 
         <!-- Quick Actions -->
-        <div class="col-lg-4">
+        <div id="guide-dash-actions" class="col-lg-4">
             <div class="card border-0 shadow-sm mb-4" style="border-radius: 20px;">
                 <div class="card-header bg-transparent border-0 p-4 pb-0">
                     <h5 class="mb-0 fw-bold">Actions Rapides</h5>
@@ -271,5 +225,6 @@
     .transition-up:hover { transform: translateY(-5px); }
     
     .btn-glass:hover { background: rgba(255,255,255,0.3) !important; }
+
 </style>
 {% endblock %}

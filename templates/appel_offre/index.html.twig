@@ -23,10 +23,19 @@
         </div>
     {% else %}
         {# --- USER HERO --- #}
-        <div class="text-center mb-5">
-            <h1 class="display-4 fw-bold text-dark mb-2">Marché des Appels d'Offres</h1>
-            <p class="lead text-muted">Trouvez les meilleures opportunités pour votre entreprise</p>
-            <div class="header-line mx-auto"></div>
+        <div class="card border-0 mb-5 position-relative overflow-hidden" style="background: var(--finora-gradient-soft); border-radius: 24px; border: 1px solid rgba(124, 58, 237, 0.1);">
+            <div class="position-absolute top-0 end-0 p-5 opacity-05">
+                <i class="bi bi-briefcase display-1 text-primary"></i>
+            </div>
+            <div class="card-body p-4 p-md-5 position-relative z-index-1">
+                <div class="row align-items-center">
+                    <div class="col-lg-8">
+                        <span class="badge bg-white bg-opacity-15 text-white mb-3 px-3 py-2 rounded-pill">Marché des Opportunités</span>
+                        <h1 class="display-5 fw-bold mb-3 text-white">Appels d'Offres & Projets</h1>
+                        <p class="lead text-white opacity-75 mb-0">Trouvez les meilleures opportunités pour votre entreprise et boostez votre croissance.</p>
+                    </div>
+                </div>
+            </div>
         </div>
     {% endif %}
 
@@ -47,7 +56,7 @@
                         </div>
                     </div>
                     <div class="col-md-2">
-                        <label class="form-label fw-bold text-muted small">Type</label>
+                        <label class="form-label fw-bold text-muted small">Type <span class="info-trigger" data-bs-toggle="tooltip" title="Achat: Acquisition directe | Partenariat: Coopération mutuelle | Don: Support gratuit.">?</span></label>
                         <select name="type" id="typeFilter" class="form-select bg-light border-0">
                             <option value="">Tous</option>
                             <option value="achat" {{ filters.type == 'achat' ? 'selected' : '' }}>Achat</option>
@@ -56,7 +65,7 @@
                         </select>
                     </div>
                     <div class="col-md-2">
-                        <label class="form-label fw-bold text-muted small">Statut</label>
+                        <label class="form-label fw-bold text-muted small">Statut <span class="info-trigger" data-bs-toggle="tooltip" title="Publié: Ouvert aux candidatures | Brouillon: En attente | Clôturé: Terminé.">?</span></label>
                         <select name="statut" id="statutFilter" class="form-select bg-light border-0">
                             <option value="">Tous</option>
                             <option value="published" {{ filters.statut == 'published' ? 'selected' : '' }}>Publié</option>
@@ -65,7 +74,7 @@
                         </select>
                     </div>
                     <div class="col-md-2">
-                        <label class="form-label fw-bold text-muted small">Catégorie</label>
+                        <label class="form-label fw-bold text-muted small">Catégorie <span class="info-trigger" data-bs-toggle="tooltip" title="Regroupement par secteur d'activité ou domaine technologique.">?</span></label>
                         <select name="categorie" id="categorieFilter" class="form-select bg-light border-0">
                             <option value="">Toutes</option>
                             {% for cat in categories %}
@@ -83,60 +92,7 @@
         </div>
     </div>
 
-    {# --- SMART RECOMMENDATIONS (CAROUSEL) --- #}
-    {% if recommendations is defined and recommendations|length > 0 and app.request.query.get('role') != 'admin' %}
-    <div class="row mb-5">
-        <div class="col-12">
-            <div id="smartRecCarousel" class="carousel slide" data-bs-ride="carousel">
-                <div class="carousel-inner" style="border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.05);">
-                    {% for rec in recommendations %}
-                    <div class="carousel-item {{ loop.first ? 'active' : '' }}">
-                        <div class="card border-0 position-relative" style="background: white; border-radius: 24px; border-left: 5px solid #6d28d9 !important;">
-                            <div class="card-body p-0">
-                                <div class="row g-0 align-items-center">
-                                    <div class="col-md-auto p-4 d-flex align-items-center justify-content-center" style="background: rgba(109, 40, 217, 0.05); min-width: 100px;">
-                                        <div class="icon-circle text-white fs-2 shadow-sm" style="width: 60px; height: 60px; display: flex; align-items:center; justify-content:center; border-radius: 18px; background: #6d28d9;">
-                                            <i class="bi {{ rec.icon }}"></i>
-                                        </div>
-                                    </div>
-                                    <div class="col-md p-4">
-                                        <div class="d-flex align-items-center gap-2 mb-1">
-                                            <span class="badge bg-warning bg-opacity-10 text-warning xsmall fw-bold px-2 py-1 rounded-pill">
-                                                <i class="bi bi-stars me-1"></i>RECOMMANDATION SMART {{ recommendations|length > 1 ? '#' ~ loop.index : '' }}
-                                            </span>
-                                        </div>
-                                        <h5 class="fw-bold text-dark mb-1">{{ rec.title }}</h5>
-                                        <p class="text-muted small mb-0">{{ rec.reason }}</p>
-                                    </div>
-                                    <div class="col-md-auto p-4">
-                                        {% if rec.formation %}
-                                            <a href="{{ path('app_formation_show', {id: rec.formation.id}) }}" class="btn admin-main-btn rounded-pill px-4 fw-bold">
-                                                Apprendre & Agir <i class="bi bi-arrow-right ms-2"></i>
-                                            </a>
-                                        {% else %}
-                                            <a href="{{ path('app_formations', {categorie: rec.category_slug}) }}" class="btn btn-outline-primary rounded-pill px-4 fw-bold">
-                                                Explorer {{ rec.category_slug }}
-                                            </a>
-                                        {% endif %}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    {% endfor %}
-                </div>
-                {% if recommendations|length > 1 %}
-                <button class="carousel-control-prev" type="button" data-bs-target="#smartRecCarousel" data-bs-slide="prev" style="width: 5%;">
-                    <span class="carousel-control-prev-icon bg-dark rounded-circle" aria-hidden="true" style="width: 30px; height: 30px;"></span>
-                </button>
-                <button class="carousel-control-next" type="button" data-bs-target="#smartRecCarousel" data-bs-slide="next" style="width: 5%;">
-                    <span class="carousel-control-next-icon bg-dark rounded-circle" aria-hidden="true" style="width: 30px; height: 30px;"></span>
-                </button>
-                {% endif %}
-            </div>
-        </div>
-    </div>
-    {% endif %}
+
 
     {# --- CONTENT --- #}
     <div id="gridContainer" style="transition: opacity 0.3s ease;">

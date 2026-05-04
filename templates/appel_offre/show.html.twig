@@ -12,19 +12,31 @@
         </a>
     </div>
 
+    {# --- HEADER BANNER --- #}
+    <div class="card border-0 mb-5 position-relative overflow-hidden" style="background: var(--finora-gradient-soft); border-radius: 24px; border: 1px solid rgba(124, 58, 237, 0.1);">
+        <div class="position-absolute top-0 end-0 p-5 opacity-05">
+            <i class="bi bi-rocket-takeoff display-1 text-primary"></i>
+        </div>
+        <div class="card-body p-4 p-md-5 position-relative z-index-1">
+            <div class="row align-items-center">
+                <div class="col-lg-8">
+                    <span class="badge bg-white bg-opacity-15 text-white mb-3 px-3 py-2 rounded-pill">Détails de l'Offre</span>
+                    <h1 class="display-5 fw-bold mb-3 text-white">{{ appel_offre.titre }}</h1>
+                    <div class="d-flex align-items-center gap-3 text-white opacity-75">
+                        <span><i class="bi bi-tag-fill me-1"></i>{{ appel_offre.categorie ? appel_offre.categorie.nom : 'Non catégorisé' }}</span>
+                        <span><i class="bi bi-hash me-1"></i>ID #{{ appel_offre.id }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="row g-4">
         {# --- LEFT COLUMN: Main Info --- #}
         <div class="col-lg-8">
             <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
                 <div class="card-header bg-white border-0 pt-4 px-4">
-                    <div class="d-flex justify-content-between align-items-start">
-                        <div>
-                            <span class="badge bg-primary-soft text-primary px-3 py-2 rounded-pill mb-2 fw-bold small">
-                                <i class="bi bi-tag-fill me-1"></i>{{ appel_offre.categorie ? appel_offre.categorie.nom : 'Non catégorisé' }}
-                            </span>
-                            <h1 class="h2 fw-extrabold text-dark mt-2 mb-3">{{ appel_offre.titre }}</h1>
-                        </div>
-                        <div class="text-end">
+                        <div class="ms-auto text-end">
                             {% if appel_offre.statut == 'published' %}
                                 <span class="badge bg-success-soft text-success px-3 py-2 rounded-pill fw-bold">
                                     <i class="bi bi-check-circle-fill me-1"></i>Publié

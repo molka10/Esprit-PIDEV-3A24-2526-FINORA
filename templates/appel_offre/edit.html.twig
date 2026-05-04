@@ -26,9 +26,20 @@
                 </a>
             </div>
 
-            <div class="text-center mb-5">
-                <h1 class="fw-extrabold text-dark mb-2">Modifier l'Offre</h1>
-                <p class="text-muted">Mise à jour des informations pour : <strong class="text-primary">{{ appel_offre.titre }}</strong></p>
+            {# --- HEADER --- #}
+            <div class="card border-0 mb-5 position-relative overflow-hidden" style="background: var(--finora-gradient-soft); border-radius: 24px; border: 1px solid rgba(124, 58, 237, 0.1);">
+                <div class="position-absolute top-0 end-0 p-5 opacity-05">
+                    <i class="bi bi-pencil-square display-1 text-primary"></i>
+                </div>
+                <div class="card-body p-4 p-md-5 position-relative z-index-1">
+                    <div class="row align-items-center text-center">
+                        <div class="col-12">
+                            <span class="badge bg-warning bg-opacity-10 text-warning mb-3 px-3 py-2 rounded-pill">Mode Édition</span>
+                            <h1 class="display-5 fw-bold mb-3" style="color: #1f1147;">Modifier l'Offre</h1>
+                            <p class="lead text-muted mb-0">Mise à jour des informations pour : <strong style="color: #6d28d9;">{{ appel_offre.titre }}</strong></p>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <div class="card card-premium overflow-hidden">

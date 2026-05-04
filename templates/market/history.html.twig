@@ -10,16 +10,16 @@
 {% block body %}
 <div class="container-fluid py-4">
     <!-- Header Section -->
-    <div class="card border-0 mb-5 position-relative overflow-hidden" style="background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%); border-radius: 24px; box-shadow: 0 15px 35px rgba(15, 23, 42, 0.2);">
+    <div class="card border-0 mb-5 position-relative overflow-hidden" style="background: var(--finora-gradient-soft); border-radius: 24px; border: 1px solid rgba(124, 58, 237, 0.1);">
         <!-- Abstract Glowing Orbs -->
-        <div style="position:absolute; top:-80px; left:-50px; width:250px; height:250px; background:#7c3aed; filter:blur(80px); opacity:0.4; pointer-events:none;"></div>
-        <div style="position:absolute; bottom:-80px; right:10%; width:200px; height:200px; background:#3b82f6; filter:blur(80px); opacity:0.3; pointer-events:none;"></div>
+        <div style="position:absolute; top:-80px; left:-50px; width:250px; height:250px; background:#7c3aed; filter:blur(80px); opacity:0.1; pointer-events:none;"></div>
+        <div style="position:absolute; bottom:-80px; right:10%; width:200px; height:200px; background:#3b82f6; filter:blur(80px); opacity:0.1; pointer-events:none;"></div>
         
         <div class="card-body p-4 p-md-5 position-relative z-index-1">
             <div class="row align-items-center">
-                <div class="col-lg-8 text-white">
-                    <h1 class="display-6 fw-bolder mb-2" style="letter-spacing: -1px;">📜 Historique des Transactions</h1>
-                    <p class="lead text-white-50 mb-4 fw-semibold" style="font-size: 16px;">Analysez vos performances, suivez vos gains et débloquez des trophées exclusifs.</p>
+                <div class="col-lg-8">
+                    <h1 class="display-6 fw-bolder mb-2" style="letter-spacing: -1px; color: #1f1147;">📜 Historique des Transactions</h1>
+                    <p class="lead text-muted mb-4 fw-semibold" style="font-size: 16px;">Analysez vos performances, suivez vos gains et débloquez des trophées exclusifs.</p>
                     <div class="d-flex gap-3 flex-wrap">
                         <a href="{{ path('app_history_pdf') }}" class="btn btn-danger btn-lg rounded-pill px-4 shadow-sm fw-bold" style="background: linear-gradient(135deg, #ef4444, #b91c1c); border:none; transition: all 0.3s;" onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 10px 20px rgba(239, 68, 68, 0.3)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none';">
                             <i class="bi bi-file-earmark-pdf me-2"></i>Télécharger Relevé PDF
@@ -44,7 +44,7 @@
             <div class="card border-0 shadow-sm h-100 p-4 stat-card-hover" style="border-radius: 20px; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);">
                 <div class="d-flex align-items-center mb-3">
                     <div class="bg-primary bg-opacity-10 p-2 rounded-4 text-primary me-3 shadow-sm" style="width:40px; height:40px; display:flex; align-items:center; justify-content:center;"><i class="bi bi-wallet2 fs-5"></i></div>
-                    <span class="text-muted fw-bolder text-uppercase" style="font-size: 11px; letter-spacing: 0.5px;">Valeur Portefeuille</span>
+                    <span class="text-muted fw-bolder text-uppercase" style="font-size: 11px; letter-spacing: 0.5px;">Valeur Portefeuille <span class="info-trigger" data-bs-toggle="tooltip" title="Valeur actuelle de vos actifs calculée selon les prix du marché en temps réel.">?</span></span>
                 </div>
                 <h3 class="fw-bolder mb-1 text-dark" style="letter-spacing: -0.5px;">{{ stats.valeur_estimee|number_format(2) }} <small class="h6 text-muted fw-bold">TND</small></h3>
                 <div class="text-{{ stats.valeur_estimee >= stats.total_investi ? 'success' : 'danger' }} fw-bold" style="font-size: 12px; margin-top:5px;">
@@ -67,7 +67,7 @@
             <div class="card border-0 shadow-sm h-100 p-4 stat-card-hover" style="border-radius: 20px; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);">
                 <div class="d-flex align-items-center mb-3">
                     <div class="bg-warning bg-opacity-10 p-2 rounded-4 text-warning me-3 shadow-sm" style="width:40px; height:40px; display:flex; align-items:center; justify-content:center;"><i class="bi bi-percent fs-5"></i></div>
-                    <span class="text-muted fw-bolder text-uppercase" style="font-size: 11px; letter-spacing: 0.5px;">Commissions (1%)</span>
+                    <span class="text-muted fw-bolder text-uppercase" style="font-size: 11px; letter-spacing: 0.5px;">Commissions (1%) <span class="info-trigger" data-bs-toggle="tooltip" title="Frais de service prélevés sur chaque transaction pour maintenir l'écosystème Finora.">?</span></span>
                 </div>
                 <h3 class="fw-bolder mb-1 text-dark" style="letter-spacing: -0.5px;">{{ stats.commissions|number_format(2) }} <small class="h6 text-muted fw-bold">TND</small></h3>
                 <div class="text-muted fw-semibold" style="font-size: 12px; margin-top:5px;">Frais de trading totaux</div>
@@ -146,7 +146,7 @@
         <!-- Risk & Diversification Gauge -->
         <div class="col-xl-4">
             <div class="card border-0 shadow-lg h-100 p-4" style="border-radius: 24px; background: white;">
-                <h5 class="fw-bolder mb-4 text-dark"><i class="bi bi-shield-lock-fill me-2 text-primary"></i>Analyse du Risque</h5>
+                <h5 class="fw-bolder mb-4 text-dark"><i class="bi bi-shield-lock-fill me-2 text-primary"></i>Analyse du Risque <span class="info-trigger" data-bs-toggle="tooltip" title="Évaluation de votre exposition. Un score élevé signifie que vos investissements sont bien répartis.">?</span></h5>
                 
                 <div class="text-center my-auto d-flex flex-column align-items-center justify-content-center" style="min-height: 350px;">
                     <div id="diversificationGauge" style="width: 100%; max-width: 300px;"></div>
@@ -177,7 +177,7 @@
         <div class="col-xl-8">
             <div class="card border-0 shadow-sm h-100 overflow-hidden" style="border-radius: 24px;">
                 <div class="card-header py-4 border-0" style="background: transparent;">
-                    <h4 class="m-0 fw-bolder text-dark" style="letter-spacing: -0.5px;"><i class="bi bi-magic me-2 text-primary"></i>What-If Simulator <span class="badge bg-primary bg-opacity-10 text-primary ms-2 fs-6 rounded-pill">Prédiction</span></h4>
+                    <h4 class="m-0 fw-bolder text-dark" style="letter-spacing: -0.5px;"><i class="bi bi-magic me-2 text-primary"></i>What-If Simulator <span class="badge bg-primary bg-opacity-10 text-primary ms-2 fs-6 rounded-pill">Prédiction</span> <span class="info-trigger" data-bs-toggle="tooltip" title="Outil de projection permettant d'estimer vos gains en cas de hausse ou baisse globale du marché.">?</span></h4>
                 </div>
                 <div class="card-body p-4 p-md-5" style="background: linear-gradient(180deg, rgba(248, 250, 252, 0) 0%, rgba(241, 245, 249, 1) 100%);">
                     <p class="text-muted fw-semibold mb-5" style="font-size: 14px;">Simulez une variation du marché sur vos actifs actuels pour estimer vos futurs gains potentiels en temps réel.</p>
@@ -234,7 +234,7 @@
         <div class="col-xl-4">
             <div class="card border-0 shadow-sm h-100 overflow-hidden" style="border-radius: 24px;">
                 <div class="card-header py-4 border-0" style="background: transparent;">
-                    <h4 class="m-0 fw-bolder text-dark" style="letter-spacing: -0.5px;"><i class="bi bi-trophy-fill me-2 text-warning"></i>Mes Trophées</h4>
+                    <h4 class="m-0 fw-bolder text-dark" style="letter-spacing: -0.5px;"><i class="bi bi-trophy-fill me-2 text-warning"></i>Mes Trophées <span class="info-trigger" data-bs-toggle="tooltip" title="Récompenses débloquées grâce à votre activité et votre régularité sur Finora.">?</span></h4>
                 </div>
                 <div class="card-body p-4 pt-0">
                     <div class="row g-3">
@@ -330,7 +330,7 @@
         <div class="col-xl-5">
             <div class="card border-0 shadow-sm rounded-4 h-100 overflow-hidden" style="border-radius: 24px;">
                 <div class="card-header bg-white py-4 border-0">
-                    <h5 class="m-0 fw-bold text-dark"><i class="bi bi-pie-chart-fill me-2 text-primary"></i>Répartition du Portefeuille</h5>
+                    <h5 class="m-0 fw-bold text-dark"><i class="bi bi-pie-chart-fill me-2 text-primary"></i>Répartition du Portefeuille <span class="info-trigger" data-bs-toggle="tooltip" title="Visualisation de la part occupée par chaque action dans votre capital total.">?</span></h5>
                 </div>
                 <div class="card-body p-4 pt-0 d-flex flex-column align-items-center justify-content-center">
                     <div id="allocationChart" style="min-height: 250px; width: 100%;"></div>
@@ -350,7 +350,7 @@
         <div class="col-xl-7">
             <div class="card border-0 shadow-sm rounded-4 h-100 overflow-hidden" style="border-radius: 24px;">
                 <div class="card-header bg-white py-4 border-0 d-flex justify-content-between align-items-center">
-                    <h5 class="m-0 fw-bold text-dark"><i class="bi bi-graph-up me-2 text-success"></i>Performance de l'Investissement</h5>
+                    <h5 class="m-0 fw-bold text-dark"><i class="bi bi-graph-up me-2 text-success"></i>Performance de l'Investissement <span class="info-trigger" data-bs-toggle="tooltip" title="Courbe de rentabilité (ROI) montrant l'évolution de vos gains au fil du temps.">?</span></h5>
                     <span class="badge bg-success bg-opacity-10 text-success px-3 py-2 rounded-pill" style="font-size: 11px;">ROIs de cette session</span>
                 </div>
                 <div class="card-body p-0">

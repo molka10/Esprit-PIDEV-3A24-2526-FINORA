@@ -8,32 +8,34 @@
 
 /* ── Hero banner ── */
 .tx-hero {
-    background: linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%);
+    background: var(--finora-gradient-soft);
+    border: 1px solid rgba(124, 58, 237, 0.1);
     border-radius: 22px;
     padding: 24px 28px;
     margin-bottom: 26px;
     display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px;
-    box-shadow: 0 16px 48px rgba(124,58,237,0.28);
     position: relative; overflow: hidden;
     animation: txFadeUp 0.4s ease both;
 }
 .tx-hero::before {
     content:''; position:absolute; right:-60px; top:-60px;
-    width:220px; height:220px; border-radius:50%; background:rgba(255,255,255,0.06);
+    width:220px; height:220px; border-radius:50%; background:rgba(124, 58, 237, 0.05);
 }
 .tx-hero h1 { margin:0; font-size:22px; font-weight:900; color:#fff; position:relative; z-index:1; }
-.tx-hero p  { margin:4px 0 0; font-size:13px; color:rgba(255,255,255,0.68); position:relative; z-index:1; }
+.tx-hero p  { margin:4px 0 0; font-size:13px; color:rgba(255,255,255,0.7); position:relative; z-index:1; }
 
 @keyframes txFadeUp { from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);} }
 
 /* ── View toggle pill ── */
 .view-toggle {
     display: inline-flex;
-    background: rgba(255,255,255,0.15);
+    background: #ffffff;
+    border: 1px solid rgba(124, 58, 237, 0.1);
     border-radius: 14px;
     padding: 4px;
     gap: 4px;
     position: relative; z-index: 1;
+    box-shadow: 0 4px 12px rgba(124, 58, 237, 0.05);
 }
 .view-toggle-btn {
     padding: 7px 16px;
@@ -43,17 +45,17 @@
     font-weight: 600;
     cursor: pointer;
     background: transparent;
-    color: rgba(255,255,255,0.75);
+    color: #64748b;
     transition: all 0.2s;
     display: flex; align-items: center; gap: 6px;
     font-family: 'Inter', sans-serif;
 }
 .view-toggle-btn.active {
-    background: rgba(255,255,255,0.92);
-    color: #7c3aed;
-    box-shadow: 0 3px 10px rgba(0,0,0,0.15);
+    background: #7c3aed;
+    color: #ffffff;
+    box-shadow: 0 3px 10px rgba(124, 58, 237, 0.2);
 }
-.view-toggle-btn:hover:not(.active) { background: rgba(255,255,255,0.12); color: #fff; }
+.view-toggle-btn:hover:not(.active) { background: rgba(124, 58, 237, 0.05); color: #7c3aed; }
 
 /* ── Add button ── */
 .tx-add-btn {

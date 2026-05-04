@@ -89,10 +89,16 @@
 
     <style>
         :root {
+            --finora-purple-light: #a78bfa;
             --finora-purple: #7c3aed;
-            --finora-dark: #1e1b4b;
-            --finora-gradient: linear-gradient(135deg, #7c3aed 0%, #3b1278 100%);
+            --finora-purple-dark: #6d28d9;
+            --finora-purple-deep: #1f1147;
+            --finora-bg-purple: rgba(124, 58, 237, 0.05);
+            --finora-gradient: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+            --finora-gradient-light: linear-gradient(135deg, rgba(124, 58, 237, 0.08) 0%, rgba(167, 139, 250, 0.12) 100%);
+            --finora-gradient-soft: linear-gradient(135deg, #1e1b4b 0%, #3b1278 100%);
         }
+        .text-primary-light { color: #7c3aed !important; }
         .btn-primary { background: var(--finora-gradient); border: none; }
         .btn-primary:hover { background: linear-gradient(135deg, #6d28d9 0%, #2e1065 100%); transform: translateY(-1px); transition: all 0.2s; }
         .nav-category .nav-link:hover { color: var(--finora-purple) !important; }
@@ -107,6 +113,22 @@
                 animation: fadeDown 0.2s ease-out forwards;
             }
         }
+        /* --- Custom UI Utilities --- */
+        .footer-purple {
+            background: #1e1b4b;
+            color: rgba(255, 255, 255, 0.7);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .footer-purple .nav-link { color: rgba(255, 255, 255, 0.7) !important; transition: all 0.2s; }
+        .footer-purple .nav-link:hover { color: #ffffff !important; transform: translateX(5px); }
+        .footer-purple h5 { color: #ffffff !important; font-weight: 700; }
+        .footer-purple .text-body-secondary { color: rgba(255, 255, 255, 0.5) !important; }
+        .footer-purple hr { border-color: rgba(255, 255, 255, 0.1); }
+        
+        .letter-spacing-2 { letter-spacing: 2px; }
+        .h-40px { height: 40px; }
+        .h-60px { height: 60px; }
+        
         /* --- Header & Module Navigation --- */
         .nav-link-module {
             color: #4b5563 !important;
@@ -116,6 +138,164 @@
             display: flex;
             align-items: center;
         }
+
+        /* --- Pulse Effect for New Features --- */
+        @keyframes pulse-purple {
+            0% { box-shadow: 0 0 0 0 rgba(124, 58, 237, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(124, 58, 237, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(124, 58, 237, 0); }
+        }
+        .btn-pulse {
+            animation: pulse-purple 2s infinite;
+        }
+
+        /* --- Smart Info Triggers --- */
+        .info-trigger {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 18px;
+            height: 18px;
+            background: rgba(124, 58, 237, 0.1);
+            color: #7c3aed;
+            border-radius: 50%;
+            font-size: 10px;
+            cursor: help;
+            margin-left: 8px;
+            transition: all 0.2s;
+            vertical-align: middle;
+            border: 1px solid rgba(124, 58, 237, 0.2);
+        }
+        .info-trigger:hover {
+            background: #7c3aed;
+            color: white;
+            transform: scale(1.1);
+        }
+
+        /* --- Magic Hotspots --- */
+        .magic-hotspot {
+            position: absolute;
+            width: 24px; height: 24px;
+            background: #f59e0b;
+            border-radius: 50%;
+            z-index: 10000;
+            cursor: pointer;
+            box-shadow: 0 0 0 rgba(245, 158, 11, 0.4);
+            animation: hotspotPulse 2s infinite;
+            display: flex; align-items: center; justify-content: center;
+            color: white; font-size: 12px; font-weight: bold;
+            border: 2px solid white;
+        }
+        @keyframes hotspotPulse {
+            0% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7); }
+            70% { box-shadow: 0 0 0 15px rgba(245, 158, 11, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); }
+        }
+        .hotspot-tooltip {
+            position: absolute;
+            background: #1e1b4b;
+            color: white;
+            padding: 12px 16px;
+            border-radius: 12px;
+            width: 220px;
+            font-size: 13px;
+            bottom: 35px;
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 0;
+            transition: all 0.3s;
+            pointer-events: none;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            z-index: 10001;
+            text-align: center;
+        }
+        .magic-hotspot:hover .hotspot-tooltip {
+            opacity: 1;
+            transform: translateX(-50%) translateY(-5px);
+        }
+        .guide-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.3);
+            backdrop-filter: blur(2px);
+            z-index: 9999;
+            display: none;
+        }
+
+        /* --- Floating Guide Button --- */
+        .fab-guide {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            z-index: 1000;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: var(--finora-gradient);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            box-shadow: 0 10px 25px rgba(124, 58, 237, 0.4);
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+        .fab-guide:hover {
+            transform: scale(1.1) rotate(15deg);
+            box-shadow: 0 15px 35px rgba(124, 58, 237, 0.6);
+            color: white;
+        }
+        .fab-guide::after {
+            content: "Guide";
+            position: absolute;
+            right: 70px;
+            background: #1e1b4b;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: bold;
+            opacity: 0;
+            transform: translateX(10px);
+            transition: all 0.3s;
+            pointer-events: none;
+        }
+        .fab-guide:hover::after {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        /* --- Finora Pro Guide Modal --- */
+        .guide-modal .modal-content {
+            border-radius: 30px;
+            border: none;
+            overflow: hidden;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(15px);
+        }
+        .guide-step { display: none; animation: fadeIn 0.4s ease; }
+        .guide-step.active { display: block; }
+        .guide-icon-box {
+            width: 80px; height: 80px;
+            background: var(--finora-gradient);
+            border-radius: 24px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 32px; color: white;
+            margin: 0 auto 24px;
+            box-shadow: 0 10px 30px rgba(124, 58, 237, 0.3);
+        }
+        .guide-progress {
+            display: flex; gap: 8px; justify-content: center; margin-top: 30px;
+        }
+        .progress-dot {
+            width: 8px; height: 8px; border-radius: 50%;
+            background: #e2e8f0; transition: all 0.3s;
+        }
+        .progress-dot.active {
+            width: 24px; border-radius: 4px; background: var(--finora-purple);
+        }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         .nav-link-module:hover {
             color: #7c3aed !important;
             transform: translateY(-1px);
@@ -231,7 +411,7 @@
             -webkit-text-fill-color: transparent;
         }
         .pro-hero {
-            background: linear-gradient(rgba(30, 27, 75, 0.85), rgba(30, 27, 75, 0.75)), url('{{ asset('assets/images/finora_hero_bg.png') }}');
+            background: linear-gradient(rgba(31, 17, 71, 0.85), rgba(31, 17, 71, 0.75)), url('{{ asset('assets/images/finora_hero_bg.png') }}');
             background-size: cover;
             background-position: center;
             min-height: 60vh;
@@ -544,7 +724,7 @@
                     <i class="bi bi-chevron-down small"></i>
                 </a>
                 <div class="collapse ps-3 {{ app.request.attributes.get('_route') starts with 'app_market' or app.request.attributes.get('_route') == 'app_history' ? 'show' : '' }}" id="sideBourse">
-                    <a href="{{ path('app_market') }}" class="sidebar-nav-link py-2 small fw-normal">Marché Live</a>
+                    <a href="{{ path('app_market') }}" class="sidebar-nav-link py-2 small fw-normal">Marché Live <span class="badge bg-success bg-opacity-10 text-success ms-auto" style="font-size: 0.6rem;">LIVE</span></a>
                     <a href="{{ path('app_history') }}" class="sidebar-nav-link py-2 small fw-normal">Historique</a>
                 </div>
             </div>
@@ -559,7 +739,7 @@
                     <a href="{{ path('dashboard') }}" class="sidebar-nav-link py-2 small fw-normal">Mon Wallet (Dashboard)</a>
                     <a href="{{ path('category_list') }}" class="sidebar-nav-link py-2 small fw-normal">Mes Catégories</a>
                     <a href="{{ path('transactions') }}" class="sidebar-nav-link py-2 small fw-normal">Mes Transactions</a>
-                    <a href="{{ path('ai_analyse') }}" class="sidebar-nav-link py-2 small fw-normal text-warning"><i class="bi bi-robot me-2"></i>Finora AI Analysis</a>
+                    <a href="{{ path('ai_analyse') }}" class="sidebar-nav-link py-2 small fw-normal text-warning"><i class="bi bi-robot me-2"></i>Finora AI Analysis <span class="badge bg-warning bg-opacity-10 text-warning ms-auto" style="font-size: 0.6rem;">SMART</span></a>
                 </div>
             </div>
 
@@ -570,9 +750,9 @@
                     <i class="bi bi-chevron-down small"></i>
                 </a>
                 <div class="collapse ps-3 {{ app.request.attributes.get('_route') starts with 'app_investment' or app.request.attributes.get('_route') == 'app_management_index' or app.request.attributes.get('_route') == 'app_investor_profile' ? 'show' : '' }}" id="sideInvest">
-                    <a href="{{ path('app_investment_home') }}" class="sidebar-nav-link py-2 small fw-normal">Recommandation</a>
+                    <a href="{{ path('app_investment_home') }}" class="sidebar-nav-link py-2 small fw-normal">Recommandation <span class="badge bg-danger bg-opacity-10 text-danger ms-auto" style="font-size: 0.6rem;">NEW</span></a>
                     <a href="{{ path('app_investment_index') }}" class="sidebar-nav-link py-2 small fw-normal">MarketPlace</a>
-                    <a href="{{ path('app_management_index') }}" class="sidebar-nav-link py-2 small fw-normal">Suivi Management</a>
+                    <a href="{{ path('app_management_index') }}" class="sidebar-nav-link py-2 small fw-normal">Suivi Management <span class="badge bg-primary bg-opacity-10 text-primary ms-auto" style="font-size: 0.6rem;">PRO</span></a>
                     {% if not is_granted('ROLE_ADMIN') %}
                         <a href="{{ path('app_investor_profile') }}" class="sidebar-nav-link py-2 small fw-normal">Profil Investisseur</a>
                     {% endif %}
@@ -604,9 +784,9 @@
                     <i class="bi bi-chevron-down small"></i>
                 </a>
                 <div class="collapse ps-3 {{ app.request.attributes.get('_route') == 'app_formations' or app.request.attributes.get('_route') == 'app_lessons' or app.request.attributes.get('_route') == 'app_my_certificates' or app.request.attributes.get('_route') == 'public_centres_map' ? 'show' : '' }}" id="sideFormation">
-                    <a href="{{ path('app_formations') }}" class="sidebar-nav-link py-2 small fw-normal">Toutes les Formations</a>
-                    <a href="{{ path('app_lessons') }}" class="sidebar-nav-link py-2 small fw-normal">Toutes les Leçons</a>
-                    <a href="{{ path('app_my_certificates') }}" class="sidebar-nav-link py-2 small fw-normal">Mes Certificats</a>
+                    <a href="{{ path('app_formations') }}" class="sidebar-nav-link py-2 small fw-normal">Catalogue <span class="badge bg-warning bg-opacity-10 text-warning ms-auto" style="font-size: 0.6rem;">PRO</span></a>
+                    <a href="{{ path('app_lessons') }}" class="sidebar-nav-link py-2 small fw-normal">Mes Leçons</a>
+                    <a href="{{ path('app_my_certificates') }}" class="sidebar-nav-link py-2 small fw-normal">Certificats <i class="fas fa-medal text-warning ms-auto"></i></a>
                     <hr class="dropdown-divider mx-3">
                     <a href="{{ path('public_centres_map') }}" class="sidebar-nav-link py-2 small fw-normal text-primary"><i class="bi bi-map me-2"></i>Centres de Formations</a>
                 </div>
@@ -629,6 +809,9 @@
     </div>
 
     <div class="sidebar-footer mt-auto p-3 border-top bg-light bg-opacity-50">
+        <button onclick="startFinoraGuide()" class="btn btn-primary-soft w-100 mb-2 d-flex align-items-center justify-content-center gap-2" style="border-radius: 12px; font-weight: bold;">
+            <i class="fas fa-question-circle"></i> Besoin d'aide ?
+        </button>
         <a href="{{ path('app_logout') }}" class="btn btn-danger-soft w-100 d-flex align-items-center justify-content-center gap-2" style="border-radius: 12px;">
             <i class="bi bi-power"></i> Déconnexion
         </a>
@@ -695,6 +878,13 @@
             <div class="d-flex align-items-center">
                 <div class="d-flex align-items-center gap-3">
 {% if app.user %}
+                        <!-- Guide Button -->
+                        <button class="btn btn-round btn-sm mb-0 shadow-sm d-flex align-items-center justify-content-center gap-2 px-3 btn-pulse" 
+                                onclick="startFinoraGuide()" 
+                                style="height: 38px; min-width: 100px; border-radius: 99px; font-weight: 800; background: var(--finora-gradient); color: white !important; border: none; transition: all 0.3s; font-size: 12px; letter-spacing: 0.5px;">
+                            <i class="fas fa-magic"></i> GUIDE
+                        </button>
+
                         <a href="{{ path('app_unified_wishlist') }}" class="btn btn-light btn-round btn-sm mb-0 shadow-sm" style="background: #fff; width: 38px; height: 38px; display: flex; align-items: center; justify-content: center;"><i class="fas fa-heart text-primary"></i></a>
                         <div class="dropdown">
                             <button class="btn btn-light btn-round btn-sm mb-0 shadow-sm position-relative" type="button" data-bs-toggle="dropdown" aria-expanded="false" onclick="markAllNotifsRead()">
@@ -803,7 +993,7 @@
                         <li><a class="dropdown-item rounded-3 mb-1" href="{{ path('dashboard') }}">Mon Wallet (Dashboard)</a></li>
                         <li><a class="dropdown-item rounded-3 mb-1" href="{{ path('category_list') }}">Mes Catégories</a></li>
                         <li><a class="dropdown-item rounded-3 mb-1" href="{{ path('transactions') }}">Mes Transactions</a></li>
-                        <li><a class="dropdown-item rounded-3 text-warning fw-bold" href="{{ path('ai_analyse') }}">Finora AI Analysis</a></li>
+                        <li><a class="dropdown-item rounded-3 fw-bold" href="{{ path('ai_analyse') }}" style="color:#7c3aed;">Finora AI Analysis</a></li>
                     </ul>
                 </li>
 
@@ -871,6 +1061,64 @@
     </div>
     <div class="main-content-wrapper">
         {% block body %}{% endblock %}
+        
+        {# --- GLOBAL SMART RECOMMENDATIONS (FIXED BOTTOM POSITION) --- #}
+        {% if recommendations is defined and recommendations|length > 0 %}
+        <div class="container-fluid px-4 mb-5 mt-5" id="guide-dash-recs">
+            <div class="row">
+                <div class="col-12">
+                    <div id="smartRecCarousel" class="carousel slide" data-bs-ride="carousel">
+                        <div class="carousel-inner" style="border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.05);">
+                            {% for rec in recommendations %}
+                            <div class="carousel-item {{ loop.first ? 'active' : '' }}">
+                                <div class="card border-0 position-relative" style="background: white; border-radius: 24px; border-left: 5px solid #7c3aed !important;">
+                                    <div class="card-body p-0">
+                                        <div class="row g-0 align-items-center">
+                                            <div class="col-md-auto p-4 d-flex align-items-center justify-content-center" style="background: rgba(124, 58, 237, 0.05); min-width: 100px;">
+                                                <div class="icon-circle text-white fs-2 shadow-sm" style="width: 60px; height: 60px; display: flex; align-items:center; justify-content:center; border-radius: 18px; background: #7c3aed;">
+                                                    <i class="bi {{ rec.icon|default('bi-stars') }}"></i>
+                                                </div>
+                                            </div>
+                                            <div class="col-md p-4">
+                                                <div class="d-flex align-items-center gap-2 mb-1">
+                                                    <span class="badge bg-warning bg-opacity-10 text-warning xsmall fw-bold px-2 py-1 rounded-pill">
+                                                        <i class="bi bi-stars me-1"></i>RECOMMANDATION SMART {{ recommendations|length > 1 ? '#' ~ loop.index : '' }}
+                                                    </span>
+                                                </div>
+                                                <h5 class="fw-bold text-dark mb-1">{{ rec.title }}</h5>
+                                                <p class="text-muted small mb-0">{{ rec.reason }}</p>
+                                            </div>
+                                            <div class="col-md-auto p-4">
+                                                {% if rec.formation is defined and rec.formation %}
+                                                    <a href="{{ path('app_formation_show', {id: rec.formation.id}) }}" class="btn btn-primary rounded-pill px-4 fw-bold">
+                                                        Apprendre & Agir <i class="bi bi-arrow-right ms-2"></i>
+                                                    </a>
+                                                {% elseif rec.category_slug is defined %}
+                                                    <a href="{{ path('app_formations', {categorie: rec.category_slug}) }}" class="btn btn-outline-primary rounded-pill px-4 fw-bold">
+                                                        Explorer {{ rec.category_slug }}
+                                                    </a>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% if recommendations|length > 1 %}
+                        <button class="carousel-control-prev" type="button" data-bs-target="#smartRecCarousel" data-bs-slide="prev" style="width: 5%;">
+                            <span class="carousel-control-prev-icon bg-dark rounded-circle" aria-hidden="true" style="width: 30px; height: 30px;"></span>
+                        </button>
+                        <button class="carousel-control-next" type="button" data-bs-target="#smartRecCarousel" data-bs-slide="next" style="width: 5%;">
+                            <span class="carousel-control-next-icon bg-dark rounded-circle" aria-hidden="true" style="width: 30px; height: 30px;"></span>
+                        </button>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
 </main>
 <!-- **************** MAIN CONTENT END **************** -->
 
@@ -878,15 +1126,15 @@
 <!-- =======================
 Footer START -->
 {% block footer %}
-<footer class="bg-dark pt-5">
+<footer class="footer-purple pt-5">
 	<div class="container">
         <!-- Sponsors START -->
         <div class="row mb-5 align-items-center">
             <div class="col-12 text-center mb-4">
-                <h6 class="text-uppercase text-muted small letter-spacing-2 mb-0">Nos Partenaires Officiels</h6>
+                <h6 class="text-uppercase text-white-50 small letter-spacing-2 mb-0">Nos Partenaires Officiels</h6>
                 <div class="d-flex flex-wrap justify-content-center align-items-center gap-5 mt-4">
-                    <img src="{{ asset('assets/images/partners/linkedin_official.png') }}" class="h-40px" alt="LinkedIn Official Logo">
-                    <img src="{{ asset('assets/images/partners/esprit_official.png') }}" class="h-60px" alt="ESPRIT Official Logo">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/ca/LinkedIn_logo_initials.png/600px-LinkedIn_logo_initials.png" alt="LinkedIn" style="height: 40px; width: auto; background: white; padding: 5px; border-radius: 8px;">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/ff/Logo_ESPRIT_-_Tunisie.png/600px-Logo_ESPRIT_-_Tunisie.png" alt="ESPRIT" style="height: 60px; width: auto; background: white; padding: 10px; border-radius: 8px;" referrerpolicy="no-referrer">
                 </div>
             </div>
         </div>
@@ -970,6 +1218,7 @@ Footer START -->
 					<!-- copyright links-->
 					<div class="nav justify-content-center mt-3 mt-lg-0">
 						<ul class="list-inline mb-0 small">
+							<li class="list-inline-item"><a class="nav-link py-0 text-body-secondary" href="javascript:void(0)" onclick="startFinoraGuide()"><i class="fas fa-magic me-1"></i>Guide Finora</a></li>
 							<li class="list-inline-item"><a class="nav-link py-0 text-body-secondary" href="#">Conditions d'utilisation</a></li>
 							<li class="list-inline-item"><a class="nav-link py-0 text-body-secondary pe-0" href="#">Confidentialité</a></li>
 						</ul>
@@ -1152,6 +1401,108 @@ document.addEventListener('DOMContentLoaded', function() {
         setInterval(loadNotifications, 30000);
     });
 })();
+</script>
+{% endif %}
+
+{% if app.request.attributes.get('_route') not in ['app_login', 'app_register'] %}
+<div class="guide-overlay" id="guideOverlay" onclick="stopFinoraGuide()"></div>
+
+<script>
+let currentGuideStep = 1;
+const totalSteps = 5;
+
+const guideConfig = {
+    'dashboard': [
+        { id: 'guide-dash-welcome', text: '<b>Bienvenue</b>: Votre centre de contrôle financier personnalisé.' },
+        { id: 'guide-dash-recs', text: '<b>IA Recommandations</b>: Cours et actions suggérés pour vous.' },
+        { id: 'guide-dash-stats', text: '<b>Vue d\'ensemble</b>: Votre volume boursier et activité wallet en un coup d\'œil.' },
+        { id: 'guide-dash-actions', text: '<b>Accès Rapides</b>: Naviguez instantanément vers les outils essentiels.' }
+    ],
+    'walletuser': [
+        { id: 'guide-wallet-pay', text: '<b>Finora Pay</b>: Envoyez de l\'argent instantanément à vos contacts Finora.' },
+        { id: 'guide-wallet-calc', text: '<b>Simulateur</b>: Calculez vos gains potentiels et convertissez vos devises.' },
+        { id: 'guide-wallet-system', text: '<b>Paramètres</b>: Gérez vos alertes et préférences de sécurité.' }
+    ],
+    'market': [
+        { id: 'guide-bourse-ai', text: '<b>Analyse IA</b>: Obtenez des prédictions intelligentes sur l\'évolution des cours.' },
+        { id: 'guide-bourse-exchange', text: '<b>Conversion Live</b>: Convertissez les devises en temps réel via API.' }
+    ],
+    'history': [
+        { id: 'ai-insights-box', text: '<b>IA Insights</b>: Analyse automatique de votre performance boursière.' }
+    ],
+    'formations': [
+        { id: 'voice-btn', text: '<b>Recherche Vocale</b>: Dictez simplement ce que vous voulez apprendre.' },
+        { id: 'hero-search-form', text: '<b>Catalogue</b>: Filtrez les cours par catégorie ou niveau.' }
+    ],
+    'appel/offre': [
+        { id: 'searchInput', text: '<b>Moteur de Recherche</b>: Identifiez les opportunités de marché par mots-clés.' },
+        { id: 'typeFilter', text: '<b>Filtre par Type</b>: Ciblez les achats, partenariats ou dons.' }
+    ],
+    'home': [
+        { id: 'how-it-works', text: '<b>Comment ça marche</b>: Découvrez les 3 piliers de l\'écosystème Finora.' },
+        { id: 'sidebarToggle', text: '<b>Navigation</b>: Accédez rapidement à tous vos modules favoris.' }
+    ]
+};
+
+function startFinoraGuide() {
+    // 1. Check if we have page-specific hotspots
+    const currentPath = window.location.pathname.toLowerCase();
+    let foundContext = null;
+    
+    // Remove existing hotspots
+    document.querySelectorAll('.magic-hotspot').forEach(el => el.remove());
+
+    // Better matching logic
+    for (const route in guideConfig) {
+        if (currentPath.includes(route) || (route === 'home' && (currentPath === '/' || currentPath === ''))) {
+            foundContext = guideConfig[route];
+            break;
+        }
+    }
+
+    if (foundContext) {
+        let foundAny = false;
+        
+        foundContext.forEach(point => {
+            const el = document.getElementById(point.id);
+            if (el) {
+                foundAny = true;
+                const rect = el.getBoundingClientRect();
+                const hotspot = document.createElement('div');
+                hotspot.className = 'magic-hotspot';
+                hotspot.style.top = (rect.top + window.scrollY - 12) + 'px';
+                hotspot.style.left = (rect.left + window.scrollX - 12) + 'px';
+                hotspot.innerHTML = '<i class="fas fa-info"></i><div class="hotspot-tooltip">' + point.text + '</div>';
+                document.body.appendChild(hotspot);
+            }
+        });
+
+        if (foundAny) {
+            Swal.fire({
+                title: 'Guide Finora Actif',
+                text: 'Explorez la page en survolant les points oranges.',
+                icon: 'info',
+                timer: 3000,
+                showConfirmButton: false,
+                toast: true,
+                position: 'top-end'
+            });
+            return;
+        }
+    }
+    
+    Swal.fire({
+        title: 'Guide Indisponible',
+        text: 'Aucun point d\'information spécifique n\'est disponible pour cette section.',
+        icon: 'warning',
+        timer: 2000,
+        showConfirmButton: false
+    });
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    console.log("Finora Guide System Ready (Manual Only)");
+});
 </script>
 {% endif %}
 

@@ -8,14 +8,14 @@
 
 <style>
     .market-hero {
-        background: linear-gradient(135deg, #1e0a3c 0%, #2d1155 50%, #1e0a3c 100%);
-        padding: 10px 0;
-        border-bottom: 1px solid #3b1278;
+        background: var(--finora-gradient-soft);
+        padding: 15px 0;
+        border-bottom: 1px solid rgba(124,58,237,0.1);
     }
     .ticker-bar {
-        background: #1e0a3c;
-        border-bottom: 1px solid #3b1278;
-        padding: 2px 0;
+        background: #ffffff;
+        border-bottom: 1px solid rgba(124,58,237,0.05);
+        padding: 4px 0;
         overflow: hidden;
         white-space: nowrap;
     }
@@ -29,21 +29,22 @@
         0% { transform: translateX(0); }
         100% { transform: translateX(-50%); }
     }
-    .ticker-item { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; color: #94a3b8; }
-    .ticker-item .symbol { color: white; font-weight: 700; }
-    .ticker-item .price { color: white; }
-    .ticker-item .up { color: #22c55e; }
-    .ticker-item .down { color: #ef4444; }
+    .ticker-item { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; color: #64748b; }
+    .ticker-item .symbol { color: #1f1147; font-weight: 700; }
+    .ticker-item .price { color: #475569; }
+    .ticker-item .up { color: #16a34a; }
+    .ticker-item .down { color: #dc2626; }
     .stat-pill {
-        background: rgba(255,255,255,0.07);
-        border: 1px solid rgba(168,85,247,0.3);
+        background: #ffffff;
+        border: 1px solid rgba(124,58,237,0.15);
         border-radius: 12px;
         padding: 8px 16px;
-        color: white;
+        color: #1f1147;
         text-align: center;
+        box-shadow: 0 4px 12px rgba(124, 58, 237, 0.05);
     }
-    .stat-pill .value { font-size: 22px; font-weight: 700; }
-    .stat-pill .label { font-size: 12px; color: #94a3b8; margin-top: 2px; }
+    .stat-pill .value { font-size: 22px; font-weight: 700; color: #7c3aed; }
+    .stat-pill .label { font-size: 12px; color: #64748b; margin-top: 2px; }
     .live-badge {
         background: #22c55e; color: white;
         padding: 4px 12px; border-radius: 20px;
@@ -57,11 +58,12 @@
     }
     @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
     .section-header {
-        background: #1e0a3c; padding: 12px 20px;
+        background: #f5f3ff; padding: 12px 20px;
+        border-bottom: 1px solid rgba(124,58,237,0.1);
         border-radius: 16px 16px 0 0;
         display: flex; justify-content: space-between; align-items: center;
     }
-    .section-header h5 { color: white; margin: 0; font-weight: 600; font-size: 16px; }
+    .section-header h5 { color: #1f1147; margin: 0; font-weight: 700; font-size: 16px; }
     .action-card {
         background: white;
         border-radius: 16px;
@@ -89,7 +91,8 @@
         display: flex; justify-content: space-between; align-items: flex-start;
     }
     .symbol-badge {
-        background: #2d1155; color: white;
+        background: #f5f3ff; color: #7c3aed;
+        border: 1px solid rgba(124,58,237,0.2);
         padding: 6px 14px; border-radius: 8px;
         font-weight: 700; font-size: 14px;
         font-family: monospace; letter-spacing: 1.5px;
@@ -741,7 +744,7 @@ document.addEventListener('DOMContentLoaded', function() {
     <div class="col-12">
         <div class="card border-0 shadow-sm overflow-hidden" style="border-radius: 24px; background: #ffffff;">
             <div class="card-header p-4 d-flex justify-content-between align-items-center border-0 bg-white">
-                <h4 class="mb-0 text-dark fw-bolder" style="letter-spacing:-0.5px;"><i class="bi bi-map-fill me-2" style="color:#7c3aed;"></i> Heatmap du Marché</h4>
+                <h4 class="mb-0 text-dark fw-bolder" style="letter-spacing:-0.5px;"><i class="bi bi-map-fill me-2" style="color:#7c3aed;"></i> Heatmap du Marché <span class="info-trigger" data-bs-toggle="tooltip" title="Visualisation thermique du marché : la taille des blocs représente le prix, la couleur représente la variation.">?</span></h4>
                 <div class="d-flex align-items-center gap-2">
                     <span class="badge rounded-pill px-3 py-2" style="background: rgba(34, 197, 94, 0.1); color: #22c55e; border: 1px solid rgba(34, 197, 94, 0.2); font-size: 11px;"><i class="bi bi-arrow-up-circle-fill me-1"></i> Hausse</span>
                     <span class="badge rounded-pill px-3 py-2" style="background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2); font-size: 11px;"><i class="bi bi-arrow-down-circle-fill me-1"></i> Baisse</span>
@@ -757,60 +760,7 @@ document.addEventListener('DOMContentLoaded', function() {
     </div>
 </div>
 
-<!-- Smart Learning Recommendations (CONTEXTUAL CAROUSEL) -->
-{% if recommendations is defined and recommendations|length > 0 %}
-<div class="row mb-5">
-    <div class="col-12">
-        <div id="smartRecCarousel" class="carousel slide" data-bs-ride="carousel">
-            <div class="carousel-inner" style="border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.05);">
-                {% for rec in recommendations %}
-                <div class="carousel-item {{ loop.first ? 'active' : '' }}">
-                    <div class="card border-0 position-relative" style="background: white; border-radius: 24px; border-left: 5px solid #6366f1 !important;">
-                        <div class="card-body p-0">
-                            <div class="row g-0 align-items-center">
-                                <div class="col-md-auto p-4 d-flex align-items-center justify-content-center" style="background: rgba(99, 102, 241, 0.05); min-width: 100px;">
-                                    <div class="icon-circle bg-primary text-white fs-2 shadow-sm" style="width: 60px; height: 60px; display: flex; align-items:center; justify-content:center; border-radius: 18px;">
-                                        <i class="bi {{ rec.icon }}"></i>
-                                    </div>
-                                </div>
-                                <div class="col-md p-4">
-                                    <div class="d-flex align-items-center gap-2 mb-1">
-                                        <span class="badge bg-warning bg-opacity-10 text-warning xsmall fw-bold px-2 py-1 rounded-pill">
-                                            <i class="bi bi-stars me-1"></i>RECOMMANDATION SMART {{ recommendations|length > 1 ? '#' ~ loop.index : '' }}
-                                        </span>
-                                    </div>
-                                    <h5 class="fw-bold text-dark mb-1">{{ rec.title }}</h5>
-                                    <p class="text-muted small mb-0">{{ rec.reason }}</p>
-                                </div>
-                                <div class="col-md-auto p-4">
-                                    {% if rec.formation %}
-                                        <a href="{{ path('app_formation_show', {id: rec.formation.id}) }}" class="btn btn-primary rounded-pill px-4 fw-bold">
-                                            Apprendre & Agir <i class="bi bi-arrow-right ms-2"></i>
-                                        </a>
-                                    {% else %}
-                                        <a href="{{ path('app_formations', {categorie: rec.category_slug}) }}" class="btn btn-outline-primary rounded-pill px-4 fw-bold">
-                                            Explorer {{ rec.category_slug }}
-                                        </a>
-                                    {% endif %}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                {% endfor %}
-            </div>
-            {% if recommendations|length > 1 %}
-            <button class="carousel-control-prev" type="button" data-bs-target="#smartRecCarousel" data-bs-slide="prev" style="width: 5%;">
-                <span class="carousel-control-prev-icon bg-dark rounded-circle" aria-hidden="true" style="width: 30px; height: 30px;"></span>
-            </button>
-            <button class="carousel-control-next" type="button" data-bs-target="#smartRecCarousel" data-bs-slide="next" style="width: 5%;">
-                <span class="carousel-control-next-icon bg-dark rounded-circle" aria-hidden="true" style="width: 30px; height: 30px;"></span>
-            </button>
-            {% endif %}
-        </div>
-    </div>
-</div>
-{% endif %}
+
 
 {% if latest_news is defined and latest_news|length > 0 %}
 <div class="ticker-bar mb-4">
@@ -844,7 +794,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <div class="row mb-5 mt-4">
     <div class="col-12">
         <div class="d-flex align-items-center mb-4">
-            <h4 class="mb-0 fw-bolder text-dark" style="letter-spacing: -0.5px;"><i class="bi bi-globe-americas me-2" style="color:#3b82f6;"></i> Actualités Financières</h4>
+            <h4 class="mb-0 fw-bolder text-dark" style="letter-spacing: -0.5px;"><i class="bi bi-globe-americas me-2" style="color:#3b82f6;"></i> Actualités Financières <span class="info-trigger" data-bs-toggle="tooltip" title="Flux d'informations économiques en temps réel pour anticiper les mouvements du marché.">?</span></h4>
             <span class="badge rounded-pill ms-3 shadow-sm" style="background: #3b82f6; font-size:10px; font-weight:700; letter-spacing:0.5px; padding: 5px 10px;"><span class="live-dot d-inline-block me-1" style="background:white; width:6px; height:6px; border-radius:50%; animation: pulse 1.5s infinite;"></span>EN DIRECT</span>
         </div>
         <div class="row g-4">
@@ -875,7 +825,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <div class="row mb-5">
     <div class="col-12">
         <div class="d-flex align-items-center mb-4">
-            <h4 class="mb-0 fw-bolder text-dark" style="letter-spacing: -0.5px;"><i class="bi bi-people-fill me-2" style="color:#7c3aed;"></i> Top Traders de Finora</h4>
+            <h4 class="mb-0 fw-bolder text-dark" style="letter-spacing: -0.5px;"><i class="bi bi-people-fill me-2" style="color:#7c3aed;"></i> Top Traders de Finora <span class="info-trigger" data-bs-toggle="tooltip" title="Les investisseurs les plus performants de la communauté Finora. Vous pouvez copier leurs stratégies.">?</span></h4>
             <span class="badge bg-purple-soft text-purple ms-3" style="font-size:10px; background: rgba(124, 58, 237, 0.1); color: #7c3aed; padding: 5px 12px; border-radius: 20px;">SOCIAL TRADING</span>
         </div>
         <div class="row g-4">
@@ -927,9 +877,9 @@ document.addEventListener('DOMContentLoaded', function() {
 }
 </style>
 
-<div class="candle-section mb-5 shadow-lg" style="background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%); border: 1px solid rgba(255,255,255,0.05); border-radius: 24px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.3) !important;">
+<div id="guide-bourse-chart" class="candle-section mb-5 shadow-lg" style="background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%); border: 1px solid rgba(255,255,255,0.05); border-radius: 24px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.3) !important;">
     <div class="candle-header border-bottom border-secondary border-opacity-25" style="padding: 20px 30px;">
-        <h5 class="mb-0 text-white fw-bolder" style="letter-spacing:-0.5px;"><i class="bi bi-bar-chart-line-fill me-2" style="color:#f59e0b;"></i> Analyse Technique</h5>
+        <h5 class="mb-0 text-white fw-bolder" style="letter-spacing:-0.5px;"><i class="bi bi-bar-chart-line-fill me-2" style="color:#7c3aed;"></i> Analyse Technique <span class="info-trigger" data-bs-toggle="tooltip" title="Graphique en bougies (Candlestick) montrant les prix d'ouverture, haut, bas et clôture (OHLC).">?</span></h5>
         <div class="d-flex align-items-center gap-3">
             <select id="candleSelector" class="candle-select shadow-sm" onchange="switchCandleAction()" style="background-color: rgba(0,0,0,0.2); border-color: rgba(255,255,255,0.1); font-size:14px; padding: 8px 16px;">
                 {% for action in actions %}
@@ -972,7 +922,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 <div class="card border-0 shadow-sm" style="border-radius: 24px; overflow: hidden; background: #ffffff;">
     <div class="card-header p-4 d-flex justify-content-between align-items-center border-0" style="background: transparent;">
-        <h4 class="mb-0 text-dark fw-bolder" style="letter-spacing:-0.5px;"><i class="bi bi-grid-3x3-gap-fill me-2" style="color:#7c3aed;"></i> Cours des Actions</h4>
+        <h4 class="mb-0 text-dark fw-bolder" style="letter-spacing:-0.5px;"><i class="bi bi-grid-3x3-gap-fill me-2" style="color:#7c3aed;"></i> Cours des Actions <span class="info-trigger" data-bs-toggle="tooltip" title="Liste détaillée de toutes les entreprises cotées. Cliquez sur une action pour trader.">?</span></h4>
         <span class="live-badge shadow-sm" style="background:#f1f5f9; color:#475569; padding: 6px 14px; border-radius: 20px;"><span class="live-dot" style="background:#10b981;"></span> EN TEMPS RÉEL</span>
     </div>
     <div class="card-body p-4">
@@ -1024,10 +974,10 @@ document.addEventListener('DOMContentLoaded', function() {
                         </div>
                     </div>
                     <div class="card-actions mt-auto">
-                        <button class="btn-buy" data-bs-toggle="modal" data-bs-target="#buyModal{{ action.id }}">
+                        <button {{ loop.first ? 'id="guide-bourse-buy"' : '' }} class="btn-buy" data-bs-toggle="modal" data-bs-target="#buyModal{{ action.id }}">
                             <i class="bi bi-arrow-down-circle"></i> Acheter
                         </button>
-                        <button class="btn-sell" data-bs-toggle="modal" data-bs-target="#sellModal{{ action.id }}">
+                        <button {{ loop.first ? 'id="guide-bourse-sell"' : '' }} class="btn-sell" data-bs-toggle="modal" data-bs-target="#sellModal{{ action.id }}">
                             <i class="bi bi-arrow-up-circle"></i> Vendre
                         </button>
                     </div>
@@ -1072,19 +1022,18 @@ document.addEventListener('DOMContentLoaded', function() {
 </div>
 <!-- Bourse Action Deck (Floating Sidebar) -->
 <div class="bourse-action-deck" id="bourseActionDeck">
-    <div class="action-deck-item">
-        <span class="deck-label">Assistant IA Finora</span>
-        <button class="deck-btn ai" onclick="toggleAiChat()">
-            <div class="pulse-ring"></div>
-            <i class="bi bi-stars"></i>
-        </button>
+    <div id="guide-bourse-ai" class="action-deck-item" onclick="toggleAIChat()">
+        <div class="deck-label">Analyse IA</div>
+        <div class="deck-btn" style="background: white; color: #7c3aed; border: 2px solid #7c3aed;">
+            <div class="pulse-ring" style="border-color: rgba(124, 58, 237, 0.4);"></div>
+            <i class="bi bi-robot"></i>
+        </div>
     </div>
-    <div class="action-deck-item">
-        <span class="deck-label">API Taux de Change</span>
-        <button class="deck-btn ex" onclick="toggleExchangePanel()">
-            <i class="bi bi-currency-exchange"></i>
-        </button>
-    </div>
+    <a href="javascript:void(0)" id="guide-bourse-exchange" class="exchange-api-btn" onclick="toggleExchangePanel()">
+        <div class="ex-icon"><i class="bi bi-shuffle"></i></div>
+        <span>Conversion Live</span>
+        <div class="conn-dot"></div>
+    </a>
 </div>
 
 <div class="exchange-panel" id="exchangePanel">
@@ -1813,6 +1762,8 @@ document.addEventListener('DOMContentLoaded', function() {
     initHeatmap();
 });
 </script>
+
+
 {% endblock %}
 
 

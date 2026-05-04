@@ -74,7 +74,7 @@
             <div class="card-footer bg-white border-0 pb-4 px-4">
                 <div class="d-grid gap-2">
                     {% if is_granted('ROLE_ENTREPRISE') and not is_granted('ROLE_ADMIN') %}
-                        <a href="{{ path('app_candidature_new', {'role': app.request.query.get('role'), 'appelOffre': appel.id}) }}" class="btn btn-primary rounded-pill py-2 fw-bold text-white shadow-sm">
+                        <a {{ loop.first ? 'id="guide-offre-postuler"' : '' }} href="{{ path('app_candidature_new', {'role': app.request.query.get('role'), 'appelOffre': appel.id}) }}" class="btn btn-primary rounded-pill py-2 fw-bold text-white shadow-sm">
                             <i class="bi bi-send me-2"></i>Postuler maintenant
                         </a>
                     {% endif %}
