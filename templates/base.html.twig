@@ -221,6 +221,29 @@
             display: none;
         }
 
+        /* Tiny Information Dots */
+        .info-dot {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: rgba(124, 58, 237, 0.1);
+            color: #7c3aed;
+            font-size: 12px;
+            cursor: pointer;
+            margin-left: 6px;
+            vertical-align: middle;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 5px rgba(124, 58, 237, 0.15);
+        }
+        .info-dot:hover {
+            background: #7c3aed;
+            color: white;
+            box-shadow: 0 4px 10px rgba(124, 58, 237, 0.3);
+        }
+
         /* --- Floating Guide Button --- */
         .fab-guide {
             position: fixed;
@@ -1518,6 +1541,15 @@ function startFinoraGuide() {
 
 document.addEventListener('DOMContentLoaded', function() {
     console.log("Finora Guide System Ready (Manual Only)");
+    
+    // Initialize tooltips globally
+    var popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'));
+    var popoverList = popoverTriggerList.map(function (popoverTriggerEl) {
+        return new bootstrap.Popover(popoverTriggerEl, {
+            trigger: 'hover focus',
+            html: true
+        });
+    });
 });
 </script>
 {% endif %}
