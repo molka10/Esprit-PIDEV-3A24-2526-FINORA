@@ -1021,7 +1021,14 @@
                         <li><a class="dropdown-item rounded-3 mb-1" href="{{ path('app_formations') }}">Toutes les Formations</a></li>
                         <li><a class="dropdown-item rounded-3 mb-1" href="{{ path('app_lessons') }}">Toutes les Leçons</a></li>
                         <li><a class="dropdown-item rounded-3 mb-1" href="{{ path('app_my_certificates') }}">Mes Certificats</a></li>
-                        <li><a class="dropdown-item rounded-3 text-primary fw-bold" href="{{ path('public_centres_map') }}">Centres de Formations</a></li>
+                        <li><a class="dropdown-item rounded-3 mb-1 text-primary fw-bold" href="{{ path('public_centres_map') }}">Centres de Formations</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <a class="dropdown-item rounded-3 fw-bold" href="{{ path('app_simulation') }}" style="color: #7c3aed;">
+                                <i class="bi bi-lightning-charge-fill me-1"></i>Simulation
+                                <span class="badge ms-1 rounded-pill" style="font-size: 0.6rem; background: linear-gradient(135deg, #7c3aed, #4338ca); color: white;">NOUVEAU</span>
+                            </a>
+                        </li>
                     </ul>
                 </li>
 
@@ -1445,6 +1452,11 @@ const guideConfig = {
     'home': [
         { id: 'how-it-works', text: '<b>Comment ça marche</b>: Découvrez les 3 piliers de l\'écosystème Finora.' },
         { id: 'sidebarToggle', text: '<b>Navigation</b>: Accédez rapidement à tous vos modules favoris.' }
+    ],
+    'simulation': [
+        { id: 'guide-sim-balance', text: '<b>Solde Virtuel</b>: Votre capital de départ sans risque.' },
+        { id: 'guide-sim-tabs', text: '<b>Modules</b>: Basculez entre Bourse, Investissement et Freelance.' },
+        { id: 'guide-sim-assets', text: '<b>Portefeuille</b>: Suivez vos gains et pertes en temps réel.' }
     ]
 };
 
