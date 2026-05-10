@@ -37,6 +37,9 @@ class InvestmentNotification
     #[ORM\JoinColumn(name: 'investment_id', referencedColumnName: 'investment_id', onDelete: 'CASCADE')]
     private ?Investment $investment = null;
 
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $link = null;
+
     public function __construct()
     {
         $this->createdAt = new \DateTimeImmutable();
@@ -140,5 +143,16 @@ class InvestmentNotification
             'INVESTMENT_REJECTED' => 'bi bi-x-circle-fill text-danger',
             default => 'bi bi-bell-fill text-primary',
         };
+    }
+
+    public function getLink(): ?string
+    {
+        return $this->link;
+    }
+
+    public function setLink(?string $link): static
+    {
+        $this->link = $link;
+        return $this;
     }
 }

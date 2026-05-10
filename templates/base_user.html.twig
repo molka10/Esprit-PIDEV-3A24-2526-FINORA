@@ -138,39 +138,33 @@
                 {% if app.user %}
                 <!-- Notifications -->
                 <li class="nav-item ms-2 ms-sm-3 dropdown">
-                    <a class="btn btn-light btn-round mb-0" href="#" role="button" data-bs-toggle="dropdown" data-bs-auto-close="outside">
+                    <a class="btn btn-light btn-round mb-0" href="#" role="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" id="notificationDropdown">
                         <i class="bi bi-bell fa-fw"></i>
                     </a>
-                    <span class="notif-badge animation-blink"></span>
+                    <span id="notif-count-badge" class="notif-badge animation-blink d-none"></span>
                     <div class="dropdown-menu dropdown-animation dropdown-menu-end dropdown-menu-size-md p-0 shadow-lg border-0">
                         <div class="card bg-transparent">
-                            <div class="card-header bg-transparent border-bottom py-4 d-flex justify-content-between align-items-center">
-                                <h6 class="m-0">Notifications</h6>
-                                <a class="small" href="#">Tout effacer</a>
+                            <div class="card-header bg-transparent border-bottom py-3 d-flex justify-content-between align-items-center">
+                                <h6 class="m-0">Notifications <span class="badge bg-danger ms-2 d-none" id="notif-count-text">0</span></h6>
+                                <a class="small text-primary fw-bold" href="javascript:void(0)" id="mark-all-read">Tout marquer comme lu</a>
                             </div>
-                            <div class="card-body p-0">
-                                <ul class="list-group list-unstyled list-group-flush">
-                                    <li>
-                                        <a href="#" class="list-group-item-action border-0 border-bottom d-flex p-3">
-                                            <div class="me-3">
-                                                <div class="avatar avatar-md">
-                                                    <img class="avatar-img rounded-circle" src="{{ asset('assets/images/avatar/03.jpg') }}" alt="avatar">
-                                                </div>
-                                            </div>
-                                            <div>
-                                                <h6 class="mb-1">Bienvenue sur FINORA</h6>
-                                                <p class="small text-body m-0">Votre compte est actif</p>
-                                                <small class="text-body">À l'instant</small>
-                                            </div>
-                                        </a>
-                                    </li>
-                                </ul>
+                            <div class="card-body p-0" style="max-height: 400px; overflow-y: auto;" id="notification-list-container">
+                                <div class="text-center p-4">
+                                    <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+                                </div>
                             </div>
                             <div class="card-footer bg-transparent border-0 py-3 text-center position-relative">
-                                <a href="#" class="stretched-link">Voir toutes les activités</a>
+                                <a href="#" class="stretched-link small fw-bold text-muted">Voir toutes les activités</a>
                             </div>
                         </div>
                     </div>
+                </li>
+
+                <!-- Messages -->
+                <li class="nav-item ms-2 ms-sm-3">
+                    <a class="btn btn-light btn-round mb-0" href="{{ path('app_messages') }}" title="Messagerie">
+                        <i class="bi bi-chat-dots fa-fw"></i>
+                    </a>
                 </li>
 
                 <!-- Profile -->
@@ -288,6 +282,60 @@
 <script src="{{ asset('assets/vendor/purecounterjs/dist/purecounter_vanilla.js') }}"></script>
 <script src="{{ asset('assets/vendor/aos/aos.js') }}"></script>
 <script src="{{ asset('assets/js/functions.js') }}"></script>
-{% block javascripts %}{% endblock %}
+{% block javascripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const notifBadge = document.getElementById('notif-count-badge');
+        const notifText = document.getElementById('notif-count-text');
+        const notifList = document.getElementById('notification-list-container');
+        const markReadBtn = document.getElementById('mark-all-read');
+        const dropdownBtn = document.getElementById('notificationDropdown');
+
+        function updateNotifCount() {
+            fetch('{{ path("notifications_count") }}')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.count > 0) {
+                        notifBadge.classList.remove('d-none');
+                        notifText.classList.remove('d-none');
+                        notifText.textContent = data.count;
+                    } else {
+                        notifBadge.classList.add('d-none');
+                        notifText.classList.add('d-none');
+                    }
+                });
+        }
+
+        function loadNotifications() {
+            fetch('{{ path("notifications_list") }}')
+                .then(response => response.text())
+                .then(html => {
+                    notifList.innerHTML = '<ul class="list-group list-unstyled list-group-flush">' + html + '</ul>';
+                });
+        }
+
+        dropdownBtn.addEventListener('show.bs.dropdown', function () {
+            loadNotifications();
+        });
+
+        markReadBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            fetch('{{ path("notifications_mark_read") }}', { method: 'POST' })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        updateNotifCount();
+                        loadNotifications();
+                    }
+                });
+        });
+
+        // Initial count check
+        updateNotifCount();
+        // Periodically check for new notifications every 30 seconds
+        setInterval(updateNotifCount, 30000);
+    });
+</script>
+{% endblock %}
 </body>
 </html>

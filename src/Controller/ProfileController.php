@@ -11,13 +11,14 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use App\Entity\UserBiometrics;
 use App\Service\FaceIdService;
+use App\Service\SessionService;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 final class ProfileController extends AbstractController
 {
     #[Route('/profile', name: 'app_profile')]
-    public function index(): Response
+    public function index(\App\Service\SmartLearningService $smartLearningService): Response
     {
         /** @var User $user */
         $user = $this->getUser();
@@ -26,15 +27,19 @@ final class ProfileController extends AbstractController
             return $this->redirectToRoute('app_login');
         }
 
+        $averageScore = $smartLearningService->getAverageAiScore($user);
+
         // 🔥 USE SIMPLE ROLE (NO ARRAY CONFUSION)
         if ($user->getRole() === 'ADMIN') {
             return $this->render('admin/profile/index.html.twig', [
                 'user' => $user,
+                'averageAiScore' => $averageScore,
             ]);
         }
 
         return $this->render('profile/index.html.twig', [
             'user' => $user,
+            'averageAiScore' => $averageScore,
         ]);
     }
 
@@ -71,7 +76,11 @@ final class ProfileController extends AbstractController
             $imageFile = $form->get('image')->getData();
 
             if ($imageFile) {
-                $newFilename = uniqid().'.'.$imageFile->guessExtension();
+                $extension = $imageFile->guessExtension();
+                if (!$extension && $imageFile->getMimeType() === 'image/svg+xml') {
+                    $extension = 'svg';
+                }
+                $newFilename = uniqid().'.'.($extension ?: 'png');
 
                 $imageFile->move(
                     $this->getParameter('images_directory'),
@@ -142,5 +151,57 @@ final class ProfileController extends AbstractController
         $em->flush();
 
         return new JsonResponse(['success' => true, 'message' => 'Face ID configured successfully.']);
+    }
+
+
+    #[Route('/profile/2fa/toggle', name: 'app_profile_2fa_toggle', methods: ['POST'])]
+    public function toggle2FA(Request $request, EntityManagerInterface $em): JsonResponse
+    {
+        /** @var User $user */
+        $user = $this->getUser();
+        if (!$user) return new JsonResponse(['success' => false], 401);
+
+        $data = json_decode($request->getContent(), true);
+        $enabled = (bool)($data['enabled'] ?? false);
+
+        $user->setTwoFaEnabled($enabled);
+        $em->flush();
+
+        return new JsonResponse([
+            'success' => true, 
+            'message' => $enabled ? '2FA activée.' : '2FA désactivée.'
+        ]);
+    }
+
+    #[Route('/profile/digest/toggle', name: 'app_profile_digest_toggle', methods: ['POST'])]
+    public function toggleDigest(Request $request, EntityManagerInterface $em): JsonResponse
+    {
+        /** @var User $user */
+        $user = $this->getUser();
+        if (!$user) return new JsonResponse(['success' => false], 401);
+
+        $data = json_decode($request->getContent(), true);
+        $enabled = (bool)($data['enabled'] ?? false);
+
+        $user->setEmailDigestEnabled($enabled);
+        $em->flush();
+
+        return new JsonResponse([
+            'success' => true, 
+            'message' => $enabled ? 'Résumé hebdomadaire activé.' : 'Résumé hebdomadaire désactivé.'
+        ]);
+    }
+
+    #[Route('/profile/session/revoke', name: 'app_profile_session_revoke', methods: ['POST'])]
+    public function revokeSession(Request $request, SessionService $sessionService): JsonResponse
+    {
+        $data = json_decode($request->getContent(), true);
+        $sessionId = (int)($data['id'] ?? 0);
+
+        if ($sessionService->revokeSession($sessionId)) {
+            return new JsonResponse(['success' => true]);
+        }
+
+        return new JsonResponse(['success' => false], 400);
     }
 }

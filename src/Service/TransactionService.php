@@ -131,6 +131,10 @@ class TransactionService
                 $walletTx->setNomTransaction('Vente de ' . $quantite . ' actions ' . $action->getSymbole());
                 $this->em->persist($walletTx);
             }
+
+            // 🔥 Real-time Balance Sync
+            $newBalance = (float)$user->getBalance() + (float)$walletTx->getMontant();
+            $user->setBalance((string)$newBalance);
         }
 
         // 6. Créer la transaction

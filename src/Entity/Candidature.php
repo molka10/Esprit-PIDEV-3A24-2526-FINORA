@@ -39,7 +39,7 @@ class Candidature
     #[ORM\Column(length: 50)]
     #[Assert\NotBlank(message: 'Le statut est obligatoire')]
     #[Assert\Choice(
-        choices: ['submitted', 'accepted', 'rejected'],
+        choices: ['draft', 'submitted', 'accepted', 'rejected', 'withdrawn'],
         message: 'Statut invalide'
     )]
     private string $statut;

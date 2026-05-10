@@ -4,6 +4,7 @@ namespace App\Form;
 
 use App\Entity\InvestmentManagement;
 use App\Entity\Investment;
+use App\Entity\User;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
@@ -95,6 +96,14 @@ class InvestmentManagementType extends AbstractType
                     'rows' => 4,
                     'placeholder' => 'Ex: Contacter l’agent immobilier, vérifier le rendement mensuel...'
                 ]
+            ])
+            ->add('coInvestor', EntityType::class, [
+                'class' => User::class,
+                'choice_label' => 'username',
+                'label' => 'Co-investisseur (Optionnel)',
+                'placeholder' => '--- Aucun (Investissement seul) ---',
+                'required' => false,
+                'attr' => ['class' => 'form-select select2-enable']
             ]);
 
     }

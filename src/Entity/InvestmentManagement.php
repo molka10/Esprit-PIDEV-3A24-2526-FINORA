@@ -54,7 +54,13 @@ class InvestmentManagement
     #[ORM\JoinColumn(name: 'user_id', referencedColumnName: 'id', nullable: true, onDelete: 'SET NULL')]
     private ?User $user = null;
 
+    #[ORM\ManyToOne(targetEntity: User::class)]
+    #[ORM\JoinColumn(name: 'co_investor_id', referencedColumnName: 'id', nullable: true, onDelete: 'SET NULL')]
+    private ?User $coInvestor = null;
 
+    #[ORM\Column(name: "co_investor_status", type: "string", length: 20, nullable: true)]
+    #[Assert\Choice(choices: ['PENDING', 'ACCEPTED', 'REJECTED'])]
+    private ?string $coInvestorStatus = null;
 
     #[ORM\Column(name: "rating", type: "integer", nullable: true)]
     #[Assert\Range(min: 1, max: 5, notInRangeMessage: "Le rating doit être entre 1 et 5")]
@@ -101,6 +107,31 @@ class InvestmentManagement
     public function setUser(?User $user): self
     {
         $this->user = $user;
+        return $this;
+    }
+
+    public function getCoInvestor(): ?User
+    {
+        return $this->coInvestor;
+    }
+
+    public function setCoInvestor(?User $coInvestor): self
+    {
+        $this->coInvestor = $coInvestor;
+        if ($coInvestor !== null && $this->coInvestorStatus === null) {
+            $this->coInvestorStatus = 'PENDING';
+        }
+        return $this;
+    }
+
+    public function getCoInvestorStatus(): ?string
+    {
+        return $this->coInvestorStatus;
+    }
+
+    public function setCoInvestorStatus(?string $status): self
+    {
+        $this->coInvestorStatus = $status;
         return $this;
     }
 
@@ -153,6 +184,11 @@ class InvestmentManagement
         $rate = $investment->getAnnualReturn() / 100;
         $principal = (float) $this->amountInvested;
         
+        // Co-investor logic: if active co-investor, amount is split
+        if ($this->coInvestor && $this->coInvestorStatus === 'ACCEPTED') {
+            $principal = $principal / 2;
+        }
+        
         // Monthly interest (annual profit / 12)
         $monthlyInterest = ($principal * $rate) / 12;
         // Monthly capital repayment (fully amortized over duration)
@@ -163,15 +199,18 @@ class InvestmentManagement
         $now = new \DateTime();
 
         for ($i = 1; $i <= $duration; $i++) {
-            // We use modify('+1 month') to generate monthly dates
             $date = (clone $currentDate)->modify("+$i month");
+            
+            // Check if this specific payment is the "current" one
+            $isCurrent = ($now->format('Y-m') === $date->format('Y-m'));
+            
             $schedule[] = [
                 'month' => $i,
                 'date' => $date,
                 'interest' => $monthlyInterest,
                 'capital' => $monthlyCapital,
                 'total' => $monthlyInterest + $monthlyCapital,
-                'status' => $date < $now ? 'PAID' : 'PENDING'
+                'status' => $date < $now ? 'PAID' : ($isCurrent ? 'CURRENT' : 'PENDING')
             ];
         }
 

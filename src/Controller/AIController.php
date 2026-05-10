@@ -4,12 +4,14 @@ namespace App\Controller;
 
 use App\Entity\User;
 use App\Service\AIAnalyzerService;
+use App\Service\AiService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Request;
 use App\Repository\TransactionWalletRepository;
+use App\Repository\AppelOffreRepository;
 
 class AIController extends AbstractController
 {
@@ -37,7 +39,6 @@ class AIController extends AbstractController
         $globalIncome = 0; $globalExpenses = 0;
 
         foreach ($transactions as $t) {
-            // CRITICAL FIX: Only analyze ACCEPTED transactions to match dashboard reality
             if ($t->getStatus() !== 'ACCEPTED') {
                 continue;
             }
@@ -48,14 +49,11 @@ class AIController extends AbstractController
             $amt = abs($t->getMontant());
             $isInc = (strtolower($t->getType()) === 'income' || strtolower($t->getType()) === 'revenu');
 
-            // Global (for overall prediction)
             if ($isInc) { $globalIncome += $amt; } else { $globalExpenses += $amt; }
 
-            // Current Month
             if ($m === $currentMonth && $y === $currentYear) {
                 if ($isInc) { $currIncome += $amt; } else { $currExpenses += $amt; }
             }
-            // Previous Month
             elseif ($m === $prevMonth && $y === $prevYear) {
                 if ($isInc) { $prevIncome += $amt; } else { $prevExpenses += $amt; }
             }
@@ -63,7 +61,6 @@ class AIController extends AbstractController
 
         $result = $ai->analyze($globalIncome, $globalExpenses);
         
-        // Add monthly comparison data
         $result['currentMonth'] = [
             'income'   => round($currIncome, 2),
             'expenses' => round($currExpenses, 2),
@@ -74,22 +71,41 @@ class AIController extends AbstractController
             'expenses' => round($prevExpenses, 2),
             'balance'  => round($prevIncome - $prevExpenses, 2)
         ];
-        $result['debugPrevMonth'] = $prevMonth;
-        $result['debugPrevYear']  = $prevYear;
 
         return $this->render('ai/analyse.html.twig', [
             'data' => $result
         ]);
     }
 
-  #[Route('/ai/analyse-data', name: 'ai_data')]
-public function analyseData(Request $request, AIAnalyzerService $ai): JsonResponse
-{
-    $income = (float) $request->query->get('income');
-    $expenses = (float) $request->query->get('expenses');
+    #[Route('/ai/analyse-data', name: 'ai_data')]
+    public function analyseData(Request $request, AIAnalyzerService $ai): JsonResponse
+    {
+        $income = (float) $request->query->get('income');
+        $expenses = (float) $request->query->get('expenses');
 
-    $result = $ai->analyze($income, $expenses);
+        $result = $ai->analyze($income, $expenses);
 
-    return $this->json($result);
-}
+        return $this->json($result);
+    }
+
+    #[Route('/ai/improve-message', name: 'ai_improve_message', methods: ['POST'])]
+    public function improveMessage(Request $request, AiService $aiService, AppelOffreRepository $tenderRepo): JsonResponse
+    {
+        $message = $request->request->get('message');
+        $tenderId = $request->request->get('tenderId');
+
+        if (!$message) {
+            return new JsonResponse(['success' => false, 'message' => 'Message vide.'], 400);
+        }
+
+        $tender = $tenderId ? $tenderRepo->find($tenderId) : null;
+        $tenderDetails = $tender ? ($tender->getTitre() . " - " . $tender->getDescription()) : "Appel d'offre général";
+
+        $improved = $aiService->improveCandidatureMessage($message, $tenderDetails);
+
+        return new JsonResponse([
+            'success' => true,
+            'improved' => $improved
+        ]);
+    }
 }

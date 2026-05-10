@@ -175,51 +175,120 @@
         /* --- Magic Hotspots --- */
         .magic-hotspot {
             position: absolute;
-            width: 24px; height: 24px;
-            background: #f59e0b;
+            width: 28px; height: 28px;
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
             border-radius: 50%;
             z-index: 10000;
             cursor: pointer;
-            box-shadow: 0 0 0 rgba(245, 158, 11, 0.4);
+            box-shadow: 0 0 20px rgba(245, 158, 11, 0.5);
             animation: hotspotPulse 2s infinite;
             display: flex; align-items: center; justify-content: center;
-            color: white; font-size: 12px; font-weight: bold;
-            border: 2px solid white;
+            color: white; font-size: 14px; font-weight: bold;
+            border: 3px solid white;
+            transition: all 0.3s ease;
+        }
+        .magic-hotspot.active {
+            transform: scale(1.3);
+            background: linear-gradient(135deg, #7c3aed 0%, #4338ca 100%);
+            box-shadow: 0 0 30px rgba(124, 58, 237, 0.6);
         }
         @keyframes hotspotPulse {
             0% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7); }
-            70% { box-shadow: 0 0 0 15px rgba(245, 158, 11, 0); }
+            70% { box-shadow: 0 0 0 20px rgba(245, 158, 11, 0); }
             100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); }
         }
         .hotspot-tooltip {
             position: absolute;
-            background: #1e1b4b;
+            background: rgba(30, 27, 75, 0.95);
+            backdrop-filter: blur(10px);
             color: white;
-            padding: 12px 16px;
-            border-radius: 12px;
-            width: 220px;
-            font-size: 13px;
-            bottom: 35px;
+            padding: 20px;
+            border-radius: 20px;
+            width: 280px;
+            font-size: 14px;
+            bottom: 45px;
+            left: 50%;
+            transform: translateX(-50%) translateY(10px);
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            pointer-events: auto;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.4);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            z-index: 10001;
+            text-align: left;
+        }
+        .magic-hotspot.active .hotspot-tooltip {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(-50%) translateY(0);
+        }
+        .hotspot-tooltip::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
             left: 50%;
             transform: translateX(-50%);
-            opacity: 0;
-            transition: all 0.3s;
-            pointer-events: none;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-            z-index: 10001;
-            text-align: center;
+            border-left: 10px solid transparent;
+            border-right: 10px solid transparent;
+            border-top: 10px solid rgba(30, 27, 75, 0.95);
         }
-        .magic-hotspot:hover .hotspot-tooltip {
-            opacity: 1;
-            transform: translateX(-50%) translateY(-5px);
+        .guide-nav-btns {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .btn-guide-next {
+            background: #f59e0b;
+            border: none;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 50px;
+            font-size: 11px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        .btn-guide-close {
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 5px 12px;
+            border-radius: 50px;
+            font-size: 11px;
         }
         .guide-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.3);
-            backdrop-filter: blur(2px);
-            z-index: 9999;
+            background: rgba(15, 10, 50, 0.55);
+            backdrop-filter: blur(4px);
+            z-index: 9998;
             display: none;
         }
+        #guidePanel {
+            position: fixed;
+            bottom: 30px;
+            left: 30px;
+            z-index: 10010;
+            background: rgba(15, 10, 50, 0.97);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(124, 58, 237, 0.4);
+            border-radius: 24px;
+            padding: 22px 26px;
+            width: 320px;
+            color: white;
+            box-shadow: 0 30px 80px rgba(0,0,0,0.5);
+            display: none;
+        }
+        #guidePanel .gp-step { font-size:10px; text-transform:uppercase; letter-spacing:2px; color:#a78bfa; font-weight:800; margin-bottom:8px; }
+        #guidePanel .gp-title { font-size:16px; font-weight:800; margin-bottom:6px; }
+        #guidePanel .gp-desc  { font-size:13px; color:rgba(255,255,255,0.7); line-height:1.6; }
+        #guidePanel .gp-bar   { height:4px; background:rgba(255,255,255,0.1); border-radius:99px; margin:14px 0 16px; overflow:hidden; }
+        #guidePanel .gp-fill  { height:100%; background:linear-gradient(90deg,#7c3aed,#f59e0b); border-radius:99px; transition:width 0.5s ease; }
+        #guidePanel .gp-btns  { display:flex; gap:10px; }
+        #guidePanel .btn-gpq  { background:rgba(255,255,255,0.07); border:1px solid rgba(255,255,255,0.15); color:rgba(255,255,255,0.6); border-radius:12px; padding:9px 14px; font-size:13px; cursor:pointer; }
+        #guidePanel .btn-gpn  { flex:1; background:linear-gradient(135deg,#7c3aed,#4338ca); border:none; color:white; border-radius:12px; padding:9px 0; font-weight:700; font-size:13px; cursor:pointer; transition:all 0.2s; }
+        #guidePanel .btn-gpn:hover { transform:translateY(-2px); box-shadow:0 8px 20px rgba(124,58,237,0.5); }
 
         /* Tiny Information Dots */
         .info-dot {
@@ -680,7 +749,7 @@
              {% set route = app.request.attributes.get('_route') %}
              {% if route in ['app_home', 'app_formation_home', 'app_formations', 'public_centres_map'] or route starts with 'app_formation' or route starts with 'app_lesson' %}is-formation-page{% endif %}">
 
-{% if app.request.attributes.get('_route') not in ['app_login', 'app_register'] %}
+{% if app.user and app.request.attributes.get('_route') not in ['app_login', 'app_register'] %}
 <!-- Sidebar Wrapper -->
 <div class="sidebar-wrapper shadow-lg" style="left: 0 !important;">
     <div class="sidebar-header">
@@ -702,7 +771,10 @@
                 {% endif %}
             </div>
             <div class="overflow-hidden">
-                <h6 class="mb-0 text-truncate">{{ app.user.username }}</h6>
+                <h6 class="mb-0 text-truncate">
+                    {{ app.user.username }}
+                    <i class="bi bi-patch-check-fill text-primary ms-1" style="font-size: 13px;" data-bs-toggle="tooltip" title="Profil Vérifié par Finora"></i>
+                </h6>
                 <p class="small text-muted mb-0 text-truncate">{{ app.user.email }}</p>
             </div>
         </div>
@@ -712,6 +784,10 @@
             <h6 class="text-uppercase xsmall text-muted fw-bold mb-3 px-2" style="font-size: 0.65rem; letter-spacing: 1.5px;">Navigation Principale</h6>
             <a href="{{ path('app_home') }}" class="sidebar-nav-link {{ app.request.attributes.get('_route') == 'app_home' ? 'active' : '' }}">
                 <i class="bi bi-house-door-fill"></i> Accueil
+            </a>
+            
+            <a href="{{ path('app_messages') }}" class="sidebar-nav-link {{ app.request.attributes.get('_route') == 'app_messages' ? 'active' : '' }}">
+                <i class="bi bi-chat-dots-fill text-primary"></i> Messages
             </a>
             
             {% if app.user %}
@@ -881,7 +957,7 @@
         <div class="d-flex align-items-center justify-content-between w-100">
             <!-- Left: Sidebar Toggle & Logo -->
             <div class="d-flex align-items-center">
-                {% if app.request.attributes.get('_route') not in ['app_login', 'app_register'] %}
+                {% if app.user and app.request.attributes.get('_route') not in ['app_login', 'app_register'] %}
                 <button class="sidebar-toggle-btn text-primary border-0 bg-transparent me-2 p-2" id="sidebarToggle" type="button">
                     <i class="bi bi-list fs-3"></i>
                 </button>
@@ -892,6 +968,7 @@
             </div>
 
             <!-- Center: Search Bar -->
+            {% if app.user %}
             <div class="flex-grow-1 mx-4 d-none d-lg-block header-search-container" style="max-width: 480px;">
                 <form class="position-relative w-100" action="{{ path('app_market') }}" method="GET">
                     <input class="form-control rounded-pill border-0 ps-4 pe-5 header-search-input" type="search" name="q" placeholder="Rechercher sur Finora..." style="background: #f1f5f9; height: 36px; font-size: 0.85rem;">
@@ -900,6 +977,7 @@
                     </button>
                 </form>
             </div>
+            {% endif %}
 
             <!-- Right: User Actions -->
             <div class="d-flex align-items-center">
@@ -936,6 +1014,11 @@
                                 </li>
                             </ul>
                         </div>
+
+                        <!-- Messages Button -->
+                        <a href="{{ path('app_messages') }}" class="btn btn-light btn-round btn-sm mb-0 shadow-sm" title="Mes Messages" style="background: #fff; width: 38px; height: 38px; display: flex; align-items: center; justify-content: center;">
+                            <i class="bi bi-chat-dots text-primary"></i>
+                        </a>
                         
                         <!-- Currency Switcher -->
                         <div class="dropdown">
@@ -986,7 +1069,7 @@
     <!-- Row 1 END -->
 
     <!-- Row 2: Secondary Nav START -->
-    {% if app.request.attributes.get('_route') not in ['app_login', 'app_register'] %}
+    {% if app.user and app.request.attributes.get('_route') not in ['app_login', 'app_register'] %}
     <div class="w-100 bg-white border-top border-bottom shadow-sm" style="height: 45px;">
         <div class="container h-100">
             <ul class="nav justify-content-center h-100 align-items-center gap-4 list-unstyled">
@@ -996,8 +1079,7 @@
                         <i class="fas fa-home me-2 text-primary"></i>ACCUEIL
                     </a>
                 </li>
-                <!-- BOURSE -->
-                <li class="nav-item dropdown h-100 d-flex align-items-center">
+                <li id="nav-market" class="nav-item dropdown h-100 d-flex align-items-center">
                     <a class="nav-link-module fw-bold small text-uppercase d-flex align-items-center dropdown-toggle text-decoration-none" href="#" data-bs-toggle="dropdown" style="color:#475569;">
                         <i class="fas fa-chart-line me-2 text-primary"></i>BOURSE
                     </a>
@@ -1007,8 +1089,7 @@
                     </ul>
                 </li>
 
-                <!-- WALLET -->
-                <li class="nav-item dropdown h-100 d-flex align-items-center">
+                <li id="nav-wallet" class="nav-item dropdown h-100 d-flex align-items-center">
                     <a class="nav-link-module fw-bold small text-uppercase d-flex align-items-center dropdown-toggle text-decoration-none" href="#" data-bs-toggle="dropdown" style="color:#475569;">
                         <i class="fas fa-wallet me-2 text-primary"></i>WALLET
                     </a>
@@ -1035,8 +1116,7 @@
                     </ul>
                 </li>
 
-                <!-- FORMATION -->
-                <li class="nav-item dropdown h-100 d-flex align-items-center">
+                <li id="nav-formations" class="nav-item dropdown h-100 d-flex align-items-center">
                     <a class="nav-link-module fw-bold small text-uppercase d-flex align-items-center dropdown-toggle text-decoration-none" href="#" data-bs-toggle="dropdown" style="color:#475569;">
                         <i class="fas fa-graduation-cap me-2 text-primary"></i>FORMATION
                     </a>
@@ -1167,8 +1247,23 @@ Footer START -->
             <div class="col-12 text-center mb-4">
                 <h6 class="text-uppercase text-white-50 small letter-spacing-2 mb-0">Nos Partenaires Officiels</h6>
                 <div class="d-flex flex-wrap justify-content-center align-items-center gap-5 mt-4">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/01/LinkedIn_Logo.svg/600px-LinkedIn_Logo.svg.png" alt="LinkedIn" style="height: 40px; width: auto; background: white; padding: 10px; border-radius: 8px;">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/ff/Logo_ESPRIT_-_Tunisie.png/600px-Logo_ESPRIT_-_Tunisie.png" alt="ESPRIT" style="height: 60px; width: auto; background: white; padding: 10px; border-radius: 8px;" referrerpolicy="no-referrer">
+                    <!-- LinkedIn Logo (SVG) -->
+                    <a href="https://www.linkedin.com" target="_blank" class="partner-logo-link d-flex align-items-center justify-content-center bg-white rounded-3 px-4 py-2 shadow-sm" style="height: 60px; min-width: 160px; transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-5px) scale(1.05)'" onmouseout="this.style.transform='translateY(0) scale(1)'">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="120" height="30" viewBox="0 0 120 30">
+                            <path fill="#0077B5" d="M11.6 0C5.2 0 0 5.2 0 11.6v6.8C0 24.8 5.2 30 11.6 30h96.8c6.4 0 11.6-5.2 11.6-11.6v-6.8C120 5.2 114.8 0 108.4 0H11.6z"/>
+                            <path fill="#FFF" d="M19.1 23.4h-4.3v-13h4.3v13zM16.9 8.6c-1.4 0-2.6-1.2-2.6-2.6s1.2-2.6 2.6-2.6 2.6 1.2 2.6 2.6-1.2 2.6-2.6 2.6zM40.2 23.4h-4.3v-6.7c0-1.6-0.1-3.7-2.3-3.7-2.2 0-2.6 1.7-2.6 3.6v6.8h-4.3v-13h4.1v1.8h0.1c0.6-1.1 2-2.3 4.1-2.3 4.4 0 5.2 2.9 5.2 6.6v6.9z"/>
+                            <text x="48" y="21" font-family="Arial, sans-serif" font-weight="bold" font-size="16" fill="white">LinkedIn</text>
+                        </svg>
+                    </a>
+                    
+                    <!-- ESPRIT Logo (SVG Style) -->
+                    <a href="https://esprit.tn" target="_blank" class="partner-logo-link d-flex align-items-center justify-content-center bg-white rounded-3 px-4 py-2 shadow-sm" style="height: 60px; min-width: 160px; transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-5px) scale(1.05)'" onmouseout="this.style.transform='translateY(0) scale(1)'">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="120" height="40" viewBox="0 0 120 40">
+                            <text x="5" y="28" font-family="'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-weight="900" font-size="28" fill="#e41b23" style="letter-spacing: -1px;">esprit</text>
+                            <rect x="85" y="10" width="15" height="15" fill="#e41b23" transform="rotate(45 92 17)"/>
+                            <text x="5" y="38" font-family="Arial, sans-serif" font-size="7" fill="#333" font-weight="bold">Se former autrement</text>
+                        </svg>
+                    </a>
                 </div>
             </div>
         </div>
@@ -1358,191 +1453,357 @@ document.addEventListener('DOMContentLoaded', function() {
 <!-- Unified Notification Bell JS -->
 {% if app.user %}
 <script>
-(function() {
-    function loadNotifications() {
-        // Fetch from both APIs
-        const boursePromise = fetch('/api/bourse/notifications', { headers: { 'X-Requested-With': 'XMLHttpRequest' } }).then(r => r.json()).catch(() => ({count:0, notifications:[]}));
-        const investPromise = fetch('/api/investment/notifications', { headers: { 'X-Requested-With': 'XMLHttpRequest' } }).then(r => r.json()).catch(() => ({count:0, notifications:[]}));
-
-        Promise.all([boursePromise, investPromise]).then(([bourseData, investData]) => {
-            const badge   = document.getElementById('notifBadge');
-            const countEl = document.getElementById('notifCount');
-            const list    = document.getElementById('notifList');
-            const emptyEl = document.getElementById('notifEmpty');
-            if (!badge || !list) return;
-
-            const totalUnread = (bourseData.count || 0) + (investData.count || 0);
-            badge.textContent = totalUnread > 9 ? '9+' : totalUnread;
-            badge.style.display = totalUnread > 0 ? '' : 'none';
-
-            if (countEl) {
-                countEl.textContent = totalUnread > 0 ? totalUnread + ' non lues' : 'À jour';
-                countEl.className = totalUnread > 0
-                    ? 'badge bg-danger bg-opacity-10 text-danger'
-                    : 'badge bg-success bg-opacity-10 text-success';
-            }
-
-            // Merge and sort by time (approximate since we don't have absolute timestamps in the API JSON yet, 
-            // but we can assume order of fetch if they were sorted on server)
-            const allNotifs = [
-                ...(bourseData.notifications || []).map(n => ({...n, module: 'bourse'})),
-                ...(investData.notifications || []).map(n => ({...n, module: 'invest'}))
-            ];
-
-            // Clean list (keep empty placeholder if needed)
-            list.querySelectorAll('.notif-item').forEach(el => el.remove());
-
-            if (allNotifs.length === 0) {
-                if (emptyEl) emptyEl.style.display = '';
-                return;
-            }
-            if (emptyEl) emptyEl.style.display = 'none';
-
-            allNotifs.forEach(n => {
-                const bg = n.isRead ? '' : 'style="background:rgba(124,58,237,0.04);"';
-                const dot = !n.isRead ? '<span class="ms-2 mt-1 flex-shrink-0"><span style="width:7px;height:7px;background:#7c3aed;border-radius:50%;display:inline-block;"></span></span>' : '';
-                const sym = n.symbol ? ` · <span class="badge bg-secondary bg-opacity-10 text-secondary fw-bold" style="font-size:10px;">${n.symbol}</span>` : '';
-                const link = n.module === 'invest' ? `/investments/${n.investmentId}` : '#';
-                
-                list.insertAdjacentHTML('beforeend', `
-                <li class="notif-item">
-                    <a href="${link}" class="list-group-item-action border-0 border-bottom d-flex p-3 text-decoration-none" ${bg}>
-                        <div class="me-3 mt-1"><i class="${n.icon} fs-5"></i></div>
-                        <div class="flex-grow-1 overflow-hidden">
-                            <h6 class="mb-1 fw-semibold text-dark" style="font-size:13px;">${n.titre}</h6>
-                            <p class="small text-muted m-0" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${n.message}</p>
-                            <small class="text-muted" style="font-size:11px;">${n.timeAgo}${sym}</small>
-                        </div>${dot}
-                    </a>
-                </li>`);
-            });
-        });
-    }
-
-    window.markAllNotifsRead = function() {
-        // Call both "read" endpoints
-        fetch('/api/bourse/notifications/read', { method: 'POST', headers: { 'X-Requested-With': 'XMLHttpRequest' } });
-        fetch('/api/investment/notifications/read', { method: 'POST', headers: { 'X-Requested-With': 'XMLHttpRequest' } });
-        
-        const badge = document.getElementById('notifBadge');
-        if (badge) badge.style.display = 'none';
-        const countEl = document.getElementById('notifCount');
-        if (countEl) { countEl.textContent = 'À jour'; countEl.className = 'badge bg-success bg-opacity-10 text-success'; }
-    };
-
     document.addEventListener('DOMContentLoaded', function() {
-        loadNotifications();
-        setInterval(loadNotifications, 30000);
+        const notifBadge = document.getElementById('notifBadge');
+        const notifCountText = document.getElementById('notifCount');
+        const notifList = document.getElementById('notifList');
+        const emptyEl = document.getElementById('notifEmpty');
+
+        function updateNotifCount() {
+            fetch('{{ path("notifications_count") }}')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.count > 0) {
+                        notifBadge.style.display = 'block';
+                        notifBadge.textContent = data.count > 9 ? '9+' : data.count;
+                        if (notifCountText) {
+                            notifCountText.textContent = data.count + ' non lues';
+                            notifCountText.className = 'badge bg-danger bg-opacity-10 text-danger';
+                        }
+                    } else {
+                        notifBadge.style.display = 'none';
+                        if (notifCountText) {
+                            notifCountText.textContent = 'À jour';
+                            notifCountText.className = 'badge bg-success bg-opacity-10 text-success';
+                        }
+                    }
+                });
+        }
+
+        // 🔔 BROWSER PUSH NOTIFICATIONS
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/sw.js').then(reg => {
+                console.log('SW Registered');
+            });
+        }
+
+        function showBrowserNotification(title, body) {
+            if (Notification.permission === 'granted') {
+                new Notification(title, { body: body, icon: '/favicon.ico' });
+            } else if (Notification.permission !== 'denied') {
+                Notification.requestPermission();
+            }
+        }
+
+        // Update pollNotifications to also trigger browser notif
+        const originalPoll = updateNotifCount;
+        updateNotifCount = async function() {
+            const countBefore = parseInt(document.getElementById('notifCount')?.textContent || '0');
+            await originalPoll();
+            const countAfter = parseInt(document.getElementById('notifCount')?.textContent || '0');
+            
+            if (countAfter > countBefore) {
+                showBrowserNotification('FINORA', 'Vous avez de nouvelles notifications !');
+            }
+        };
+
+        function loadNotifications() {
+            fetch('{{ path("notifications_list") }}')
+                .then(response => response.text())
+                .then(html => {
+                    if (html.trim() === '') {
+                        emptyEl.style.display = 'block';
+                    } else {
+                        emptyEl.style.display = 'none';
+                        // Replace existing notification items but keep the empty placeholder
+                        const existingItems = notifList.querySelectorAll('li:not(#notifEmpty)');
+                        existingItems.forEach(item => item.remove());
+                        notifList.insertAdjacentHTML('beforeend', html);
+                    }
+                });
+        }
+
+        window.markAllNotifsRead = function() {
+            fetch('{{ path("notifications_mark_read") }}', { method: 'POST' })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        updateNotifCount();
+                        loadNotifications();
+                    }
+                });
+        };
+
+        // Initial load
+        updateNotifCount();
+        // Periodically update count
+        setInterval(updateNotifCount, 30000);
+
+        // Load content when dropdown opens
+        const dropdownParent = notifBadge.closest('.dropdown');
+        if (dropdownParent) {
+            dropdownParent.addEventListener('show.bs.dropdown', function () {
+                loadNotifications();
+            });
+        }
     });
-})();
 </script>
 {% endif %}
 
+
 {% if app.request.attributes.get('_route') not in ['app_login', 'app_register'] %}
-<div class="guide-overlay" id="guideOverlay" onclick="stopFinoraGuide()"></div>
+<!-- Intro.js CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/intro.js@7.2.0/introjs.min.css">
+<style>
+    /* Premium Intro.js Custom Styles */
+    .introjs-overlay {
+        background: rgba(15, 23, 42, 0.85);
+        backdrop-filter: blur(4px);
+    }
+    .introjs-tooltip {
+        background: #ffffff;
+        border-radius: 20px;
+        box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+        border: 1px solid rgba(124, 58, 237, 0.2);
+        padding: 10px;
+        min-width: 320px;
+    }
+    .introjs-tooltiptext {
+        font-family: 'Outfit', sans-serif;
+        color: #1e293b;
+        font-size: 15px;
+        line-height: 1.6;
+        padding: 15px;
+    }
+    .introjs-tooltip-title {
+        color: #7c3aed;
+        font-weight: 800;
+        font-size: 18px;
+        margin-bottom: 5px;
+    }
+    .introjs-progress {
+        background-color: #f1f5f9;
+        height: 6px;
+        border-radius: 3px;
+    }
+    .introjs-progressbar {
+        background: linear-gradient(90deg, #7c3aed, #a855f7);
+    }
+    .introjs-button {
+        border-radius: 10px;
+        font-weight: 700;
+        text-shadow: none;
+        transition: all 0.2s;
+        border: none !important;
+        padding: 8px 18px !important;
+    }
+    .introjs-nextbutton {
+        background: #7c3aed !important;
+        color: white !important;
+        text-shadow: none !important;
+    }
+    .introjs-prevbutton {
+        background: #f1f5f9 !important;
+        color: #64748b !important;
+        text-shadow: none !important;
+    }
+    .introjs-skipbutton {
+        color: #94a3b8 !important;
+    }
+    .introjs-bullets ul li a.active {
+        background: #7c3aed !important;
+    }
+    .introjs-helperLayer {
+        background: rgba(255, 255, 255, 0.1);
+        border: 2px solid #7c3aed;
+        box-shadow: 0 0 0 1000px rgba(15, 23, 42, 0.8), 0 0 30px rgba(124, 58, 237, 0.5);
+    }
+</style>
+
+<!-- Intro.js Script -->
+<script src="https://cdn.jsdelivr.net/npm/intro.js@7.2.0/intro.min.js"></script>
 
 <script>
-let currentGuideStep = 1;
-const totalSteps = 5;
-
-const guideConfig = {
-    'dashboard': [
-        { id: 'guide-dash-welcome', text: '<b>Bienvenue</b>: Votre centre de contrôle financier personnalisé.' },
-        { id: 'guide-dash-recs', text: '<b>IA Recommandations</b>: Cours et actions suggérés pour vous.' },
-        { id: 'guide-dash-stats', text: '<b>Vue d\'ensemble</b>: Votre volume boursier et activité wallet en un coup d\'œil.' },
-        { id: 'guide-dash-actions', text: '<b>Accès Rapides</b>: Naviguez instantanément vers les outils essentiels.' }
-    ],
-    'walletuser': [
-        { id: 'guide-wallet-pay', text: '<b>Finora Pay</b>: Envoyez de l\'argent instantanément à vos contacts Finora.' },
-        { id: 'guide-wallet-calc', text: '<b>Simulateur</b>: Calculez vos gains potentiels et convertissez vos devises.' },
-        { id: 'guide-wallet-system', text: '<b>Paramètres</b>: Gérez vos alertes et préférences de sécurité.' }
-    ],
-    'market': [
-        { id: 'guide-bourse-ai', text: '<b>Analyse IA</b>: Obtenez des prédictions intelligentes sur l\'évolution des cours.' },
-        { id: 'guide-bourse-exchange', text: '<b>Conversion Live</b>: Convertissez les devises en temps réel via API.' }
-    ],
-    'history': [
-        { id: 'ai-insights-box', text: '<b>IA Insights</b>: Analyse automatique de votre performance boursière.' }
-    ],
-    'formations': [
-        { id: 'voice-btn', text: '<b>Recherche Vocale</b>: Dictez simplement ce que vous voulez apprendre.' },
-        { id: 'hero-search-form', text: '<b>Catalogue</b>: Filtrez les cours par catégorie ou niveau.' }
-    ],
-    'appel/offre': [
-        { id: 'searchInput', text: '<b>Moteur de Recherche</b>: Identifiez les opportunités de marché par mots-clés.' },
-        { id: 'typeFilter', text: '<b>Filtre par Type</b>: Ciblez les achats, partenariats ou dons.' }
-    ],
-    'home': [
-        { id: 'how-it-works', text: '<b>Comment ça marche</b>: Découvrez les 3 piliers de l\'écosystème Finora.' },
-        { id: 'sidebarToggle', text: '<b>Navigation</b>: Accédez rapidement à tous vos modules favoris.' }
-    ],
-    'simulation': [
-        { id: 'guide-sim-balance', text: '<b>Solde Virtuel</b>: Votre capital de départ sans risque.' },
-        { id: 'guide-sim-tabs', text: '<b>Modules</b>: Basculez entre Bourse, Investissement et Freelance.' },
-        { id: 'guide-sim-assets', text: '<b>Portefeuille</b>: Suivez vos gains et pertes en temps réel.' }
-    ]
-};
-
+/**
+ * Global Route-Aware Guide System (FINORA Guide)
+ */
 function startFinoraGuide() {
-    // 1. Check if we have page-specific hotspots
-    const currentPath = window.location.pathname.toLowerCase();
-    let foundContext = null;
-    
-    // Remove existing hotspots
-    document.querySelectorAll('.magic-hotspot').forEach(el => el.remove());
+    const route = "{{ app.request.attributes.get('_route') }}";
+    let steps = [];
 
-    // Better matching logic
-    for (const route in guideConfig) {
-        if (currentPath.includes(route) || (route === 'home' && (currentPath === '/' || currentPath === ''))) {
-            foundContext = guideConfig[route];
+    // Configuration des étapes par route
+    switch(route) {
+        case 'app_home':
+        case 'app_formation_home':
+            steps = [
+                {
+                    title: 'Bienvenue sur FINORA ! 👋',
+                    intro: 'Laissez-nous vous faire découvrir votre nouvel écosystème financier intelligent.'
+                },
+                {
+                    element: '#sidebarToggle',
+                    title: 'Navigation Latérale',
+                    intro: 'Accédez rapidement à tous les modules de la plateforme depuis ce menu.'
+                },
+                {
+                    element: '#nav-market',
+                    title: 'Marché Boursier',
+                    intro: 'Suivez les cours en temps réel et investissez dans les plus grandes entreprises tunisiennes.'
+                },
+                {
+                    element: '#nav-formations',
+                    title: 'Formations Premium',
+                    intro: 'Apprenez les secrets de l\'investissement avec nos cours interactifs et certifiants.'
+                },
+                {
+                    element: '#nav-wallet',
+                    title: 'Votre Portefeuille',
+                    intro: 'Gérez votre capital, suivez vos dépenses et envoyez de l\'argent instantanément.'
+                }
+            ];
             break;
-        }
+
+        case 'app_market':
+            steps = [
+                {
+                    title: 'Le Marché Boursier 📊',
+                    intro: 'Découvrez les opportunités d\'investissement en direct de la Bourse de Tunis.'
+                },
+                {
+                    element: '#guide-bourse-chart',
+                    title: 'Analyse Technique',
+                    intro: 'Observez les tendances avec nos graphiques interactifs en temps réel.'
+                },
+                {
+                    element: '#guide-bourse-buy',
+                    title: 'Achat d\'Actions',
+                    intro: 'Cliquez ici pour acquérir des parts d\'entreprises et faire fructifier votre capital.'
+                },
+                {
+                    element: '#guide-bourse-ai',
+                    title: 'Analyste IA',
+                    intro: 'Demandez à notre IA une recommandation personnalisée sur n\'importe quelle action.'
+                },
+                {
+                    element: '#guide-bourse-exchange',
+                    title: 'Conversion Live',
+                    intro: 'Convertissez vos gains en différentes devises avec les taux officiels du jour.'
+                }
+            ];
+            break;
+
+        case 'app_formations':
+            steps = [
+                {
+                    title: 'Catalogue des Formations 🎓',
+                    intro: 'Devenez un expert de la finance grâce à nos parcours d\'apprentissage.'
+                },
+                {
+                    element: '#bestsellerCarousel',
+                    title: 'Les Incontournables',
+                    intro: 'Découvrez les formations les plus populaires de la communauté FINORA.'
+                },
+                {
+                    element: '#category-list',
+                    title: 'Parcours Thématiques',
+                    intro: 'Filtrez par sujet (Bourse, Crypto, Fiscalité) pour trouver ce qui vous passionne.'
+                },
+                {
+                    element: '#fo-formation-filter-form',
+                    title: 'Recherche Avancée',
+                    intro: 'Trouvez exactement ce que vous cherchez par titre, niveau ou prix.'
+                }
+            ];
+            break;
+
+        case 'dashboard':
+            steps = [
+                {
+                    title: 'Gestion de Fortune 💰',
+                    intro: 'Bienvenue dans votre centre de contrôle financier.'
+                },
+                {
+                    element: '.clean-stats',
+                    title: 'Vue d\'Ensemble',
+                    intro: 'Suivez votre solde, vos revenus et vos dépenses en un coup d\'œil.'
+                },
+                {
+                    element: '#mainFlowChart',
+                    title: 'Analyse des Flux',
+                    intro: 'Visualisez l\'évolution de votre patrimoine sur les derniers jours.'
+                },
+                {
+                    element: '#guide-wallet-pay',
+                    title: 'Finora Pay',
+                    intro: 'Transférez des fonds à vos amis instantanément et sans frais.'
+                },
+                {
+                    element: '#guide-wallet-calc',
+                    title: 'Simulateur',
+                    intro: 'Calculez vos futurs profits et convertissez vos gains en devises étrangères.'
+                }
+            ];
+            break;
+
+        case 'app_profile':
+            steps = [
+                {
+                    title: 'Votre Identité Finora 👤',
+                    intro: 'Gérez vos paramètres personnels et votre sécurité de haut niveau.'
+                },
+                {
+                    element: '#faceConfigContainer',
+                    title: 'Sécurité Biométrique',
+                    intro: 'Configurez le Face ID pour un accès sécurisé et futuriste à votre compte.'
+                },
+                {
+                    element: '#twoFaToggle',
+                    title: 'Double Protection',
+                    intro: 'Activez la 2FA pour recevoir un code par email à chaque connexion sensible.'
+                }
+            ];
+            break;
+
+        default:
+            steps = [
+                {
+                    title: 'Besoin d\'aide ? 💡',
+                    intro: 'Vous êtes sur une page sans guide spécifique, mais vous pouvez toujours explorer les menus principaux pour naviguer.'
+                }
+            ];
     }
 
-    if (foundContext) {
-        let foundAny = false;
-        
-        foundContext.forEach(point => {
-            const el = document.getElementById(point.id);
-            if (el) {
-                foundAny = true;
-                const rect = el.getBoundingClientRect();
-                const hotspot = document.createElement('div');
-                hotspot.className = 'magic-hotspot';
-                hotspot.style.top = (rect.top + window.scrollY - 12) + 'px';
-                hotspot.style.left = (rect.left + window.scrollX - 12) + 'px';
-                hotspot.innerHTML = '<i class="fas fa-info"></i><div class="hotspot-tooltip">' + point.text + '</div>';
-                document.body.appendChild(hotspot);
-            }
-        });
-
-        if (foundAny) {
-            Swal.fire({
-                title: 'Guide Finora Actif',
-                text: 'Explorez la page en survolant les points oranges.',
-                icon: 'info',
-                timer: 3000,
-                showConfirmButton: false,
-                toast: true,
-                position: 'top-end'
-            });
-            return;
-        }
-    }
-    
-    Swal.fire({
-        title: 'Guide Indisponible',
-        text: 'Aucun point d\'information spécifique n\'est disponible pour cette section.',
-        icon: 'warning',
-        timer: 2000,
-        showConfirmButton: false
+    // Filtrer les étapes dont les éléments n'existent pas dans le DOM
+    const filteredSteps = steps.filter(step => {
+        if (!step.element) return true;
+        return document.querySelector(step.element) !== null;
     });
+
+    // Lancement d'Intro.js
+    introJs().setOptions({
+        steps: filteredSteps,
+        showProgress: true,
+        showBullets: true,
+        exitOnOverlayClick: false,
+        nextLabel: 'Suivant →',
+        prevLabel: '← Précédent',
+        doneLabel: 'Terminer 🎉',
+        skipLabel: 'Passer'
+    }).onbeforechange(function(element) {
+        if (element) {
+            element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    }).start();
+}
+
+function stopFinoraGuide() {
+    // legacy function for compatibility
 }
 
 document.addEventListener('DOMContentLoaded', function() {
-    console.log("Finora Guide System Ready (Manual Only)");
+    console.log("Global Guide System Initialized with Intro.js");
     
-    // Initialize tooltips globally
+    // Auto-init tooltips/popovers
     var popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'));
     var popoverList = popoverTriggerList.map(function (popoverTriggerEl) {
         return new bootstrap.Popover(popoverTriggerEl, {
@@ -1553,6 +1814,6 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 {% endif %}
-
 </body>
 </html>
+

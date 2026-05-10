@@ -1,0 +1,132 @@
+<!-- 🤖 Robo-Advisor Modal -->
+<div class="modal fade" id="roboAdvisorModal" tabindex="-1" aria-labelledby="roboAdvisorModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 24px; overflow: hidden;">
+            <div class="modal-header border-0 bg-dark p-4 text-white">
+                <div class="d-flex align-items-center">
+                    <div class="p-2 bg-primary bg-opacity-20 rounded-circle me-3">
+                        <i class="bi bi-robot text-primary fs-4"></i>
+                    </div>
+                    <div>
+                        <h5 class="modal-title fw-black mb-0" id="roboAdvisorModalLabel">Assistant <span class="text-primary">Finora AI</span></h5>
+                        <small class="opacity-50">Conseiller Privé Automatisé</small>
+                    </div>
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-0">
+                <div class="row g-0" style="height: 600px;">
+                    <!-- Left Context Panel -->
+                    <div class="col-lg-3 d-none d-lg-flex flex-column bg-light p-4 border-end">
+                        <h6 class="text-uppercase small fw-bold text-muted mb-4" style="letter-spacing: 1px;">Analyses Disponibles</h6>
+                        <div class="list-group list-group-flush gap-2">
+                            <button onclick="suggestModal('Analyse mon profil de risque')" class="list-group-item list-group-item-action border-0 rounded-3 small py-3">
+                                <i class="bi bi-shield-check me-2 text-success"></i> Profil de Risque
+                            </button>
+                            <button onclick="suggestModal('Opportunités du moment')" class="list-group-item list-group-item-action border-0 rounded-3 small py-3">
+                                <i class="bi bi-stars me-2 text-warning"></i> Opportunités
+                            </button>
+                            <button onclick="suggestModal('Comment diversifier ?')" class="list-group-item list-group-item-action border-0 rounded-3 small py-3">
+                                <i class="bi bi-pie-chart me-2 text-info"></i> Diversification
+                            </button>
+                        </div>
+                        <div class="mt-auto p-3 rounded-4 bg-primary bg-opacity-5 border border-primary border-opacity-10">
+                            <p class="small text-muted mb-0"><i class="bi bi-info-circle me-1"></i> Vos données sont chiffrées.</p>
+                        </div>
+                    </div>
+                    <!-- Chat Panel -->
+                    <div class="col-lg-9 d-flex flex-column bg-white">
+                        <div id="modal-chat-messages" class="flex-grow-1 p-4 overflow-auto d-flex flex-column gap-3" style="background: #ffffff; scrollbar-width: thin;">
+                            <div class="d-flex justify-content-center my-2">
+                                <span class="badge bg-light text-muted rounded-pill px-3 py-2 fw-normal">Session d'IA souveraine activée</span>
+                            </div>
+                            <div class="msg-bot">
+                                <div class="msg-content shadow-sm bg-light">
+                                    Bonjour ! Je suis prêt à vous assister sur cette page. Comment puis-je vous aider ?
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Typing -->
+                        <div id="modal-ai-loader" class="px-4 py-2 text-muted small" style="display: none;">
+                            <div class="spinner-grow spinner-grow-sm text-primary"></div> Finora analyse...
+                        </div>
+                        <!-- Input -->
+                        <div class="p-4 border-top">
+                            <div class="position-relative">
+                                <input type="text" id="modal-chat-input" class="form-control border-0 bg-light rounded-pill px-4 py-3" placeholder="Posez votre question..." style="box-shadow: none;">
+                                <button id="modal-send-btn" class="btn btn-primary rounded-circle position-absolute end-0 top-50 translate-middle-y me-2 shadow-sm" style="width: 40px; height: 40px;">
+                                    <i class="bi bi-send-fill"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .msg-bot, .msg-user { max-width: 80%; display: flex; flex-direction: column; }
+    .msg-bot { align-self: flex-start; }
+    .msg-user { align-self: flex-end; }
+    .msg-content { padding: 12px 18px; border-radius: 18px; font-size: 14px; }
+    .msg-bot .msg-content { background: #f3f4f6; color: #1f2937; border-bottom-left-radius: 4px; }
+    .msg-user .msg-content { background: #7c3aed; color: #ffffff; border-bottom-right-radius: 4px; }
+</style>
+
+<script>
+function addModalMessage(text, isUser = false) {
+    const chatContainer = document.getElementById('modal-chat-messages');
+    if(!chatContainer) return;
+    const div = document.createElement('div');
+    div.className = isUser ? 'msg-user' : 'msg-bot';
+    
+    let formattedText = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
+
+    div.innerHTML = `<div class="msg-content shadow-sm">${formattedText}</div>`;
+    chatContainer.appendChild(div);
+    chatContainer.scrollTop = chatContainer.scrollHeight;
+}
+
+function suggestModal(text) {
+    document.getElementById('modal-chat-input').value = text;
+    sendModalMessage();
+}
+
+function sendModalMessage() {
+    const input = document.getElementById('modal-chat-input');
+    const text = input.value.trim();
+    if (!text) return;
+
+    addModalMessage(text, true);
+    input.value = '';
+    
+    document.getElementById('modal-ai-loader').style.display = 'block';
+
+    fetch('{{ path("app_investment_ai_chat") }}', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: text, language: 'fr' })
+    })
+    .then(res => res.json())
+    .then(data => {
+        document.getElementById('modal-ai-loader').style.display = 'none';
+        if (data.text) addModalMessage(data.text);
+    })
+    .catch(() => {
+        document.getElementById('modal-ai-loader').style.display = 'none';
+    });
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const sendBtn = document.getElementById('modal-send-btn');
+    if(sendBtn) {
+        sendBtn.addEventListener('click', sendModalMessage);
+    }
+    const inputField = document.getElementById('modal-chat-input');
+    if(inputField) {
+        inputField.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendModalMessage(); });
+    }
+});
+</script>

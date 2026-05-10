@@ -47,6 +47,12 @@ class MarketController extends AbstractController
         // 🧠 SMART RECOMMENDATIONS
         $recommendations = ($user instanceof User) ? $smartLearningService->getRecommendations($user) : [];
 
+        // 🔔 CHECK PRICE ALERTS
+        if ($user instanceof User) {
+            $priceAlertService = new \App\Service\PriceAlertService($em); // Manual instantiation if not injected
+            $priceAlertService->checkPriceAlerts($user);
+        }
+
         return $this->render('market/index.html.twig', [
             'actions'       => $repo->findAllWithBourse(),
             'type'          => null,

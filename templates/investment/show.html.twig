@@ -170,22 +170,29 @@
 
 {% block body %}
 
-<section class="py-4 bg-white border-bottom shadow-sm mb-4">
-    <div class="container">
-        <div class="d-flex justify-content-between align-items-center">
-            <div>
-                <h1 class="fw-bold text-dark mb-1">{{ investment.name }}</h1>
-                <p class="text-muted small mb-0"><i class="bi bi-geo-alt me-1"></i>{{ investment.location }}</p>
-            </div>
-            <div class="d-flex align-items-center">
-                <nav aria-label="breadcrumb" class="me-4 d-none d-md-block">
+<!-- 📁 Premium Project Hero -->
+<section class="py-5 mb-5 position-relative overflow-hidden" style="background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%); border-radius: 0 0 50px 50px; margin-top: -24px; margin-left: -12px; margin-right: -12px;">
+    <div class="container position-relative z-1">
+        <div class="row align-items-center">
+            <div class="col-lg-8 text-white">
+                <nav aria-label="breadcrumb" class="mb-3">
                     <ol class="breadcrumb mb-0">
-                        <li class="breadcrumb-item"><a href="{{ path('app_home') }}">Accueil</a></li>
-                        <li class="breadcrumb-item"><a href="{{ path('app_investment_index') }}">Opportunités</a></li>
-                        <li class="breadcrumb-item active">Suivi</li>
+                        <li class="breadcrumb-item"><a href="{{ path('app_home') }}" class="text-white-50 text-decoration-none">Finora</a></li>
+                        <li class="breadcrumb-item"><a href="{{ path('app_investment_index') }}" class="text-white-50 text-decoration-none">Opportunités</a></li>
+                        <li class="breadcrumb-item active text-white" aria-current="page">Détails</li>
                     </ol>
                 </nav>
-                <img src="{{ asset('assets/images/avatar/01.jpg') }}" class="rounded-circle shadow-sm" width="40" height="40" alt="">
+                <div class="d-flex align-items-center mb-3">
+                    <span class="badge bg-primary bg-opacity-20 text-primary-light px-3 py-2 rounded-pill me-3 border border-white border-opacity-10" style="color: #a78bfa !important;">
+                        <i class="bi bi-tag-fill me-2"></i>{{ investment_category_label(investment.category) }}
+                    </span>
+                    <span class="text-white-50 small"><i class="bi bi-geo-alt me-1"></i>{{ investment.location }}</span>
+                </div>
+                <h1 class="display-4 fw-black text-white mb-2" style="letter-spacing: -2px;">{{ investment.name }}</h1>
+            </div>
+            <div class="col-lg-4 d-none d-lg-block text-end">
+                <img src="{{ asset('assets/images/avatar/01.jpg') }}" class="rounded-circle border border-4 border-white border-opacity-10 shadow-lg" width="80" height="80" alt="Analyst">
+                <div class="mt-2 text-white-50 small fw-bold">Analyste Certifié Finora</div>
             </div>
         </div>
     </div>

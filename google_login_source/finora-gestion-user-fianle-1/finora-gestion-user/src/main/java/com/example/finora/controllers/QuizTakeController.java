@@ -451,8 +451,16 @@ public class QuizTakeController {
             successBox.getChildren().add(successText);
             root.getChildren().add(successBox);
 
-            // ✅ Save only if clean (USE REAL USERNAME)
+            // ✅ Save only if clean (USE REAL USER ID AND USERNAME)
+            int userId = 0;
+            try {
+                if (Session.getCurrentUser() != null) {
+                    userId = Session.getCurrentUser().getId();
+                }
+            } catch (Exception ignored) {}
+
             resultService.save(
+                    userId,
                     currentUserName,
                     lesson.getId(),
                     lesson.getTitre(),

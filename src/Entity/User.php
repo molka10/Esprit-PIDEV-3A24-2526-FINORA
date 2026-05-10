@@ -21,9 +21,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function __construct()
     {
         $this->wishlist = new ArrayCollection();
+        $this->userSessions = new ArrayCollection();
         $this->purchasedFormations = new ArrayCollection();
         $this->candidatures = new ArrayCollection();
         $this->appelOffres = new ArrayCollection();
+        $this->sentMessages = new ArrayCollection();
+        $this->receivedMessages = new ArrayCollection();
         $this->ratings = new ArrayCollection();
         $this->centreRatings = new ArrayCollection();
         $this->walletTransactions = new ArrayCollection();
@@ -99,11 +102,27 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: 'boolean')]
     private bool $isVerified = false;
 
-    // ================= SESSION TRACKING =================
-    #[ORM\Column(length: 255, nullable: true)]
-    private ?string $currentSessionId = null;
-
     // ================= SECURITY =================
+    #[ORM\Column(type: 'boolean', options: ["default" => 0])]
+    private bool $twoFaEnabled = false;
+
+    #[ORM\Column(length: 10, nullable: true)]
+    private ?string $otpCode = null;
+
+    #[ORM\Column(type: 'datetime', nullable: true)]
+    private ?\DateTimeInterface $otpExpiresAt = null;
+
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: UserSession::class, cascade: ['persist', 'remove'])]
+    private $userSessions;
+
+    #[ORM\OneToMany(mappedBy: 'sender', targetEntity: Message::class, orphanRemoval: true)]
+    private Collection $sentMessages;
+
+    #[ORM\OneToMany(mappedBy: 'receiver', targetEntity: Message::class, orphanRemoval: true)]
+    private Collection $receivedMessages;
+
+    #[ORM\Column(type: 'boolean', options: ['default' => false])]
+    private bool $emailDigestEnabled = false;
 
     public function getUserIdentifier(): string
     {
@@ -234,7 +253,84 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->currentSessionId = $currentSessionId;
         return $this;
     }
+    public function isTwoFaEnabled(): bool
+    {
+        return $this->twoFaEnabled;
+    }
 
+    public function setTwoFaEnabled(bool $twoFaEnabled): static
+    {
+        $this->twoFaEnabled = $twoFaEnabled;
+        return $this;
+    }
+
+    public function getOtpCode(): ?string
+    {
+        return $this->otpCode;
+    }
+
+    public function setOtpCode(?string $otpCode): static
+    {
+        $this->otpCode = $otpCode;
+        return $this;
+    }
+
+    public function getOtpExpiresAt(): ?\DateTimeInterface
+    {
+        return $this->otpExpiresAt;
+    }
+
+    public function setOtpExpiresAt(?\DateTimeInterface $otpExpiresAt): self
+    {
+        $this->otpExpiresAt = $otpExpiresAt;
+        return $this;
+    }
+
+    public function isEmailDigestEnabled(): bool
+    {
+        return $this->emailDigestEnabled;
+    }
+
+    public function setEmailDigestEnabled(bool $emailDigestEnabled): self
+    {
+        $this->emailDigestEnabled = $emailDigestEnabled;
+        return $this;
+    }
+
+    public function isOtpValid(): bool
+    {
+        return $this->otpExpiresAt && $this->otpExpiresAt > new \DateTime();
+    }
+
+    /**
+     * @return Collection<int, UserSession>
+     */
+    public function getUserSessions(): Collection
+    {
+        return $this->userSessions;
+    }
+
+    public function addUserSession(UserSession $userSession): static
+    {
+        if (!$this->userSessions->contains($userSession)) {
+            $this->userSessions->add($userSession);
+            $userSession->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeUserSession(UserSession $userSession): static
+    {
+        if ($this->userSessions->removeElement($userSession)) {
+            // set the owning side to null (unless already changed)
+            if ($userSession->getUser() === $this) {
+                $userSession->setUser(null);
+            }
+        }
+
+        return $this;
+    }
     #[ORM\ManyToMany(targetEntity: Formation::class, inversedBy: 'wishlistedBy')]
     #[ORM\JoinTable(name: 'user_formation_wishlist')]
     private Collection $wishlist;

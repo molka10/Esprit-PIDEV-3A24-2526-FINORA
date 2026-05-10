@@ -97,7 +97,9 @@ final class CandidatureController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            // Handle CV Upload & Text Extraction
+            $action = $request->request->get('action', 'submit');
+            
+            // Handle CV Upload for both Draft and Submit
             $cvFile = $form->get('cvFile')->getData();
             $cvText = "";
             if ($cvFile) {
@@ -109,15 +111,22 @@ final class CandidatureController extends AbstractController
                     $pdf = $pdfParser->parseFile($cvUploader->getTargetDirectory() . '/' . $cvFileName);
                     $cvText = $pdf->getText();
                 } catch (\Exception $e) {
-                    // Silently fail or log if PDF parsing fails
+                    // Fail silently or log
                 }
             }
 
-            // AI Analysis
+            if ($action === 'draft') {
+                $candidature->setStatut('draft');
+                $entityManager->persist($candidature);
+                $entityManager->flush();
+                $this->addFlash('info', 'Brouillon enregistré avec succès (Document inclus).');
+                return $this->redirectToRoute('app_candidature_index');
+            }
+
+            // AI Analysis (Only for final submission)
             $tender = $candidature->getAppelOffre();
             $criteria = $tender->getRequiredCriteria() ?? $tender->getDescription();
             
-            // Combine Message + CV Text for a full profile analysis
             $candidateProfile = "MESSAGE DE MOTIVATION:\n" . $candidature->getMessage() . 
                                "\n\nCONTENU DU CV:\n" . $cvText;
 
@@ -128,27 +137,26 @@ final class CandidatureController extends AbstractController
             );
 
             $candidature->setAiScore($aiResult['score']);
-            $candidature->setAiAnalysis($aiResult['analysis']);
+            
+            // Store both analysis and axes in the aiAnalysis field as JSON
+            $analysisData = [
+                'text' => $aiResult['analysis'],
+                'axes' => $aiResult['axes']
+            ];
+            $candidature->setAiAnalysis(json_encode($analysisData));
+            
+            $candidature->setStatut('submitted');
 
             $entityManager->persist($candidature);
             $entityManager->flush();
 
-            // Notification SMS à l'admin
+            // Notification SMS
             $admin = $userRepository->findOneAdmin();
-            if ($admin) {
-                if ($admin->getPhone()) {
-                    $success = $smsService->sendSms($admin->getPhone(), "Nouvelle candidature reçue (" . $aiResult['score'] . "%) pour: " . $tender->getTitre());
-                    if (!$success) {
-                        $this->addFlash('warning', 'Échec SMS : ' . $smsService->getLastError());
-                    }
-                } else {
-                    $this->addFlash('warning', 'L\'administrateur n\'a pas de numéro de téléphone configuré.');
-                }
-            } else {
-                $this->addFlash('warning', 'Aucun administrateur trouvé pour recevoir la notification SMS.');
+            if ($admin && $admin->getPhone()) {
+                $smsService->sendSms($admin->getPhone(), "Nouvelle candidature reçue (" . $aiResult['score'] . "%) pour: " . $tender->getTitre());
             }
 
-            $this->addFlash('success', 'Candidature soumise avec succès ! L\'IA a évalué votre profil à ' . $aiResult['score'] . '%.');
+            $this->addFlash('success', 'Candidature soumise avec succès ! Score IA : ' . $aiResult['score'] . '%.');
             return $this->redirectToRoute('app_candidature_index', ['role' => $request->query->get('role')], Response::HTTP_SEE_OTHER);
         }
 
@@ -161,10 +169,24 @@ final class CandidatureController extends AbstractController
     #[Route('/{id}', name: 'app_candidature_show', methods: ['GET'])]
     public function show(Candidature $candidature): Response
     {
+        $analysisData = $candidature->getAiAnalysis();
+        $axes = [];
+        $text = $analysisData;
+
+        // Try to decode if it's JSON
+        if ($analysisData && str_starts_with($analysisData, '{')) {
+            $decoded = json_decode($analysisData, true);
+            if ($decoded) {
+                $text = $decoded['text'] ?? '';
+                $axes = $decoded['axes'] ?? [];
+            }
+        }
+
         return $this->render('candidature/show.html.twig', [
             'candidature' => $candidature,
             'matchingScore' => $candidature->getAiScore(),
-            'aiAnalysis' => $candidature->getAiAnalysis(),
+            'aiAnalysis' => $text,
+            'aiAxes' => $axes
         ]);
     }
 
@@ -180,8 +202,17 @@ final class CandidatureController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            $action = $request->request->get('action', 'submit');
+            
+            if ($action === 'draft') {
+                $candidature->setStatut('draft');
+                $this->addFlash('info', 'Modifications enregistrées comme brouillon.');
+            } else {
+                $candidature->setStatut('submitted');
+                $this->addFlash('success', 'Candidature soumise avec succès !');
+            }
+
             $entityManager->flush();
-            $this->addFlash('success', 'Candidature modifiée avec succès !');
             return $this->redirectToRoute('app_candidature_index', ['role' => $request->query->get('role')], Response::HTTP_SEE_OTHER);
         }
 
@@ -193,16 +224,26 @@ final class CandidatureController extends AbstractController
 
     #[Route('/{id}/accepter', name: 'app_candidature_accepter', methods: ['POST'])]
     #[IsGranted('ROLE_ADMIN')]
-    public function accepter(Request $request, Candidature $candidature, EntityManagerInterface $entityManager, SmsService $smsService): Response
+    public function accepter(Request $request, Candidature $candidature, EntityManagerInterface $entityManager, SmsService $smsService, \App\Service\NotificationService $notificationService): Response
     {
         if ($this->isCsrfTokenValid('accepter'.$candidature->getId(), $request->getPayload()->getString('_token'))) {
             $candidature->setStatut('accepted');
             $entityManager->flush();
 
-            // Notification SMS à l'entreprise
+            // Notification SMS à l'étudiant
             $user = $candidature->getUser();
             if ($user && $user->getPhone()) {
                 $smsService->sendSms($user->getPhone(), "Félicitations ! Votre candidature pour '" . $candidature->getAppelOffre()->getTitre() . "' a été ACCEPTEE.");
+            }
+
+            // Notification Interne
+            if ($user) {
+                $notificationService->send(
+                    $user,
+                    'APPEL_OFFRE',
+                    '✅ Candidature Acceptée',
+                    "Félicitations ! Votre candidature pour l'appel d'offre '" . $candidature->getAppelOffre()->getTitre() . "' a été acceptée par l'administrateur."
+                );
             }
 
             $this->addFlash('success', 'Candidature acceptée avec succès !');
@@ -213,22 +254,54 @@ final class CandidatureController extends AbstractController
 
     #[Route('/{id}/rejeter', name: 'app_candidature_rejeter', methods: ['POST'])]
     #[IsGranted('ROLE_ADMIN')]
-    public function rejeter(Request $request, Candidature $candidature, EntityManagerInterface $entityManager, SmsService $smsService): Response
+    public function rejeter(Request $request, Candidature $candidature, EntityManagerInterface $entityManager, SmsService $smsService, \App\Service\NotificationService $notificationService): Response
     {
         if ($this->isCsrfTokenValid('rejeter'.$candidature->getId(), $request->getPayload()->getString('_token'))) {
             $candidature->setStatut('rejected');
             $entityManager->flush();
 
-            // Notification SMS à l'entreprise
+            // Notification SMS à l'étudiant
             $user = $candidature->getUser();
             if ($user && $user->getPhone()) {
                 $smsService->sendSms($user->getPhone(), "Désolé, votre candidature pour '" . $candidature->getAppelOffre()->getTitre() . "' a été refusée.");
+            }
+
+            // Notification Interne
+            if ($user) {
+                $notificationService->send(
+                    $user,
+                    'APPEL_OFFRE',
+                    '❌ Candidature Refusée',
+                    "Nous sommes désolés, mais votre candidature pour l'appel d'offre '" . $candidature->getAppelOffre()->getTitre() . "' n'a pas été retenue."
+                );
             }
 
             $this->addFlash('success', 'Candidature rejetée avec succès !');
         }
 
         return $this->redirectToRoute('app_candidature_show', ['id' => $candidature->getId(), 'role' => $request->query->get('role')]);
+    }
+
+    #[Route('/{id}/withdraw', name: 'app_candidature_withdraw', methods: ['POST'])]
+    public function withdraw(Request $request, Candidature $candidature, EntityManagerInterface $entityManager): Response
+    {
+        if ($candidature->getUser() !== $this->getUser()) {
+             throw new AccessDeniedException('Action non autorisée.');
+        }
+        
+        $deadline = $candidature->getAppelOffre()->getDateLimite();
+        if ($deadline && $deadline < new \DateTime()) {
+            $this->addFlash('error', 'Impossible de retirer votre candidature après la date limite.');
+            return $this->redirectToRoute('app_candidature_index');
+        }
+
+        if ($this->isCsrfTokenValid('withdraw'.$candidature->getId(), $request->request->get('_token'))) {
+            $candidature->setStatut('withdrawn');
+            $entityManager->flush();
+            $this->addFlash('success', 'Candidature retirée avec succès.');
+        }
+
+        return $this->redirectToRoute('app_candidature_index');
     }
 
     #[Route('/{id}', name: 'app_candidature_delete', methods: ['POST'])]

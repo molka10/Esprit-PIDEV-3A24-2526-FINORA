@@ -42,7 +42,7 @@ final class QuizController extends AbstractController
         }
 
         // Check for fraud strikes (3 strikes = blocked) using User ID if possible
-        $criteria = ['lessonId' => $lesson->getId(), 'fraudSuspected' => 1];
+        $criteria = ['lesson' => $lesson, 'fraudSuspected' => 1];
         if ($user) {
             $criteria['user'] = $user;
         } else {
@@ -195,6 +195,18 @@ final class QuizController extends AbstractController
         return $dompdfWrapper->getStreamResponse($html, sprintf('certificat_%s.pdf', $quizResult->getStudentName()));
     }
 
+    #[Route('/certificate/{id}/share', name: 'app_quiz_certificate_share', methods: ['GET'])]
+    public function certificateShare(QuizResult $quizResult): Response
+    {
+        if (!$quizResult->isPassed()) {
+            return $this->redirectToRoute('app_home');
+        }
+
+        return $this->render('quiz/certificate_share.html.twig', [
+            'quizResult' => $quizResult,
+        ]);
+    }
+
     #[Route('/my-certificates', name: 'app_my_certificates', methods: ['GET'])]
     public function myCertificates(
         EntityManagerInterface $entityManager
@@ -273,10 +285,10 @@ final class QuizController extends AbstractController
         }
 
         $passedLessonsCount = $em->getRepository(QuizResult::class)->createQueryBuilder('q')
-            ->select('COUNT(DISTINCT q.lessonId)')
+            ->select('COUNT(DISTINCT IDENTITY(q.lesson))')
             ->where('q.user = :user')
             ->andWhere('q.passed = 1')
-            ->andWhere('q.lessonId IN (:ids)')
+            ->andWhere('q.lesson IN (:ids)')
             ->setParameter('user', $user)
             ->setParameter('ids', $lessons->map(fn($l) => $l->getId())->toArray())
             ->getQuery()

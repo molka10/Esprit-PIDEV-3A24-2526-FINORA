@@ -18,20 +18,21 @@ public class QuizResultService {
         }
     }
 
-    public void save(String studentName, int lessonId, String lessonTitle,
+    public void save(int userId, String studentName, int lessonId, String lessonTitle,
             String formationTitle, int score) {
         String sql = """
                 INSERT INTO quiz_result
-                  (student_name, lesson_id, lesson_title, formation_title, score, passed)
-                VALUES (?, ?, ?, ?, ?, ?)
+                  (user_id, student_name, lesson_id, lesson_title, formation_title, score, passed, taken_at, fraud_suspected)
+                VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), 0)
                 """;
         try (PreparedStatement ps = cnx.prepareStatement(sql)) {
-            ps.setString(1, studentName);
-            ps.setInt(2, lessonId);
-            ps.setString(3, lessonTitle);
-            ps.setString(4, formationTitle);
-            ps.setInt(5, score);
-            ps.setBoolean(6, score >= 80);
+            ps.setInt(1, userId);
+            ps.setString(2, studentName);
+            ps.setInt(3, lessonId);
+            ps.setString(4, lessonTitle);
+            ps.setString(5, formationTitle);
+            ps.setInt(6, score);
+            ps.setInt(7, score >= 80 ? 1 : 0);
             ps.executeUpdate();
         } catch (Exception e) {
             System.err.println("QuizResultService.save: " + e.getMessage());

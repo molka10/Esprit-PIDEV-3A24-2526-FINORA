@@ -403,7 +403,10 @@
                                             {% endif %}
 										</div>
 										<div>
-											<a class="h6 mt-2 mt-sm-0" href="#">{{ app.user ? app.user.username : 'Guest' }}</a>
+											<a class="h6 mt-2 mt-sm-0" href="#">
+                                                {{ app.user ? app.user.username : 'Guest' }}
+                                                <i class="bi bi-patch-check-fill text-primary ms-1" style="font-size: 14px;" data-bs-toggle="tooltip" title="Administrateur Certifié"></i>
+                                            </a>
 											<p class="small m-0">{{ app.user ? app.user.email : '' }}</p>
 										</div>
 									</div>

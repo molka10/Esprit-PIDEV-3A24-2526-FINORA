@@ -35,12 +35,12 @@ class AiService
     /**
      * Feature 1: Advanced Matching Analysis
      * Uses AI to analyze the candidate's profile against specific criteria.
-     * Returns an array with 'score' and 'analysis'.
+     * Returns an array with 'score', 'analysis' and 'axes' for Radar Chart.
      */
     public function analyzeCandidature(string $tenderTitle, string $tenderCriteria, string $candidateProfile): array
     {
         if (!$this->isKeyValid()) {
-            return ['score' => 0, 'analysis' => 'Clé API non configurée.'];
+            return ['score' => 0, 'analysis' => 'Clé API non configurée.', 'axes' => []];
         }
 
         try {
@@ -58,7 +58,14 @@ class AiService
                         Réponds UNIQUEMENT au format JSON suivant :
                         {
                             "score": <nombre entre 0 et 100>,
-                            "analysis": "<analyse détaillée en 2-3 phrases en français soulignant les points forts et faibles>"
+                            "analysis": "<analyse détaillée en 2-3 phrases en français>",
+                            "axes": {
+                                "Experience": <0-100>,
+                                "Skills": <0-100>,
+                                "BudgetFit": <0-100>,
+                                "Motivation": <0-100>,
+                                "Reliability": <0-100>
+                            }
                         }'],
                         ['role' => 'user', 'content' => "Appel d'offre: $tenderTitle\nCritères requis: $tenderCriteria\nProfil du candidat: $candidateProfile"]
                     ],
@@ -73,9 +80,46 @@ class AiService
             return [
                 'score' => (int)($result['score'] ?? 0),
                 'analysis' => $result['analysis'] ?? 'Analyse indisponible.',
+                'axes' => $result['axes'] ?? [
+                    "Experience" => 0, "Skills" => 0, "BudgetFit" => 0, "Motivation" => 0, "Reliability" => 0
+                ]
             ];
         } catch (\Exception $e) {
-            return ['score' => 0, 'analysis' => 'Erreur lors de l\'analyse AI : ' . $e->getMessage()];
+            return ['score' => 0, 'analysis' => 'Erreur lors de l\'analyse AI : ' . $e->getMessage(), 'axes' => []];
+        }
+    }
+
+    /**
+     * Feature 5: AI Cover Letter Enhancer
+     * Refines the candidate's motivation message.
+     */
+    public function improveCandidatureMessage(string $currentMessage, string $tenderDetails): string
+    {
+        if (!$this->isKeyValid()) {
+            return $currentMessage;
+        }
+
+        try {
+            $response = $this->httpClient->request('POST', $this->getUrl(), [
+                'verify_peer' => false,
+                'headers' => [
+                    'Authorization' => 'Bearer ' . $this->apiKey,
+                    'Content-Type' => 'application/json',
+                ],
+                'json' => [
+                    'model' => $this->getModel(),
+                    'messages' => [
+                        ['role' => 'system', 'content' => 'Tu es un coach en carrière. Ton but est d\'améliorer la lettre de motivation (ou le message) d\'un candidat pour qu\'il soit plus convaincant, professionnel et aligné avec l\'offre. Garde le même sens mais améliore le style et le vocabulaire. Réponds UNIQUEMENT avec le nouveau message amélioré.'],
+                        ['role' => 'user', 'content' => "Message actuel: $currentMessage\nDétails de l'offre: $tenderDetails"]
+                    ],
+                    'temperature' => 0.7,
+                ],
+            ]);
+
+            $data = $response->toArray();
+            return trim($data['choices'][0]['message']['content'], '"\' ');
+        } catch (\Exception $e) {
+            return $currentMessage;
         }
     }
 

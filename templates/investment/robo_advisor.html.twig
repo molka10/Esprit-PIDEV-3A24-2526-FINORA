@@ -1,0 +1,198 @@
+{% block body %}
+<div class="container-fluid py-4" style="background: #f4f7fa; min-height: 90vh;">
+    <div class="row justify-content-center">
+        <div class="col-xl-9">
+            <!-- Header with Back Button -->
+            <div class="d-flex align-items-center justify-content-between mb-4">
+                <div class="d-flex align-items-center">
+                    <a href="{{ path('app_investment_home') }}" class="btn btn-white shadow-sm rounded-circle me-3" style="width: 45px; height: 45px; display: flex; align-items: center; justify-content: center; background: white;">
+                        <i class="bi bi-arrow-left text-dark"></i>
+                    </a>
+                    <div>
+                        <h4 class="fw-black mb-0">Assistant <span class="text-primary">Finora AI</span></h4>
+                        <small class="text-muted">Conseiller en investissement certifié</small>
+                    </div>
+                </div>
+                <div class="d-none d-md-flex gap-2">
+                    <div class="badge bg-white text-dark shadow-sm px-3 py-2 border rounded-pill">
+                        <span class="status-indicator online"></span> Connecté
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Chat Interface -->
+            <div class="card border-0 shadow-sm overflow-hidden" style="border-radius: 20px; height: 750px;">
+                <div class="row g-0 h-100">
+                    <!-- Left Panel: Context & Tools -->
+                    <div class="col-lg-3 d-none d-lg-flex flex-column bg-dark p-4 text-white">
+                        <div class="mb-5">
+                            <h6 class="text-uppercase small fw-bold opacity-50 mb-3" style="letter-spacing: 1px;">Mode de Service</h6>
+                            <div class="p-3 rounded-4 bg-white bg-opacity-10 border border-white border-opacity-10 mb-2">
+                                <i class="bi bi-robot me-2 text-primary"></i> Robo-Advisor
+                            </div>
+                            <div class="p-3 rounded-4 bg-transparent border border-white border-opacity-5 opacity-50">
+                                <i class="bi bi-person me-2"></i> Expert Humain (Bientôt)
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <h6 class="text-uppercase small fw-bold opacity-50 mb-3" style="letter-spacing: 1px;">Analyses Rapides</h6>
+                            <ul class="list-unstyled">
+                                <li class="mb-2"><a href="#" class="text-white text-decoration-none small hover-link" onclick="suggest('Analyse mon profil de risque')"><i class="bi bi-shield-check me-2 text-success"></i>Profil de Risque</a></li>
+                                <li class="mb-2"><a href="#" class="text-white text-decoration-none small hover-link" onclick="suggest('Meilleures opportunités du moment')"><i class="bi bi-stars me-2 text-warning"></i>Opportunités</a></li>
+                                <li class="mb-2"><a href="#" class="text-white text-decoration-none small hover-link" onclick="suggest('Calculateur de rendement')"><i class="bi bi-calculator me-2 text-info"></i>Calculateur ROI</a></li>
+                            </ul>
+                        </div>
+
+                        <div class="mt-auto">
+                            <div class="p-3 rounded-4 bg-primary bg-opacity-10 border border-primary border-opacity-20">
+                                <p class="small mb-0"><i class="bi bi-info-circle me-2"></i>Toutes les données sont anonymisées et protégées par chiffrement de bout en bout.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Panel: Conversation -->
+                    <div class="col-lg-9 d-flex flex-column bg-white">
+                        <!-- Chat Messages -->
+                        <div id="chat-messages" class="flex-grow-1 p-4 overflow-auto d-flex flex-column gap-4" style="background: #ffffff; scrollbar-width: thin;">
+                            <!-- System Welcome -->
+                            <div class="d-flex justify-content-center my-3">
+                                <span class="badge bg-light text-muted rounded-pill px-3 py-2">Conversation sécurisée par Finora Intelligence</span>
+                            </div>
+
+                            <!-- Bot Message -->
+                            <div class="msg-bot">
+                                <div class="msg-content">
+                                    <p class="mb-0">Bonjour ! Je suis votre assistant de gestion privée. Comment puis-je vous accompagner dans vos investissements aujourd'hui ?</p>
+                                </div>
+                                <span class="msg-time">Maintenant</span>
+                            </div>
+                        </div>
+
+                        <!-- Typing Indicator -->
+                        <div id="ai-loader" class="px-4 py-2 text-muted small" style="display: none;">
+                            <div class="typing-indicator">
+                                <span></span><span></span><span></span>
+                            </div>
+                            Finora analyse votre demande...
+                        </div>
+
+                        <!-- Input Container -->
+                        <div class="p-4 border-top">
+                            <div class="chat-input-wrapper">
+                                <input type="text" id="chat-input" class="form-control border-0 bg-light rounded-pill px-4 py-3" placeholder="Posez une question sur vos finances..." style="box-shadow: none;">
+                                <button id="send-btn" class="btn btn-primary rounded-circle shadow-sm">
+                                    <i class="bi bi-send-fill"></i>
+                                </button>
+                            </div>
+                            <div class="d-flex gap-2 mt-3 flex-wrap">
+                                <span class="small text-muted me-2 mt-1">Suggestions :</span>
+                                <button class="btn btn-sm btn-outline-secondary rounded-pill" onclick="suggest('Quels sont les avantages du Crowdfunding ?')">Crowdfunding</button>
+                                <button class="btn btn-sm btn-outline-secondary rounded-pill" onclick="suggest('Comment diversifier mon portefeuille ?')">Diversification</button>
+                                <button class="btn btn-sm btn-outline-secondary rounded-pill" onclick="suggest('Impact des ODD sur la rentabilité')">Investissement Vert</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .fw-black { font-weight: 900; }
+    .status-indicator { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 5px; }
+    .status-indicator.online { background: #10b981; box-shadow: 0 0 5px #10b981; }
+    
+    .hover-link:hover { opacity: 0.8; text-decoration: underline !important; }
+
+    /* Chat Bubbles */
+    .msg-bot, .msg-user { max-width: 80%; display: flex; flex-direction: column; }
+    .msg-bot { align-self: flex-start; }
+    .msg-user { align-self: flex-end; }
+
+    .msg-content { padding: 15px 20px; border-radius: 20px; font-size: 15px; line-height: 1.5; }
+    .msg-bot .msg-content { background: #f3f4f6; color: #1f2937; border-bottom-left-radius: 5px; }
+    .msg-user .msg-content { background: #7c3aed; color: #ffffff; border-bottom-right-radius: 5px; }
+
+    .msg-time { font-size: 11px; color: #9ca3af; margin-top: 5px; padding: 0 10px; }
+    .msg-user .msg-time { text-align: right; }
+
+    /* Input Styling */
+    .chat-input-wrapper { position: relative; }
+    #send-btn { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); width: 45px; height: 45px; display: flex; align-items: center; justify-content: center; }
+
+    /* Typing Animation */
+    .typing-indicator span { width: 6px; height: 6px; background: #9ca3af; border-radius: 50%; display: inline-block; margin-right: 3px; animation: bounce 1.3s infinite; }
+    .typing-indicator span:nth-child(2) { animation-delay: 0.15s; }
+    .typing-indicator span:nth-child(3) { animation-delay: 0.3s; }
+    @keyframes bounce { 0%, 60%, 100% { transform: translateY(0); } 30% { transform: translateY(-4px); } }
+
+    .msg-anim { animation: slideIn 0.3s ease-out; }
+    @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+</style>
+
+<script>
+const chatMessages = document.getElementById('chat-messages');
+const chatInput = document.getElementById('chat-input');
+const sendBtn = document.getElementById('send-btn');
+const aiLoader = document.getElementById('ai-loader');
+
+function addMessage(text, isUser = false) {
+    const div = document.createElement('div');
+    div.className = `${isUser ? 'msg-user' : 'msg-bot'} msg-anim`;
+    
+    // Simple markdown formatting
+    let formattedText = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                           .replace(/\n/g, '<br>');
+
+    div.innerHTML = `
+        <div class="msg-content shadow-sm">
+            ${formattedText}
+        </div>
+        <span class="msg-time">${new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+    `;
+    chatMessages.appendChild(div);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+function suggest(text) {
+    chatInput.value = text;
+    sendMessage();
+}
+
+function sendMessage() {
+    const text = chatInput.value.trim();
+    if (!text) return;
+
+    addMessage(text, true);
+    chatInput.value = '';
+    
+    // Show typing
+    aiLoader.style.display = 'block';
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+
+    fetch('{{ path("app_investment_ai_chat") }}', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: text, language: 'fr' })
+    })
+    .then(res => res.json())
+    .then(data => {
+        aiLoader.style.display = 'none';
+        if (data.reply) {
+            addMessage(data.reply);
+        } else {
+            addMessage("Désolé, je ne parviens pas à traiter votre demande. Veuillez réessayer.");
+        }
+    })
+    .catch(() => {
+        aiLoader.style.display = 'none';
+        addMessage("Une erreur réseau est survenue. Vérifiez votre connexion.");
+    });
+}
+
+sendBtn.addEventListener('click', sendMessage);
+chatInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendMessage(); });
+</script>
+{% endblock %}

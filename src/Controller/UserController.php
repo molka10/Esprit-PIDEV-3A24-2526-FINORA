@@ -100,7 +100,11 @@ final class UserController extends AbstractController
             $imageFile = $form->get('image')->getData();
 
             if ($imageFile) {
-                $newFilename = uniqid().'.'.$imageFile->guessExtension();
+                $extension = $imageFile->guessExtension();
+                if (!$extension && $imageFile->getMimeType() === 'image/svg+xml') {
+                    $extension = 'svg';
+                }
+                $newFilename = uniqid().'.'.($extension ?: 'png');
 
                 $imageFile->move(
                     $this->getParameter('images_directory'),
@@ -157,7 +161,11 @@ final class UserController extends AbstractController
             $imageFile = $form->get('image')->getData();
 
             if ($imageFile) {
-                $newFilename = uniqid().'.'.$imageFile->guessExtension();
+                $extension = $imageFile->guessExtension();
+                if (!$extension && $imageFile->getMimeType() === 'image/svg+xml') {
+                    $extension = 'svg';
+                }
+                $newFilename = uniqid().'.'.($extension ?: 'png');
 
                 $imageFile->move(
                     $this->getParameter('images_directory'),

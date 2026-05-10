@@ -18,6 +18,67 @@ class SmartLearningService
         private CacheInterface $cache
     ) {}
 
+    public function getOfferRecommendations(User $user): array
+    {
+        $userId = $user->getId();
+        return $this->cache->get('offer_recs_user_' . $userId, function (ItemInterface $item) use ($user) {
+            $item->expiresAfter(300);
+
+            // 1. Get categories of past applications
+            $candidatures = $user->getCandidatures();
+            $categoryIds = [];
+            foreach ($candidatures as $cand) {
+                if ($cand->getAppelOffre() && $cand->getAppelOffre()->getCategorie()) {
+                    $categoryIds[] = $cand->getAppelOffre()->getCategorie()->getId();
+                }
+            }
+
+            $categoryIds = array_unique($categoryIds);
+            
+            // 2. Find open offers in these categories that the user hasn't applied to yet
+            $qb = $this->entityManager->getRepository(\App\Entity\AppelOffre::class)->createQueryBuilder('a');
+            $qb->where('a.statut = :status')
+               ->setParameter('status', 'published');
+
+            if (!empty($categoryIds)) {
+                $qb->andWhere('a.categorie IN (:catIds)')
+                   ->setParameter('catIds', $categoryIds);
+            }
+
+            // Exclude already applied offers
+            $appliedOfferIds = [];
+            foreach ($candidatures as $cand) {
+                if ($cand->getAppelOffre()) {
+                    $appliedOfferIds[] = $cand->getAppelOffre()->getId();
+                }
+            }
+            if (!empty($appliedOfferIds)) {
+                $qb->andWhere('a.id NOT IN (:appliedIds)')
+                   ->setParameter('appliedIds', $appliedOfferIds);
+            }
+
+            $qb->setMaxResults(3);
+            return $qb->getQuery()->getResult();
+        });
+    }
+
+    public function getAverageAiScore(User $user): ?float
+    {
+        $candidatures = $user->getCandidatures();
+        if ($candidatures->isEmpty()) return null;
+
+        $total = 0;
+        $count = 0;
+        foreach ($candidatures as $cand) {
+            if ($cand->getAiScore() !== null) {
+                $total += $cand->getAiScore();
+                $count++;
+            }
+        }
+
+        return $count > 0 ? round($total / $count, 1) : null;
+    }
+
     /**
      * Analyzes user behavior and suggests relevant formations.
      * Returns an array of recommendations.

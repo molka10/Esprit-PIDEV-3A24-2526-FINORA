@@ -55,7 +55,16 @@ class InvestmentController extends AbstractController
     }
 
     /**
-     * 🤖 AI Chat Assistant
+     * 💬 Robo-Advisor Chat Interface
+     */
+    #[Route('/ai/robo-advisor', name: 'app_robo_advisor_chat', methods: ['GET'])]
+    public function roboAdvisorChat(): Response
+    {
+        return $this->render('investment/robo_advisor.html.twig');
+    }
+
+    /**
+     * 🤖 AI Chat Assistant (API)
      */
     #[Route('/ai/chat', name: 'app_investment_ai_chat', methods: ['POST'])]
     public function aiChat(Request $request, \App\Service\AiAssistantService $aiService): \Symfony\Component\HttpFoundation\JsonResponse

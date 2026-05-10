@@ -26,6 +26,9 @@ class BourseWishlist
     #[ORM\Column(type: 'datetime_immutable')]
     private \DateTimeImmutable $createdAt;
 
+    #[ORM\Column(type: 'decimal', precision: 10, scale: 2, nullable: true)]
+    private ?string $targetPrice = null;
+
     public function __construct()
     {
         $this->createdAt = new \DateTimeImmutable();
@@ -66,6 +69,17 @@ class BourseWishlist
     protected function setCreatedAt(\DateTimeImmutable $createdAt): self
     {
         $this->createdAt = $createdAt;
+        return $this;
+    }
+
+    public function getTargetPrice(): ?string
+    {
+        return $this->targetPrice;
+    }
+
+    public function setTargetPrice(?string $targetPrice): static
+    {
+        $this->targetPrice = $targetPrice;
         return $this;
     }
 }

@@ -162,7 +162,7 @@ final class LessonController extends AbstractController
         if ($user) {
             $fraudCount = $entityManager->getRepository(QuizResult::class)->count([
                 'studentName' => $user->getUsername(),
-                'lessonId' => $lesson->getId(),
+                'lesson' => $lesson,
                 'fraudSuspected' => 1
             ]);
         }

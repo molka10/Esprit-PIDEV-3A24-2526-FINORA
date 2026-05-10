@@ -91,7 +91,8 @@ final class AppelOffreController extends AbstractController
                 'categorie' => $categorieId,
                 'search' => $search,
             ],
-            'recommendations' => $recommendations
+            'recommendations' => $recommendations,
+            'offer_recommendations' => ($user instanceof User) ? $smartLearningService->getOfferRecommendations($user) : []
         ];
 
         if ($request->query->get('ajax')) {
@@ -113,6 +114,11 @@ final class AppelOffreController extends AbstractController
         \App\Repository\UserRepository $userRepository
     ): Response {
         $appelOffre = new AppelOffre();
+        $user = $this->getUser();
+        if ($user instanceof User) {
+            $appelOffre->setCreatedBy($user);
+        }
+        
         $form = $this->createForm(AppelOffreType::class, $appelOffre);
         $form->handleRequest($request);
 
@@ -158,6 +164,22 @@ final class AppelOffreController extends AbstractController
         return $this->render('appel_offre/new.html.twig', [
             'appel_offre' => $appelOffre,
             'form' => $form,
+        ]);
+    }
+
+    #[Route('/compare', name: 'app_appel_offre_compare', methods: ['GET'])]
+    public function compare(Request $request, AppelOffreRepository $appelOffreRepository): Response
+    {
+        $ids = $request->query->all('ids');
+        if (empty($ids)) {
+            $this->addFlash('warning', 'Veuillez sélectionner au moins deux offres à comparer.');
+            return $this->redirectToRoute('app_appel_offre_index');
+        }
+
+        $offres = $appelOffreRepository->findBy(['id' => $ids]);
+
+        return $this->render('appel_offre/compare.html.twig', [
+            'offres' => $offres,
         ]);
     }
 

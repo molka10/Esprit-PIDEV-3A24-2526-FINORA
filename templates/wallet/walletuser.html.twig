@@ -113,6 +113,13 @@
     .chart-header h3 { font-size: 17px; font-weight: 800; color: var(--text-main); margin: 0; }
 
     @media (max-width: 1200px) { .dashboard-main-row { grid-template-columns: 1fr; } }
+
+    /* ── Privacy Mode ── */
+    .privacy-blurred {
+        filter: blur(8px);
+        transition: filter 0.3s ease;
+        user-select: none;
+    }
 </style>
 {% endblock %}
 
@@ -123,7 +130,13 @@
     <div class="dash-hero" style="padding: 15px 25px; margin-bottom: 20px;">
         <div class="dash-hero-bg"></div>
         <div class="dash-hero-content" style="z-index: 2; position: relative;">
-            <h1><i class="bi bi-wallet2 me-3"></i>Tableau de Bord Wallet<span class="info-dot ms-2" data-bs-toggle="popover" title="Tableau de Bord Wallet" data-bs-content="Gérez votre capital, suivez vos dépenses et envoyez de l'argent instantanément avec Finora Pay."><i class="fas fa-question"></i></span></h1>
+            <div class="d-flex align-items-center">
+                <h1><i class="bi bi-wallet2 me-3"></i>Tableau de Bord Wallet</h1>
+                <button id="privacy-toggle" class="btn btn-link text-white ms-3 p-0" title="Mode Discret (Masquer les montants)">
+                    <i class="bi bi-eye-fill fs-4" id="privacy-icon"></i>
+                </button>
+                <span class="info-dot ms-2" data-bs-toggle="popover" title="Tableau de Bord Wallet" data-bs-content="Gérez votre capital, suivez vos dépenses et envoyez de l'argent instantanément avec Finora Pay."><i class="fas fa-question"></i></span>
+            </div>
             <p>Suivez vos flux financiers en temps réel avec une précision intelligente.</p>
         </div>
         
@@ -131,10 +144,6 @@
 
             <a href="{{ path('app_wallet_system') }}" id="guide-wallet-system" class="btn-outline" style="background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.2); color: white;">
                 <i class="bi bi-grid-fill"></i> Système
-            </a>
-
-            <a href="javascript:void(0)" id="guide-wallet-recharge" class="btn-outline" style="background: #ffffff; color: #1e293b; border: 1px solid #e2e8f0;">
-                <i class="bi bi-plus-circle-fill text-primary"></i> Recharger
             </a>
             
             <a href="#" id="guide-wallet-pay" class="btn-outline" style="background: linear-gradient(135deg, #ec4899, #8b5cf6); color: white; border: none; font-weight: bold;" data-bs-toggle="modal" data-bs-target="#finoraPayModal">
@@ -883,6 +892,43 @@
         });
     }
 
+    // 7. Privacy Mode Logic
+    const privacyToggle = document.getElementById('privacy-toggle');
+    const privacyIcon = document.getElementById('privacy-icon');
+    
+    function applyPrivacyMode() {
+        const allAmounts = document.querySelectorAll('h2, .calc-display, .text-success, .text-danger, .fw-bold');
+        const isPrivacyMode = localStorage.getItem('privacyMode') === 'true';
+
+        allAmounts.forEach(el => {
+            const text = el.innerText.trim();
+            if (text.includes('TND') || text.includes('DT') || text.includes('€') || text.includes('$') || /^-?\d+([.,]\d+)?$/.test(text)) {
+                if (isPrivacyMode) el.classList.add('privacy-blurred');
+                else el.classList.remove('privacy-blurred');
+            }
+        });
+        
+        if (privacyIcon) {
+            if (isPrivacyMode) {
+                privacyIcon.classList.remove('bi-eye-fill');
+                privacyIcon.classList.add('bi-eye-slash-fill');
+                privacyToggle.title = "Mode Public (Afficher les montants)";
+            } else {
+                privacyIcon.classList.remove('bi-eye-slash-fill');
+                privacyIcon.classList.add('bi-eye-fill');
+                privacyToggle.title = "Mode Discret (Masquer les montants)";
+            }
+        }
+    }
+
+    if (privacyToggle) {
+        privacyToggle.addEventListener('click', () => {
+            const currentMode = localStorage.getItem('privacyMode') === 'true';
+            localStorage.setItem('privacyMode', !currentMode);
+            applyPrivacyMode();
+        });
+        applyPrivacyMode();
+    }
 </script>
 {% endblock %}
 {% endblock %}

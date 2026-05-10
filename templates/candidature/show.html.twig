@@ -18,6 +18,7 @@
         font-size: 0.9rem;
         box-shadow: 0 4px 10px rgba(0,0,0,0.05);
     }
+    .fw-extrabold { font-weight: 800; }
 </style>
 {% endblock %}
 
@@ -99,7 +100,7 @@
             <div class="card card-premium mb-4" style="background: linear-gradient(135deg, #6d28d9, #4f46e5); color: white;">
                 <div class="card-body p-5">
                     <div class="row align-items-center">
-                        <div class="col-md-8">
+                        <div class="col-md-7">
                             <h4 class="fw-bold mb-2"><i class="bi bi-robot me-2 text-warning"></i>Analyse Professionnelle IA</h4>
                             <p class="opacity-75 mb-4">{{ aiAnalysis|default('L\'IA n\'a pas encore généré d\'analyse détaillée pour cette candidature.') }}</p>
                             
@@ -108,9 +109,15 @@
                             </div>
                             <span class="small opacity-75">Score de Matching : {{ matchingScore }}% | Basé sur les critères requis</span>
                         </div>
-                        <div class="col-md-4 text-center">
-                            <div class="h1 fw-bold mb-0" style="font-size: 3.5rem;">{{ matchingScore }}%</div>
-                            <span class="badge bg-white text-primary px-3 py-2 rounded-pill fw-bold">Score Global</span>
+                        <div class="col-md-5 text-center">
+                            {% if aiAxes is not empty %}
+                                <div style="height: 220px;">
+                                    <canvas id="aiRadarChart"></canvas>
+                                </div>
+                            {% else %}
+                                <div class="h1 fw-bold mb-0" style="font-size: 3.5rem;">{{ matchingScore }}%</div>
+                                <span class="badge bg-white text-primary px-3 py-2 rounded-pill fw-bold">Score Global</span>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
@@ -193,8 +200,57 @@
 
     </div>
 </div>
+{% endblock %}
 
-<style>
-    .fw-extrabold { font-weight: 800; }
-</style>
+{% block javascripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    {% if aiAxes is not empty %}
+    const ctx = document.getElementById('aiRadarChart');
+    if (ctx) {
+        new Chart(ctx, {
+            type: 'radar',
+            data: {
+                labels: ['Expérience', 'Compétences', 'Budget', 'Motivation', 'Fiabilité'],
+                datasets: [{
+                    label: 'Score IA (%)',
+                    data: [
+                        {{ aiAxes.Experience|default(0) }},
+                        {{ aiAxes.Skills|default(0) }},
+                        {{ aiAxes.BudgetFit|default(0) }},
+                        {{ aiAxes.Motivation|default(0) }},
+                        {{ aiAxes.Reliability|default(0) }}
+                    ],
+                    fill: true,
+                    backgroundColor: 'rgba(255, 193, 7, 0.2)',
+                    borderColor: 'rgba(255, 193, 7, 1)',
+                    pointBackgroundColor: 'rgba(255, 193, 7, 1)',
+                    pointBorderColor: '#fff',
+                    pointHoverBackgroundColor: '#fff',
+                    pointHoverBorderColor: 'rgba(255, 193, 7, 1)'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    r: {
+                        angleLines: { color: 'rgba(255,255,255,0.2)' },
+                        grid: { color: 'rgba(255,255,255,0.2)' },
+                        pointLabels: { color: '#fff', font: { size: 10, weight: 'bold' } },
+                        ticks: { display: false, stepSize: 20 },
+                        suggestedMin: 0,
+                        suggestedMax: 100
+                    }
+                },
+                plugins: {
+                    legend: { display: false }
+                }
+            }
+        });
+    }
+    {% endif %}
+});
+</script>
 {% endblock %}

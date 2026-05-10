@@ -85,7 +85,12 @@
 
                         {# MESSAGE #}
                         <div class="col-12">
-                            <label class="form-label"><i class="bi bi-chat-left-text me-2"></i>Lettre de Motivation / Proposition Technique</label>
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <label class="form-label mb-0"><i class="bi bi-chat-left-text me-2"></i>Lettre de Motivation / Proposition Technique</label>
+                                <button type="button" id="improveAiBtn" class="btn btn-sm btn-outline-primary rounded-pill px-3 py-1 fw-bold" style="font-size: 0.75rem;">
+                                    <i class="bi bi-magic me-1"></i> Améliorer avec l'IA
+                                </button>
+                            </div>
                             {{ form_widget(form.message, {'attr': {'class': 'form-control', 'rows': '6', 'placeholder': 'Décrivez votre plus-value pour ce projet...'}}) }}
                             {% if form_errors(form.message) %}
                                 <div class="invalid-feedback d-block">{{ form_errors(form.message) }}</div>
@@ -103,13 +108,18 @@
                         </div>
                     </div>
 
-                    <div class="mt-5 d-flex flex-column flex-md-row gap-3 justify-content-between align-items-center">
-                        <a href="{{ path('app_candidature_index', {'role': app.request.query.get('role')}) }}" class="btn btn-link text-muted fw-bold text-decoration-none">
-                            <i class="bi bi-arrow-left me-2"></i>Annuler et revenir
+                    <div class="mt-5 d-flex flex-column flex-md-row gap-3 justify-content-between align-items-center w-100">
+                        <a href="{{ path('app_candidature_index', {'role': app.request.query.get('role')}) }}" class="btn btn-link text-muted fw-bold text-decoration-none order-3 order-md-1">
+                            <i class="bi bi-arrow-left me-2"></i>Annuler
                         </a>
-                        <button type="submit" class="btn btn-primary rounded-pill px-5 py-3 fw-bold text-white shadow">
-                            <i class="bi bi-send-check me-2"></i>Soumettre ma candidature
-                        </button>
+                        <div class="d-flex gap-2 order-1 order-md-2 w-100 w-md-auto">
+                            <button type="submit" name="action" value="draft" class="btn btn-outline-primary rounded-pill px-4 py-3 fw-bold flex-grow-1">
+                                <i class="bi bi-pencil-square me-2"></i>Brouillon
+                            </button>
+                            <button type="submit" name="action" value="submit" class="btn btn-primary rounded-pill px-5 py-3 fw-bold text-white shadow flex-grow-1">
+                                <i class="bi bi-send-check me-2"></i>Soumettre
+                            </button>
+                        </div>
                     </div>
 
                     {{ form_end(form) }}
@@ -222,6 +232,58 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             } else {
                 setInvalid(this, 'Le CV est obligatoire');
+            }
+        });
+    }
+
+    // AI Improvement
+    const improveBtn = document.getElementById('improveAiBtn');
+    if (improveBtn) {
+        improveBtn.addEventListener('click', async function() {
+            const msg = msgField.value.trim();
+            if (!msg) {
+                Swal.fire('Oups!', 'Veuillez d\'abord écrire un message à améliorer.', 'warning');
+                return;
+            }
+
+            const tenderId = appelField.value;
+            
+            improveBtn.disabled = true;
+            improveBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Polissage en cours...';
+
+            try {
+                const formData = new FormData();
+                formData.append('message', msg);
+                formData.append('tenderId', tenderId);
+
+                const response = await fetch('{{ path("ai_improve_message") }}', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    msgField.value = data.improved;
+                    msgField.dispatchEvent(new Event('input')); // Trigger char counter
+                    
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Magie opérée !',
+                        text: 'Votre message a été optimisé pour cet appel d\'offre.',
+                        timer: 2000,
+                        showConfirmButton: false,
+                        toast: true,
+                        position: 'top-end'
+                    });
+                } else {
+                    Swal.fire('Erreur', data.message || 'Échec de l\'amélioration.', 'error');
+                }
+            } catch (e) {
+                console.error(e);
+                Swal.fire('Erreur', 'Impossible de contacter l\'IA pour le moment.', 'error');
+            } finally {
+                improveBtn.disabled = false;
+                improveBtn.innerHTML = '<i class="bi bi-magic me-1"></i> Améliorer avec l\'IA';
             }
         });
     }

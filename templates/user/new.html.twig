@@ -3,90 +3,88 @@
 {% block title %}Nouvel Utilisateur{% endblock %}
 
 {% block body %}
-
-<div class="py-3 mb-4" style="background: linear-gradient(135deg, #1a1a2e, #16213e); border-radius: 10px;">
-    <div class="container text-white text-center py-2">
-        <h2 class="font-weight-bold"><i class="fas fa-user-plus"></i> Nouvel Utilisateur</h2>
-    </div>
-</div>
-
-<div class="row justify-content-center">
-    <div class="col-md-7">
-        <div class="card shadow">
-            <div class="card-header" style="background:#1a1a2e; color:white;">
-                <h5 class="mb-0"><i class="fas fa-user"></i> Informations</h5>
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Header -->
+            <div class="mb-4">
+                <a href="{{ path('app_user_index', {'role': app.request.query.get('role')}) }}" class="btn btn-link text-muted p-0 mb-2 text-decoration-none small">
+                    <i class="fas fa-arrow-left me-1"></i> Retour à la liste
+                </a>
+                <h2 class="fw-bold mb-0" style="color: #1f1147;">Créer un Nouvel Utilisateur</h2>
+                <p class="text-muted">Remplissez les informations ci-dessous pour ajouter un membre.</p>
             </div>
-            <div class="card-body">
-                {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
 
-                <div class="mb-3">
-                    {{ form_label(form.username) }}
-                    {{ form_widget(form.username) }}
-                    {% if form_errors(form.username) %}
-                        <div class="text-danger small mt-1">
-                            <i class="fas fa-exclamation-circle"></i>
-                            {{ form_errors(form.username) }}
+            <!-- Form Card -->
+            <div class="card border-0 shadow-sm" style="border-radius: 25px;">
+                <div class="card-body p-4 p-md-5">
+                    {{ form_start(form, {'attr': {'class': 'needs-validation', 'novalidate': 'novalidate'}}) }}
+                        <div class="row g-4">
+                            <!-- Username -->
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold small text-muted text-uppercase">Nom d'utilisateur</label>
+                                {{ form_widget(form.username, {'attr': {'class': 'form-control bg-light border-0 py-2', 'placeholder': 'Ex: JeanDoe'}}) }}
+                                {{ form_errors(form.username) }}
+                            </div>
+
+                            <!-- Email -->
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold small text-muted text-uppercase">Adresse Email</label>
+                                {{ form_widget(form.email, {'attr': {'class': 'form-control bg-light border-0 py-2', 'placeholder': 'email@example.com'}}) }}
+                                {{ form_errors(form.email) }}
+                            </div>
+
+                            <!-- Phone -->
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold small text-muted text-uppercase">Téléphone</label>
+                                {{ form_widget(form.phone, {'attr': {'class': 'form-control bg-light border-0 py-2', 'placeholder': '+216 -- --- ---'}}) }}
+                                {{ form_errors(form.phone) }}
+                            </div>
+
+                            <!-- Address -->
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold small text-muted text-uppercase">Adresse</label>
+                                {{ form_widget(form.address, {'attr': {'class': 'form-control bg-light border-0 py-2', 'placeholder': 'Ville, Pays'}}) }}
+                                {{ form_errors(form.address) }}
+                            </div>
+
+                            <!-- Role -->
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold small text-muted text-uppercase">Rôle / Type de compte</label>
+                                {{ form_widget(form.role, {'attr': {'class': 'form-select bg-light border-0'}}) }}
+                                {{ form_errors(form.role) }}
+                            </div>
+
+                            <!-- Password -->
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold small text-muted text-uppercase">Mot de Passe</label>
+                                {{ form_widget(form.password, {'attr': {'class': 'form-control bg-light border-0 py-2', 'placeholder': 'Minimum 6 caractères'}}) }}
+                                {{ form_errors(form.password) }}
+                            </div>
+
+                            <!-- Image Upload -->
+                            <div class="col-12">
+                                <label class="form-label fw-bold small text-muted text-uppercase">Photo de Profil (Optionnel)</label>
+                                {{ form_widget(form.image, {'attr': {'class': 'form-control bg-light border-0'}}) }}
+                                {{ form_errors(form.image) }}
+                            </div>
+
+                            <!-- Actions -->
+                            <div class="col-12 mt-5">
+                                <div class="d-flex gap-3">
+                                    <button type="submit" class="btn btn-primary rounded-pill px-5 py-2 shadow-sm">
+                                        <i class="fas fa-user-plus me-2"></i>Créer l'utilisateur
+                                    </button>
+                                    <a href="{{ path('app_user_index', {'role': app.request.query.get('role')}) }}" class="btn btn-light rounded-pill px-4 py-2">
+                                        Annuler
+                                    </a>
+                                </div>
+                            </div>
                         </div>
-                    {% endif %}
+                    {{ form_end(form) }}
                 </div>
-
-                <div class="mb-3">
-                    {{ form_label(form.email) }}
-                    {{ form_widget(form.email) }}
-                    {% if form_errors(form.email) %}
-                        <div class="text-danger small mt-1">
-                            <i class="fas fa-exclamation-circle"></i>
-                            {{ form_errors(form.email) }}
-                        </div>
-                    {% endif %}
-                </div>
-
-                <div class="mb-3">
-                    {{ form_label(form.phone) }}
-                    {{ form_widget(form.phone) }}
-                    {% if form_errors(form.phone) %}
-                        <div class="text-danger small mt-1">
-                            <i class="fas fa-exclamation-circle"></i>
-                            {{ form_errors(form.phone) }}
-                        </div>
-                    {% endif %}
-                </div>
-
-                <div class="mb-3">
-                    {{ form_label(form.roles) }}
-                    {{ form_widget(form.roles) }}
-                    {% if form_errors(form.roles) %}
-                        <div class="text-danger small mt-1">
-                            <i class="fas fa-exclamation-circle"></i>
-                            {{ form_errors(form.roles) }}
-                        </div>
-                    {% endif %}
-                </div>
-
-                <div class="mb-3">
-                    {{ form_label(form.password) }}
-                    {{ form_widget(form.password) }}
-                    {% if form_errors(form.password) %}
-                        <div class="text-danger small mt-1">
-                            <i class="fas fa-exclamation-circle"></i>
-                            {{ form_errors(form.password) }}
-                        </div>
-                    {% endif %}
-                </div>
-
-                <div class="d-flex justify-content-between mt-3">
-                    <a href="{{ path('app_user_index', {'role': app.request.query.get('role')}) }}" class="btn btn-secondary">
-                        <i class="fas fa-arrow-left"></i> Retour
-                    </a>
-                    <button type="submit" class="btn btn-warning">
-                        <i class="fas fa-save"></i> Enregistrer
-                    </button>
-                </div>
-
-                {{ form_end(form) }}
             </div>
         </div>
     </div>
 </div>
-
 {% endblock %}

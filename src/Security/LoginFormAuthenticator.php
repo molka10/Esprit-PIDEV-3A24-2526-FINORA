@@ -28,7 +28,12 @@ class LoginFormAuthenticator extends AbstractLoginFormAuthenticator
         private UrlGeneratorInterface $urlGenerator,
         private UserProviderInterface $userProvider,
         private HttpClientInterface $httpClient,
-        private EntityManagerInterface $entityManager
+        private EntityManagerInterface $entityManager,
+        private \App\Service\TwoFactorService $twoFactorService,
+        private \App\Service\SessionService $sessionService,
+        private \App\Service\FormationReminderService $formationReminderService,
+        private \App\Service\OfferExpiryService $offerExpiryService,
+        private \App\Service\PriceAlertService $priceAlertService
     )
     {
     }
@@ -72,6 +77,7 @@ class LoginFormAuthenticator extends AbstractLoginFormAuthenticator
             new PasswordCredentials($password),
             [
                 new CsrfTokenBadge('authenticate', $request->request->get('_csrf_token')),
+                new \Symfony\Component\Security\Http\Authenticator\Passport\Badge\RememberMeBadge(),
             ]
         );
     }
@@ -85,13 +91,30 @@ class LoginFormAuthenticator extends AbstractLoginFormAuthenticator
         $user->setCurrentSessionId($request->getSession()->getId());
         $this->entityManager->flush();
 
-        if (in_array('ROLE_ADMIN', $user->getRoles())) {
+        // 📱 RECORD SESSION FOR CONNECTED DEVICES LIST
+        $this->sessionService->recordSession($user, $request);
 
-            return new RedirectResponse($this->urlGenerator->generate('app_admin'));
+        // 📅 CHECK FORMATION DEADLINES
+        $this->formationReminderService->checkDeadlines($user);
+
+        // 📝 CHECK OFFER EXPIRIES
+        $this->offerExpiryService->checkExpiries($user);
+
+        // 📈 CHECK PRICE ALERTS
+        $this->priceAlertService->checkPriceAlerts($user);
+
+        // 🛡️ CHECK 2FA
+        if ($user->isTwoFaEnabled()) {
+            $otp = $this->twoFactorService->generateOtp($user);
+            $this->twoFactorService->sendOtpEmail($user, $otp);
+            
+            $request->getSession()->set('2fa_required', true);
+            
+            return new RedirectResponse($this->urlGenerator->generate('app_2fa_verify'));
         }
 
-        if (in_array('ROLE_ENTREPRISE', $user->getRoles())) {
-            return new RedirectResponse($this->urlGenerator->generate('app_home'));
+        if (in_array('ROLE_ADMIN', $user->getRoles())) {
+            return new RedirectResponse($this->urlGenerator->generate('app_admin'));
         }
 
         return new RedirectResponse($this->urlGenerator->generate('app_home'));

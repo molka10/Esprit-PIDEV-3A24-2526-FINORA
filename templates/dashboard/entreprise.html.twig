@@ -16,7 +16,10 @@
             
             <div class="row align-items-center position-relative">
                 <div class="col-lg-8">
-                    <h1 class="text-white mb-2 display-6 fw-bold">Espace Entreprise : {{ app.user.username }} ! 🏢</h1>
+                    <h1 class="text-white mb-2 display-6 fw-bold">
+                        Espace Entreprise : {{ app.user.username }} 
+                        <i class="bi bi-patch-check-fill ms-1" style="color: #38bdf8; font-size: 0.7em;" data-bs-toggle="tooltip" title="Profil Entreprise Certifié"></i> 🏢
+                    </h1>
                     <p class="mb-0 fs-5 opacity-80 fw-light">Gérez vos appels d'offres, vos investissements et suivez vos performances financières avec précision.</p>
                 </div>
                 <div class="col-lg-4 text-lg-end mt-4 mt-lg-0 d-flex gap-3 justify-content-lg-end">

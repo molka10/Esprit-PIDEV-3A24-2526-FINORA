@@ -7,32 +7,36 @@ use App\Repository\TransactionWalletRepository;
 class WalletBalanceService
 {
     private TransactionWalletRepository $transactionRepository;
+    private \Doctrine\ORM\EntityManagerInterface $em;
 
-    public function __construct(TransactionWalletRepository $transactionRepository)
+    public function __construct(TransactionWalletRepository $transactionRepository, \Doctrine\ORM\EntityManagerInterface $em)
     {
         $this->transactionRepository = $transactionRepository;
+        $this->em = $em;
     }
 
     public function calculateUserBalance(int $userId): float
     {
-        $transactions = $this->transactionRepository->findBy(['user' => $userId]);
-        $balance = 0.0;
+        $user = $this->em->getRepository(\App\Entity\User::class)->find($userId);
+        if (!$user) return 0.0;
 
-        foreach ($transactions as $transaction) {
-            // Only count ACCEPTED transactions
-            if ($transaction->getStatus() !== 'ACCEPTED') {
-                continue;
+        $currentField = (float)$user->getBalance();
+
+        // 🔥 One-time sync: if balance field is 0 but history exists
+        if ($currentField == 0) {
+            $transactions = $this->transactionRepository->findBy(['user' => $userId, 'status' => 'ACCEPTED']);
+            $calculated = 0.0;
+            foreach ($transactions as $t) {
+                $amt = abs((float)$t->getMontant());
+                $calculated += ($t->getType() === 'OUTCOME') ? -$amt : $amt;
             }
-            // Robust calculation: Use the type field to determine the sign,
-            // ensuring that even if signs are inconsistent in the DB, the balance is correct.
-            $amount = abs($transaction->getMontant());
-            if ($transaction->getType() === 'OUTCOME') {
-                $balance -= $amount;
-            } else {
-                $balance += $amount;
+            if ($calculated != 0) {
+                $user->setBalance((string)$calculated);
+                $this->em->flush();
+                return $calculated;
             }
         }
 
-        return $balance;
+        return $currentField;
     }
 }

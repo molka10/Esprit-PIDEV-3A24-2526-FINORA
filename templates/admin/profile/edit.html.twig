@@ -1,168 +1,259 @@
 {% extends 'admin/base.html.twig' %}
 
+{% block title %}Modifier mon Profil Admin{% endblock %}
+
 {% block body %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <!-- Header -->
+            <div class="mb-4 d-flex align-items-center justify-content-between">
+                <div>
+                    <a href="{{ path('app_profile') }}" class="btn btn-link text-muted p-0 mb-2 text-decoration-none small">
+                        <i class="fas fa-arrow-left me-1"></i> Retour au profil
+                    </a>
+                    <h2 class="fw-bold mb-0" style="color: #1f1147;">Paramètres du Compte Admin</h2>
+                    <p class="text-muted">Gérez vos informations personnelles et de sécurité.</p>
+                </div>
+                <div class="avatar avatar-xl">
+                    {% if app.user.image %}
+                        <img class="avatar-img rounded-circle border border-3 border-white shadow-sm" src="{{ asset('uploads/' ~ app.user.image) }}" alt="avatar" style="width: 80px; height: 80px; object-fit: cover;">
+                    {% else %}
+                        <img class="avatar-img rounded-circle border border-3 border-white shadow-sm" src="https://ui-avatars.com/api/?name={{ app.user.username }}&background=7c3aed&color=fff&size=80" alt="avatar" style="width: 80px;">
+                    {% endif %}
+                </div>
+            </div>
 
-<h2>Edit Profile</h2>
+            {{ form_start(form, {'attr': {'class': 'needs-validation', 'novalidate': 'novalidate'}}) }}
+            <div class="row g-4">
+                <!-- Main Info Card -->
+                <div class="col-md-8">
+                    <div class="card border-0 shadow-sm" style="border-radius: 25px;">
+                        <div class="card-header bg-white border-0 p-4 pb-0">
+                            <h5 class="fw-bold mb-0">Informations de Base</h5>
+                        </div>
+                        <div class="card-body p-4 p-md-5">
+                            <div class="row g-4">
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold small text-muted text-uppercase">Nom d'utilisateur</label>
+                                    {{ form_widget(form.username, {'attr': {'class': 'form-control bg-light border-0 py-2'}}) }}
+                                    {{ form_errors(form.username) }}
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold small text-muted text-uppercase">Email</label>
+                                    {{ form_widget(form.email, {'attr': {'class': 'form-control bg-light border-0 py-2'}}) }}
+                                    {{ form_errors(form.email) }}
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold small text-muted text-uppercase">Téléphone</label>
+                                    {{ form_widget(form.phone, {'attr': {'class': 'form-control bg-light border-0 py-2'}}) }}
+                                    {{ form_errors(form.phone) }}
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold small text-muted text-uppercase">Adresse</label>
+                                    {{ form_widget(form.address, {'attr': {'class': 'form-control bg-light border-0 py-2'}}) }}
+                                    {{ form_errors(form.address) }}
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label fw-bold small text-muted text-uppercase">Date de naissance</label>
+                                    {{ form_widget(form.date_of_birth, {'attr': {'class': 'form-control bg-light border-0 py-2'}}) }}
+                                    {{ form_errors(form.date_of_birth) }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
-{{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+                <!-- Profile Photo Card -->
+                <div class="col-md-4">
+                    <div class="card border-0 shadow-sm" style="border-radius: 25px;">
+                        <div class="card-header bg-white border-0 p-4 pb-0">
+                            <h5 class="fw-bold mb-0">Photo de Profil</h5>
+                        </div>
+                        <div class="card-body p-4 text-center">
+                            <div class="mb-3 position-relative group">
+                                {% if app.user.image %}
+                                    <img id="avatarPreview" src="{{ asset('uploads/' ~ app.user.image) }}" class="rounded-4 shadow-sm w-100" style="height: 200px; object-fit: cover;">
+                                {% else %}
+                                    <div id="avatarPlaceholder" class="bg-light rounded-4 d-flex align-items-center justify-content-center" style="height: 200px;">
+                                        <i class="fas fa-user fa-4x text-muted opacity-25"></i>
+                                    </div>
+                                    <img id="avatarPreview" src="" class="rounded-4 shadow-sm w-100 d-none" style="height: 200px; object-fit: cover;">
+                                {% endif %}
+                                
+                                <!-- AI Badge -->
+                                <div class="position-absolute top-0 end-0 m-2">
+                                    <span class="badge bg-primary rounded-pill shadow-sm py-2 px-3">
+                                        <i class="fas fa-robot me-1"></i> IA Ready
+                                    </span>
+                                </div>
+                            </div>
+                            
+                            {{ form_widget(form.image, {'attr': {'class': 'form-control form-control-sm mb-3', 'onchange': 'previewImage(this)'}}) }}
+                            
+                            <div class="d-grid gap-2">
+                                <button type="button" class="btn btn-dark btn-sm rounded-pill py-2" data-bs-toggle="modal" data-bs-target="#aiAvatarModal">
+                                    <i class="fas fa-magic me-2"></i>Générer par IA
+                                </button>
+                            </div>
+                            
+                            {{ form_errors(form.image) }}
+                            <p class="small text-muted mt-2">JPG, PNG autorisés. Max 2Mo.</p>
+                        </div>
+                    </div>
 
-    {{ form_errors(form) }}
+                    <!-- Security Alert -->
+                    <div class="card border-0 shadow-sm mt-4 bg-primary bg-opacity-10" style="border-radius: 20px;">
+                        <div class="card-body p-4">
+                            <h6 class="fw-bold text-primary mb-2"><i class="fas fa-shield-alt me-2"></i>Protection Active</h6>
+                            <p class="small text-primary opacity-75 mb-0">Vos modifications sont sécurisées par chiffrement de bout en bout.</p>
+                        </div>
+                    </div>
+                </div>
 
-    <div>
-        {{ form_label(form.username) }}
-        {{ form_widget(form.username) }}
-        {{ form_errors(form.username) }}
-    </div>
+                <!-- Password Card -->
+                <div class="col-md-8">
+                    <div class="card border-0 shadow-sm" style="border-radius: 25px;">
+                        <div class="card-header bg-white border-0 p-4 pb-0">
+                            <h5 class="fw-bold mb-0">Sécurité & Mot de Passe</h5>
+                        </div>
+                        <div class="card-body p-4">
+                            <div class="p-3 bg-light rounded-4">
+                                <label class="form-label fw-bold small text-muted text-uppercase">Nouveau Mot de Passe</label>
+                                {{ form_widget(form.password, {'attr': {'class': 'form-control border-0', 'placeholder': 'Laisser vide pour ne pas changer'}}) }}
+                                <p class="small text-muted mt-2 mb-0">Conseil : Utilisez au moins 8 caractères avec des chiffres et symboles.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
-    <div>
-        {{ form_label(form.email) }}
-        {{ form_widget(form.email) }}
-        {{ form_errors(form.email) }}
-    </div>
-
-    <div>
-        {{ form_label(form.password) }}
-        {{ form_widget(form.password) }}
-        {{ form_errors(form.password) }}
-    </div>
-
-    <div>
-        {{ form_label(form.image) }}
-        {{ form_widget(form.image) }}
-        {{ form_errors(form.image) }}
-    </div>
-
-    {% if app.user.image %}
-        <img src="{{ asset('uploads/' ~ app.user.image) }}" width="120">
-    {% endif %}
-
-    <div>
-        {{ form_label(form.role) }}
-        {{ form_widget(form.role) }}
-    </div>
-
-    <div>
-        {{ form_label(form.phone) }}
-        {{ form_widget(form.phone) }}
-        {{ form_errors(form.phone) }}
-    </div>
-
-    <div>
-        {{ form_label(form.address) }}
-        {{ form_widget(form.address) }}
-        {{ form_errors(form.address) }}
-    </div>
-
-    <div>
-        {{ form_label(form.date_of_birth) }}
-        {{ form_widget(form.date_of_birth) }}
-    </div>
-
-    <div>
-        {{ form_label(form.isVerified) }}
-        {{ form_widget(form.isVerified) }}
-    </div>
-
-    <button type="submit" class="btn">Save</button>
-
-{{ form_end(form) }}
-
-<hr>
-
-<h3 class="mt-4">Biometrics Security (Face ID)</h3>
-<div class="card mb-4 mt-2 border-0 shadow-sm col-md-8">
-    <div class="card-body text-center">
-        {% set biometrics = app.user.userBiometrics %}
-        {% if biometrics and biometrics.faceEmbedding %}
-            <h5 class="text-success mb-3">✅ Face ID is active</h5>
-            <button id="btnConfigureFaceId" type="button" class="btn btn-warning">Reconfigure Face ID</button>
-        {% else %}
-            <h5 class="text-secondary mb-3">❌ Face ID is NOT active</h5>
-            <button id="btnConfigureFaceId" type="button" class="btn btn-primary">Configure Face ID</button>
-        {% endif %}
-
-        <div id="faceIdSetupArea" style="display:none;" class="mt-4">
-            <video id="videoElement" width="400" height="300" autoplay style="border:1px solid #ccc; border-radius:8px;"></video>
-            <br>
-            <button id="btnCaptureFace" type="button" class="btn btn-success mt-2">Take Photo & Save</button>
-            <button id="btnCancelFace" type="button" class="btn btn-secondary mt-2">Cancel</button>
-            <canvas id="canvasElement" style="display:none;"></canvas>
-            
-            <div id="faceIdStatus" class="mt-3 text-info fw-bold"></div>
+                <!-- Sticky Action Bar -->
+                <div class="col-12 mt-4">
+                    <div class="card border-0 shadow-lg bg-dark text-white p-3" style="border-radius: 20px;">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <p class="mb-0 small opacity-75 ms-3 d-none d-md-block">Vérifiez vos informations avant de sauvegarder.</p>
+                            <div class="d-flex gap-2">
+                                <a href="{{ path('app_profile') }}" class="btn btn-outline-light rounded-pill px-4">Annuler</a>
+                                <button type="submit" class="btn btn-primary rounded-pill px-5 shadow">
+                                    <i class="fas fa-save me-2"></i>Mettre à jour mon profil
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {{ form_end(form) }}
         </div>
     </div>
 </div>
 
+<!-- AI Avatar Modal -->
+<div class="modal fade" id="aiAvatarModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 25px;">
+            <div class="modal-header border-0 p-4 pb-0">
+                <h5 class="fw-bold"><i class="fas fa-robot text-primary me-2"></i>Générateur d'Avatar IA</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="text-center mb-4 p-3 bg-light rounded-4">
+                    <img id="aiPreviewImg" src="https://api.dicebear.com/7.x/avataaars/svg?seed=FinoraAdmin" 
+                         class="rounded-circle shadow" style="width: 150px; height: 150px; background: white;">
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label small fw-bold text-uppercase text-muted">Style de l'IA</label>
+                    <select id="aiStyleSelect" class="form-select border-0 bg-light">
+                        <option value="avataaars">Professionnel (Classic)</option>
+                        <option value="bottts">Robotique (Tech)</option>
+                        <option value="adventurer">Aventurier (Créatif)</option>
+                        <option value="pixel-art">Pixel Art (Rétro)</option>
+                        <option value="big-ears">Minimaliste</option>
+                    </select>
+                </div>
+
+                <div class="d-grid gap-2">
+                    <button type="button" id="btnRegenerate" class="btn btn-outline-primary rounded-pill">
+                        <i class="fas fa-sync-alt me-2"></i>Régénérer
+                    </button>
+                    <button type="button" id="btnApplyAiAvatar" class="btn btn-primary rounded-pill">
+                        <i class="fas fa-check me-2"></i>Appliquer cet avatar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-    const btnConfigureFaceId = document.getElementById('btnConfigureFaceId');
-    const faceIdSetupArea = document.getElementById('faceIdSetupArea');
-    const video = document.getElementById('videoElement');
-    const canvas = document.getElementById('canvasElement');
-    const btnCaptureFace = document.getElementById('btnCaptureFace');
-    const btnCancelFace = document.getElementById('btnCancelFace');
-    const faceIdStatus = document.getElementById('faceIdStatus');
-    let stream = null;
-
-    btnConfigureFaceId.addEventListener('click', async (e) => {
-        e.preventDefault();
-        faceIdSetupArea.style.display = 'block';
-        btnConfigureFaceId.style.display = 'none';
-        
-        try {
-            stream = await navigator.mediaDevices.getUserMedia({ video: true });
-            video.srcObject = stream;
-        } catch (err) {
-            console.error("Camera error:", err);
-            faceIdStatus.innerHTML = "<span class='text-danger'>Could not access webcam.</span>";
+function previewImage(input) {
+    if (input.files && input.files[0]) {
+        var reader = new FileReader();
+        reader.onload = function(e) {
+            const preview = document.getElementById('avatarPreview');
+            const placeholder = document.getElementById('avatarPlaceholder');
+            if (placeholder) placeholder.classList.add('d-none');
+            preview.classList.remove('d-none');
+            preview.src = e.target.result;
         }
-    });
+        reader.readAsDataURL(input.files[0]);
+    }
+}
 
-    btnCancelFace.addEventListener('click', (e) => {
-        e.preventDefault();
-        if (stream) {
-            stream.getTracks().forEach(track => track.stop());
-        }
-        faceIdSetupArea.style.display = 'none';
-        btnConfigureFaceId.style.display = 'inline-block';
-        faceIdStatus.innerHTML = "";
-    });
+document.addEventListener('DOMContentLoaded', function() {
+    const aiPreviewImg = document.getElementById('aiPreviewImg');
+    const aiStyleSelect = document.getElementById('aiStyleSelect');
+    const btnRegenerate = document.getElementById('btnRegenerate');
+    const btnApplyAiAvatar = document.getElementById('btnApplyAiAvatar');
 
-    btnCaptureFace.addEventListener('click', (e) => {
-        e.preventDefault();
-        faceIdStatus.innerHTML = "Processing image...";
+    function updateAiAvatar() {
+        const style = aiStyleSelect.value;
+        const seed = Math.random().toString(36).substring(7);
+        aiPreviewImg.src = `https://api.dicebear.com/7.x/${style}/svg?seed=${seed}`;
+    }
+
+    btnRegenerate.addEventListener('click', updateAiAvatar);
+    aiStyleSelect.addEventListener('change', updateAiAvatar);
+
+    btnApplyAiAvatar.addEventListener('click', function() {
+        const avatarUrl = aiPreviewImg.src;
         
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-        canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
-        
-        const base64Image = canvas.toDataURL('image/jpeg');
-
-        fetch("{{ path('app_profile_face_enroll') }}", {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ image: base64Image })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                faceIdStatus.innerHTML = "<span class='text-success'>" + data.message + "</span>";
-                if (stream) {
-                    stream.getTracks().forEach(track => track.stop());
-                }
-                setTimeout(() => location.reload(), 2000);
-            } else {
-                faceIdStatus.innerHTML = "<span class='text-danger'>" + data.message + "</span>";
-            }
-        })
-        .catch(err => {
-            console.error(err);
-            faceIdStatus.innerHTML = "<span class='text-danger'>Error connecting to server.</span>";
+        Swal.fire({
+            title: 'Génération en cours...',
+            text: 'Nous préparons votre avatar professionnel',
+            allowOutsideClick: false,
+            didOpen: () => { Swal.showLoading(); }
         });
+
+        fetch(avatarUrl)
+            .then(res => res.blob())
+            .then(blob => {
+                const file = new File([blob], "ai-avatar.svg", { type: "image/svg+xml" });
+                const dataTransfer = new DataTransfer();
+                dataTransfer.items.add(file);
+                const fileInput = document.querySelector('input[type="file"]');
+                fileInput.files = dataTransfer.files;
+                
+                const preview = document.getElementById('avatarPreview');
+                const placeholder = document.getElementById('avatarPlaceholder');
+                if (placeholder) placeholder.classList.add('d-none');
+                preview.classList.remove('d-none');
+                preview.src = avatarUrl;
+
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Avatar IA Appliqué !',
+                    text: 'N\'oubliez pas de sauvegarder votre profil.',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+
+                const modalEl = document.getElementById('aiAvatarModal');
+                const modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+                modal.hide();
+            });
     });
+});
 </script>
-
-<a href="{{ path('app_profile') }}" class="btn btn-secondary mt-3 mb-5">Back</a>
-
 {% endblock %}

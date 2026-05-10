@@ -31,17 +31,31 @@
                 <p class="text-muted mb-0">Analysez et étudiez les propositions soumises par les prestataires et partenaires.</p>
             </div>
         </div>
-    {% else %}
-        {# --- USER HERO --- #}
-        <div class="d-flex justify-content-between align-items-center mb-5">
-            <div>
-                <h1 class="display-5 fw-extrabold text-dark mb-1">Vos Candidatures</h1>
-                <p class="lead text-muted mb-0">Suivez l'état de vos propositions en temps réel</p>
-                <div class="header-line mt-2"></div>
+    {% endif %}
+    
+    {# --- STATS OVERVIEW (User only) --- #}
+    {% if app.request.query.get('role') != 'admin' %}
+        <div class="row g-4 mb-5">
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm p-4 text-center" style="border-radius: 20px; background: rgba(109, 40, 217, 0.05);">
+                    <div class="h3 fw-extrabold text-primary mb-1">{{ total_items }}</div>
+                    <div class="text-muted small fw-bold text-uppercase">Total Candidatures</div>
+                </div>
             </div>
-            <a href="{{ path('app_appel_offre_index') }}" class="btn btn-primary rounded-pill px-4 fw-bold text-white shadow-sm">
-                <i class="bi bi-search me-2"></i>Découvrir de nouvelles offres
-            </a>
+            <div class="col-md-4">
+                {% set accepted_count = 0 %}
+                {% for c in candidatures %}{% if c.statut == 'accepted' %}{% set accepted_count = accepted_count + 1 %}{% endif %}{% endfor %}
+                <div class="card border-0 shadow-sm p-4 text-center" style="border-radius: 20px; background: rgba(25, 135, 84, 0.05);">
+                    <div class="h3 fw-extrabold text-success mb-1">Actif</div>
+                    <div class="text-muted small fw-bold text-uppercase">Suivi en temps réel</div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm p-4 text-center" style="border-radius: 20px; background: rgba(255, 193, 7, 0.05);">
+                    <div class="h3 fw-extrabold text-warning mb-1"><i class="bi bi-lightning-charge"></i></div>
+                    <div class="text-muted small fw-bold text-uppercase">Mises à jour IA</div>
+                </div>
+            </div>
         </div>
     {% endif %}
 

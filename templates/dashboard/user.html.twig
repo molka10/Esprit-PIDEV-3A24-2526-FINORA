@@ -17,7 +17,10 @@
                 <div class="row align-items-center position-relative">
                     <div class="col-md-8">
                         <span class="badge bg-white bg-opacity-20 text-white mb-3 px-3 py-2 rounded-pill">Aperçu Quotidien</span>
-                        <h1 class="text-white display-5 fw-bold mb-2">Bon retour, {{ app.user.username }} ! 👋</h1>
+                        <h1 class="text-white display-5 fw-bold mb-2">
+                            Bon retour, {{ app.user.username }} 
+                            <i class="bi bi-patch-check-fill ms-1" style="color: #38bdf8; font-size: 0.7em;" data-bs-toggle="tooltip" title="Votre compte est certifié Finora"></i> ! 👋
+                        </h1>
                         <p class="lead mb-0 opacity-80">Votre écosystème financier est sous contrôle. Voici vos performances actuelles.</p>
                     </div>
                     <div class="col-md-4 text-md-end mt-4 mt-md-0">

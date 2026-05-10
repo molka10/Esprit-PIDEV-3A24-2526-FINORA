@@ -64,7 +64,7 @@ public class ServiceTransactionBourse {
 
         String sql = """
                     INSERT INTO transaction_bourse
-                    (id_action, id_user, type_transaction, quantite, prix_unitaire, montant_total, commission, acteur_role, acteur_label)
+                    (action_id, user_id, type_transaction, quantite, prix_unitaire, montant_total, commission, acteur_role, acteur_label)
                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """;
 
@@ -112,7 +112,7 @@ public class ServiceTransactionBourse {
             END), 0
         ) AS possede
         FROM transaction_bourse
-        WHERE id_user = ? AND id_action = ?
+        WHERE user_id = ? AND action_id = ?
     """;
 
         try (PreparedStatement pst = getConnection().prepareStatement(sql)) {
@@ -170,19 +170,19 @@ public class ServiceTransactionBourse {
 
         // ⚠️ si ta table portefeuille utilise user_id (pas id_user), garde user_id ici
         String sqlUpsertPortefeuille = """
-                    INSERT INTO portefeuille (user_id, id_action, quantite)
+                    INSERT INTO portefeuille (user_id, action_id, quantite)
                     VALUES (?, ?, ?)
                     ON DUPLICATE KEY UPDATE quantite = quantite + VALUES(quantite)
                 """;
 
         String sqlUpdatePortefeuilleVente = """
                     UPDATE portefeuille SET quantite = quantite - ?
-                    WHERE user_id = ? AND id_action = ? AND quantite >= ?
+                    WHERE user_id = ? AND action_id = ? AND quantite >= ?
                 """;
 
         String sqlCleanupPortefeuille = """
                     DELETE FROM portefeuille
-                    WHERE user_id = ? AND id_action = ? AND quantite <= 0
+                    WHERE user_id = ? AND action_id = ? AND quantite <= 0
                 """;
 
         Connection conn = getConnection();
@@ -297,7 +297,7 @@ public class ServiceTransactionBourse {
         }
     }
     public List<TransactionBourse> getAllByUser(int userId) {
-        return requeteTransactions("WHERE t.id_user = " + userId + " ORDER BY t.date_transaction DESC");
+        return requeteTransactions("WHERE t.user_id = " + userId + " ORDER BY t.date_transaction DESC");
     }
     // ─────────────────────────────────────────────────────────
     // POWER BI INTEGRATION (non bloquant)
@@ -359,7 +359,7 @@ public class ServiceTransactionBourse {
                 "a.prix_unitaire AS prix_action, a.quantite_disponible, a.statut AS statut_action, " +
                 "b.id_bourse, b.nom_bourse, b.pays, b.devise, b.statut AS statut_bourse " +
                 "FROM transaction_bourse t " +
-                "LEFT JOIN action a ON t.id_action = a.id_action " +
+                "LEFT JOIN action a ON t.action_id = a.id_action " +
                 "LEFT JOIN bourse b ON a.id_bourse = b.id_bourse " +
                 extra;
 
@@ -441,7 +441,7 @@ public class ServiceTransactionBourse {
     }
 
     public int getNombreActions(int userId) {
-        String sql = "SELECT COUNT(DISTINCT id_action) FROM portefeuille WHERE user_id = ?";
+        String sql = "SELECT COUNT(DISTINCT action_id) FROM portefeuille WHERE user_id = ?";
         try (PreparedStatement pst = getConnection().prepareStatement(sql)) {
             pst.setInt(1, userId);
             try (ResultSet rs = pst.executeQuery()) {

@@ -23,14 +23,24 @@ final class InvestmentExtension extends AbstractExtension
             return null;
         }
         $v = $investment->getImageUrl();
-        if ($v === null || $v === '') {
-            return null;
-        }
-        if (str_contains($v, '://')) {
-            return $v;
+        
+        // If specific image exists, use it
+        if ($v !== null && $v !== '') {
+            if (str_contains($v, '://')) {
+                return $v;
+            }
+            return '/uploads/investments/'.$v;
         }
 
-        return '/uploads/investments/'.$v;
+        // Default realistic images based on category
+        $category = $investment->getCategory();
+        return match ($category) {
+            'IMMOBILIER', 'MAISON', 'HOTEL', 'TERRAIN' => '/assets/images/investments/real_estate.png',
+            'STARTUP' => '/assets/images/investments/startup.png',
+            'AGRICULTURE' => '/assets/images/investments/agriculture.png',
+            'ENERGIE' => '/assets/images/investments/energy.png',
+            default => '/assets/images/courses/4by3/06.jpg',
+        };
     }
 
     public function investmentCategoryLabel(?string $code): string

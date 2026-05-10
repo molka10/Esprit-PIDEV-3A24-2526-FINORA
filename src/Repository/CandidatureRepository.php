@@ -49,7 +49,9 @@ class CandidatureRepository extends ServiceEntityRepository
 
         if ($role === 'entreprise' && $user) {
             $qb->andWhere('c.user = :user')
-               ->setParameter('user', $user);
+               ->andWhere('c.statut != :withdrawn')
+               ->setParameter('user', $user)
+               ->setParameter('withdrawn', 'withdrawn');
         }
 
         return $qb;

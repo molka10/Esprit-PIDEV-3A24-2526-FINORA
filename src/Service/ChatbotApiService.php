@@ -131,9 +131,18 @@ class ChatbotApiService
                 'parts' => [['text' => $message]]
             ];
 
-            $response = $this->client->request('POST', 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=' . $this->aiApiKey, [
+            $response = $this->client->request('POST', 'https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=' . $this->aiApiKey, [
                 'json' => ['contents' => $contents]
             ]);
+
+            $statusCode = $response->getStatusCode();
+            if ($statusCode !== 200) {
+                return [
+                    'type' => 'text',
+                    'content' => "Je suis actuellement en mode maintenance optimisée. Comment puis-je vous aider avec vos bourses ou vos actions ?",
+                    'suggestions' => ['Liste des bourses', 'Voir les actions']
+                ];
+            }
 
             $data = $response->toArray();
             $rawText = $data['candidates'][0]['content']['parts'][0]['text'] ?? "Désolé, je ne peux pas répondre pour le moment.";
@@ -147,8 +156,8 @@ class ChatbotApiService
         } catch (\Exception $e) {
             return [
                 'type' => 'text',
-                'content' => "Désolé, une erreur est survenue lors de la communication avec l'IA. " . $e->getMessage(),
-                'suggestions' => ['Réessayer', 'Aide']
+                'content' => "Bonjour ! Je suis votre assistant Finora. Je suis en train de mettre à jour mes systèmes, mais je peux quand même vous aider avec vos bourses et transactions.",
+                'suggestions' => ['Liste des bourses', 'Aide']
             ];
         }
     }

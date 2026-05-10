@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Investment;
 use App\Entity\InvestmentManagement;
+use App\Entity\User;
 use App\Form\InvestmentManagementType;
 use App\Repository\InvestmentManagementRepository;
 use App\Service\AiAssistantService;
@@ -35,6 +36,7 @@ class InvestmentManagementController extends AbstractController
         $user = $this->getUser();
         $search = trim((string)$request->query->get('search', ''));
         $status = trim((string)$request->query->get('status', ''));
+        $types = $request->query->all('types');
         $tri = (string)$request->query->get('tri', 'managementId');
         $ordre = strtolower((string)$request->query->get('ordre', 'desc'));
 
@@ -42,9 +44,9 @@ class InvestmentManagementController extends AbstractController
                    ->leftJoin('m.investment', 'i')
                    ->addSelect('i');
 
-        // Isolation: regular users see only their own participations
+        // Isolation: regular users see only their own participations (as owner or co-investor)
         if (!$this->isGranted('ROLE_ADMIN')) {
-            $qb->andWhere('m.user = :user')
+            $qb->andWhere('m.user = :user OR m.coInvestor = :user')
                ->setParameter('user', $user);
         }
 
@@ -56,6 +58,11 @@ class InvestmentManagementController extends AbstractController
         if ($status !== '') {
             $qb->andWhere('m.status = :status')
                ->setParameter('status', $status);
+        }
+
+        if (!empty($types)) {
+            $qb->andWhere('m.investmentType IN (:types)')
+               ->setParameter('types', $types);
         }
 
         $allowedSortFields = ['managementId', 'amountInvested', 'ownershipPercentage', 'status'];
@@ -72,7 +79,6 @@ class InvestmentManagementController extends AbstractController
         $managements = $paginator->paginate($query, $page, 10);
 
         if ($request->isXmlHttpRequest()) {
-            // For the /management page, always use the card list partial
             return $this->render('investment_management/_management_list.html.twig', [
                 'managements' => $managements,
             ]);
@@ -82,6 +88,7 @@ class InvestmentManagementController extends AbstractController
             'managements' => $managements,
             'search' => $search,
             'status' => $status,
+            'types' => $types,
             'tri' => $tri,
             'ordre' => strtolower($ordre),
         ]);
@@ -128,7 +135,8 @@ class InvestmentManagementController extends AbstractController
     public function new(
         Request $request, 
         EntityManagerInterface $em,
-        \App\Service\WalletBalanceService $walletBalanceService
+        \App\Service\WalletBalanceService $walletBalanceService,
+        \App\Service\NotificationService $notificationService
     ): Response
     {
         $invId = $request->query->get('inv_id');
@@ -148,24 +156,25 @@ class InvestmentManagementController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             /** @var \App\Entity\User $user */
             $user = $this->getUser();
-            $amountInvested = $item->getAmountInvested() ?? 0.0;
-            
+            $amountInvested = (float)($item->getAmountInvested() ?? 0.0);
             if ($amountInvested > 0) {
+                $coInvestor = $item->getCoInvestor();
+                $amountPerPerson = $coInvestor ? ($amountInvested / 2) : $amountInvested;
+
+                // Check Main User Balance
                 $balance = $walletBalanceService->calculateUserBalance($user->getId());
-                
-                if ($balance < $amountInvested) {
-                    $redirectUrl = $this->generateUrl('dashboard');
-                    $this->addFlash('danger', sprintf(
-                        'Solde insuffisant dans votre portefeuille. (Requis: %.2f DT, Actuel: %.2f DT). <a href="%s" class="btn btn-sm btn-light ms-2 text-dark fw-bold">Recharger mon portefeuille</a>', 
-                        $amountInvested, 
-                        $balance,
-                        $redirectUrl
-                    ));
-                    
-                    return $this->render('investment_management/new.html.twig', [
-                        'form' => $form->createView(),
-                        'investment' => $item->getInvestment()
-                    ]);
+                if ($balance < $amountPerPerson) {
+                    $this->addFlash('danger', sprintf('Solde insuffisant (Principal). Requis: %.2f TND, Actuel: %.2f TND.', $amountPerPerson, $balance));
+                    return $this->render('investment_management/new.html.twig', ['form' => $form->createView(), 'investment' => $item->getInvestment()]);
+                }
+
+                // Check Co-Investor Balance if applicable
+                if ($coInvestor) {
+                    $coBalance = $walletBalanceService->calculateUserBalance($coInvestor->getId());
+                    if ($coBalance < $amountPerPerson) {
+                        $this->addFlash('danger', sprintf('Le co-investisseur (%s) n\'a pas assez de fonds. Requis: %.2f TND, Actuel: %.2f TND.', $coInvestor->getUsername(), $amountPerPerson, $coBalance));
+                        return $this->render('investment_management/new.html.twig', ['form' => $form->createView(), 'investment' => $item->getInvestment()]);
+                    }
                 }
                 
                 // Fetch or Create Category "Investissement Projet"
@@ -182,17 +191,36 @@ class InvestmentManagementController extends AbstractController
                     $em->flush();
                 }
                 
+                // Transaction for Main User
                 $walletTx = new \App\Entity\TransactionWallet();
-                $walletTx->setMontant((string)(-abs((float)$amountInvested))); // Negative = expense
+                $walletTx->setMontant((string)(-abs((float)$amountPerPerson))); 
                 $walletTx->setType('OUTCOME');
                 $walletTx->setDateTransaction(new \DateTimeImmutable());
-                $walletTx->setCategory($category);
                 $walletTx->setUser($user);
-                
-                $investmentName = $item->getInvestment() ? $item->getInvestment()->getName() : 'Projet (' . $item->getInvestmentType() . ')';
-                $walletTx->setNomTransaction('Investissement: ' . $investmentName);
-                
+                $walletTx->setCategory($category);
+                $investmentName = $item->getInvestment() ? $item->getInvestment()->getName() : 'Projet';
+                $walletTx->setNomTransaction('Investissement (Co-inv): ' . $investmentName);
                 $em->persist($walletTx);
+
+                // Transaction for Co-Investor
+                if ($coInvestor) {
+                    $coTx = new \App\Entity\TransactionWallet();
+                    $coTx->setMontant((string)(-abs((float)$amountPerPerson))); 
+                    $coTx->setType('OUTCOME');
+                    $coTx->setDateTransaction(new \DateTimeImmutable());
+                    $coTx->setUser($coInvestor);
+                    $coTx->setCategory($category);
+                    $coTx->setNomTransaction('Investissement Partagé: ' . $investmentName);
+                    $em->persist($coTx);
+
+                    // Send Notification to Co-Investor
+                    $notificationService->send(
+                        $coInvestor,
+                        'INVESTMENT',
+                        '🤝 Nouvelle Collaboration',
+                        sprintf('%s a initié un investissement partagé avec vous sur le projet "%s". Votre part de %.2f TND a été prélevée.', $user->getUsername(), $investmentName, $amountPerPerson)
+                    );
+                }
             }
 
             $item->setUser($user);
@@ -215,16 +243,94 @@ class InvestmentManagementController extends AbstractController
      * 👁️ Show Participation
      */
     #[Route('/{id}', name: 'app_management_show', requirements: ['id' => '\d+'], methods: ['GET'])]
-    public function show(InvestmentManagement $item): Response
+    public function show(InvestmentManagement $item, EntityManagerInterface $em): Response
     {
-        // Security: Ensure ownership
-        if (!$this->isGranted('ROLE_ADMIN') && $item->getUser() !== $this->getUser()) {
+        // Security: Ensure ownership or co-investment
+        if (!$this->isGranted('ROLE_ADMIN') && $item->getUser() !== $this->getUser() && $item->getCoInvestor() !== $this->getUser()) {
             throw $this->createAccessDeniedException('Accès refusé.');
         }
 
         return $this->render('investment_management/show.html.twig', [
             'item' => $item,
+            'users' => $em->getRepository(User::class)->findAll() // To invite co-investors
         ]);
+    }
+
+    #[Route('/{id}/invite', name: 'app_management_invite', methods: ['POST'])]
+    public function inviteCoInvestor(Request $request, InvestmentManagement $item, EntityManagerInterface $em, \App\Service\NotificationService $notifService): JsonResponse
+    {
+        if ($item->getUser() !== $this->getUser()) {
+            return new JsonResponse(['success' => false, 'message' => 'Seul le propriétaire peut inviter.'], 403);
+        }
+
+        $data = json_decode($request->getContent(), true);
+        $coInvestorId = $data['userId'] ?? null;
+
+        if (!$coInvestorId) return new JsonResponse(['success' => false], 400);
+
+        $coInvestor = $em->getRepository(User::class)->find($coInvestorId);
+        if (!$coInvestor) return new JsonResponse(['success' => false, 'message' => 'Utilisateur non trouvé.'], 404);
+
+        $item->setCoInvestor($coInvestor);
+        $item->setCoInvestorStatus('PENDING');
+        $em->flush();
+
+        // Notify co-investor
+        $notifService->send(
+            $coInvestor,
+            'INVESTMENT',
+            '🤝 Invitation Partenariat',
+            sprintf('%s vous a invité à co-investir sur le projet "%s". Veuillez accepter ou refuser l\'invitation.', $this->getUser()->getUsername(), $item->getInvestment()->getName()),
+            $this->generateUrl('app_management_show', ['id' => $item->getId()])
+        );
+
+        return new JsonResponse(['success' => true]);
+    }
+
+    #[Route('/{id}/accept', name: 'app_management_accept', methods: ['POST'])]
+    public function acceptInvitation(InvestmentManagement $item, EntityManagerInterface $em, \App\Service\NotificationService $notifService): JsonResponse
+    {
+        if ($item->getCoInvestor() !== $this->getUser()) {
+            return new JsonResponse(['success' => false, 'message' => 'Action non autorisée.'], 403);
+        }
+
+        $item->setCoInvestorStatus('ACCEPTED');
+        $em->flush();
+
+        // Notify owner
+        $notifService->send(
+            $item->getUser(),
+            'INVESTMENT',
+            '✅ Partenariat Accepté',
+            sprintf('%s a accepté votre invitation de co-investissement sur le projet "%s".', $this->getUser()->getUsername(), $item->getInvestment()->getName()),
+            $this->generateUrl('app_management_show', ['id' => $item->getId()])
+        );
+
+        return new JsonResponse(['success' => true]);
+    }
+
+    #[Route('/{id}/refuse', name: 'app_management_refuse', methods: ['POST'])]
+    public function refuseInvitation(InvestmentManagement $item, EntityManagerInterface $em, \App\Service\NotificationService $notifService): JsonResponse
+    {
+        if ($item->getCoInvestor() !== $this->getUser()) {
+            return new JsonResponse(['success' => false, 'message' => 'Action non autorisée.'], 403);
+        }
+
+        $item->setCoInvestorStatus('REJECTED');
+        // We might want to remove the link or just keep the status
+        // $item->setCoInvestor(null); 
+        $em->flush();
+
+        // Notify owner
+        $notifService->send(
+            $item->getUser(),
+            'INVESTMENT',
+            '❌ Partenariat Refusé',
+            sprintf('%s a décliné votre invitation de co-investissement sur le projet "%s".', $this->getUser()->getUsername(), $item->getInvestment()->getName()),
+            $this->generateUrl('app_management_show', ['id' => $item->getId()])
+        );
+
+        return new JsonResponse(['success' => true]);
     }
 
     /**

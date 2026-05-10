@@ -91,12 +91,23 @@
         }
 
         .status-paid {
-            background: var(--finora-purple-light);
-            color: var(--finora-purple-dark);
+            background: #dcfce7;
+            color: #166534;
             padding: 4px 12px;
             border-radius: 50px;
             font-weight: 600;
             font-size: 0.75rem;
+        }
+
+        .status-current {
+            background: #fef9c3;
+            color: #854d0e;
+            padding: 4px 12px;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 0.75rem;
+            border: 1px solid #fde047;
+            box-shadow: 0 0 10px rgba(253, 224, 71, 0.3);
         }
 
         .status-pending {
@@ -172,7 +183,44 @@
 
 {% block body %}
 
-<!-- ⚡ Main Content -->
+<!-- 📁 Premium Portfolio Detail Hero -->
+<section class="py-5 mb-5 position-relative overflow-hidden" style="background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%); border-radius: 0 0 50px 50px; margin-top: -24px; margin-left: -12px; margin-right: -12px;">
+    <div class="container position-relative z-1">
+        <div class="row align-items-center">
+            <div class="col-lg-8 text-white">
+                <nav aria-label="breadcrumb" class="mb-3">
+                    <ol class="breadcrumb mb-0">
+                        <li class="breadcrumb-item"><a href="{{ path('app_home') }}" class="text-white-50 text-decoration-none">Finora</a></li>
+                        <li class="breadcrumb-item"><a href="{{ path('app_management_index') }}" class="text-white-50 text-decoration-none">Portefeuille</a></li>
+                        <li class="breadcrumb-item active text-white" aria-current="page">Détails de l'Actif</li>
+                    </ol>
+                </nav>
+                <div class="d-flex align-items-center mb-3">
+                    <div class="p-2 bg-white bg-opacity-10 rounded-circle me-3 border border-white border-opacity-10">
+                        <i class="bi bi-shield-shaded text-white fs-5"></i>
+                    </div>
+                    <span class="text-uppercase fw-bold text-white-50 small" style="letter-spacing: 2px; font-size: 0.7rem;">Suivi de Participation Institutionnelle</span>
+                </div>
+                <h1 class="display-4 fw-black text-white mb-2" style="letter-spacing: -2px;">{{ item.investment.name }}</h1>
+                <p class="text-white-50 mb-0 opacity-75"><i class="bi bi-calendar-check me-2"></i>Souscrit le {{ item.startDate|date('d/m/Y') }}</p>
+            </div>
+            <div class="col-lg-4 d-none d-lg-block text-end">
+                <div class="p-4 bg-white bg-opacity-10 rounded-4 border border-white border-opacity-10 backdrop-filter-blur">
+                    <span class="text-white-50 small text-uppercase fw-bold d-block mb-1">Status de l'Investissement</span>
+                    {% if item.status == 'ACTIVE' %}
+                        <h3 class="text-success mb-0"><i class="bi bi-check-circle-fill me-2"></i>ACTIF</h3>
+                    {% elseif item.status == 'CRITICAL' %}
+                        <h3 class="text-warning mb-0"><i class="bi bi-exclamation-triangle-fill me-2"></i>CRITIQUE</h3>
+                    {% else %}
+                        <h3 class="text-secondary mb-0"><i class="bi bi-lock-fill me-2"></i>CLÔTURÉ</h3>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="container py-2">
     <div class="row g-4">
         <div class="col-xl-8">
             <!-- 🏢 Project Identity -->
@@ -267,15 +315,21 @@
                         </thead>
                         <tbody>
                             {% for row in item.repaymentSchedule %}
-                                <tr>
+                                <tr class="{{ row.status == 'CURRENT' ? 'table-light' : '' }}">
                                     <td class="fw-bold text-dark">#{{ row.month }}</td>
-                                    <td>{{ row.date|date('d/m/Y') }}</td>
+                                    <td class="{{ row.status == 'CURRENT' ? 'fw-bold text-primary' : '' }}">{{ row.date|date('d/m/Y') }}</td>
                                     <td class="text-success fw-medium">+{{ row.interest|number_format(2, ',', ' ') }}</td>
                                     <td class="text-primary">{{ row.capital|number_format(2, ',', ' ') }}</td>
                                     <td class="fw-bold">{{ row.total|format_currency }}</td>
                                     <td class="text-end">
-                                        <span class="{{ row.status == 'PAID' ? 'status-paid' : 'status-pending' }}">
-                                            {{ row.status == 'PAID' ? 'Payé' : 'En attente' }}
+                                        <span class="status-{{ row.status|lower }}">
+                                            {% if row.status == 'PAID' %}
+                                                Payé
+                                            {% elseif row.status == 'CURRENT' %}
+                                                Mois en cours
+                                            {% else %}
+                                                En attente
+                                            {% endif %}
                                         </span>
                                     </td>
                                 </tr>
@@ -317,6 +371,56 @@
                     <p class="text-muted small">Ce projet offre un rendement de haut niveau avec une fréquence de remboursement mensuelle garantie.</p>
                 </div>
 
+                <!-- SHARED INVESTMENT -->
+                <div class="glass-card p-4 mb-4">
+                    <h6 class="fw-bold mb-4 border-bottom pb-3"><i class="bi bi-people-fill me-2"></i>Investissement Partagé</h6>
+                    {% if item.coInvestor %}
+                        <div class="d-flex align-items-center p-3 bg-light rounded-3 mb-3">
+                            <div class="avatar avatar-sm me-3">
+                                <img class="avatar-img rounded-circle" src="https://ui-avatars.com/api/?name={{ item.coInvestor.username }}&background=7c3aed&color=fff" alt="" style="width: 32px; height: 32px;">
+                            </div>
+                            <div class="flex-grow-1">
+                                <h6 class="mb-0 small fw-bold">{{ item.coInvestor.username }}</h6>
+                                <p class="small text-muted mb-0">Partenaire</p>
+                            </div>
+                            {% if item.coInvestorStatus == 'ACCEPTED' %}
+                                <span class="badge bg-success rounded-pill small">Confirmé</span>
+                            {% elseif item.coInvestorStatus == 'REJECTED' %}
+                                <span class="badge bg-danger rounded-pill small">Refusé</span>
+                            {% else %}
+                                <span class="badge bg-warning text-dark rounded-pill small">En attente</span>
+                            {% endif %}
+                        </div>
+
+                        {% if app.user == item.coInvestor and item.coInvestorStatus == 'PENDING' %}
+                            <div class="alert alert-info border-0 small mb-0">
+                                <p class="mb-3">Souhaitez-vous accepter ce co-investissement ?</p>
+                                <div class="d-flex gap-2">
+                                    <button onclick="respondInvite('accept')" class="btn btn-success btn-sm flex-grow-1 rounded-pill">Accepter</button>
+                                    <button onclick="respondInvite('refuse')" class="btn btn-outline-danger btn-sm flex-grow-1 rounded-pill">Refuser</button>
+                                </div>
+                            </div>
+                        {% elseif app.user == item.user and item.coInvestorStatus == 'PENDING' %}
+                            <div class="text-center">
+                                <p class="small text-muted mb-0"><i class="bi bi-hourglass-split me-1"></i>En attente de réponse...</p>
+                            </div>
+                        {% endif %}
+                    {% elseif app.user == item.user %}
+                        <p class="small text-muted mb-3">Partagez cet investissement avec un partenaire pour le suivre ensemble.</p>
+                        <select id="coInvestorSelect" class="form-select form-select-sm mb-2 border-0 bg-light" style="border-radius: 10px;">
+                            <option value="">Sélectionner un partenaire...</option>
+                            {% for u in users %}
+                                {% if u.id != app.user.id %}
+                                    <option value="{{ u.id }}">{{ u.username }}</option>
+                                {% endif %}
+                            {% endfor %}
+                        </select>
+                        <button id="inviteBtn" class="btn btn-primary btn-sm w-100 rounded-pill">Inviter</button>
+                    {% else %}
+                        <p class="small text-muted mb-0">Vous suivez cet investissement avec <strong>{{ item.user.username }}</strong>.</p>
+                    {% endif %}
+                </div>
+
                 <!-- ACTIONS -->
                 <div class="glass-card p-4 mb-4">
                     <h6 class="fw-bold mb-4 border-bottom pb-3"><i class="bi bi-gear-wide-connected me-2"></i>Actions disponibles</h6>
@@ -324,13 +428,16 @@
                         <a href="{{ path('app_management_export_single', {id: item.id}) }}" class="btn btn-primary sidebar-btn shadow-sm">
                             <i class="bi bi-file-earmark-pdf fs-5"></i>Télécharger le reçu (PDF)
                         </a>
+                        {% if app.user == item.user %}
                         <a href="{{ path('app_management_edit', {id: item.id}) }}" class="btn btn-outline-warning sidebar-btn">
                             <i class="bi bi-pencil-square fs-5"></i>Modifier la ligne
                         </a>
+                        {% endif %}
                         <a href="{{ path('app_management_index') }}" class="btn btn-light sidebar-btn">
                             <i class="bi bi-grid-fill fs-5"></i>Retour au portefeuille
                         </a>
 
+                        {% if app.user == item.user %}
                         <hr class="my-2 opacity-50">
 
                         <form method="post" action="{{ path('app_management_delete', {id: item.id}) }}" onsubmit="return confirm('Attention ! Supprimer cet actif est une action irréversible. Confirmer ?');">
@@ -339,8 +446,47 @@
                                 <i class="bi bi-trash3 me-2"></i>Supprimer définitivement
                             </button>
                         </form>
+                        {% endif %}
                     </div>
                 </div>
+
+                <script>
+                    document.getElementById('inviteBtn')?.addEventListener('click', async () => {
+                        const userId = document.getElementById('coInvestorSelect').value;
+                        if (!userId) return alert('Veuillez sélectionner un utilisateur.');
+                        
+                        try {
+                            const response = await fetch('{{ path("app_management_invite", {id: item.id}) }}', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ userId: userId })
+                            });
+                            const result = await response.json();
+                            if (result.success) {
+                                location.reload();
+                            } else {
+                                alert(result.message || 'Une erreur est survenue.');
+                            }
+                        } catch (e) {
+                            alert('Erreur lors de l\'invitation.');
+                        }
+                    });
+
+                    async function respondInvite(action) {
+                        const path = action === 'accept' ? '{{ path("app_management_accept", {id: item.id}) }}' : '{{ path("app_management_refuse", {id: item.id}) }}';
+                        try {
+                            const response = await fetch(path, { method: 'POST' });
+                            const result = await response.json();
+                            if (result.success) {
+                                location.reload();
+                            } else {
+                                alert(result.message || 'Erreur lors de la réponse.');
+                            }
+                        } catch (e) {
+                            alert('Erreur réseau.');
+                        }
+                    }
+                </script>
 
                 <!-- TRUST BADGE -->
                 <div class="bg-white p-4 rounded-4 shadow-sm text-center">

@@ -70,8 +70,8 @@ class UserType extends AbstractType
                 'constraints' => [
                     new File([
                         'maxSize' => '2M',
-                        'mimeTypes' => ['image/jpeg', 'image/png'],
-                        'mimeTypesMessage' => 'Upload a valid image (JPG/PNG)',
+                        'mimeTypes' => ['image/jpeg', 'image/png', 'image/svg+xml'],
+                        'mimeTypesMessage' => 'Upload a valid image (JPG/PNG/SVG)',
                     ])
                 ],
             ])

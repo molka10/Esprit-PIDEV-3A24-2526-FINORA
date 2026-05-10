@@ -1,0 +1,58 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Nouveau mot de passe - FINORA{% endblock %}
+
+{% block body %}
+<section class="p-0 overflow-hidden" style="min-height: 100vh;">
+    <div class="row g-0 align-items-center h-100">
+        <!-- Left side: Illustration -->
+        <div class="col-lg-6 d-none d-lg-block vh-100 position-relative p-0" style="background: var(--finora-gradient-soft); border-right: 1px solid rgba(124, 58, 237, 0.1);">
+            <div class="position-absolute top-50 start-50 translate-middle text-center w-75">
+                <div class="mb-5">
+                    <h2 class="fw-bold mb-3 h4" style="color: #6d28d9;">Sécurité avant tout</h2>
+                    <p class="text-muted fs-5">Choisissez un mot de passe robuste pour protéger vos actifs et vos données financières.</p>
+                </div>
+                <img src="https://illustrations.popsy.co/purple/lock.svg" class="w-75 px-5" alt="illustration">
+            </div>
+        </div>
+
+        <!-- Right side: Form -->
+        <div class="col-lg-6 vh-100 d-flex align-items-center justify-content-center bg-white p-4 p-sm-5">
+            <div class="w-100 animate-in" style="max-width: 450px;">
+                <h1 class="h2 fw-bold text-dark mb-1">Nouveau mot de passe 🔑</h1>
+                <p class="text-muted mb-4">Veuillez définir votre nouveau secret de connexion.</p>
+
+                {{ form_start(resetForm, {'attr': {'novalidate': 'novalidate'}}) }}
+                    <div class="mb-4">
+                        <label class="form-label fw-bold small text-uppercase opacity-70">Nouveau mot de passe</label>
+                        {{ form_widget(resetForm.plainPassword.first, {
+                            'attr': {
+                                'class': 'form-control bg-light border-0 py-3 mb-3',
+                                'style': 'border-radius: 12px;',
+                                'placeholder': '••••••••'
+                            }
+                        }) }}
+                        {{ form_errors(resetForm.plainPassword.first) }}
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-bold small text-uppercase opacity-70">Confirmer le mot de passe</label>
+                        {{ form_widget(resetForm.plainPassword.second, {
+                            'attr': {
+                                'class': 'form-control bg-light border-0 py-3',
+                                'style': 'border-radius: 12px;',
+                                'placeholder': '••••••••'
+                            }
+                        }) }}
+                        {{ form_errors(resetForm.plainPassword.second) }}
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-lg w-100 py-3 mb-3 shadow" style="border-radius: 16px; font-weight: 700; background: linear-gradient(135deg, #7c3aed 0%, #3b1278 100%); border: none;">
+                        RÉINITIALISER
+                    </button>
+                {{ form_end(resetForm) }}
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

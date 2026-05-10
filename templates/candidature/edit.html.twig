@@ -73,7 +73,12 @@
 
                         {# MESSAGE #}
                         <div class="col-12">
-                            <label class="form-label"><i class="bi bi-chat-left-text me-2"></i>Lettre de Motivation / Proposition Technique</label>
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <label class="form-label mb-0"><i class="bi bi-chat-left-text me-2"></i>Lettre de Motivation / Proposition Technique</label>
+                                <button type="button" id="improveAiBtn" class="btn btn-sm btn-outline-warning rounded-pill px-3 py-1 fw-bold" style="font-size: 0.75rem;">
+                                    <i class="bi bi-magic me-1"></i> Améliorer avec l'IA
+                                </button>
+                            </div>
                             {{ form_widget(form.message, {'attr': {'class': 'form-control', 'rows': '6'}}) }}
                             {% if form_errors(form.message) %}
                                 <div class="invalid-feedback d-block">{{ form_errors(form.message) }}</div>
@@ -81,13 +86,18 @@
                         </div>
                     </div>
 
-                    <div class="mt-5 d-flex flex-column flex-md-row gap-3 justify-content-between align-items-center">
-                        <a href="{{ path('app_candidature_index', {'role': app.request.query.get('role')}) }}" class="btn btn-link text-muted fw-bold text-decoration-none">
-                            <i class="bi bi-arrow-left me-2"></i>Abandonner les modifications
+                    <div class="mt-5 d-flex flex-column flex-md-row gap-3 justify-content-between align-items-center w-100">
+                        <a href="{{ path('app_candidature_index', {'role': app.request.query.get('role')}) }}" class="btn btn-link text-muted fw-bold text-decoration-none order-3 order-md-1">
+                            <i class="bi bi-arrow-left me-2"></i>Abandonner
                         </a>
-                        <button type="submit" class="btn btn-warning rounded-pill px-5 py-3 fw-bold text-dark shadow-sm">
-                            <i class="bi bi-save2 me-2"></i>Mettre à jour le dossier
-                        </button>
+                        <div class="d-flex gap-2 order-1 order-md-2 w-100 w-md-auto">
+                            <button type="submit" name="action" value="draft" class="btn btn-outline-warning rounded-pill px-4 py-3 fw-bold flex-grow-1">
+                                <i class="bi bi-pencil-square me-2"></i>Brouillon
+                            </button>
+                            <button type="submit" name="action" value="submit" class="btn btn-warning rounded-pill px-5 py-3 fw-bold text-dark shadow-sm flex-grow-1">
+                                <i class="bi bi-save2 me-2"></i>Mettre à jour
+                            </button>
+                        </div>
                     </div>
 
                     {{ form_end(form) }}

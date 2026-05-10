@@ -69,4 +69,29 @@ class BourseWishlistController extends AbstractController
         
         return new JsonResponse(['ids' => $ids]);
     }
+
+    #[Route('/set-target-price/{id}', name: 'app_bourse_wishlist_set_target', methods: ['POST'])]
+    public function setTargetPrice(int $id, Request $request, BourseWishlistRepository $repository, EntityManagerInterface $em): JsonResponse
+    {
+        $wishlist = $repository->findOneBy([
+            'user' => $this->getUser(),
+            'action' => $id
+        ]);
+
+        if (!$wishlist) {
+            return new JsonResponse(['status' => 'error', 'message' => 'Cette action n\'est pas dans votre wishlist.'], 404);
+        }
+
+        $data = json_decode($request->getContent(), true);
+        $price = $data['price'] ?? null;
+
+        if ($price === null) {
+            return new JsonResponse(['status' => 'error', 'message' => 'Prix invalide.'], 400);
+        }
+
+        $wishlist->setTargetPrice((string)$price);
+        $em->flush();
+
+        return new JsonResponse(['status' => 'success', 'message' => 'Alerte de prix configurée !']);
+    }
 }

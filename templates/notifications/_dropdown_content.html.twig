@@ -1,0 +1,21 @@
+{% for notification in notifications %}
+    <li onclick="window.location.href='{{ notification.link|default('#') }}';" style="cursor: pointer;">
+        <a href="{{ notification.link|default('#') }}" class="list-group-item-action border-0 border-bottom d-flex p-3 {% if not notification.is_read %}bg-light{% endif %}" onclick="event.stopPropagation();">
+            <div class="me-3">
+                <div class="avatar avatar-md bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center">
+                    <i class="bi {{ notification.icon }} fs-5"></i>
+                </div>
+            </div>
+            <div>
+                <h6 class="mb-1 small">{{ notification.title }}</h6>
+                <p class="small text-body m-0" style="font-size: 0.75rem;">{{ notification.message|slice(0, 60) }}{% if notification.message|length > 60 %}...{% endif %}</p>
+                <small class="text-muted" style="font-size: 0.7rem;">{{ notification.created_at|date('d/m H:i') }}</small>
+            </div>
+        </a>
+    </li>
+{% else %}
+    <li class="p-4 text-center">
+        <i class="bi bi-bell-slash fs-2 text-muted opacity-50 d-block mb-2"></i>
+        <p class="small text-muted mb-0">Aucune notification pour le moment</p>
+    </li>
+{% endfor %}

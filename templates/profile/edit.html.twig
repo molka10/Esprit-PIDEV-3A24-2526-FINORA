@@ -46,18 +46,27 @@
                         {{ form_errors(form.password) }}
                     </div>
                     
-                    <div class="col-12 mb-3">
-                        <label class="form-label fw-bold small text-uppercase text-muted">Photo de profil</label>
+                    <div class="col-12 mb-3                        <label class="form-label fw-bold small text-uppercase text-muted">Photo de profil</label>
                         <div class="d-flex align-items-center gap-4 p-3 border rounded-3 bg-light-subtle">
-                            {% if app.user.image %}
-                                <div class="position-relative">
-                                    <img src="{{ asset('uploads/' ~ app.user.image) }}" width="80" height="80" class="rounded-circle shadow-sm border border-2 border-white object-fit-cover">
-                                    <span class="position-absolute bottom-0 end-0 bg-primary text-white p-1 rounded-circle" style="line-height:0;"><i class="bi bi-camera" style="font-size:10px;"></i></span>
-                                </div>
-                            {% endif %}
+                            <div class="position-relative">
+                                {% if app.user.image %}
+                                    <img id="avatarPreview" src="{{ asset('uploads/' ~ app.user.image) }}" width="80" height="80" class="rounded-circle shadow-sm border border-2 border-white object-fit-cover">
+                                {% else %}
+                                    <div id="avatarPlaceholder" class="bg-primary bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
+                                        <i class="bi bi-person text-primary fs-3"></i>
+                                    </div>
+                                    <img id="avatarPreview" src="" width="80" height="80" class="rounded-circle shadow-sm border border-2 border-white object-fit-cover d-none">
+                                {% endif %}
+                                <span class="position-absolute bottom-0 end-0 bg-primary text-white p-1 rounded-circle" style="line-height:0; cursor: pointer;" onclick="document.querySelector('input[type=file]').click()"><i class="bi bi-camera" style="font-size:10px;"></i></span>
+                            </div>
                             <div class="flex-grow-1">
-                                {{ form_widget(form.image, {'attr': {'class': 'form-control form-control-sm'}}) }}
-                                <small class="text-muted d-block mt-1">Format recommandé: Carré (JPG, PNG)</small>
+                                {{ form_widget(form.image, {'attr': {'class': 'form-control form-control-sm mb-2', 'onchange': 'previewImage(this)'}}) }}
+                                <div class="d-flex gap-2 align-items-center">
+                                    <small class="text-muted">Format recommandé: Carré (JPG, PNG)</small>
+                                    <span class="badge bg-primary bg-opacity-10 text-primary cursor-pointer" style="cursor: pointer;" data-bs-toggle="modal" data-bs-target="#aiAvatarModal">
+                                        <i class="bi bi-robot me-1"></i> Générer par IA
+                                    </span>
+                                </div>
                             </div>
                         </div>
                         {{ form_errors(form.image) }}
@@ -103,4 +112,129 @@
         </div>
     </div>
 </div>
+
+<!-- AI Avatar Modal -->
+<div class="modal fade" id="aiAvatarModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 25px;">
+            <div class="modal-header border-0 p-4 pb-0">
+                <h5 class="fw-bold"><i class="bi bi-robot text-primary me-2"></i>Générateur d'Avatar IA</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4 text-center">
+                <p class="text-muted small">L'intelligence artificielle de Finora va vous proposer un avatar unique.</p>
+                
+                <div class="mb-4 p-3 bg-light rounded-4 d-inline-block">
+                    <img id="aiPreviewImg" src="https://api.dicebear.com/7.x/avataaars/svg?seed=FinoraUser" 
+                         class="rounded-circle shadow" style="width: 120px; height: 120px; background: white;">
+                </div>
+
+                <div class="mb-4 text-start">
+                    <label class="form-label small fw-bold text-uppercase text-muted">Choisissez un univers</label>
+                    <div class="row g-2">
+                        <div class="col-6">
+                            <button type="button" class="btn btn-light w-100 py-2 style-btn active" data-style="avataaars">Professionnel</button>
+                        </div>
+                        <div class="col-6">
+                            <button type="button" class="btn btn-light w-100 py-2 style-btn" data-style="bottts">Robotique</button>
+                        </div>
+                        <div class="col-6">
+                            <button type="button" class="btn btn-light w-100 py-2 style-btn" data-style="adventurer">Aventurier</button>
+                        </div>
+                        <div class="col-6">
+                            <button type="button" class="btn btn-light w-100 py-2 style-btn" data-style="fun-emoji">Fun Emoji</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-grid gap-2">
+                    <button type="button" id="btnRegenerate" class="btn btn-outline-primary rounded-pill py-2">
+                        <i class="bi bi-arrow-clockwise me-2"></i>Changer d'avatar
+                    </button>
+                    <button type="button" id="btnApplyAiAvatar" class="btn btn-primary rounded-pill py-2">
+                        <i class="bi bi-check2-circle me-2"></i>Utiliser cet avatar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+function previewImage(input) {
+    if (input.files && input.files[0]) {
+        var reader = new FileReader();
+        reader.onload = function(e) {
+            const preview = document.getElementById('avatarPreview');
+            const placeholder = document.getElementById('avatarPlaceholder');
+            if (placeholder) placeholder.classList.add('d-none');
+            preview.classList.remove('d-none');
+            preview.src = e.target.result;
+        }
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const aiPreviewImg = document.getElementById('aiPreviewImg');
+    const btnRegenerate = document.getElementById('btnRegenerate');
+    const btnApplyAiAvatar = document.getElementById('btnApplyAiAvatar');
+    let currentStyle = 'avataaars';
+
+    document.querySelectorAll('.style-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('.style-btn').forEach(b => b.classList.remove('active', 'btn-primary'));
+            document.querySelectorAll('.style-btn').forEach(b => b.classList.add('btn-light'));
+            this.classList.remove('btn-light');
+            this.classList.add('active', 'btn-primary');
+            currentStyle = this.dataset.style;
+            updateAiAvatar();
+        });
+    });
+
+    function updateAiAvatar() {
+        const seed = Math.random().toString(36).substring(7);
+        aiPreviewImg.src = `https://api.dicebear.com/7.x/${currentStyle}/svg?seed=${seed}`;
+    }
+
+    btnRegenerate.addEventListener('click', updateAiAvatar);
+
+    btnApplyAiAvatar.addEventListener('click', function() {
+        const avatarUrl = aiPreviewImg.src;
+        
+        Swal.fire({
+            title: 'Génération...',
+            allowOutsideClick: false,
+            didOpen: () => { Swal.showLoading(); }
+        });
+
+        fetch(avatarUrl)
+            .then(res => res.blob())
+            .then(blob => {
+                const file = new File([blob], "ai-avatar.svg", { type: "image/svg+xml" });
+                const dataTransfer = new DataTransfer();
+                dataTransfer.items.add(file);
+                const fileInput = document.querySelector('input[type="file"]');
+                fileInput.files = dataTransfer.files;
+                
+                const preview = document.getElementById('avatarPreview');
+                const placeholder = document.getElementById('avatarPlaceholder');
+                if (placeholder) placeholder.classList.add('d-none');
+                preview.classList.remove('d-none');
+                preview.src = avatarUrl;
+
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Avatar Prêt !',
+                    text: 'Sauvegardez pour finaliser.',
+                    timer: 1500,
+                    showConfirmButton: false
+                });
+
+                bootstrap.Modal.getInstance(document.getElementById('aiAvatarModal')).hide();
+            });
+    });
+});
+</script>
 {% endblock %}

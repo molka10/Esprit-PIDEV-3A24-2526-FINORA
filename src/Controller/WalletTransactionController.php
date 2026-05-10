@@ -78,6 +78,11 @@ public function add(Request $req, EntityManagerInterface $em): Response
         }
 
         $em->persist($transaction);
+        
+        // 🔥 Real-time Balance Sync
+        $newBalance = (float)$user->getBalance() + (float)$transaction->getMontant();
+        $user->setBalance((string)$newBalance);
+        
         $em->flush();
 
         return $this->redirectToRoute('transactions');
@@ -140,6 +145,11 @@ $transaction->setType($type);
         }
         
         $em->persist($transaction);
+
+        // 🔥 Real-time Balance Sync
+        $newBalance = (float)$user->getBalance() + (float)$transaction->getMontant();
+        $user->setBalance((string)$newBalance);
+
         $em->flush();
 
         return $this->redirectToRoute('transactions');

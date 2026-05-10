@@ -111,26 +111,82 @@
         padding: 15px;
         border: 1px solid rgba(124, 58, 237, 0.05);
     }
+
+    .floating-anim {
+        animation: floating 4s ease-in-out infinite;
+    }
+
+    @keyframes floating {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-15px); }
+    }
+
+    @keyframes floating {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-15px); }
+    }
+
+    .fw-black { font-weight: 900; }
 </style>
 {% endblock %}
 
 {% block body %}
-<!-- 🚀 Hero Section -->
-<section class="hero-section mb-5" style="background: var(--finora-gradient-soft); border-bottom: 1px solid rgba(124, 58, 237, 0.1); padding: 80px 0;">
-    <div class="container">
+<!-- 🤖 Professional AI Home Hero -->
+<section class="py-5 mb-5 position-relative overflow-hidden" style="background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%); border-radius: 0 0 50px 50px;">
+    <!-- Abstract background elements -->
+    <div class="position-absolute top-0 end-0 p-5 opacity-10">
+        <i class="bi bi-cpu-fill text-white" style="font-size: 300px;"></i>
+    </div>
+    <div class="container position-relative z-1 py-4">
         <div class="row align-items-center">
-            <div class="col-lg-7">
-                <div class="d-inline-flex align-items-center badge bg-primary bg-opacity-10 text-primary mb-3 px-3 py-2 rounded-pill">
-                    <i class="bi bi-stars me-2"></i>RECOMMANDATIONS IA
+            <div class="col-lg-6 text-white">
+                <div class="pe-lg-5">
+                    <div class="d-flex align-items-center mb-4">
+                        <div class="p-2 bg-white bg-opacity-10 rounded-circle me-3 border border-white border-opacity-10">
+                            <i class="bi bi-robot text-white fs-4"></i>
+                        </div>
+                        <span class="text-uppercase fw-bold text-white-50 small" style="letter-spacing: 3px;">Intelligence Artificielle Finora</span>
+                    </div>
+                    <h1 class="display-3 fw-black text-white mb-4" style="line-height: 1.1; letter-spacing: -2px;">
+                        Investissez avec <br><span class="text-primary-light" style="color: #a78bfa !important;">Précision.</span>
+                    </h1>
+                    <p class="fs-4 text-white-50 mb-5 fw-normal opacity-75">
+                        Laissez notre Robo-Advisor analyser vos données financières pour vous proposer les meilleures stratégies.
+                    </p>
+                    <div class="d-flex gap-3">
+                        <button type="button" class="btn btn-primary btn-lg px-5 py-3 rounded-pill fw-bold shadow-lg" style="background: #7c3aed; border: none;" data-bs-toggle="modal" data-bs-target="#roboAdvisorModal">
+                            Lancer le Robo-Advisor
+                        </button>
+                        <a href="{{ path('app_investment_index') }}" class="btn btn-outline-light btn-lg px-5 py-3 rounded-pill fw-bold border-opacity-25">
+                            Explorer le Marché
+                        </a>
+                    </div>
                 </div>
-                <h1 class="display-3 fw-bold mb-4" style="color: #1f1147;">Propulsez votre <span class="text-primary">Avenir</span></h1>
-                <p class="fs-4 text-muted mb-5">
-                    Le moteur de recommandation FINORA scanne des milliers d'opportunités pour vous proposer les plus rentables.
-                </p>
-                <div class="d-flex gap-3">
-                    <a href="{{ path('app_investment_index') }}" class="btn btn-primary btn-lg rounded-pill px-5 py-3 shadow-lg fw-bold">
-                        Explorer le marché
-                    </a>
+            </div>
+            <div class="col-lg-6 d-none d-lg-block">
+                <div class="position-relative">
+                    <!-- Glass Metric Cards -->
+                    <div class="card border-0 shadow-lg p-4 rounded-4 mb-4" style="background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1) !important; border-left: 5px solid #7c3aed !important;">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <small class="text-white-50 d-block mb-1">Précision Algorithmique</small>
+                                <h3 class="fw-bold mb-0 text-white">99.8%</h3>
+                            </div>
+                            <div style="color: #a78bfa;"><i class="bi bi-cpu fs-2"></i></div>
+                        </div>
+                    </div>
+                    <div class="card border-0 shadow-lg p-4 rounded-4 ms-lg-5" style="background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1) !important; border-left: 5px solid #10b981 !important;">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <small class="text-white-50 d-block mb-1">Analyse des Risques</small>
+                                <h3 class="fw-bold mb-0 text-white">Temps Réel</h3>
+                            </div>
+                            <div class="text-success"><i class="bi bi-shield-check fs-2"></i></div>
+                        </div>
+                    </div>
+                    
+                    <!-- Decorative Circle -->
+                    <div class="position-absolute top-50 start-50 translate-middle opacity-25" style="width: 400px; height: 400px; background: radial-gradient(circle, #7c3aed 0%, transparent 70%); filter: blur(50px); z-index: -1;"></div>
                 </div>
             </div>
         </div>
@@ -242,33 +298,23 @@
         {% endfor %}
     </div>
 </div>
-
-{% block javascripts %}
-{{ parent() }}
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const observerOptions = {
-            threshold: 0.1
-        };
-
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach((entry, index) => {
-                if (entry.isIntersecting) {
-                    // staggered animation
-                    setTimeout(() => {
-                        entry.target.classList.add('visible');
-                    }, index * 100);
-                    observer.unobserve(entry.target);
-                }
-            });
-        }, observerOptions);
-
-        document.querySelectorAll('.scroll-item').forEach(item => {
-            observer.observe(item);
-        });
-    });
-</script>
 {% endblock %}
 
-    {% include 'investment/_ai_chat_widget.html.twig' %}
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const observerOptions = { threshold: 0.1 };
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach((entry, index) => {
+                    if (entry.isIntersecting) {
+                        setTimeout(() => { entry.target.classList.add('visible'); }, index * 100);
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, observerOptions);
+            document.querySelectorAll('.scroll-item').forEach(item => { observer.observe(item); });
+        });
+    </script>
+    {% include 'investment/_robo_advisor_modal.html.twig' %}
 {% endblock %}

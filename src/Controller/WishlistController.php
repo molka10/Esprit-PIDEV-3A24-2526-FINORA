@@ -33,10 +33,20 @@ class WishlistController extends AbstractController
         $formations = $user->getWishlist();
 
         // 2. Bourse (BourseWishlist Entity)
-        $bourseItems = $em->getRepository(BourseWishlist::class)->findBy(['user' => $user]);
+        $bourseItems = $em->getRepository(BourseWishlist::class)->createQueryBuilder('bw')
+            ->join('bw.action', 'a')
+            ->where('bw.user = :user')
+            ->setParameter('user', $user)
+            ->getQuery()
+            ->getResult();
 
         // 3. Investment (InvestmentWishlist Entity)
-        $investmentItems = $em->getRepository(InvestmentWishlist::class)->findBy(['user' => $user]);
+        $investmentItems = $em->getRepository(InvestmentWishlist::class)->createQueryBuilder('iw')
+            ->join('iw.investment', 'i')
+            ->where('iw.user = :user')
+            ->setParameter('user', $user)
+            ->getQuery()
+            ->getResult();
 
         // 4. Wallet (WalletWishlist Entity)
         $walletItems = $em->getRepository(WalletWishlist::class)->findBy(['user' => $user->getId()]);

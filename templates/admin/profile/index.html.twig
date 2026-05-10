@@ -1,12 +1,173 @@
 {% extends 'admin/base.html.twig' %}
+
+{% block title %}Mon Profil Administrateur{% endblock %}
+
 {% block body %}
-<h2>My Profile</h2>
+<div class="container-fluid py-4">
+    <div class="row">
+        <!-- Sidebar Profile Card -->
+        <div class="col-xl-4 col-lg-5">
+            <div class="card border-0 shadow-sm mb-4 overflow-hidden" style="border-radius: 20px;">
+                <div class="card-header border-0 pt-5 pb-4 text-center" style="background: var(--finora-gradient-soft);">
+                    <div class="avatar avatar-xxl mb-3">
+                        {% if app.user.image %}
+                            <img class="avatar-img rounded-circle border border-4 border-white shadow" src="{{ asset('uploads/' ~ app.user.image) }}" alt="avatar" style="width: 120px; height: 120px; object-fit: cover;">
+                        {% else %}
+                            <img class="avatar-img rounded-circle border border-4 border-white shadow" src="https://ui-avatars.com/api/?name={{ app.user.username }}&background=7c3aed&color=fff&size=120" alt="avatar" style="width: 120px;">
+                        {% endif %}
+                    </div>
+                    <h4 class="text-white fw-bold mb-1">{{ app.user.username }}</h4>
+                    <span class="badge bg-danger bg-opacity-25 text-white px-3 py-1 rounded-pill small">Administrateur Principal</span>
+                </div>
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between mb-3">
+                        <span class="text-muted">Statut</span>
+                        <span class="text-success fw-bold"><i class="fas fa-check-circle me-1"></i>Actif</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-3">
+                        <span class="text-muted">Email</span>
+                        <span class="text-dark fw-bold">{{ app.user.email }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span class="text-muted">Membre depuis</span>
+                        <span class="text-dark fw-bold">{{ app.user.createdAt|date('M Y') }}</span>
+                    </div>
+                </div>
+                <div class="card-footer bg-light border-0 p-3">
+                    <a href="{{ path('app_profile_edit') }}" class="btn btn-primary w-100 rounded-pill shadow-sm">
+                        <i class="fas fa-edit me-2"></i>Modifier le Profil
+                    </a>
+                </div>
+            </div>
 
-<p><strong>Username:</strong> {{ app.user.username }}</p>
-<p><strong>Email:</strong> {{ app.user.email }}</p>
-<p><strong>Phone:</strong> {{ app.user.phone }}</p>
-<p><strong>Address:</strong> {{ app.user.address }}</p>
+            <!-- Quick Stats -->
+            <div class="card border-0 shadow-sm rounded-4 bg-dark text-white p-4">
+                <h5 class="fw-bold mb-3">Statistiques Admin</h5>
+                <div class="row text-center">
+                    <div class="col-6 mb-3">
+                        <h4 class="fw-bold text-primary mb-0">{{ app.user.appelOffres|length }}</h4>
+                        <span class="small opacity-50">Appels créés</span>
+                    </div>
+                    <div class="col-6 mb-3">
+                        <h4 class="fw-bold text-success mb-0">{{ app.user.balance|format_currency('TND') }}</h4>
+                        <span class="small opacity-50">Solde Wallet</span>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-<a href="{{ path('app_profile_edit') }}" class="btn">Edit Profile</a>
-<a href="{{ path('app_dashboard') }}" class="btn btn-secondary">Back</a>
+        <!-- Main Info Section -->
+        <div class="col-xl-8 col-lg-7">
+            <div class="card border-0 shadow-sm rounded-4 mb-4">
+                <div class="card-header bg-white border-0 p-4">
+                    <h4 class="fw-bold mb-0" style="color: #1f1147;"><i class="fas fa-user-shield text-primary me-2"></i>Informations Personnelles</h4>
+                </div>
+                <div class="card-body p-4">
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <div class="p-3 bg-light rounded-4">
+                                <label class="small text-muted text-uppercase fw-bold mb-1">Nom d'utilisateur</label>
+                                <p class="h6 mb-0">{{ app.user.username }}</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="p-3 bg-light rounded-4">
+                                <label class="small text-muted text-uppercase fw-bold mb-1">Adresse Email</label>
+                                <p class="h6 mb-0">{{ app.user.email }}</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="p-3 bg-light rounded-4">
+                                <label class="small text-muted text-uppercase fw-bold mb-1">Téléphone</label>
+                                <p class="h6 mb-0">{{ app.user.phone ?? 'Non renseigné' }}</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="p-3 bg-light rounded-4">
+                                <label class="small text-muted text-uppercase fw-bold mb-1">Adresse</label>
+                                <p class="h6 mb-0">{{ app.user.address ?? 'Non renseigné' }}</p>
+                            </div>
+                        </div>
+                        <div class="col-md-12">
+                            <div class="p-3 bg-light rounded-4">
+                                <label class="small text-muted text-uppercase fw-bold mb-1">Date de Naissance</label>
+                                <p class="h6 mb-0">{{ app.user.dateOfBirth ? app.user.dateOfBirth|date('d F Y') : 'Non renseigné' }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Security Features -->
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+                <div class="card-header bg-white border-0 p-4">
+                    <h4 class="fw-bold mb-0" style="color: #1f1147;"><i class="fas fa-lock text-warning me-2"></i>Sécurité du Compte</h4>
+                </div>
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center justify-content-between p-3 border rounded-4 mb-3">
+                        <div class="d-flex align-items-center">
+                            <div class="bg-warning bg-opacity-10 p-3 rounded-circle text-warning me-3">
+                                <i class="fas fa-shield-alt fs-5"></i>
+                            </div>
+                            <div>
+                                <h6 class="mb-0 fw-bold">Authentification à deux facteurs</h6>
+                                <p class="small text-muted mb-0">Ajoutez une couche de sécurité supplémentaire à votre compte admin.</p>
+                            </div>
+                        </div>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="2faSwitch" {% if app.user.twoFaEnabled %}checked{% endif %}>
+                        </div>
+                    </div>
+
+                    <div class="d-flex align-items-center justify-content-between p-3 border rounded-4">
+                        <div class="d-flex align-items-center">
+                            <div class="bg-primary bg-opacity-10 p-3 rounded-circle text-primary me-3">
+                                <i class="fas fa-envelope-open-text fs-5"></i>
+                            </div>
+                            <div>
+                                <h6 class="mb-0 fw-bold">Rapports Hebdomadaires</h6>
+                                <p class="small text-muted mb-0">Recevez un résumé par email de l'activité du dashboard.</p>
+                            </div>
+                        </div>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="digestSwitch" {% if app.user.emailDigestEnabled %}checked{% endif %}>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const switches = {
+        '2faSwitch': '{{ path("app_profile_2fa_toggle") }}',
+        'digestSwitch': '{{ path("app_profile_digest_toggle") }}'
+    };
+
+    Object.entries(switches).forEach(([id, url]) => {
+        const el = document.getElementById(id);
+        if (el) {
+            el.addEventListener('change', function() {
+                fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ enabled: this.checked })
+                }).then(res => res.json()).then(data => {
+                    if (data.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Mis à jour !',
+                            text: data.message,
+                            timer: 1500,
+                            showConfirmButton: false
+                        });
+                    }
+                });
+            });
+        }
+    });
+});
+</script>
 {% endblock %}

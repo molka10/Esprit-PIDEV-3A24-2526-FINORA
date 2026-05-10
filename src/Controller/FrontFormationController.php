@@ -290,9 +290,20 @@ final class FrontFormationController extends AbstractController
                 $transaction->setNomTransaction('Achat Formation: ' . $formation->getTitre());
                 
                 $entityManager->persist($transaction);
+                
+                // 🔥 Real-time Balance Sync
+                $newBalance = (float)$user->getBalance() + (float)$transaction->getMontant();
+                $user->setBalance((string)$newBalance);
             }
 
             $user->addPurchasedFormation($formation);
+
+            // 📅 TRACK PROGRESS & DEADLINE
+            $progress = new \App\Entity\UserFormationProgress();
+            $progress->setUser($user);
+            $progress->setFormation($formation);
+            $entityManager->persist($progress);
+
             $entityManager->flush();
         }
 

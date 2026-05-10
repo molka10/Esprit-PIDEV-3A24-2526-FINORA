@@ -138,20 +138,80 @@
         .text-primary, .text-decoration-none:hover {
             color: var(--finora-purple) !important;
         }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 0.2; }
+            50% { transform: scale(1.1); opacity: 0.3; }
+        }
+
+        .floating-anim {
+            animation: floating 4s ease-in-out infinite;
+        }
+
+        @keyframes floating {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
+        }
+
+        @keyframes floating {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
+        }
+
+        .fw-black { font-weight: 900; }
     </style>
 {% endblock %}
 
 {% block body %}
-    <div class="row g-4">
+    <!-- 🏢 Professional Fintech Hero -->
+    <section class="py-5 mb-5 position-relative overflow-hidden" style="background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%); border-radius: 0 0 50px 50px; margin-top: -24px; margin-left: -12px; margin-right: -12px;">
+        <div class="container position-relative z-1">
+            <div class="row align-items-center">
+                <div class="col-lg-7 text-white">
+                    <div class="d-inline-flex align-items-center mb-3 px-3 py-2 rounded-pill bg-white bg-opacity-10 text-white-50 fw-bold small border border-white border-opacity-10">
+                        <i class="bi bi-shield-check me-2"></i>PLATEFORME CERTIFIÉE SÉCURISÉE
+                    </div>
+                    <h1 id="guide-invest-title" class="display-5 fw-black text-white mb-2" style="letter-spacing: -2px;">Explorez les Opportunités</h1>
+                    <p class="text-white-50 mb-4 fw-normal opacity-75">Investissez dans l'économie réelle de demain avec le soutien de l'intelligence artificielle Finora.</p>
+                    <div class="d-flex gap-3">
+                        <a href="#projects" class="btn btn-primary px-4 py-2 rounded-pill fw-bold shadow-lg">Découvrir les projets</a>
+                        <a id="guide-invest-robo" href="{{ path('app_investment_robo_advisor') }}" class="btn btn-outline-light px-4 py-2 rounded-pill fw-bold border-2"><i class="bi bi-cpu me-2"></i>Robo-Advisor</a>
+                    </div>
+                    
+                    <div class="mt-5 d-flex gap-5">
+                        <div class="d-flex flex-column">
+                            <span class="h3 fw-black mb-0 text-white">{{ investments.getTotalItemCount() }}</span>
+                            <span class="small text-white-50 text-uppercase fw-bold ls-1" style="font-size: 0.65rem;">Projets Actifs</span>
+                        </div>
+                        <div class="vr bg-white opacity-10"></div>
+                        <div class="d-flex flex-column">
+                            <span class="h3 fw-black mb-0 text-success">12.4%</span>
+                            <span class="small text-white-50 text-uppercase fw-bold ls-1" style="font-size: 0.65rem;">Rendement Moyen</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-5 d-none d-lg-block">
+                    <div class="position-absolute top-50 start-50 translate-middle opacity-10" style="width: 500px; height: 500px; background: radial-gradient(circle, #7c3aed 0%, transparent 70%); filter: blur(80px); z-index: -1;"></div>
+                    <div class="text-center">
+                        <i class="bi bi-shop text-white opacity-10" style="font-size: 200px;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="row g-4" id="filters">
         <!-- Sidebar Filters -->
         <div class="col-lg-3">
             <div class="filter-sidebar shadow-sm">
                 <form id="investment-filter-form" method="get" action="{{ path('app_investment_index') }}">
                     <!-- RECHERCHE -->
-                    <h6 class="fw-bold mb-3 text-uppercase small text-primary" style="letter-spacing: 1px;">Recherche</h6>
-                    <div class="input-group mb-4">
-                        <span class="input-group-text bg-light border-0"><i class="bi bi-search"></i></span>
-                        <input type="text" name="search" class="form-control bg-light border-0" placeholder="Nom, lieu..." value="{{ app.request.query.get('search') }}">
+                    <div id="guide-invest-filters">
+                        <h6 class="fw-bold mb-3 text-uppercase small text-primary" style="letter-spacing: 1px;">Recherche & Filtres</h6>
+                        <div class="input-group mb-4">
+                            <span class="input-group-text bg-light border-0"><i class="bi bi-search"></i></span>
+                            <input type="text" name="search" class="form-control bg-light border-0" placeholder="Nom, lieu..." value="{{ app.request.query.get('search') }}">
+                        </div>
                     </div>
 
                     <!-- TRI -->
@@ -213,9 +273,14 @@
                     <p class="text-muted small mb-0">Découvrez les meilleures opportunités du moment</p>
                 </div>
                 {% if is_granted('ROLE_ENTREPRISE') %}
+                <div class="d-flex gap-2">
+                    <a id="guide-mgmt-export" href="{{ path('app_management_export_portfolio') }}" class="btn btn-outline-primary rounded-pill px-4 shadow-sm border-2">
+                        <i class="bi bi-file-earmark-pdf me-2"></i>Exporter (PDF)
+                    </a>
                     <a href="{{ path('app_investment_new') }}" class="btn btn-success rounded-pill px-4 shadow-sm">
                         <i class="bi bi-plus-circle me-2"></i>Publier un projet
                     </a>
+                </div>
                 {% endif %}
             </div>
 
@@ -455,4 +520,5 @@
 })();
 </script>
 {% endif %}
+    {% include 'investment/_robo_advisor_modal.html.twig' %}
 {% endblock %}

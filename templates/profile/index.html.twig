@@ -82,6 +82,67 @@
                     {% endif %}
                 </div>
 
+                <hr class="my-5">
+
+                <h5 class="mb-4 d-flex align-items-center">
+                    <i class="bi bi-envelope-check me-2 text-primary"></i> Double Authentification (2FA)
+                </h5>
+
+                <div class="p-4 rounded-4 border bg-light mb-3">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <h6 class="mb-1">Code par Email (2FA)</h6>
+                            <p class="small text-muted mb-0">Sécurisez votre compte avec un code envoyé par email.</p>
+                        </div>
+                        <div class="form-check form-switch form-check-lg">
+                            <input class="form-check-input" type="checkbox" id="twoFaToggle" {% if app.user.twoFaEnabled %}checked{% endif %} style="width: 3rem; height: 1.5rem; cursor: pointer;">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="p-4 rounded-4 border bg-light">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <h6 class="mb-1">Résumé Hebdomadaire</h6>
+                            <p class="small text-muted mb-0">Recevez chaque semaine un digest de vos activités et opportunités.</p>
+                        </div>
+                        <div class="form-check form-switch form-check-lg">
+                            <input class="form-check-input" type="checkbox" id="toggleDigest" {% if app.user.emailDigestEnabled %}checked{% endif %} style="width: 3rem; height: 1.5rem; cursor: pointer;">
+                        </div>
+                    </div>
+                </div>
+
+                <hr class="my-5">
+
+                <h5 class="mb-4 d-flex align-items-center">
+                    <i class="bi bi-laptop me-2 text-primary"></i> Appareils Connectés
+                </h5>
+
+                <div class="list-group list-group-flush border rounded-4 overflow-hidden mb-5">
+                    {% for session in app.user.userSessions %}
+                        <div class="list-group-item p-3 d-flex align-items-center justify-content-between">
+                            <div class="d-flex align-items-center">
+                                <div class="avatar avatar-sm bg-light text-primary rounded-circle me-3 d-flex align-items-center justify-content-center" style="width: 45px; height: 45px;">
+                                    {% if 'PC' in session.deviceName or 'Windows' in session.deviceName or 'Mac' in session.deviceName %}
+                                        <i class="bi bi-pc-display fs-5"></i>
+                                    {% else %}
+                                        <i class="bi bi-phone fs-5"></i>
+                                    {% endif %}
+                                </div>
+                                <div>
+                                    <h6 class="mb-0 small fw-bold">{{ session.deviceName }} {% if session.sessionId == app.session.id %}<span class="badge bg-success ms-2" style="font-size: 10px;">Cet appareil</span>{% endif %}</h6>
+                                    <p class="small text-muted mb-0" style="font-size: 11px;">{{ session.ipAddress }} • Dernier accès: {{ session.lastActivity|date('d/m H:i') }}</p>
+                                </div>
+                            </div>
+                            {% if session.sessionId != app.session.id %}
+                                <button class="btn btn-outline-danger btn-sm rounded-pill px-3 revoke-session" data-id="{{ session.id }}">Révoquer</button>
+                            {% endif %}
+                        </div>
+                    {% else %}
+                        <div class="p-4 text-center text-muted small">Aucun appareil enregistré.</div>
+                    {% endfor %}
+                </div>
+
                 {# Video & Canvas elements for webcam #}
                 <div id="webcamContainer" style="display:none; margin-top:30px; text-center: center;">
                     <div class="card bg-dark p-3 text-center d-inline-block shadow-lg" style="border-radius: 20px;">
@@ -115,8 +176,10 @@
                         <div class="fw-bold text-primary">Utilisateur</div>
                     </div>
                     <div class="col-6">
-                        <div class="text-muted small">Statut</div>
-                        <div class="fw-bold text-success">Actif</div>
+                        <div class="text-muted small">Score IA</div>
+                        <div class="fw-bold {% if averageAiScore >= 70 %}text-success{% elseif averageAiScore >= 40 %}text-warning{% else %}text-danger{% endif %}">
+                            {{ averageAiScore ? averageAiScore ~ '%' : 'N/A' }}
+                        </div>
                     </div>
                 </div>
             </div>
@@ -281,6 +344,107 @@ document.addEventListener('DOMContentLoaded', () => {
         faceConfig.style.display = 'block';
         captureBtn.innerHTML = '<i class="bi bi-camera me-1"></i> Capturer & Enregistrer';
     }
+
+    // --- 2FA Toggle ---
+    const toggle2FA = document.getElementById('twoFaToggle');
+    if (toggle2FA) {
+        toggle2FA.addEventListener('change', async function() {
+            const enabled = this.checked;
+            try {
+                const response = await fetch('{{ path("app_profile_2fa_toggle") }}', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ enabled: enabled })
+                });
+                const result = await response.json();
+                if (result.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: enabled ? '2FA Activé' : '2FA Désactivé',
+                        text: result.message,
+                        timer: 2000,
+                        showConfirmButton: false,
+                        toast: true,
+                        position: 'top-end'
+                    });
+                }
+            } catch (e) {
+                alert('Erreur lors de la modification des paramètres 2FA.');
+                this.checked = !enabled;
+            }
+        });
+    }
+
+    // 📧 Digest Toggle
+    const toggleDigest = document.getElementById('toggleDigest');
+    if (toggleDigest) {
+        toggleDigest.addEventListener('change', async function() {
+            const enabled = this.checked;
+            try {
+                const response = await fetch('{{ path("app_profile_digest_toggle") }}', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ enabled: enabled })
+                });
+                const data = await response.json();
+                if (data.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: data.message,
+                        timer: 1500,
+                        showConfirmButton: false,
+                        toast: true,
+                        position: 'top-end'
+                    });
+                }
+            } catch (e) {
+                this.checked = !enabled;
+                alert('Erreur lors de la mise à jour.');
+            }
+        });
+    }
+
+    // --- Revoke Session ---
+    const revokeBtns = document.querySelectorAll('.revoke-session');
+    revokeBtns.forEach(btn => {
+        btn.addEventListener('click', async function() {
+            const sessionId = this.getAttribute('data-id');
+            const row = this.closest('.list-group-item');
+            
+            const result = await Swal.fire({
+                title: 'Révoquer l\'accès ?',
+                text: "Cet appareil sera déconnecté immédiatement.",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc3545',
+                cancelButtonColor: '#6e7881',
+                confirmButtonText: 'Oui, révoquer',
+                cancelButtonText: 'Annuler'
+            });
+
+            if (result.isConfirmed) {
+                try {
+                    const response = await fetch('{{ path("app_profile_session_revoke") }}', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ id: sessionId })
+                    });
+                    const data = await response.json();
+                    if (data.success) {
+                        row.remove();
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Accès révoqué',
+                            timer: 1500,
+                            showConfirmButton: false
+                        });
+                    }
+                } catch (e) {
+                    alert('Erreur lors de la révocation.');
+                }
+            }
+        });
+    });
 });
 </script>
 </div>
