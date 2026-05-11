@@ -56,7 +56,7 @@
                     <div class="mb-3">
                         <label class="form-label">Image actuelle</label>
                         {% if formation.imageUrl %}
-                            <img src="{{ asset('uploads/formations/' ~ formation.imageUrl) }}" class="img-fluid rounded mb-2 d-block" style="max-height: 150px">
+                            <img src="{{ formation.imageUrl starts with 'http' ? formation.imageUrl : asset('uploads/formations/' ~ formation.imageUrl) }}" class="img-fluid rounded mb-2 d-block" style="max-height: 150px">
                         {% endif %}
                         {{ form_label(form.imageFile, "Remplacer l'image", {'label_attr': {'class': 'form-label small'}}) }}
                         {{ form_widget(form.imageFile, {'attr': {'class': 'form-control'}}) }}

@@ -146,7 +146,7 @@
                                 <td>
                                     {% if formation.imageUrl %}
                                         <img
-                                            src="{{ asset('uploads/formations/' ~ formation.imageUrl) }}"
+                                            src="{{ formation.imageUrl starts with 'http' ? formation.imageUrl : asset('uploads/formations/' ~ formation.imageUrl) }}"
                                             alt="{{ formation.titre }}"
                                             class="table-thumb"
                                         >

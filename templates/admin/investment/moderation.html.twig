@@ -157,7 +157,7 @@
                 <div class="card h-100 border-0 shadow-sm moderation-card p-2">
                     <div class="project-image-wrapper">
                         {% if investment.imageUrl %}
-                            <img src="{{ asset('uploads/investments/' ~ investment.imageUrl) }}" class="img-fluid" style="height: 220px; width: 100%; object-fit: cover;" alt="">
+                            <img src="{{ investment.imageUrl starts with 'http' ? investment.imageUrl : asset('uploads/investments/' ~ investment.imageUrl) }}" class="img-fluid" style="height: 220px; width: 100%; object-fit: cover;" alt="">
                         {% else %}
                             <div class="bg-light d-flex align-items-center justify-content-center" style="height: 220px;">
                                 <i class="bi bi-image display-4 text-muted"></i>

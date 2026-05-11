@@ -336,7 +336,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private Collection $wishlist;
 
     #[ORM\ManyToMany(targetEntity: Formation::class, inversedBy: 'purchasedBy')]
-    #[ORM\JoinTable(name: 'user_formation_purchased')]
+    #[ORM\JoinTable(name: 'user_formation_progress')]
     private Collection $purchasedFormations;
 
     public function getWishlist(): Collection

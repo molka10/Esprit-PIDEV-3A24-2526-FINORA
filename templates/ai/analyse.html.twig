@@ -113,6 +113,11 @@
 {% endblock %}
 
 {% block body %}
+    {% set colorMap = {
+        'low': '#16a34a',
+        'medium': '#f59e0b',
+        'high': '#dc2626'
+    } %}
 
 
     {# ── NEW: Financial Health Score Meter ── #}

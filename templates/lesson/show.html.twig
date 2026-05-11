@@ -645,6 +645,52 @@
                             </div>
                         </div>
 
+                        {# --- Flashcard Section --- #}
+                        <div class="flashcard-section" id="flashcard-root">
+                            <div class="d-flex justify-content-between align-items-center mb-4">
+                                <div>
+                                    <h3 class="h4 fw-bold mb-1">🧠 Flashcards Smart IA</h3>
+                                    <p class="text-muted small mb-0">Révisez les points clés de la leçon avec des cartes générées par l'IA.</p>
+                                </div>
+                                <button class="btn btn-sm btn-outline-primary rounded-pill px-3" id="btn-regenerate-flashcards">
+                                    <i class="fas fa-sync-alt me-1"></i> Régénérer
+                                </button>
+                            </div>
+
+                            <div id="flashcards-loading" class="text-center py-5 d-none">
+                                <div class="spinner-border text-primary mb-3" role="status"></div>
+                                <p class="text-muted">L'IA prépare vos cartes de révision...</p>
+                            </div>
+
+                            <div id="flashcards-content" class="d-none">
+                                <div class="flashcard-container" id="flashcard-card">
+                                    <div class="flashcard-inner">
+                                        <div class="flashcard-front" id="fc-question">Question ?</div>
+                                        <div class="flashcard-back" id="fc-answer">Réponse !</div>
+                                    </div>
+                                </div>
+
+                                <div class="flashcard-nav">
+                                    <button class="btn btn-icon btn-light rounded-circle shadow-sm" id="fc-prev">
+                                        <i class="fas fa-chevron-left"></i>
+                                    </button>
+                                    <div id="fc-dots" class="d-flex gap-1"></div>
+                                    <button class="btn btn-icon btn-light rounded-circle shadow-sm" id="fc-next">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </button>
+                                </div>
+                                <p class="text-center text-muted small mt-3">Cliquez sur la carte pour voir la réponse</p>
+                            </div>
+
+                            <div id="flashcards-empty" class="text-center py-5">
+                                <img src="https://cdn-icons-png.flaticon.com/512/3406/3406828.png" width="60" class="mb-3 opacity-50">
+                                <p class="text-muted">Prêt à tester vos connaissances ?</p>
+                                <button class="btn btn-primary rounded-pill px-4" id="btn-start-flashcards">
+                                    Générer les Flashcards
+                                </button>
+                            </div>
+                        </div>
+
                         {# --- TTS Premium Player --- #}
                         <div class="tts-player" id="tts-player">
                             <div class="tts-player-header">
@@ -1969,6 +2015,71 @@
         if (prompt) sendMessage(prompt);
     });
 })();
+</script>
+
+<script>
+    (function() {
+        const lessonId = {{ lesson.id }};
+        const emptyState = document.getElementById('flashcards-empty');
+        const loadingState = document.getElementById('flashcards-loading');
+        const contentState = document.getElementById('flashcards-content');
+        const cardEl = document.getElementById('flashcard-card');
+        const qEl = document.getElementById('fc-question');
+        const aEl = document.getElementById('fc-answer');
+        const dotsEl = document.getElementById('fc-dots');
+        const btnStart = document.getElementById('btn-start-flashcards');
+        const btnRegen = document.getElementById('btn-regenerate-flashcards');
+        const btnPrev = document.getElementById('fc-prev');
+        const btnNext = document.getElementById('fc-next');
+
+        let flashcards = [];
+        let currentIndex = 0;
+
+        async function loadFlashcards(regenerate = false) {
+            if (!emptyState || !loadingState || !contentState) return;
+            emptyState.classList.add('d-none');
+            contentState.classList.add('d-none');
+            loadingState.classList.remove('d-none');
+            try {
+                const res = await fetch(regenerate ? `/api/flashcards/lesson/${lessonId}/regenerate` : `/api/flashcards/lesson/${lessonId}`, { method: regenerate ? 'POST' : 'GET' });
+                flashcards = await res.json();
+                if (flashcards.length > 0) {
+                    renderCard(0);
+                    loadingState.classList.add('d-none');
+                    contentState.classList.remove('d-none');
+                } else {
+                    loadingState.classList.add('d-none');
+                    emptyState.classList.remove('d-none');
+                }
+            } catch (e) {
+                loadingState.classList.add('d-none');
+                emptyState.classList.remove('d-none');
+            }
+        }
+
+        function renderCard(index) {
+            currentIndex = index;
+            if (cardEl) cardEl.classList.remove('flipped');
+            if (qEl) qEl.textContent = flashcards[index].q;
+            if (aEl) aEl.textContent = flashcards[index].a;
+            if (dotsEl) {
+                dotsEl.innerHTML = '';
+                flashcards.forEach((_, i) => {
+                    const dot = document.createElement('div');
+                    dot.className = `flashcard-dot ${i === index ? 'active' : ''}`;
+                    dotsEl.appendChild(dot);
+                });
+            }
+            if (btnPrev) btnPrev.disabled = index === 0;
+            if (btnNext) btnNext.disabled = index === flashcards.length - 1;
+        }
+
+        if (cardEl) cardEl.addEventListener('click', () => cardEl.classList.toggle('flipped'));
+        if (btnPrev) btnPrev.addEventListener('click', () => currentIndex > 0 && renderCard(currentIndex - 1));
+        if (btnNext) btnNext.addEventListener('click', () => currentIndex < flashcards.length - 1 && renderCard(currentIndex + 1));
+        if (btnStart) btnStart.addEventListener('click', () => loadFlashcards());
+        if (btnRegen) btnRegen.addEventListener('click', () => loadFlashcards(true));
+    })();
 </script>
 
 {% endblock %}

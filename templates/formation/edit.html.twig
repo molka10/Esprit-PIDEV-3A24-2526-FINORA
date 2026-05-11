@@ -66,7 +66,7 @@
                 {% if formation.imageUrl %}
                     <div class="mb-3">
                         <label class="form-label">Image actuelle</label><br>
-                        <img src="{{ asset('uploads/formations/' ~ formation.imageUrl) }}" alt="{{ formation.titre }}" style="max-width: 220px; border-radius: 12px;">
+                        <img src="{{ formation.imageUrl starts with 'http' ? formation.imageUrl : asset('uploads/formations/' ~ formation.imageUrl) }}" alt="{{ formation.titre }}" style="max-width: 220px; border-radius: 12px;">
                     </div>
                 {% endif %}
 

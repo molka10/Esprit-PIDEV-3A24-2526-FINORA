@@ -151,13 +151,29 @@ class MarketController extends AbstractController
             try {
                 $user = $this->getUser();
                 if (!$user instanceof User) {
+                    if ($request->headers->get('X-Requested-With') === 'XMLHttpRequest') {
+                        return new \Symfony\Component\HttpFoundation\JsonResponse(['error' => 'Not authenticated'], 401);
+                    }
                     return $this->redirectToRoute('app_login');
                 }
                 $transaction = $this->transactionService->executerTrade('ACHAT', $action->getId(), (int)$quantite, $user);
+
+                // AJAX call: return JSON with new balance
+                if ($request->headers->get('X-Requested-With') === 'XMLHttpRequest') {
+                    $newBalance = $this->walletBalanceService->calculateUserBalance($user->getId());
+                    return new \Symfony\Component\HttpFoundation\JsonResponse([
+                        'success'    => true,
+                        'balance'    => round($newBalance, 2),
+                        'message'    => 'Achat confirmé !',
+                        'redirectTo' => $this->generateUrl('app_market_confirmation', ['id' => $transaction->getId()]),
+                    ]);
+                }
                 return $this->redirectToRoute('app_market_confirmation', ['id' => $transaction->getId()]);
 
             } catch (\Exception $e) {
-                // Flash message for the SweetAlert popup
+                if ($request->headers->get('X-Requested-With') === 'XMLHttpRequest') {
+                    return new \Symfony\Component\HttpFoundation\JsonResponse(['error' => $e->getMessage()], 400);
+                }
                 $this->addFlash('danger', '❌ ' . $e->getMessage());
                 return $this->redirectToRoute('app_market');
             }
@@ -182,12 +198,28 @@ class MarketController extends AbstractController
             try {
                 $user = $this->getUser();
                 if (!$user instanceof User) {
+                    if ($request->headers->get('X-Requested-With') === 'XMLHttpRequest') {
+                        return new \Symfony\Component\HttpFoundation\JsonResponse(['error' => 'Not authenticated'], 401);
+                    }
                     return $this->redirectToRoute('app_login');
                 }
                 $transaction = $this->transactionService->executerTrade('VENTE', $action->getId(), (int)$quantite, $user);
+
+                if ($request->headers->get('X-Requested-With') === 'XMLHttpRequest') {
+                    $newBalance = $this->walletBalanceService->calculateUserBalance($user->getId());
+                    return new \Symfony\Component\HttpFoundation\JsonResponse([
+                        'success'    => true,
+                        'balance'    => round($newBalance, 2),
+                        'message'    => 'Vente confirmée !',
+                        'redirectTo' => $this->generateUrl('app_market_confirmation', ['id' => $transaction->getId()]),
+                    ]);
+                }
                 return $this->redirectToRoute('app_market_confirmation', ['id' => $transaction->getId()]);
 
             } catch (\Exception $e) {
+                if ($request->headers->get('X-Requested-With') === 'XMLHttpRequest') {
+                    return new \Symfony\Component\HttpFoundation\JsonResponse(['error' => $e->getMessage()], 400);
+                }
                 $this->addFlash('danger', '❌ ' . $e->getMessage());
                 return $this->redirectToRoute('app_market');
             }

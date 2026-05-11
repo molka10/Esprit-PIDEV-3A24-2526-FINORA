@@ -902,10 +902,13 @@
         </div>
 
         {% if is_granted('ROLE_ADMIN') %}
-        <div class="sidebar-section mt-4 pt-4 border-top">
+        <div class="sidebar-section mt-4 pt-4 border-top" id="admin-sidebar-section">
             <h6 class="text-uppercase xsmall text-muted fw-bold mb-3 px-2" style="font-size: 0.65rem; letter-spacing: 1.5px;">Administration</h6>
             <a href="{{ path('app_admin') }}" class="sidebar-nav-link text-danger border border-danger border-opacity-10">
                 <i class="bi bi-shield-lock-fill"></i> Panel Admin
+            </a>
+            <a href="{{ path('app_admin_bourse_transactions') }}" class="sidebar-nav-link py-2 small fw-normal">
+                <i class="bi bi-list-check me-2"></i> Audit Transactions
             </a>
         </div>
         {% endif %}
@@ -1096,7 +1099,7 @@
                     <ul class="dropdown-menu border-0 shadow-lg mt-0 p-2" style="border-radius: 16px; min-width: 240px;">
                         <li class="px-3 py-3 mb-2 rounded-4" style="background: #f8fafc;">
                             <div class="small text-muted mb-1 text-uppercase fw-bold" style="font-size: 0.65rem; letter-spacing: 0.5px;">Solde Disponible</div>
-                            <div class="h5 mb-0 text-primary fw-bold">{{ wallet_balance()|format_currency }}</div>
+                            <div id="header-wallet-balance" class="h5 mb-0 text-primary fw-bold" data-raw="{{ wallet_balance() }}">{{ wallet_balance()|format_currency }}</div>
                         </li>
                         <li><a class="dropdown-item rounded-3 mb-1" href="{{ path('dashboard') }}">Mon Wallet (Dashboard)</a></li>
                         <li><a class="dropdown-item rounded-3 mb-1" href="{{ path('category_list') }}">Mes Catégories</a></li>

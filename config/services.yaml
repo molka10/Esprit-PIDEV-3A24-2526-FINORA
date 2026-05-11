@@ -56,6 +56,10 @@ services:
         arguments:
             $groqApiKey: '%groq_api_key%'
 
+    App\Service\FlashcardGeneratorService:
+        arguments:
+            $groqApiKey: '%groq_api_key%'
+
     App\Service\SpeechToTextService:
         arguments:
             $apiKey: '%tts_api_key%'

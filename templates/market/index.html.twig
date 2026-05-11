@@ -923,7 +923,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 <div class="card border-0 shadow-sm" style="border-radius: 24px; overflow: hidden; background: #ffffff;">
     <div class="card-header p-4 d-flex justify-content-between align-items-center border-0" style="background: transparent;">
-        <h4 class="mb-0 text-dark fw-bolder" style="letter-spacing:-0.5px;"><i class="bi bi-grid-3x3-gap-fill me-2" style="color:#7c3aed;"></i> Cours des Actions <span class="info-trigger" data-bs-toggle="tooltip" title="Liste détaillée de toutes les entreprises cotées. Cliquez sur une action pour trader.">?</span></h4>
+        <h4 class="mb-0 text-dark fw-bolder" style="letter-spacing:-0.5px;"><i class="bi bi-graph-up-arrow me-2" style="color:#7c3aed;"></i> Tendances du Marché <span class="info-trigger" data-bs-toggle="tooltip" title="Liste détaillée de toutes les entreprises cotées. Cliquez sur une action pour trader.">?</span></h4>
         <span class="live-badge shadow-sm" style="background:#f1f5f9; color:#475569; padding: 6px 14px; border-radius: 20px;"><span class="live-dot" style="background:#10b981;"></span> EN TEMPS RÉEL</span>
     </div>
     <div class="card-body p-4">
@@ -945,8 +945,8 @@ document.addEventListener('DOMContentLoaded', function() {
                             {% else %}
                                 <span class="change-down"><i class="bi bi-caret-down-fill me-1"></i>-{{ variation|number_format(2) }}%</span>
                             {% endif %}
-                              <button class="watchlist-star me-2" data-id="{{ action.id|default(0) }}" onclick="toggleWatchlist({{ action.id|default(0) }}, '{{ action.symbole }}')" title="Suivre cette action">
-                                 <i class="bi bi-star"></i>
+                              <button class="watchlist-star me-2" data-id="{{ action.id|default(0) }}" onclick="toggleWatchlist({{ action.id|default(0) }}, '{{ action.symbole }}')" title="Ajouter aux favoris">
+                                 <i class="bi bi-heart heart-icon" style="color: #cbd5e1; transition: all 0.3s;"></i>
                              </button>
                              <button class="btn btn-sm p-0 border-0" onclick="setPriceAlert({{ action.id }}, '{{ action.symbole }}', {{ action.prixUnitaire }})" title="Définir une alerte de prix" style="font-size: 1.2rem; background:transparent; color: #f59e0b;">
                                  <i class="bi bi-bell-fill"></i>
@@ -1093,7 +1093,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <button class="exchange-floating-trigger" id="exchangeFloatingTrigger" onclick="toggleExchangePanel()"><i class="bi bi-currency-exchange"></i></button>
 
 <div class="watchlist-toast" id="watchlistToast">
-    <i class="bi bi-star-fill toast-icon add" id="toastIcon"></i>
+    <i class="bi bi-heart-fill toast-icon add" id="toastIcon"></i>
     <span id="toastMsg"></span>
 </div>
 
@@ -1188,6 +1188,100 @@ function updateBuyTotal(id, price) {
 function updateSellTotal(id, price) {
     var qty = document.getElementById('sellQty' + id).value;
     document.getElementById('sellTotal' + id).textContent = (qty ? (qty * price).toFixed(2) : '0.00') + ' TND';
+}
+
+/* ═══ LIVE BALANCE REFRESH ═══ */
+function refreshWalletBalance() {
+    fetch('{{ path('api_balance') }}', { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+        .then(r => r.json())
+        .then(data => {
+            const el = document.getElementById('header-wallet-balance');
+            if (!el) return;
+            // Animate the change with a quick flash
+            el.style.transition = 'opacity 0.2s';
+            el.style.opacity = '0';
+            setTimeout(() => {
+                el.textContent = data.formatted;
+                el.dataset.raw = data.raw;
+                el.style.opacity = '1';
+                // Pulse green to signal update
+                el.style.color = '#22c55e';
+                setTimeout(() => { el.style.color = ''; }, 1200);
+            }, 200);
+        })
+        .catch(() => {}); // Fail silently
+}
+
+/* ═══ AJAX BUY / SELL FORMS ═══ */
+document.addEventListener('DOMContentLoaded', function() {
+    // Intercept all buy + sell modal forms
+    document.querySelectorAll('form[action*="/buy/"], form[action*="/sell/"]').forEach(function(form) {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const actionUrl  = form.getAttribute('action');
+            const formData   = new FormData(form);
+            const modalEl    = form.closest('.modal');
+            const confirmBtn = form.querySelector('button[type="submit"]');
+            const isBuy      = actionUrl.includes('/buy/');
+
+            // Show loading state on button
+            if (confirmBtn) {
+                confirmBtn.disabled = true;
+                confirmBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Traitement...';
+            }
+
+            fetch(actionUrl, {
+                method: 'POST',
+                body: formData,
+                headers: { 'X-Requested-With': 'XMLHttpRequest' },
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Close the modal
+                    if (modalEl) {
+                        const bsModal = bootstrap.Modal.getInstance(modalEl);
+                        if (bsModal) bsModal.hide();
+                    }
+                    // Update balance in navbar instantly
+                    refreshWalletBalance();
+                    // Show success toast
+                    showTradeToast(isBuy ? '✅ Achat confirmé !' : '✅ Vente confirmée !', 'success');
+                } else {
+                    showTradeToast('❌ ' + (data.error || 'Erreur lors de la transaction'), 'danger');
+                }
+            })
+            .catch(() => {
+                showTradeToast('❌ Erreur de connexion au serveur.', 'danger');
+            })
+            .finally(() => {
+                if (confirmBtn) {
+                    confirmBtn.disabled = false;
+                    confirmBtn.innerHTML = isBuy
+                        ? '<i class="bi bi-check-circle me-1"></i> Confirmer l\'achat'
+                        : '<i class="bi bi-check-circle me-1"></i> Confirmer la vente';
+                }
+            });
+        });
+    });
+});
+
+/* Trade toast notification */
+function showTradeToast(msg, type) {
+    let toast = document.getElementById('tradeToast');
+    if (!toast) {
+        toast = document.createElement('div');
+        toast.id = 'tradeToast';
+        toast.style.cssText = 'position:fixed;bottom:24px;right:24px;z-index:9999;padding:14px 22px;border-radius:14px;font-weight:700;font-size:14px;box-shadow:0 8px 30px rgba(0,0,0,0.15);transition:all 0.3s;';
+        document.body.appendChild(toast);
+    }
+    const colors = { success: '#22c55e', info: '#7c3aed', danger: '#ef4444' };
+    toast.style.background = colors[type] || '#22c55e';
+    toast.style.color = '#fff';
+    toast.textContent = msg;
+    toast.style.opacity = '1';
+    toast.style.transform = 'translateY(0)';
+    setTimeout(() => { toast.style.opacity = '0'; toast.style.transform = 'translateY(10px)'; }, 3000);
 }
 
 /* ═══ ASSISTANT IA ═══ */
@@ -1457,10 +1551,11 @@ function updateWatchlistUI() {
             var id = parseInt(btn.dataset.id);
             if (list.indexOf(id) > -1) {
                 btn.classList.add('active');
-                btn.querySelector('i').className = 'bi bi-star-fill';
+                btn.querySelector('i').className = 'bi bi-heart-fill text-danger';
             } else {
                 btn.classList.remove('active');
-                btn.querySelector('i').className = 'bi bi-star';
+                btn.querySelector('i').className = 'bi bi-heart';
+                btn.querySelector('i').style.color = '#cbd5e1';
             }
         });
         var badge = document.getElementById('watchlistCount');
@@ -1470,7 +1565,7 @@ function updateWatchlistUI() {
 function showToast(msg, type) {
     var toast = document.getElementById('watchlistToast');
     var icon = document.getElementById('toastIcon');
-    icon.className = 'bi bi-star-fill toast-icon ' + type;
+    icon.className = 'bi bi-heart-fill toast-icon ' + type;
     document.getElementById('toastMsg').textContent = msg;
     toast.classList.add('show');
     setTimeout(function() { toast.classList.remove('show'); }, 2200);

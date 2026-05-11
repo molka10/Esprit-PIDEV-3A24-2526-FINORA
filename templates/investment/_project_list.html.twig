@@ -11,15 +11,7 @@
                     <span class="badge rounded-pill bg-success px-3 py-2 shadow-sm" style="font-size: 0.65rem; background: #10b981 !important;">EN COURS</span>
                 </div>
 
-                {% if app.user and investment.status == 'ACTIVE' %}
-                    <div class="position-absolute top-0 end-0 p-3">
-                        <button class="wishlist-toggle-btn d-flex align-items-center justify-content-center shadow-sm"
-                                data-investment-id="{{ investment.id }}"
-                                style="border-radius:50%;width:35px;height:35px;background:white;border:none;cursor:pointer;z-index:10;transition:transform 0.2s ease;">
-                            <i class="bi bi-heart heart-icon" id="heart-icon-{{ investment.id }}" style="color:#e53e3e;font-size:1rem;"></i>
-                        </button>
-                    </div>
-                {% endif %}
+
             </div>
             
             <!-- Catalog Info -->

@@ -67,7 +67,7 @@
                             <div class="d-flex align-items-center">
                                 <div class="avatar avatar-lg me-2">
                                     {% if formation.imageUrl %}
-                                        <img class="avatar-img rounded" src="{{ asset('uploads/formations/' ~ formation.imageUrl) }}" alt="">
+                                        <img class="avatar-img rounded" src="{{ formation.imageUrl starts with 'http' ? formation.imageUrl : asset('uploads/formations/' ~ formation.imageUrl) }}" alt="">
                                     {% else %}
                                         <div class="avatar-img rounded bg-primary d-flex align-items-center justify-content-center text-white fw-bold">F</div>
                                     {% endif %}

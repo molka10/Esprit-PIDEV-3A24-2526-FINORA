@@ -71,6 +71,8 @@ class AIController extends AbstractController
             'expenses' => round($prevExpenses, 2),
             'balance'  => round($prevIncome - $prevExpenses, 2)
         ];
+        $result['debugPrevMonth'] = $prevMonth;
+        $result['debugPrevYear'] = $prevYear;
 
         return $this->render('ai/analyse.html.twig', [
             'data' => $result

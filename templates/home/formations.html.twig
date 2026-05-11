@@ -105,7 +105,7 @@
                                 <div class="carousel-item {{ loop.first ? 'active' : '' }}" data-bs-interval="5000">
                                     <div class="position-relative h-400px h-md-500px bg-dark">
                                         {% if best.imageUrl %}
-                                            <img src="{{ asset('uploads/formations/' ~ best.imageUrl) }}" class="d-block w-100 h-100 transition-all" style="object-fit: cover; opacity: 0.6; filter: brightness(0.7);" alt="{{ best.titre }}">
+                                            <img src="{{ best.imageUrl starts with 'http' ? best.imageUrl : asset('uploads/formations/' ~ best.imageUrl) }}" class="d-block w-100 h-100 transition-all" style="object-fit: cover; opacity: 0.6; filter: brightness(0.7);" alt="{{ best.titre }}">
                                         {% else %}
                                             <img src="{{ asset('assets/images/courses/4by3/16.jpg') }}" class="d-block w-100 h-100 transition-all" style="object-fit: cover; opacity: 0.6; filter: brightness(0.7);" alt="{{ best.titre }}">
                                         {% endif %}

@@ -19,7 +19,7 @@
                         <div class="formation-hero-media-wrapper">
                             {% if formation.imageUrl %}
                                 <img
-                                    src="{{ asset('uploads/formations/' ~ formation.imageUrl) }}"
+                                    src="{{ formation.imageUrl starts with 'http' ? formation.imageUrl : asset('uploads/formations/' ~ formation.imageUrl) }}"
                                     alt="{{ formation.titre }}"
                                     class="formation-hero-media"
                                 >
@@ -329,87 +329,200 @@
                 </style>
             {% endif %}
 
-            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
-                <div>
-                    <h2 class="h3 mb-1 formation-section-title">Lessons de cette formation</h2>
-                    <p class="text-muted mb-0">Découvrez les lessons incluses dans ce parcours.</p>
-                </div>
-                <span class="lesson-count-badge">{{ lessons|length }} lesson(s)</span>
-            </div>
+            {% if isPurchased %}
+                <div class="row g-5 mt-4">
+                    <div class="col-lg-7">
+                        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+                            <div>
+                                <h2 class="h3 mb-1 formation-section-title">Lessons de cette formation</h2>
+                                <p class="text-muted mb-0">Découvrez les lessons incluses dans ce parcours.</p>
+                            </div>
+                            <span class="lesson-count-badge">{{ lessons|length }} lesson(s)</span>
+                        </div>
 
-            {% if lessons|length > 0 %}
+                        {% if lessons|length > 0 %}
+                            <div class="row g-4">
+                                {% for lesson in lessons %}
+                                    <div class="col-md-6">
+                                        {# (Keep the lesson card content as is, just wrapped in col-md-6 now) #}
+                                        <div class="card lesson-card border-0 h-100">
+                                            <div class="thumb">
+                                                {% if lesson.videoUrl and lesson.youTubeVideoId %}
+                                                    <img src="https://img.youtube.com/vi/{{ lesson.youTubeVideoId }}/hqdefault.jpg" alt="{{ lesson.titre }}">
+                                                    <div class="thumb-overlay"></div>
+                                                    <div class="play-badge">▶</div>
+                                                {% elseif lesson.videoUrl and lesson.isUploadedVideo %}
+                                                    <div class="fallback with-video">▶ Vidéo</div>
+                                                    <div class="thumb-overlay"></div>
+                                                    <div class="play-badge">▶</div>
+                                                {% else %}
+                                                    <div class="fallback">FINORA</div>
+                                                    <div class="thumb-overlay soft"></div>
+                                                {% endif %}
+                                                <div class="badge-order">Leçon {{ '%02d'|format(lesson.ordre) }}</div>
+                                            </div>
+                                            <div class="card-body d-flex flex-column">
+                                                <div class="mb-2 d-flex flex-wrap gap-2">
+                                                    <span class="mini-chip duration-chip">⏱ {{ lesson.dureeMinutes }} min</span>
+                                                </div>
+                                                <h5 class="fw-bold lesson-title">{{ lesson.titre }}</h5>
+                                                <p class="text-muted small flex-grow-1 lesson-text">
+                                                    {{ lesson.contenu ? lesson.contenu|slice(0, 80) ~ '...' : 'Pas de contenu' }}
+                                                </p>
+                                                <div class="d-flex justify-content-between align-items-center mt-3">
+                                                    <span class="duration-label">Ordre {{ lesson.ordre }}</span>
+                                                    <a href="{{ path('app_lesson_show', {'id': lesson.id}) }}" class="btn btn-sm btn-primary lesson-btn">Accéder</a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="col-lg-5">
+                        <div class="study-group-card" id="study-group-root">
+                            <div class="chat-header">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="icon-md bg-white bg-opacity-20 rounded-circle d-flex align-items-center justify-content-center" style="width: 45px; height: 45px;">
+                                        <i class="fas fa-users fs-5 text-white"></i>
+                                    </div>
+                                    <div>
+                                        <h4 class="h6 fw-bold mb-0 text-white">Groupe d'étude</h4>
+                                        <p class="small mb-0 text-white text-opacity-75" id="study-group-name">Chargement...</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="chat-messages" id="chat-messages">
+                                <div class="text-center py-5">
+                                    <div class="spinner-border text-primary" role="status"></div>
+                                </div>
+                            </div>
+
+                            <div class="chat-input-area">
+                                <input type="text" class="chat-input" id="chat-input" placeholder="Partagez vos réflexions..." autocomplete="off">
+                                <button class="btn-send-chat" id="btn-send-chat">
+                                    <i class="fas fa-paper-plane"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% else %}
+                {# Original logic for non-purchased users #}
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+                    <div>
+                        <h2 class="h3 mb-1 formation-section-title">Lessons de cette formation</h2>
+                        <p class="text-muted mb-0">Découvrez les lessons incluses dans ce parcours.</p>
+                    </div>
+                    <span class="lesson-count-badge">{{ lessons|length }} lesson(s)</span>
+                </div>
                 <div class="row g-4">
                     {% for lesson in lessons %}
                         <div class="col-md-6 col-xl-4">
-                            <div class="card lesson-card border-0 h-100 {% if not isPurchased %}locked-lesson{% endif %}">
-
+                            <div class="card lesson-card border-0 h-100 locked-lesson">
                                 <div class="thumb">
-                                    {% if lesson.videoUrl and lesson.youTubeVideoId %}
-                                        <img src="https://img.youtube.com/vi/{{ lesson.youTubeVideoId }}/hqdefault.jpg" alt="{{ lesson.titre }}">
-                                        <div class="thumb-overlay"></div>
-                                        <div class="play-badge">{% if isPurchased %}▶{% else %}<i class="bi bi-lock-fill"></i>{% endif %}</div>
-                                    {% elseif lesson.videoUrl and lesson.isUploadedVideo %}
-                                        <div class="fallback with-video">▶ Vidéo</div>
-                                        <div class="thumb-overlay"></div>
-                                        <div class="play-badge">{% if isPurchased %}▶{% else %}<i class="bi bi-lock-fill"></i>{% endif %}</div>
-                                    {% else %}
-                                        <div class="fallback">FINORA</div>
-                                        <div class="thumb-overlay soft"></div>
-                                        {% if not isPurchased %}
-                                            <div class="play-badge"><i class="bi bi-lock-fill"></i></div>
-                                        {% endif %}
-                                    {% endif %}
-
-                                    <div class="badge-order">
-                                        Leçon {{ '%02d'|format(lesson.ordre) }}
-                                    </div>
-
-                                    {% if lesson.videoUrl %}
-                                        <div class="badge-video">Vidéo</div>
-                                    {% endif %}
+                                    <div class="fallback">FINORA</div>
+                                    <div class="play-badge"><i class="bi bi-lock-fill"></i></div>
                                 </div>
-
-                                <div class="card-body d-flex flex-column">
-                                    <div class="mb-2 d-flex flex-wrap gap-2">
-                                        <span class="mini-chip duration-chip">⏱ {{ lesson.dureeMinutes }} min</span>
-
-                                        {% if lesson.videoUrl %}
-                                            <span class="mini-chip video-chip">Avec vidéo</span>
-                                        {% else %}
-                                            <span class="mini-chip neutral-chip">Contenu texte</span>
-                                        {% endif %}
-                                    </div>
-
+                                <div class="card-body">
                                     <h5 class="fw-bold lesson-title">{{ lesson.titre }}</h5>
-
-                                    <p class="text-muted small flex-grow-1 lesson-text">
-                                        {{ lesson.contenu ? lesson.contenu|slice(0, 120) ~ '...' : 'Pas de contenu' }}
-                                    </p>
-
-                                    <div class="d-flex justify-content-between align-items-center mt-3">
-                                        <span class="duration-label">Ordre {{ lesson.ordre }}</span>
-
-                                        {% if isPurchased %}
-                                            <a href="{{ path('app_lesson_show', {'id': lesson.id}) }}" class="btn btn-sm btn-primary lesson-btn">
-                                                Accéder
-                                            </a>
-                                        {% else %}
-                                            <button type="button" class="btn btn-sm btn-light text-muted lesson-btn" data-bs-toggle="modal" data-bs-target="#purchaseModalShow">
-                                                <i class="bi bi-lock-fill"></i> Verrouillé
-                                            </button>
-                                        {% endif %}
-                                    </div>
+                                    <button type="button" class="btn btn-sm btn-light text-muted w-100 mt-3" data-bs-toggle="modal" data-bs-target="#purchaseModalShow">
+                                        <i class="bi bi-lock-fill"></i> Verrouillé
+                                    </button>
                                 </div>
-
                             </div>
                         </div>
                     {% endfor %}
                 </div>
-            {% else %}
-                <div class="alert alert-info">
-                    Cette formation ne contient encore aucune lesson.
-                </div>
             {% endif %}
+        </div>
+    </section>
+
+    {# --- Study Group JS --- #}
+    {% if isPurchased %}
+    <script>
+    (function() {
+        const formationId = {{ formation.id }};
+        const currentUserId = {{ app.user ? app.user.id : 0 }};
+        const msgList = document.getElementById('chat-messages');
+        const input = document.getElementById('chat-input');
+        const sendBtn = document.getElementById('btn-send-chat');
+        const groupNameEl = document.getElementById('study-group-name');
+        
+        let groupId = null;
+        let lastMsgId = 0;
+
+        async function init() {
+            try {
+                const res = await fetch(`/api/study-group/formation/${formationId}`);
+                const group = await res.json();
+                groupId = group.id;
+                groupNameEl.textContent = group.name;
+                
+                loadMessages();
+                setInterval(loadMessages, 5000); // Polling every 5s
+            } catch (e) {
+                console.error("Study group init error:", e);
+            }
+        }
+
+        async function loadMessages() {
+            if (!groupId) return;
+            try {
+                const res = await fetch(`/api/study-group/${groupId}/messages`);
+                const messages = await res.json();
+                
+                if (messages.length === 0) {
+                    msgList.innerHTML = '<div class="text-center py-5 text-muted small">Aucun message pour le moment. Soyez le premier à parler !</div>';
+                    return;
+                }
+
+                // Simple render
+                msgList.innerHTML = '';
+                messages.forEach(m => {
+                    const isMine = m.userId === currentUserId;
+                    const div = document.createElement('div');
+                    div.className = `chat-bubble ${isMine ? 'mine' : 'others'}`;
+                    div.innerHTML = `
+                        <div class="chat-meta">${isMine ? 'Moi' : m.user} • ${m.at}</div>
+                        <div class="chat-text">${escapeHtml(m.content)}</div>
+                    `;
+                    msgList.appendChild(div);
+                });
+                
+                msgList.scrollTop = msgList.scrollHeight;
+            } catch (e) {}
+        }
+
+        async function send() {
+            const content = input.value.trim();
+            if (!content || !groupId) return;
+            
+            input.value = '';
+            try {
+                const res = await fetch(`/api/study-group/${groupId}/send`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ content })
+                });
+                if (res.ok) loadMessages();
+            } catch (e) {}
+        }
+
+        sendBtn.addEventListener('click', send);
+        input.addEventListener('keydown', e => { if (e.key === 'Enter') send(); });
+
+        function escapeHtml(str) {
+            const d = document.createElement('div'); d.textContent = str; return d.innerHTML;
+        }
+
+        init();
+    })();
+    </script>
+    {% endif %}
         </div>
     </section>
 </main>
@@ -612,6 +725,106 @@
 .thumb-overlay.soft {
     background: linear-gradient(to top, rgba(46, 16, 101, 0.35), rgba(46, 16, 101, 0.05));
 }
+
+/* --- Study Group Chat Premium --- */
+.study-group-card {
+    background: white;
+    border-radius: 24px;
+    border: 1px solid rgba(124,58,237,0.1);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+    display: flex;
+    flex-direction: column;
+    height: 600px;
+    overflow: hidden;
+}
+
+.chat-header {
+    background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+    padding: 1.25rem 1.5rem;
+    color: white;
+}
+
+.chat-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1.5rem;
+    background: #fdfbff;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.chat-bubble {
+    max-width: 85%;
+    padding: 0.85rem 1.1rem;
+    border-radius: 18px;
+    font-size: 0.92rem;
+    line-height: 1.5;
+    position: relative;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.03);
+}
+
+.chat-bubble.mine {
+    align-self: flex-end;
+    background: #7c3aed;
+    color: white;
+    border-bottom-right-radius: 4px;
+}
+
+.chat-bubble.others {
+    align-self: flex-start;
+    background: white;
+    color: #1e1b4b;
+    border: 1px solid #ede9fe;
+    border-bottom-left-radius: 4px;
+}
+
+.chat-meta {
+    font-size: 0.72rem;
+    margin-bottom: 0.25rem;
+    font-weight: 700;
+}
+
+.chat-bubble.others .chat-meta { color: #7c3aed; }
+.chat-bubble.mine .chat-meta { color: rgba(255,255,255,0.7); }
+
+.chat-input-area {
+    padding: 1.25rem;
+    background: white;
+    border-top: 1px solid #ede9fe;
+    display: flex;
+    gap: 0.75rem;
+}
+
+.chat-input {
+    flex: 1;
+    border: 1.5px solid #ede9fe;
+    border-radius: 12px;
+    padding: 0.65rem 1rem;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+}
+
+.chat-input:focus {
+    outline: none;
+    border-color: #7c3aed;
+    box-shadow: 0 0 0 3px rgba(124,58,237,0.1);
+}
+
+.btn-send-chat {
+    background: #7c3aed;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    width: 45px;
+    height: 45px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.btn-send-chat:hover { background: #6d28d9; transform: scale(1.05); }
 
 .play-badge {
     position: absolute;
